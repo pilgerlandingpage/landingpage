@@ -299,8 +299,11 @@ const DEFAULT_CONFIGS: Record<string, string> = {
     brevo_sender_email: 'contato@guilhermepilger.ai',
     brevo_reply_to_email: 'contato@guilhermepilger.ai',
     brevo_test_recipient: '',
-    google_image_search_enabled: 'true',
-    google_image_search_priority: '1',
+    wikimedia_commons_enabled: 'true',
+    wikimedia_commons_priority: '1',
+    wikimedia_commons_per_page: '12',
+    google_image_search_enabled: 'false',
+    google_image_search_priority: '3',
     google_image_search_per_page: '10',
     google_image_search_rights: 'cc_publicdomain|cc_attribute',
     google_image_search_require_license_metadata: 'true',
@@ -309,7 +312,7 @@ const DEFAULT_CONFIGS: Record<string, string> = {
     pexels_priority: '2',
     pexels_per_page: '12',
     pixabay_enabled: 'true',
-    pixabay_priority: '3',
+    pixabay_priority: '4',
     pixabay_per_page: '12',
     editorial_image_default_orientation: 'horizontal',
     editorial_image_safe_search: 'true',
@@ -414,11 +417,13 @@ function normalizeConfigValue(key: string, value: string) {
         editorial_distribution_push_daily_limit: { fallback: DEFAULT_CONFIGS.editorial_distribution_push_daily_limit, min: 1, max: 10000 },
         editorial_distribution_recommendation_min_score: { fallback: DEFAULT_CONFIGS.editorial_distribution_recommendation_min_score, min: 1, max: 100 },
         editorial_distribution_recommendation_batch_limit: { fallback: DEFAULT_CONFIGS.editorial_distribution_recommendation_batch_limit, min: 1, max: 500 },
-        google_image_search_priority: { fallback: DEFAULT_CONFIGS.google_image_search_priority, min: 1, max: 3 },
+        wikimedia_commons_priority: { fallback: DEFAULT_CONFIGS.wikimedia_commons_priority, min: 1, max: 4 },
+        wikimedia_commons_per_page: { fallback: DEFAULT_CONFIGS.wikimedia_commons_per_page, min: 3, max: 30 },
+        google_image_search_priority: { fallback: DEFAULT_CONFIGS.google_image_search_priority, min: 1, max: 4 },
         google_image_search_per_page: { fallback: DEFAULT_CONFIGS.google_image_search_per_page, min: 3, max: 10 },
-        pexels_priority: { fallback: DEFAULT_CONFIGS.pexels_priority, min: 1, max: 3 },
+        pexels_priority: { fallback: DEFAULT_CONFIGS.pexels_priority, min: 1, max: 4 },
         pexels_per_page: { fallback: DEFAULT_CONFIGS.pexels_per_page, min: 3, max: 40 },
-        pixabay_priority: { fallback: DEFAULT_CONFIGS.pixabay_priority, min: 1, max: 3 },
+        pixabay_priority: { fallback: DEFAULT_CONFIGS.pixabay_priority, min: 1, max: 4 },
         pixabay_per_page: { fallback: DEFAULT_CONFIGS.pixabay_per_page, min: 3, max: 40 },
     }
 
@@ -454,7 +459,8 @@ function normalizeConfigValue(key: string, value: string) {
     if (key === 'editorial_distribution_push_enabled') return value === 'true' ? 'true' : 'false'
     if (key === 'editorial_distribution_message_review_required') return value === 'false' ? 'false' : 'true'
     if (key === 'editorial_distribution_recommendations_enabled') return value === 'false' ? 'false' : 'true'
-    if (key === 'google_image_search_enabled') return value === 'false' ? 'false' : 'true'
+    if (key === 'wikimedia_commons_enabled') return value === 'false' ? 'false' : 'true'
+    if (key === 'google_image_search_enabled') return value === 'true' ? 'true' : 'false'
     if (key === 'google_image_search_require_license_metadata') return value === 'true' ? 'true' : 'false'
     if (key === 'google_image_search_commercial_only') return value === 'false' ? 'false' : 'true'
     if (key === 'google_image_search_rights') {

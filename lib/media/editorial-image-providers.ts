@@ -1,7 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { uploadFile } from '@/lib/r2'
 
-export type EditorialImageProvider = 'google_licensed' | 'pexels' | 'pixabay'
+export type EditorialImageProvider = 'wikimedia_commons' | 'google_licensed' | 'pexels' | 'pixabay'
 export type EditorialImageOrientation = 'horizontal' | 'vertical' | 'all'
 export type EditorialImageOrder = 'popular' | 'latest'
 
@@ -31,7 +31,7 @@ export type EditorialImageResult = {
   alt: string
   license: string
   licenseUrl?: string
-  licenseStatus?: 'metadata_confirmed' | 'trusted_commons_source' | 'google_rights_filter'
+  licenseStatus?: 'wikimedia_commons_metadata' | 'metadata_confirmed' | 'trusted_commons_source' | 'google_rights_filter'
   attributionRequired?: boolean
   metadata?: Record<string, unknown>
   score: number
@@ -43,6 +43,9 @@ export type PersistedEditorialImage = EditorialImageResult & {
 }
 
 export type EditorialImageProviderConfig = {
+  wikimediaCommonsEnabled: boolean
+  wikimediaCommonsPriority: number
+  wikimediaCommonsPerPage: number
   googleImageSearchApiKey: string
   googleImageSearchCx: string
   googleImageSearchEnabled: boolean
@@ -65,6 +68,9 @@ export type EditorialImageProviderConfig = {
 }
 
 const IMAGE_CONFIG_KEYS = [
+  'wikimedia_commons_enabled',
+  'wikimedia_commons_priority',
+  'wikimedia_commons_per_page',
   'google_image_search_api_key',
   'google_image_search_cx',
   'google_image_search_enabled',
@@ -116,6 +122,29 @@ function normalizeTags(value: unknown) {
     .split(',')
     .map(tag => tag.trim())
     .filter(Boolean)
+}
+
+function decodeHtmlEntities(value: string) {
+  return value
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCharCode(Number.parseInt(code, 16)))
+}
+
+function stripHtml(value: unknown) {
+  return decodeHtmlEntities(String(value || '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim())
+}
+
+function commonsMetadataValue(metadata: Record<string, any>, key: string) {
+  return stripHtml(metadata?.[key]?.value)
 }
 
 function firstText(...values: unknown[]): string {
@@ -190,21 +219,24 @@ export async function getEditorialImageProviderConfig(source?: Record<string, st
   const appConfig = source || await readImageConfigRows()
 
   return {
+    wikimediaCommonsEnabled: toBool(appConfig.wikimedia_commons_enabled, true),
+    wikimediaCommonsPriority: toInt(appConfig.wikimedia_commons_priority, 1, 1, 4),
+    wikimediaCommonsPerPage: toInt(appConfig.wikimedia_commons_per_page, 12, 3, 30),
     googleImageSearchApiKey: (appConfig.google_image_search_api_key || process.env.GOOGLE_IMAGE_SEARCH_API_KEY || process.env.GOOGLE_CSE_API_KEY || '').trim(),
     googleImageSearchCx: (appConfig.google_image_search_cx || process.env.GOOGLE_IMAGE_SEARCH_CX || process.env.GOOGLE_CSE_CX || '').trim(),
-    googleImageSearchEnabled: toBool(appConfig.google_image_search_enabled, true),
-    googleImageSearchPriority: toInt(appConfig.google_image_search_priority, 1, 1, 3),
+    googleImageSearchEnabled: toBool(appConfig.google_image_search_enabled, false),
+    googleImageSearchPriority: toInt(appConfig.google_image_search_priority, 3, 1, 4),
     googleImageSearchPerPage: toInt(appConfig.google_image_search_per_page, 10, 3, 10),
     googleImageSearchRights: normalizeGoogleRights(appConfig.google_image_search_rights),
     googleImageSearchRequireLicenseMetadata: toBool(appConfig.google_image_search_require_license_metadata, true),
     googleImageSearchCommercialOnly: toBool(appConfig.google_image_search_commercial_only, true),
     pexelsApiKey: (appConfig.pexels_api_key || process.env.PEXELS_API_KEY || '').trim(),
     pexelsEnabled: toBool(appConfig.pexels_enabled, true),
-    pexelsPriority: toInt(appConfig.pexels_priority, 1, 1, 3),
+    pexelsPriority: toInt(appConfig.pexels_priority, 2, 1, 4),
     pexelsPerPage: toInt(appConfig.pexels_per_page, 12, 3, 40),
     pixabayApiKey: (appConfig.pixabay_api_key || process.env.PIXABAY_API_KEY || '').trim(),
     pixabayEnabled: toBool(appConfig.pixabay_enabled, true),
-    pixabayPriority: toInt(appConfig.pixabay_priority, 2, 1, 3),
+    pixabayPriority: toInt(appConfig.pixabay_priority, 4, 1, 4),
     pixabayPerPage: toInt(appConfig.pixabay_per_page, 12, 3, 40),
     defaultOrientation: normalizeOrientation(appConfig.editorial_image_default_orientation),
     safeSearch: toBool(appConfig.editorial_image_safe_search, true),
@@ -250,6 +282,20 @@ function isTrustedCommonsSource(url: string) {
 
 function googleRightsAllowCommercialUse(rights: string) {
   return !String(rights || '').toLowerCase().includes('cc_noncommercial')
+}
+
+function isAllowedCommonsLicense(license: string) {
+  const normalized = license.toLowerCase()
+  if (!normalized) return false
+  return ![
+    'noncommercial',
+    'non-commercial',
+    'fair use',
+    'copyrighted',
+    'all rights reserved',
+    'unknown',
+    'unlicensed',
+  ].some(term => normalized.includes(term))
 }
 
 export async function searchGoogleLicensedImages(
@@ -358,6 +404,97 @@ export async function searchGoogleLicensedImages(
   }).filter((item: EditorialImageResult | null): item is EditorialImageResult => Boolean(item?.imageUrl && item?.sourceUrl))
 }
 
+export async function searchWikimediaCommonsImages(
+  config: EditorialImageProviderConfig,
+  options: EditorialImageSearchOptions,
+): Promise<EditorialImageResult[]> {
+  const orientation = options.orientation || config.defaultOrientation
+  const perPage = Math.min(30, Math.max(3, options.perPage || config.wikimediaCommonsPerPage))
+  const offset = 0
+  const params = new URLSearchParams({
+    action: 'query',
+    format: 'json',
+    formatversion: '2',
+    origin: '*',
+    generator: 'search',
+    gsrsearch: options.query,
+    gsrnamespace: '6',
+    gsrlimit: String(perPage),
+    gsroffset: String(offset),
+    prop: 'imageinfo',
+    iiprop: 'url|size|mime|extmetadata',
+    iiurlwidth: '1600',
+  })
+
+  const response = await fetch(`https://commons.wikimedia.org/w/api.php?${params.toString()}`, {
+    cache: 'no-store',
+    headers: {
+      'User-Agent': 'PilgerLandingPage/1.0 (https://guilhermepilger.ai)',
+    },
+  })
+
+  const payload = await response.json().catch(() => null)
+  if (!response.ok || payload?.error) {
+    throw new Error(`Wikimedia Commons retornou ${response.status}: ${payload?.error?.info || response.statusText}`)
+  }
+
+  const pages = Array.isArray(payload?.query?.pages) ? payload.query.pages : []
+  return pages.map((page: any) => {
+    const info = Array.isArray(page?.imageinfo) ? page.imageinfo[0] : null
+    const metadata = info?.extmetadata && typeof info.extmetadata === 'object' ? info.extmetadata : {}
+    const imageUrl = String(info?.url || '').trim()
+    const sourceUrl = String(info?.descriptionurl || `https://commons.wikimedia.org/wiki/${encodeURIComponent(String(page?.title || ''))}`).trim()
+    const title = stripHtml(commonsMetadataValue(metadata, 'ObjectName') || String(page?.title || options.query).replace(/^File:/, ''))
+    const description = stripHtml(commonsMetadataValue(metadata, 'ImageDescription') || commonsMetadataValue(metadata, 'Credit') || title)
+    const author = stripHtml(commonsMetadataValue(metadata, 'Artist') || commonsMetadataValue(metadata, 'Credit') || 'Wikimedia Commons')
+    const license = stripHtml(commonsMetadataValue(metadata, 'LicenseShortName') || commonsMetadataValue(metadata, 'UsageTerms'))
+    const licenseUrl = String(metadata?.LicenseUrl?.value || '').trim() || undefined
+    const mime = String(info?.mime || '').toLowerCase()
+    const width = Number(info?.width || 0)
+    const height = Number(info?.height || 0)
+    const tags = normalizeTags(`${title}, ${description}, ${license}, Wikimedia Commons`)
+
+    if (!imageUrl || !sourceUrl) return null
+    if (mime && !mime.startsWith('image/')) return null
+    if (mime.includes('svg') || mime.includes('gif')) return null
+    if (!license || !isAllowedCommonsLicense(license)) return null
+    if (!matchesOrientation(width, height, orientation)) return null
+
+    const result: Omit<EditorialImageResult, 'score'> = {
+      provider: 'wikimedia_commons',
+      id: String(page?.pageid || page?.title || imageUrl),
+      title,
+      description,
+      imageUrl,
+      previewUrl: String(info?.thumburl || imageUrl),
+      downloadUrl: imageUrl,
+      sourceUrl,
+      author,
+      authorUrl: sourceUrl,
+      width,
+      height,
+      tags,
+      alt: title || options.query,
+      license,
+      licenseUrl,
+      licenseStatus: 'wikimedia_commons_metadata',
+      attributionRequired: /(^|\s)cc\s+by/i.test(license) || Boolean(author && author !== 'Wikimedia Commons'),
+      metadata: {
+        page_title: page?.title || null,
+        mime: info?.mime || null,
+        credit_text: commonsMetadataValue(metadata, 'Credit') || null,
+        usage_terms: commonsMetadataValue(metadata, 'UsageTerms') || null,
+        license_validation: 'wikimedia_commons_metadata',
+      },
+    }
+
+    return {
+      ...result,
+      score: rankImage(result, options.query, config.wikimediaCommonsPriority) + 12 + (licenseUrl ? 5 : 0),
+    }
+  }).filter((item: EditorialImageResult | null): item is EditorialImageResult => Boolean(item?.imageUrl && item?.sourceUrl))
+}
+
 export async function searchPexelsImages(
   config: EditorialImageProviderConfig,
   options: EditorialImageSearchOptions,
@@ -458,11 +595,17 @@ export async function searchPixabayImages(
 export async function searchEditorialImages(options: EditorialImageSearchOptions) {
   const config = await getEditorialImageProviderConfig()
   const providerOrder: Record<EditorialImageProvider, number> = {
-    google_licensed: 0,
-    pexels: 1,
-    pixabay: 2,
+    wikimedia_commons: 0,
+    google_licensed: 1,
+    pexels: 2,
+    pixabay: 3,
   }
   const providers: Array<{ id: EditorialImageProvider; priority: number; enabled: boolean }> = [
+    {
+      id: 'wikimedia_commons' as const,
+      priority: config.wikimediaCommonsPriority,
+      enabled: config.wikimediaCommonsEnabled,
+    },
     {
       id: 'google_licensed' as const,
       priority: config.googleImageSearchPriority,
@@ -476,7 +619,14 @@ export async function searchEditorialImages(options: EditorialImageSearchOptions
 
   const results = await Promise.allSettled(providers.map(provider => {
     const perPage = options.perPage
-      || (provider.id === 'google_licensed' ? config.googleImageSearchPerPage : provider.id === 'pexels' ? config.pexelsPerPage : config.pixabayPerPage)
+      || (provider.id === 'wikimedia_commons'
+        ? config.wikimediaCommonsPerPage
+        : provider.id === 'google_licensed'
+          ? config.googleImageSearchPerPage
+          : provider.id === 'pexels'
+            ? config.pexelsPerPage
+            : config.pixabayPerPage)
+    if (provider.id === 'wikimedia_commons') return searchWikimediaCommonsImages(config, { ...options, perPage })
     if (provider.id === 'google_licensed') return searchGoogleLicensedImages(config, { ...options, perPage })
     if (provider.id === 'pexels') return searchPexelsImages(config, { ...options, perPage })
     return searchPixabayImages(config, { ...options, perPage })
@@ -491,7 +641,9 @@ export async function testEditorialImageProvider(provider: EditorialImageProvide
   const config = await getEditorialImageProviderConfig(source)
   const query = 'Balneario Camboriu skyline arquitetura'
   const options: EditorialImageSearchOptions = { query, orientation: 'horizontal', perPage: 3, provider }
-  const results = provider === 'google_licensed'
+  const results = provider === 'wikimedia_commons'
+    ? await searchWikimediaCommonsImages(config, options)
+    : provider === 'google_licensed'
     ? await searchGoogleLicensedImages(config, options)
     : provider === 'pexels'
       ? await searchPexelsImages(config, options)

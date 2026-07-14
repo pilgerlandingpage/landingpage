@@ -22,6 +22,7 @@
     "developments:landings:dry-run": "node scripts/generate-development-landing-pages.mjs",
     "developments:landings:apply": "node scripts/generate-development-landing-pages.mjs --apply",
     "developments:landings:audit": "node scripts/generate-development-landing-pages.mjs --audit-only",
+    "developments:links:audit": "node scripts/audit-property-development-context.mjs",
     "import:properties:dry-run": "node scripts/property-import-dry-run.mjs",
     "import:properties:check-db": "node scripts/property-import-check-db.mjs",
     "import:properties:apply": "node scripts/property-import-apply.mjs",

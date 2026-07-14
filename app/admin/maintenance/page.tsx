@@ -103,9 +103,41 @@ const INTEGRATIONS: IntegrationCard[] = [
     },
 
     {
+        id: 'wikimedia_commons',
+        title: 'Wikimedia Commons - Imagens Licenciadas',
+        description: 'Fonte principal para imagens editoriais abertas, com autor, pagina de origem e licenca verificavel. Nao exige chave de API e espelha a imagem aprovada no R2 antes de usar em blog e noticias.',
+        icon: 'image_bank',
+        fields: [
+            {
+                key: 'wikimedia_commons_enabled',
+                label: 'Uso nos agentes',
+                placeholder: 'Ativo',
+                isSecret: false,
+                options: [
+                    { value: 'true', label: 'Ativo' },
+                    { value: 'false', label: 'Inativo' },
+                ],
+            },
+            {
+                key: 'wikimedia_commons_priority',
+                label: 'Prioridade',
+                placeholder: '1',
+                isSecret: false,
+                options: [
+                    { value: '1', label: '1 - Principal' },
+                    { value: '2', label: '2 - Backup' },
+                    { value: '3', label: '3 - Terceiro' },
+                    { value: '4', label: '4 - Ultimo recurso' },
+                ],
+            },
+            { key: 'wikimedia_commons_per_page', label: 'Imagens por busca', placeholder: '12', isSecret: false },
+        ],
+    },
+
+    {
         id: 'google_images',
         title: 'Google Imagens Licenciadas - Editorial',
-        description: 'Busca programatica de imagens com filtro Creative Commons/licencas livres. O agente usa termos contextuais, valida sinais de licenca e espelha a imagem aprovada no R2 antes de usar em blog e noticias.',
+        description: 'Fonte opcional. Mantida como backup futuro, mas pode ficar inativa quando o projeto Google nao tiver acesso ao Custom Search JSON API.',
         icon: 'image_bank',
         fields: [
             { key: 'google_image_search_api_key', label: 'Google Custom Search API Key', placeholder: 'Chave da API do Google Custom Search', isSecret: true },
@@ -128,7 +160,8 @@ const INTEGRATIONS: IntegrationCard[] = [
                 options: [
                     { value: '1', label: '1 - Principal' },
                     { value: '2', label: '2 - Backup' },
-                    { value: '3', label: '3 - Ultimo recurso' },
+                    { value: '3', label: '3 - Terceiro' },
+                    { value: '4', label: '4 - Ultimo recurso' },
                 ],
             },
             { key: 'google_image_search_per_page', label: 'Imagens por busca', placeholder: '10', isSecret: false },
@@ -170,7 +203,7 @@ const INTEGRATIONS: IntegrationCard[] = [
     {
         id: 'pexels',
         title: 'Pexels - Banco de Imagens Editorial',
-        description: 'Biblioteca externa de apoio para os agentes quando acervo real e Google licenciado nao retornarem imagem adequada.',
+        description: 'Biblioteca externa de apoio para os agentes quando acervo real e Wikimedia Commons nao retornarem imagem adequada.',
         icon: 'image_bank',
         fields: [
             { key: 'pexels_api_key', label: 'Pexels API Key', placeholder: 'Sua chave da Pexels API', isSecret: true },
@@ -192,7 +225,8 @@ const INTEGRATIONS: IntegrationCard[] = [
                 options: [
                     { value: '1', label: '1 - Principal' },
                     { value: '2', label: '2 - Backup' },
-                    { value: '3', label: '3 - Ultimo recurso' },
+                    { value: '3', label: '3 - Terceiro' },
+                    { value: '4', label: '4 - Ultimo recurso' },
                 ],
             },
             { key: 'pexels_per_page', label: 'Imagens por busca', placeholder: '12', isSecret: false },
@@ -202,7 +236,7 @@ const INTEGRATIONS: IntegrationCard[] = [
     {
         id: 'pixabay',
         title: 'Pixabay - Banco de Imagens Editorial',
-        description: 'Fonte complementar para fotos, ilustracoes e imagens editoriais quando Google licenciado e acervo interno nao forem suficientes.',
+        description: 'Fonte complementar para fotos, ilustracoes e imagens editoriais quando Wikimedia Commons e acervo interno nao forem suficientes.',
         icon: 'image_bank',
         fields: [
             { key: 'pixabay_api_key', label: 'Pixabay API Key', placeholder: 'Sua chave da Pixabay API', isSecret: true },
@@ -224,7 +258,8 @@ const INTEGRATIONS: IntegrationCard[] = [
                 options: [
                     { value: '1', label: '1 - Principal' },
                     { value: '2', label: '2 - Backup' },
-                    { value: '3', label: '3 - Ultimo recurso' },
+                    { value: '3', label: '3 - Terceiro' },
+                    { value: '4', label: '4 - Ultimo recurso' },
                 ],
             },
             { key: 'pixabay_per_page', label: 'Imagens por busca', placeholder: '12', isSecret: false },

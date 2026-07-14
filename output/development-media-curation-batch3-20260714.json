@@ -1,0 +1,930 @@
+{
+  "batch_id": "development-media-curation-batch3-20260714",
+  "generated_at": "2026-07-14T18:45:00.000Z",
+  "items": [
+    {
+      "slug": "scenarium",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2025/01/edificio-scenarium-praia-brava-itajai-1.jpg",
+      "description": "O Scenarium Brava Norte é um empreendimento da FG Empreendimentos na Praia Brava, em Itajaí, em posição frente-mar no canto norte da praia. O projeto combina quatro torres de baixa altura, implantação integrada à natureza, vista para o mar e um home club com lazer amplo, pensado para quem busca exclusividade em uma das áreas mais desejadas do litoral catarinense.",
+      "seo_description": "Conheça o Scenarium Brava Norte, empreendimento frente-mar da FG na Praia Brava, Itajaí, com quatro torres, natureza preservada e lazer amplo.",
+      "gallery": [
+        {
+          "title": "Scenarium Brava Norte - fachada",
+          "category": "Empreendimento",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/01/edificio-scenarium-praia-brava-itajai-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/edificio-scenarium/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Scenarium Brava Norte - implantação frente-mar",
+          "category": "Localização",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/01/edificio-scenarium-praia-brava-itajai-2.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/edificio-scenarium/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Scenarium Brava Norte - evolução da obra",
+          "category": "Empreendimento",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/01/edificio-scenarium-praia-brava-itajai-obras-verao-26.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/edificio-scenarium/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Scenarium Brava Norte - acesso e paisagismo",
+          "category": "Áreas comuns",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/01/edificio-scenarium-praia-brava-itajai-3.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/edificio-scenarium/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente-mar na Praia Brava",
+          "description": "Implantação no canto norte da Praia Brava, com relação direta com o mar e o entorno natural."
+        },
+        {
+          "icon": "TreePine",
+          "title": "Natureza preservada",
+          "description": "O projeto valoriza áreas verdes e uma implantação menos verticalizada, integrada à paisagem da Brava Norte."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Home club completo",
+          "description": "Piscinas, wine bar, academia, pilates, beauty, brinquedoteca, business e áreas de convivência ampliam o uso diário do empreendimento."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Obra da FG Empreendimentos",
+          "description": "O projeto é apresentado como empreendimento da FG, marca associada a alto padrão no litoral catarinense."
+        },
+        {
+          "title": "Quatro torres",
+          "description": "A configuração em quatro torres cria uma implantação ampla e distinta dos edifícios isolados da região."
+        },
+        {
+          "title": "Mais de 3.600 m² de lazer",
+          "description": "As fontes consultadas indicam estrutura de lazer de grande escala para atender diferentes perfis de morador."
+        },
+        {
+          "title": "Entrega prevista para 2028",
+          "description": "A MySide informa entrega prevista para setembro de 2028, posicionando o Scenarium como projeto em construção."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Scenarium Brava Norte?",
+          "answer": "O Scenarium fica na Avenida José Medeiros Vieira, na Praia Brava, em Itajaí, no canto norte da praia."
+        },
+        {
+          "question": "Quem desenvolve o Scenarium?",
+          "answer": "As fontes consultadas apresentam o Scenarium Brava Norte como empreendimento da FG Empreendimentos."
+        },
+        {
+          "question": "Qual é a estrutura de lazer do Scenarium?",
+          "answer": "O lazer inclui piscinas, bar molhado, piscina aquecida, salão de festas, jogos, brinquedoteca, wine bar, academia, pilates, salas de massagem, beauty, empório, business e playground."
+        },
+        {
+          "question": "Quando o Scenarium será entregue?",
+          "answer": "A MySide informa previsão de entrega para setembro de 2028, sujeita à confirmação comercial do empreendimento."
+        }
+      ],
+      "sources": [
+        "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/edificio-scenarium/",
+        "https://myside.com.br/apartamento-venda-scenarium-brava-norte-itajai-sc"
+      ]
+    },
+    {
+      "slug": "condominio-haras-rio-do-ouro",
+      "hero_image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/March2022/VQemFK6U8C2QpusVAcG5.jpg",
+      "description": "O Condomínio Haras Rio do Ouro é um condomínio fechado de alto padrão no bairro Ariribá, em Balneário Camboriú. A proposta combina terrenos amplos, ruas pavimentadas, áreas verdes, lazer completo, lago, piscinas, quadras, campo de futebol e segurança 24 horas, em localização com acesso facilitado ao Centro de Balneário Camboriú, Itajaí e Praia Brava.",
+      "seo_description": "Conheça o Condomínio Haras Rio do Ouro no Ariribá, Balneário Camboriú, com terrenos amplos, lazer completo, áreas verdes e segurança 24h.",
+      "gallery": [
+        {
+          "title": "Haras Rio do Ouro - piscina e áreas comuns",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/March2022/VQemFK6U8C2QpusVAcG5.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-haras-rio-do-ouro-EM5016",
+          "source_label": "Imobille Negócios"
+        },
+        {
+          "title": "Haras Rio do Ouro - playground",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/March2022/8g9yc5jEllC5UA8JaMQE.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-haras-rio-do-ouro-EM5016",
+          "source_label": "Imobille Negócios"
+        },
+        {
+          "title": "Haras Rio do Ouro - lago",
+          "category": "Áreas comuns",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/March2022/6G6xw5FStsLZ0DScudym.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-haras-rio-do-ouro-EM5016",
+          "source_label": "Imobille Negócios"
+        },
+        {
+          "title": "Haras Rio do Ouro - lazer e piscina",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/March2022/FJyl1TsMHou5Cc04c2fp.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-haras-rio-do-ouro-EM5016",
+          "source_label": "Imobille Negócios"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "ShieldCheck",
+          "title": "Condomínio fechado",
+          "description": "Portaria, vigilância e controle de acesso reforçam privacidade e tranquilidade para famílias."
+        },
+        {
+          "icon": "TreePine",
+          "title": "Terrenos amplos",
+          "description": "As fontes citam terrenos de 450 m² a 2.000 m², favorecendo casas com jardins, lazer privativo e boa distância entre residências."
+        },
+        {
+          "icon": "Activity",
+          "title": "Lazer para todas as idades",
+          "description": "Piscinas, lago, quadras, campo de futebol, academia, playground e salões de festas compõem a estrutura comum."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Localização no Ariribá",
+          "description": "O condomínio fica em Balneário Camboriú, com acesso ao Centro, Itajaí e Praia Brava."
+        },
+        {
+          "title": "Ruas pavimentadas",
+          "description": "A infraestrutura interna foi citada com ruas pavimentadas e estrutura preparada para moradia permanente."
+        },
+        {
+          "title": "Contato com áreas verdes",
+          "description": "O Haras Rio do Ouro combina espaços abertos, lago e natureza em um perfil residencial horizontal."
+        },
+        {
+          "title": "Perfil residencial de alto padrão",
+          "description": "O condomínio é posicionado pelas fontes como opção de luxo, conforto e privacidade em Balneário Camboriú."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Condomínio Haras Rio do Ouro?",
+          "answer": "Fica no bairro Ariribá, em Balneário Camboriú, com referência de endereço na Avenida das Arapongas."
+        },
+        {
+          "question": "O Haras Rio do Ouro é condomínio fechado?",
+          "answer": "Sim. As fontes consultadas apresentam o Haras Rio do Ouro como condomínio fechado de alto padrão com segurança e portaria 24 horas."
+        },
+        {
+          "question": "Quais áreas de lazer existem no Haras Rio do Ouro?",
+          "answer": "O condomínio conta com piscinas, lago, quadras poliesportivas, campo de futebol, quadra de tênis, academia, playground e salões de festas."
+        },
+        {
+          "question": "Qual é o perfil dos terrenos no Haras Rio do Ouro?",
+          "answer": "As referências citam terrenos amplos, com metragens de aproximadamente 450 m² a 2.000 m², dependendo da unidade disponível."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/condominio-haras-rio-do-ouro-EM5016",
+        "https://imoveisterra.net/empreendimento/128/condominio-residencial-haras-rio-do-ouro/",
+        "https://felicitanegocios.com.br/empreendimento/224/haras-do-rio-do-ouro/"
+      ]
+    },
+    {
+      "slug": "italian-residence",
+      "hero_image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/April2022/spEzFEoWHStCZfM1oziF.jpg",
+      "description": "O Italian Residence é um empreendimento do Grupo Pavoni na Barra Norte de Balneário Camboriú, no bairro Pioneiros, próximo à Praia Central e à FG Big Wheel. O edifício reúne apartamentos amplos, padrão construtivo elevado e mais de 1.500 m² de lazer, com piscinas, ofurô, sauna, espaço gourmet, academia, sala de jogos, playground, cinema, quiosque e ambientes sociais.",
+      "seo_description": "Conheça o Italian Residence na Barra Norte de Balneário Camboriú, próximo à praia e à FG Big Wheel, com mais de 1.500 m² de lazer.",
+      "gallery": [
+        {
+          "title": "Italian Residence - localização e fachada",
+          "category": "Empreendimento",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/April2022/spEzFEoWHStCZfM1oziF.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-italian-residence-EM22255",
+          "source_label": "Imobille Negócios"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Barra Norte",
+          "description": "Localização no bairro Pioneiros, próxima ao mar, à roda gigante e ao acesso para Praia Brava e Itajaí."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Mais de 1.500 m² de lazer",
+          "description": "Piscinas, ofurô, sauna, gourmet, academia, jogos, playground e cinema compõem a estrutura comum."
+        },
+        {
+          "icon": "Building2",
+          "title": "Apartamentos amplos",
+          "description": "As fontes consultadas apresentam unidades em torno de 190 m², com plantas de alto padrão e várias suítes."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Grupo Pavoni",
+          "description": "O empreendimento é associado ao Grupo Pavoni, empresa com atuação histórica em Balneário Camboriú."
+        },
+        {
+          "title": "Perto da FG Big Wheel",
+          "description": "A proximidade com a roda gigante coloca o edifício em uma das áreas mais reconhecidas da Barra Norte."
+        },
+        {
+          "title": "Lazer social completo",
+          "description": "Salão de festas, espaço gourmet, quiosque, pub, bar molhado e cinema favorecem recepção e convivência."
+        },
+        {
+          "title": "Endereço residencial consolidado",
+          "description": "Rua Romeu Pereira, 23, no bairro Pioneiros, com serviços e comércio no entorno."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Italian Residence?",
+          "answer": "O Italian Residence fica na Rua Romeu Pereira, 23, no bairro Pioneiros, Barra Norte de Balneário Camboriú."
+        },
+        {
+          "question": "Quem é responsável pelo Italian Residence?",
+          "answer": "As fontes consultadas associam o empreendimento ao Grupo Pavoni."
+        },
+        {
+          "question": "Quais áreas de lazer o Italian Residence oferece?",
+          "answer": "O lazer inclui piscinas adulto, infantil e aquecida, ofurô, sauna, espaço gourmet, academia, sala de jogos, playground, cinema, quiosque, pub, bar molhado e espelho d'água."
+        },
+        {
+          "question": "O Italian Residence fica perto da praia?",
+          "answer": "Sim. As fontes posicionam o edifício a poucos metros da Praia Central e próximo à FG Big Wheel."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-italian-residence-EM22255",
+        "https://felicitanegocios.com.br/empreendimento/105/italian-residence/"
+      ]
+    },
+    {
+      "slug": "bellas-artes-residencial",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2017/05/edificio-bellas-artes-balneario-camboriu-qma3382-1-1.jpg",
+      "description": "O Bellas Artes Residencial é um home club na Barra Norte de Balneário Camboriú, no bairro Pioneiros, próximo à praia e à FG Big Wheel. O empreendimento possui duas torres, portaria 24 horas e uma das estruturas de lazer mais completas da região, com piscinas, spa, sauna, academia, salões de festas, gourmet, musical, jogos, bocha, quadra, brinquedoteca, playground, mini golf e cinema.",
+      "seo_description": "Conheça o Bellas Artes Residencial na Barra Norte de Balneário Camboriú, home club com duas torres, portaria 24h e lazer completo.",
+      "gallery": [
+        {
+          "title": "Bellas Artes - fachada",
+          "category": "Empreendimento",
+          "image": "https://litoralvertical.com/wp-content/uploads/2017/05/edificio-bellas-artes-balneario-camboriu-qma3382-1-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-bellas-artes/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Bellas Artes - piscinas e áreas comuns",
+          "category": "Lazer",
+          "image": "https://litoralvertical.com/wp-content/uploads/2017/05/edificio-bellas-artes-balneario-camboriu-qma3382-2-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-bellas-artes/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Bellas Artes - hall",
+          "category": "Áreas comuns",
+          "image": "https://litoralvertical.com/wp-content/uploads/2017/05/edificio-bellas-artes-balneario-camboriu-qma3382-3-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-bellas-artes/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Bellas Artes - pub",
+          "category": "Áreas comuns",
+          "image": "https://litoralvertical.com/wp-content/uploads/2017/05/edificio-bellas-artes-balneario-camboriu-qma3382-5-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-bellas-artes/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Barra Norte/Pioneiros",
+          "description": "Endereço na Rua João Francisco dos Santos, em região próxima à praia, à Big Wheel e aos serviços da Barra Norte."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscinas e spa",
+          "description": "Piscinas externa adulto, infantil, interna aquecida, spa com ofurô e saunas ampliam o uso do lazer o ano todo."
+        },
+        {
+          "icon": "PartyPopper",
+          "title": "Estrutura social ampla",
+          "description": "Quatro salões de festas, gourmet, salão musical, lounge e jogos dão suporte a encontros e eventos dos moradores."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Duas torres",
+          "description": "O empreendimento é apresentado com duas torres, quatro apartamentos por andar e três elevadores por torre."
+        },
+        {
+          "title": "Home club consolidado",
+          "description": "Entregue em 2009, o Bellas Artes é reconhecido pela escala de lazer e pela proposta de clube residencial."
+        },
+        {
+          "title": "Lazer esportivo",
+          "description": "Academia, cancha de bocha, quadra poliesportiva, mini golf e playground atendem diferentes rotinas."
+        },
+        {
+          "title": "Portaria 24h",
+          "description": "Controle de acesso e operação condominial permanente reforçam a segurança do empreendimento."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Bellas Artes Residencial?",
+          "answer": "Fica na Rua João Francisco dos Santos, 20, bairro Pioneiros, região da Barra Norte de Balneário Camboriú."
+        },
+        {
+          "question": "O Bellas Artes tem quantas torres?",
+          "answer": "As fontes consultadas apresentam o Bellas Artes com duas torres, quatro apartamentos por andar em cada torre e três elevadores por torre."
+        },
+        {
+          "question": "Quais itens de lazer existem no Bellas Artes?",
+          "answer": "O empreendimento conta com piscinas, spa com ofurô, saunas, academia, salão de festas, gourmet, salão musical, lounge, jogos, bocha, quadra poliesportiva, brinquedoteca, playground, mini golf e cinema."
+        },
+        {
+          "question": "Quem construiu o Bellas Artes?",
+          "answer": "A Litoral Vertical cita a Construtora Mendes Sibara como responsável pela obra."
+        }
+      ],
+      "sources": [
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-bellas-artes/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-bellas-artes-EM56750",
+        "https://felicitanegocios.com.br/empreendimento/682/bellas-artes/"
+      ]
+    },
+    {
+      "slug": "brava-beach-internacional",
+      "hero_image": "https://cdn.myside.com.br/base/470/60d/fad/complexo-brava-beach-group.jpg",
+      "description": "O Brava Beach Internacional é um complexo residencial Home Resort na Praia Brava, em Itajaí, idealizado pelo Grupo Brava Beach. O conjunto reúne reservas residenciais, boulevard, áreas de lazer, paisagismo e estrutura de segurança em um endereço frente-mar, com piscinas, spa, academia, sauna, cinema, espaços gourmet, salões sociais, pet place e atendimento de praia.",
+      "seo_description": "Conheça o Brava Beach Internacional, complexo Home Resort frente-mar na Praia Brava, Itajaí, com boulevard, lazer completo e segurança.",
+      "gallery": [
+        {
+          "title": "Brava Beach Internacional - complexo frente-mar",
+          "category": "Empreendimento",
+          "image": "https://cdn.myside.com.br/base/470/60d/fad/complexo-brava-beach-group.jpg",
+          "source_url": "https://myside.com.br/guia-balneario-camboriu/complexo-brava-beach-praia-brava-itajai-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Brava Beach Internacional - Reserva Figueira",
+          "category": "Empreendimento",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/brava-beach-reserva-figueira-praia-brava-itajai-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/brava-beach-internacional-reserva-figueira/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Brava Beach Internacional - piscinas",
+          "category": "Lazer",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/brava-beach-reserva-figueira-praia-brava-itajai-4.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/brava-beach-internacional-reserva-figueira/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Brava Beach Internacional - boulevard",
+          "category": "Áreas comuns",
+          "image": "https://cdn.myside.com.br/base/1f5/0d0/737/boulavrd-brava-beach.jpg",
+          "source_url": "https://myside.com.br/guia-balneario-camboriu/complexo-brava-beach-praia-brava-itajai-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Brava Beach Internacional - torres Reserva Figueira",
+          "category": "Empreendimento",
+          "image": "https://cdn.myside.com.br/base/aee/a73/be8/torres-reserva-figueira.jpg",
+          "source_url": "https://myside.com.br/guia-balneario-camboriu/complexo-brava-beach-praia-brava-itajai-sc",
+          "source_label": "MySide"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente-mar na Praia Brava",
+          "description": "O complexo está implantado na região mais valorizada da Praia Brava, com relação direta com a orla."
+        },
+        {
+          "icon": "Trees",
+          "title": "Conceito Home Resort",
+          "description": "Reservas residenciais, boulevard, áreas comuns e paisagismo criam uma experiência de resort residencial."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Segurança 24h",
+          "description": "As fontes citam segurança e monitoramento como parte da infraestrutura do condomínio."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Grupo Brava Beach",
+          "description": "O complexo é associado ao grupo formado por FG, Ciaplan, Riviera e J.A. Russi."
+        },
+        {
+          "title": "Mais de 5.500 m² de lazer",
+          "description": "As fontes consultadas destacam uma estrutura ampla de lazer, incluindo piscinas, spa, academia, sauna, cinema e áreas gourmet."
+        },
+        {
+          "title": "Boulevard próprio",
+          "description": "O boulevard conecta as reservas e qualifica a circulação externa com paisagismo e espaços de convivência."
+        },
+        {
+          "title": "Reservas residenciais",
+          "description": "O conjunto é organizado em reservas como Corais, Aroeira, Figueira, Recife, Colibri e Araçari."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Brava Beach Internacional?",
+          "answer": "Fica na Praia Brava, em Itajaí, com referências à Avenida José Medeiros Vieira e à Rua Delfim Mário Pádua Peixoto."
+        },
+        {
+          "question": "O Brava Beach Internacional é frente-mar?",
+          "answer": "Sim. As fontes consultadas apresentam o Brava Beach Internacional como complexo frente-mar na Praia Brava."
+        },
+        {
+          "question": "Quais áreas de lazer existem no Brava Beach?",
+          "answer": "O complexo reúne piscinas, spa, beauty center, academia, sauna, cinema, playground, salões de festas, espaços gourmet, pet place e boulevard."
+        },
+        {
+          "question": "Quem idealizou o Brava Beach Internacional?",
+          "answer": "A MySide informa que o projeto foi idealizado pelo Grupo Brava Beach, formado por FG Empreendimentos, Ciaplan, Riviera e J.A. Russi."
+        }
+      ],
+      "sources": [
+        "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/brava-beach-internacional-reserva-figueira/",
+        "https://myside.com.br/guia-balneario-camboriu/complexo-brava-beach-praia-brava-itajai-sc",
+        "https://sortinvestimentos.com.br/empreendimentos/brava-beach-internacional"
+      ]
+    },
+    {
+      "slug": "brava-vel-residence",
+      "hero_image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/11/Vel-1-2-768x1097.jpg",
+      "description": "O Brava Vel Residence é um empreendimento da Absoluta na Praia Brava, em Itajaí, criado para unir design, conforto e a paisagem do canto sul da praia. A torre reúne apartamentos, unidades diferenciadas, coberturas e uma estrutura social com hall, piscina, pub, salão de festas, academia e áreas de convivência, em endereço próximo ao mar e ao eixo entre Itajaí e Balneário Camboriú.",
+      "seo_description": "Conheça o Brava Vel Residence, empreendimento da Absoluta na Praia Brava, Itajaí, com design contemporâneo, piscina, hall e áreas sociais.",
+      "gallery": [
+        {
+          "title": "Brava Vel Residence - fachada",
+          "category": "Empreendimento",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/11/Vel-1-2-768x1097.jpg",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-vel-residence/",
+          "source_label": "Absoluta"
+        },
+        {
+          "title": "Brava Vel Residence - fachada noturna",
+          "category": "Empreendimento",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/11/Vel-2-1-768x1097.jpg",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-vel-residence/",
+          "source_label": "Absoluta"
+        },
+        {
+          "title": "Brava Vel Residence - piscina",
+          "category": "Lazer",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/11/Social_Piscina-1-768x499.jpg",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-vel-residence/",
+          "source_label": "Absoluta"
+        },
+        {
+          "title": "Brava Vel Residence - hall social",
+          "category": "Áreas comuns",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/11/Socail_Hall-768x1024.jpg",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-vel-residence/",
+          "source_label": "Absoluta"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Praia Brava",
+          "description": "Localização no canto sul da Praia Brava, com acesso rápido ao mar, restaurantes e serviços da região."
+        },
+        {
+          "icon": "Building2",
+          "title": "Torre compacta e exclusiva",
+          "description": "A fonte oficial apresenta 17 apartamentos tipo, duas unidades diferenciadas e duas coberturas."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Áreas sociais planejadas",
+          "description": "Hall, piscina, pub, salão de festas, academia e espaços de convivência atendem a rotina do condomínio."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Assinatura Absoluta",
+          "description": "Empreendimento da Absoluta Construtora e Incorporadora, com linguagem arquitetônica contemporânea."
+        },
+        {
+          "title": "Rua Miguel Francisco Borges",
+          "description": "Endereço na Praia Brava, em Itajaí, próximo à divisa com Balneário Camboriú."
+        },
+        {
+          "title": "Plantas variadas",
+          "description": "As fontes citam apartamentos de 93,61 m² a 319,80 m², incluindo coberturas."
+        },
+        {
+          "title": "Entrega recente",
+          "description": "Fontes de mercado posicionam o Brava Vel como pronto para morar ou de entrega recente."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Brava Vel Residence?",
+          "answer": "Fica na Rua Miguel Francisco Borges, na Praia Brava, em Itajaí."
+        },
+        {
+          "question": "Quem é a construtora do Brava Vel?",
+          "answer": "O empreendimento é da Absoluta Construtora e Incorporadora."
+        },
+        {
+          "question": "Quais áreas comuns existem no Brava Vel Residence?",
+          "answer": "As imagens e fontes apresentam hall, piscina, pub, salão de festas, academia e áreas sociais."
+        },
+        {
+          "question": "Qual é o perfil das unidades do Brava Vel?",
+          "answer": "A fonte oficial cita apartamentos tipo, unidades diferenciadas e coberturas, com metragens variadas."
+        }
+      ],
+      "sources": [
+        "https://www.absolutaincorporadora.com.br/empreendimento/brava-vel-residence/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-vel-EM27909",
+        "https://apto.vc/br/sc/itajai/praia-brava/brava-vel"
+      ]
+    },
+    {
+      "slug": "brava-villi",
+      "hero_image": "https://afincorporadora.com.br/wp-content/uploads/2022/08/af_brava_fachada_02-650x650.jpg",
+      "description": "O Brava Villi Soul Residence é um empreendimento da AF Incorporadora na Praia Brava, em Itajaí, com proposta de morar à beira-mar em conexão com a paisagem. O projeto valoriza fachada contemporânea, áreas comuns de lazer, piscina, deck, espaço gourmet, garden, espaço zen, festas, jogos, brinquedoteca, academia, pub e pilates, em endereço na Avenida José Medeiros Vieira.",
+      "seo_description": "Conheça o Brava Villi Soul Residence na Praia Brava, Itajaí, empreendimento da AF Incorporadora com fachada contemporânea e lazer completo.",
+      "gallery": [
+        {
+          "title": "Brava Villi - fachada",
+          "category": "Empreendimento",
+          "image": "https://afincorporadora.com.br/wp-content/uploads/2022/08/af_brava_fachada_02-650x650.jpg",
+          "source_url": "https://afincorporadora.com.br/brava-villi/",
+          "source_label": "AF Incorporadora"
+        },
+        {
+          "title": "Brava Villi - fachada e piscina",
+          "category": "Empreendimento",
+          "image": "https://afincorporadora.com.br/wp-content/uploads/2022/08/af_brava_fachada_05-650x650.jpg",
+          "source_url": "https://afincorporadora.com.br/brava-villi/",
+          "source_label": "AF Incorporadora"
+        },
+        {
+          "title": "Brava Villi - torres",
+          "category": "Empreendimento",
+          "image": "https://afincorporadora.com.br/wp-content/uploads/2022/08/af_brava_fachada_01-650x650.jpg",
+          "source_url": "https://afincorporadora.com.br/brava-villi/",
+          "source_label": "AF Incorporadora"
+        },
+        {
+          "title": "Brava Villi - entorno praia",
+          "category": "Localização",
+          "image": "https://afincorporadora.com.br/wp-content/uploads/2022/08/af_brava_empreendimento_0-650x650.jpg",
+          "source_url": "https://afincorporadora.com.br/brava-villi/",
+          "source_label": "AF Incorporadora"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Beira-mar na Praia Brava",
+          "description": "O empreendimento é apresentado pela AF como experiência residencial à beira-mar na Praia Brava."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Fachada contemporânea",
+          "description": "A linguagem visual combina volumes, vidro e materiais naturais em uma escala residencial sofisticada."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer completo",
+          "description": "Piscina, deck, espaço gourmet, garden, espaço zen, festas, jogos, brinquedoteca, academia, pub e pilates compõem a estrutura comum."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "AF Incorporadora",
+          "description": "O Brava Villi faz parte do portfólio da AF Incorporadora na Praia Brava."
+        },
+        {
+          "title": "Avenida José Medeiros Vieira",
+          "description": "A MySide informa endereço na Avenida José Medeiros Vieira, 1526, Praia Brava, Itajaí."
+        },
+        {
+          "title": "Entrega em 2022",
+          "description": "A MySide informa entrega em março de 2022, posicionando o empreendimento como pronto e consolidado."
+        },
+        {
+          "title": "Plantas de alto padrão",
+          "description": "As fontes apresentam unidades de 3 a 4 dormitórios, com metragens de aproximadamente 172 m² a 342 m²."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Brava Villi?",
+          "answer": "Fica na Avenida José Medeiros Vieira, 1526, Praia Brava, Itajaí."
+        },
+        {
+          "question": "Quem desenvolveu o Brava Villi?",
+          "answer": "O empreendimento é apresentado pela AF Incorporadora."
+        },
+        {
+          "question": "Quais áreas de lazer o Brava Villi oferece?",
+          "answer": "As fontes citam piscina, deck, espelho d'água, espaço gourmet, garden, espaço zen, salão de festas, jogos, brinquedoteca, academia, pub e pilates."
+        },
+        {
+          "question": "Quando o Brava Villi foi entregue?",
+          "answer": "A MySide informa entrega em março de 2022."
+        }
+      ],
+      "sources": [
+        "https://afincorporadora.com.br/brava-villi/",
+        "https://myside.com.br/apartamento-venda-brava-villi-itajai-sc",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-villi-EM82947"
+      ]
+    },
+    {
+      "slug": "edifiicio-brava-fascine",
+      "hero_image": "https://clarusconstrutora.com.br/uploads/imagens/fachada-brava-fascine-504.webp",
+      "description": "O Brava Fascine Residencial é um empreendimento da Clarus na Praia Brava, em Itajaí, com arquitetura de alto padrão, vistas para o mar e uma implantação pensada para bem-estar. O projeto reúne apartamentos de diferentes tipologias, hall com controle de acesso, guarita, academia, gourmet, piscina adulto, deck e áreas sociais, em uma escala residencial exclusiva.",
+      "seo_description": "Conheça o Brava Fascine Residencial, empreendimento da Clarus na Praia Brava, Itajaí, com fachada contemporânea, vistas para o mar e lazer.",
+      "gallery": [
+        {
+          "title": "Brava Fascine - fachada",
+          "category": "Empreendimento",
+          "image": "https://clarusconstrutora.com.br/uploads/imagens/fachada-brava-fascine-504.webp",
+          "source_url": "https://clarusconstrutora.com.br/empreendimento/brava-fascine",
+          "source_label": "Clarus Construtora"
+        },
+        {
+          "title": "Brava Fascine - vista praia",
+          "category": "Empreendimento",
+          "image": "https://clarusconstrutora.com.br/uploads/imagens/lg-brava-fascine-8-423.jpg",
+          "source_url": "https://clarusconstrutora.com.br/empreendimento/brava-fascine",
+          "source_label": "Clarus Construtora"
+        },
+        {
+          "title": "Brava Fascine - acesso",
+          "category": "Áreas comuns",
+          "image": "https://clarusconstrutora.com.br/uploads/imagens/lg-brava-fascine-8-967.jpg",
+          "source_url": "https://clarusconstrutora.com.br/empreendimento/brava-fascine",
+          "source_label": "Clarus Construtora"
+        },
+        {
+          "title": "Brava Fascine - deck e piscina",
+          "category": "Lazer",
+          "image": "https://clarusconstrutora.com.br/uploads/imagens/lg-brava-fascine-8-264.jpg",
+          "source_url": "https://clarusconstrutora.com.br/empreendimento/brava-fascine",
+          "source_label": "Clarus Construtora"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Praia Brava",
+          "description": "Localização em uma das regiões mais valorizadas de Itajaí, próxima ao mar e aos serviços da Brava."
+        },
+        {
+          "icon": "Building2",
+          "title": "Escala exclusiva",
+          "description": "A MySide cita 38 apartamentos, reforçando o perfil mais reservado do empreendimento."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Arquitetura de alto padrão",
+          "description": "A fachada combina linhas contemporâneas, madeira, vidro e paisagismo para uma presença elegante."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Clarus Construtora",
+          "description": "O Brava Fascine é apresentado no site oficial da Clarus como empreendimento de alto padrão."
+        },
+        {
+          "title": "Metragens variadas",
+          "description": "A fonte oficial cita opções de 92,57 m² a 421,64 m², com até três suítes e duas a três vagas."
+        },
+        {
+          "title": "Áreas comuns qualificadas",
+          "description": "Hall com controle de acesso, guarita, academia, gourmet, piscina adulto e deck compõem a estrutura."
+        },
+        {
+          "title": "Vista para o mar",
+          "description": "A comunicação oficial destaca vistas e relação visual com a Praia Brava."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Brava Fascine?",
+          "answer": "Fica na Praia Brava, em Itajaí, Santa Catarina."
+        },
+        {
+          "question": "Quem desenvolve o Brava Fascine?",
+          "answer": "O empreendimento é da Clarus Construtora."
+        },
+        {
+          "question": "Qual é o porte do Brava Fascine?",
+          "answer": "A MySide cita 38 apartamentos; a fonte oficial apresenta metragens de 92,57 m² a 421,64 m², conforme tipologia."
+        },
+        {
+          "question": "Quais áreas comuns o Brava Fascine oferece?",
+          "answer": "As fontes citam hall de entrada com controle de acesso, guarita, academia, gourmet, piscina adulto e deck piscina."
+        }
+      ],
+      "sources": [
+        "https://clarusconstrutora.com.br/empreendimento/brava-fascine",
+        "https://myside.com.br/apartamento-venda-brava-fascine-residencial-itajai-sc",
+        "https://litoralvertical.com/venda/itajai/apartamentos/edificio-brava-fascine/"
+      ]
+    },
+    {
+      "slug": "olympo-tower",
+      "hero_image": "https://olympotower.com.br/wp-content/uploads/2024/04/Olympo-Tower-67.webp",
+      "description": "O Olympo Tower é um empreendimento da FG Empreendimentos no Centro de Balneário Camboriú, na Rua 1141, esquina com a Avenida Brasil. A torre tem design marcante, 44 pavimentos, exclusividade de um apartamento por andar e três pavimentos dedicados ao lazer, com piscina, academia, cinema, spa, sauna, mini golf, playground, terraço com gazebo, baby room e sala de massagem.",
+      "seo_description": "Conheça o Olympo Tower, empreendimento da FG no Centro de Balneário Camboriú com 44 pavimentos, um apartamento por andar e três pisos de lazer.",
+      "gallery": [
+        {
+          "title": "Olympo Tower - fachada",
+          "category": "Empreendimento",
+          "image": "https://olympotower.com.br/wp-content/uploads/2024/04/Olympo-Tower-67.webp",
+          "source_url": "https://olympotower.com.br/",
+          "source_label": "Olympo Tower"
+        },
+        {
+          "title": "Olympo Tower - piscina",
+          "category": "Lazer",
+          "image": "https://olympotower.com.br/wp-content/uploads/2024/04/Olympo-Tower-58-1024x576.webp",
+          "source_url": "https://olympotower.com.br/",
+          "source_label": "Olympo Tower"
+        },
+        {
+          "title": "Olympo Tower - deck da piscina",
+          "category": "Lazer",
+          "image": "https://olympotower.com.br/wp-content/uploads/2024/04/Olympo-Tower-64-1024x576.webp",
+          "source_url": "https://olympotower.com.br/",
+          "source_label": "Olympo Tower"
+        },
+        {
+          "title": "Olympo Tower - mini golf",
+          "category": "Lazer",
+          "image": "https://olympotower.com.br/wp-content/uploads/2024/04/Olympo-Tower-65-1024x576.webp",
+          "source_url": "https://olympotower.com.br/",
+          "source_label": "Olympo Tower"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro de Balneário Camboriú",
+          "description": "Endereço na Rua 1141, 85, em área nobre da Avenida Brasil, com acesso a comércio, serviços e orla central."
+        },
+        {
+          "icon": "Building2",
+          "title": "Um apartamento por andar",
+          "description": "A configuração reforça privacidade e exclusividade para os moradores."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Três pavimentos de lazer",
+          "description": "Piscina, academia, cinema, spa, sauna, mini golf, playground, terraço com gazebo, baby room e massagem compõem a estrutura."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "FG Empreendimentos",
+          "description": "O Olympo Tower é apresentado pelas fontes como obra da FG Empreendimentos."
+        },
+        {
+          "title": "44 pavimentos",
+          "description": "A Litoral Vertical e Imobille citam 44 pavimentos, com presença vertical marcante no Centro."
+        },
+        {
+          "title": "Entregue em 2020",
+          "description": "A Litoral Vertical apresenta o empreendimento como entregue em 2020."
+        },
+        {
+          "title": "Lazer decorado",
+          "description": "As fontes destacam área de lazer equipada e decorada para diferentes idades."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Olympo Tower?",
+          "answer": "Fica na Rua 1141, 85, Centro de Balneário Camboriú, na região da Avenida Brasil."
+        },
+        {
+          "question": "Quem construiu o Olympo Tower?",
+          "answer": "As fontes consultadas apresentam o Olympo Tower como empreendimento da FG Empreendimentos."
+        },
+        {
+          "question": "Quantos pavimentos tem o Olympo Tower?",
+          "answer": "As fontes citam 44 pavimentos e exclusividade de um apartamento por andar."
+        },
+        {
+          "question": "Quais itens de lazer o Olympo Tower oferece?",
+          "answer": "O lazer inclui piscina, salão de festas, academia, sauna, spa, playground, cinema, mini golf, terraço com gazebo, baby room, sala de massagem e espaço zen."
+        }
+      ],
+      "sources": [
+        "https://olympotower.com.br/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-olympo-tower-residence-EM86440",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-olympo-tower/"
+      ]
+    },
+    {
+      "slug": "terra-all-resort",
+      "hero_image": "https://allresort.com.br/_next/image/?dpl=dpl_E3UnMh5LVaJ1KUeEggaaL5jnf95k&q=65&url=%2Fimg%2Fpages%2Fall-resort%2Fterra%2Fbanner.png&w=828",
+      "description": "O Terra All Resort é um empreendimento dentro do ALL Resort Club Residence, em Porto Belo, concebido pela All Wert para integrar arquitetura, natureza, lazer e lifestyle. O projeto se conecta ao ecossistema do All Resort, com golf, tennis, beach, wellness, park art design, campo de golfe iluminado, praia particular, espaços esportivos e áreas de convivência em escala de resort.",
+      "seo_description": "Conheça o Terra All Resort em Porto Belo, parte do ALL Resort Club Residence, com arquitetura integrada à natureza, golf, tennis, beach e wellness.",
+      "gallery": [
+        {
+          "title": "Terra All Resort - implantação",
+          "category": "Empreendimento",
+          "image": "https://allresort.com.br/_next/image/?dpl=dpl_E3UnMh5LVaJ1KUeEggaaL5jnf95k&q=65&url=%2Fimg%2Fpages%2Fall-resort%2Fterra%2Fbanner.png&w=828",
+          "source_url": "https://allresort.com.br/",
+          "source_label": "All Resort"
+        },
+        {
+          "title": "ALL Resort - localização",
+          "category": "Localização",
+          "image": "https://allresort.com.br/_next/image/?dpl=dpl_E3UnMh5LVaJ1KUeEggaaL5jnf95k&q=65&url=%2Fimg%2Fpages%2Fhome%2Flocation.jpg&w=828",
+          "source_url": "https://allresort.com.br/",
+          "source_label": "All Resort"
+        },
+        {
+          "title": "ALL Resort - golf",
+          "category": "Lazer",
+          "image": "https://allresort.com.br/_next/image/?dpl=dpl_E3UnMh5LVaJ1KUeEggaaL5jnf95k&q=65&url=%2Fimg%2Fpages%2Fall-resort%2Fall-golf%2Fcampo-noturno.jpg&w=828",
+          "source_url": "https://allresort.com.br/",
+          "source_label": "All Resort"
+        },
+        {
+          "title": "ALL Resort - Park Art Design",
+          "category": "Áreas comuns",
+          "image": "https://allresort.com.br/_next/image/?dpl=dpl_E3UnMh5LVaJ1KUeEggaaL5jnf95k&q=65&url=%2Fimg%2Fpages%2Fall-resort%2Fpark-art-design%2Fpraca-a.png&w=640",
+          "source_url": "https://allresort.com.br/",
+          "source_label": "All Resort"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Trees",
+          "title": "Natureza como conceito",
+          "description": "O Terra é apresentado como refúgio onde natureza e bem-estar são protagonistas dentro do All Resort."
+        },
+        {
+          "icon": "Flag",
+          "title": "Golf e tennis",
+          "description": "O ecossistema do ALL inclui campo de golfe iluminado e centro de tênis como diferenciais esportivos."
+        },
+        {
+          "icon": "Waves",
+          "title": "Beach e wellness",
+          "description": "A comunicação oficial destaca praia, lazer contínuo e espaços de bem-estar como parte do estilo de vida."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "ALL Resort Club Residence",
+          "description": "O Terra faz parte de um masterplan de resort residencial em Porto Belo, com múltiplas experiências integradas."
+        },
+        {
+          "title": "All Wert",
+          "description": "O empreendimento está vinculado à All Wert, responsável pelo conceito e desenvolvimento do ecossistema."
+        },
+        {
+          "title": "Entrega prevista para 2030",
+          "description": "A MySide informa previsão de entrega para dezembro de 2030, sujeita à confirmação comercial."
+        },
+        {
+          "title": "Lazer em escala de resort",
+          "description": "Fontes citam salão de festas, gourmet, spa, cinema, massagem, gamer, quadras, mercado, restaurante, padaria, parque aquático e clube internacional."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Terra All Resort?",
+          "answer": "Fica em Porto Belo, Santa Catarina, dentro do ALL Resort Club Residence."
+        },
+        {
+          "question": "Quem desenvolve o Terra All Resort?",
+          "answer": "O projeto está associado à All Wert e ao ecossistema ALL Resort Club Residence."
+        },
+        {
+          "question": "Quais experiências o ALL Resort oferece?",
+          "answer": "A comunicação oficial organiza o resort em eixos como golf, tennis, beach, mountain, wellness, design e lazer integrado."
+        },
+        {
+          "question": "Quando o Terra All Resort será entregue?",
+          "answer": "A MySide informa previsão de entrega para dezembro de 2030, sujeita à confirmação do empreendimento."
+        }
+      ],
+      "sources": [
+        "https://allresort.com.br/",
+        "https://myside.com.br/apartamento-venda-terra-all-resort-porto-belo-sc",
+        "https://www.lancamentosportobelo.com.br/lancamentos/terra-all-resort/"
+      ]
+    }
+  ]
+}

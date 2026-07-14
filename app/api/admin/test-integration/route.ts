@@ -604,6 +604,21 @@ export async function POST(request: NextRequest) {
                     })
                 }
             }
+            case 'wikimedia_commons': {
+                try {
+                    const result = await testEditorialImageProvider('wikimedia_commons', config)
+                    return NextResponse.json({
+                        success: true,
+                        message: `Wikimedia Commons conectado. ${result.count} imagem(ns) licenciada(s) retornada(s) no teste editorial.`,
+                        sample: result.sample,
+                    })
+                } catch (e) {
+                    return NextResponse.json({
+                        success: false,
+                        message: `Erro Wikimedia Commons: ${e instanceof Error ? e.message : String(e)}`,
+                    })
+                }
+            }
             case 'google_images':
             case 'google_licensed': {
                 try {

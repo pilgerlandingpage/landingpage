@@ -71,6 +71,19 @@ function unique(values: Array<string | null | undefined>) {
   return Array.from(new Set(values.map(value => String(value || '').replace(/\s+/g, ' ').trim()).filter(Boolean)))
 }
 
+function extractKnownPlace(...values: Array<unknown>) {
+  const text = normalize(values.flat().join(' '))
+  if (/\bpraia\s+brava\b|\bbrava\b/.test(text)) return 'Praia Brava Itajai'
+  if (/\bbalneario\s+camboriu\b|\bcamboriu\b/.test(text)) return 'Balneario Camboriu'
+  if (/\bitapema\b/.test(text)) return 'Itapema'
+  if (/\bitajai\b/.test(text)) return 'Itajai'
+  if (/\bporto\s+belo\b/.test(text)) return 'Porto Belo'
+  if (/\bflorianopolis\b/.test(text)) return 'Florianopolis'
+  if (/\bsanta\s+catarina\b|\bsc\b/.test(text)) return 'Santa Catarina'
+  if (/\bblumenau\b/.test(text)) return 'Blumenau'
+  return ''
+}
+
 function cleanKeyword(value: string) {
   return value
     .replace(/[^\p{L}\p{N}\s-]/gu, ' ')
@@ -119,7 +132,10 @@ function buildEditorialImageQueries(input: CurateEditorialImagesInput) {
   const rawKeywords = unique(input.keywords.map(keyword => compactKeyword(String(keyword || ''))))
     .filter(keyword => keyword.length > 2)
     .filter(keyword => !GENERIC_TERMS.has(normalize(keyword)))
-  const local = rawKeywords.find(keyword => LOCAL_TERMS.test(normalize(keyword)))
+  let local = extractKnownPlace(input.title, input.keywords, rawKeywords)
+    || rawKeywords.find(keyword => LOCAL_TERMS.test(normalize(keyword)))
+    || 'Balneario Camboriu'
+  if (local === 'Santa Catarina') local = 'Balneario Camboriu'
   const title = titleTerms(input.title)
   const base = rawKeywords.slice(0, 4).join(' ')
   const topic = unique([title, base]).join(' ')
@@ -139,16 +155,21 @@ function buildEditorialImageQueries(input: CurateEditorialImagesInput) {
     ]
 
   const queries = [
+    `${local} skyline`,
+    `${local} praia`,
+    `${local} orla`,
+    `${local} arquitetura urbana`,
+    `${local} edificios`,
+    `${local} Santa Catarina`,
     unique([local, topic, contentSuffixes[0]]).join(' '),
-    unique([topic, contentSuffixes[1]]).join(' '),
+    unique([local, topic, contentSuffixes[1]]).join(' '),
     unique([local, contentSuffixes[2]]).join(' '),
-    unique([base, contentSuffixes[3]]).join(' '),
-    unique([title, 'apartment building exterior']).join(' '),
+    unique([local, base, contentSuffixes[3]]).join(' '),
+    unique([local, title, 'apartment building exterior']).join(' '),
     unique([local, 'urban skyline apartments']).join(' '),
-    'modern residential architecture beach city',
-    'real estate investment city buildings',
-    'luxury apartment facade city',
-    'urban development residential buildings',
+    unique([local, 'residential architecture beach city']).join(' '),
+    unique([local, 'apartment facade city']).join(' '),
+    unique([local, 'urban development residential buildings']).join(' '),
   ]
 
   return unique(queries)
@@ -470,7 +491,7 @@ export async function registerEditorialVisualPlanUsage(
 
   for (const asset of assets) {
     const source = String(asset.source || asset.provider || '')
-    if (source !== 'google_licensed' && source !== 'pexels' && source !== 'pixabay') continue
+    if (source !== 'wikimedia_commons' && source !== 'google_licensed' && source !== 'pexels' && source !== 'pixabay') continue
     await registerEditorialImageUsage(supabase, {
       provider: source as EditorialImageProvider,
       provider_asset_id: asset.provider_asset_id || asset.id,

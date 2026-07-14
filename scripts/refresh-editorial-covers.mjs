@@ -14,7 +14,7 @@ const providersArg = process.argv.find(arg => arg.startsWith('--providers='))
 const limit = Math.max(1, Math.min(200, Number.parseInt(limitArg?.split('=')[1] || '80', 10) || 80))
 const statusFilter = statusArg?.split('=')[1]?.trim()
 const idFilter = idsArg?.split('=')[1]?.split(',').map(id => id.trim()).filter(Boolean) || []
-const providerFilter = new Set((providersArg?.split('=')[1] || 'google_licensed,pexels,pixabay').split(',').map(provider => provider.trim()).filter(Boolean))
+const providerFilter = new Set((providersArg?.split('=')[1] || 'wikimedia_commons,google_licensed,pexels,pixabay').split(',').map(provider => provider.trim()).filter(Boolean))
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -26,6 +26,9 @@ if (!supabaseUrl || !serviceRoleKey) {
 const supabase = createClient(supabaseUrl, serviceRoleKey)
 
 const CONFIG_KEYS = [
+  'wikimedia_commons_enabled',
+  'wikimedia_commons_priority',
+  'wikimedia_commons_per_page',
   'google_image_search_api_key',
   'google_image_search_cx',
   'google_image_search_enabled',
@@ -115,6 +118,35 @@ function unique(values) {
   return Array.from(new Set(values.map(value => String(value || '').trim()).filter(Boolean)))
 }
 
+function extractKnownPlace(...values) {
+  const text = normalize(values.flat().join(' '))
+  if (/\bpraia\s+brava\b|\bbrava\b/.test(text)) return 'Praia Brava Itajai'
+  if (/\bbalneario\s+camboriu\b|\bcamboriu\b/.test(text)) return 'Balneario Camboriu'
+  if (/\bitapema\b/.test(text)) return 'Itapema'
+  if (/\bitajai\b/.test(text)) return 'Itajai'
+  if (/\bporto\s+belo\b/.test(text)) return 'Porto Belo'
+  if (/\bflorianopolis\b/.test(text)) return 'Florianopolis'
+  if (/\bsanta\s+catarina\b|\bsc\b/.test(text)) return 'Santa Catarina'
+  if (/\bblumenau\b/.test(text)) return 'Blumenau'
+  return ''
+}
+
+function placeTokens(place) {
+  const normalized = normalize(place)
+  if (normalized.includes('praia brava')) return ['praia', 'brava', 'itajai']
+  if (normalized.includes('balneario camboriu')) return ['balneario', 'camboriu']
+  if (normalized.includes('porto belo')) return ['porto', 'belo']
+  if (normalized.includes('santa catarina')) return ['santa', 'catarina']
+  return normalized.split(/\s+/).filter(Boolean)
+}
+
+function imageMatchesPlace(image, place) {
+  const tokens = placeTokens(place)
+  if (!tokens.length || normalize(place) === 'santa catarina') return true
+  const text = imageText(image)
+  return tokens.every(token => text.includes(token))
+}
+
 function decodeText(value) {
   const raw = String(value || '').replace(/\+/g, ' ')
   try {
@@ -198,6 +230,29 @@ function firstText(...values) {
   return ''
 }
 
+function decodeHtmlEntities(value) {
+  return String(value || '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCharCode(Number.parseInt(code, 16)))
+}
+
+function stripHtml(value) {
+  return decodeHtmlEntities(String(value || '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim())
+}
+
+function commonsMetadataValue(metadata, key) {
+  return stripHtml(metadata?.[key]?.value)
+}
+
 function sourceDomain(url) {
   try {
     return new URL(url).hostname.replace(/^www\./, '').toLowerCase()
@@ -256,6 +311,20 @@ function googleRightsAllowCommercialUse(rights) {
   return !String(rights || '').toLowerCase().includes('cc_noncommercial')
 }
 
+function isAllowedCommonsLicense(license) {
+  const normalized = normalize(license)
+  if (!normalized) return false
+  return ![
+    'noncommercial',
+    'non commercial',
+    'fair use',
+    'copyrighted',
+    'all rights reserved',
+    'unknown',
+    'unlicensed',
+  ].some(term => normalized.includes(term))
+}
+
 function postContextText(post) {
   return normalize([
     post.title,
@@ -282,6 +351,7 @@ function sanitizePlannedQuery(post, value) {
     'nuremberg',
     'nurnberg',
     'paris',
+    'curitiba',
   ]
 
   if (unrelatedPlaces.some(place => normalizedQuery.includes(place))) {
@@ -306,6 +376,7 @@ function isBadVisualCandidate(image) {
     'arte de rua',
     'ave',
     'aves',
+    'barco',
     'bird',
     'cachorro',
     'carro',
@@ -328,8 +399,10 @@ function isBadVisualCandidate(image) {
     'palma',
     'passaro',
     'pescaria',
+    'pirata',
     'quarto',
     'salto',
+    'sambaqui',
     'sapato',
     'trem',
     'train',
@@ -356,6 +429,7 @@ function hasDomainVisualSignal(image) {
     'litoral',
     'mar',
     'orla',
+    'panorama',
     'praia',
     'predio',
     'predios',
@@ -364,6 +438,7 @@ function hasDomainVisualSignal(image) {
     'skyline',
     'urbano',
     'urbana',
+    'vista',
   ].some(term => text.includes(term))
 }
 
@@ -373,6 +448,15 @@ function buildCoverQueries(post) {
     visualPlan.image_search_query,
     ...(Array.isArray(visualPlan.image_plan) ? visualPlan.image_plan.map(item => item?.query) : []),
   ].map(query => sanitizePlannedQuery(post, query)).filter(Boolean)
+  let place = extractKnownPlace(
+    post.title,
+    post.primary_keyword,
+    post.secondary_keywords,
+    post.local_entities,
+    post.tags,
+    post.category,
+  ) || 'Balneario Camboriu'
+  if (place === 'Santa Catarina') place = 'Balneario Camboriu'
   const tags = [
     post.primary_keyword,
     ...(Array.isArray(post.secondary_keywords) ? post.secondary_keywords : []),
@@ -386,31 +470,35 @@ function buildCoverQueries(post) {
     .slice(0, 5)
   const titleWords = compactSearchTerm(post.title)
 
-  const local = cleaned.find(term => /balneario|camboriu|itajai|itapema|porto belo|praia brava|santa catarina/i.test(normalize(term)))
   const suffixes = isNewsPost(post)
     ? [
-      'Creative Commons cidade litoral arquitetura',
-      'Wikimedia Commons desenvolvimento urbano Santa Catarina',
-      'skyline arquitetura urbana Creative Commons',
-      'mercado imobiliario cidade litoral fonte verificavel',
+      'cidade litoral arquitetura',
+      'desenvolvimento urbano Santa Catarina',
+      'skyline arquitetura urbana',
+      'mercado imobiliario cidade litoral',
     ]
     : [
-      'Creative Commons arquitetura urbana litoral',
-      'Wikimedia Commons skyline Santa Catarina',
+      'arquitetura urbana litoral',
+      'skyline Santa Catarina',
       'alto padrao cidade praia arquitetura licenciada',
-      'mercado imobiliario skyline cidade Creative Commons',
+      'mercado imobiliario skyline cidade',
     ]
 
   return unique([
-    ...plannedQueries,
-    unique([local, cleaned.slice(0, 3).join(' '), titleWords, suffixes[0]]).join(' '),
-    unique([cleaned.slice(0, 3).join(' '), suffixes[1]]).join(' '),
-    unique([local, suffixes[2]]).join(' '),
-    unique([titleWords, suffixes[3]]).join(' '),
-    unique([local, 'urban skyline apartments']).join(' '),
-    'modern residential architecture beach city',
-    'real estate investment city buildings',
-    'luxury apartment facade city',
+    `${place} skyline`,
+    `${place} praia`,
+    `${place} orla`,
+    `${place} arquitetura urbana`,
+    `${place} edificios`,
+    `${place} Santa Catarina`,
+    ...plannedQueries.map(query => unique([place, query]).join(' ')),
+    unique([place, cleaned.slice(0, 3).join(' '), titleWords, suffixes[0]]).join(' '),
+    unique([place, cleaned.slice(0, 3).join(' '), suffixes[1]]).join(' '),
+    unique([place, suffixes[2]]).join(' '),
+    unique([place, titleWords, suffixes[3]]).join(' '),
+    unique([place, 'urban skyline apartments']).join(' '),
+    unique([place, 'residential architecture beach city']).join(' '),
+    unique([place, 'apartment facade city']).join(' '),
   ])
     .map(query => sanitizePlannedQuery(post, query))
     .filter(query => query.length > 8)
@@ -430,21 +518,24 @@ function isNewsPost(post) {
 
 function getProviderConfig(configMap) {
   return {
+    wikimediaCommonsEnabled: toBool(configMap.wikimedia_commons_enabled, true),
+    wikimediaCommonsPriority: toInt(configMap.wikimedia_commons_priority, 1, 1, 4),
+    wikimediaCommonsPerPage: toInt(configMap.wikimedia_commons_per_page, 12, 3, 30),
     googleImageSearchApiKey: (configMap.google_image_search_api_key || process.env.GOOGLE_IMAGE_SEARCH_API_KEY || process.env.GOOGLE_CSE_API_KEY || '').trim(),
     googleImageSearchCx: (configMap.google_image_search_cx || process.env.GOOGLE_IMAGE_SEARCH_CX || process.env.GOOGLE_CSE_CX || '').trim(),
-    googleImageSearchEnabled: toBool(configMap.google_image_search_enabled, true),
-    googleImageSearchPriority: toInt(configMap.google_image_search_priority, 1, 1, 3),
+    googleImageSearchEnabled: toBool(configMap.google_image_search_enabled, false),
+    googleImageSearchPriority: toInt(configMap.google_image_search_priority, 3, 1, 4),
     googleImageSearchPerPage: toInt(configMap.google_image_search_per_page, 10, 3, 10),
     googleImageSearchRights: normalizeGoogleRights(configMap.google_image_search_rights),
     googleImageSearchRequireLicenseMetadata: toBool(configMap.google_image_search_require_license_metadata, true),
     googleImageSearchCommercialOnly: toBool(configMap.google_image_search_commercial_only, true),
     pexelsApiKey: (configMap.pexels_api_key || process.env.PEXELS_API_KEY || '').trim(),
     pexelsEnabled: toBool(configMap.pexels_enabled, true),
-    pexelsPriority: toInt(configMap.pexels_priority, 1, 1, 3),
+    pexelsPriority: toInt(configMap.pexels_priority, 2, 1, 4),
     pexelsPerPage: toInt(configMap.pexels_per_page, 12, 3, 40),
     pixabayApiKey: (configMap.pixabay_api_key || process.env.PIXABAY_API_KEY || '').trim(),
     pixabayEnabled: toBool(configMap.pixabay_enabled, true),
-    pixabayPriority: toInt(configMap.pixabay_priority, 2, 1, 3),
+    pixabayPriority: toInt(configMap.pixabay_priority, 4, 1, 4),
     pixabayPerPage: toInt(configMap.pixabay_per_page, 12, 3, 40),
     safeSearch: toBool(configMap.editorial_image_safe_search, true),
     lang: String(configMap.editorial_image_lang || 'pt').trim().toLowerCase() || 'pt',
@@ -540,6 +631,93 @@ async function searchGoogleLicensed(config, query, options = {}) {
       return {
         ...result,
         score: rankImage(result, query, config.googleImageSearchPriority) + 6 + (trustedCommons ? 10 : 0) + (licenseMetadata.licenseUrl ? 8 : 0),
+      }
+    })
+    .filter(item => item?.imageUrl && item?.sourceUrl)
+}
+
+async function searchWikimediaCommons(config, query, options = {}) {
+  if (!config.wikimediaCommonsEnabled) return []
+
+  const perPage = Math.min(30, Math.max(3, config.wikimediaCommonsPerPage || 12))
+  const params = new URLSearchParams({
+    action: 'query',
+    format: 'json',
+    formatversion: '2',
+    origin: '*',
+    generator: 'search',
+    gsrsearch: query,
+    gsrnamespace: '6',
+    gsrlimit: String(perPage),
+    gsroffset: '0',
+    prop: 'imageinfo',
+    iiprop: 'url|size|mime|extmetadata',
+    iiurlwidth: '1600',
+  })
+
+  const response = await fetch(`https://commons.wikimedia.org/w/api.php?${params.toString()}`, {
+    headers: {
+      'User-Agent': 'PilgerLandingPage/1.0 (https://guilhermepilger.ai)',
+    },
+  })
+  const payload = await response.json().catch(() => null)
+  if (!response.ok || payload?.error) {
+    throw new Error(`Wikimedia Commons ${response.status}: ${payload?.error?.info || response.statusText}`)
+  }
+
+  const pages = Array.isArray(payload?.query?.pages) ? payload.query.pages : []
+  return pages
+    .map(page => {
+      const info = Array.isArray(page?.imageinfo) ? page.imageinfo[0] : null
+      const metadata = info?.extmetadata && typeof info.extmetadata === 'object' ? info.extmetadata : {}
+      const imageUrl = String(info?.url || '').trim()
+      const sourceUrl = String(info?.descriptionurl || `https://commons.wikimedia.org/wiki/${encodeURIComponent(String(page?.title || ''))}`).trim()
+      const title = stripHtml(commonsMetadataValue(metadata, 'ObjectName') || String(page?.title || query).replace(/^File:/, ''))
+      const description = stripHtml(commonsMetadataValue(metadata, 'ImageDescription') || commonsMetadataValue(metadata, 'Credit') || title)
+      const author = stripHtml(commonsMetadataValue(metadata, 'Artist') || commonsMetadataValue(metadata, 'Credit') || 'Wikimedia Commons')
+      const license = stripHtml(commonsMetadataValue(metadata, 'LicenseShortName') || commonsMetadataValue(metadata, 'UsageTerms'))
+      const licenseUrl = String(metadata?.LicenseUrl?.value || '').trim() || null
+      const mime = String(info?.mime || '').toLowerCase()
+      const width = Number(info?.width || 0)
+      const height = Number(info?.height || 0)
+
+      if (!imageUrl || !sourceUrl) return null
+      if (mime && !mime.startsWith('image/')) return null
+      if (mime.includes('svg') || mime.includes('gif')) return null
+      if (!license || !isAllowedCommonsLicense(license)) return null
+      if (!matchesHorizontal(width, height)) return null
+
+      const result = {
+        provider: 'wikimedia_commons',
+        id: String(page?.pageid || page?.title || imageUrl),
+        title,
+        description,
+        imageUrl,
+        previewUrl: String(info?.thumburl || imageUrl),
+        downloadUrl: imageUrl,
+        sourceUrl,
+        author,
+        authorUrl: sourceUrl,
+        width,
+        height,
+        tags: tagsFrom(`${title}, ${description}, ${license}, Wikimedia Commons`),
+        alt: title || query,
+        license,
+        licenseUrl,
+        licenseStatus: 'wikimedia_commons_metadata',
+        attributionRequired: /(^|\s)cc\s+by/i.test(license) || Boolean(author && author !== 'Wikimedia Commons'),
+        metadata: {
+          page_title: page?.title || null,
+          mime: info?.mime || null,
+          credit_text: commonsMetadataValue(metadata, 'Credit') || null,
+          usage_terms: commonsMetadataValue(metadata, 'UsageTerms') || null,
+          license_validation: 'wikimedia_commons_metadata',
+        },
+      }
+
+      return {
+        ...result,
+        score: rankImage(result, query, config.wikimediaCommonsPriority) + 12 + (licenseUrl ? 5 : 0),
       }
     })
     .filter(item => item?.imageUrl && item?.sourceUrl)
@@ -728,6 +906,12 @@ async function searchEditorialCover(config, queries, memory) {
   const candidates = []
   const providers = [
     {
+      id: 'wikimedia_commons',
+      priority: config.wikimediaCommonsPriority,
+      enabled: providerFilter.has('wikimedia_commons') && config.wikimediaCommonsEnabled,
+      search: searchWikimediaCommons,
+    },
+    {
       id: 'google_licensed',
       priority: config.googleImageSearchPriority,
       enabled: providerFilter.has('google_licensed') && config.googleImageSearchEnabled && Boolean(config.googleImageSearchApiKey && config.googleImageSearchCx),
@@ -747,11 +931,12 @@ async function searchEditorialCover(config, queries, memory) {
     },
   ]
     .filter(provider => provider.enabled)
-    .sort((a, b) => a.priority - b.priority || ['google_licensed', 'pexels', 'pixabay'].indexOf(a.id) - ['google_licensed', 'pexels', 'pixabay'].indexOf(b.id))
+    .sort((a, b) => a.priority - b.priority || ['wikimedia_commons', 'google_licensed', 'pexels', 'pixabay'].indexOf(a.id) - ['wikimedia_commons', 'google_licensed', 'pexels', 'pixabay'].indexOf(b.id))
 
   for (const query of queries) {
     const page = randomInt(1, 8)
     const order = Math.random() > 0.45 ? 'popular' : 'latest'
+    const queryPlace = extractKnownPlace(query)
     const results = await Promise.allSettled(providers.map(provider => provider.search(config, query, { page, order })))
 
     for (const image of results.flatMap(result => result.status === 'fulfilled' ? result.value : [])) {
@@ -761,7 +946,8 @@ async function searchEditorialCover(config, queries, memory) {
       if (isRecentlyUsed(image, memory)) continue
       if (isBadVisualCandidate(image)) continue
       const textScore = makeQueryScore(query, `${image.title} ${image.description} ${image.alt} ${image.tags.join(' ')}`)
-      if (image.provider !== 'google_licensed' && (!hasDomainVisualSignal(image) || textScore < 4)) continue
+      if ((image.provider === 'wikimedia_commons' || image.provider === 'google_licensed') && queryPlace && !imageMatchesPlace(image, queryPlace)) continue
+      if (image.provider !== 'wikimedia_commons' && image.provider !== 'google_licensed' && (!hasDomainVisualSignal(image) || textScore < 4)) continue
 
       const score = diversityScore(image, query, memory) + textScore
       if (score <= 0) continue
@@ -788,11 +974,23 @@ function extensionFromContentType(contentType) {
 async function persistToR2(config, image, post) {
   const r2 = config.r2
   if (!r2.accountId || !r2.accessKeyId || !r2.secretAccessKey || !r2.bucketName || !r2.publicUrl) {
-    return { url: image.imageUrl, key: null, mirrored: false }
+    throw new Error('R2 nao configurado para espelhar a imagem editorial.')
   }
 
-  const response = await fetch(image.downloadUrl || image.imageUrl)
-  if (!response.ok) return { url: image.imageUrl, key: null, mirrored: false }
+  let response = null
+  const downloadUrl = image.downloadUrl || image.imageUrl
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    response = await fetch(downloadUrl, {
+      headers: {
+        'User-Agent': 'PilgerLandingPage/1.0 (https://guilhermepilger.ai)',
+      },
+    }).catch(error => ({ ok: false, status: 0, statusText: error?.message || 'fetch_failed', headers: new Headers(), arrayBuffer: null }))
+    if (response?.ok) break
+    if (attempt < 3) await sleep(1200 * attempt)
+  }
+  if (!response?.ok || typeof response.arrayBuffer !== 'function') {
+    throw new Error(`Download da imagem falhou antes do R2 (${response?.status || 0}: ${response?.statusText || 'sem resposta'}).`)
+  }
 
   const contentType = response.headers.get('content-type') || 'image/jpeg'
   const buffer = Buffer.from(await response.arrayBuffer())
@@ -1095,6 +1293,9 @@ async function main() {
       }
 
       const persisted = await persistToR2(config, image, post)
+      if (!persisted.mirrored) {
+        throw new Error('Imagem nao foi espelhada no R2; capa nao atualizada.')
+      }
       const currentSourceSummary = await loadPostSourceSummary(post.id)
       const sourceSummary = mergeSourceSummary({ ...post, source_summary: currentSourceSummary }, image, persisted, selectedQuery)
       const { error } = await runSupabase('updateBlogPostCover', () => supabase

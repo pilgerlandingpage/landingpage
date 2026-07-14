@@ -1,0 +1,527 @@
+{
+  "batch_id": "development-media-curation-batch2-20260714",
+  "generated_at": "2026-07-14T18:05:00.000Z",
+  "items": [
+    {
+      "slug": "one-tower",
+      "hero_image": "https://onetower.com.br/wp-content/uploads/2025/07/05.jpg",
+      "description": "O One Tower é um empreendimento residencial da FG Empreendimentos na Barra Sul de Balneário Camboriú, em endereço frente-mar na Avenida Atlântica. A torre se destaca pela escala vertical, pela fachada em pele de vidro, pela vista ampla da orla e por uma estrutura de lazer distribuída em vários pavimentos, com piscinas, spa, academia, salões sociais e ambientes de convivência.",
+      "seo_description": "Conheça o One Tower na Barra Sul de Balneário Camboriú, torre frente-mar da FG com lazer em vários pavimentos, vista da orla e alto padrão.",
+      "gallery": [
+        {
+          "title": "One Tower - fachada frente-mar",
+          "category": "Empreendimento",
+          "image": "https://onetower.com.br/wp-content/uploads/2025/07/05.jpg",
+          "source_url": "https://onetower.com.br/",
+          "source_label": "One Tower"
+        },
+        {
+          "title": "One Tower - torre e pódio",
+          "category": "Empreendimento",
+          "image": "https://onetower.com.br/wp-content/uploads/2025/07/06.jpg",
+          "source_url": "https://onetower.com.br/",
+          "source_label": "One Tower"
+        },
+        {
+          "title": "One Tower - piscina externa",
+          "category": "Lazer",
+          "image": "https://onetower.com.br/wp-content/uploads/2025/07/10.jpg",
+          "source_url": "https://onetower.com.br/",
+          "source_label": "One Tower"
+        },
+        {
+          "title": "One Tower - lazer frente-mar",
+          "category": "Lazer",
+          "image": "https://onetower.com.br/wp-content/uploads/2025/07/12.jpg",
+          "source_url": "https://onetower.com.br/",
+          "source_label": "One Tower"
+        },
+        {
+          "title": "One Tower - piscina e convivência",
+          "category": "Lazer",
+          "image": "https://onetower.com.br/wp-content/uploads/2025/07/11.jpg",
+          "source_url": "https://onetower.com.br/",
+          "source_label": "One Tower"
+        },
+        {
+          "title": "One Tower - áreas comuns",
+          "category": "Áreas comuns",
+          "image": "https://onetower.com.br/wp-content/uploads/2025/07/One-Tower-016.jpg",
+          "source_url": "https://onetower.com.br/",
+          "source_label": "One Tower"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente-mar na Barra Sul",
+          "description": "Endereço na Avenida Atlântica, em uma das regiões mais valorizadas de Balneário Camboriú, com conexão direta à orla e ao eixo da Barra Sul."
+        },
+        {
+          "icon": "Building2",
+          "title": "Torre de grande presença",
+          "description": "Projeto vertical da FG com 84 pavimentos e 290 metros de altura, pensado para entregar vista ampla e presença marcante no skyline."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer em múltiplos pavimentos",
+          "description": "Piscinas, spa, sauna, academia, wine bar, salão de festas, espaço kids, minigolfe, pomar e piscina interna aquecida ampliam a rotina dentro do condomínio."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fachada em pele de vidro",
+          "description": "A linguagem arquitetônica privilegia transparência, iluminação e uma leitura contemporânea da torre."
+        },
+        {
+          "title": "Vista 360 graus",
+          "description": "A altura e a implantação favorecem visuais para o mar, cidade, rio e morros de Balneário Camboriú."
+        },
+        {
+          "title": "Apartamentos amplos",
+          "description": "A comunicação oficial apresenta apartamentos tipo com 196,13 m², quatro suítes e três a quatro vagas."
+        },
+        {
+          "title": "Infraestrutura de alto padrão",
+          "description": "O empreendimento combina automação, acabamentos selecionados, gerador e áreas de uso comum voltadas para conforto permanente."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o One Tower?",
+          "answer": "O One Tower fica na Avenida Atlântica, 4954, Barra Sul, Balneário Camboriú, em localização frente-mar."
+        },
+        {
+          "question": "Quem é a construtora do One Tower?",
+          "answer": "O empreendimento é da FG Empreendimentos, incorporadora com forte atuação em Balneário Camboriú."
+        },
+        {
+          "question": "Quais são os principais itens de lazer do One Tower?",
+          "answer": "Entre os destaques estão piscinas, spa, sauna, academia, wine bar, salão de festas, espaço kids, minigolfe, pomar e piscina interna aquecida."
+        },
+        {
+          "question": "O One Tower tem apartamentos de que porte?",
+          "answer": "A comunicação oficial apresenta apartamentos tipo com 196,13 m², quatro suítes e três a quatro vagas, além de plantas superiores conforme disponibilidade."
+        }
+      ],
+      "sources": [
+        "https://onetower.com.br/"
+      ]
+    },
+    {
+      "slug": "boreal-tower",
+      "hero_image": "https://borealtower.com.br/wp-content/uploads/2024/05/boreal-tower.jpg",
+      "description": "O Boreal Tower é um empreendimento residencial da FG na Barra Norte de Balneário Camboriú, em posição frente-mar. A proposta combina arquitetura inspirada na flor de lótus, plantas amplas, vista para a orla e uma estrutura de lazer com aproximadamente 3.600 m², organizada para bem-estar, esportes, descanso e convivência.",
+      "seo_description": "Conheça o Boreal Tower, empreendimento frente-mar da FG na Barra Norte de Balneário Camboriú com lazer amplo, plantas de 4 a 5 suítes e vista da orla.",
+      "gallery": [
+        {
+          "title": "Boreal Tower - fachada frente-mar",
+          "category": "Empreendimento",
+          "image": "https://borealtower.com.br/wp-content/uploads/2024/05/boreal-tower.jpg",
+          "source_url": "https://borealtower.com.br/",
+          "source_label": "Boreal Tower"
+        },
+        {
+          "title": "Boreal Tower - hall",
+          "category": "Áreas comuns",
+          "image": "https://borealtower.com.br/wp-content/uploads/2024/05/boreal-tower-hall-1920x1200-1.jpg",
+          "source_url": "https://borealtower.com.br/",
+          "source_label": "Boreal Tower"
+        },
+        {
+          "title": "Boreal Tower - piscina",
+          "category": "Lazer",
+          "image": "https://borealtower.com.br/wp-content/uploads/2024/05/boreal-tower-piscina-1920x1200-1.jpg",
+          "source_url": "https://borealtower.com.br/",
+          "source_label": "Boreal Tower"
+        },
+        {
+          "title": "Boreal Tower - piscina aquecida",
+          "category": "Lazer",
+          "image": "https://borealtower.com.br/wp-content/uploads/2024/05/boreal-tower-piscina-aquecida-1920x1200-1.jpg",
+          "source_url": "https://borealtower.com.br/",
+          "source_label": "Boreal Tower"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente-mar na Barra Norte",
+          "description": "Localização na orla de Balneário Camboriú, com acesso privilegiado à praia e à região norte da cidade."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Arquitetura autoral",
+          "description": "O conceito visual do empreendimento é inspirado na flor de lótus, criando uma identidade própria para a torre."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer de grande escala",
+          "description": "A estrutura reúne cerca de 3.600 m² de lazer com piscinas, gourmet, quadra, pub, spa, sauna, pilates, yoga, beauty e áreas de convivência."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Plantas amplas",
+          "description": "A comunicação do empreendimento apresenta opções de 184,03 m² a 380 m², com quatro a cinco suítes."
+        },
+        {
+          "title": "Três andares de lazer",
+          "description": "A estrutura de lazer é distribuída em múltiplos níveis, favorecendo diferentes usos sem concentrar tudo em um único ambiente."
+        },
+        {
+          "title": "Bem-estar completo",
+          "description": "Piscina aquecida, spa, sauna, pilates/yoga e beauty reforçam uma rotina voltada a saúde e relaxamento."
+        },
+        {
+          "title": "Segurança e serviços",
+          "description": "Portaria 24h e espaços coletivos bem definidos sustentam uma experiência residencial de alto padrão."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Boreal Tower?",
+          "answer": "O Boreal Tower fica na Barra Norte de Balneário Camboriú, em posição frente-mar."
+        },
+        {
+          "question": "Quem desenvolve o Boreal Tower?",
+          "answer": "O empreendimento é apresentado pela FG, incorporadora reconhecida por torres de alto padrão em Balneário Camboriú."
+        },
+        {
+          "question": "Qual é o tamanho das unidades do Boreal Tower?",
+          "answer": "As referências oficiais apresentam unidades de 184,03 m² a 380 m², com quatro a cinco suítes."
+        },
+        {
+          "question": "Quais áreas de lazer o Boreal Tower oferece?",
+          "answer": "O empreendimento reúne piscinas, piscina aquecida, gourmet, quadra poliesportiva, pub, spa, sauna, pilates/yoga, beauty, salão de festas, jogos e academia."
+        }
+      ],
+      "sources": [
+        "https://borealtower.com.br/"
+      ]
+    },
+    {
+      "slug": "condominio-porto-riviera",
+      "hero_image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/hGJNDPtWpn378jvsD3CA.jpg",
+      "description": "O Condomínio Porto Riviera Exclusive fica na Praia Brava, em Itajaí, próximo ao mar e ao eixo de serviços entre Itajaí e Balneário Camboriú. É um condomínio horizontal de grande porte, com infraestrutura esportiva, lazer para famílias, áreas de convivência, segurança e controle de acesso, pensado para quem busca casa em uma região litorânea valorizada.",
+      "seo_description": "Conheça o Condomínio Porto Riviera Exclusive na Praia Brava, Itajaí, com estrutura esportiva, lazer familiar, segurança e localização próxima ao mar.",
+      "gallery": [
+        {
+          "title": "Porto Riviera - área esportiva",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/hGJNDPtWpn378jvsD3CA.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+          "source_label": "Imobille Negócios"
+        },
+        {
+          "title": "Porto Riviera - campo e áreas externas",
+          "category": "Áreas comuns",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/jRdHFy6AvgeSh38RKOFT.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+          "source_label": "Imobille Negócios"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Praia Brava como endereço",
+          "description": "Localização em Itajaí, em região desejada pela proximidade com a Praia Brava e com Balneário Camboriú."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Condomínio com controle",
+          "description": "Estrutura com portaria, vigilância e controle de acesso para uma rotina mais reservada."
+        },
+        {
+          "icon": "Activity",
+          "title": "Estrutura esportiva",
+          "description": "O condomínio reúne ginásio, campo de futebol, academia e espaços externos para atividades de lazer."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Mais de 100 mil m² de infraestrutura",
+          "description": "As fontes consultadas destacam a escala do condomínio e a variedade de áreas de uso comum."
+        },
+        {
+          "title": "Lazer para famílias",
+          "description": "Playground, piscina infantil, salão de festas, jogos, gourmet e churrasqueira ampliam a convivência entre moradores."
+        },
+        {
+          "title": "Perto do mar",
+          "description": "A comunicação de mercado posiciona o condomínio a poucos metros da Praia Brava, favorecendo uso diário da praia."
+        },
+        {
+          "title": "Perfil horizontal",
+          "description": "A proposta é voltada a casas e residências em condomínio, diferente dos edifícios verticais da orla."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Condomínio Porto Riviera?",
+          "answer": "O Porto Riviera Exclusive fica na Praia Brava, em Itajaí, com referências de endereço na Avenida Osvaldo Reis."
+        },
+        {
+          "question": "O Porto Riviera é condomínio de casas?",
+          "answer": "Sim. A comunicação consultada apresenta o Porto Riviera como condomínio horizontal, com casas e estrutura comum de lazer e segurança."
+        },
+        {
+          "question": "Quais itens de lazer existem no Porto Riviera?",
+          "answer": "Entre os itens citados estão academia, ginásio poliesportivo, campo de futebol, playground, salão de festas, jogos, sauna, espaço gourmet, piscina infantil, bar molhado, churrasqueira e lounge."
+        },
+        {
+          "question": "O Porto Riviera fica perto da Praia Brava?",
+          "answer": "Sim. As fontes posicionam o condomínio na Praia Brava, com referência de poucos metros ou cerca de 150 metros da praia."
+        }
+      ],
+      "sources": [
+        "https://felicitanegocios.com.br/empreendimento/607/porto-riviera-exclusive/",
+        "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+        "https://tonadri.com.br/condominios/porto-riviera"
+      ]
+    },
+    {
+      "slug": "condominio-vivendas-do-atlantico",
+      "hero_image": "https://vivendasdoatlantico.com.br/wp-content/uploads/2024/08/3-1.png",
+      "description": "O Condomínio Vivendas do Atlântico fica na Praia do Estaleiro, em Balneário Camboriú, com acesso direto à praia e perfil residencial integrado à natureza. O condomínio reúne lotes e residências em uma área ampla, com lazer de frente para o mar, quadras de tênis, academia, salão de festas, espaços gourmet, lago artificial, controle de acesso e segurança.",
+      "seo_description": "Conheça o Condomínio Vivendas do Atlântico na Praia do Estaleiro, Balneário Camboriú, com acesso à praia, lazer frente-mar e segurança.",
+      "gallery": [
+        {
+          "title": "Vivendas do Atlântico - lazer frente-mar",
+          "category": "Lazer",
+          "image": "https://vivendasdoatlantico.com.br/wp-content/uploads/2024/08/3-1.png",
+          "source_url": "https://vivendasdoatlantico.com.br/",
+          "source_label": "Vivendas do Atlântico"
+        },
+        {
+          "title": "Vivendas do Atlântico - piscina",
+          "category": "Lazer",
+          "image": "https://vivendasdoatlantico.com.br/wp-content/uploads/2024/08/pikaso_enhance__none_2K_Standard_r_c_-3.jpeg",
+          "source_url": "https://vivendasdoatlantico.com.br/",
+          "source_label": "Vivendas do Atlântico"
+        },
+        {
+          "title": "Vivendas do Atlântico - áreas comuns",
+          "category": "Áreas comuns",
+          "image": "https://vivendasdoatlantico.com.br/wp-content/uploads/2024/08/pikaso_enhance__none_2K_Standard_r_c_-1.jpeg",
+          "source_url": "https://vivendasdoatlantico.com.br/",
+          "source_label": "Vivendas do Atlântico"
+        },
+        {
+          "title": "Vivendas do Atlântico - acesso e identidade",
+          "category": "Empreendimento",
+          "image": "https://vivendasdoatlantico.com.br/wp-content/uploads/2024/08/pikaso_enhance__none_2K_Standard_r_c_-4-1-e1722893869583-1.jpeg",
+          "source_url": "https://vivendasdoatlantico.com.br/",
+          "source_label": "Vivendas do Atlântico"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Acesso direto à praia",
+          "description": "A localização na Praia do Estaleiro aproxima a rotina residencial do mar e de um dos trechos mais preservados de Balneário Camboriú."
+        },
+        {
+          "icon": "TreePine",
+          "title": "Convivência com natureza",
+          "description": "A implantação valoriza áreas verdes, lago artificial e espaços externos de lazer em um ambiente residencial de baixa densidade."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Segurança condominial",
+          "description": "Portaria 24h, vigilância e controle de acesso reforçam privacidade e tranquilidade para moradores."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Praia do Estaleiro",
+          "description": "Endereço em uma praia de perfil mais reservado, com forte apelo para moradia, lazer e casas de alto padrão."
+        },
+        {
+          "title": "Lotes amplos",
+          "description": "A comunicação oficial cita lotes de 375 m² a 720 m², distribuídos em uma área total superior a 113 mil m²."
+        },
+        {
+          "title": "Lazer frente-mar",
+          "description": "Piscina com vista para o mar, quadras de tênis, academia, salão de festas, gourmet, jogos, pub, kids e praça de fogo compõem a estrutura comum."
+        },
+        {
+          "title": "Condomínio consolidado",
+          "description": "O projeto reúne residências e lotes em uma implantação madura, voltada a uso familiar e permanência no litoral."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Vivendas do Atlântico?",
+          "answer": "O condomínio fica na Praia do Estaleiro, em Balneário Camboriú, com referência de endereço na Avenida Rodesindo Pavan."
+        },
+        {
+          "question": "O Vivendas do Atlântico tem acesso à praia?",
+          "answer": "Sim. As fontes oficiais destacam acesso direto ou exclusivo à praia, com lazer integrado à paisagem do Estaleiro."
+        },
+        {
+          "question": "Quais áreas de lazer existem no Vivendas do Atlântico?",
+          "answer": "O condomínio conta com piscina de frente para o mar, quadras de tênis em saibro, playground, academia, salão de festas, gourmet, jogos, pub, kids, praça de fogo e lago artificial."
+        },
+        {
+          "question": "Qual é o perfil do Vivendas do Atlântico?",
+          "answer": "É um condomínio residencial horizontal, com lotes e casas em uma área ampla, voltado a privacidade, contato com a natureza e uso familiar."
+        }
+      ],
+      "sources": [
+        "https://vivendasdoatlantico.com.br/",
+        "https://vivendasdoatlantico.net.br/"
+      ]
+    },
+    {
+      "slug": "edificio-riva",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2022/04/edificio-riva-praia-brava-itajai-balneario-camboriu-1.1.jpg",
+      "description": "O Edifício Riva é um empreendimento residencial na Praia Brava, em Itajaí, a uma quadra do mar. Desenvolvido pela Max Realiza Empreendimentos, o projeto tem duas torres de 15 pavimentos, três elevadores por torre e área de lazer completa, incluindo piscina externa, piscina interna aquecida, salão de festas, gourmet, pub/parrilla, academia, sauna, brinquedoteca, playground e pet place.",
+      "seo_description": "Conheça o Edifício Riva na Praia Brava, Itajaí, a uma quadra do mar, com duas torres, lazer completo e entrega citada para fevereiro de 2025.",
+      "gallery": [
+        {
+          "title": "Edifício Riva - fachada",
+          "category": "Empreendimento",
+          "image": "https://litoralvertical.com/wp-content/uploads/2022/04/edificio-riva-praia-brava-itajai-balneario-camboriu-1.1.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/edificio-riva/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Uma quadra do mar",
+          "description": "Localização na Praia Brava, em Itajaí, com deslocamento rápido até a praia e os serviços da região."
+        },
+        {
+          "icon": "Building2",
+          "title": "Duas torres planejadas",
+          "description": "Projeto com duas torres de 15 pavimentos e três elevadores por torre, equilibrando escala residencial e infraestrutura."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer completo",
+          "description": "Piscina externa com bar, piscina interna aquecida, salão de festas, gourmet, pub/parrilla, academia, sauna, brinquedoteca, playground e pet place."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Praia Brava em Itajaí",
+          "description": "Endereço em um dos bairros mais desejados do litoral norte catarinense, próximo a Balneário Camboriú."
+        },
+        {
+          "title": "Entrega recente",
+          "description": "A fonte consultada cita entrega em fevereiro de 2025, o que posiciona o empreendimento como produto novo na região."
+        },
+        {
+          "title": "Plantas variadas",
+          "description": "As referências apresentam apartamentos de 126 m² a 179 m² e coberturas duplex de 251 m² a 361 m²."
+        },
+        {
+          "title": "Áreas para famílias e pets",
+          "description": "Brinquedoteca, playground e pet place ampliam o uso diário além dos espaços sociais tradicionais."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Edifício Riva?",
+          "answer": "O Edifício Riva fica na Praia Brava, em Itajaí, com referência na Avenida Delfim Mário de Pádua Peixoto, a uma quadra do mar."
+        },
+        {
+          "question": "Quem desenvolveu o Edifício Riva?",
+          "answer": "A fonte consultada apresenta a Max Realiza Empreendimentos como responsável pelo projeto."
+        },
+        {
+          "question": "Quais áreas de lazer o Edifício Riva oferece?",
+          "answer": "O lazer inclui salão de festas, gourmet, pub/parrilla, piscina externa com bar, piscina interna aquecida, brinquedoteca, playground, pet place, academia, sauna seca, vestiários, espaço mulher/massagem e sala de reunião."
+        },
+        {
+          "question": "Qual é o porte das unidades no Edifício Riva?",
+          "answer": "As informações consultadas citam apartamentos de 126 m² a 179 m² e coberturas duplex de 251 m² a 361 m²."
+        }
+      ],
+      "sources": [
+        "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/edificio-riva/"
+      ]
+    },
+    {
+      "slug": "fischer-dreams",
+      "hero_image": "https://procave.com.br/wp-content/webp-express/webp-images/uploads/2023/05/fischer-imagem-destacada.png.webp",
+      "description": "O Fischer Dreams é um empreendimento residencial frente-mar na Barra Sul de Balneário Camboriú, desenvolvido pela Procave em parceria com a Fischer. O projeto ocupa endereço nobre na Avenida Atlântica, com duas torres, ampla frente para a praia, apartamentos de alto padrão e vistas para o mar, Rio Camboriú, cidade e Mata Atlântica.",
+      "seo_description": "Conheça o Fischer Dreams na Barra Sul de Balneário Camboriú, empreendimento frente-mar da Procave/Fischer com duas torres e apartamentos amplos.",
+      "gallery": [
+        {
+          "title": "Fischer Dreams - lazer frente-mar",
+          "category": "Lazer",
+          "image": "https://procave.com.br/wp-content/webp-express/webp-images/uploads/2023/05/fischer-imagem-destacada.png.webp",
+          "source_url": "https://procave.com.br/empreendimento/fischer-dreams/",
+          "source_label": "Procave"
+        },
+        {
+          "title": "Fischer Dreams - Barra Sul",
+          "category": "Localização",
+          "image": "https://procave.com.br/wp-content/webp-express/webp-images/uploads/2023/05/barra-sul.jpg.webp",
+          "source_url": "https://procave.com.br/empreendimento/fischer-dreams/",
+          "source_label": "Procave"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente-mar na Barra Sul",
+          "description": "Endereço na Avenida Atlântica, com conexão direta à praia e ao trecho mais valorizado da Barra Sul."
+        },
+        {
+          "icon": "Building2",
+          "title": "Duas torres de alto padrão",
+          "description": "Projeto residencial com escala exclusiva, fachada marcante e frente ampla para a orla."
+        },
+        {
+          "icon": "Eye",
+          "title": "Vistas múltiplas",
+          "description": "As fontes destacam visuais para mar, Rio Camboriú, cidade e Mata Atlântica, valorizando diferentes orientações das plantas."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Projeto Procave/Fischer",
+          "description": "O empreendimento combina a atuação da Procave com a presença da Fischer em um projeto de referência na Barra Sul."
+        },
+        {
+          "title": "62 metros de frente",
+          "description": "A comunicação consultada destaca ampla frente para a praia, reforçando a relação do projeto com a Avenida Atlântica."
+        },
+        {
+          "title": "Apartamentos amplos",
+          "description": "As fontes citam unidades de 186 m² a 491 m², com três a oito suítes e quatro a oito vagas."
+        },
+        {
+          "title": "Design 360 graus",
+          "description": "A comunicação da Fischer apresenta conceito de design voltado a fachadas, vistas e experiência residencial integral."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Fischer Dreams?",
+          "answer": "O Fischer Dreams fica na Avenida Atlântica, 4770, Barra Sul, Balneário Camboriú, em posição frente-mar."
+        },
+        {
+          "question": "Quem desenvolve o Fischer Dreams?",
+          "answer": "As fontes consultadas apresentam o empreendimento como projeto Procave em parceria com a Fischer."
+        },
+        {
+          "question": "Qual é o porte dos apartamentos do Fischer Dreams?",
+          "answer": "As referências citam unidades de 186 m² a 491 m², com três a oito suítes e quatro a oito vagas, conforme tipologia."
+        },
+        {
+          "question": "Quais vistas o Fischer Dreams oferece?",
+          "answer": "A comunicação do empreendimento destaca vistas para o mar, Rio Camboriú, cidade e Mata Atlântica."
+        }
+      ],
+      "sources": [
+        "https://procave.com.br/empreendimento/fischer-dreams/",
+        "https://www.fischergroup.com.br/fischer-dreams"
+      ]
+    }
+  ]
+}

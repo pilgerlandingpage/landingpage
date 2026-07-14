@@ -105,6 +105,7 @@ function buildImageSearchQuery(input: BuildVisualPlanInput) {
 }
 
 function providerLabel(provider: EditorialImageProvider) {
+  if (provider === 'wikimedia_commons') return 'Wikimedia Commons'
   if (provider === 'google_licensed') return 'Google Imagens licenciadas'
   if (provider === 'pexels') return 'Pexels'
   return 'Pixabay'

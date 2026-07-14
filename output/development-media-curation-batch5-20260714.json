@@ -1,0 +1,956 @@
+{
+  "batch_id": "development-media-curation-batch5-20260714",
+  "generated_at": "2026-07-14T20:05:00.000Z",
+  "items": [
+    {
+      "slug": "ibiza-towers",
+      "hero_image": "https://ibizatowersbc.com.br/wp-content/uploads/2024/08/Ibiza-Towers-1-1.webp",
+      "description": "O Ibiza Towers é um empreendimento da Procave na Barra Sul de Balneário Camboriú, em endereço frente-mar na Avenida Atlântica. O conjunto reúne três torres, mais de 51 mil m² de área construída e 4.662 m² de lazer, com estrutura de resort urbano, salões sociais, restaurante, boate privativa, áreas de convivência e uma implantação voltada para a orla.",
+      "seo_description": "Conheça o Ibiza Towers na Barra Sul de Balneário Camboriú, empreendimento Procave com três torres, frente-mar e 4.662 m² de lazer.",
+      "gallery": [
+        {
+          "title": "Ibiza Towers - fachada",
+          "category": "Empreendimento",
+          "image": "https://ibizatowersbc.com.br/wp-content/uploads/2024/08/Ibiza-Towers-1-1.webp",
+          "source_url": "https://ibizatowersbc.com.br/",
+          "source_label": "Ibiza Towers"
+        },
+        {
+          "title": "Ibiza Towers - torres",
+          "category": "Empreendimento",
+          "image": "https://ibizatowersbc.com.br/wp-content/uploads/2024/08/Ibiza-Towers-2-1.webp",
+          "source_url": "https://ibizatowersbc.com.br/",
+          "source_label": "Ibiza Towers"
+        },
+        {
+          "title": "Ibiza Towers - skyline",
+          "category": "Empreendimento",
+          "image": "https://ibizatowersbc.com.br/wp-content/uploads/2024/08/Ibiza-Towers-3-1.webp",
+          "source_url": "https://ibizatowersbc.com.br/",
+          "source_label": "Ibiza Towers"
+        },
+        {
+          "title": "Ibiza Towers - área comum",
+          "category": "Áreas comuns",
+          "image": "https://ibizatowersbc.com.br/wp-content/uploads/2024/08/AnyConv.com__2-Area-Comum6-1.webp",
+          "source_url": "https://ibizatowersbc.com.br/",
+          "source_label": "Ibiza Towers"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente-mar na Barra Sul",
+          "description": "Localização na Avenida Atlântica, 5720, em uma das áreas mais valorizadas de Balneário Camboriú."
+        },
+        {
+          "icon": "Building2",
+          "title": "Três torres",
+          "description": "O conjunto possui três torres e grande presença urbana na orla da Barra Sul."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "4.662 m² de lazer",
+          "description": "A Procave destaca lazer completo para diferentes perfis familiares, com salões, restaurante, boate privativa e espaços de convivência."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Assinatura Procave",
+          "description": "Empreendimento da Procave, incorporadora com presença forte em projetos de alto padrão no litoral catarinense."
+        },
+        {
+          "title": "Mais de 51 mil m² construídos",
+          "description": "A escala do projeto reforça a proposta de condomínio completo e infraestrutura robusta."
+        },
+        {
+          "title": "Boate privativa",
+          "description": "A comunicação da Procave destaca uma boate privativa entre os diferenciais do lazer."
+        },
+        {
+          "title": "Barra Sul",
+          "description": "A região reúne marina, gastronomia, acesso à orla e alguns dos empreendimentos mais exclusivos da cidade."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Ibiza Towers?",
+          "answer": "Fica na Avenida Atlântica, 5720, Barra Sul, Balneário Camboriú."
+        },
+        {
+          "question": "Quem desenvolveu o Ibiza Towers?",
+          "answer": "As fontes consultadas apresentam o Ibiza Towers como empreendimento da Procave."
+        },
+        {
+          "question": "Quantas torres tem o Ibiza Towers?",
+          "answer": "O empreendimento possui três torres."
+        },
+        {
+          "question": "Quais itens de lazer existem no Ibiza Towers?",
+          "answer": "A Procave cita 4.662 m² de lazer, com diferentes salões de festas, espaços de lazer, restaurante e boate privativa."
+        }
+      ],
+      "sources": [
+        "https://ibizatowersbc.com.br/",
+        "https://procave.com.br/empreendimento/ibiza-towers/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-ibiza-towers-EM64210"
+      ]
+    },
+    {
+      "slug": "brava-ocean-home-club",
+      "hero_image": "https://www.bravaocean.com.br/assets/img/fachadas/fachada-inspirar.jpg",
+      "description": "O Brava Ocean Home Club é um empreendimento da CN Empreendimentos na Praia Brava, em Itajaí, com arquitetura inspirada no movimento do oceano. O projeto tem design assinado por Vanessa Larré, fachada dinâmica, tecnologia Windscreen, apartamentos de diferentes portes e mais de 30 itens de lazer, criando um home club sofisticado em uma das regiões mais desejadas do litoral.",
+      "seo_description": "Conheça o Brava Ocean Home Club na Praia Brava, Itajaí, empreendimento da CN com fachada dinâmica, design Vanessa Larré e mais de 30 itens de lazer.",
+      "gallery": [
+        {
+          "title": "Brava Ocean Home Club - fachada",
+          "category": "Empreendimento",
+          "image": "https://www.bravaocean.com.br/assets/img/fachadas/fachada-inspirar.jpg",
+          "source_url": "https://www.bravaocean.com.br/",
+          "source_label": "Brava Ocean"
+        },
+        {
+          "title": "Brava Ocean Home Club - fachada lateral",
+          "category": "Empreendimento",
+          "image": "https://www.bravaocean.com.br/assets/img/fachadas/fachada-encantar.jpg",
+          "source_url": "https://www.bravaocean.com.br/",
+          "source_label": "Brava Ocean"
+        },
+        {
+          "title": "Brava Ocean Home Club - fachada e implantação",
+          "category": "Empreendimento",
+          "image": "https://www.bravaocean.com.br/assets/img/empreendimentos/a-fachada-2.jpg",
+          "source_url": "https://www.bravaocean.com.br/",
+          "source_label": "Brava Ocean"
+        },
+        {
+          "title": "Brava Ocean Home Club - piscina",
+          "category": "Lazer",
+          "image": "https://www.bravaocean.com.br/assets/img/empreendimentos/a-piscina.jpg",
+          "source_url": "https://www.bravaocean.com.br/",
+          "source_label": "Brava Ocean"
+        },
+        {
+          "title": "Brava Ocean Home Club - hall",
+          "category": "Áreas comuns",
+          "image": "https://www.bravaocean.com.br/assets/img/empreendimentos/a-hall-de-entrada.jpg",
+          "source_url": "https://www.bravaocean.com.br/",
+          "source_label": "Brava Ocean"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Praia Brava",
+          "description": "Endereço na Rua Cabo-PM Antônio Rudolf, 155, em uma região nobre de Itajaí."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Design Vanessa Larré",
+          "description": "A comunicação do empreendimento destaca design assinado por Vanessa Larré e fachada inspirada no oceano."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Mais de 30 itens de lazer",
+          "description": "Piscinas, salões, gourmet, pub, academia, spa, sauna, yoga, kids e outros ambientes compõem a estrutura."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Tecnologia Windscreen",
+          "description": "Fontes de mercado destacam a fachada com tecnologia Windscreen da Hunter Douglas."
+        },
+        {
+          "title": "CN Empreendimentos",
+          "description": "Empreendimento da CN, com comunicação própria dedicada ao Brava Ocean."
+        },
+        {
+          "title": "Entrega prevista para 2027",
+          "description": "A MySide informa previsão de entrega para dezembro de 2027."
+        },
+        {
+          "title": "Plantas variadas",
+          "description": "A MySide apresenta opções de 94 m², 121 m² e 215 m², com dois a quatro quartos."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Brava Ocean Home Club?",
+          "answer": "Fica na Rua Cabo-PM Antônio Rudolf, 155, Praia Brava, Itajaí."
+        },
+        {
+          "question": "Quem desenvolve o Brava Ocean?",
+          "answer": "O empreendimento é apresentado pela CN Empreendimentos."
+        },
+        {
+          "question": "Quais áreas de lazer existem no Brava Ocean?",
+          "answer": "A comunicação oficial cita mais de 30 itens, incluindo piscinas, hall, gourmet, salões, pub, academia, spa, sauna, yoga, kids e áreas de convivência."
+        },
+        {
+          "question": "Quando o Brava Ocean será entregue?",
+          "answer": "A MySide informa previsão de entrega para dezembro de 2027, sujeita à confirmação comercial."
+        }
+      ],
+      "sources": [
+        "https://www.bravaocean.com.br/",
+        "https://cnempreendimentos.net/empreendimento/brava-ocean-home-club/",
+        "https://myside.com.br/apartamento-venda-brava-ocean-home-club-itajai-sc"
+      ]
+    },
+    {
+      "slug": "bella-vista-residence-club",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/17022026153326240-1771353206.jpg",
+      "description": "O Bella Vista Residence Club é um condomínio fechado de alto padrão no bairro Barra, em Balneário Camboriú. A proposta une casas e terrenos em uma área reservada, com contato com a natureza, segurança, privacidade e lazer completo, incluindo piscinas, academia, salão de festas, espaço gourmet, bocha, campo de futebol, quadra poliesportiva e áreas verdes para convivência.",
+      "seo_description": "Conheça o Bella Vista Residence Club, condomínio fechado de alto padrão no bairro Barra, Balneário Camboriú, com segurança, áreas verdes e lazer.",
+      "gallery": [
+        {
+          "title": "Bella Vista Residence Club - implantação",
+          "category": "Empreendimento",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/17022026153326240-1771353206.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-bella-vista-residence-club-EM72185",
+          "source_label": "Imobille Negócios"
+        },
+        {
+          "title": "Bella Vista Residence Club - áreas verdes",
+          "category": "Áreas comuns",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2024/bella-vista-30-1718127224.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-bella-vista-residence-club-EM72185",
+          "source_label": "Imobille Negócios"
+        },
+        {
+          "title": "Bella Vista Residence Club - lazer",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2024/bella-vista-27-1718127223.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-bella-vista-residence-club-EM72185",
+          "source_label": "Imobille Negócios"
+        },
+        {
+          "title": "Bella Vista Residence Club - convivência",
+          "category": "Áreas comuns",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2024/bella-vista-11-1718127216.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-bella-vista-residence-club-EM72185",
+          "source_label": "Imobille Negócios"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "ShieldCheck",
+          "title": "Condomínio fechado",
+          "description": "Privacidade, controle de acesso e segurança reforçam a proposta residencial de alto padrão."
+        },
+        {
+          "icon": "TreePine",
+          "title": "Áreas verdes",
+          "description": "O condomínio fica em região reservada, com contato com natureza e ambiente horizontal."
+        },
+        {
+          "icon": "Activity",
+          "title": "Lazer completo",
+          "description": "Piscinas, academia, salão de festas, gourmet, bocha, campo de futebol e quadra poliesportiva atendem a rotina familiar."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Bairro Barra",
+          "description": "Localização em Balneário Camboriú, com acesso ao Centro, BR-101, praias e serviços."
+        },
+        {
+          "title": "Terrenos amplos",
+          "description": "A comunicação oficial cita terrenos com áreas de 380 m² a 1.034 m²."
+        },
+        {
+          "title": "Perfil horizontal",
+          "description": "Diferente dos edifícios verticais da orla, o Bella Vista valoriza casas, jardins e espaços privativos."
+        },
+        {
+          "title": "Alto padrão",
+          "description": "O condomínio é apresentado como refúgio de alto padrão, com casas contemporâneas e infraestrutura completa."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Bella Vista Residence Club?",
+          "answer": "Fica no bairro Barra, em Balneário Camboriú, Santa Catarina."
+        },
+        {
+          "question": "O Bella Vista é condomínio fechado?",
+          "answer": "Sim. As fontes consultadas apresentam o Bella Vista como condomínio fechado de alto padrão."
+        },
+        {
+          "question": "Quais áreas de lazer existem no Bella Vista?",
+          "answer": "O condomínio oferece piscinas, academia, salão de festas, espaço gourmet, bocha, campo de futebol, quadra poliesportiva e áreas verdes."
+        },
+        {
+          "question": "Qual é o perfil dos imóveis no Bella Vista?",
+          "answer": "O condomínio reúne terrenos e casas de alto padrão, com foco em privacidade, segurança e contato com natureza."
+        }
+      ],
+      "sources": [
+        "https://bellavistaresidenceclub.com.br/",
+        "https://www.imobillenegocios.com.br/empreendimento/condominio-bella-vista-residence-club-EM72185",
+        "https://solkimoveis.com.br/empreendimento/959841/bella-vista/"
+      ]
+    },
+    {
+      "slug": "vista-jardins-vivapark",
+      "hero_image": "https://vivaparkportobelo.com.br/vistajardins/frame-vista-jardins.jpg",
+      "description": "O Vista Jardins é um empreendimento da Vokkan dentro do VivaPark Porto Belo, criado para morar com vista permanente para o parque Viva Energia, lagos e montanhas. O projeto reúne apartamentos de alto padrão, arquitetura conectada à natureza e a infraestrutura urbana do bairro-parque, combinando tranquilidade, sofisticação, áreas verdes e acesso ao ecossistema planejado do VivaPark.",
+      "seo_description": "Conheça o Vista Jardins no VivaPark Porto Belo, empreendimento da Vokkan com vista para parque, lagos e montanhas, integrado ao bairro-parque.",
+      "gallery": [
+        {
+          "title": "Vista Jardins - fachada",
+          "category": "Empreendimento",
+          "image": "https://vivaparkportobelo.com.br/vistajardins/frame-vista-jardins.jpg",
+          "source_url": "https://vivaparkportobelo.com.br/vistajardins/",
+          "source_label": "VivaPark Porto Belo"
+        },
+        {
+          "title": "Vista Jardins - implantação",
+          "category": "Empreendimento",
+          "image": "https://vivaparkportobelo.com.br/vistajardins/imagens/vistajardins-arealazer.jpg",
+          "source_url": "https://vivaparkportobelo.com.br/vistajardins/",
+          "source_label": "VivaPark Porto Belo"
+        },
+        {
+          "title": "Vista Jardins - paisagismo",
+          "category": "Áreas comuns",
+          "image": "https://vivaparkportobelo.com.br/vistajardins/imagens/vistajardins-arealazer-interna.jpg",
+          "source_url": "https://vivaparkportobelo.com.br/vistajardins/",
+          "source_label": "VivaPark Porto Belo"
+        },
+        {
+          "title": "Vista Jardins - áreas comuns",
+          "category": "Áreas comuns",
+          "image": "https://vivaparkportobelo.com.br/vistajardins/imagens/thumb-vista-parque.jpg",
+          "source_url": "https://vivaparkportobelo.com.br/vistajardins/",
+          "source_label": "VivaPark Porto Belo"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Trees",
+          "title": "Dentro do VivaPark",
+          "description": "O empreendimento integra o bairro-parque planejado da Vokkan em Porto Belo."
+        },
+        {
+          "icon": "Mountain",
+          "title": "Vista permanente",
+          "description": "A Vokkan destaca vista para o parque Viva Energia, lagos e montanhas de Porto Belo."
+        },
+        {
+          "icon": "Leaf",
+          "title": "Conexão com natureza",
+          "description": "O projeto valoriza áreas verdes, bem-estar e vida ao ar livre dentro do masterplan."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Projeto Vokkan",
+          "description": "Empreendimento da Vokkan, desenvolvedora responsável pelo VivaPark Porto Belo."
+        },
+        {
+          "title": "Bairro-parque",
+          "description": "O Vista Jardins aproveita a infraestrutura planejada do VivaPark, com parques, lagos e mobilidade de bairro."
+        },
+        {
+          "title": "Apartamentos de alto padrão",
+          "description": "As fontes apresentam unidades com perfil premium e plantas amplas no contexto de Porto Belo."
+        },
+        {
+          "title": "Status em evolução",
+          "description": "A comunicação da Vokkan posiciona o empreendimento em construção, com obra avançando dentro do VivaPark."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Vista Jardins?",
+          "answer": "Fica dentro do VivaPark Porto Belo, em Porto Belo, Santa Catarina."
+        },
+        {
+          "question": "Quem desenvolve o Vista Jardins?",
+          "answer": "O empreendimento é da Vokkan."
+        },
+        {
+          "question": "Qual é o principal diferencial do Vista Jardins?",
+          "answer": "A Vokkan destaca vista permanente para o parque Viva Energia, lagos e montanhas, além da integração ao bairro-parque VivaPark."
+        },
+        {
+          "question": "O Vista Jardins é parte do VivaPark?",
+          "answer": "Sim. O Vista Jardins é um empreendimento inserido no masterplan do VivaPark Porto Belo."
+        }
+      ],
+      "sources": [
+        "https://vokkan.com.br/empreendimento/vista-jardins/pt",
+        "https://vivaparkportobelo.com.br/vistajardins/",
+        "https://myside.com.br/apartamento-venda-vivapark-vista-jardins-porto-belo-sc"
+      ]
+    },
+    {
+      "slug": "atmosphere-home-spa",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2026/06/atmosphere-home-spa-praia-brava-itajai-fachada.jpg",
+      "description": "O Atmosphere Home Spa é um empreendimento wellness de alto padrão na Praia Brava, em Itajaí, com proposta residencial voltada a saúde, spa e bem-estar. O projeto reúne oito torres, arquitetura internacional, interiores com referência Versace, mais de 13.000 m² de lazer segundo a Litoral Vertical e uma estrutura pensada para transformar a rotina em uma experiência de resort de saúde.",
+      "seo_description": "Conheça o Atmosphere Home Spa na Praia Brava, Itajaí, empreendimento wellness com oito torres, spa residencial, arquitetura internacional e lazer amplo.",
+      "gallery": [
+        {
+          "title": "Atmosphere Home Spa - fachada",
+          "category": "Empreendimento",
+          "image": "https://litoralvertical.com/wp-content/uploads/2026/06/atmosphere-home-spa-praia-brava-itajai-fachada.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/atmosphere-home-spa/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Atmosphere Home Spa - implantação",
+          "category": "Empreendimento",
+          "image": "https://litoralvertical.com/wp-content/uploads/2026/06/atmosphere-home-spa-praia-brava-itajai-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/atmosphere-home-spa/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Atmosphere Home Spa - lazer",
+          "category": "Lazer",
+          "image": "https://litoralvertical.com/wp-content/uploads/2026/06/atmosphere-home-spa-praia-brava-itajai-12.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/atmosphere-home-spa/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Atmosphere Home Spa - áreas comuns",
+          "category": "Áreas comuns",
+          "image": "https://litoralvertical.com/wp-content/uploads/2026/06/atmosphere-home-spa-praia-brava-itajai-9.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/atmosphere-home-spa/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "HeartPulse",
+          "title": "Conceito wellness",
+          "description": "O empreendimento é apresentado como um wellness center residencial na Praia Brava."
+        },
+        {
+          "icon": "Waves",
+          "title": "Perto do mar",
+          "description": "A Litoral Vertical posiciona o Atmosphere a cerca de 150 metros da praia."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer de grande escala",
+          "description": "As fontes citam spa, áreas verdes, lazer amplo e estrutura de resort residencial."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Oito torres",
+          "description": "As fontes consultadas apresentam o projeto com oito torres residenciais."
+        },
+        {
+          "title": "Arquitetura internacional",
+          "description": "A comunicação destaca projeto arquitetônico internacional e referência de design Versace."
+        },
+        {
+          "title": "Entrega prevista para 2029",
+          "description": "A página Viva Atmosphere informa previsão de entrega em 2029."
+        },
+        {
+          "title": "Praia Brava",
+          "description": "Localização em uma das áreas de maior valorização do litoral catarinense."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Atmosphere Home Spa?",
+          "answer": "Fica na Praia Brava, em Itajaí, Santa Catarina."
+        },
+        {
+          "question": "Qual é o conceito do Atmosphere Home Spa?",
+          "answer": "O projeto é apresentado como um empreendimento wellness residencial, com spa e estrutura voltada a saúde e bem-estar."
+        },
+        {
+          "question": "Quantas torres tem o Atmosphere?",
+          "answer": "As fontes consultadas apresentam o empreendimento com oito torres."
+        },
+        {
+          "question": "Quando o Atmosphere será entregue?",
+          "answer": "A página Viva Atmosphere informa previsão de entrega em 2029, sujeita à confirmação comercial."
+        }
+      ],
+      "sources": [
+        "https://atmospherehomespa.com.br/",
+        "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/atmosphere-home-spa/",
+        "https://vivaatmosphere.com.br/",
+        "https://felicitanegocios.com.br/blog/lancamentos/atmosphere-home-spa/"
+      ]
+    },
+    {
+      "slug": "brava-home-resort",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2015/02/brava-home-resort-praia-vraba-itajai-balneario-camboriu-pba324-1.jpg",
+      "description": "O Brava Home Resort é um condomínio da Procave na Praia Brava, em Itajaí, com 14 torres, terreno de 75 mil m² e mais de 60 mil m² de áreas verdes e lazer. O complexo reúne praia artificial privativa, cinco piscinas, restaurante, quadras, campo, lago, pomar, pista de skate, espaços para crianças, yoga, cooper e segurança 24 horas, em um dos maiores home resorts do litoral.",
+      "seo_description": "Conheça o Brava Home Resort da Procave na Praia Brava, Itajaí, com 14 torres, praia artificial, 5 piscinas e mais de 60 mil m² de lazer.",
+      "gallery": [
+        {
+          "title": "Brava Home Resort - implantação",
+          "category": "Empreendimento",
+          "image": "https://litoralvertical.com/wp-content/uploads/2015/02/brava-home-resort-praia-vraba-itajai-balneario-camboriu-pba324-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/brava-home-resort/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Brava Home Resort - praia artificial",
+          "category": "Lazer",
+          "image": "https://litoralvertical.com/wp-content/uploads/2015/02/brava-home-resort-praia-vraba-itajai-balneario-camboriu-pba324-2.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/brava-home-resort/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Brava Home Resort - piscinas",
+          "category": "Lazer",
+          "image": "https://litoralvertical.com/wp-content/uploads/2015/02/brava-home-resort-praia-vraba-itajai-balneario-camboriu-pba324-3.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/brava-home-resort/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Brava Home Resort - áreas comuns",
+          "category": "Áreas comuns",
+          "image": "https://litoralvertical.com/wp-content/uploads/2015/02/brava-home-resort-praia-vraba-itajai-balneario-camboriu-pba324-4.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/brava-home-resort/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Praia Brava",
+          "description": "Localização na Rua Delfim Mário de Pádua Peixoto, 350, próxima ao mar e ao Brava Mall."
+        },
+        {
+          "icon": "Trees",
+          "title": "Mais de 60 mil m² de verde e lazer",
+          "description": "A Procave destaca áreas verdes e lazer em escala de resort, com natureza integrada ao condomínio."
+        },
+        {
+          "icon": "Umbrella",
+          "title": "Praia artificial privativa",
+          "description": "A praia artificial é um dos diferenciais centrais do Brava Home Resort."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "14 torres",
+          "description": "A Litoral Vertical apresenta o empreendimento com 14 torres."
+        },
+        {
+          "title": "Terreno de 75 mil m²",
+          "description": "A implantação ampla permite lazer aberto, circulação e áreas verdes em escala rara."
+        },
+        {
+          "title": "Cinco piscinas",
+          "description": "As fontes citam cinco piscinas, incluindo estrutura semiolímpica e áreas para diferentes idades."
+        },
+        {
+          "title": "Condomínio completo",
+          "description": "Restaurante, quadras, pista de cooper, skate, pomar, lago, capela e segurança 24h sustentam uma rotina de resort."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Brava Home Resort?",
+          "answer": "Fica na Rua Delfim Mário de Pádua Peixoto, 350, Praia Brava, Itajaí."
+        },
+        {
+          "question": "Quem desenvolveu o Brava Home Resort?",
+          "answer": "As fontes consultadas apresentam o Brava Home Resort como empreendimento da Procave."
+        },
+        {
+          "question": "Quais áreas de lazer existem no Brava Home Resort?",
+          "answer": "O condomínio conta com praia artificial, cinco piscinas, restaurante, kids, yoga, cooper, quadras, campo, mini golf, bocha, lago, quiosques, skate, capela, pomar e segurança 24h."
+        },
+        {
+          "question": "Qual é o tamanho do terreno do Brava Home Resort?",
+          "answer": "A Litoral Vertical informa terreno de 75 mil m² e mais de 60 mil m² de área verde e lazer."
+        }
+      ],
+      "sources": [
+        "https://procave.com.br/empreendimento/brava-home-resort/",
+        "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/brava-home-resort/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-home-resort-EM18497",
+        "https://myside.com.br/guia-balneario-camboriu/brava-home-resort-itajai-sc"
+      ]
+    },
+    {
+      "slug": "edificio-magnolia",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2025/12/edificio-magnolia-itapema-1-1.jpg",
+      "description": "O Edifício Magnólia é um empreendimento Dallo no Canto da Praia, região central de Itapema, a poucos passos do mar. Com arquitetura de inspiração neoclássica, apartamentos voltados para o mar, opções de três ou quatro suítes e lazer completo, o projeto combina elegância clássica, vista e a conveniência de morar próximo à praia e aos serviços do Centro.",
+      "seo_description": "Conheça o Edifício Magnólia da Dallo em Itapema, a cerca de 100 metros da praia, com arquitetura neoclássica, vista mar e lazer completo.",
+      "gallery": [
+        {
+          "title": "Edifício Magnólia - fachada",
+          "category": "Empreendimento",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/12/edificio-magnolia-itapema-1-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/edificio-magnolia/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Edifício Magnólia - acesso",
+          "category": "Áreas comuns",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/12/edificio-magnolia-itapema-2-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/edificio-magnolia/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Edifício Magnólia - áreas comuns",
+          "category": "Áreas comuns",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/12/edificio-magnolia-itapema-3-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/edificio-magnolia/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Edifício Magnólia - lazer",
+          "category": "Lazer",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/12/edificio-magnolia-itapema-4-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/edificio-magnolia/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Canto da Praia",
+          "description": "Localização no Centro de Itapema, a cerca de 100 metros da praia segundo a Litoral Vertical."
+        },
+        {
+          "icon": "Building2",
+          "title": "Arquitetura neoclássica",
+          "description": "O projeto segue linguagem clássica da Dallo, com fachada elegante e presença marcante."
+        },
+        {
+          "icon": "Eye",
+          "title": "Apartamentos voltados para o mar",
+          "description": "A Dallo destaca que todos os apartamentos do Magnólia são voltados para o mar."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Padrão Dallo",
+          "description": "Empreendimento da Dallo, construtora reconhecida por projetos de alto padrão em Itapema."
+        },
+        {
+          "title": "Entrega no prazo",
+          "description": "A página oficial da Dallo informa que o empreendimento foi entregue aos clientes no prazo."
+        },
+        {
+          "title": "Três ou quatro suítes",
+          "description": "As fontes consultadas apresentam plantas com três ou quatro suítes."
+        },
+        {
+          "title": "Lazer completo",
+          "description": "A Litoral Vertical destaca ampla área de lazer para o empreendimento."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Edifício Magnólia?",
+          "answer": "Fica no Canto da Praia, região central de Itapema, Santa Catarina."
+        },
+        {
+          "question": "Quem construiu o Magnólia?",
+          "answer": "O empreendimento é da Construtora Dallo."
+        },
+        {
+          "question": "O Magnólia fica perto da praia?",
+          "answer": "Sim. A Litoral Vertical posiciona o edifício a cerca de 100 metros da praia."
+        },
+        {
+          "question": "Qual é o perfil do Magnólia?",
+          "answer": "É um empreendimento de alto padrão, com arquitetura neoclássica, apartamentos voltados para o mar, opções de três ou quatro suítes e lazer completo."
+        }
+      ],
+      "sources": [
+        "https://www.dallo.com.br/empreendimento/magnolia/",
+        "https://litoralvertical.com/venda/itapema/apartamentos/edificio-magnolia/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-magnolia-EM35455"
+      ]
+    },
+    {
+      "slug": "la-rocca",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2025/05/edificio-la-rocca-itapema-14.jpg",
+      "description": "O La Rocca é um empreendimento da Dallo na Avenida Nereu Ramos, em Itapema, criado como uma torre de alto impacto urbano no Centro da cidade. O projeto possui 54 andares, 163 apartamentos de luxo, plantas com quatro suítes, pelo menos três vagas e lazer completo com rooftop no 54º andar, vista panorâmica de 360 graus e ambientes pensados para diferentes idades.",
+      "seo_description": "Conheça o La Rocca da Dallo em Itapema, torre de 54 andares na Avenida Nereu Ramos com quatro suítes, rooftop e vista 360 graus.",
+      "gallery": [
+        {
+          "title": "La Rocca - fachada",
+          "category": "Empreendimento",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/05/edificio-la-rocca-itapema-14.jpg",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/edificio-la-rocca/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "La Rocca - implantação",
+          "category": "Empreendimento",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/05/edificio-la-rocca-itapema-29.jpg",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/edificio-la-rocca/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "La Rocca - áreas comuns",
+          "category": "Áreas comuns",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/05/edificio-la-rocca-itapema-33.jpg",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/edificio-la-rocca/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "La Rocca - lazer",
+          "category": "Lazer",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/05/edificio-la-rocca-itapema-34.jpg",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/edificio-la-rocca/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "54 andares",
+          "description": "A Dallo apresenta o La Rocca como uma torre de 54 andares na principal avenida de Itapema."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Avenida Nereu Ramos",
+          "description": "Endereço no Centro de Itapema, com acesso à praia, comércio, restaurantes e serviços."
+        },
+        {
+          "icon": "Eye",
+          "title": "Rooftop com vista 360 graus",
+          "description": "A Litoral Vertical destaca o rooftop no 54º andar com vista panorâmica de 360 graus."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Padrão Dallo",
+          "description": "Empreendimento da Dallo, com posicionamento de luxo moderno em Itapema."
+        },
+        {
+          "title": "163 apartamentos",
+          "description": "A página oficial cita 163 apartamentos de luxo, todos com quatro suítes."
+        },
+        {
+          "title": "Lazer completo",
+          "description": "As fontes destacam área de lazer ampla, rooftop e ambientes para diferentes idades."
+        },
+        {
+          "title": "Cinco elevadores",
+          "description": "Fontes de mercado citam cinco elevadores e infraestrutura condominial robusta."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o La Rocca?",
+          "answer": "Fica na Avenida Nereu Ramos, 518, Centro, Itapema."
+        },
+        {
+          "question": "Quem desenvolve o La Rocca?",
+          "answer": "O empreendimento é da Construtora Dallo."
+        },
+        {
+          "question": "Quantos andares tem o La Rocca?",
+          "answer": "A Dallo apresenta o La Rocca com 54 andares."
+        },
+        {
+          "question": "Qual é o diferencial do rooftop do La Rocca?",
+          "answer": "A Litoral Vertical destaca rooftop no 54º andar com vista panorâmica de 360 graus."
+        }
+      ],
+      "sources": [
+        "https://www.dallo.com.br/empreendimento/la-rocca/",
+        "https://litoralvertical.com/venda/itapema/apartamentos/edificio-la-rocca/",
+        "https://myside.com.br/apartamento-venda-la-rocca-itapema-sc",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-la-rocca-EM55276"
+      ]
+    },
+    {
+      "slug": "mares-do-sul",
+      "hero_image": "https://construtoradetalhe.com.br/wp-content/uploads/2024/09/RESIDENCIAL-MARES-DO-SUL-1.webp",
+      "description": "O Residencial Mares do Sul é um empreendimento da Construtora Detalhe em Meia Praia, Itapema, pensado para unir arquitetura contemporânea, elegância e proximidade com o mar. O projeto reúne apartamentos amplos, quatro suítes, três vagas e áreas comuns com hall, salão de festas, piscina, brinquedoteca, academia e ambientes de convivência voltados a conforto e sofisticação.",
+      "seo_description": "Conheça o Residencial Mares do Sul em Meia Praia, Itapema, empreendimento da Construtora Detalhe com quatro suítes, piscina e lazer completo.",
+      "gallery": [
+        {
+          "title": "Mares do Sul - fachada",
+          "category": "Empreendimento",
+          "image": "https://construtoradetalhe.com.br/wp-content/uploads/2024/09/RESIDENCIAL-MARES-DO-SUL-1.webp",
+          "source_url": "https://construtoradetalhe.com.br/project/residencial-mares-do-sul/",
+          "source_label": "Construtora Detalhe"
+        },
+        {
+          "title": "Mares do Sul - implantação",
+          "category": "Empreendimento",
+          "image": "https://construtoradetalhe.com.br/wp-content/uploads/2024/09/R-MARES-DO-SUL-2.webp",
+          "source_url": "https://construtoradetalhe.com.br/project/residencial-mares-do-sul/",
+          "source_label": "Construtora Detalhe"
+        },
+        {
+          "title": "Mares do Sul - acesso",
+          "category": "Áreas comuns",
+          "image": "https://construtoradetalhe.com.br/wp-content/uploads/2024/09/R-MARES-DO-SUL-3.webp",
+          "source_url": "https://construtoradetalhe.com.br/project/residencial-mares-do-sul/",
+          "source_label": "Construtora Detalhe"
+        },
+        {
+          "title": "Mares do Sul - lazer",
+          "category": "Lazer",
+          "image": "https://construtoradetalhe.com.br/wp-content/uploads/2024/09/R-MARES-DO-SUL-5.webp",
+          "source_url": "https://construtoradetalhe.com.br/project/residencial-mares-do-sul/",
+          "source_label": "Construtora Detalhe"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Meia Praia",
+          "description": "Localização em uma das regiões mais buscadas de Itapema, próxima ao mar e aos serviços da orla."
+        },
+        {
+          "icon": "Building2",
+          "title": "Quatro suítes",
+          "description": "As fontes consultadas apresentam plantas com quatro quartos/suítes e três vagas."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer para a rotina",
+          "description": "Hall, salão de festas, piscina, brinquedoteca e academia qualificam o uso diário do condomínio."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Construtora Detalhe",
+          "description": "O empreendimento integra o portfólio da Construtora Detalhe em Itapema."
+        },
+        {
+          "title": "Arquitetura contemporânea",
+          "description": "A comunicação oficial destaca arquitetura contemporânea e elegante."
+        },
+        {
+          "title": "Rua 301",
+          "description": "A MySide informa endereço na Rua 301, 55, Meia Praia, Itapema."
+        },
+        {
+          "title": "Áreas amplas",
+          "description": "A MySide apresenta opções residenciais de 159 m² a 217 m², conforme disponibilidade."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Mares do Sul?",
+          "answer": "Fica em Meia Praia, Itapema; a MySide informa endereço na Rua 301, 55."
+        },
+        {
+          "question": "Quem desenvolve o Mares do Sul?",
+          "answer": "O empreendimento é da Construtora Detalhe."
+        },
+        {
+          "question": "Qual é o perfil das unidades do Mares do Sul?",
+          "answer": "As fontes apresentam apartamentos com quatro suítes, três vagas e áreas privativas amplas."
+        },
+        {
+          "question": "Quais áreas comuns existem no Mares do Sul?",
+          "answer": "As fontes citam hall de entrada, salão de festas, piscina, brinquedoteca, academia e áreas de convivência."
+        }
+      ],
+      "sources": [
+        "https://construtoradetalhe.com.br/project/residencial-mares-do-sul/",
+        "https://www.potencialimoveis.com.br/imoveis/mares-do-sul-apartamento-4-suites-meia-praia-itapema--IM5231",
+        "https://myside.com.br/apartamento-venda-mares-do-sul-itapema-sc"
+      ]
+    },
+    {
+      "slug": "tonino-lamborghini-residences",
+      "hero_image": "https://lamborghini.it/cdn/shop/files/1_FACHADA_-_TLRBC_modulo2_690x776_crop_center.jpg?v=1701468366",
+      "description": "O Tonino Lamborghini Residences é um branded residence na Barra Sul de Balneário Camboriú, desenvolvido com assinatura da marca italiana Tonino Lamborghini. O projeto possui 53 pavimentos, 67 apartamentos de 194 m² a 429 m², 2.500 m² de lazer, quatro elevadores, cinco pavimentos de garagem e localização a poucos metros da praia, combinando design italiano e alto padrão residencial.",
+      "seo_description": "Conheça o Tonino Lamborghini Residences na Barra Sul de Balneário Camboriú, branded residence com 53 pavimentos, design italiano e 2.500 m² de lazer.",
+      "gallery": [
+        {
+          "title": "Tonino Lamborghini Residences - fachada",
+          "category": "Empreendimento",
+          "image": "https://lamborghini.it/cdn/shop/files/1_FACHADA_-_TLRBC_modulo2_690x776_crop_center.jpg?v=1701468366",
+          "source_url": "https://lamborghini.it/en-int/pages/project-real-estate-balneario-camboriu",
+          "source_label": "Tonino Lamborghini"
+        },
+        {
+          "title": "Tonino Lamborghini Residences - torre",
+          "category": "Empreendimento",
+          "image": "https://lamborghini.it/cdn/shop/files/3_FACHADA_-_TLRBC_375x191_crop_center.jpg?v=1700751461",
+          "source_url": "https://lamborghini.it/en-int/pages/project-real-estate-balneario-camboriu",
+          "source_label": "Tonino Lamborghini"
+        },
+        {
+          "title": "Tonino Lamborghini Residences - piscina",
+          "category": "Lazer",
+          "image": "https://lamborghini.it/cdn/shop/files/21_PISCINA_-_TLRBC_690x777_crop_center.jpg?v=1701708620",
+          "source_url": "https://lamborghini.it/en-int/pages/project-real-estate-balneario-camboriu",
+          "source_label": "Tonino Lamborghini"
+        },
+        {
+          "title": "Tonino Lamborghini Residences - academia",
+          "category": "Lazer",
+          "image": "https://lamborghini.it/cdn/shop/files/12_ACADEMIA_-_TLRBC_copia_690x774_crop_center.jpg?v=1701708189",
+          "source_url": "https://lamborghini.it/en-int/pages/project-real-estate-balneario-camboriu",
+          "source_label": "Tonino Lamborghini"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Sparkles",
+          "title": "Branded residence",
+          "description": "Primeiro projeto residencial da marca Tonino Lamborghini em Balneário Camboriú, com design italiano como diferencial."
+        },
+        {
+          "icon": "Building2",
+          "title": "53 pavimentos",
+          "description": "A página da marca informa 53 pavimentos e 67 apartamentos."
+        },
+        {
+          "icon": "Waves",
+          "title": "Barra Sul",
+          "description": "Localização na Rua 4600, 100, a poucos metros da praia segundo fontes consultadas."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "2.500 m² de lazer",
+          "description": "A Tonino Lamborghini informa 2.500 m² de área de lazer no empreendimento."
+        },
+        {
+          "title": "Apartamentos de 194 m² a 429 m²",
+          "description": "A marca apresenta unidades entre 194 m² e 429 m², incluindo opções superiores."
+        },
+        {
+          "title": "Quatro elevadores",
+          "description": "A ficha da marca cita quatro elevadores e cinco pavimentos de garagem."
+        },
+        {
+          "title": "Padrão Embraed",
+          "description": "A Litoral Vertical posiciona o empreendimento como padrão Embraed na Barra Sul."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Tonino Lamborghini Residences?",
+          "answer": "Fica na Rua 4600, 100, Barra Sul, Balneário Camboriú, segundo a MySide."
+        },
+        {
+          "question": "Quantos pavimentos tem o Tonino Lamborghini Residences?",
+          "answer": "A página da marca informa 53 pavimentos."
+        },
+        {
+          "question": "Qual é o porte das unidades?",
+          "answer": "A Tonino Lamborghini informa apartamentos de 194 m² a 429 m²."
+        },
+        {
+          "question": "Qual é o diferencial do empreendimento?",
+          "answer": "O projeto combina branded residence, design italiano, localização na Barra Sul e 2.500 m² de lazer."
+        }
+      ],
+      "sources": [
+        "https://lamborghini.it/en-int/pages/project-real-estate-balneario-camboriu",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-tonino-lamborghini-residences/",
+        "https://myside.com.br/apartamento-venda-tonino-lamborghini-residences-balneario-camboriu-sc"
+      ]
+    }
+  ]
+}

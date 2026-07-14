@@ -1,0 +1,302 @@
+{
+  "batch_id": "development-media-curation-batch1-20260714",
+  "generated_at": "2026-07-14T17:30:00.000Z",
+  "items": [
+    {
+      "slug": "vivapark-porto-belo",
+      "hero_image": "https://vokkan.com.br/uploads/imagens/vivapark-porto-belo-fachada-754.webp",
+      "description": "O VivaPark Porto Belo é um bairro-parque planejado pela Vokkan em Porto Belo, com assinatura urbanística de Jaime Lerner. O masterplan reúne moradia, trabalho, educação, comércio e lazer em um ambiente com grandes áreas verdes, parques com lagos, praças equipadas e mobilidade pensada para caminhar, pedalar e conviver.",
+      "seo_description": "Conheça o VivaPark Porto Belo, bairro-parque da Vokkan com áreas verdes, lagos, praças e infraestrutura para morar e investir em Porto Belo.",
+      "gallery": [
+        {
+          "title": "VivaPark Porto Belo - masterplan",
+          "category": "Empreendimento",
+          "image": "https://vokkan.com.br/uploads/imagens/vivapark-porto-belo-fachada-754.webp",
+          "source_url": "https://vokkan.com.br/empreendimento/vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "VivaPark Porto Belo - etapa do bairro-parque",
+          "category": "Empreendimento",
+          "image": "https://vokkan.com.br/uploads/imagens/vivapark-porto-belo-etapa-img-1-17.webp",
+          "source_url": "https://vokkan.com.br/empreendimento/vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "VivaPark Porto Belo - áreas verdes",
+          "category": "Empreendimento",
+          "image": "https://vokkan.com.br/uploads/imagens/vivapark-porto-belo-etapa-img-3-311.webp",
+          "source_url": "https://vokkan.com.br/empreendimento/vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "VivaPark Porto Belo - parque central",
+          "category": "Áreas comuns",
+          "image": "https://admin.ja8.com.br/uploads/project/28/66cf567cf20396.92322033.jpg",
+          "source_url": "https://www.ja8.com.br/projeto/viva-park-porto-belo/",
+          "source_label": "JA8 Arquitetura Viva"
+        },
+        {
+          "title": "VivaPark Porto Belo - paisagismo",
+          "category": "Áreas comuns",
+          "image": "https://admin.ja8.com.br/uploads/projectcontent/169/66cfa57239bd15.14209846.jpg",
+          "source_url": "https://www.ja8.com.br/projeto/viva-park-porto-belo/",
+          "source_label": "JA8 Arquitetura Viva"
+        },
+        {
+          "title": "VivaPark Porto Belo - espaços públicos",
+          "category": "Áreas comuns",
+          "image": "https://admin.ja8.com.br/uploads/projectcontent/170/66cfa588785354.10360965.jpg",
+          "source_url": "https://www.ja8.com.br/projeto/viva-park-porto-belo/",
+          "source_label": "JA8 Arquitetura Viva"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Trees",
+          "title": "Bairro-parque planejado",
+          "description": "Masterplan aberto em Porto Belo, pensado para integrar moradia, lazer, trabalho, educação e serviços no mesmo território."
+        },
+        {
+          "icon": "Leaf",
+          "title": "Natureza como infraestrutura",
+          "description": "A Vokkan destaca grandes áreas verdes, parques com lagos, pistas integradas para caminhada e praças equipadas para esporte e lazer."
+        },
+        {
+          "icon": "Route",
+          "title": "Mobilidade de bairro",
+          "description": "Ruas, parques e áreas de convivência favorecem deslocamentos a pé, bicicleta e uma rotina menos dependente do carro."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Assinatura Jaime Lerner",
+          "description": "O conceito urbanístico leva a assinatura de Jaime Lerner, referência internacional em planejamento urbano."
+        },
+        {
+          "title": "Parques, lagos e praças",
+          "description": "O projeto organiza áreas verdes e espaços públicos como parte central da experiência de morar e investir."
+        },
+        {
+          "title": "Infraestrutura de uso misto",
+          "description": "O bairro reúne vocação residencial com educação, comércio, lazer, cultura e bem-estar."
+        },
+        {
+          "title": "Porto Belo em expansão",
+          "description": "Localização em uma das regiões de maior crescimento do litoral catarinense, com potencial de valorização urbana."
+        }
+      ],
+      "faq": [
+        {
+          "question": "O que é o VivaPark Porto Belo?",
+          "answer": "É um bairro-parque planejado pela Vokkan em Porto Belo, criado para integrar moradia, trabalho, serviços, lazer, natureza e vida urbana em escala de bairro."
+        },
+        {
+          "question": "O VivaPark é um condomínio fechado?",
+          "answer": "A comunicação oficial trata o VivaPark como bairro-parque/masterplan urbano. As unidades e empreendimentos internos podem ter regras próprias, mas a página deve apresentar o conjunto como bairro planejado."
+        },
+        {
+          "question": "Quais são os principais diferenciais do VivaPark?",
+          "answer": "Áreas verdes, parques com lagos, praças, mobilidade para caminhar e pedalar, infraestrutura integrada e assinatura urbanística de Jaime Lerner."
+        },
+        {
+          "question": "Onde fica o VivaPark Porto Belo?",
+          "answer": "O VivaPark fica em Porto Belo, no litoral norte de Santa Catarina, em uma região com forte expansão imobiliária e turística."
+        }
+      ],
+      "sources": [
+        "https://vokkan.com.br/empreendimento/vivapark-porto-belo/pt",
+        "https://www.ja8.com.br/projeto/viva-park-porto-belo/"
+      ]
+    },
+    {
+      "slug": "vivapark",
+      "copy_from_slug": "vivapark-porto-belo"
+    },
+    {
+      "slug": "yachthouse-by-pininfarina",
+      "hero_image": "https://yachthousepininfarina.com.br/imgs/fachada/fachada-01.jpg",
+      "description": "O Yachthouse by Pininfarina é um complexo residencial de duas torres na Barra Sul, em Balneário Camboriú, desenvolvido pela Pasqualotto & GT com design assinado pela Pininfarina. O empreendimento combina escala vertical, vista para mar e marina, hall privativo, apartamentos amplos e uma estrutura de lazer de alto padrão.",
+      "seo_description": "Conheça o Yachthouse by Pininfarina, complexo de duas torres na Barra Sul com design assinado, lazer completo e vista para mar e marina.",
+      "gallery": [
+        {
+          "title": "Yachthouse by Pininfarina - fachada",
+          "category": "Empreendimento",
+          "image": "https://yachthousepininfarina.com.br/imgs/fachada/fachada-01.jpg",
+          "source_url": "https://yachthousepininfarina.com.br/",
+          "source_label": "Yachthouse Pininfarina"
+        },
+        {
+          "title": "Yachthouse by Pininfarina - torres",
+          "category": "Empreendimento",
+          "image": "https://yachthousepininfarina.com.br/imgs/fachada/fachada-03.jpg",
+          "source_url": "https://yachthousepininfarina.com.br/",
+          "source_label": "Yachthouse Pininfarina"
+        },
+        {
+          "title": "Yachthouse by Pininfarina - implantação",
+          "category": "Empreendimento",
+          "image": "https://yachthousepininfarina.com.br/imgs/fachada/fachada-06.jpg",
+          "source_url": "https://yachthousepininfarina.com.br/",
+          "source_label": "Yachthouse Pininfarina"
+        },
+        {
+          "title": "Yachthouse by Pininfarina - skyline",
+          "category": "Empreendimento",
+          "image": "https://yachthousepininfarina.com.br/imgs/fachada/fachada-10.jpg",
+          "source_url": "https://yachthousepininfarina.com.br/",
+          "source_label": "Yachthouse Pininfarina"
+        },
+        {
+          "title": "Yachthouse by Pininfarina - lazer",
+          "category": "Áreas comuns",
+          "image": "https://yachthousepininfarina.com.br/imgs/lazer/lazer-22.jpg",
+          "source_url": "https://yachthousepininfarina.com.br/",
+          "source_label": "Yachthouse Pininfarina"
+        },
+        {
+          "title": "Yachthouse by Pininfarina - áreas comuns",
+          "category": "Áreas comuns",
+          "image": "https://yachthousepininfarina.com.br/imgs/lazer/lazer-95.jpg",
+          "source_url": "https://yachthousepininfarina.com.br/",
+          "source_label": "Yachthouse Pininfarina"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Duas torres icônicas",
+          "description": "Complexo residencial de grande escala na Barra Sul, com presença marcante no skyline de Balneário Camboriú."
+        },
+        {
+          "icon": "PenTool",
+          "title": "Design Pininfarina",
+          "description": "Projeto desenvolvido pela Pasqualotto & GT com assinatura do estúdio italiano Pininfarina."
+        },
+        {
+          "icon": "Waves",
+          "title": "Vista para mar e marina",
+          "description": "Localização estratégica na Barra Sul, conectada ao mar, à marina e ao eixo mais exclusivo da cidade."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Hall privativo",
+          "description": "As plantas destacam privacidade e acesso reservado por unidade, reforçando o padrão residencial do empreendimento."
+        },
+        {
+          "title": "Lazer completo",
+          "description": "Piscinas, spa, saunas, academia, cinema, brinquedoteca, salões de festas e espaços gourmet compõem a experiência do condomínio."
+        },
+        {
+          "title": "Escala residencial rara",
+          "description": "A comunicação oficial cita duas torres com 81 pavimentos e 264 unidades."
+        },
+        {
+          "title": "Barra Sul",
+          "description": "Endereço em uma das regiões mais valorizadas de Balneário Camboriú, próximo ao mar, marina e serviços premium."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Yachthouse by Pininfarina?",
+          "answer": "Fica na Barra Sul, em Balneário Camboriú, próximo ao mar, à marina e aos principais pontos de lazer da região."
+        },
+        {
+          "question": "Quem desenvolveu o Yachthouse?",
+          "answer": "O empreendimento é desenvolvido pela Pasqualotto & GT, com design assinado pelo estúdio italiano Pininfarina."
+        },
+        {
+          "question": "Quantas torres tem o Yachthouse?",
+          "answer": "A comunicação consultada apresenta o Yachthouse como um complexo de duas torres residenciais."
+        },
+        {
+          "question": "Quais áreas de lazer o Yachthouse oferece?",
+          "answer": "Entre os destaques estão piscinas, spa, saunas, academia, cinema, brinquedoteca, salões de festas, espaços gourmet e áreas de convivência."
+        }
+      ],
+      "sources": [
+        "https://yachthouse.net.br/",
+        "https://yachthousepininfarina.com.br/"
+      ]
+    },
+    {
+      "slug": "vitra-by-pininfarina",
+      "hero_image": "https://vitrabypininfarinabc.com.br/wp-content/uploads/2024/05/20240229_132112348_iOS-696x1024.jpg",
+      "description": "O Vitra by Pininfarina é um empreendimento de design em Balneário Camboriú, a cerca de 180 metros do mar, com linguagem arquitetônica marcada pela base envidraçada e pela combinação de uso comercial e residencial. A proposta valoriza iluminação e ventilação naturais, fachada em pele de vidro, infraestrutura de alto padrão e lazer para uma rotina urbana sofisticada.",
+      "seo_description": "Conheça o Vitra by Pininfarina em Balneário Camboriú, torre de design a 180 m do mar com fachada em pele de vidro e lazer completo.",
+      "gallery": [
+        {
+          "title": "Vitra by Pininfarina - fachada real",
+          "category": "Empreendimento",
+          "image": "https://vitrabypininfarinabc.com.br/wp-content/uploads/2024/05/20240229_132112348_iOS-696x1024.jpg",
+          "source_url": "https://vitrabypininfarinabc.com.br/",
+          "source_label": "Vitra by Pininfarina"
+        },
+        {
+          "title": "Vitra by Pininfarina - fachada",
+          "category": "Empreendimento",
+          "image": "https://vitrabypininfarinabc.com.br/wp-content/uploads/2024/05/44-A.jpg",
+          "source_url": "https://vitrabypininfarinabc.com.br/",
+          "source_label": "Vitra by Pininfarina"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "PenTool",
+          "title": "Design assinado",
+          "description": "Arquitetura com linguagem Pininfarina, voltada a marcar a paisagem urbana de Balneário Camboriú."
+        },
+        {
+          "icon": "Waves",
+          "title": "A 180 metros do mar",
+          "description": "Localização central e próxima à praia, com conveniência urbana e acesso rápido à orla."
+        },
+        {
+          "icon": "Building2",
+          "title": "Base comercial e residencial",
+          "description": "O projeto combina áreas comerciais e residenciais, com grandes panos de vidro na base do edifício."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fachada em pele de vidro",
+          "description": "Elemento arquitetônico destacado pela própria comunicação do empreendimento."
+        },
+        {
+          "title": "Iluminação e ventilação naturais",
+          "description": "A posição com três lados frontais favorece luz e ventilação nos pavimentos."
+        },
+        {
+          "title": "Infraestrutura de alto padrão",
+          "description": "Gerador, segurança interna, guarita, escada pressurizada, bicicletário, box de praia e captação de água de chuva."
+        },
+        {
+          "title": "Hall e lazer",
+          "description": "Hall mobiliado e climatizado, lazer com piscinas, salão de festas, jogos, academia e espaço kids."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Vitra by Pininfarina?",
+          "answer": "O Vitra by Pininfarina fica em Balneário Camboriú, a aproximadamente 180 metros do mar, segundo a comunicação consultada."
+        },
+        {
+          "question": "Qual é o conceito do Vitra by Pininfarina?",
+          "answer": "É uma torre de design com linguagem Pininfarina, combinando uso comercial e residencial e uma base envidraçada voltada à cidade."
+        },
+        {
+          "question": "Quais são os diferenciais do empreendimento?",
+          "answer": "Fachada em pele de vidro, hall mobiliado e climatizado, segurança, box de praia, 3 elevadores, captação de água de chuva, guarita e bicicletário."
+        },
+        {
+          "question": "Como são as unidades do Vitra?",
+          "answer": "A fonte consultada informa apartamentos a partir de 172 m², com 4 suítes e 3 vagas, sujeitos à disponibilidade atual."
+        }
+      ],
+      "sources": [
+        "https://vitrabypininfarinabc.com.br/"
+      ]
+    }
+  ]
+}

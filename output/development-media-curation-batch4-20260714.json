@@ -1,0 +1,929 @@
+{
+  "batch_id": "development-media-curation-batch4-20260714",
+  "generated_at": "2026-07-14T19:25:00.000Z",
+  "items": [
+    {
+      "slug": "vista-mare",
+      "hero_image": "https://www.lotisa.com.br/wp-content/uploads/2024/12/Galeria-Vista-Mare_0004_Lotisa_Vista_Mare_Fachada_Dia_A_RF.png",
+      "description": "O Vista Mare Residencial é um empreendimento da Lotisa no bairro Fazenda, em Itajaí, na Alameda Ernesto Schneider. O projeto integra vida urbana, vista e proximidade com a Beira-Rio, com plantas de três suítes ou uma suíte mais dois dormitórios, áreas privativas entre 95,83 m² e 136,92 m² e uma estrutura de lazer completa para convivência, bem-estar e rotina familiar.",
+      "seo_description": "Conheça o Vista Mare Residencial da Lotisa no bairro Fazenda, Itajaí, com lazer completo, vista, plantas de 95 a 136 m² e localização na Beira-Rio.",
+      "gallery": [
+        {
+          "title": "Vista Mare - fachada",
+          "category": "Empreendimento",
+          "image": "https://www.lotisa.com.br/wp-content/uploads/2024/12/Galeria-Vista-Mare_0004_Lotisa_Vista_Mare_Fachada_Dia_A_RF.png",
+          "source_url": "https://www.lotisa.com.br/empreendimento/vista-mare/",
+          "source_label": "Lotisa"
+        },
+        {
+          "title": "Vista Mare - vista aérea",
+          "category": "Empreendimento",
+          "image": "https://www.lotisa.com.br/wp-content/uploads/2024/12/Galeria-Vista-Mare_0005_Lotisa_Vista_Mare_Voo_Passaro_01_B_RF.png",
+          "source_url": "https://www.lotisa.com.br/empreendimento/vista-mare/",
+          "source_label": "Lotisa"
+        },
+        {
+          "title": "Vista Mare - área de lazer",
+          "category": "Lazer",
+          "image": "https://www.lotisa.com.br/wp-content/uploads/2024/12/Galeria-Vista-Mare_0000_Lotisa_Vista_Mare_Area_Lazer_02_A_RF.png",
+          "source_url": "https://www.lotisa.com.br/empreendimento/vista-mare/",
+          "source_label": "Lotisa"
+        },
+        {
+          "title": "Vista Mare - piscina e convivência",
+          "category": "Lazer",
+          "image": "https://www.lotisa.com.br/wp-content/uploads/2024/12/Galeria-Vista-Mare_0001_Lotisa_Vista_Mare_Area_Lazer_02_B_RF.png",
+          "source_url": "https://www.lotisa.com.br/empreendimento/vista-mare/",
+          "source_label": "Lotisa"
+        },
+        {
+          "title": "Vista Mare - hall",
+          "category": "Áreas comuns",
+          "image": "https://www.lotisa.com.br/wp-content/uploads/2024/12/Galeria-Vista-Mare_0011_HALL-02.png",
+          "source_url": "https://www.lotisa.com.br/empreendimento/vista-mare/",
+          "source_label": "Lotisa"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Fazenda, Itajaí",
+          "description": "Endereço na Alameda Ernesto Schneider, região conectada à Beira-Rio, serviços, lazer urbano e acesso às praias de Itajaí."
+        },
+        {
+          "icon": "Building2",
+          "title": "Plantas funcionais",
+          "description": "Opções de três suítes ou uma suíte mais dois dormitórios, com 95,83 m² a 136,92 m² e uma a quatro vagas."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer completo",
+          "description": "Áreas de lazer, hall, academia, brinquedoteca, gourmet e espaços sociais ampliam o uso do condomínio além da unidade."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Projeto Lotisa",
+          "description": "Empreendimento da Lotisa, construtora com atuação consolidada no litoral catarinense."
+        },
+        {
+          "title": "Vista e paisagem urbana",
+          "description": "A comunicação oficial valoriza a integração entre vida urbana e as paisagens de Itajaí."
+        },
+        {
+          "title": "Em obras",
+          "description": "A página oficial posiciona o Vista Mare como empreendimento em obras, preservando potencial de compra em ciclo de desenvolvimento."
+        },
+        {
+          "title": "Múltiplas tipologias",
+          "description": "As fontes apresentam unidades tipo, opções diferenciadas e coberturas, ampliando alternativas de escolha."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Vista Mare Residencial?",
+          "answer": "Fica na Alameda Ernesto Schneider, 150, bairro Fazenda, em Itajaí, Santa Catarina."
+        },
+        {
+          "question": "Quem desenvolve o Vista Mare?",
+          "answer": "O empreendimento é da Lotisa."
+        },
+        {
+          "question": "Quais são as metragens do Vista Mare?",
+          "answer": "A fonte oficial apresenta plantas de 95,83 m² a 136,92 m², com uma a quatro vagas, além de tipologias diferenciadas conforme disponibilidade."
+        },
+        {
+          "question": "Qual é o perfil do lazer do Vista Mare?",
+          "answer": "O projeto inclui áreas sociais, lazer externo, hall, academia, brinquedoteca, gourmet e ambientes de convivência."
+        }
+      ],
+      "sources": [
+        "https://www.lotisa.com.br/empreendimento/vista-mare/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-vista-mare-residencial-EM38710",
+        "https://felicitanegocios.com.br/empreendimento/760/vista-mare/"
+      ]
+    },
+    {
+      "slug": "ed-sirena",
+      "hero_image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/4suaxOKMnGO4NqH2o4VY.jpg",
+      "description": "O Torres da Brava - Sirena é um empreendimento na Praia Brava, em Itajaí, localizado na Rua Luci Canziani. A torre reúne apartamentos de dois a três quartos, metragens compactas para a região e uma infraestrutura de lazer completa, com piscina de borda infinita, raia de 25 metros, pub, boate, playground, sala de jogos, espaço kids, fitness, quadra de padel e cinco salões de festa.",
+      "seo_description": "Conheça o Torres da Brava - Sirena na Praia Brava, Itajaí, com apartamentos de 82 a 110 m² e lazer com piscina, padel, pub e fitness.",
+      "gallery": [
+        {
+          "title": "Torres da Brava Sirena - fachada",
+          "category": "Empreendimento",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/4suaxOKMnGO4NqH2o4VY.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torres-da-brava-sirena-EM13688",
+          "source_label": "Imobille Negócios"
+        },
+        {
+          "title": "Torres da Brava Sirena - implantação",
+          "category": "Empreendimento",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/epD6qjsrzbiK9C0FAMF4.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torres-da-brava-sirena-EM13688",
+          "source_label": "Imobille Negócios"
+        },
+        {
+          "title": "Torres da Brava Sirena - piscina",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/6cyJ9gJlVXMLQpBNGwBx.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torres-da-brava-sirena-EM13688",
+          "source_label": "Imobille Negócios"
+        },
+        {
+          "title": "Torres da Brava Sirena - área comum",
+          "category": "Áreas comuns",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/qD3YoVCQa2oG3ctehvd2.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torres-da-brava-sirena-EM13688",
+          "source_label": "Imobille Negócios"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Praia Brava",
+          "description": "Localização na Rua Luci Canziani, em região de forte valorização entre Itajaí e Balneário Camboriú."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina de borda infinita",
+          "description": "O lazer contempla piscina de borda infinita e raia de 25 metros para uso esportivo e recreativo."
+        },
+        {
+          "icon": "Activity",
+          "title": "Lazer esportivo e social",
+          "description": "Quadra de padel, fitness, pub, boate, jogos, kids, playground e cinco salões de festa atendem diferentes rotinas."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Torres da Brava",
+          "description": "O Sirena integra o conceito Torres da Brava, com endereço estratégico na Praia Brava."
+        },
+        {
+          "title": "Entrega recente",
+          "description": "A MySide informa entrega em junho de 2026, sujeita à confirmação comercial."
+        },
+        {
+          "title": "Plantas de 82 m² a 110 m²",
+          "description": "As fontes apresentam unidades de dois a três quartos, com metragens funcionais para a região."
+        },
+        {
+          "title": "Lazer para família",
+          "description": "Espaço kids, playground, jogos, salões e piscina criam suporte para uso familiar cotidiano."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Torres da Brava - Sirena?",
+          "answer": "Fica na Rua Luci Canziani, Praia Brava, Itajaí, Santa Catarina."
+        },
+        {
+          "question": "Quais tamanhos existem no Sirena?",
+          "answer": "A MySide informa apartamentos de 82 m² a 110 m², com opções de dois a três quartos."
+        },
+        {
+          "question": "Quais áreas de lazer o Sirena oferece?",
+          "answer": "O lazer inclui piscina de borda infinita, raia de 25 metros, pub, boate, playground, sala de jogos, espaço kids, fitness, quadra de padel e cinco salões de festa."
+        },
+        {
+          "question": "Quando o Sirena foi entregue?",
+          "answer": "A MySide informa entrega em junho de 2026, informação que deve ser confirmada no atendimento comercial."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-torres-da-brava-sirena-EM13688",
+        "https://myside.com.br/apartamento-venda-torres-da-brava-sirena-itajai-sc"
+      ]
+    },
+    {
+      "slug": "brava-dreams",
+      "hero_image": "https://cdn.imoview.com.br/bryann/Imoveis/7126/cutpvk-construttore-brava-dreams-fachada-1771285321.jpg?1777074303",
+      "description": "O Brava Dreams é um empreendimento de altíssimo padrão da Construttore na Praia Brava, em Itajaí, com proposta beira-mar, poucas unidades e plantas exclusivas. O projeto valoriza vista panorâmica, piscinas privativas aquecidas, coberturas duplex e áreas comuns entregues mobiliadas, equipadas e decoradas, incluindo salão gourmet, piscina aquecida, academia, lounge bar, solarium e controle de acesso.",
+      "seo_description": "Conheça o Brava Dreams na Praia Brava, Itajaí, empreendimento beira-mar da Construttore com poucas unidades, piscinas privativas e lazer exclusivo.",
+      "gallery": [
+        {
+          "title": "Brava Dreams - fachada",
+          "category": "Empreendimento",
+          "image": "https://cdn.imoview.com.br/bryann/Imoveis/7126/cutpvk-construttore-brava-dreams-fachada-1771285321.jpg?1777074303",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/769/brava-dreams/",
+          "source_label": "Felicità"
+        },
+        {
+          "title": "Brava Dreams - acesso",
+          "category": "Áreas comuns",
+          "image": "https://cdn.imoview.com.br/bryann/Imoveis/7127/9k1y6-dreams-construttore-acesso-as-lojas-1771285321.jpg?1771285586",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/769/brava-dreams/",
+          "source_label": "Felicità"
+        },
+        {
+          "title": "Brava Dreams - solarium",
+          "category": "Lazer",
+          "image": "https://cdn.imoview.com.br/bryann/Imoveis/7128/rk99w-dremas-solarium-1771285321.jpg?1771285908",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/769/brava-dreams/",
+          "source_label": "Felicità"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Beira-mar na Praia Brava",
+          "description": "A Construttore posiciona o empreendimento como localizado à beira-mar na Praia Brava."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Poucas unidades",
+          "description": "O projeto é descrito com apenas 10 unidades habitacionais, reforçando exclusividade e privacidade."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscinas privativas",
+          "description": "As unidades contam com plantas exclusivas e piscinas privativas aquecidas, além de lazer comum."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Construttore",
+          "description": "Empreendimento da Construttore, com proposta de alto padrão na Praia Brava."
+        },
+        {
+          "title": "Coberturas duplex",
+          "description": "A comunicação oficial destaca coberturas duplex entre as tipologias do projeto."
+        },
+        {
+          "title": "Áreas comuns equipadas",
+          "description": "Salão gourmet, piscina aquecida, academia, lounge bar e solarium são entregues mobiliados, equipados e decorados."
+        },
+        {
+          "title": "Infraestrutura para veículos elétricos",
+          "description": "A fonte oficial cita infraestrutura para abastecimento de veículos elétricos."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Brava Dreams?",
+          "answer": "Fica na Praia Brava, em Itajaí, com referências de endereço na Avenida Carlos Drummond de Andrade e Rua Albatroz."
+        },
+        {
+          "question": "Quem desenvolve o Brava Dreams?",
+          "answer": "O empreendimento é apresentado pela Construttore Empreendimentos."
+        },
+        {
+          "question": "Qual é o perfil do Brava Dreams?",
+          "answer": "É um empreendimento beira-mar de alto padrão, com poucas unidades, plantas exclusivas, piscinas privativas e coberturas duplex."
+        },
+        {
+          "question": "Quais áreas comuns existem no Brava Dreams?",
+          "answer": "As fontes citam salão de festas gourmet, piscina aquecida, academia, lounge bar, solarium, controle de acesso e áreas comuns mobiliadas e equipadas."
+        }
+      ],
+      "sources": [
+        "https://construttore.com.br/empreendimento/brava-dreams/",
+        "https://felicitanegocios.com.br/empreendimento/769/brava-dreams/",
+        "https://myside.com.br/apartamento-venda-brava-dreams-itajai-sc"
+      ]
+    },
+    {
+      "slug": "citta-di-vinci",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-citta-di-vinci-balneario-camboriu-1.0.jpg",
+      "description": "O Città di Vinci é um edifício residencial de alto padrão em Balneário Camboriú, em localização central e na quadra do mar. O empreendimento atende quem busca plantas amplas, quatro suítes, várias vagas e estrutura condominial em uma região consolidada da cidade, próxima à Praia Central, comércio, serviços e conveniências urbanas.",
+      "seo_description": "Conheça o Città di Vinci em Balneário Camboriú, edifício de alto padrão na quadra do mar, com plantas amplas, quatro suítes e lazer.",
+      "gallery": [
+        {
+          "title": "Città di Vinci - fachada",
+          "category": "Empreendimento",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-citta-di-vinci-balneario-camboriu-1.0.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-citta-di-vinci/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Città di Vinci - torre",
+          "category": "Empreendimento",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-citta-di-vinci-balneario-camboriu-final02.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-citta-di-vinci/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Città di Vinci - área comum",
+          "category": "Áreas comuns",
+          "image": "https://litoralvertical.com/wp-content/uploads/2015/02/edificio-citta-di-vinci-balneario-camboriu-sqa422-2-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-citta-di-vinci/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Quadra do mar",
+          "description": "Localização central em Balneário Camboriú, com acesso rápido à Praia Central e à infraestrutura urbana."
+        },
+        {
+          "icon": "Building2",
+          "title": "Plantas amplas",
+          "description": "As fontes consultadas apresentam unidades com quatro dormitórios e quatro suítes, voltadas ao alto padrão."
+        },
+        {
+          "icon": "Car",
+          "title": "Vagas generosas",
+          "description": "O empreendimento aparece em ofertas com três a quatro vagas, atributo valorizado na região central."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Endereço consolidado",
+          "description": "A localização central facilita uso a pé de comércio, serviços, restaurantes e praia."
+        },
+        {
+          "title": "Alto padrão",
+          "description": "A Litoral Vertical posiciona o Città di Vinci entre imóveis de alto padrão em Balneário Camboriú."
+        },
+        {
+          "title": "Fachada vertical marcante",
+          "description": "A torre se destaca pela presença urbana e pela implantação próxima à orla."
+        },
+        {
+          "title": "Perfil familiar",
+          "description": "Quatro suítes, área social ampla e múltiplas vagas atendem famílias que buscam moradia permanente ou temporada qualificada."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Città di Vinci?",
+          "answer": "Fica em Balneário Camboriú, em localização central e na quadra do mar segundo a fonte consultada."
+        },
+        {
+          "question": "Qual é o perfil das unidades do Città di Vinci?",
+          "answer": "As ofertas consultadas apresentam unidades amplas, com quatro dormitórios, quatro suítes e três a quatro vagas."
+        },
+        {
+          "question": "O Città di Vinci fica perto da praia?",
+          "answer": "Sim. A fonte posiciona o edifício na quadra do mar, com acesso rápido à Praia Central."
+        },
+        {
+          "question": "Qual é o perfil do empreendimento?",
+          "answer": "É um edifício residencial de alto padrão em Balneário Camboriú, voltado a plantas amplas e localização urbana valorizada."
+        }
+      ],
+      "sources": [
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-citta-di-vinci/"
+      ]
+    },
+    {
+      "slug": "diamond-hill",
+      "hero_image": "https://bertecempreendimentos.com.br/wp-content/uploads/2019/06/diamond-hill.jpg",
+      "description": "O Diamond Hill é um empreendimento residencial frente-mar na Barra Sul de Balneário Camboriú, associado ao alto padrão da Embraed/Bertec. O edifício reúne apartamentos amplos, vista para o mar, plantas com suítes e vagas generosas, além de lazer com piscina térmica adulto e infantil, sauna seca, sauna a vapor, academia, studio pilates, sala de jogos e sala de massagem.",
+      "seo_description": "Conheça o Diamond Hill na Barra Sul de Balneário Camboriú, empreendimento frente-mar de alto padrão com lazer completo, vista mar e plantas amplas.",
+      "gallery": [
+        {
+          "title": "Diamond Hill - fachada",
+          "category": "Empreendimento",
+          "image": "https://bertecempreendimentos.com.br/wp-content/uploads/2019/06/diamond-hill.jpg",
+          "source_url": "https://bertecempreendimentos.com.br/empreendimentos/diamond-hill/",
+          "source_label": "Bertec"
+        },
+        {
+          "title": "Diamond Hill - fachada frente-mar",
+          "category": "Empreendimento",
+          "image": "https://litoralvertical.com/wp-content/uploads/2022/03/edificio-diamond-hill-balneario-camboriu-1.2.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-diamond-hill/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Diamond Hill - acesso",
+          "category": "Áreas comuns",
+          "image": "https://litoralvertical.com/wp-content/uploads/2022/03/edificio-diamond-hill-balneario-camboriu-1.1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-diamond-hill/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Diamond Hill - área comum",
+          "category": "Áreas comuns",
+          "image": "https://litoralvertical.com/wp-content/uploads/2022/03/edificio-diamond-hill-balneario-camboriu-2.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-diamond-hill/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente-mar na Barra Sul",
+          "description": "Endereço em uma das regiões mais exclusivas de Balneário Camboriú, com vista e acesso à orla."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Alto padrão consolidado",
+          "description": "O empreendimento é associado à Embraed/Bertec e posicionado como produto de luxo frente-mar."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer e bem-estar",
+          "description": "Piscina térmica adulto e infantil, saunas, academia, pilates, jogos e massagem completam a estrutura."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Apartamentos de 185 m²",
+          "description": "A Imobille apresenta apartamentos com 185 m² privativos, três suítes e três vagas."
+        },
+        {
+          "title": "Vista para o mar",
+          "description": "A localização frente-mar favorece vista permanente e alto valor de liquidez."
+        },
+        {
+          "title": "Pronto para morar",
+          "description": "A Bertec apresenta o empreendimento como 100% concluído e pronto para morar."
+        },
+        {
+          "title": "Barra Sul",
+          "description": "A região concentra empreendimentos de alto padrão, marina, gastronomia e acesso ao eixo sul da cidade."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Diamond Hill?",
+          "answer": "Fica na Barra Sul de Balneário Camboriú, em localização frente-mar."
+        },
+        {
+          "question": "Qual é o perfil do Diamond Hill?",
+          "answer": "É um edifício residencial de alto padrão, com apartamentos amplos, vista mar e lazer completo."
+        },
+        {
+          "question": "Quais áreas de lazer existem no Diamond Hill?",
+          "answer": "As fontes citam piscina térmica adulto e infantil, sauna seca, sauna a vapor, academia, studio pilates, sala de jogos e sala de massagem."
+        },
+        {
+          "question": "O Diamond Hill está pronto?",
+          "answer": "A Bertec apresenta o empreendimento como concluído e pronto para morar."
+        }
+      ],
+      "sources": [
+        "https://bertecempreendimentos.com.br/empreendimentos/diamond-hill/",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-diamond-hill/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-diamond-hill-EM15835"
+      ]
+    },
+    {
+      "slug": "dusseldorf",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2023/03/edificio-dusseldorf-praia-brava-itajai-0.3.jpg",
+      "description": "O Edifício Dusseldorf é um residencial boutique na Praia Brava, em Itajaí, localizado em rua reta ao mar. O empreendimento reúne apenas 16 apartamentos, dois por andar, fachadas contemporâneas em pele de vidro e área de lazer no rooftop, com proposta de privacidade, alto padrão de acabamento e rotina próxima à praia.",
+      "seo_description": "Conheça o Edifício Dusseldorf na Praia Brava, Itajaí, residencial boutique com 16 apartamentos, fachada em pele de vidro e lazer no rooftop.",
+      "gallery": [
+        {
+          "title": "Dusseldorf - fachada",
+          "category": "Empreendimento",
+          "image": "https://litoralvertical.com/wp-content/uploads/2023/03/edificio-dusseldorf-praia-brava-itajai-0.3.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/edificio-dusseldorf/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Dusseldorf - fachada lateral",
+          "category": "Empreendimento",
+          "image": "https://litoralvertical.com/wp-content/uploads/2023/03/edificio-dusseldorf-praia-brava-itajai-0.1.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/edificio-dusseldorf/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Dusseldorf - fachada e acesso",
+          "category": "Áreas comuns",
+          "image": "https://litoralvertical.com/wp-content/uploads/2023/03/edificio-dusseldorf-praia-brava-itajai-0.2.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/edificio-dusseldorf/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Rua reta ao mar",
+          "description": "Localização na Praia Brava, com acesso simples à areia e ao eixo gastronômico da região."
+        },
+        {
+          "icon": "Building2",
+          "title": "Apenas 16 apartamentos",
+          "description": "A escala reduzida reforça privacidade, menor fluxo interno e sensação de exclusividade."
+        },
+        {
+          "icon": "Sun",
+          "title": "Lazer no rooftop",
+          "description": "A estrutura de lazer na cobertura aproveita melhor vista, ventilação e uso social do edifício."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Dois apartamentos por andar",
+          "description": "A distribuição favorece privacidade e menor circulação em cada pavimento."
+        },
+        {
+          "title": "Fachada em pele de vidro",
+          "description": "A comunicação de mercado destaca fachada contemporânea e visual elegante."
+        },
+        {
+          "title": "Alto padrão de acabamento",
+          "description": "As fontes citam acabamento em gesso, porcelanato, medidores individuais e atenção aos detalhes."
+        },
+        {
+          "title": "Praia Brava",
+          "description": "O bairro reúne valorização, praia, restaurantes e conexão com Balneário Camboriú."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Edifício Dusseldorf?",
+          "answer": "Fica na Praia Brava, em Itajaí, em rua reta ao mar segundo a Litoral Vertical."
+        },
+        {
+          "question": "Quantos apartamentos tem o Dusseldorf?",
+          "answer": "As fontes consultadas citam apenas 16 apartamentos, sendo dois por andar."
+        },
+        {
+          "question": "O Dusseldorf tem lazer?",
+          "answer": "Sim. As fontes citam área de lazer no rooftop."
+        },
+        {
+          "question": "Qual é o perfil do Dusseldorf?",
+          "answer": "É um residencial boutique de alto padrão na Praia Brava, com fachada contemporânea, privacidade e proximidade do mar."
+        }
+      ],
+      "sources": [
+        "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/edificio-dusseldorf/",
+        "https://manicamarin.com.br/imovel/empreendimento-praia-brava-itajai-sc-398143",
+        "https://www.imobillenegocios.com.br/imoveis/apartamento-garden-no-dusseldorf-na-praia-brava-itajai-IM68308"
+      ]
+    },
+    {
+      "slug": "las-brisas",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-las-brisas-balneario-camboriu-1.jpg",
+      "description": "O Las Brisas Residence é um empreendimento da Orla Construtora no bairro Pioneiros, em Balneário Camboriú, entre a 3ª Avenida e a Avenida Brasil. O projeto tem uma torre, 39 residências, plantas amplas de 157 m² a 314 m² e estrutura condominial com hall decorado, monitoramento, guarita, elevadores, lazer e acesso rápido à Praia Central.",
+      "seo_description": "Conheça o Las Brisas Residence no bairro Pioneiros, Balneário Camboriú, com plantas de 157 a 314 m², uma torre, lazer e portaria.",
+      "gallery": [
+        {
+          "title": "Las Brisas - fachada",
+          "category": "Empreendimento",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-las-brisas-balneario-camboriu-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-las-brisas-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Las Brisas - torre",
+          "category": "Empreendimento",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-las-brisas-balneario-camboriu-2.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-las-brisas-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Las Brisas - acesso",
+          "category": "Áreas comuns",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-las-brisas-balneario-camboriu-3-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-las-brisas-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Las Brisas - área comum",
+          "category": "Áreas comuns",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-las-brisas-balneario-camboriu-14.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-las-brisas-residence/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Pioneiros",
+          "description": "Localização na Rua Protásio Boaventura Caetano, com acesso à Praia Central, Avenida Brasil e 3ª Avenida."
+        },
+        {
+          "icon": "Building2",
+          "title": "Uma torre e 39 residências",
+          "description": "A configuração reduz o fluxo e reforça exclusividade em comparação a grandes home clubs."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Segurança e operação",
+          "description": "Guarita, portaria 24h, monitoramento e controle condominial apoiam a rotina residencial."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Orla Construtora",
+          "description": "A Apto identifica o projeto como desenvolvimento da Orla Construtora e Incorporadora."
+        },
+        {
+          "title": "Pronto para morar",
+          "description": "A Apto informa status pronto para morar, com previsão de entrega em junho de 2024."
+        },
+        {
+          "title": "Plantas amplas",
+          "description": "As fontes apresentam unidades de 157 m² a 314 m², com quatro a cinco quartos e várias vagas."
+        },
+        {
+          "title": "Hall decorado",
+          "description": "Fontes de mercado destacam hall de entrada decorado com pé-direito duplo e fachada moderna."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Las Brisas Residence?",
+          "answer": "Fica na Rua Protásio Boaventura Caetano, bairro Pioneiros, Balneário Camboriú."
+        },
+        {
+          "question": "Quem desenvolveu o Las Brisas?",
+          "answer": "A Apto apresenta o Las Brisas como projeto da Orla Construtora e Incorporadora."
+        },
+        {
+          "question": "Qual é o porte do Las Brisas?",
+          "answer": "A fonte consultada cita uma torre e 39 residências, com plantas entre 157 m² e 314 m²."
+        },
+        {
+          "question": "O Las Brisas está pronto?",
+          "answer": "A Apto indica status pronto para morar, informação que deve ser confirmada no atendimento comercial."
+        }
+      ],
+      "sources": [
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-las-brisas-residence/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-las-brisas-EM51282",
+        "https://apto.vc/br/sc/balneario-camboriu/pioneiros/las-brisas-residence",
+        "https://sortinvestimentos.com.br/empreendimentos/las-brisas"
+      ]
+    },
+    {
+      "slug": "marina-beach",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2015/02/edificio-marina-beach-towers-balneario-camboriu-1.jpg",
+      "description": "O Marina Beach Towers é um empreendimento residencial em Balneário Camboriú conhecido pela marina privativa, duas torres e estrutura de lazer de grande escala. O projeto reúne 6.500 m² de áreas comuns, heliponto homologado pela ANAC, lounge hall, cinema, sala de jogos, brinquedoteca, playground, salão de beleza, spa, fitness, saunas e áreas de bem-estar integradas à marina.",
+      "seo_description": "Conheça o Marina Beach Towers em Balneário Camboriú, empreendimento com marina privativa, duas torres, heliponto e 6.500 m² de lazer.",
+      "gallery": [
+        {
+          "title": "Marina Beach Towers - fachada",
+          "category": "Empreendimento",
+          "image": "https://litoralvertical.com/wp-content/uploads/2015/02/edificio-marina-beach-towers-balneario-camboriu-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/marina-beach-towers/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Marina Beach Towers - marina",
+          "category": "Áreas comuns",
+          "image": "https://litoralvertical.com/wp-content/uploads/2015/02/edificio-marina-beach-towers-balneario-camboriu-2.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/marina-beach-towers/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Marina Beach Towers - áreas comuns",
+          "category": "Áreas comuns",
+          "image": "https://litoralvertical.com/wp-content/uploads/2015/02/edificio-marina-beach-towers-balneario-camboriu-3.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/marina-beach-towers/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Marina Beach Towers - lazer",
+          "category": "Lazer",
+          "image": "https://litoralvertical.com/wp-content/uploads/2015/02/edificio-marina-beach-towers-balneario-camboriu-4.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/marina-beach-towers/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "ShipWheel",
+          "title": "Marina privativa",
+          "description": "O empreendimento se diferencia pela conexão direta com marina, um atributo raro em torres residenciais."
+        },
+        {
+          "icon": "Plane",
+          "title": "Heliponto homologado",
+          "description": "A Litoral Vertical cita heliponto homologado pela ANAC, reforçando o padrão de infraestrutura."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "6.500 m² de lazer",
+          "description": "Cinema, jogos, brinquedoteca, playground, salão de beleza, spa, fitness e saunas criam uma experiência de clube."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Duas torres",
+          "description": "O conjunto se organiza em duas torres residenciais com presença marcante na paisagem."
+        },
+        {
+          "title": "Sky Fit",
+          "description": "A página oficial cita área de bem-estar no 19º pavimento, com beauty care, massagem, spa e academia."
+        },
+        {
+          "title": "Mendes Sibara",
+          "description": "A MySide associa o Marina Beach Towers à Mendes & Sibara Construtora."
+        },
+        {
+          "title": "Perfil náutico",
+          "description": "A relação com a marina cria um posicionamento diferente dos empreendimentos apenas frente-mar."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Marina Beach Towers?",
+          "answer": "Fica em Balneário Camboriú, em localização conectada à marina e ao eixo da Barra Sul/Centro."
+        },
+        {
+          "question": "O Marina Beach Towers tem marina privativa?",
+          "answer": "Sim. As fontes consultadas destacam a marina privativa como diferencial do empreendimento."
+        },
+        {
+          "question": "Quais áreas de lazer existem no Marina Beach Towers?",
+          "answer": "A Litoral Vertical cita 6.500 m² de lazer com lounge hall, cinema, jogos, brinquedoteca, playground, salão de beleza, spa, fitness, sauna seca e sauna úmida."
+        },
+        {
+          "question": "O Marina Beach Towers tem heliponto?",
+          "answer": "Sim. A fonte consultada cita heliponto homologado pela ANAC."
+        }
+      ],
+      "sources": [
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/marina-beach-towers/",
+        "https://myside.com.br/apartamento-venda-marina-beach-balneario-camboriu-sc",
+        "https://www.marinabeachtowers.com.br/marina-beach-towers-tem-assinatura-feminina-no-projeto/"
+      ]
+    },
+    {
+      "slug": "reserva-figueira",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2021/08/brava-beach-reserva-figueira-praia-brava-itajai-1.jpg",
+      "description": "O Reserva Figueira é um empreendimento do Brava Beach Internacional na Praia Brava, em Itajaí, pensado como home resort próximo ao mar e à Mata Atlântica. O projeto reúne três torres, unidades amplas, mais de 5.000 m² de lazer e áreas comuns com piscinas, cinema, jogos, salões, churrasqueiras, pet place, redário, jardins, segurança e estrutura de convivência para uso permanente ou temporada.",
+      "seo_description": "Conheça o Reserva Figueira no Brava Beach Internacional, Praia Brava, Itajaí, com três torres, mais de 5.000 m² de lazer e home resort.",
+      "gallery": [
+        {
+          "title": "Reserva Figueira - fachada",
+          "category": "Empreendimento",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/brava-beach-reserva-figueira-praia-brava-itajai-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/brava-beach-internacional-reserva-figueira/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Reserva Figueira - implantação",
+          "category": "Empreendimento",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/brava-beach-reserva-figueira-praia-brava-itajai-2.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/brava-beach-internacional-reserva-figueira/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Reserva Figueira - lazer",
+          "category": "Lazer",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/brava-beach-reserva-figueira-praia-brava-itajai-4.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/brava-beach-internacional-reserva-figueira/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Reserva Figueira - áreas comuns",
+          "category": "Áreas comuns",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/brava-beach-reserva-figueira-praia-brava-itajai-10.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/brava-beach-internacional-reserva-figueira/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Praia Brava",
+          "description": "Endereço na Rua Delfim Mário de Pádua Peixoto, em uma das regiões mais valorizadas de Itajaí."
+        },
+        {
+          "icon": "Trees",
+          "title": "Home resort",
+          "description": "O Brava Beach Group posiciona o Reserva Figueira como projeto que integra proximidade do mar e Mata Atlântica."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Mais de 5.000 m² de lazer",
+          "description": "Piscinas, cinema, jogos, salões, churrasqueiras, pet place, redário e jardins compõem a experiência comum."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Brava Beach Group",
+          "description": "O empreendimento faz parte do complexo Brava Beach Internacional."
+        },
+        {
+          "title": "Três torres",
+          "description": "Fontes de mercado apresentam o Reserva Figueira com três torres residenciais."
+        },
+        {
+          "title": "Entrega em 2024",
+          "description": "A MySide informa entrega em abril de 2024."
+        },
+        {
+          "title": "Unidades amplas",
+          "description": "A MySide cita metragens de 151 m² a 548 m², com opções de três a quatro quartos."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Reserva Figueira?",
+          "answer": "Fica na Rua Delfim Mário de Pádua Peixoto, 1100, Praia Brava, Itajaí."
+        },
+        {
+          "question": "O Reserva Figueira faz parte do Brava Beach Internacional?",
+          "answer": "Sim. As fontes consultadas apresentam o Reserva Figueira dentro do complexo Brava Beach Internacional."
+        },
+        {
+          "question": "Quais áreas de lazer existem no Reserva Figueira?",
+          "answer": "As fontes citam salão de festas, churrasqueiras, piscinas adulto, infantil e aquecida, cinema, jogos, fitness, sauna, jardins, pet place, bicicletário, redário e playground."
+        },
+        {
+          "question": "Quando o Reserva Figueira foi entregue?",
+          "answer": "A MySide informa entrega em abril de 2024."
+        }
+      ],
+      "sources": [
+        "https://www.bravabeachgroup.com/reserva-figueira/",
+        "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/brava-beach-internacional-reserva-figueira/",
+        "https://myside.com.br/apartamento-venda-reserva-figueira-itajai-sc",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-beach-reserva-figueira-EM91434"
+      ]
+    },
+    {
+      "slug": "south-beach",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2022/09/edificio-south-beach-balneario-camboriu-1-1.jpg",
+      "description": "O South Beach é um empreendimento da Embraed na Barra Sul de Balneário Camboriú, em endereço frente-mar na Rua 3700. A torre entregue em 2020 possui 46 andares, apartamentos amplos, padrão de alto luxo e lazer com piscina, salão de festas, pub, sala de jogos, espaço kids, academia, spa, sauna e ambientes sociais decorados.",
+      "seo_description": "Conheça o South Beach da Embraed na Barra Sul de Balneário Camboriú, edifício frente-mar com 46 andares, lazer completo e alto padrão.",
+      "gallery": [
+        {
+          "title": "South Beach - fachada frente-mar",
+          "category": "Empreendimento",
+          "image": "https://litoralvertical.com/wp-content/uploads/2022/09/edificio-south-beach-balneario-camboriu-1-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-south-beach/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "South Beach - torre",
+          "category": "Empreendimento",
+          "image": "https://litoralvertical.com/wp-content/uploads/2022/09/edificio-south-beach-balneario-camboriu-2-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-south-beach/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "South Beach - acesso",
+          "category": "Áreas comuns",
+          "image": "https://litoralvertical.com/wp-content/uploads/2022/09/edificio-south-beach-balneario-camboriu-1-2.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-south-beach/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "South Beach - lazer",
+          "category": "Lazer",
+          "image": "https://litoralvertical.com/wp-content/uploads/2022/09/edificio-south-beach-balneario-camboriu-13-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-south-beach/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente-mar na Barra Sul",
+          "description": "Endereço na Rua 3700, uma das áreas mais nobres de Balneário Camboriú."
+        },
+        {
+          "icon": "Building2",
+          "title": "Torre de 46 andares",
+          "description": "A fonte consultada cita 46 andares e 68 apartamentos, reforçando o padrão vertical de alto luxo."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer completo",
+          "description": "Piscina, salão de festas, pub, jogos, kids, academia, spa e sauna atendem convivência, saúde e bem-estar."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Obra Embraed",
+          "description": "A Litoral Vertical apresenta o South Beach como empreendimento da Embraed."
+        },
+        {
+          "title": "Entregue em 2020",
+          "description": "A fonte consultada informa entrega em 2020."
+        },
+        {
+          "title": "Apartamentos amplos",
+          "description": "As ofertas consultadas apresentam unidades de alto padrão com área privativa ampla e múltiplas suítes."
+        },
+        {
+          "title": "Barra Sul",
+          "description": "A localização concentra marina, gastronomia, acesso à orla alargada e empreendimentos premium."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o South Beach?",
+          "answer": "Fica na Rua 3700, 91, Barra Sul, Balneário Camboriú, em localização frente-mar."
+        },
+        {
+          "question": "Quem construiu o South Beach?",
+          "answer": "A fonte consultada apresenta o South Beach como empreendimento da Embraed."
+        },
+        {
+          "question": "Quantos andares tem o South Beach?",
+          "answer": "A Litoral Vertical cita 46 andares e 68 apartamentos."
+        },
+        {
+          "question": "Quais áreas de lazer existem no South Beach?",
+          "answer": "O lazer inclui piscina, salão de festas, pub, sala de jogos, espaço kids, academia, spa, sauna e ambientes sociais."
+        }
+      ],
+      "sources": [
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-south-beach/"
+      ]
+    }
+  ]
+}
