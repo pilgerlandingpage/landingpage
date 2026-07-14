@@ -5175,7 +5175,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 }
 
                 .bc-page.bc-property-layout .bc-dev-nearby-section {
-                    background: #f7f5f0;
+                    background: #fff;
                 }
 
                 .bc-page.bc-property-layout .bc-dev-section-inner {
