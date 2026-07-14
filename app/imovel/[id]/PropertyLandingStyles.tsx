@@ -5128,11 +5128,10 @@ export default function PropertyLandingStyles() {
                 }
 
                 .plp-related-band {
-                    margin: 36px 44px 0;
-                    padding: 30px;
-                    border: 1px solid var(--plp-line);
-                    border-radius: var(--plp-radius);
-                    background: linear-gradient(180deg, #fbfaf7 0%, #f2eee6 100%);
+                    margin: 42px 44px 0;
+                    padding: clamp(34px, 4vw, 52px) 0 0;
+                    border-top: 1px solid var(--plp-line);
+                    background: #fff;
                     color: var(--plp-ink);
                 }
 
@@ -5141,114 +5140,153 @@ export default function PropertyLandingStyles() {
                     align-items: end;
                     justify-content: space-between;
                     gap: 22px;
-                    margin-bottom: 18px;
+                    margin-bottom: 22px;
                 }
 
                 .plp-related-head span {
                     display: block;
-                    margin-bottom: 5px;
+                    margin-bottom: 7px;
                     color: var(--plp-gold-dark);
-                    font-size: 12px;
+                    font-size: 11px;
                     font-weight: 900;
+                    letter-spacing: 0.18em;
                     text-transform: uppercase;
                 }
 
                 .plp-related-head h2 {
+                    max-width: 760px;
+                    margin: 0;
                     color: var(--plp-ink);
+                    font-size: clamp(2.25rem, 3vw, 3rem);
+                    line-height: 1.08;
                 }
 
-                .plp-related-head a {
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 8px;
-                    color: var(--plp-gold-dark);
+                .plp-related-head p {
+                    max-width: 340px;
+                    margin: 0 0 2px;
+                    color: #53606a;
                     font-size: 13px;
-                    font-weight: 850;
-                    text-decoration: none;
+                    font-weight: 600;
+                    line-height: 1.65;
                 }
 
                 .plp-related-grid {
                     display: grid;
-                    grid-template-columns: repeat(4, minmax(0, 1fr));
-                    gap: 14px;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    gap: 16px;
                 }
 
                 .plp-related-card {
                     position: relative;
+                    min-height: 300px;
                     overflow: hidden;
                     border-radius: var(--plp-radius);
-                    border: 1px solid var(--plp-line);
-                    background: #fff;
-                    color: var(--plp-ink);
+                    background: #111820;
+                    color: #fff;
                     text-decoration: none;
-                    box-shadow: 0 14px 32px rgba(36, 29, 20, 0.08);
+                    box-shadow: 0 18px 36px rgba(16, 18, 20, 0.10);
+                    isolation: isolate;
+                }
+
+                .plp-related-card::after {
+                    content: '';
+                    position: absolute;
+                    inset: 0;
+                    z-index: 1;
+                    background: linear-gradient(to top, rgba(9, 12, 16, 0.88) 0%, rgba(9, 12, 16, 0.42) 44%, rgba(9, 12, 16, 0.10) 100%);
+                    pointer-events: none;
                 }
 
                 .plp-related-card img {
+                    position: absolute;
+                    inset: 0;
+                    z-index: 0;
                     display: block;
                     width: 100%;
-                    aspect-ratio: var(--plp-photo-aspect);
-                    height: auto;
+                    height: 100%;
                     object-fit: cover;
                     object-position: center;
                 }
 
                 .plp-card-ribbon {
                     position: absolute;
-                    top: 10px;
-                    right: 10px;
+                    top: 14px;
+                    right: 14px;
+                    z-index: 2;
                     min-height: 24px;
-                    padding: 5px 8px;
+                    padding: 6px 9px;
                     border-radius: var(--plp-radius);
-                    background: var(--plp-gold);
+                    background: rgba(189, 149, 81, 0.94);
                     color: #fff;
                     font-size: 10px;
                     font-weight: 900;
+                    letter-spacing: 0.02em;
                     text-transform: uppercase;
                 }
 
                 .plp-related-card > div {
-                    padding: 13px;
+                    position: absolute;
+                    inset: auto 18px 18px;
+                    z-index: 2;
+                    display: grid;
+                    gap: 6px;
+                    padding: 0;
                 }
 
                 .plp-related-card small {
                     display: flex;
                     align-items: center;
                     gap: 5px;
-                    margin-bottom: 8px;
-                    color: var(--plp-muted);
-                    font-size: 10px;
+                    margin: 0;
+                    min-width: 0;
+                    color: rgba(255, 255, 255, 0.82);
+                    font-size: 11px;
                     font-weight: 850;
+                    letter-spacing: 0.08em;
+                    line-height: 1.2;
                     text-transform: uppercase;
                 }
 
+                .plp-related-card small span {
+                    min-width: 0;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
                 .plp-related-card h3 {
-                    min-height: 42px;
-                    margin: 0 0 10px;
-                    color: var(--plp-ink);
-                    font-size: 14px;
-                    line-height: 1.28;
+                    display: -webkit-box;
+                    min-height: 0;
+                    margin: 0;
+                    overflow: hidden;
+                    color: #fff;
+                    font-size: clamp(1.15rem, 1.35vw, 1.45rem);
+                    line-height: 1.12;
+                    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.28);
+                    -webkit-box-orient: vertical;
+                    -webkit-line-clamp: 2;
                 }
 
                 .plp-related-meta {
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 6px;
-                    padding-top: 10px;
-                    border-top: 1px solid var(--plp-line);
+                    display: flex;
+                    align-items: center;
+                    flex-wrap: wrap;
+                    gap: 6px 12px;
+                    padding-top: 2px;
                 }
 
                 .plp-related-meta span,
                 .plp-related-meta strong {
-                    color: #4a535a;
+                    color: rgba(255, 255, 255, 0.86);
                     font-size: 11px;
                     font-weight: 850;
                     line-height: 1.25;
+                    text-transform: uppercase;
                 }
 
                 .plp-related-meta strong {
-                    grid-column: 1 / -1;
-                    color: var(--plp-ink);
+                    flex-basis: 100%;
+                    color: #fff;
                     font-size: 13px;
                     white-space: nowrap;
                 }
@@ -5777,10 +5815,10 @@ export default function PropertyLandingStyles() {
 
                     .plp-related-band {
                         margin: 28px 14px 0;
-                        padding: 22px 14px 26px;
+                        padding: 22px 0 26px;
                     }
 
-                    .plp-related-head a {
+                    .plp-related-head p {
                         margin-top: 12px;
                     }
 
@@ -6358,7 +6396,7 @@ export default function PropertyLandingStyles() {
 
                 .plp-related-band {
                     margin: 26px 22px 0;
-                    padding: 22px;
+                    padding: 26px 0 0;
                 }
 
                 .plp-development-context-band {
@@ -6375,16 +6413,17 @@ export default function PropertyLandingStyles() {
                 }
 
                 .plp-related-card img {
-                    height: auto;
+                    height: 100%;
                 }
 
                 .plp-related-card > div {
-                    padding: 10px;
+                    inset: auto 14px 14px;
+                    padding: 0;
                 }
 
                 .plp-related-card h3 {
-                    min-height: 34px;
-                    font-size: 13px;
+                    min-height: 0;
+                    font-size: 18px;
                 }
 
                 .plp-final-cta {
@@ -6646,7 +6685,7 @@ export default function PropertyLandingStyles() {
 
                     .plp-related-band {
                         margin: 20px 9px 0;
-                        padding: 16px 10px 18px;
+                        padding: 20px 0 18px;
                     }
 
                     .plp-related-grid {

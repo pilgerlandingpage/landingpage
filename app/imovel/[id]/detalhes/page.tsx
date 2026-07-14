@@ -95,6 +95,47 @@ const PROPERTY_MAP_MODAL_SELECT = [
     'longitude',
     'updated_at',
 ].join(', ')
+
+const PROPERTY_DETAIL_SELECT = [
+    'id',
+    'source_slug',
+    'source_reference',
+    'title',
+    'description',
+    'seo_title',
+    'seo_description',
+    'city',
+    'state',
+    'neighborhood',
+    'price',
+    'rent',
+    'purpose',
+    'featured_image',
+    'images',
+    'video_url',
+    'property_type',
+    'bedrooms',
+    'bathrooms',
+    'suites',
+    'parking_spaces',
+    'area_m2',
+    'area_private_m2',
+    'area_total_m2',
+    'latitude',
+    'longitude',
+    'amenities',
+    'exclusive',
+    'source_status',
+    'status',
+    'street',
+    'condo_fee',
+    'iptu',
+    'created_at',
+    'updated_at',
+    'source_created_at',
+    'source_updated_at',
+    'imported_at',
+].join(', ')
 type RelatedPropertyCandidate = {
     id: string
     source_slug?: string | null
@@ -583,9 +624,21 @@ function locationLabelFromProperty(property: any) {
         .join(' - ')
 }
 
-const PROPERTY_LOOKUP_TIMEOUT_MS = 10000
+const PROPERTY_LOOKUP_TIMEOUT_MS = 7000
+const PROPERTY_METADATA_LOOKUP_TIMEOUT_MS = 3500
 const PROPERTY_SECONDARY_QUERY_TIMEOUT_MS = 7000
-const PROPERTY_LOOKUP_RETRY_DELAYS_MS = [300, 900, 1600]
+const PROPERTY_LOOKUP_RETRY_DELAYS_MS = [700]
+
+class PropertyLookupUnavailableError extends Error {
+    constructor(message = 'Nao foi possivel consultar o imovel agora.') {
+        super(message)
+        this.name = 'PropertyLookupUnavailableError'
+    }
+}
+
+function isPropertyLookupUnavailableError(error: unknown) {
+    return error instanceof PropertyLookupUnavailableError
+}
 
 function fallbackResponsibleBroker() {
     return {
@@ -638,27 +691,46 @@ function waitForPropertyLookupRetry(ms: number) {
 
 async function runPropertyLookup<T>(
     createLookup: () => Promise<{ data: T | null; error: unknown }>,
-    logLabel: string
+    logLabel: string,
+    retryDelaysMs = PROPERTY_LOOKUP_RETRY_DELAYS_MS
 ) {
-    for (let attempt = 0; attempt <= PROPERTY_LOOKUP_RETRY_DELAYS_MS.length; attempt += 1) {
+    for (let attempt = 0; attempt <= retryDelaysMs.length; attempt += 1) {
         const { data, error } = await createLookup()
         if (!error) return (data || null) as T | null
 
-        const canRetry = attempt < PROPERTY_LOOKUP_RETRY_DELAYS_MS.length && isRetriablePropertyLookupError(error)
+        const isRetriable = isRetriablePropertyLookupError(error)
+        const canRetry = attempt < retryDelaysMs.length && isRetriable
         if (!canRetry) {
-            console.error(`[Property Detail] ${logLabel} failed:`, summarizeSupabaseError(error))
+            const summary = summarizeSupabaseError(error)
+            if (isRetriable) {
+                console.warn(`[Property Detail] ${logLabel} unavailable:`, summary)
+                throw new PropertyLookupUnavailableError()
+            }
+
+            console.error(`[Property Detail] ${logLabel} failed:`, summary)
             throw new Error('Nao foi possivel carregar este imovel agora.')
         }
 
-        await waitForPropertyLookupRetry(PROPERTY_LOOKUP_RETRY_DELAYS_MS[attempt])
+        await waitForPropertyLookupRetry(retryDelaysMs[attempt])
     }
 
     return null
 }
 
-async function getPropertyByIdentifier<T = any>(identifier: string, select = '*'): Promise<T | null> {
+type PropertyLookupOptions = {
+    timeoutMs?: number
+    retryDelaysMs?: number[]
+}
+
+async function getPropertyByIdentifier<T = any>(
+    identifier: string,
+    select = PROPERTY_DETAIL_SELECT,
+    options: PropertyLookupOptions = {}
+): Promise<T | null> {
     const decodedIdentifier = decodeURIComponent(identifier || '').trim()
     const idFromSeoSlug = extractPropertyIdFromSeoSlug(decodedIdentifier)
+    const timeoutMs = options.timeoutMs ?? PROPERTY_LOOKUP_TIMEOUT_MS
+    const retryDelaysMs = options.retryDelaysMs ?? PROPERTY_LOOKUP_RETRY_DELAYS_MS
 
     if (idFromSeoSlug || isUuid(decodedIdentifier)) {
         const propertyId = idFromSeoSlug || decodedIdentifier
@@ -667,9 +739,10 @@ async function getPropertyByIdentifier<T = any>(identifier: string, select = '*'
                 .from('properties')
                 .select(select)
                 .eq('id', propertyId)
-                .abortSignal(createSupabaseAbortSignal(PROPERTY_LOOKUP_TIMEOUT_MS))
+                .abortSignal(createSupabaseAbortSignal(timeoutMs))
                 .maybeSingle(),
-            'property lookup by id'
+            'property lookup by id',
+            retryDelaysMs
         )
     }
 
@@ -679,9 +752,10 @@ async function getPropertyByIdentifier<T = any>(identifier: string, select = '*'
             .select(select)
             .eq('source_slug', decodedIdentifier)
             .limit(1)
-            .abortSignal(createSupabaseAbortSignal(PROPERTY_LOOKUP_TIMEOUT_MS))
+            .abortSignal(createSupabaseAbortSignal(timeoutMs))
             .maybeSingle(),
-        'property lookup by slug'
+        'property lookup by slug',
+        retryDelaysMs
     )
 }
 
@@ -763,7 +837,8 @@ async function getPropertyDevelopmentContext(supabase: any, property: any): Prom
 async function getPropertyForSeo(identifier: string) {
     return getPropertyByIdentifier<any>(
         identifier,
-        'id, source_slug, title, description, seo_title, seo_description, city, state, neighborhood, price, featured_image, images, property_type, bedrooms, bathrooms, suites, parking_spaces, area_m2, area_private_m2, latitude, longitude, amenities, status, created_at, updated_at'
+        'id, source_slug, title, description, seo_title, seo_description, city, state, neighborhood, price, featured_image, images, property_type, bedrooms, bathrooms, suites, parking_spaces, area_m2, area_private_m2, latitude, longitude, amenities, status, created_at, updated_at',
+        { timeoutMs: PROPERTY_METADATA_LOOKUP_TIMEOUT_MS, retryDelaysMs: [] }
     )
 }
 
@@ -1453,6 +1528,7 @@ function pickBestUnselected(
 }
 
 function selectRelatedProperties(current: any, candidates: RelatedPropertyCandidate[]) {
+    const maxRelatedProperties = 6
     const ranked = candidates
         .filter(candidate => candidate.id && candidate.id !== current.id)
         .map(candidate => scoreRelatedProperty(current, candidate))
@@ -1482,13 +1558,13 @@ function selectRelatedProperties(current: any, candidates: RelatedPropertyCandid
     }
 
     for (const item of ranked) {
-        if (selected.length >= 4) break
+        if (selected.length >= maxRelatedProperties) break
         if (selectedIds.has(item.property.id)) continue
         selected.push(item)
         selectedIds.add(item.property.id)
     }
 
-    return selected.slice(0, 4).map(item => item.property)
+    return selected.slice(0, maxRelatedProperties).map(item => item.property)
 }
 
 function formatPercent(value: number | null) {
@@ -1596,6 +1672,135 @@ type PropertyDetailPageProps = {
     canonicalize?: boolean
 }
 
+function PropertyLookupUnavailablePage({ identifier }: { identifier: string }) {
+    const decodedIdentifier = decodeURIComponent(identifier || '').trim()
+    const requestedPath = decodedIdentifier ? `/imovel/${encodeURIComponent(decodedIdentifier)}/detalhes` : '/busca'
+    const requestedUrl = absoluteUrl(requestedPath)
+
+    return (
+        <>
+            <PropertyLandingStyles />
+            <GlobalHeader />
+            <main
+                className="plp-page"
+                style={{
+                    minHeight: '70vh',
+                    display: 'grid',
+                    placeItems: 'center',
+                    padding: '96px 20px',
+                    background: '#f7f5f0',
+                }}
+            >
+                <section
+                    aria-labelledby="property-unavailable-title"
+                    style={{
+                        width: '100%',
+                        maxWidth: 720,
+                        border: '1px solid #eadfce',
+                        borderRadius: 24,
+                        background: '#fff',
+                        padding: '42px 30px',
+                        textAlign: 'center',
+                        boxShadow: '0 20px 60px rgba(28, 23, 16, 0.08)',
+                    }}
+                >
+                    <span
+                        style={{
+                            display: 'inline-flex',
+                            marginBottom: 14,
+                            color: '#9b6a22',
+                            fontFamily: 'Montserrat, sans-serif',
+                            fontSize: 12,
+                            fontWeight: 800,
+                            letterSpacing: '0.08em',
+                            textTransform: 'uppercase',
+                        }}
+                    >
+                        Catalogo temporariamente indisponivel
+                    </span>
+                    <h1
+                        id="property-unavailable-title"
+                        style={{
+                            margin: '0 auto 14px',
+                            maxWidth: 560,
+                            color: '#07172d',
+                            fontSize: 'clamp(2rem, 4vw, 3rem)',
+                            lineHeight: 1.05,
+                        }}
+                    >
+                        Nao foi possivel carregar este imovel agora.
+                    </h1>
+                    <p
+                        style={{
+                            margin: '0 auto 28px',
+                            maxWidth: 560,
+                            color: '#4b5b73',
+                            fontFamily: 'Montserrat, sans-serif',
+                            fontSize: 15,
+                            lineHeight: 1.7,
+                        }}
+                    >
+                        O catalogo demorou para responder. Voce pode voltar para a busca ou chamar um especialista para confirmar disponibilidade e alternativas.
+                    </p>
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            justifyContent: 'center',
+                            gap: 12,
+                        }}
+                    >
+                        <Link
+                            href="/busca"
+                            style={{
+                                minWidth: 180,
+                                borderRadius: 999,
+                                border: '1px solid #9b6a22',
+                                background: '#9b6a22',
+                                color: '#fff',
+                                padding: '13px 20px',
+                                fontFamily: 'Montserrat, sans-serif',
+                                fontSize: 13,
+                                fontWeight: 800,
+                                textDecoration: 'none',
+                                textTransform: 'uppercase',
+                            }}
+                        >
+                            Ver imoveis
+                        </Link>
+                        <WhatsAppCaptureLink
+                            phone={GLOBAL_PROPERTY_WHATSAPP_PHONE}
+                            message={`Ola, tentei abrir este imovel e quero confirmar disponibilidade: ${requestedUrl}`}
+                            slug="imovel"
+                            template="property-unavailable"
+                            metadata={{
+                                requested_url: requestedUrl,
+                                source: 'property_lookup_unavailable',
+                            }}
+                            style={{
+                                minWidth: 180,
+                                borderRadius: 999,
+                                border: '1px solid #d7c6aa',
+                                background: '#fff',
+                                color: '#9b6a22',
+                                padding: '13px 20px',
+                                fontFamily: 'Montserrat, sans-serif',
+                                fontSize: 13,
+                                fontWeight: 800,
+                                textDecoration: 'none',
+                                textTransform: 'uppercase',
+                            }}
+                        >
+                            Especialista
+                        </WhatsAppCaptureLink>
+                    </div>
+                </section>
+            </main>
+            <Footer />
+        </>
+    )
+}
+
 export default async function PropertyDetailPage({
     params,
     canonicalize = true,
@@ -1603,7 +1808,16 @@ export default async function PropertyDetailPage({
     const supabase = createAdminClient()
     const { id } = await params
 
-    const property = await getPropertyByIdentifier(id)
+    let property = null
+    try {
+        property = await getPropertyByIdentifier(id)
+    } catch (error) {
+        if (isPropertyLookupUnavailableError(error)) {
+            return <PropertyLookupUnavailablePage identifier={id} />
+        }
+
+        throw error
+    }
 
     if (!property) return notFound()
 
@@ -2717,9 +2931,9 @@ export default async function PropertyDetailPage({
                         <div className="plp-related-head">
                             <div>
                                 <span>Imóveis semelhantes</span>
-                                <h2>Compare com outras oportunidades.</h2>
+                                <h2>Outras oportunidades para comparar.</h2>
                             </div>
-                            <Link href="/busca">Ver busca completa <ArrowRight size={16} /></Link>
+                            <p>Veja imóveis selecionados pela curadoria Guilherme Pilger.</p>
                         </div>
                         <div className="plp-related-grid">
                             {related.map((item: any) => {
@@ -2736,7 +2950,7 @@ export default async function PropertyDetailPage({
                                             {itemQualityLabel.label}
                                         </span>
                                         <div>
-                                            <small><MapPin size={13} /> {relatedLocation || 'Litoral catarinense'}</small>
+                                            <small><MapPin size={13} /> <span>{relatedLocation || 'Litoral catarinense'}</span></small>
                                             <h3>{relatedTitle}</h3>
                                             <div className="plp-related-meta">
                                                 <span>{itemArea ? `${itemArea.toLocaleString('pt-BR')} m²` : 'Área sob consulta'}</span>
