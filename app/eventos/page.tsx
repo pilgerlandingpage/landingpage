@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { CalendarDays, MapPin, Users } from 'lucide-react'
 import GlobalHeader from '@/components/layout/GlobalHeader'
 import Footer from '@/components/layout/Footer'
-import { createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient, createSupabaseAbortSignal, summarizeSupabaseError } from '@/lib/supabase/server'
 import { DEFAULT_EVENT_HERO, formatEventDate } from '@/lib/events/utils'
 import { JsonLd, absoluteUrl, breadcrumbJsonLd, itemListJsonLd, organizationJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
 
@@ -16,15 +16,28 @@ export const metadata: Metadata = {
     alternates: { canonical: '/eventos' },
 }
 
-async function getPublishedEvents() {
-    const supabase = createAdminClient()
-    const { data } = await supabase
-        .from('event_events')
-        .select('id, title, slug, eyebrow, subtitle, description, event_date, location_name, location_address, hero_image_url, capacity')
-        .eq('status', 'published')
-        .order('event_date', { ascending: true })
+const EVENTS_LIST_TIMEOUT_MS = 8000
 
-    return data || []
+async function getPublishedEvents() {
+    try {
+        const supabase = createAdminClient()
+        const { data, error } = await supabase
+            .from('event_events')
+            .select('id, title, slug, eyebrow, subtitle, description, event_date, location_name, location_address, hero_image_url, capacity')
+            .eq('status', 'published')
+            .order('event_date', { ascending: true })
+            .abortSignal(createSupabaseAbortSignal(EVENTS_LIST_TIMEOUT_MS))
+
+        if (error) {
+            console.warn('[Eventos] public list unavailable:', summarizeSupabaseError(error))
+            return []
+        }
+
+        return data || []
+    } catch (error) {
+        console.warn('[Eventos] public list unavailable:', summarizeSupabaseError(error))
+        return []
+    }
 }
 
 export default async function EventosPage() {

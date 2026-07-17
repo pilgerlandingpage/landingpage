@@ -4,9 +4,34 @@ export type BlogPostViewTarget = {
 }
 
 const EDITORIAL_VIEW_EVENTS = ['blog_post_viewed', 'news_post_viewed']
+const BLOG_VIEW_COUNT_TIMEOUT_MS = 4000
 
 type SupabaseLike = {
     from: (table: string) => any
+}
+
+function createBlogViewAbortSignal(timeoutMs = BLOG_VIEW_COUNT_TIMEOUT_MS) {
+    if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function') {
+        return AbortSignal.timeout(timeoutMs)
+    }
+
+    const controller = new AbortController()
+    setTimeout(() => controller.abort(), timeoutMs)
+    return controller.signal
+}
+
+function summarizeBlogViewError(error: unknown) {
+    const message = error && typeof error === 'object' && 'message' in error
+        ? String((error as { message?: unknown }).message || '')
+        : String(error || '')
+
+    const cleaned = message
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+
+    if (!cleaned) return 'Erro desconhecido'
+    return cleaned.length > 260 ? `${cleaned.slice(0, 260).trim()}...` : cleaned
 }
 
 function uniqueValues(values: string[]) {
@@ -46,9 +71,10 @@ export async function getBlogPostViewCount(supabase: SupabaseLike, postId: strin
         .select('id', { count: 'exact', head: true })
         .in('event_type', EDITORIAL_VIEW_EVENTS)
         .contains('metadata', { post_id: postId })
+        .abortSignal(createBlogViewAbortSignal())
 
     if (error) {
-        console.warn('[Blog views] view count unavailable:', error.message)
+        console.warn('[Blog views] view count unavailable:', summarizeBlogViewError(error))
         return 0
     }
 
@@ -69,6 +95,7 @@ export async function getBlogPostViewCounts<T extends BlogPostViewTarget>(supaba
             .in('event_type', EDITORIAL_VIEW_EVENTS)
             .filter('metadata->>post_id', 'in', postgrestInList(ids))
             .limit(50000)
+            .abortSignal(createBlogViewAbortSignal())
 
         if (error) throw error
 
@@ -81,15 +108,9 @@ export async function getBlogPostViewCounts<T extends BlogPostViewTarget>(supaba
 
         return counts
     } catch (error: any) {
-        console.warn('[Blog views] batch view counts unavailable:', error?.message || error)
+        console.warn('[Blog views] batch view counts unavailable:', summarizeBlogViewError(error))
+        return counts
     }
-
-    const fallbackCounts = await Promise.all(
-        ids.map(async id => [id, await getBlogPostViewCount(supabase, id)] as const)
-    )
-    fallbackCounts.forEach(([id, count]) => counts.set(id, count))
-
-    return counts
 }
 
 export function attachBlogPostViewCounts<T extends BlogPostViewTarget>(posts: T[], counts: Map<string, number>) {

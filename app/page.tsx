@@ -249,7 +249,8 @@ async function getHomeBaseData() {
   } catch (error) {
     const warning = summarizeSupabaseError(error)
     if (shouldAbortHomeCache(warning)) {
-      throw error
+      console.warn('[Home] critical base data unavailable, rendering fallback:', warning)
+      return emptyHomeBaseData(warning)
     }
     return emptyHomeBaseData(warning)
   }

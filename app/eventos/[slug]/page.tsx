@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import { CalendarDays, CheckCircle2, MapPin, ShieldCheck, Users } from 'lucide-react'
 import GlobalHeader from '@/components/layout/GlobalHeader'
 import Footer from '@/components/layout/Footer'
-import { createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient, createSupabaseAbortSignal, summarizeSupabaseError } from '@/lib/supabase/server'
 import { DEFAULT_EVENT_HERO, DEFAULT_EVENT_PROFILE, formatEventDate } from '@/lib/events/utils'
 import RegistrationForm, { EventFormAnchorButton } from './RegistrationForm'
 import { JsonLd, breadcrumbJsonLd, eventJsonLd, organizationJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
@@ -17,15 +17,29 @@ export function generateStaticParams() {
 
 type PageProps = { params: Promise<{ slug: string }> }
 
+const EVENT_DETAIL_TIMEOUT_MS = 8000
+
 async function getEvent(slug: string) {
-    const supabase = createAdminClient()
-    const { data } = await supabase
-        .from('event_events')
-        .select('*')
-        .eq('slug', slug)
-        .eq('status', 'published')
-        .maybeSingle()
-    return data
+    try {
+        const supabase = createAdminClient()
+        const { data, error } = await supabase
+            .from('event_events')
+            .select('*')
+            .eq('slug', slug)
+            .eq('status', 'published')
+            .maybeSingle()
+            .abortSignal(createSupabaseAbortSignal(EVENT_DETAIL_TIMEOUT_MS))
+
+        if (error) {
+            console.warn(`[Evento] public detail unavailable (${slug}):`, summarizeSupabaseError(error))
+            return null
+        }
+
+        return data
+    } catch (error) {
+        console.warn(`[Evento] public detail unavailable (${slug}):`, summarizeSupabaseError(error))
+        return null
+    }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

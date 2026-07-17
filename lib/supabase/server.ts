@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-const DEVELOPMENT_SUPABASE_FETCH_TIMEOUT_MS = 12000
+const DEFAULT_SUPABASE_FETCH_TIMEOUT_MS = 12000
 const DEVELOPMENT_SUPABASE_FETCH_RETRY_DELAYS_MS = [250, 900]
 
 function wait(ms: number) {
@@ -41,27 +41,36 @@ function createFetchTimeoutSignal(sourceSignal: AbortSignal | null | undefined, 
     }
 }
 
-function createDevelopmentNoStoreFetch() {
-    if (process.env.NODE_ENV !== 'development') return undefined
+function resolveSupabaseFetchTimeoutMs() {
+    const configured = Number(process.env.SUPABASE_FETCH_TIMEOUT_MS)
+    return Number.isFinite(configured) && configured > 0
+        ? configured
+        : DEFAULT_SUPABASE_FETCH_TIMEOUT_MS
+}
+
+export function createSupabaseFetch() {
+    const timeoutMs = resolveSupabaseFetchTimeoutMs()
+    const isDevelopment = process.env.NODE_ENV === 'development'
+    const retryDelays = isDevelopment ? DEVELOPMENT_SUPABASE_FETCH_RETRY_DELAYS_MS : []
 
     return async (input: RequestInfo | URL, init?: RequestInit) => {
-        for (let attempt = 0; attempt <= DEVELOPMENT_SUPABASE_FETCH_RETRY_DELAYS_MS.length; attempt += 1) {
-            const timeoutSignal = createFetchTimeoutSignal(init?.signal, DEVELOPMENT_SUPABASE_FETCH_TIMEOUT_MS)
+        for (let attempt = 0; attempt <= retryDelays.length; attempt += 1) {
+            const timeoutSignal = createFetchTimeoutSignal(init?.signal, timeoutMs)
 
             try {
                 return await fetch(input, {
                     ...init,
-                    cache: 'no-store',
+                    ...(isDevelopment ? { cache: 'no-store' } : {}),
                     signal: timeoutSignal.signal,
                 })
             } catch (error) {
                 const canRetry =
-                    attempt < DEVELOPMENT_SUPABASE_FETCH_RETRY_DELAYS_MS.length &&
+                    attempt < retryDelays.length &&
                     !init?.signal?.aborted &&
                     isRetriableDevelopmentFetchError(error)
 
                 if (!canRetry) throw error
-                await wait(DEVELOPMENT_SUPABASE_FETCH_RETRY_DELAYS_MS[attempt])
+                await wait(retryDelays[attempt])
             } finally {
                 timeoutSignal.cleanup()
             }
@@ -73,13 +82,13 @@ function createDevelopmentNoStoreFetch() {
 
 export async function createServerSupabase() {
     const cookieStore = await cookies()
-    const developmentFetch = createDevelopmentNoStoreFetch()
+    const supabaseFetch = createSupabaseFetch()
 
     return createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
-            ...(developmentFetch ? { global: { fetch: developmentFetch } } : {}),
+            global: { fetch: supabaseFetch },
             cookies: {
                 getAll() {
                     return cookieStore.getAll()
@@ -103,12 +112,12 @@ export const createClient = createServerSupabase
 
 export function createAdminClient() {
     const { createClient } = require('@supabase/supabase-js')
-    const developmentFetch = createDevelopmentNoStoreFetch()
+    const supabaseFetch = createSupabaseFetch()
 
     return createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!,
-        developmentFetch ? { global: { fetch: developmentFetch } } : undefined
+        { global: { fetch: supabaseFetch } }
     )
 }
 
