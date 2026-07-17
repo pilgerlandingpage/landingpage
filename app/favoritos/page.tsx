@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import GlobalHeader from '@/components/layout/GlobalHeader'
+import Footer from '@/components/layout/Footer'
 import FavoritePropertiesClient from '@/components/marketplace/FavoritePropertiesClient'
 import { JsonLd, breadcrumbJsonLd, organizationJsonLd, webPageJsonLd } from '@/lib/seo/json-ld'
 
@@ -31,6 +32,7 @@ export default function FavoritosPage() {
             <GlobalHeader />
             <JsonLd data={jsonLd} />
             <FavoritePropertiesClient />
+            <Footer />
         </div>
     )
 }

@@ -4,6 +4,7 @@ import React from 'react'
 import { Bed, Bath, Move, MapPin, MessageCircle } from 'lucide-react'
 import { TemplateProps } from './types'
 import LandingPageLogic from '@/components/landing/LandingPageLogic'
+import PublicGoogleReviewsSection from '@/components/marketplace/PublicGoogleReviewsSection'
 
 export default function ClassicTemplate({ data, slug, landingPageId, agentName, greetingMessage }: TemplateProps) {
     const {
@@ -114,6 +115,8 @@ export default function ClassicTemplate({ data, slug, landingPageId, agentName, 
                     </div>
                 </div>
             </section>
+
+            <PublicGoogleReviewsSection />
 
             {/* Footer */}
             <footer className="lp-footer">

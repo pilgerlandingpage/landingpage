@@ -4,6 +4,7 @@ import React from 'react'
 import { Bed, Bath, Move, MapPin, MessageCircle, ArrowRight } from 'lucide-react'
 import { TemplateProps } from './types'
 import LandingPageLogic from '@/components/landing/LandingPageLogic'
+import PublicGoogleReviewsSection from '@/components/marketplace/PublicGoogleReviewsSection'
 import { trackEvent } from '@/lib/tracking/client'
 
 export default function ModernLuxuryTemplate({ data, slug, landingPageId, agentName, greetingMessage }: TemplateProps) {
@@ -121,6 +122,8 @@ export default function ModernLuxuryTemplate({ data, slug, landingPageId, agentN
                     </div>
                 </div>
             </section>
+
+            <PublicGoogleReviewsSection />
 
             {/* Footer */}
             <footer className="modern-footer">

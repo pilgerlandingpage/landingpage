@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { Clock, Flame, MapPin, ChevronRight } from 'lucide-react'
 import { TemplateProps } from './types'
 import LandingPageLogic from '@/components/landing/LandingPageLogic'
+import PublicGoogleReviewsSection from '@/components/marketplace/PublicGoogleReviewsSection'
 import { openWhatsAppWithLeadCapture } from '@/lib/tracking/whatsapp-capture'
 
 export default function UrgencyTemplate({ data, slug, landingPageId, agentName, greetingMessage }: TemplateProps) {
@@ -116,6 +117,8 @@ export default function UrgencyTemplate({ data, slug, landingPageId, agentName, 
                     {cta || 'Saiba Mais'}
                 </button>
             </div>
+
+            <PublicGoogleReviewsSection />
 
             <style jsx>{`
                 .urg { font-family: 'Inter', -apple-system, sans-serif; }

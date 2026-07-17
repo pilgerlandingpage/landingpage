@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { Crown, Lock, MapPin, ChevronRight, Users } from 'lucide-react'
 import { TemplateProps } from './types'
 import LandingPageLogic from '@/components/landing/LandingPageLogic'
+import PublicGoogleReviewsSection from '@/components/marketplace/PublicGoogleReviewsSection'
 import { openWhatsAppWithLeadCapture } from '@/lib/tracking/whatsapp-capture'
 
 export default function VipExclusiveTemplate({ data, slug, landingPageId, agentName, greetingMessage }: TemplateProps) {
@@ -95,6 +96,8 @@ export default function VipExclusiveTemplate({ data, slug, landingPageId, agentN
                     <ChevronRight size={16} />
                 </button>
             </div>
+
+            <PublicGoogleReviewsSection />
 
             <style jsx>{`
                 .vip {

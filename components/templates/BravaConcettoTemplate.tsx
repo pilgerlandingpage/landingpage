@@ -1722,7 +1722,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 />
             </main>
 
-            <Footer />
+            <Footer showGoogleReviews={false} />
 
             {locationModal && createPortal(
                 <DevelopmentLocationModal

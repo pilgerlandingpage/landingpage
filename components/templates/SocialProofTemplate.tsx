@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { Star, Eye, MapPin, ChevronRight, Quote } from 'lucide-react'
 import { TemplateProps } from './types'
 import LandingPageLogic from '@/components/landing/LandingPageLogic'
+import PublicGoogleReviewsSection from '@/components/marketplace/PublicGoogleReviewsSection'
 import { openWhatsAppWithLeadCapture } from '@/lib/tracking/whatsapp-capture'
 
 const testimonials = [
@@ -97,6 +98,8 @@ export default function SocialProofTemplate({ data, slug, landingPageId, agentNa
                     Falar com Especialista
                 </button>
             </section>
+
+            <PublicGoogleReviewsSection />
 
             {/* === STICKY BAR (mobile) === */}
             <div className="sp-sticky">

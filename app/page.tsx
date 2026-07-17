@@ -579,7 +579,7 @@ export default async function MarketplaceHome() {
       <YoutubeFeedSection />
       <HomeBlogSection posts={homeBlogPosts} />
 
-        <Footer />
+        <Footer showGoogleReviews={false} />
       </main>
       <WhatsAppFloatingButton />
       <MobileNav />

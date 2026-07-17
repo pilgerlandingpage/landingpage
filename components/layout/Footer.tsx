@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowUpRight, Building2, ChevronLeft, ChevronRight, Facebook, Instagram, MapPin, Navigation, Youtube } from 'lucide-react'
 import WhatsAppCaptureLink from '@/components/common/WhatsAppCaptureLink'
+import GoogleReviewsSection from '@/components/marketplace/GoogleReviewsSection'
 import type { HomepageGoogleReviews } from '@/lib/google-reviews'
 
 const TiktokIcon = () => (
@@ -29,10 +30,13 @@ const FOOTER_OFFICE_FALLBACK_ADDRESS = 'Av. Carlos Drummond de Andrade, 33 - Loj
 const FOOTER_OFFICE_FALLBACK_MAPS_URL = `https://www.google.com/maps/search/${encodeURIComponent(FOOTER_OFFICE_FALLBACK_ADDRESS)}`
 const FOOTER_OFFICE_FALLBACK_PHOTO = '/images/eventos/fundo-imobiliaria.jpeg'
 
-function FooterGooglePlaceShowcase() {
+type FooterProps = {
+    showGoogleReviews?: boolean
+}
+
+function useFooterGooglePlace() {
     const [place, setPlace] = useState<HomepageGoogleReviews | null>(null)
     const [hasLoadedPlace, setHasLoadedPlace] = useState(false)
-    const galleryTrackRef = useRef<HTMLDivElement | null>(null)
 
     useEffect(() => {
         let active = true
@@ -54,6 +58,12 @@ function FooterGooglePlaceShowcase() {
             active = false
         }
     }, [])
+
+    return { place, hasLoadedPlace }
+}
+
+function FooterGooglePlaceShowcase({ place, hasLoadedPlace }: { place: HomepageGoogleReviews | null; hasLoadedPlace: boolean }) {
+    const galleryTrackRef = useRef<HTMLDivElement | null>(null)
 
     const photos = place?.photos || []
     const visiblePhotos = photos.length
@@ -409,10 +419,13 @@ function FooterGooglePlaceShowcase() {
     )
 }
 
-export default function Footer() {
+export default function Footer({ showGoogleReviews = true }: FooterProps) {
+    const { place, hasLoadedPlace } = useFooterGooglePlace()
+
     return (
         <footer className="site-footer">
-            <FooterGooglePlaceShowcase />
+            {showGoogleReviews && <GoogleReviewsSection data={place} />}
+            <FooterGooglePlaceShowcase place={place} hasLoadedPlace={hasLoadedPlace} />
             <div className="footer-main">
                 <div className="footer-brand">
                     <Link href="/" className="footer-logo">

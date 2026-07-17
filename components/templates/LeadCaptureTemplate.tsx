@@ -4,6 +4,7 @@ import React from 'react'
 import { Bed, Bath, Move, MapPin, MessageCircle, ArrowRight, Check } from 'lucide-react'
 import { TemplateProps } from './types'
 import LandingPageLogic from '@/components/landing/LandingPageLogic'
+import PublicGoogleReviewsSection from '@/components/marketplace/PublicGoogleReviewsSection'
 
 export default function LeadCaptureTemplate({ data, slug, landingPageId, agentName, greetingMessage }: TemplateProps) {
     const {
@@ -104,6 +105,8 @@ export default function LeadCaptureTemplate({ data, slug, landingPageId, agentNa
                     </div>
                 </div>
             </section>
+
+            <PublicGoogleReviewsSection />
 
             {/* Footer */}
             <footer className="lead-footer">

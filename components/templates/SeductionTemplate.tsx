@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { TemplateProps } from './types'
 import { Send, CheckCircle, Star, Quote } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import PublicGoogleReviewsSection from '@/components/marketplace/PublicGoogleReviewsSection'
 
 // "Seduction" Template
 // Focus: Visuality, Desire, Lifestyle, "How to Win Friends" (Make them feel important)
@@ -153,6 +154,8 @@ export default function SeductionTemplate({ data, slug, landingPageId, agentName
                     </div>
                 </div>
             </section>
+
+            <PublicGoogleReviewsSection />
 
             <style jsx global>{`
                 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');

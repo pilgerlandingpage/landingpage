@@ -3,6 +3,7 @@
 import React from 'react'
 import { TemplateProps } from './types'
 import { Shield, Award, Users, Check, Star } from 'lucide-react'
+import PublicGoogleReviewsSection from '@/components/marketplace/PublicGoogleReviewsSection'
 
 // "Authority" Template
 // Focus: Trust, Expertise, Status, "48 Laws of Power" (Reputation is everything)
@@ -172,6 +173,8 @@ export default function AuthorityTemplate({ data, slug, landingPageId, agentName
                     </div>
                 </div>
             </section>
+
+            <PublicGoogleReviewsSection />
 
         </div>
     )

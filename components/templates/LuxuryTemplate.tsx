@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { TemplateProps } from './types'
 import LandingPageLogic from '@/components/landing/LandingPageLogic'
+import PublicGoogleReviewsSection from '@/components/marketplace/PublicGoogleReviewsSection'
 import { openWhatsAppWithLeadCapture } from '@/lib/tracking/whatsapp-capture'
 
 export default function LuxuryTemplate({ data, slug, landingPageId, agentName, greetingMessage }: TemplateProps) {
@@ -349,6 +350,8 @@ export default function LuxuryTemplate({ data, slug, landingPageId, agentName, g
                     </div>
                 </section>
             </div>
+
+            <PublicGoogleReviewsSection />
 
             {/* === FOOTER === */}
             <footer className="bg-black py-24 px-6 border-t border-white/5 text-white">

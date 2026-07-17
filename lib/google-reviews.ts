@@ -1,3 +1,5 @@
+import { getPublicAppUrl } from '@/lib/app-url'
+
 export type HomepageGoogleReview = {
   id: string
   authorName: string
@@ -168,6 +170,16 @@ function resolveApiKey() {
   )
 }
 
+function googleApiHeaders(): HeadersInit {
+  const referer = cleanString(
+    process.env.GOOGLE_PLACES_HTTP_REFERER
+    || process.env.GOOGLE_API_HTTP_REFERER
+    || getPublicAppUrl()
+  )
+
+  return referer ? { Referer: `${referer.replace(/\/+$/, '')}/` } : {}
+}
+
 async function resolveGooglePlacePhotoUri(photoName: string, apiKey: string) {
   const safeName = cleanString(photoName)
   if (!safeName || !apiKey) return ''
@@ -184,6 +196,7 @@ async function resolveGooglePlacePhotoUri(photoName: string, apiKey: string) {
 
     const response = await fetch(url.toString(), {
       signal: controller.signal,
+      headers: googleApiHeaders(),
       next: { revalidate: GOOGLE_REVIEWS_REVALIDATE_SECONDS },
     })
 
@@ -283,6 +296,7 @@ export async function getHomepageGoogleReviews(configMap: Record<string, string>
 
     const response = await fetch(url.toString(), {
       signal: controller.signal,
+      headers: googleApiHeaders(),
       next: { revalidate: GOOGLE_REVIEWS_REVALIDATE_SECONDS },
     })
 
