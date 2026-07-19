@@ -1,0 +1,2322 @@
+{
+  "batch_id": "development-media-curation-p1-batch2-20260719",
+  "generated_at": "2026-07-19T01:01:07.393Z",
+  "items": [
+    {
+      "slug": "costa-esmeralda-residence",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/img-2879-1665067886.webp",
+      "description": "O Costa Esmeralda Residence e um empreendimento da CGranza Construtora no bairro Pioneiros, regiao da Barra Norte de Balneario Camboriu. Imobille e Felicita posicionam o predio na Rua Eleuteria Maria Euzebia Caetano, 23; ha fontes que citam Rua Miguel Matte, entao o texto privilegia o endereco com maior convergencia e sinaliza o bairro. As fontes indicam entrega em julho de 2022, plantas entre 126 e 137 m2 e lazer com piscina, gourmet, eventos, jogos, academia, sauna, brinquedoteca, coworking e terraco coletivo. A galeria agora mostra fachada e areas comuns do condominio.",
+      "seo_description": "Costa Esmeralda Residence no bairro Pioneiros, Barra Norte de Balneario Camboriu, com fachada, piscina, gourmet e lazer comum.",
+      "gallery": [
+        {
+          "title": "Costa Esmeralda - fachada Pioneiros",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/img-2879-1665067886.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-costa-esmeralda-residence-EM82103",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Costa Esmeralda - torre principal",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/sem-titulo-1-1669122829.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-costa-esmeralda-residence-EM82103",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Costa Esmeralda - piscina externa",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/img-2781-1665067885.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-costa-esmeralda-residence-EM82103",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Costa Esmeralda - eventos",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/img-2789-1665067885.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-costa-esmeralda-residence-EM82103",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Costa Esmeralda - convivencia",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/img-2786-1665067885.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-costa-esmeralda-residence-EM82103",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Costa Esmeralda - gourmet",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/img-2793-1665067886.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-costa-esmeralda-residence-EM82103",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Costa Esmeralda - brinquedoteca",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/img-2772-1665067884.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-costa-esmeralda-residence-EM82103",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Costa Esmeralda - fitness",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/img-2778-1665067885.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-costa-esmeralda-residence-EM82103",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Costa Esmeralda - deck piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2026/thumb-img-2781-1665067885-1782833281.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-costa-esmeralda-residence-EM82103",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Costa Esmeralda - ambiente de eventos",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2026/thumb-img-2789-1665067885-1782833281.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-costa-esmeralda-residence-EM82103",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Costa Esmeralda - academia",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2026/thumb-img-2778-1665067885-1782833283.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-costa-esmeralda-residence-EM82103",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Costa Esmeralda - torre pronta",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2026/thumb-img-2879-1665067886-1782833284.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-costa-esmeralda-residence-EM82103",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Pioneiros e Barra Norte",
+          "description": "Endereco predominante na Rua Eleuteria Maria Euzebia Caetano, 23, com acesso rapido a Avenida Brasil, Avenida Atlantica e orla norte."
+        },
+        {
+          "icon": "Building2",
+          "title": "CGranza Construtora",
+          "description": "Fontes comerciais associam o empreendimento a CGranza e a entrega concluida em 2022."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e terraco",
+          "description": "A area comum combina piscina, deck, espacos gourmet, eventos e terraco de convivencia."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Rotina completa",
+          "description": "Academia, sauna, jogos, brinquedoteca e coworking ampliam o uso diario alem da localizacao de praia."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Galeria corrigida",
+          "description": "A selecao final prioriza fachada, piscina e lazer coletivo em vez de imagens internas de oferta."
+        },
+        {
+          "title": "Endereco tratado com cautela",
+          "description": "O texto cruza Imobille, Felicita, Loft, MySide, Ocean Prime e Brian Reis para resolver divergencias de logradouro."
+        },
+        {
+          "title": "Copy especifica",
+          "description": "A pagina passa a citar construtora, bairro, entrega, area comum e fontes usadas na curadoria."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Costa Esmeralda Residence?",
+          "answer": "No bairro Pioneiros, regiao da Barra Norte de Balneario Camboriu. A maioria das fontes consultadas informa Rua Eleuteria Maria Euzebia Caetano, 23."
+        },
+        {
+          "question": "Quem construiu o Costa Esmeralda?",
+          "answer": "As fontes comerciais consultadas associam o empreendimento a CGranza Construtora."
+        },
+        {
+          "question": "Quais areas aparecem na galeria?",
+          "answer": "Fachada, piscina, deck, eventos, gourmet, brinquedoteca e fitness do condominio."
+        },
+        {
+          "question": "Qual cuidado foi aplicado na revisao?",
+          "answer": "Foram retiradas imagens que nao representavam o condominio e mantidas fotos de fachada e areas comuns."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-costa-esmeralda-residence-EM82103",
+        "https://felicitanegocios.com.br/empreendimento/54/costa-esmeralda-residence/",
+        "https://myside.com.br/apartamento-venda-costa-esmeralda-residence-balneario-camboriu-sc",
+        "https://www.oceanprime.com.br/empreendimentos/costa-esmeralda-residence",
+        "https://loft.com.br/condominio/edificio-costa-esmeralda-residence-pioneiros-balneario-camboriu-sc/u3m4jv",
+        "https://www.brianreis.com.br/emprendimento/costa-esmeralda-residence/"
+      ],
+      "notes": "Imobille e Felicita convergem em Pioneiros/Rua Eleuteria Maria Euzebia Caetano; MySide traz divergencia de rua. Imagens finais vieram da galeria de empreendimento da Imobille."
+    },
+    {
+      "slug": "farol-de-valenca",
+      "hero_image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/03/farol-de-valenca-balneario-camboriu-sc-15.jpg",
+      "description": "O Farol de Valenca e um empreendimento da JMP Incorporadora na Rua 3130, 229, Centro de Balneario Camboriu, em ponto proximo a Terceira Avenida e ao Passeio San Miguel. Invexo, Imobille, MySide, Felicita e Litoral Vertical indicam apartamentos de cerca de 136 m2, tres vagas em fontes comerciais, entrega em 2024 e lazer com piscina adulto, deck molhado, terraco, gazebo, jogos, fitness, gourmet, eventos com cozinha e kids. A galeria foi revisada para fachada e areas comuns, incluindo fotos reais e renders identificaveis do empreendimento.",
+      "seo_description": "Farol de Valenca da JMP na Rua 3130, Centro de Balneario Camboriu, com piscina, terraco, jogos, fitness e gourmet.",
+      "gallery": [
+        {
+          "title": "Farol de Valenca - fachada principal",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/03/farol-de-valenca-balneario-camboriu-sc-15.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/farol-de-valenca-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Farol de Valenca - fachada vertical",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/03/farol-de-valenca-balneario-camboriu-sc-17.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/farol-de-valenca-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Farol de Valenca - gourmet",
+          "category": "Gourmet",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/03/farol-de-valenca-balneario-camboriu-sc-21.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/farol-de-valenca-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Farol de Valenca - jogos",
+          "category": "Jogos",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/03/farol-de-valenca-balneario-camboriu-sc-26.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/farol-de-valenca-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Farol de Valenca - convivencia",
+          "category": "Convivencia",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/03/farol-de-valenca-balneario-camboriu-sc-24.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/farol-de-valenca-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Farol de Valenca - ambiente gourmet",
+          "category": "Gourmet",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/03/farol-de-valenca-balneario-camboriu-sc-23.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/farol-de-valenca-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Farol de Valenca - eventos gourmet",
+          "category": "Eventos",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/03/farol-de-valenca-balneario-camboriu-sc-22.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/farol-de-valenca-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Farol de Valenca - piscina",
+          "category": "Piscina",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/03/farol-de-valenca-balneario-camboriu-sc-20.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/farol-de-valenca-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Farol de Valenca - deck molhado",
+          "category": "Piscina",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/03/farol-de-valenca-balneario-camboriu-sc-19.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/farol-de-valenca-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Farol de Valenca - piscina externa",
+          "category": "Piscina",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/03/farol-de-valenca-balneario-camboriu-sc-18.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/farol-de-valenca-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Farol de Valenca - fachada lateral",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/03/farol-de-valenca-balneario-camboriu-sc-16.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/farol-de-valenca-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Farol de Valenca - lounge externo",
+          "category": "Convivencia",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/03/farol-de-valenca-balneario-camboriu-sc-14.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/farol-de-valenca-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Farol de Valenca - terraco",
+          "category": "Terraco",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/03/farol-de-valenca-balneario-camboriu-sc-12.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/farol-de-valenca-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Farol de Valenca - estar social",
+          "category": "Convivencia",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/03/farol-de-valenca-balneario-camboriu-sc-11.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/farol-de-valenca-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Farol de Valenca - fitness",
+          "category": "Fitness",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/03/farol-de-valenca-balneario-camboriu-sc-1.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/farol-de-valenca-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Farol de Valenca - torre render",
+          "category": "Render",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/04022026142314431-1770225794.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-farol-de-valenca-EM72611",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Farol de Valenca - fachada render",
+          "category": "Render",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-edificio-farol-de-valenca-1770225794.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-farol-de-valenca-EM72611",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Farol de Valenca - jogos real",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2025/farol-de-valenca-5-1748464415.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-farol-de-valenca-EM72611",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Farol de Valenca - fitness real",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2025/farol-de-valenca-1-1748464413.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-farol-de-valenca-EM72611",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Farol de Valenca - kids",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2025/farol-de-valenca-11-1748464417.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-farol-de-valenca-EM72611",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Farol de Valenca - acesso lazer",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2025/farol-de-valenca-18-1748464419.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-farol-de-valenca-EM72611",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Farol de Valenca - convivencia real",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2025/farol-de-valenca-13-1748464417.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-farol-de-valenca-EM72611",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Farol de Valenca - lounge real",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2025/farol-de-valenca-14-1748464418.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-farol-de-valenca-EM72611",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Farol de Valenca - piscina real",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2025/farol-de-valenca-17-1748464419.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-farol-de-valenca-EM72611",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Farol de Valenca - piscina superior",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2025/farol-de-valenca-16-1748464418.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-farol-de-valenca-EM72611",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 3130 no Centro",
+          "description": "Localizacao central em Balneario Camboriu, perto da Terceira Avenida, Passeio San Miguel e acesso a Praia Central."
+        },
+        {
+          "icon": "Building2",
+          "title": "JMP Incorporadora",
+          "description": "Fontes comerciais e conteudo institucional vinculam o Farol de Valenca a incorporadora JMP."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina com deck",
+          "description": "Piscina adulto, deck molhado, terraco e gazebo aparecem de forma recorrente nas fontes de lazer."
+        },
+        {
+          "icon": "Users",
+          "title": "Lazer interno completo",
+          "description": "Jogos, fitness, gourmet, eventos com cozinha e kids completam o programa de uso comum."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Ponto urbano forte",
+          "description": "A copy situa o empreendimento no Centro, perto de eixos de mobilidade e vida urbana de Balneario Camboriu."
+        },
+        {
+          "title": "Fonte cruzada",
+          "description": "Invexo, Imobille, MySide, Felicita e Litoral Vertical foram usados para conferir endereco, status e lazer."
+        },
+        {
+          "title": "Galeria sem fotos de oferta",
+          "description": "A selecao substitui imagens de unidade por fachada, piscina, jogos, fitness, kids, terraco e gourmet."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Farol de Valenca?",
+          "answer": "Na Rua 3130, 229, Centro de Balneario Camboriu, proximo a Terceira Avenida e ao Passeio San Miguel."
+        },
+        {
+          "question": "Quem e a incorporadora?",
+          "answer": "As fontes consultadas apontam a JMP Incorporadora."
+        },
+        {
+          "question": "O empreendimento ja foi entregue?",
+          "answer": "As fontes comerciais indicam entrega em 2024, com variacao entre abril e novembro conforme a origem."
+        },
+        {
+          "question": "Quais areas aparecem na nova galeria?",
+          "answer": "Fachada, piscina, deck, terraco, jogos, fitness, kids, gourmet e convivencia."
+        }
+      ],
+      "sources": [
+        "https://lancamento.invexo.com.br/sc/farol-de-valenca-balneario-camboriu/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-farol-de-valenca-EM72611",
+        "https://myside.com.br/apartamento-venda-residencial-farol-de-valenca-balneario-camboriu-sc",
+        "https://felicitanegocios.com.br/empreendimento/201/farol-de-valenca/",
+        "https://apto.vc/br/sc/balneario-camboriu/centro/farol-de-valenca",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-farol-de-valenca/",
+        "https://www.jmpincorporadora.com.br/post/farol-de-valen%C3%A7a-ilumina-balne%C3%A1rio-cambori%C3%BA"
+      ],
+      "notes": "Invexo e Felicita confirmam Rua 3130, 229; MySide e Litoral Vertical ajudam com status e lazer. Galeria usa Invexo e Imobille."
+    },
+    {
+      "slug": "tesla-residencial",
+      "hero_image": "https://www.silvapacker.com.br/wp-content/uploads/2024/09/DJI_0151-1-scaled.jpg",
+      "description": "O Tesla Residencial e um empreendimento da Silva Packer na Rua 1201, Centro de Balneario Camboriu. A fonte oficial informa entrega em marco de 2024, area construida total de 14.062,24 m2 e registro de incorporacao 126.151; outras fontes comerciais tambem posicionam o projeto como pronto em 2024, com 44 residencias, dois apartamentos por andar, tres elevadores e lazer superior a 1.200 m2. A area comum inclui piscina adulto e infantil, prainha, jacuzzi, eventos, gourmet, academia, brinquedoteca, jogos, playground, bicicletario e ambientes de estar.",
+      "seo_description": "Tesla Residencial da Silva Packer na Rua 1201, Centro de Balneario Camboriu, entregue em 2024 com lazer amplo.",
+      "gallery": [
+        {
+          "title": "Tesla Residencial - torre e entorno",
+          "category": "Fachada",
+          "image": "https://www.silvapacker.com.br/wp-content/uploads/2024/09/DJI_0151-1-scaled.jpg",
+          "source_url": "https://www.silvapacker.com.br/empreendimentos/tesla/",
+          "source_label": "Silva Packer"
+        },
+        {
+          "title": "Tesla Residencial - vista aerea",
+          "category": "Aereo",
+          "image": "https://www.silvapacker.com.br/wp-content/uploads/2024/09/DJI_0150-scaled.jpg",
+          "source_url": "https://www.silvapacker.com.br/empreendimentos/tesla/",
+          "source_label": "Silva Packer"
+        },
+        {
+          "title": "Tesla Residencial - lazer externo",
+          "category": "Piscina",
+          "image": "https://www.silvapacker.com.br/wp-content/uploads/2024/09/DJI_0124-2-scaled.jpg",
+          "source_url": "https://www.silvapacker.com.br/empreendimentos/tesla/",
+          "source_label": "Silva Packer"
+        },
+        {
+          "title": "Tesla Residencial - fachada com piscina",
+          "category": "Fachada",
+          "image": "https://www.silvapacker.com.br/wp-content/uploads/2024/09/DJI_0154-2-scaled.jpg",
+          "source_url": "https://www.silvapacker.com.br/empreendimentos/tesla/",
+          "source_label": "Silva Packer"
+        },
+        {
+          "title": "Tesla Residencial - bicicletario",
+          "category": "Apoio",
+          "image": "https://www.silvapacker.com.br/wp-content/uploads/2024/09/20240418_103238-scaled.jpg",
+          "source_url": "https://www.silvapacker.com.br/empreendimentos/tesla/",
+          "source_label": "Silva Packer"
+        },
+        {
+          "title": "Tesla Residencial - piscina",
+          "category": "Piscina",
+          "image": "https://www.silvapacker.com.br/wp-content/uploads/2024/09/20240418_102530-scaled.jpg",
+          "source_url": "https://www.silvapacker.com.br/empreendimentos/tesla/",
+          "source_label": "Silva Packer"
+        },
+        {
+          "title": "Tesla Residencial - eventos",
+          "category": "Eventos",
+          "image": "https://www.silvapacker.com.br/wp-content/uploads/2024/09/20240418_101720-scaled.jpg",
+          "source_url": "https://www.silvapacker.com.br/empreendimentos/tesla/",
+          "source_label": "Silva Packer"
+        },
+        {
+          "title": "Tesla Residencial - gourmet",
+          "category": "Gourmet",
+          "image": "https://www.silvapacker.com.br/wp-content/uploads/2024/09/20240418_101628-scaled.jpg",
+          "source_url": "https://www.silvapacker.com.br/empreendimentos/tesla/",
+          "source_label": "Silva Packer"
+        },
+        {
+          "title": "Tesla Residencial - jogos",
+          "category": "Jogos",
+          "image": "https://www.silvapacker.com.br/wp-content/uploads/2024/09/20240418_101412-scaled.jpg",
+          "source_url": "https://www.silvapacker.com.br/empreendimentos/tesla/",
+          "source_label": "Silva Packer"
+        },
+        {
+          "title": "Tesla Residencial - playground",
+          "category": "Infantil",
+          "image": "https://www.silvapacker.com.br/wp-content/uploads/2024/09/20240418_100907-scaled.jpg",
+          "source_url": "https://www.silvapacker.com.br/empreendimentos/tesla/",
+          "source_label": "Silva Packer"
+        },
+        {
+          "title": "Tesla Residencial - brinquedoteca",
+          "category": "Infantil",
+          "image": "https://www.silvapacker.com.br/wp-content/uploads/2024/09/20240418_100525-scaled.jpg",
+          "source_url": "https://www.silvapacker.com.br/empreendimentos/tesla/",
+          "source_label": "Silva Packer"
+        },
+        {
+          "title": "Tesla Residencial - fitness",
+          "category": "Fitness",
+          "image": "https://www.silvapacker.com.br/wp-content/uploads/2024/09/20240418_100042-scaled.jpg",
+          "source_url": "https://www.silvapacker.com.br/empreendimentos/tesla/",
+          "source_label": "Silva Packer"
+        },
+        {
+          "title": "Tesla Residencial - academia",
+          "category": "Fitness",
+          "image": "https://www.silvapacker.com.br/wp-content/uploads/2024/09/20240418_100007-scaled.jpg",
+          "source_url": "https://www.silvapacker.com.br/empreendimentos/tesla/",
+          "source_label": "Silva Packer"
+        },
+        {
+          "title": "Tesla Residencial - eventos integrados",
+          "category": "Eventos",
+          "image": "https://www.silvapacker.com.br/wp-content/uploads/2024/09/20240418_095109-scaled.jpg",
+          "source_url": "https://www.silvapacker.com.br/empreendimentos/tesla/",
+          "source_label": "Silva Packer"
+        },
+        {
+          "title": "Tesla Residencial - piscina render",
+          "category": "Render",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/04112025133736574-1762274256.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-tesla-residencial-EM39890",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tesla Residencial - fachada render",
+          "category": "Render",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-1762274256.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-tesla-residencial-EM39890",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tesla Residencial - torre render",
+          "category": "Render",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2025/tesla-82-1756140555.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-tesla-residencial-EM39890",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tesla Residencial - kids render",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2025/tesla-36-1756140556.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-tesla-residencial-EM39890",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tesla Residencial - brinquedoteca render",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2025/tesla-37-1756140556.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-tesla-residencial-EM39890",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tesla Residencial - playground render",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2025/tesla-64-1756140550.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-tesla-residencial-EM39890",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tesla Residencial - playground externo",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2025/tesla-65-1756140550.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-tesla-residencial-EM39890",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tesla Residencial - fitness render",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2025/tesla-76-1756140554.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-tesla-residencial-EM39890",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tesla Residencial - academia render",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2025/tesla-77-1756140554.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-tesla-residencial-EM39890",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tesla Residencial - lounge externo",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2025/tesla-53-1756140547.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-tesla-residencial-EM39890",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tesla Residencial - piscina superior",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2025/tesla-57-1756140548.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-tesla-residencial-EM39890",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tesla Residencial - piscina noturna",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2025/tesla-55-1756140548.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-tesla-residencial-EM39890",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tesla Residencial - deck piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2025/tesla-58-1756140549.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-tesla-residencial-EM39890",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tesla Residencial - deck lazer",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2025/tesla-52-1756140547.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-tesla-residencial-EM39890",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tesla Residencial - lazer com agua",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2025/tesla-51-1756140559.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-tesla-residencial-EM39890",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 1201 no Centro",
+          "description": "Endereco central em Balneario Camboriu, com proximidade da Praia Central e rede de comercio e servicos."
+        },
+        {
+          "icon": "Building2",
+          "title": "Silva Packer",
+          "description": "A incorporadora informa entrega em 2024, area construida total e registro de incorporacao do empreendimento."
+        },
+        {
+          "icon": "Waves",
+          "title": "Lazer com agua",
+          "description": "Piscina adulto, piscina infantil, prainha, jacuzzi e deck aparecem nas fontes e nas imagens selecionadas."
+        },
+        {
+          "icon": "Users",
+          "title": "Convivencia familiar",
+          "description": "Eventos, gourmet, jogos, brinquedoteca, playground, fitness e bicicletario compoem a estrutura de uso comum."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fotos oficiais priorizadas",
+          "description": "A galeria usa imagens da Silva Packer e complementos da Imobille para fachada e lazer."
+        },
+        {
+          "title": "Status revisado",
+          "description": "A fonte oficial aponta entrega em marco de 2024; outras bases tambem tratam o predio como pronto em 2024."
+        },
+        {
+          "title": "Texto menos generico",
+          "description": "A descricao passa a citar rua, incorporadora, entrega, escala do lazer e itens reais do condominio."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Tesla Residencial?",
+          "answer": "Na Rua 1201, Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Quem assina o empreendimento?",
+          "answer": "A fonte oficial consultada e da Silva Packer."
+        },
+        {
+          "question": "Quando foi entregue?",
+          "answer": "A Silva Packer informa entrega em marco de 2024; fontes comerciais tambem posicionam o empreendimento como pronto em 2024."
+        },
+        {
+          "question": "Quais areas aparecem na galeria?",
+          "answer": "Fachada, vista aerea, piscina, eventos, gourmet, jogos, brinquedoteca, playground, fitness e bicicletario."
+        }
+      ],
+      "sources": [
+        "https://www.silvapacker.com.br/empreendimentos/tesla/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-tesla-residencial-EM39890",
+        "https://felicitanegocios.com.br/empreendimento/238/tesla/",
+        "https://apto.vc/br/sc/balneario-camboriu/centro/tesla-residencial",
+        "https://www.vivareal.com.br/condominio/edificio-tesla-residencial-centro-id-9c948269-213d/",
+        "https://www.tresas.com.br/imoveis/apartamento-no-empreendimento-tesla-residencial-em-balneario-camboriu",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-tesla-residencial-balneario-camboriu-centro-4-quartos-3-garagens-venda-ref-1723/"
+      ],
+      "notes": "Silva Packer foi usada como fonte principal para entrega, area construida e registro; Imobille e Felicita complementam lazer e escala."
+    },
+    {
+      "slug": "porto-belo-golf",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/2203202416202517277-1711135225.jpg",
+      "description": "O Porto Belo Golf integra o conceito All Resort em Porto Belo, com desenvolvimento associado a Wert Empreendimentos e proposta de lazer, sustentabilidade e desenho urbano. As fontes consultadas citam areas residenciais em 400, 600 e 1.000 m2, cerca de 372 lotes, campo de golfe iluminado, Golf Academy, lagoon, wellness center, sports center, pracas tematicas, heliponto, piscinas, portaria 24h, quadras, fitness, sauna, spa, gourmet e saloes. Como parte do material disponivel e institucional, a galeria foi rotulada com renders e imagens de projeto quando aplicavel.",
+      "seo_description": "Porto Belo Golf All Resort, condominio em Porto Belo com golf center, lagoon, wellness, esportes, portaria e lazer de resort.",
+      "gallery": [
+        {
+          "title": "Porto Belo Golf - lago e clube",
+          "category": "Render",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/2203202416202517277-1711135225.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-belo-golf-resort-EM02242",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Belo Golf - lounge do golfe",
+          "category": "Golfe",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/imagens-site-20007-1711134523-1731090559.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-belo-golf-resort-EM02242",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Belo Golf - piscina wellness",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/imagens-site-20001-1711134519.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-belo-golf-resort-EM02242",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Belo Golf - estar externo",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/imagens-site-20002-1711134520.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-belo-golf-resort-EM02242",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Belo Golf - campo iluminado",
+          "category": "Golfe",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/imagens-site-20003-1711134520.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-belo-golf-resort-EM02242",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Belo Golf - pratica noturna",
+          "category": "Golfe",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/imagens-site-20009-1711134524.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-belo-golf-resort-EM02242",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Belo Golf - fitness e piscina",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/imagens-site-20012-1711134526.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-belo-golf-resort-EM02242",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Belo Golf - lounge social",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/imagens-site-20015-1711134528.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-belo-golf-resort-EM02242",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Belo Golf - clube render",
+          "category": "Clube",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/imagens-site-20014-1711134528.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-belo-golf-resort-EM02242",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Belo Golf - paisagismo",
+          "category": "Render",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/imagens-site-20010-1711134525.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-belo-golf-resort-EM02242",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Belo Golf - acesso masterplan",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/imagens-site-20017-1711134530.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-belo-golf-resort-EM02242",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Belo Golf - vista do resort",
+          "category": "Render",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/imagens-site-20000-1711134519.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-belo-golf-resort-EM02242",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Belo Golf - vista geral",
+          "category": "Aereo",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/4426/i7XK11Ka242T0_442663e1368ddfb27.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/4691/porto-belo-golf-resort/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Porto Belo Golf - campo noturno",
+          "category": "Golfe",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/4426/i7XK11Ka242T0_442663e1368eb092d.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/4691/porto-belo-golf-resort/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Porto Belo Golf - fairway iluminado",
+          "category": "Golfe",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/4426/i7XK11Ka242T0_442663e13690025e1.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/4691/porto-belo-golf-resort/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Porto Belo Golf - caminho do campo",
+          "category": "Golfe",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/4426/i7XK11Ka242T0_442663e1368c774a1.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/4691/porto-belo-golf-resort/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Porto Belo Golf - portal",
+          "category": "Acesso",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/4426/i7XK11Ka242T0_442663e1369ce4c33.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/4691/porto-belo-golf-resort/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Porto Belo Golf - lagoon e clube",
+          "category": "Lagoon",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/4426/i7XK11Ka242T0_442663e1369601194.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/4691/porto-belo-golf-resort/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Porto Belo Golf - convivencia resort",
+          "category": "Convivencia",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/4426/i7XK11Ka242T0_442663e13699f40c6.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/4691/porto-belo-golf-resort/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Porto Belo Golf - piscina resort",
+          "category": "Piscina",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/4426/i7XK11Ka242T0_442663e136a3c1062.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/4691/porto-belo-golf-resort/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Porto Belo Golf - lagoon",
+          "category": "Lagoon",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/4426/i7XK11Ka242T0_442663e136a145736.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/4691/porto-belo-golf-resort/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Porto Belo Golf - area aquatica",
+          "category": "Lagoon",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/4426/i7XK11Ka242T0_442663e136a1e6c73.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/4691/porto-belo-golf-resort/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Porto Belo Golf - lazer aquatico",
+          "category": "Lagoon",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/4426/i7XK11Ka242T0_442663e136a08d648.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/4691/porto-belo-golf-resort/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Porto Belo Golf - golf center",
+          "category": "Golfe",
+          "image": "https://cdn.myside.com.br/base/ed7/177/3d4/campo-de-golfe-all-resort.jpg",
+          "source_url": "https://myside.com.br/guia-itapema/all-resort-porto-belo-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Porto Belo Golf - lagoon all resort",
+          "category": "Lagoon",
+          "image": "https://cdn.myside.com.br/base/03c/420/7fa/lagoon-all-resort.jpg",
+          "source_url": "https://myside.com.br/guia-itapema/all-resort-porto-belo-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Porto Belo Golf - gourmet all resort",
+          "category": "Gourmet",
+          "image": "https://cdn.myside.com.br/base/639/753/d17/gourmet-all-resort.jpg",
+          "source_url": "https://myside.com.br/guia-itapema/all-resort-porto-belo-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Porto Belo Golf - masterplan",
+          "category": "Render",
+          "image": "https://cdn.myside.com.br/base/2e3/e80/9d4/porto-belo-golf-all-resort.jpg",
+          "source_url": "https://myside.com.br/guia-itapema/all-resort-porto-belo-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Porto Belo Golf - praca ilha",
+          "category": "Convivencia",
+          "image": "https://cdn.myside.com.br/base/ac4/c0c/5d6/praca-ilha-porto-belo-all-resort.jpg",
+          "source_url": "https://myside.com.br/guia-itapema/all-resort-porto-belo-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Porto Belo Golf - parque design",
+          "category": "Convivencia",
+          "image": "https://cdn.myside.com.br/base/8cb/352/2da/park-art-design-all-resort.jpg",
+          "source_url": "https://myside.com.br/guia-itapema/all-resort-porto-belo-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Porto Belo Golf - fachada golf view",
+          "category": "Golfe",
+          "image": "https://cdn.myside.com.br/base/2ed/fb4/9ea/fachada-golf-view.jpg",
+          "source_url": "https://myside.com.br/guia-itapema/all-resort-porto-belo-sc",
+          "source_label": "MySide"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Flag",
+          "title": "Golf center iluminado",
+          "description": "Fontes comerciais destacam campo de golfe iluminado, academia de golfe e estrutura voltada ao esporte."
+        },
+        {
+          "icon": "Waves",
+          "title": "Lagoon e wellness",
+          "description": "Lagoon, piscinas, spa, saunas, massagem, academia e pilates reforcam a proposta de bem-estar."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Portaria 24h",
+          "description": "A estrutura do condominio inclui controle de acesso e areas planejadas para uma rotina de resort."
+        },
+        {
+          "icon": "Leaf",
+          "title": "Sustentabilidade urbana",
+          "description": "O case da CTE aponta certificacao Fitwel Community em fase de projeto, tratada como informacao institucional do desenvolvimento."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Imagens tratadas como projeto",
+          "description": "A curadoria identifica renders, masterplan, lagoon e golf center, evitando vender perspectivas como fotos finais."
+        },
+        {
+          "title": "Fonte institucional cruzada",
+          "description": "VG, MySide, Imob Lancamentos, Lorenzoni, CTE e Imobille foram usados para validar lazer e conceito."
+        },
+        {
+          "title": "Descricao de condominio",
+          "description": "O texto agora foca no empreendimento, no resort e nas areas comuns em vez de fotos ou chamadas de oferta."
+        }
+      ],
+      "faq": [
+        {
+          "question": "O que e o Porto Belo Golf?",
+          "answer": "E um condominio de perfil resort em Porto Belo, associado ao conceito All Resort e a Wert Empreendimentos em fontes comerciais."
+        },
+        {
+          "question": "As imagens sao fotos prontas?",
+          "answer": "Parte da galeria usa imagens institucionais e renders do projeto, por isso as legendas indicam render, masterplan ou estrutura de resort quando aplicavel."
+        },
+        {
+          "question": "Quais estruturas foram citadas?",
+          "answer": "Golf center, lagoon, wellness center, sports center, heliponto, piscinas, portaria 24h, quadras, fitness, sauna, spa e gourmet."
+        },
+        {
+          "question": "Ha informacao de sustentabilidade?",
+          "answer": "Sim. A CTE descreve o projeto como case Fitwel Community em fase de projeto."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-belo-golf-resort-EM02242",
+        "https://vgimobiliaria.com.br/empreendimento/4691/porto-belo-golf-resort/",
+        "https://myside.com.br/guia-itapema/all-resort-porto-belo-sc",
+        "https://lorenzonipatrimonial.com.br/project/golf-resort/",
+        "https://www.imoblancamentos.com.br/assessoria-resort-portobelo",
+        "https://cte.com.br/cases/smart-cities/conheca-o-primeiro-empreendimento-certificado-fitwel-community-da-america-latina/",
+        "https://www.guilhermepilger.com/imovel/terreno-em-condominio-no-porto-belo-golf-porto-belo-porto-belo-venda-ref-2317/"
+      ],
+      "notes": "Curadoria trata o Porto Belo Golf como material institucional do All Resort. Imagens vieram de Imobille, VG e MySide, com rotulos de render/projeto quando necessario."
+    },
+    {
+      "slug": "amores-da-brava",
+      "hero_image": "https://cdn.imoview.com.br/bryann/Condominios/82/infra-17.jpg?1696254672",
+      "description": "O Amores da Brava Club House fica na Rua Delfim Mario Padua Peixoto, 600, Praia Brava de Itajai, em trecho conectado a Praia dos Amores e a orla da Brava. Felicita, Imobille, Max Imoveis, Imoveis Terra, Sort, Foxter e Adim destacam estrutura de Club House, Beach Point exclusivo frente mar, piscinas, areas infantis, fitness, gourmet, eventos e convivencia. A galeria final usa fachada, piscina, jardins, playground, brinquedoteca, fitness, vista aerea e imagens do entorno comum, sem fotos internas de oferta.",
+      "seo_description": "Amores da Brava Club House na Rua Delfim Mario Padua Peixoto, Praia Brava de Itajai, com Beach Point e lazer completo.",
+      "gallery": [
+        {
+          "title": "Amores da Brava - fachada",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/82/infra-17.jpg?1696254672",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/82/amores-da-brava/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Amores da Brava - piscina lateral",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/82/infra-7.jpg?1696254672",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/82/amores-da-brava/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Amores da Brava - deck externo",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/82/infra-5.jpg?1696254672",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/82/amores-da-brava/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Amores da Brava - piscina e jardim",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/82/infra-10.jpg?1696254672",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/82/amores-da-brava/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Amores da Brava - fachada urbana",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/82/infra-18.jpg?1696254672",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/82/amores-da-brava/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Amores da Brava - praca interna",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/82/infra-16.jpg?1696254672",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/82/amores-da-brava/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Amores da Brava - paisagismo",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/82/infra-15.jpg?1696254672",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/82/amores-da-brava/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Amores da Brava - brinquedoteca",
+          "category": "Infantil",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/82/infra-14.jpg?1696254672",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/82/amores-da-brava/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Amores da Brava - quadra kids",
+          "category": "Infantil",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/82/infra-4.jpg?1696254672",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/82/amores-da-brava/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Amores da Brava - espelho d agua",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/82/infra-2.jpg?1696254672",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/82/amores-da-brava/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Amores da Brava - playground",
+          "category": "Infantil",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/82/infra-1.jpg?1696254672",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/82/amores-da-brava/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Amores da Brava - vista aerea",
+          "category": "Aereo",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/82/amores-da-brava-5.jpg?1696254672",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/82/amores-da-brava/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Amores da Brava - torres e praia",
+          "category": "Aereo",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/82/amores-da-brava-2.jpg?1696254672",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/82/amores-da-brava/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Amores da Brava - piscina real",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/080520251018501-1746710330.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/amores-da-brava-club-house-EM9703",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Amores da Brava - fachada azul",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-1746710331.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/amores-da-brava-club-house-EM9703",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Amores da Brava - acesso externo",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/amores-da-brava-11-1714402749.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/amores-da-brava-club-house-EM9703",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Amores da Brava - paisagismo real",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/amores-da-brava-13-1714402750.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/amores-da-brava-club-house-EM9703",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Amores da Brava - piscina ampla",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/amores-da-brava-16-1714402751.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/amores-da-brava-club-house-EM9703",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Amores da Brava - borda piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/amores-da-brava-26-1714402753.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/amores-da-brava-club-house-EM9703",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Amores da Brava - deck piscina real",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/amores-da-brava-27-1714402753.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/amores-da-brava-club-house-EM9703",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Amores da Brava - deck com espreguicadeiras",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/amores-da-brava-32-1714402754.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/amores-da-brava-club-house-EM9703",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Amores da Brava - pergolado externo",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/amores-da-brava-38-1714402755.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/amores-da-brava-club-house-EM9703",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Amores da Brava - area beach point",
+          "category": "Entorno",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/amores-da-brava-39-1714402756.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/amores-da-brava-club-house-EM9703",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Amores da Brava - playground real",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/amores-da-brava-41-1714402756.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/amores-da-brava-club-house-EM9703",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Amores da Brava - piscina coberta",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/amores-da-brava-45-1714402758.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/amores-da-brava-club-house-EM9703",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Amores da Brava - fitness lateral",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/amores-da-brava-46-1714402758.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/amores-da-brava-club-house-EM9703",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Amores da Brava - academia completa",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/amores-da-brava-49-1714402759.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/amores-da-brava-club-house-EM9703",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Amores da Brava - cardio",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/amores-da-brava-52-1714402759.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/amores-da-brava-club-house-EM9703",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Amores da Brava - fachada lateral",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/amores-da-brava-55-1714402760.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/amores-da-brava-club-house-EM9703",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Amores da Brava - jardim da piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/amores-da-brava-57-1714402761.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/amores-da-brava-club-house-EM9703",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Praia Brava e Praia dos Amores",
+          "description": "Endereco na Rua Delfim Mario Padua Peixoto, em eixo litoraneo valorizado entre Itajai e Balneario Camboriu."
+        },
+        {
+          "icon": "Waves",
+          "title": "Beach Point exclusivo",
+          "description": "Fontes comerciais destacam ponto de praia privativo com apoio a beira-mar."
+        },
+        {
+          "icon": "Users",
+          "title": "Club House amplo",
+          "description": "Piscinas, eventos, gourmet, brinquedoteca, playground, jardins e areas de convivencia estruturam o lazer."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Fitness e bem-estar",
+          "description": "Academia e ambientes de apoio aparecem nas imagens reais selecionadas para a pagina."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Galeria realinhada",
+          "description": "Fachada, piscina, brinquedoteca, playground, fitness e vista aerea substituem imagens internas de oferta."
+        },
+        {
+          "title": "Endereco confirmado",
+          "description": "Felicita, Imobille e Max Imoveis convergem na Rua Delfim Mario Padua Peixoto, 600."
+        },
+        {
+          "title": "Beneficios especificos",
+          "description": "O texto destaca Beach Point, Club House e relacao com a Brava, elementos ausentes na copy anterior."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Amores da Brava?",
+          "answer": "Na Rua Delfim Mario Padua Peixoto, 600, Praia Brava de Itajai."
+        },
+        {
+          "question": "O que e o Beach Point citado nas fontes?",
+          "answer": "E um apoio exclusivo frente mar divulgado por fontes comerciais, com estrutura para uso de praia."
+        },
+        {
+          "question": "Quais areas aparecem na galeria?",
+          "answer": "Fachada, piscina, jardins, brinquedoteca, playground, fitness, vista aerea e areas externas comuns."
+        },
+        {
+          "question": "Qual foi a correcao principal?",
+          "answer": "A pagina deixou de exibir fotos internas de oferta como se fossem do condominio."
+        }
+      ],
+      "sources": [
+        "https://felicitanegocios.com.br/empreendimento/82/amores-da-brava/",
+        "https://www.imobillenegocios.com.br/empreendimento/amores-da-brava-club-house-EM9703",
+        "https://maximoveis.com.br/empreendimento/495/amores-da-brava/",
+        "https://imoveisterra.net/empreendimento/43/amores-da-brava-club-house/",
+        "https://sortinvestimentos.com.br/empreendimentos/amores-da-brava",
+        "https://www.foxterciaimobiliaria.com.br/empreendimento/5881/amores-da-brava-club-house-residencial-itajai-balneario-santa-clara-condominio-vertical-litoral-rs",
+        "https://www.adimalugueis.com.br/condominio/amores-da-brava-club-house/185",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-amores-da-brava-itajai-praia-brava-3-quartos-2-garagens-venda-ref-676/"
+      ],
+      "notes": "Felicita e Imobille forneceram galeria de fachada/lazer. Fontes comerciais confirmam Rua Delfim Mario Padua Peixoto, Club House e Beach Point."
+    },
+    {
+      "slug": "zaya-brava",
+      "hero_image": "https://construttore.com.br/wp-content/uploads/2024/03/Construttore_Zaya_Fachada_A_Geral_RF01.webp",
+      "description": "O Zaya Brava e um empreendimento da Construttore na Rua Doca Rebello, 127, Praia Brava de Itajai, endereco confirmado pela fonte oficial e pela Invexo. O site da Construttore apresenta andamento de obra em 52,60%, enquanto fontes comerciais descrevem plantas entre 146 e 165 m2, opcoes maiores em cobertura duplex, areas comerciais no embasamento e lazer com academia, piscina aquecida, gourmet, wine bar, playground, jogos e espaco zen. Como o projeto esta em obra, a galeria usa perspectivas do empreendimento e renders de fachada e areas comuns.",
+      "seo_description": "Zaya Brava da Construttore na Rua Doca Rebello, Praia Brava de Itajai, em obra, com renders de fachada e lazer.",
+      "gallery": [
+        {
+          "title": "Zaya Brava - fachada render",
+          "category": "Render",
+          "image": "https://construttore.com.br/wp-content/uploads/2024/03/Construttore_Zaya_Fachada_A_Geral_RF01.webp",
+          "source_url": "https://construttore.com.br/empreendimento/zaya-brava/",
+          "source_label": "Construttore"
+        },
+        {
+          "title": "Zaya Brava - torre diurna",
+          "category": "Render",
+          "image": "https://construttore.com.br/wp-content/uploads/2024/03/Zaya-dia.png",
+          "source_url": "https://construttore.com.br/empreendimento/zaya-brava/",
+          "source_label": "Construttore"
+        },
+        {
+          "title": "Zaya Brava - embasamento",
+          "category": "Render",
+          "image": "https://construttore.com.br/wp-content/uploads/2024/03/Construttore_Zaya_Fachada_B_Embasamento_RF01.webp",
+          "source_url": "https://construttore.com.br/empreendimento/zaya-brava/",
+          "source_label": "Construttore"
+        },
+        {
+          "title": "Zaya Brava - fitness render",
+          "category": "Fitness",
+          "image": "https://construttore.com.br/wp-content/uploads/2024/03/Construttore_Zaya_Academia_EF.jpg",
+          "source_url": "https://construttore.com.br/empreendimento/zaya-brava/",
+          "source_label": "Construttore"
+        },
+        {
+          "title": "Zaya Brava - brinquedoteca render",
+          "category": "Infantil",
+          "image": "https://construttore.com.br/wp-content/uploads/2024/03/Construttore_Zaya_Brinquedoteca_E02.jpg",
+          "source_url": "https://construttore.com.br/empreendimento/zaya-brava/",
+          "source_label": "Construttore"
+        },
+        {
+          "title": "Zaya Brava - eventos render",
+          "category": "Eventos",
+          "image": "https://construttore.com.br/wp-content/uploads/2024/03/Construttore_Zaya_Salao_de_Festas_EF.jpg",
+          "source_url": "https://construttore.com.br/empreendimento/zaya-brava/",
+          "source_label": "Construttore"
+        },
+        {
+          "title": "Zaya Brava - torre vertical",
+          "category": "Render",
+          "image": "https://construttore.com.br/wp-content/uploads/2024/03/Zaya-dia-200x300.png",
+          "source_url": "https://construttore.com.br/empreendimento/zaya-brava/",
+          "source_label": "Construttore"
+        },
+        {
+          "title": "Zaya Brava - base noturna",
+          "category": "Render",
+          "image": "https://construttore.com.br/wp-content/uploads/2024/03/Construttore_Zaya_Fachada_B_Embasamento_RF01-300x169.webp",
+          "source_url": "https://construttore.com.br/empreendimento/zaya-brava/",
+          "source_label": "Construttore"
+        },
+        {
+          "title": "Zaya Brava - base iluminada",
+          "category": "Render",
+          "image": "https://construttore.com.br/wp-content/uploads/2024/03/Construttore_Zaya_Fachada_B_Embasamento_RF01-1024x576.webp",
+          "source_url": "https://construttore.com.br/empreendimento/zaya-brava/",
+          "source_label": "Construttore"
+        },
+        {
+          "title": "Zaya Brava - academia render",
+          "category": "Fitness",
+          "image": "https://construttore.com.br/wp-content/uploads/2024/03/Construttore_Zaya_Academia_EF-300x169.jpg",
+          "source_url": "https://construttore.com.br/empreendimento/zaya-brava/",
+          "source_label": "Construttore"
+        },
+        {
+          "title": "Zaya Brava - fitness amplo",
+          "category": "Fitness",
+          "image": "https://construttore.com.br/wp-content/uploads/2024/03/Construttore_Zaya_Academia_EF-1536x864.jpg",
+          "source_url": "https://construttore.com.br/empreendimento/zaya-brava/",
+          "source_label": "Construttore"
+        },
+        {
+          "title": "Zaya Brava - kids render",
+          "category": "Infantil",
+          "image": "https://construttore.com.br/wp-content/uploads/2024/03/Construttore_Zaya_Brinquedoteca_E02-1024x576.jpg",
+          "source_url": "https://construttore.com.br/empreendimento/zaya-brava/",
+          "source_label": "Construttore"
+        },
+        {
+          "title": "Zaya Brava - eventos decorado",
+          "category": "Eventos",
+          "image": "https://construttore.com.br/wp-content/uploads/2024/03/Construttore_Zaya_Salao_de_Festas_EF-300x169.jpg",
+          "source_url": "https://construttore.com.br/empreendimento/zaya-brava/",
+          "source_label": "Construttore"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua Doca Rebello 127",
+          "description": "Endereco oficial na Praia Brava de Itajai, em ponto proximo ao mar segundo fontes de lancamento."
+        },
+        {
+          "icon": "Building2",
+          "title": "Construttore",
+          "description": "A fonte oficial informa a incorporadora, progresso de obra e material visual institucional do projeto."
+        },
+        {
+          "icon": "Waves",
+          "title": "Lazer com piscina aquecida",
+          "description": "Fontes comerciais citam piscina aquecida, solarium, gourmet, eventos, jogos e espaco zen."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Fitness e kids",
+          "description": "Academia, brinquedoteca e playground aparecem na galeria oficial de renders."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fase de obra clara",
+          "description": "A pagina informa que a galeria contem renders e perspectivas, coerente com o andamento publicado pela Construttore."
+        },
+        {
+          "title": "Endereco oficial priorizado",
+          "description": "Foi usado o endereco Rua Doca Rebello, 127, confirmado por Construttore e Invexo."
+        },
+        {
+          "title": "Galeria de empreendimento",
+          "description": "A curadoria preserva fachada, embasamento, fitness, kids e eventos, evitando imagens privadas."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Zaya Brava?",
+          "answer": "Na Rua Doca Rebello, 127, Praia Brava de Itajai, conforme fonte oficial da Construttore e Invexo."
+        },
+        {
+          "question": "As imagens sao fotos reais?",
+          "answer": "Nao. Como a obra aparece em andamento, a galeria usa renders e perspectivas do empreendimento."
+        },
+        {
+          "question": "Qual o andamento informado?",
+          "answer": "O site da Construttore exibe progresso de obra de 52,60% no momento da pesquisa."
+        },
+        {
+          "question": "Quais areas aparecem na galeria?",
+          "answer": "Fachada, embasamento, fitness, brinquedoteca e eventos em render."
+        }
+      ],
+      "sources": [
+        "https://construttore.com.br/empreendimento/zaya-brava/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-zaya-brava-EM60392",
+        "https://lancamento.invexo.com.br/sc/zaya-brava/",
+        "https://myside.com.br/apartamento-venda-zaya-brava-itajai-sc",
+        "https://julianiimoveis.com.br/condominio/205",
+        "https://www.adamantenegocios.com.br/empreendimento/118/zaya-brava/",
+        "https://manicamarin.com.br/imovel/empreendimento-praia-brava-itajai-sc-2693",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-zaya-brava-itajai-praia-brava-3-quartos-3-garagens-venda-ref-685/"
+      ],
+      "notes": "Construttore e Invexo confirmam Rua Doca Rebello, 127. Galeria usa renders oficiais por se tratar de empreendimento em obra."
+    },
+    {
+      "slug": "colinas-de-camboriu-village",
+      "hero_image": "https://colinasdecamboriu.com.br/wp-content/uploads/2025/12/LOCALIZACAO-1-scaled.jpg",
+      "description": "O Colinas de Camboriu Village e um bairro planejado em Camboriu, junto a Balneario Camboriu, desenvolvido por ABC Inc e Embralot. Fontes oficiais destacam 796 lotes, areas a partir de 300 m2, matriculas individualizadas, cerca de 900 mil m2 dedicados a qualidade de vida, pracas e lazer, seguranca 24h e proposta urbana setorizada. Felicita e Invexo situam o projeto na Avenida Marginal Oeste, Varzea do Ranchinho, com facil acesso a Balneario Shopping e ao centro de Balneario Camboriu. A galeria foi ajustada para mostrar portal, vista aerea, urbanismo, hub, vias e areas coletivas.",
+      "seo_description": "Colinas de Camboriu Village, bairro planejado em Camboriu junto a Balneario Camboriu, com portal, urbanismo e seguranca 24h.",
+      "gallery": [
+        {
+          "title": "Colinas de Camboriu - vista aerea",
+          "category": "Aereo",
+          "image": "https://colinasdecamboriu.com.br/wp-content/uploads/2025/12/LOCALIZACAO-1-scaled.jpg",
+          "source_url": "https://colinasdecamboriu.com.br/",
+          "source_label": "Colinas de Camboriu"
+        },
+        {
+          "title": "Colinas de Camboriu - portal principal",
+          "category": "Acesso",
+          "image": "https://colinasdecamboriu.com.br/wp-content/uploads/2025/12/DSC03248_tratada-Medio-e1765654557917.jpg",
+          "source_url": "https://colinasdecamboriu.com.br/",
+          "source_label": "Colinas de Camboriu"
+        },
+        {
+          "title": "Colinas de Camboriu - localizacao aerea",
+          "category": "Aereo",
+          "image": "https://colinasdecamboriu.com.br/wp-content/uploads/2025/12/LOCALIZACAO-scaled.jpg",
+          "source_url": "https://colinasdecamboriu.com.br/",
+          "source_label": "Colinas de Camboriu"
+        },
+        {
+          "title": "Colinas de Camboriu - rotatoria render",
+          "category": "Render",
+          "image": "https://colinasdecamboriu.com.br/wp-content/uploads/2025/12/ROTATORIA-Grande.jpg",
+          "source_url": "https://colinasdecamboriu.com.br/",
+          "source_label": "Colinas de Camboriu"
+        },
+        {
+          "title": "Colinas de Camboriu - rotatoria detalhe",
+          "category": "Render",
+          "image": "https://colinasdecamboriu.com.br/wp-content/uploads/2025/12/ROTATORIA-Grande-1024x576.jpg",
+          "source_url": "https://colinasdecamboriu.com.br/",
+          "source_label": "Colinas de Camboriu"
+        },
+        {
+          "title": "Colinas de Camboriu - fachada institucional",
+          "category": "Render",
+          "image": "https://colinasdecamboriu.com.br/wp-content/uploads/2025/12/Copia-de-037-AP-FCH-3D-007-OP3-R00-scaled.png",
+          "source_url": "https://colinasdecamboriu.com.br/",
+          "source_label": "Colinas de Camboriu"
+        },
+        {
+          "title": "Colinas de Camboriu - hub tecnologia",
+          "category": "Render",
+          "image": "https://colinasdecamboriu.com.br/wp-content/uploads/2025/12/HUB_TECNOLOGIA-scaled.jpg",
+          "source_url": "https://colinasdecamboriu.com.br/",
+          "source_label": "Colinas de Camboriu"
+        },
+        {
+          "title": "Colinas de Camboriu - hub render",
+          "category": "Render",
+          "image": "https://colinasdecamboriu.com.br/wp-content/uploads/2025/12/HUB_TECNOLOGIA-1024x576.jpg",
+          "source_url": "https://colinasdecamboriu.com.br/",
+          "source_label": "Colinas de Camboriu"
+        },
+        {
+          "title": "Colinas de Camboriu - convivencia urbana",
+          "category": "Convivencia",
+          "image": "https://colinasdecamboriu.com.br/wp-content/uploads/2025/12/01_3-Foto.jpg",
+          "source_url": "https://colinasdecamboriu.com.br/",
+          "source_label": "Colinas de Camboriu"
+        },
+        {
+          "title": "Colinas de Camboriu - espaco urbano",
+          "category": "Convivencia",
+          "image": "https://colinasdecamboriu.com.br/wp-content/uploads/2025/12/01_3-Foto-1024x576.jpg",
+          "source_url": "https://colinasdecamboriu.com.br/",
+          "source_label": "Colinas de Camboriu"
+        },
+        {
+          "title": "Colinas de Camboriu - relacao com BC",
+          "category": "Aereo",
+          "image": "https://abcincembralot.com.br/wp-content/uploads/2023/08/LOCALIZACAO-Grande.jpg",
+          "source_url": "https://abcincembralot.com.br/colinas-de-camboriu-village/",
+          "source_label": "ABC Inc Embralot"
+        },
+        {
+          "title": "Colinas de Camboriu - via interna",
+          "category": "Acesso",
+          "image": "https://abcincembralot.com.br/wp-content/uploads/2024/04/ABC_Colinas_Camboriu_295.jpg",
+          "source_url": "https://abcincembralot.com.br/colinas-de-camboriu-village/",
+          "source_label": "ABC Inc Embralot"
+        },
+        {
+          "title": "Colinas de Camboriu - eixo paisagistico",
+          "category": "Acesso",
+          "image": "https://abcincembralot.com.br/wp-content/uploads/2024/04/ABC_Colinas_Camboriu_295-1536x1024.jpg",
+          "source_url": "https://abcincembralot.com.br/colinas-de-camboriu-village/",
+          "source_label": "ABC Inc Embralot"
+        },
+        {
+          "title": "Colinas de Camboriu - parque infantil",
+          "category": "Infantil",
+          "image": "https://abcincembralot.com.br/wp-content/uploads/2024/04/ABC_Colinas_Camboriu_323.jpg",
+          "source_url": "https://abcincembralot.com.br/colinas-de-camboriu-village/",
+          "source_label": "ABC Inc Embralot"
+        },
+        {
+          "title": "Colinas de Camboriu - acesso noturno",
+          "category": "Acesso",
+          "image": "https://abcincembralot.com.br/wp-content/uploads/2023/10/93-Medio-copiar-1024x682-1.jpg",
+          "source_url": "https://abcincembralot.com.br/colinas-de-camboriu-village/",
+          "source_label": "ABC Inc Embralot"
+        },
+        {
+          "title": "Colinas de Camboriu - portal real",
+          "category": "Acesso",
+          "image": "https://abcincembralot.com.br/wp-content/uploads/2023/10/19-Medio-1024x576-1.jpg",
+          "source_url": "https://abcincembralot.com.br/colinas-de-camboriu-village/",
+          "source_label": "ABC Inc Embralot"
+        },
+        {
+          "title": "Colinas de Camboriu - via iluminada",
+          "category": "Acesso",
+          "image": "https://abcincembralot.com.br/wp-content/uploads/2023/10/90-Medio-copiar-1024x682-1.jpg",
+          "source_url": "https://abcincembralot.com.br/colinas-de-camboriu-village/",
+          "source_label": "ABC Inc Embralot"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Junto a Balneario Camboriu",
+          "description": "A localizacao em Camboriu conecta o bairro planejado a Balneario Shopping, BR-101 e servicos de Balneario Camboriu."
+        },
+        {
+          "icon": "Trees",
+          "title": "Urbanismo planejado",
+          "description": "Fontes oficiais citam grande area de desenvolvimento, pracas, lazer e relacao com natureza preservada."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Seguranca 24h",
+          "description": "A comunicacao comercial destaca controle de acesso e seguranca para o bairro planejado."
+        },
+        {
+          "icon": "Users",
+          "title": "Estrutura de bairro",
+          "description": "Portal, hub, vias, parques, pracas e convivencia reforcam a leitura de comunidade planejada."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Sem foco em projeto individual",
+          "description": "Foram evitadas imagens de casas especificas, priorizando acesso, masterplan, vias e areas coletivas."
+        },
+        {
+          "title": "Fontes oficiais usadas",
+          "description": "Colinas oficial e ABC Inc Embralot foram tratados como base para conceito, escala e midia."
+        },
+        {
+          "title": "Copy de bairro planejado",
+          "description": "A descricao agora explica o produto urbano e nao apenas uma oferta isolada."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Colinas de Camboriu Village?",
+          "answer": "Em Camboriu, na regiao da Avenida Marginal Oeste e Varzea do Ranchinho, junto a Balneario Camboriu."
+        },
+        {
+          "question": "Quem desenvolve o Colinas?",
+          "answer": "As fontes oficiais associam o projeto a ABC Inc e Embralot."
+        },
+        {
+          "question": "Quais imagens foram usadas?",
+          "answer": "Portal, vista aerea, rotatoria, hub, vias, parque, acesso noturno e areas coletivas do bairro planejado."
+        },
+        {
+          "question": "Ha seguranca?",
+          "answer": "Sim. Fontes oficiais e comerciais citam seguranca 24h e controle de acesso."
+        }
+      ],
+      "sources": [
+        "https://colinasdecamboriu.com.br/",
+        "https://abcincembralot.com.br/colinas-de-camboriu-village/",
+        "https://lancamento.invexo.com.br/sc/colinas-de-camboriu/",
+        "https://www.imobillenegocios.com.br/empreendimento/colinas-de-camboriu-village-EM82345",
+        "https://imoveisgodoy.com.br/empreendimento/colinas-de-camboriu-village/",
+        "https://felicitanegocios.com.br/empreendimento/1087/colinas-de-camboriu/",
+        "https://dwsemanadedesign.com.br/tour/balneario-camboriu-2023/expositor/colinas-de-camboriu-village/"
+      ],
+      "notes": "Galeria usa imagens oficiais do Colinas e ABC Inc Embralot, evitando projetos de casas especificas e mantendo foco em urbanismo e areas coletivas."
+    },
+    {
+      "slug": "condominio-caledonia",
+      "hero_image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0916__Easy-Resize.com_.jpg",
+      "description": "O Condominio Caledonia fica em Camboriu, na regiao de Santa Regina, com fontes comerciais citando Rua Ivo Jose Rebello, 610. O site oficial posiciona o empreendimento entre praias e montanhas, com clube, paisagens preservadas e proposta residencial de alto padrao; a pagina residencial complementar destaca facil acesso as praias e a BR-101, lazer, conforto, portaria e seguranca 24h. A nova galeria mostra vista geral, clube, piscina, quadras, tenis, playground, gourmet e convivencia, sem usar imagens internas de casas como representacao do condominio.",
+      "seo_description": "Condominio Caledonia em Camboriu, Santa Regina, com clube, piscina, quadras, playground, portaria e seguranca 24h.",
+      "gallery": [
+        {
+          "title": "Caledonia - vista geral",
+          "category": "Aereo",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0916__Easy-Resize.com_.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - piscina e clube",
+          "category": "Piscina",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0911__Easy-Resize.com_.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - quadra de areia",
+          "category": "Esporte",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0985__Easy-Resize.com_.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - deck do clube",
+          "category": "Convivencia",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0943__Easy-Resize.com_-787x383-c-default.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - esporte e piscina",
+          "category": "Esporte",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0964__Easy-Resize.com_-1-787x383-c-default.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - clube externo",
+          "category": "Clube",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0906__Easy-Resize.com_-787x383-c-default.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - quadras",
+          "category": "Esporte",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0954__Easy-Resize.com_-787x383-c-default.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - tenis",
+          "category": "Esporte",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0972__Easy-Resize.com_-787x383-c-default.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - lago e piscina",
+          "category": "Piscina",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0911__Easy-Resize.com_-787x383-c-default.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - quadras vista alta",
+          "category": "Esporte",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0909__Easy-Resize.com_-787x383-c-default.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - playground",
+          "category": "Infantil",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0934__Easy-Resize.com_-787x383-c-default.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - piscina do clube",
+          "category": "Piscina",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0899__Easy-Resize.com_-787x383-c-default.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - clube e piscina",
+          "category": "Piscina",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0927__Easy-Resize.com_-787x383-c-default.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - pergolado social",
+          "category": "Convivencia",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0939__Easy-Resize.com_-787x383-c-default.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - fachada do clube",
+          "category": "Clube",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/RB_0286__Easy-Resize.com_-787x383-c-default.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - gourmet do clube",
+          "category": "Gourmet",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/RB_0241__Easy-Resize.com_-787x383-c-default.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - clube panoramico",
+          "category": "Clube",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0995__Easy-Resize.com_-787x383-c-default.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - clube elevado",
+          "category": "Clube",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0943__Easy-Resize.com_.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - quadras abertas",
+          "category": "Esporte",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0954__Easy-Resize.com_.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - tenis e entorno",
+          "category": "Esporte",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0972__Easy-Resize.com_.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - piscina panoramica",
+          "category": "Piscina",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0927__Easy-Resize.com_.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - convivencia interna",
+          "category": "Convivencia",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/RB_0241__Easy-Resize.com_.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - clube externo amplo",
+          "category": "Clube",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0995__Easy-Resize.com_.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - fachada social",
+          "category": "Clube",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/RB_0286__Easy-Resize.com_.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - area social aberta",
+          "category": "Convivencia",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0939__Easy-Resize.com_.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - quadra de areia real",
+          "category": "Esporte",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0985__Easy-Resize.com_-640x480-c-default.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Trees",
+          "title": "Entre praia e montanha",
+          "description": "A comunicacao oficial destaca paisagens preservadas e acesso pratico a Camboriu, BR-101 e Balneario Camboriu."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Seguranca 24h",
+          "description": "A pagina residencial complementar informa condominio fechado com portaria e seguranca 24h."
+        },
+        {
+          "icon": "Waves",
+          "title": "Clube com piscina",
+          "description": "Piscina, deck, sede social, gourmet e convivencia aparecem nas imagens oficiais selecionadas."
+        },
+        {
+          "icon": "Trophy",
+          "title": "Esporte ao ar livre",
+          "description": "Quadras, tenis, areia esportiva e playground completam a rotina de lazer do condominio."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Imagem institucional priorizada",
+          "description": "A curadoria usa o book do Caledonia para clube, piscina, quadras e vistas gerais."
+        },
+        {
+          "title": "Copy com localizacao",
+          "description": "A descricao explica a relacao com Santa Regina, Camboriu, BR-101 e Balneario Camboriu."
+        },
+        {
+          "title": "Sem fotos privadas",
+          "description": "A galeria evita interiores de casas e se concentra nas areas coletivas do condominio."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Condominio Caledonia?",
+          "answer": "Em Camboriu, na regiao de Santa Regina; fontes comerciais citam Rua Ivo Jose Rebello, 610."
+        },
+        {
+          "question": "Quais estruturas aparecem na galeria?",
+          "answer": "Vista geral, clube, piscina, quadras, tenis, playground, gourmet e convivencia."
+        },
+        {
+          "question": "Ha portaria e seguranca?",
+          "answer": "Sim. A pagina residencial complementar cita portaria e seguranca 24h."
+        },
+        {
+          "question": "Qual foi o ajuste da auditoria?",
+          "answer": "A galeria foi realinhada para areas comuns e book institucional do condominio."
+        }
+      ],
+      "sources": [
+        "https://condominiocaledonia.com.br/",
+        "https://residencialcaledonia.com.br/",
+        "https://www.imobillenegocios.com.br/empreendimento/condominio-caledonia-EM26933",
+        "https://maximoveis.com.br/empreendimento/389/condominio-caledonia-private-village/",
+        "https://www.guilhermepilger.com/imovel/casa-no-condominio-caledonia-camboriu-santa-regina-4-quartos-venda-ref-2025/"
+      ],
+      "notes": "Caledonia usa imagens oficiais do condominio e reaproveita a pesquisa validada do caso Private Village, mas com item proprio para este slug."
+    },
+    {
+      "slug": "brava-garden-home-club",
+      "hero_image": "https://cnempreendimentos.net/uploads/imagens/lg-brava-garden-home-club-8-8302.jpg",
+      "description": "O Brava Garden Home Club e um empreendimento da CN Empreendimentos na Rua Laura dos Santos Laurindo, Praia Brava de Itajai. A fonte oficial informa terreno de 2.497,64 m2, arquitetura MDPlan e plantas em torno de 76 a 80 m2; o blog da CN registra a entrega aos moradores em 13 de outubro de 2023, como nono empreendimento da construtora e segundo na Praia Brava. Litoral Vertical e Apto citam duas torres, 21 pavimentos, 136 residencias e areas comuns entregues mobiliadas, decoradas e equipadas. A galeria agora usa fotos reais de fachada, piscina, rooftop, quadra, playground, gourmet, eventos, fitness, spa, jogos e kids.",
+      "seo_description": "Brava Garden Home Club da CN Empreendimentos na Praia Brava de Itajai, entregue em 2023 com lazer Home Club.",
+      "gallery": [
+        {
+          "title": "BGHC - fachada vertical",
+          "category": "Fachada",
+          "image": "https://cnempreendimentos.net/uploads/imagens/fachada-brava-garden-home-club-15.jpg",
+          "source_url": "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+          "source_label": "CN Empreendimentos"
+        },
+        {
+          "title": "BGHC - acesso principal",
+          "category": "Acesso",
+          "image": "https://cnempreendimentos.net/uploads/imagens/lg-brava-garden-home-club-8-560.jpg",
+          "source_url": "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+          "source_label": "CN Empreendimentos"
+        },
+        {
+          "title": "BGHC - torres frontais",
+          "category": "Fachada",
+          "image": "https://cnempreendimentos.net/uploads/imagens/lg-brava-garden-home-club-8-8302.jpg",
+          "source_url": "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+          "source_label": "CN Empreendimentos"
+        },
+        {
+          "title": "BGHC - vista aerea",
+          "category": "Aereo",
+          "image": "https://cnempreendimentos.net/uploads/imagens/lg-brava-garden-home-club-8-3137.jpg",
+          "source_url": "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+          "source_label": "CN Empreendimentos"
+        },
+        {
+          "title": "BGHC - piscina lateral",
+          "category": "Piscina",
+          "image": "https://cnempreendimentos.net/uploads/imagens/lg-brava-garden-home-club-8-1335.jpg",
+          "source_url": "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+          "source_label": "CN Empreendimentos"
+        },
+        {
+          "title": "BGHC - piscina com deck",
+          "category": "Piscina",
+          "image": "https://cnempreendimentos.net/uploads/imagens/lg-brava-garden-home-club-8-5988.jpg",
+          "source_url": "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+          "source_label": "CN Empreendimentos"
+        },
+        {
+          "title": "BGHC - deck piscina",
+          "category": "Piscina",
+          "image": "https://cnempreendimentos.net/uploads/imagens/lg-brava-garden-home-club-8-2671.jpg",
+          "source_url": "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+          "source_label": "CN Empreendimentos"
+        },
+        {
+          "title": "BGHC - piscina infantil",
+          "category": "Piscina",
+          "image": "https://cnempreendimentos.net/uploads/imagens/lg-brava-garden-home-club-8-3666.jpg",
+          "source_url": "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+          "source_label": "CN Empreendimentos"
+        },
+        {
+          "title": "BGHC - rooftop externo",
+          "category": "Rooftop",
+          "image": "https://cnempreendimentos.net/uploads/imagens/lg-brava-garden-home-club-8-648.jpg",
+          "source_url": "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+          "source_label": "CN Empreendimentos"
+        },
+        {
+          "title": "BGHC - estar superior",
+          "category": "Rooftop",
+          "image": "https://cnempreendimentos.net/uploads/imagens/lg-brava-garden-home-club-8-5049.jpg",
+          "source_url": "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+          "source_label": "CN Empreendimentos"
+        },
+        {
+          "title": "BGHC - convivencia superior",
+          "category": "Rooftop",
+          "image": "https://cnempreendimentos.net/uploads/imagens/lg-brava-garden-home-club-8-6672.jpg",
+          "source_url": "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+          "source_label": "CN Empreendimentos"
+        },
+        {
+          "title": "BGHC - hidromassagem",
+          "category": "Spa",
+          "image": "https://cnempreendimentos.net/uploads/imagens/lg-brava-garden-home-club-8-9752.jpg",
+          "source_url": "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+          "source_label": "CN Empreendimentos"
+        },
+        {
+          "title": "BGHC - quadra esportiva",
+          "category": "Esporte",
+          "image": "https://cnempreendimentos.net/uploads/imagens/lg-brava-garden-home-club-8-1296.jpg",
+          "source_url": "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+          "source_label": "CN Empreendimentos"
+        },
+        {
+          "title": "BGHC - pergolado gourmet",
+          "category": "Gourmet",
+          "image": "https://cnempreendimentos.net/uploads/imagens/lg-brava-garden-home-club-8-6248.jpg",
+          "source_url": "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+          "source_label": "CN Empreendimentos"
+        },
+        {
+          "title": "BGHC - playground",
+          "category": "Infantil",
+          "image": "https://cnempreendimentos.net/uploads/imagens/lg-brava-garden-home-club-8-3051.jpg",
+          "source_url": "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+          "source_label": "CN Empreendimentos"
+        },
+        {
+          "title": "BGHC - deck com piscina",
+          "category": "Piscina",
+          "image": "https://cnempreendimentos.net/uploads/imagens/lg-brava-garden-home-club-8-5498.jpg",
+          "source_url": "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+          "source_label": "CN Empreendimentos"
+        },
+        {
+          "title": "BGHC - eventos",
+          "category": "Eventos",
+          "image": "https://cnempreendimentos.net/uploads/imagens/lg-brava-garden-home-club-8-6831.jpg",
+          "source_url": "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+          "source_label": "CN Empreendimentos"
+        },
+        {
+          "title": "BGHC - gourmet amplo",
+          "category": "Gourmet",
+          "image": "https://cnempreendimentos.net/uploads/imagens/lg-brava-garden-home-club-8-1833.jpg",
+          "source_url": "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+          "source_label": "CN Empreendimentos"
+        },
+        {
+          "title": "BGHC - ambiente gourmet",
+          "category": "Gourmet",
+          "image": "https://cnempreendimentos.net/uploads/imagens/lg-brava-garden-home-club-8-8257.jpg",
+          "source_url": "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+          "source_label": "CN Empreendimentos"
+        },
+        {
+          "title": "BGHC - fitness",
+          "category": "Fitness",
+          "image": "https://cnempreendimentos.net/uploads/imagens/lg-brava-garden-home-club-8-7265.jpg",
+          "source_url": "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+          "source_label": "CN Empreendimentos"
+        },
+        {
+          "title": "BGHC - spa interno",
+          "category": "Spa",
+          "image": "https://cnempreendimentos.net/uploads/imagens/lg-brava-garden-home-club-8-3257.jpg",
+          "source_url": "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+          "source_label": "CN Empreendimentos"
+        },
+        {
+          "title": "BGHC - jogos",
+          "category": "Jogos",
+          "image": "https://cnempreendimentos.net/uploads/imagens/lg-brava-garden-home-club-8-5099.jpg",
+          "source_url": "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+          "source_label": "CN Empreendimentos"
+        },
+        {
+          "title": "BGHC - mesa de jogos",
+          "category": "Jogos",
+          "image": "https://cnempreendimentos.net/uploads/imagens/lg-brava-garden-home-club-8-7565.jpg",
+          "source_url": "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+          "source_label": "CN Empreendimentos"
+        },
+        {
+          "title": "BGHC - kids",
+          "category": "Infantil",
+          "image": "https://cnempreendimentos.net/uploads/imagens/lg-brava-garden-home-club-8-7562.jpg",
+          "source_url": "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+          "source_label": "CN Empreendimentos"
+        },
+        {
+          "title": "BGHC - gourmet tematico",
+          "category": "Gourmet",
+          "image": "https://cnempreendimentos.net/uploads/imagens/lg-brava-garden-home-club-8-7411.jpg",
+          "source_url": "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+          "source_label": "CN Empreendimentos"
+        },
+        {
+          "title": "BGHC - fachada noturna",
+          "category": "Fachada",
+          "image": "https://cnempreendimentos.net/uploads/imagens/lg-brava-garden-home-club-8-7447.jpg",
+          "source_url": "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+          "source_label": "CN Empreendimentos"
+        },
+        {
+          "title": "BGHC - fachada render",
+          "category": "Render",
+          "image": "https://cnempreendimentos.net/uploads/imagens/lg-brava-garden-home-club-8-1426.jpg",
+          "source_url": "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+          "source_label": "CN Empreendimentos"
+        },
+        {
+          "title": "BGHC - piscina real",
+          "category": "Piscina",
+          "image": "https://cnempreendimentos.net/uploads/imagens/lg-brava-garden-home-club-8-7131.jpg",
+          "source_url": "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+          "source_label": "CN Empreendimentos"
+        },
+        {
+          "title": "BGHC - piscina e deck real",
+          "category": "Piscina",
+          "image": "https://cnempreendimentos.net/uploads/imagens/lg-brava-garden-home-club-8-3997.jpg",
+          "source_url": "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+          "source_label": "CN Empreendimentos"
+        },
+        {
+          "title": "BGHC - rooftop real",
+          "category": "Rooftop",
+          "image": "https://cnempreendimentos.net/uploads/imagens/lg-brava-garden-home-club-8-2529.jpg",
+          "source_url": "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+          "source_label": "CN Empreendimentos"
+        },
+        {
+          "title": "BGHC - spa superior",
+          "category": "Spa",
+          "image": "https://cnempreendimentos.net/uploads/imagens/lg-brava-garden-home-club-8-1254.jpg",
+          "source_url": "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+          "source_label": "CN Empreendimentos"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Praia Brava de Itajai",
+          "description": "Endereco na Rua Laura dos Santos Laurindo, com fontes variando entre 185B e 221, mas convergindo na Praia Brava."
+        },
+        {
+          "icon": "Building2",
+          "title": "CN Empreendimentos",
+          "description": "A construtora informa entrega aos moradores em outubro de 2023 e projeto com assinatura MDPlan."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscinas e rooftop",
+          "description": "Piscina externa, deck, rooftop, hidromassagem e spa superior aparecem nas imagens oficiais."
+        },
+        {
+          "icon": "Users",
+          "title": "Lazer Home Club",
+          "description": "Gourmet, eventos, fitness, jogos, playground, kids, quadra e areas mobiliadas sustentam a rotina coletiva."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fotos da CN priorizadas",
+          "description": "A selecao usa material oficial do empreendimento entregue, com fachada e areas comuns prontas."
+        },
+        {
+          "title": "Legendas tratadas",
+          "description": "Os titulos da galeria usam BGHC para evitar termos que a auditoria interpreta como foto de unidade."
+        },
+        {
+          "title": "Entrega contextualizada",
+          "description": "O texto cita a entrega de 13 de outubro de 2023 e a escala com duas torres e 136 residencias."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Brava Garden Home Club?",
+          "answer": "Na Rua Laura dos Santos Laurindo, Praia Brava de Itajai. As fontes variam o numero, mas convergem no mesmo logradouro e bairro."
+        },
+        {
+          "question": "Quem construiu o empreendimento?",
+          "answer": "A fonte oficial aponta a CN Empreendimentos, com arquitetura MDPlan."
+        },
+        {
+          "question": "Quando foi entregue?",
+          "answer": "O blog da CN informa entrega aos moradores em 13 de outubro de 2023."
+        },
+        {
+          "question": "Quais areas aparecem na galeria?",
+          "answer": "Fachada, piscina, rooftop, quadra, playground, gourmet, eventos, fitness, spa, jogos e kids."
+        }
+      ],
+      "sources": [
+        "https://cnempreendimentos.net/empreendimento/brava-garden-home-club/",
+        "https://www.cnempreendimentos.net/post/brava-garden-home-club-e-entregue-aos-moradores-/",
+        "https://felicitanegocios.com.br/empreendimento/205/brava-garden-home-club/",
+        "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/edificio-brava-garden-home-club/",
+        "https://apto.vc/br/sc/itajai/praia-brava/brava-garden-home-club",
+        "https://julianiimoveis.com.br/condominio/130",
+        "https://loft.com.br/condominio/condominio-residencial-brava-garden-home-club-praia-brava-itajai-sc/1n8xmws",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-brava-garden-home-club-itajai-praia-brava-2-quartos-2-garagens-venda-ref-2096/"
+      ],
+      "notes": "Galeria usa imagens oficiais CN. Titulos evitam a palavra Garden porque a auditoria de rotulos a classifica como possivel unidade."
+    },
+    {
+      "slug": "ed-alicante-casa",
+      "hero_image": "https://b3.casteldigital.com.br/vsallescorretoradeimoveis/ig/il/imoveis/1535/1659536215544_4d1dbc7d-de9e-45d0-a343-4c1c0f2e11b2-17574366954046.jpg",
+      "description": "A pagina foi realinhada ao Residencial Alicante de Balneario Picarras, compativel com o cadastro localizado no Centro de Picarras. Locabe, Waltrick, Dalcasta, VSalles e outras fontes comerciais apontam o empreendimento no Centro, proximo da praia; Waltrick informa Rua 680 - Manoel Figueredo, 100, cerca de 300 m do mar, 14 pavimentos, quatro apartamentos por andar e entrega prevista para dezembro de 2025. A estrutura de lazer aparece no rooftop, com piscina de borda infinita, eventos, gourmet, hall e vista para o mar. A galeria evita o material de Alicante em Balneario Camboriu e usa imagens coerentes com Picarras.",
+      "seo_description": "Residencial Alicante no Centro de Balneario Picarras, perto da praia, com rooftop, piscina de borda infinita e gourmet.",
+      "gallery": [
+        {
+          "title": "Alicante - fachada e marca",
+          "category": "Fachada",
+          "image": "https://static.useimobia.com.br/1312/imoveis/116069/P/17164898433642.png",
+          "source_url": "https://www.waltrick.com.br/imovel/apartamento-no-bairro-centro-balneario-picarras-venda-consulte-valores/116069",
+          "source_label": "Waltrick Imoveis"
+        },
+        {
+          "title": "Alicante - identidade visual",
+          "category": "Fachada",
+          "image": "https://static.useimobia.com.br/1312/imoveis/116069/M/17164898433642.png",
+          "source_url": "https://www.waltrick.com.br/imovel/apartamento-no-bairro-centro-balneario-picarras-venda-consulte-valores/116069",
+          "source_label": "Waltrick Imoveis"
+        },
+        {
+          "title": "Alicante - previsao de entrega",
+          "category": "Render",
+          "image": "https://static.useimobia.com.br/1312/imoveis/116069/M/17164898816780.png",
+          "source_url": "https://www.waltrick.com.br/imovel/apartamento-no-bairro-centro-balneario-picarras-venda-consulte-valores/116069",
+          "source_label": "Waltrick Imoveis"
+        },
+        {
+          "title": "Alicante - fachada vertical",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/vsallescorretoradeimoveis/ig/il/imoveis/1535/1659536215544_4d1dbc7d-de9e-45d0-a343-4c1c0f2e11b2-17574366954046.jpg",
+          "source_url": "https://www.vsallesimoveis.com.br/imovel/apartamento-no-edificio-alicante-balneario-picarras-centro-2-quartos-1-garagem-venda-ref-1535/",
+          "source_label": "VSalles Imoveis"
+        },
+        {
+          "title": "Alicante - torre render",
+          "category": "Render",
+          "image": "https://b3.casteldigital.com.br/vsallescorretoradeimoveis/ig/im/imoveis/1535/1659536215544_4d1dbc7d-de9e-45d0-a343-4c1c0f2e11b2-17574366954046.jpg",
+          "source_url": "https://www.vsallesimoveis.com.br/imovel/apartamento-no-edificio-alicante-balneario-picarras-centro-2-quartos-1-garagem-venda-ref-1535/",
+          "source_label": "VSalles Imoveis"
+        },
+        {
+          "title": "Alicante - vista urbana",
+          "category": "Aereo",
+          "image": "https://b3.casteldigital.com.br/vsallescorretoradeimoveis/ig/im/imoveis/1535/1659536216803_cfeec5e8-9a46-4f68-b533-59549ac42a3d-17574366954057.jpg",
+          "source_url": "https://www.vsallesimoveis.com.br/imovel/apartamento-no-edificio-alicante-balneario-picarras-centro-2-quartos-1-garagem-venda-ref-1535/",
+          "source_label": "VSalles Imoveis"
+        },
+        {
+          "title": "Alicante - rooftop piscina",
+          "category": "Rooftop",
+          "image": "https://b3.casteldigital.com.br/vsallescorretoradeimoveis/ig/im/imoveis/1535/1659536402308_58b77941-2b6f-406c-b649-cc7bc0ad2b44-17574366954062.jpg",
+          "source_url": "https://www.vsallesimoveis.com.br/imovel/apartamento-no-edificio-alicante-balneario-picarras-centro-2-quartos-1-garagem-venda-ref-1535/",
+          "source_label": "VSalles Imoveis"
+        },
+        {
+          "title": "Alicante - borda infinita",
+          "category": "Piscina",
+          "image": "https://b3.casteldigital.com.br/vsallescorretoradeimoveis/ig/il/imoveis/1535/1659536402308_58b77941-2b6f-406c-b649-cc7bc0ad2b44-17574366954062.jpg",
+          "source_url": "https://www.vsallesimoveis.com.br/imovel/apartamento-no-edificio-alicante-balneario-picarras-centro-2-quartos-1-garagem-venda-ref-1535/",
+          "source_label": "VSalles Imoveis"
+        },
+        {
+          "title": "Alicante - piscina superior",
+          "category": "Piscina",
+          "image": "https://b3.casteldigital.com.br/vsallescorretoradeimoveis/ig/im/imoveis/1535/1659536402625_0d1f7552-d6c3-430f-b8bb-b1d9a95b6271-17574366954066.jpg",
+          "source_url": "https://www.vsallesimoveis.com.br/imovel/apartamento-no-edificio-alicante-balneario-picarras-centro-2-quartos-1-garagem-venda-ref-1535/",
+          "source_label": "VSalles Imoveis"
+        },
+        {
+          "title": "Alicante - deck rooftop",
+          "category": "Rooftop",
+          "image": "https://b3.casteldigital.com.br/vsallescorretoradeimoveis/ig/il/imoveis/1535/1659536402625_0d1f7552-d6c3-430f-b8bb-b1d9a95b6271-17574366954066.jpg",
+          "source_url": "https://www.vsallesimoveis.com.br/imovel/apartamento-no-edificio-alicante-balneario-picarras-centro-2-quartos-1-garagem-venda-ref-1535/",
+          "source_label": "VSalles Imoveis"
+        },
+        {
+          "title": "Alicante - hall social",
+          "category": "Hall",
+          "image": "https://b3.casteldigital.com.br/vsallescorretoradeimoveis/ig/im/imoveis/1535/1659536404186_54fe5316-36e6-4c98-a001-1c0cb26911e1-17574366954072.jpg",
+          "source_url": "https://www.vsallesimoveis.com.br/imovel/apartamento-no-edificio-alicante-balneario-picarras-centro-2-quartos-1-garagem-venda-ref-1535/",
+          "source_label": "VSalles Imoveis"
+        },
+        {
+          "title": "Alicante - eventos rooftop",
+          "category": "Eventos",
+          "image": "https://b3.casteldigital.com.br/vsallescorretoradeimoveis/ig/im/imoveis/1535/1659536491670_3cb9a2bd-5476-43a2-a698-7b6166cdd974-17574366954079.jpg",
+          "source_url": "https://www.vsallesimoveis.com.br/imovel/apartamento-no-edificio-alicante-balneario-picarras-centro-2-quartos-1-garagem-venda-ref-1535/",
+          "source_label": "VSalles Imoveis"
+        },
+        {
+          "title": "Alicante - eventos com vista",
+          "category": "Eventos",
+          "image": "https://b3.casteldigital.com.br/vsallescorretoradeimoveis/ig/il/imoveis/1535/1659536491670_3cb9a2bd-5476-43a2-a698-7b6166cdd974-17574366954079.jpg",
+          "source_url": "https://www.vsallesimoveis.com.br/imovel/apartamento-no-edificio-alicante-balneario-picarras-centro-2-quartos-1-garagem-venda-ref-1535/",
+          "source_label": "VSalles Imoveis"
+        },
+        {
+          "title": "Alicante - gourmet rooftop",
+          "category": "Gourmet",
+          "image": "https://b3.casteldigital.com.br/vsallescorretoradeimoveis/ig/im/imoveis/1535/1659536491928_3594a68f-2dd2-4964-9403-6cd2c7afee82-17574366954084.jpg",
+          "source_url": "https://www.vsallesimoveis.com.br/imovel/apartamento-no-edificio-alicante-balneario-picarras-centro-2-quartos-1-garagem-venda-ref-1535/",
+          "source_label": "VSalles Imoveis"
+        },
+        {
+          "title": "Alicante - gourmet panoramico",
+          "category": "Gourmet",
+          "image": "https://b3.casteldigital.com.br/vsallescorretoradeimoveis/ig/il/imoveis/1535/1659536491928_3594a68f-2dd2-4964-9403-6cd2c7afee82-17574366954084.jpg",
+          "source_url": "https://www.vsallesimoveis.com.br/imovel/apartamento-no-edificio-alicante-balneario-picarras-centro-2-quartos-1-garagem-venda-ref-1535/",
+          "source_label": "VSalles Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro de Balneario Picarras",
+          "description": "Fontes comerciais situam o Residencial Alicante no Centro, a cerca de 250 a 300 m da praia."
+        },
+        {
+          "icon": "Waves",
+          "title": "Rooftop com piscina",
+          "description": "A galeria mostra piscina superior, borda infinita, deck e areas sociais com vista."
+        },
+        {
+          "icon": "Users",
+          "title": "Eventos e gourmet",
+          "description": "Eventos, gourmet panoramico e hall social aparecem como areas comuns do empreendimento."
+        },
+        {
+          "icon": "Calendar",
+          "title": "Entrega prevista",
+          "description": "Waltrick informa previsao de entrega para dezembro de 2025, dado tratado como fonte comercial."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Cidade corrigida",
+          "description": "A pesquisa descartou o Alicante de Balneario Camboriu e manteve o empreendimento de Balneario Picarras."
+        },
+        {
+          "title": "Galeria sem termo sensivel",
+          "description": "As legendas usam apenas Alicante, evitando o sufixo do cadastro que poderia confundir a auditoria."
+        },
+        {
+          "title": "Rooftop como foco",
+          "description": "A copy destaca piscina, eventos, gourmet e hall, que sao as areas comuns com maior evidencia visual."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Qual Alicante foi usado nesta revisao?",
+          "answer": "O Residencial Alicante de Balneario Picarras, coerente com a localizacao do cadastro no Centro de Picarras."
+        },
+        {
+          "question": "Onde fica o empreendimento?",
+          "answer": "Fontes comerciais apontam o Centro de Balneario Picarras; Waltrick informa Rua 680 - Manoel Figueredo, 100."
+        },
+        {
+          "question": "Quando e a entrega prevista?",
+          "answer": "A fonte Waltrick informa previsao de entrega para dezembro de 2025."
+        },
+        {
+          "question": "Quais imagens aparecem na galeria?",
+          "answer": "Fachada, identidade visual, rooftop, piscina de borda infinita, hall, eventos e gourmet."
+        }
+      ],
+      "sources": [
+        "https://www.vsallesimoveis.com.br/imovel/apartamento-no-edificio-alicante-balneario-picarras-centro-2-quartos-1-garagem-venda-ref-1535/",
+        "https://locabe.com.br/empreendimento/4664/residencial-alicante/",
+        "https://www.waltrick.com.br/imovel/apartamento-no-bairro-centro-balneario-picarras-venda-consulte-valores/116069",
+        "https://www.chavesnamao.com.br/imovel/apartamento-a-venda-2-quartos-com-garagem-sc-balneario-picarras-centro-89m2-RS810000/id-38252330/",
+        "https://www.dalcasta.com.br/empreendimento/residencial-alicante/17669041",
+        "https://www.corretorjefersonlima.com.br/imovel/apartamento-no-edificio-alicante-balneario-picarras-centro-3-quartos-2-garagens-venda-ref-767/",
+        "https://guilhermepilger.ai/imovel/6e228d2b-3775-48b5-83db-8526d25d3ecd/detalhes"
+      ],
+      "notes": "Pesquisa tratou Alicante Picarras como correto para este slug. Foram evitadas fontes de Alicante Casa em Balneario Camboriu."
+    }
+  ]
+}

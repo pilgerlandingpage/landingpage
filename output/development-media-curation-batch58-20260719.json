@@ -1,0 +1,2099 @@
+{
+  "batch_id": "development-media-curation-p2-batch3-20260719",
+  "generated_at": "2026-07-19T05:15:20.251Z",
+  "items": [
+    {
+      "slug": "bellas-artes",
+      "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1764/001-20220721_1404481708348485762-17498250331054.jpg",
+      "description": "O Bellas Artes esta na Rua Joao Francisco dos Santos, 20, no bairro Pioneiros, em Balneario Camboriu. Felicita, Imobille e CRI posicionam o edificio em uma area de acesso rapido a praia, a Barra Norte, ao comercio do Pioneiros e ao eixo turistico do FG Big Wheel. A nova curadoria visual mostra fachada, acesso, piscina, deck, quadra, playground, pub, espaco gourmet e garagem, substituindo fotos de ambientes privativos que apareciam junto ao acervo. O resultado apresenta o condominio como ele e vivido: predio vertical, lazer externo e apoio de convivencia para quem busca morar perto do mar no Pioneiros.",
+      "seo_description": "Bellas Artes no Pioneiros, Balneario Camboriu, Rua Joao Francisco dos Santos, com fachada, piscina, quadra, playground e gourmet.",
+      "gallery": [
+        {
+          "title": "Bellas Artes - fachada e piscina",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1764/001-20220721_1404481708348485762-17498250331054.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Bellas Artes - acesso principal",
+          "category": "Acesso",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1764/002-20220721_1334401708348485751-17498250331052.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Bellas Artes - deck piscina",
+          "category": "Piscina",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1764/003-20220721_1401131708348485548-17498250331052.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Bellas Artes - piscina externa",
+          "category": "Piscina",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1764/004-20220721_1401531708348485464-17498250331053.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Bellas Artes - espreguicadeiras",
+          "category": "Deck",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1764/005-20220721_1404331708348485309-17498250331053.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Bellas Artes - entrada frontal",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2026/4-11zon-1782318183.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-bellas-artes-EM56750",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Bellas Artes - jardins fachada",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2026/3-11zon-1782318183.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-bellas-artes-EM56750",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Bellas Artes - torre vertical",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2026/1-11zon-1782318180.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-bellas-artes-EM56750",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Bellas Artes - lazer piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2026/dsc-9021-11zon-1782318180.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-bellas-artes-EM56750",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Bellas Artes - garagem coletiva",
+          "category": "Garagem",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2026/dsc-9014-11zon-1782318181.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-bellas-artes-EM56750",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Bellas Artes - portico social",
+          "category": "Acesso",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/682/img-100.jpeg?1748375312",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/682/bellas-artes/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Bellas Artes - piscina descoberta",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/682/img-52.jpeg?1748375312",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/682/bellas-artes/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Bellas Artes - torre e deck",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/682/img-57.jpeg?1748375312",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/682/bellas-artes/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Bellas Artes - vista piscina",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/682/img-99.jpeg?1748375312",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/682/bellas-artes/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Bellas Artes - praca externa",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/682/img-90.jpeg?1748375312",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/682/bellas-artes/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Bellas Artes - quadra esportiva",
+          "category": "Quadra",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/682/img-87.jpeg?1748375312",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/682/bellas-artes/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Bellas Artes - playground",
+          "category": "Playground",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/682/img-95.jpeg?1748375312",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/682/bellas-artes/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Bellas Artes - pub convivencia",
+          "category": "Pub",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/682/img-66.jpeg?1748375312",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/682/bellas-artes/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Bellas Artes - esporte coberto",
+          "category": "Quadra",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/682/img-81.jpeg?1748375312",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/682/bellas-artes/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Bellas Artes - gourmet coberto",
+          "category": "Gourmet",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/682/img-84.jpeg?1748375312",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/682/bellas-artes/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Bellas Artes - eventos",
+          "category": "Eventos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/682/img-69.jpeg?1748375312",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/682/bellas-artes/",
+          "source_label": "Felicita Negocios"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Pioneiros perto do mar",
+          "description": "Endereco na Rua Joao Francisco dos Santos, com acesso rapido a praia, Barra Norte e servicos do bairro."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e deck",
+          "description": "A nova galeria destaca piscina descoberta, espreguicadeiras e area externa de lazer."
+        },
+        {
+          "icon": "Activity",
+          "title": "Quadra e playground",
+          "description": "O condominio aparece com areas de esporte, recreacao infantil e convivencia ao ar livre."
+        },
+        {
+          "icon": "DoorOpen",
+          "title": "Acesso e garagem",
+          "description": "Portico, entrada frontal e garagem coletiva ajudam a representar a rotina do edificio."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Galeria corrigida",
+          "description": "A selecao prioriza fachada, piscina, quadra, playground, pub, gourmet e garagem."
+        },
+        {
+          "title": "Contexto de bairro",
+          "description": "A descricao passa a explicar a conexao com Pioneiros, Barra Norte e FG Big Wheel."
+        },
+        {
+          "title": "Acervo mais fiel",
+          "description": "Ambientes privativos foram evitados para que a pagina apresente o condominio."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Bellas Artes?",
+          "answer": "Na Rua Joao Francisco dos Santos, 20, bairro Pioneiros, em Balneario Camboriu."
+        },
+        {
+          "question": "Quais areas aparecem na galeria?",
+          "answer": "Fachada, acesso, piscina, deck, quadra, playground, pub, gourmet, eventos e garagem."
+        },
+        {
+          "question": "O que foi corrigido nas fotos?",
+          "answer": "Foram removidas fotos de ambientes privativos e mantidas imagens do predio e das areas comuns."
+        },
+        {
+          "question": "Qual e o contexto da localizacao?",
+          "answer": "Pioneiros fica proximo da praia, da Barra Norte, de servicos locais e do eixo do FG Big Wheel."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-bellas-artes-EM56750",
+        "https://felicitanegocios.com.br/empreendimento/682/bellas-artes/",
+        "https://www.flyimoveis.com.br/imovel/apartamento-no-edificio-bellas-artes-balneario-camboriu-pioneiros-2-quartos-2-garagens-venda-ref-8/",
+        "https://www.imobiliariacri.com.br/imovel/apartamento-no-edificio-bellas-artes-com-03-quartos-no-pioneiros-em-balneario-camboriu-IM00230"
+      ],
+      "notes": "Fontes confirmam Rua Joao Francisco dos Santos, 20, em Pioneiros. Imagens internas foram substituidas por fachada, piscina, quadra, playground, pub, gourmet e garagem."
+    },
+    {
+      "slug": "black-piano",
+      "hero_image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/June2022/9JCLDvusuUeyGqeIS9tB.jpg",
+      "description": "O Black Piano Residence fica na Rua 236, em Meia Praia, Itapema. Versatil associa o predio a Zimmermann Construtora e descreve estrutura com hall decorado, dois elevadores, box de praia, circuito de cameras, rooftop, lounge, espaco gourmet, piscina infantil, jogos e eventos; Imobille e VivaReal reforcam piscina, hall, jogos e gourmet. As fontes variam entre os numeros 191 e 203 para o mesmo eixo da Rua 236, entao a pagina usa a rua e o bairro como referencia principal. A nova galeria remove interiores de apartamento e apresenta fachada, hall, elevadores, gourmet, jogos e fitness.",
+      "seo_description": "Black Piano Residence em Meia Praia, Itapema, Rua 236, com fachada, hall, rooftop, gourmet, jogos, fitness e estrutura de lazer.",
+      "gallery": [
+        {
+          "title": "Black Piano - fachada real",
+          "category": "Fachada",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/June2022/9JCLDvusuUeyGqeIS9tB.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-black-piano-EM35989",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Black Piano - fachada render",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_896_12142_1535_250924.jpeg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/black-piano-residence/itapema/meia-praia/426",
+          "source_label": "Versatil Imobiliaria"
+        },
+        {
+          "title": "Black Piano - torre vertical",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_909_21188_1504_120526.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/black-piano-residence/itapema/meia-praia/426",
+          "source_label": "Versatil Imobiliaria"
+        },
+        {
+          "title": "Black Piano - hall decorado",
+          "category": "Hall",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_896_12144_1535_250924.jpeg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/black-piano-residence/itapema/meia-praia/426",
+          "source_label": "Versatil Imobiliaria"
+        },
+        {
+          "title": "Black Piano - eventos",
+          "category": "Eventos",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_896_12157_1536_250924.jpeg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/black-piano-residence/itapema/meia-praia/426",
+          "source_label": "Versatil Imobiliaria"
+        },
+        {
+          "title": "Black Piano - gourmet",
+          "category": "Gourmet",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_896_12160_1536_250924.jpeg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/black-piano-residence/itapema/meia-praia/426",
+          "source_label": "Versatil Imobiliaria"
+        },
+        {
+          "title": "Black Piano - jogos",
+          "category": "Jogos",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_896_12156_1536_250924.jpeg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/black-piano-residence/itapema/meia-praia/426",
+          "source_label": "Versatil Imobiliaria"
+        },
+        {
+          "title": "Black Piano - elevadores",
+          "category": "Hall",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_909_21189_1504_120526.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/black-piano-residence/itapema/meia-praia/426",
+          "source_label": "Versatil Imobiliaria"
+        },
+        {
+          "title": "Black Piano - acesso interno",
+          "category": "Acesso",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_909_21190_1504_120526.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/black-piano-residence/itapema/meia-praia/426",
+          "source_label": "Versatil Imobiliaria"
+        },
+        {
+          "title": "Black Piano - jogos equipado",
+          "category": "Jogos",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_909_21191_1504_120526.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/black-piano-residence/itapema/meia-praia/426",
+          "source_label": "Versatil Imobiliaria"
+        },
+        {
+          "title": "Black Piano - fitness",
+          "category": "Fitness",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_909_21192_1504_120526.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/black-piano-residence/itapema/meia-praia/426",
+          "source_label": "Versatil Imobiliaria"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 236, Meia Praia",
+          "description": "Localizacao em um dos eixos mais desejados de Itapema, com comercio e praia por perto."
+        },
+        {
+          "icon": "Building2",
+          "title": "Zimmermann Construtora",
+          "description": "Versatil associa o Black Piano Residence a Zimmermann Construtora."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Hall e rooftop",
+          "description": "As fontes citam hall decorado, lounge, rooftop e apoio comum para receber."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Jogos e fitness",
+          "description": "A selecao visual confirma jogos, equipamentos de exercicio e espacos de convivencia."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Endereco tratado com cautela",
+          "description": "Fontes divergem entre os numeros 191 e 203; a pagina referencia Rua 236 e Meia Praia."
+        },
+        {
+          "title": "Fotos privativas removidas",
+          "description": "A galeria deixa de abrir com interiores e passa a mostrar predio e areas comuns."
+        },
+        {
+          "title": "Lazer melhor explicado",
+          "description": "Rooftop, gourmet, jogos, eventos, fitness, box de praia e monitoramento entram no texto."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Black Piano Residence?",
+          "answer": "Na Rua 236, em Meia Praia, Itapema. As fontes variam entre os numeros 191 e 203."
+        },
+        {
+          "question": "Quem e a construtora?",
+          "answer": "A fonte Versatil associa o empreendimento a Zimmermann Construtora."
+        },
+        {
+          "question": "Quais areas foram selecionadas?",
+          "answer": "Fachada, hall, elevadores, gourmet, jogos, eventos e fitness."
+        },
+        {
+          "question": "Por que a galeria ficou mais enxuta?",
+          "answer": "Porque os interiores de apartamento foram descartados para manter apenas imagens do condominio."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-black-piano-EM35989",
+        "https://imobiliariaversatil.com.br/edificios/black-piano-residence/itapema/meia-praia/426",
+        "https://www.vivareal.com.br/condominio/black-piano-residence-meia-praia-id-a3e4c41a-b310/",
+        "https://www.imoveispraitapema.com.br/imovel/venda-apartamento-03-dormitorio-em-itapema/black-piano-03-ou-04-suites/231"
+      ],
+      "notes": "Acervo inicial tinha interiores de oferta. Versatil e Imobille forneceram fachada e areas comuns; divergencia de numero na Rua 236 foi registrada."
+    },
+    {
+      "slug": "blue-building",
+      "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1885/001-002-17525933904127.jpg",
+      "description": "O Blue Building e um projeto da MC Construtora e Incorporadora no Balneario Pereque, em Porto Belo. A pagina oficial da MC localiza o empreendimento na esquina da Rua Ida Celi Lorenzo com a Rua Ibirama; MySide e iaRe usam variacoes do endereco, como Rua Ida Ceni Lorenzi e Rua Ibirama, mas convergem no bairro Pereque. As fontes de lancamento indicam entrega para dezembro de 2030 e plantas de 2 a 3 quartos. A curadoria manteve fachada, implantacao urbana, academia, piscina/spa, brinquedoteca, gourmet, playground e deck, todos ligados ao empreendimento, sem imagens privativas.",
+      "seo_description": "Blue Building da MC no Pereque, Porto Belo, com fachada, piscina/spa, fitness, gourmet, kids, playground e entrega prevista para 2030.",
+      "gallery": [
+        {
+          "title": "Blue Building - fachada noturna",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1885/001-002-17525933904127.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Blue Building - torre frontal",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1885/002-001-17525933904126.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Blue Building - insercao urbana",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1885/003-003-17525933904128.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Blue Building - base arquitetonica",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1885/004-005-17525933904128.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Blue Building - fitness vista mar",
+          "category": "Fitness",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1885/005-blue_building_-_academia_-_rf_-_01-17525933904128.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Blue Building - spa piscina",
+          "category": "Piscina",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1885/006-blue_building_-_area_de_spa_e_piscina_aquecina_-_rf_-_01-17525933904129.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Blue Building - brinquedoteca",
+          "category": "Kids",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1885/007-blue_building_-_brinquedoteca_-_rf_-_01-17525933904129.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Blue Building - gourmet vista",
+          "category": "Gourmet",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1885/008-blue_building_-_espaco_gourmet_-_rf_-_01-17525933904129.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Blue Building - gourmet panoramico",
+          "category": "Gourmet",
+          "image": "https://mcincorporadorasc.com.br/wp-content/uploads/2025/05/building_hor_02.jpg",
+          "source_url": "https://mcincorporadorasc.com.br/blue-builnding/",
+          "source_label": "MC Incorporadora"
+        },
+        {
+          "title": "Blue Building - academia",
+          "category": "Fitness",
+          "image": "https://mcincorporadorasc.com.br/wp-content/uploads/2025/05/building_hor_01.jpg",
+          "source_url": "https://mcincorporadorasc.com.br/blue-builnding/",
+          "source_label": "MC Incorporadora"
+        },
+        {
+          "title": "Blue Building - lounge gourmet",
+          "category": "Convivencia",
+          "image": "https://mcincorporadorasc.com.br/wp-content/uploads/2025/05/building_hor_08.jpg",
+          "source_url": "https://mcincorporadorasc.com.br/blue-builnding/",
+          "source_label": "MC Incorporadora"
+        },
+        {
+          "title": "Blue Building - deck mirante",
+          "category": "Deck",
+          "image": "https://mcincorporadorasc.com.br/wp-content/uploads/2025/05/building_hor_09.jpg",
+          "source_url": "https://mcincorporadorasc.com.br/blue-builnding/",
+          "source_label": "MC Incorporadora"
+        },
+        {
+          "title": "Blue Building - kids interno",
+          "category": "Kids",
+          "image": "https://mcincorporadorasc.com.br/wp-content/uploads/2025/05/building_hor_03.jpg",
+          "source_url": "https://mcincorporadorasc.com.br/blue-builnding/",
+          "source_label": "MC Incorporadora"
+        },
+        {
+          "title": "Blue Building - playground externo",
+          "category": "Playground",
+          "image": "https://mcincorporadorasc.com.br/wp-content/uploads/2025/05/building_hor_05.jpg",
+          "source_url": "https://mcincorporadorasc.com.br/blue-builnding/",
+          "source_label": "MC Incorporadora"
+        },
+        {
+          "title": "Blue Building - piscina aquecida",
+          "category": "Piscina",
+          "image": "https://mcincorporadorasc.com.br/wp-content/uploads/2025/05/building_hor_07.jpg",
+          "source_url": "https://mcincorporadorasc.com.br/blue-builnding/",
+          "source_label": "MC Incorporadora"
+        },
+        {
+          "title": "Blue Building - torre MC",
+          "category": "Fachada",
+          "image": "https://mcincorporadorasc.com.br/wp-content/uploads/2025/05/building-576x1024.jpg",
+          "source_url": "https://mcincorporadorasc.com.br/blue-builnding/",
+          "source_label": "MC Incorporadora"
+        },
+        {
+          "title": "Blue Building - fachada iaRe",
+          "category": "Fachada",
+          "image": "https://iarebrokers.fsn1.your-objectstorage.com/sites/8/2025/10/17124027/fachada-recanto-do-pereque-dg-construtora-1.webp",
+          "source_url": "https://sc.iarebrokers.com.br/imoveis/porto-belo/pereque/apartamento/19638/blue-building-apartamento-com-86-m%C2%B2-em-pereque/",
+          "source_label": "iaRe Brokers"
+        },
+        {
+          "title": "Blue Building - vista fachada",
+          "category": "Fachada",
+          "image": "https://iarebrokers.fsn1.your-objectstorage.com/sites/8/2026/02/20155536/fachada-dinora-residence-sul-construtora.webp",
+          "source_url": "https://sc.iarebrokers.com.br/imoveis/porto-belo/pereque/apartamento/19638/blue-building-apartamento-com-86-m%C2%B2-em-pereque/",
+          "source_label": "iaRe Brokers"
+        },
+        {
+          "title": "Blue Building - entrada torre",
+          "category": "Fachada",
+          "image": "https://iarebrokers.fsn1.your-objectstorage.com/sites/8/2025/02/09000001/fachada-burj-exclusive-residence-agv-selent-construtora-e-incorporadora.webp",
+          "source_url": "https://sc.iarebrokers.com.br/imoveis/porto-belo/pereque/apartamento/19638/blue-building-apartamento-com-86-m%C2%B2-em-pereque/",
+          "source_label": "iaRe Brokers"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Pereque, Porto Belo",
+          "description": "Fontes convergem no Balneario Pereque, em eixo de crescimento entre Rua Ibirama e Ida Celi Lorenzo."
+        },
+        {
+          "icon": "Building2",
+          "title": "MC Incorporadora",
+          "description": "A fonte oficial associa o projeto a MC Construtora e Incorporadora."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e spa",
+          "description": "A galeria destaca piscina aquecida, spa e areas molhadas de convivencia."
+        },
+        {
+          "icon": "Users",
+          "title": "Lazer familiar",
+          "description": "Kids, playground, gourmet e fitness reforcam a vocacao de uso diario."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Endereco depurado",
+          "description": "A copy registra variacoes de grafia e usa Pereque/Porto Belo como contexto seguro."
+        },
+        {
+          "title": "Galeria ja coerente",
+          "description": "As imagens atuais e oficiais estavam alinhadas com fachada e areas comuns."
+        },
+        {
+          "title": "Status de lancamento",
+          "description": "MySide indica entrega para dezembro de 2030, tratada como dado de lancamento."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Blue Building?",
+          "answer": "No Balneario Pereque, em Porto Belo. A MC informa esquina da Rua Ida Celi Lorenzo com a Rua Ibirama."
+        },
+        {
+          "question": "Quem assina o empreendimento?",
+          "answer": "A fonte oficial associa o Blue Building a MC Construtora e Incorporadora."
+        },
+        {
+          "question": "Qual e a previsao de entrega?",
+          "answer": "MySide informa dezembro de 2030 para o empreendimento."
+        },
+        {
+          "question": "Quais imagens aparecem na galeria?",
+          "answer": "Fachada, piscina/spa, academia, brinquedoteca, gourmet, playground, deck e vistas da torre."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/",
+        "https://mcincorporadorasc.com.br/blue-builnding/",
+        "https://myside.com.br/apartamento-venda-blue-building-porto-belo-sc",
+        "https://www.investirnapraia.com.br/empreendimento/blue-building/611",
+        "https://sc.iarebrokers.com.br/imoveis/porto-belo/pereque/apartamento/19638/blue-building-apartamento-com-86-m%C2%B2-em-pereque/"
+      ],
+      "notes": "Fontes usam variacoes de grafia para Rua Ida Celi/Ceni Lorenzo; MC e MySide confirmam o contexto do Pereque. Galeria ja era majoritariamente de empreendimento."
+    },
+    {
+      "slug": "blue-life",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/blue-life-32-1681501343.webp",
+      "description": "O Blue Life Residence e um empreendimento realizado pela AS Ramos no Centro de Balneario Camboriu, com endereco divulgado na Rua 1542, 55. A pagina oficial informa uma torre com 19 pavimentos, dois apartamentos por andar, 24 apartamentos, cobertura rooftop, dois elevadores e home box, enquanto Felicita e Litoral Vertical reforcam o perfil de alto padrao no Centro. A nova galeria troca fotos internas por fachada, hall, area externa, piscina, fitness, cinema, brinquedoteca e jogos, mostrando o condominio em vez de ambientes privativos.",
+      "seo_description": "Blue Life Residence da AS Ramos no Centro de Balneario Camboriu, Rua 1542, com fachada, piscina, fitness, cinema e kids.",
+      "gallery": [
+        {
+          "title": "Blue Life - fachada real",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/blue-life-32-1681501343.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-blue-life-residence-EM92579",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Blue Life - fachada render",
+          "category": "Fachada",
+          "image": "https://asramos.com.br/wp-content/uploads/10.png",
+          "source_url": "https://asramos.com.br/empreendimentos/blue-life-residence/",
+          "source_label": "AS Ramos"
+        },
+        {
+          "title": "Blue Life - torre lateral",
+          "category": "Fachada",
+          "image": "https://asramos.com.br/wp-content/uploads/FACHADA-2-2-scaled.jpg",
+          "source_url": "https://asramos.com.br/empreendimentos/blue-life-residence/",
+          "source_label": "AS Ramos"
+        },
+        {
+          "title": "Blue Life - hall social",
+          "category": "Hall",
+          "image": "https://asramos.com.br/wp-content/uploads/HALL-DE-ENTRADA-scaled.jpg",
+          "source_url": "https://asramos.com.br/empreendimentos/blue-life-residence/",
+          "source_label": "AS Ramos"
+        },
+        {
+          "title": "Blue Life - fitness",
+          "category": "Fitness",
+          "image": "https://asramos.com.br/wp-content/uploads/ESPACO-FITNESS-5-scaled.jpg",
+          "source_url": "https://asramos.com.br/empreendimentos/blue-life-residence/",
+          "source_label": "AS Ramos"
+        },
+        {
+          "title": "Blue Life - cinema",
+          "category": "Cinema",
+          "image": "https://asramos.com.br/wp-content/uploads/DISCO-scaled.jpg",
+          "source_url": "https://asramos.com.br/empreendimentos/blue-life-residence/",
+          "source_label": "AS Ramos"
+        },
+        {
+          "title": "Blue Life - convivencia externa",
+          "category": "Convivencia",
+          "image": "https://asramos.com.br/wp-content/uploads/AREA-EXTERNA-scaled.jpg",
+          "source_url": "https://asramos.com.br/empreendimentos/blue-life-residence/",
+          "source_label": "AS Ramos"
+        },
+        {
+          "title": "Blue Life - deck piscina",
+          "category": "Piscina",
+          "image": "https://asramos.com.br/wp-content/uploads/PISCINA-3-scaled.jpg",
+          "source_url": "https://asramos.com.br/empreendimentos/blue-life-residence/",
+          "source_label": "AS Ramos"
+        },
+        {
+          "title": "Blue Life - brinquedoteca",
+          "category": "Kids",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/iDqgiIcgJ6DR0RixmGaX.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-blue-life-residence-EM92579",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Blue Life - academia",
+          "category": "Fitness",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/is2ox7njVw6q5L84tmsf.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-blue-life-residence-EM92579",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Blue Life - cinema equipado",
+          "category": "Cinema",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/W23pAxkYV9tTm22TOgGe.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-blue-life-residence-EM92579",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Blue Life - piscina",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/CQ6Q2LFi3pgwoXYcOVkT.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-blue-life-residence-EM92579",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Blue Life - deck externo",
+          "category": "Deck",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/ebEQptODnK7By8NOlnrx.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-blue-life-residence-EM92579",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Blue Life - piscina coberta",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/rlUzl7rraDEQWYMPdILM.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-blue-life-residence-EM92579",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Blue Life - fachada Imobille",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2023/blue-life-32-1681501212.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-blue-life-residence-EM92579",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Blue Life - kids apoio",
+          "category": "Kids",
+          "image": "https://imobillesitehomolog.s3.sa-east-1.amazonaws.com/ventures-photo/September2023/thumb-idqgiicgj6dr0rixmgax-1695671048.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-blue-life-residence-EM92579",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Blue Life - piscina lateral",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/852/img-6.jpg?1770059046",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/852/blue-life/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Blue Life - lounge externo",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/852/img-4.jpg?1770059046",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/852/blue-life/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Blue Life - estar externo",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/852/img-1.jpg?1770059046",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/852/blue-life/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Blue Life - fitness Felicita",
+          "category": "Fitness",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/852/infra-11.jpg?1770059046",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/852/blue-life/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Blue Life - cinema Felicita",
+          "category": "Cinema",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/852/infra-13.jpg?1770059046",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/852/blue-life/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Blue Life - jogos",
+          "category": "Jogos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/852/infra-5.jpg?1770059046",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/852/blue-life/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Blue Life - brinquedoteca Felicita",
+          "category": "Kids",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/852/infra-3.jpg?1770059046",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/852/blue-life/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Blue Life - acesso social",
+          "category": "Acesso",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/852/img-8.jpg?1770059046",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/852/blue-life/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Blue Life - torre Litoral",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-blue-life-balneario-camboriu-1.1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-blue-life/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 1542, Centro",
+          "description": "Endereco central divulgado por Felicita, com acesso facil a servicos e a malha urbana de Balneario Camboriu."
+        },
+        {
+          "icon": "Building2",
+          "title": "Realizado pela AS Ramos",
+          "description": "A fonte oficial apresenta o Blue Life como empreendimento realizado pela incorporadora."
+        },
+        {
+          "icon": "DoorOpen",
+          "title": "Torre organizada",
+          "description": "AS Ramos informa 19 pavimentos, dois elevadores, home box e dois apartamentos por andar."
+        },
+        {
+          "icon": "Film",
+          "title": "Lazer completo",
+          "description": "Piscina, fitness, cinema, brinquedoteca, jogos e areas externas aparecem na nova galeria."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fachada como hero",
+          "description": "A imagem principal passa a ser a fachada real, tirando interiores da abertura."
+        },
+        {
+          "title": "Dados oficiais incorporados",
+          "description": "A copy usa informacoes da AS Ramos sobre torre, pavimentos, elevadores e home box."
+        },
+        {
+          "title": "Galeria de condominio",
+          "description": "Piscina, kids, cinema, fitness e acesso social substituem fotos de ambientes privativos."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Blue Life Residence?",
+          "answer": "Na Rua 1542, 55, Centro de Balneario Camboriu, conforme Felicita."
+        },
+        {
+          "question": "Quem realizou o empreendimento?",
+          "answer": "A pagina oficial associa o Blue Life Residence a AS Ramos."
+        },
+        {
+          "question": "Como e a torre?",
+          "answer": "A AS Ramos informa 19 pavimentos, dois apartamentos por andar, 24 apartamentos, cobertura rooftop, dois elevadores e home box."
+        },
+        {
+          "question": "O que mudou nas imagens?",
+          "answer": "Foram priorizadas fachada, hall, piscina, fitness, cinema, brinquedoteca, jogos e areas externas."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-blue-life-residence-EM92579",
+        "https://asramos.com.br/empreendimentos/blue-life-residence/",
+        "https://felicitanegocios.com.br/empreendimento/852/blue-life/",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-blue-life/"
+      ],
+      "notes": "Acervo inicial trazia interiores. AS Ramos validou dados da torre; Felicita, Imobille e Litoral forneceram fachada e areas comuns."
+    },
+    {
+      "slug": "blue-ocean-residence",
+      "hero_image": "https://cdn.imoview.com.br/bryann/Condominios/390/img-76.jpg?1696514323",
+      "description": "O Blue Ocean Residence fica na Rua 3110, 193, no Centro de Balneario Camboriu. Felicita, VivaReal, Mazzotti e Econodata convergem no endereco; Imoveis Terra detalha lazer com eventos, jogos, brinquedoteca, gourmet, quiosque com churrasqueira, piscina, academia e cinema. A auditoria encontrou interiores de unidade no inicio do acervo atual e substituiu por fachada, hall, piscina, quadra, academia, jogos, gourmet e areas externas. Assim a pagina passa a representar o edificio e sua estrutura comum no miolo central de Balneario Camboriu.",
+      "seo_description": "Blue Ocean Residence no Centro de Balneario Camboriu, Rua 3110, com fachada, hall, piscina, quadra, academia e jogos.",
+      "gallery": [
+        {
+          "title": "Blue Ocean - fachada principal",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/390/img-76.jpg?1696514323",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/390/blue-ocean-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Blue Ocean - torre frontal",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/390/img-77.jpg?1696514323",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/390/blue-ocean-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Blue Ocean - hall entrada",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/390/img-74.jpg?1696514323",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/390/blue-ocean-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Blue Ocean - hall decorado",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/390/img-73.jpg?1696514323",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/390/blue-ocean-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Blue Ocean - convivencia externa",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/390/img-66.jpg?1696514323",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/390/blue-ocean-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Blue Ocean - academia",
+          "category": "Fitness",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/390/img-64.jpg?1696514323",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/390/blue-ocean-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Blue Ocean - quadra gramada",
+          "category": "Quadra",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/390/img-62.jpg?1696514323",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/390/blue-ocean-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Blue Ocean - piscina",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/390/img-60.jpg?1696514323",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/390/blue-ocean-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Blue Ocean - piscina deck",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/390/img-59.jpg?1696514323",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/390/blue-ocean-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Blue Ocean - deck externo",
+          "category": "Deck",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/390/img-57.jpg?1696514323",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/390/blue-ocean-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Blue Ocean - apoio piscina",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/390/img-56.jpg?1696514323",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/390/blue-ocean-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Blue Ocean - jogos",
+          "category": "Jogos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/390/img-54.jpg?1696514323",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/390/blue-ocean-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Blue Ocean - gourmet apoio",
+          "category": "Gourmet",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/390/img-52.jpg?1696514323",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/390/blue-ocean-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Blue Ocean - eventos",
+          "category": "Eventos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/390/img-51.jpg?1696514323",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/390/blue-ocean-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Blue Ocean - convivencia interna",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/390/img-50.jpg?1696514323",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/390/blue-ocean-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Blue Ocean - fachada urbana",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/390/img-81.jpg?1696514323",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/390/blue-ocean-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Blue Ocean - torre vertical",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/390/img-78.jpg?1696514323",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/390/blue-ocean-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Blue Ocean - base fachada",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/390/img-80.jpg?1696514323",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/390/blue-ocean-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Blue Ocean - fachada Felicita",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/390/img-79.jpg?1696514323",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/390/blue-ocean-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Blue Ocean - torre Terra",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/terraitajai/Condominios/529/whatsapp-image-2024-05-07-at-162007.jpeg?1715111525",
+          "source_url": "https://imoveisterra.net/empreendimento/529/edificio-blue-ocean-residence/",
+          "source_label": "Imoveis Terra"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 3110, Centro",
+          "description": "Endereco confirmado por diferentes fontes no miolo central de Balneario Camboriu."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e deck",
+          "description": "A nova galeria mostra piscina, deck, apoio externo e areas de descanso."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Academia e quadra",
+          "description": "Fitness e quadra gramada aparecem como parte da estrutura comum."
+        },
+        {
+          "icon": "Gamepad2",
+          "title": "Jogos e gourmet",
+          "description": "Jogos, gourmet, eventos e convivencia interna entram na apresentacao do condominio."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Hero corrigido para fachada",
+          "description": "A imagem principal passa a mostrar a torre e nao ambientes internos."
+        },
+        {
+          "title": "Fontes convergentes",
+          "description": "Felicita, VivaReal, Mazzotti e Terra ajudam a validar endereco e lazer."
+        },
+        {
+          "title": "Galeria depurada",
+          "description": "Foram descartados candidatos de interiores e imagens de projetos relacionados."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Blue Ocean Residence?",
+          "answer": "Na Rua 3110, 193, Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Quais areas de lazer foram verificadas?",
+          "answer": "Piscina, academia, quadra, jogos, gourmet, eventos e areas de convivencia."
+        },
+        {
+          "question": "O que foi corrigido na galeria?",
+          "answer": "Interiores foram substituidos por fachada, hall, piscina, quadra, fitness, jogos e areas externas."
+        },
+        {
+          "question": "Quais fontes confirmam o endereco?",
+          "answer": "Felicita, VivaReal, Mazzotti e dados empresariais apontam Rua 3110, 193."
+        }
+      ],
+      "sources": [
+        "https://felicitanegocios.com.br/empreendimento/390/blue-ocean-residence/",
+        "https://www.vivareal.com.br/condominio/edificio-blue-ocean-residence-centro-id-cbe14ecf-4448/",
+        "https://imoveisterra.net/empreendimento/529/edificio-blue-ocean-residence/",
+        "https://loft.com.br/condominio/edificio-blue-ocean-residence-centro-balneario-camboriu-sc/jr7zei",
+        "https://mazzottiimoveis.com/edificios/blue-ocean-residence/balneario-camboriu/centro/99"
+      ],
+      "notes": "Selecao ficou nos candidatos Felicita/Terra coerentes com a torre da Rua 3110; material de outros projetos e interiores foi descartado."
+    },
+    {
+      "slug": "blue-tower",
+      "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1870/001-3e1a7cd9bf102de477c9da3036f0bcb02219f20fd43fe6dc5aaf0474a8a71008-17521692453313.jpeg",
+      "description": "O Blue Tower de Pereque, Porto Belo, tem fontes com nomes semelhantes no mercado, por isso a curadoria foi feita com cautela. A pagina atual apresenta area na faixa de 115 a 124 m2 e perfil de 3 suites, alinhado ao material de Lancamentos Porto Belo associado a Pillar Construtora, com entrega indicada para dezembro de 2026. A selecao final usa somente o conjunto visual compativel com esse projeto: fachada, base da torre, piscina/deck, hall, gourmet, jogos e ambiente kids. Materiais de outro Blue Tower com flats e rooftop panoramico foram descartados da aplicacao.",
+      "seo_description": "Blue Tower em Pereque, Porto Belo, associado a Pillar Construtora, com fachada, piscina/deck, hall, gourmet, jogos e kids.",
+      "gallery": [
+        {
+          "title": "Blue Tower - fachada noturna",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1870/001-3e1a7cd9bf102de477c9da3036f0bcb02219f20fd43fe6dc5aaf0474a8a71008-17521692453313.jpeg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Blue Tower - torre iluminada",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1870/002-img_9494-17521692453317.jpeg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Blue Tower - base arquitetonica",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1870/003-4c0b7ddc-d04f-416b-91da-ad1495922a1c-17521692453314.jpeg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Blue Tower - jogos gourmet",
+          "category": "Jogos",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1870/004-5bf6ebc1-0843-4682-a654-8f07e74807b9-17521692453315.jpeg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Blue Tower - rooftop coberto",
+          "category": "Rooftop",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1870/005-5c1a3346-b19e-4378-9404-bc8ad8f6f5fb-17521692453315.jpeg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Blue Tower - hall elevadores",
+          "category": "Hall",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1870/006-7cd13086-27a6-4127-b011-b85f326a8f7c-17521692453315.jpeg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Blue Tower - piscina deck",
+          "category": "Piscina",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1870/007-26be5fc7-b848-4025-877c-7ad122f40d84-17521692453315.jpeg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Blue Tower - eventos",
+          "category": "Eventos",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1870/008-757aa392-595c-4466-bd2e-511d872d465c-17521692453315.jpeg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Blue Tower - piscina lateral",
+          "category": "Piscina",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/06/Blue-Tower6.jpg",
+          "source_url": "https://www.lancamentosportobelo.com.br/lancamentos/blue-tower/",
+          "source_label": "Lancamentos Porto Belo"
+        },
+        {
+          "title": "Blue Tower - fachada dia",
+          "category": "Fachada",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/06/Blue-Tower9.jpg",
+          "source_url": "https://www.lancamentosportobelo.com.br/lancamentos/blue-tower/",
+          "source_label": "Lancamentos Porto Belo"
+        },
+        {
+          "title": "Blue Tower - kids",
+          "category": "Kids",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/06/Blue-Tower11.jpg",
+          "source_url": "https://www.lancamentosportobelo.com.br/lancamentos/blue-tower/",
+          "source_label": "Lancamentos Porto Belo"
+        },
+        {
+          "title": "Blue Tower - fachada Pillar",
+          "category": "Fachada",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/06/Aurum-Tower4-576x1024.jpg",
+          "source_url": "https://www.lancamentosportobelo.com.br/lancamentos/blue-tower/",
+          "source_label": "Lancamentos Porto Belo"
+        },
+        {
+          "title": "Blue Tower - base torre",
+          "category": "Fachada",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/06/Residencial-Por-do-Sol-1-801x1024.jpg",
+          "source_url": "https://www.lancamentosportobelo.com.br/lancamentos/blue-tower/",
+          "source_label": "Lancamentos Porto Belo"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Pereque, Porto Belo",
+          "description": "A pagina atual e as fontes usadas apontam para o Balneario Pereque como contexto do empreendimento."
+        },
+        {
+          "icon": "Building2",
+          "title": "Conjunto Pillar validado",
+          "description": "A selecao visual ficou no material associado a Pillar e ao perfil de 3 suites da pagina."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e deck",
+          "description": "Piscina, deck e areas cobertas compoem o recorte de lazer selecionado."
+        },
+        {
+          "icon": "Gamepad2",
+          "title": "Jogos, eventos e kids",
+          "description": "A galeria inclui ambientes comuns para convivencia, eventos e uso infantil."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Homonimos separados",
+          "description": "Imagens de outro Blue Tower com perfil de flats foram descartadas para evitar mistura."
+        },
+        {
+          "title": "Coerencia com a pagina",
+          "description": "A copy usa o projeto que corresponde a area e tipologia ja cadastradas."
+        },
+        {
+          "title": "Galeria conservadora",
+          "description": "Ficaram apenas imagens que combinam com a torre Pillar: fachada, base, piscina, hall, jogos e kids."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Por que ha ressalva no Blue Tower?",
+          "answer": "Porque existem fontes de projetos homonimos em Porto Belo; a curadoria usou o conjunto visual que bate com a pagina atual."
+        },
+        {
+          "question": "Qual fonte foi usada como principal?",
+          "answer": "Lancamentos Porto Belo, associado a Pillar Construtora e ao perfil de 3 suites."
+        },
+        {
+          "question": "Quais imagens foram mantidas?",
+          "answer": "Fachada, base da torre, piscina/deck, hall, gourmet, jogos, eventos e kids."
+        },
+        {
+          "question": "O que foi descartado?",
+          "answer": "Materiais de outro Blue Tower com flats e rooftop panoramico, alem de plantas e interiores."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/",
+        "https://www.lancamentosportobelo.com.br/lancamentos/blue-tower/",
+        "https://myside.com.br/apartamento-venda-blue-tower-porto-belo-sc",
+        "https://lancamentosemportobelo.com.br/lancamentos/bluetower/",
+        "https://immovia.com.br/propriedades/blue-tower-2/"
+      ],
+      "notes": "Fontes indicam projetos homonimos. Curadoria aplicou o conjunto Pillar/3 suites que combina com a pagina atual e excluiu candidato visual destoante."
+    },
+    {
+      "slug": "bonne-vie",
+      "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1580/001-t1-17455221304282.webp",
+      "description": "O Edificio Bonne Vie esta na Rua 1922, 131, no Centro de Balneario Camboriu. Litoral Vertical destaca a localizacao proxima ao Camelodromo e o perfil de um apartamento por andar, com 3 suites; Imobille, Felicita e MySide confirmam o endereco e o contexto central. A nova galeria prioriza fachada, piscina, deck, fitness, brinquedoteca, jogos, gourmet e ambientes de convivencia, evitando imagens com interferencia visual e fotos privativas. A pagina passa a explicar melhor o condominio, com foco em privacidade vertical, lazer enxuto e proximidade aos servicos do Centro.",
+      "seo_description": "Edificio Bonne Vie no Centro de Balneario Camboriu, Rua 1922, com fachada, piscina, deck, fitness, kids, jogos e eventos.",
+      "gallery": [
+        {
+          "title": "Bonne Vie - fachada principal",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1580/001-t1-17455221304282.webp",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Bonne Vie - fachada lateral",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1580/002-t2-17455221304283.webp",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Bonne Vie - deck descanso",
+          "category": "Deck",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1580/005-t5-17455221304284.webp",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Bonne Vie - fitness",
+          "category": "Fitness",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1580/006-t6-17455221304284.webp",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Bonne Vie - piscina",
+          "category": "Piscina",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1580/007-t7-17455221304284.webp",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Bonne Vie - torre Litoral",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2022/03/edificio-bonne-vie-balneario-camboriu-0.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-bonne-vie/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Bonne Vie - fachada arvore",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2022/03/edificio-bonne-vie-balneario-camboriu-0.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-bonne-vie/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Bonne Vie - deck Litoral",
+          "category": "Deck",
+          "image": "https://litoralvertical.com/wp-content/uploads/2022/03/edificio-bonne-vie-balneario-camboriu-2-2.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-bonne-vie/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Bonne Vie - piscina Litoral",
+          "category": "Piscina",
+          "image": "https://litoralvertical.com/wp-content/uploads/2022/03/edificio-bonne-vie-balneario-camboriu-3-1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-bonne-vie/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Bonne Vie - brinquedoteca",
+          "category": "Kids",
+          "image": "https://litoralvertical.com/wp-content/uploads/2022/03/edificio-bonne-vie-balneario-camboriu-5-1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-bonne-vie/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Bonne Vie - jogos",
+          "category": "Jogos",
+          "image": "https://litoralvertical.com/wp-content/uploads/2022/03/edificio-bonne-vie-balneario-camboriu-6-1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-bonne-vie/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Bonne Vie - academia",
+          "category": "Fitness",
+          "image": "https://litoralvertical.com/wp-content/uploads/2022/03/edificio-bonne-vie-balneario-camboriu-7-1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-bonne-vie/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Bonne Vie - acesso frontal",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2015/01/edificio-alameda-jardins-balneario-camboriu-1-1-1-488x326.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-bonne-vie/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Bonne Vie - piscina Imobille",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/2207202410314117402-1721655101.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-bonne-vie-EM91998",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Bonne Vie - deck Imobille",
+          "category": "Deck",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/July2024/imagens-site-50001-1721655031.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-bonne-vie-EM91998",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Bonne Vie - kids Imobille",
+          "category": "Kids",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/July2024/imagens-site-50002-1721655031.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-bonne-vie-EM91998",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Bonne Vie - fachada Felicita",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/391/dwv-gallery-image-12.jpg?1696696383",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/391/bonne-vie/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Bonne Vie - fachada noturna",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/391/dwv-gallery-image-10.jpg?1696696383",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/391/bonne-vie/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Bonne Vie - piscina Felicita",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/391/dwv-gallery-image-3.jpg?1696696383",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/391/bonne-vie/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Bonne Vie - jogos Felicita",
+          "category": "Jogos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/391/dwv-gallery-image-1.jpg?1696696383",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/391/bonne-vie/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Bonne Vie - eventos",
+          "category": "Eventos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/391/dwv-gallery-image-9.jpg?1696696383",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/391/bonne-vie/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Bonne Vie - fitness Felicita",
+          "category": "Fitness",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/391/dwv-gallery-image-0.jpg?1696696383",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/391/bonne-vie/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Bonne Vie - kids Felicita",
+          "category": "Kids",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/391/dwv-gallery-image-6.jpg?1696696383",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/391/bonne-vie/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Bonne Vie - torre central",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/391/dwv-gallery-image-5.jpg?1696696383",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/391/bonne-vie/",
+          "source_label": "Felicita Negocios"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 1922, Centro",
+          "description": "Endereco confirmado por Imobille, Felicita e MySide, perto de servicos centrais."
+        },
+        {
+          "icon": "Building2",
+          "title": "Privacidade vertical",
+          "description": "Litoral Vertical destaca o perfil de um apartamento por andar."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e deck",
+          "description": "A galeria mostra piscina, deck e areas externas compactas para descanso."
+        },
+        {
+          "icon": "Gamepad2",
+          "title": "Kids, jogos e fitness",
+          "description": "Brinquedoteca, jogos, academia e eventos compoem a estrutura comum selecionada."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fachada valorizada",
+          "description": "A imagem principal passa a representar claramente a torre do Bonne Vie."
+        },
+        {
+          "title": "Interferencias removidas",
+          "description": "Fotos com mao, cortes de oferta ou ambientes privativos ficaram fora da aplicacao."
+        },
+        {
+          "title": "Centro com contexto",
+          "description": "A copy agora cita Rua 1922, Camelodromo e conveniencias do Centro."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Edificio Bonne Vie?",
+          "answer": "Na Rua 1922, 131, Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Qual e o perfil do predio?",
+          "answer": "Litoral Vertical destaca um apartamento por andar e 3 suites nas ofertas consultadas."
+        },
+        {
+          "question": "Quais imagens foram usadas?",
+          "answer": "Fachada, piscina, deck, fitness, kids, jogos, eventos e areas comuns."
+        },
+        {
+          "question": "O que foi evitado?",
+          "answer": "Interiores privativos, fotos com interferencia visual e candidatos de origem incerta."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-bonne-vie/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-bonne-vie-EM91998",
+        "https://felicitanegocios.com.br/empreendimento/391/bonne-vie/",
+        "https://myside.com.br/apartamento-venda-bonne-vie-balneario-camboriu-sc"
+      ],
+      "notes": "Galeria final usa fachada e lazer coerentes com Bonne Vie; imagens com mao/overlay forte e candidatos de outros edificios foram descartados."
+    },
+    {
+      "slug": "boston",
+      "hero_image": "https://cdn.imoview.com.br/bryann/Condominios/323/img-84.jpg?1714488098",
+      "description": "O Edificio Boston fica no Centro de Balneario Camboriu, com VivaReal informando Rua 1401, 100, e fontes comerciais descrevendo posicao de quadra mar ou a poucos passos da praia. Felicita mostra uma galeria ampla de fachada, hall, gourmet, playground, churrasqueira, convivencia e jogos; VivaReal cita elevador, bicicletario, gourmet, academia e acessibilidade. A pagina atual estava tomada por imagens internas de oferta, entao a curadoria reposiciona a apresentacao para o condominio e seu lazer, com foco no endereco central e na rotina perto da orla.",
+      "seo_description": "Edificio Boston no Centro de Balneario Camboriu, Rua 1401, com fachada, hall, gourmet, playground, jogos e lazer perto da orla.",
+      "gallery": [
+        {
+          "title": "Boston - fachada principal",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/323/img-84.jpg?1714488098",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/323/edificio-boston/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Boston - torre vertical",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/323/img-83.jpg?1714488098",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/323/edificio-boston/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Boston - fachada Felicita",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/323/img-82.jpg?1714488098",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/323/edificio-boston/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Boston - hall estar",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/323/img-80.jpg?1714488098",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/323/edificio-boston/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Boston - recepcao social",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/323/img-79.jpg?1714488098",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/323/edificio-boston/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Boston - eventos",
+          "category": "Eventos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/323/img-77.jpg?1714488098",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/323/edificio-boston/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Boston - convivencia",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/323/img-76.jpg?1714488098",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/323/edificio-boston/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Boston - eventos amplo",
+          "category": "Eventos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/323/img-75.jpg?1714488098",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/323/edificio-boston/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Boston - gourmet central",
+          "category": "Gourmet",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/323/img-74.jpg?1714488098",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/323/edificio-boston/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Boston - apoio gourmet",
+          "category": "Gourmet",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/323/img-73.jpg?1714488098",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/323/edificio-boston/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Boston - estar social",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/323/img-72.jpg?1714488098",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/323/edificio-boston/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Boston - lounge eventos",
+          "category": "Eventos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/323/img-71.jpg?1714488098",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/323/edificio-boston/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Boston - patio externo",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/323/img-70.jpg?1714488098",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/323/edificio-boston/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Boston - churrasqueira",
+          "category": "Gourmet",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/323/img-69.jpg?1714488098",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/323/edificio-boston/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Boston - terraco gourmet",
+          "category": "Gourmet",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/323/img-68.jpg?1714488098",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/323/edificio-boston/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Boston - mesas externas",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/323/img-67.jpg?1714488098",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/323/edificio-boston/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Boston - playground",
+          "category": "Playground",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/323/img-66.jpg?1714488098",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/323/edificio-boston/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Boston - recreacao externa",
+          "category": "Playground",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/323/img-65.jpg?1714488098",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/323/edificio-boston/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Boston - brinquedos externos",
+          "category": "Playground",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/323/img-64.jpg?1714488098",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/323/edificio-boston/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Boston - kids externo",
+          "category": "Kids",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/323/img-63.jpg?1714488098",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/323/edificio-boston/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Boston - jogos e apoio",
+          "category": "Jogos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/323/img-62.jpg?1714488098",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/323/edificio-boston/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Boston - jogos",
+          "category": "Jogos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/323/img-61.jpg?1714488098",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/323/edificio-boston/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Boston - jogos equipado",
+          "category": "Jogos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/323/img-60.jpg?1714488098",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/323/edificio-boston/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Boston - tenis de mesa",
+          "category": "Jogos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/323/img-59.jpg?1714488098",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/323/edificio-boston/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Boston - tenis apoio",
+          "category": "Jogos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/323/img-58.jpg?1714488098",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/323/edificio-boston/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Boston - sinuca e tenis",
+          "category": "Jogos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/323/img-57.jpg?1714488098",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/323/edificio-boston/",
+          "source_label": "Felicita Negocios"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro e quadra mar",
+          "description": "Fontes comerciais posicionam o Boston perto da praia e da rede de servicos centrais."
+        },
+        {
+          "icon": "Building2",
+          "title": "Rua 1401, 100",
+          "description": "VivaReal informa o endereco do condominio no Centro de Balneario Camboriu."
+        },
+        {
+          "icon": "Utensils",
+          "title": "Gourmet e churrasqueira",
+          "description": "A nova galeria mostra ambientes de eventos, churrasqueira e apoio gourmet."
+        },
+        {
+          "icon": "Gamepad2",
+          "title": "Playground e jogos",
+          "description": "Kids externo, playground, sinuca e tenis de mesa completam a representacao comum."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Mudanca visual intensa",
+          "description": "Interiores que ocupavam o acervo foram substituidos por fachada e lazer comum."
+        },
+        {
+          "title": "Rotina perto da praia",
+          "description": "A descricao destaca Centro, quadra mar e acesso aos servicos de Balneario Camboriu."
+        },
+        {
+          "title": "Galeria robusta",
+          "description": "Fachada, hall, gourmet, playground e jogos criam uma leitura clara do condominio."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Edificio Boston?",
+          "answer": "No Centro de Balneario Camboriu. VivaReal informa Rua 1401, 100."
+        },
+        {
+          "question": "O predio fica perto da praia?",
+          "answer": "Fontes comerciais descrevem posicao de quadra mar ou a poucos passos da praia."
+        },
+        {
+          "question": "Quais areas aparecem na nova galeria?",
+          "answer": "Fachada, hall, eventos, gourmet, churrasqueira, playground, kids e jogos."
+        },
+        {
+          "question": "O que foi corrigido?",
+          "answer": "A pagina saiu de uma galeria com interiores de oferta para imagens do condominio."
+        }
+      ],
+      "sources": [
+        "https://felicitanegocios.com.br/empreendimento/323/edificio-boston/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-boston-EM7186",
+        "https://www.vivareal.com.br/condominio/edificio-boston-bloco-a-centro-id-71ec2091-e002/",
+        "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-boston-residence-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-601/"
+      ],
+      "notes": "Primeiros candidatos eram quase todos interiores. Felicita forneceu fachada e ampla sequencia de areas comuns, usadas na aplicacao final."
+    },
+    {
+      "slug": "boulevard-royal",
+      "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1779/001-1619619597873_46e301dc-b480-4603-b6b6-b41ca4fc59c2-1750253452629.jpg",
+      "description": "O Boulevard Royal Residence e um empreendimento da RDO em Itapema, no eixo da Rua 119, com fontes variando entre Centro e Canto da Praia para a mesma regiao. A RDO apresenta o projeto como seu segundo empreendimento em Itapema; Versatil registrava previsao para novembro de 2025 e uma estrutura com brinquedoteca, gourmet, fitness, piscinas, playground, pub, jogos, eventos e terraco. A nova galeria usa o material da RDO e do acervo Pilger para mostrar fachada, acesso, hall, piscina, gourmet, kids, fitness, quadra e playground, sem inserir ambientes privativos.",
+      "seo_description": "Boulevard Royal Residence da RDO em Itapema, Rua 119, com fachada, piscinas, hall, gourmet, pub, kids, fitness e quadra.",
+      "gallery": [
+        {
+          "title": "Boulevard Royal - fachada principal",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1779/001-1619619597873_46e301dc-b480-4603-b6b6-b41ca4fc59c2-1750253452629.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Boulevard Royal - piscina coberta",
+          "category": "Piscina",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1779/002-1619619564459_e687a27a-3741-4560-87cd-3e886fbd941e-17502534526288.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Boulevard Royal - piscina externa",
+          "category": "Piscina",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1779/003-1619619572257_021d7513-2133-4e59-9771-e25468e90bbb-17502534526289.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Boulevard Royal - hall social",
+          "category": "Hall",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1779/004-1619619579949_b07a9fe2-4172-4728-be11-7821a24bc429-17502534526289.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Boulevard Royal - lounge externo",
+          "category": "Convivencia",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1779/005-1619619584835_77248150-f367-4df3-83b7-ec9f5cb01690-1750253452629.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Boulevard Royal - gourmet vista",
+          "category": "Gourmet",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1779/007-1619619605297_374f1adf-7b75-4a70-9d4e-feef562e050e-1750253452629.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Boulevard Royal - base noturna",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1779/008-1619619607462_63745c31-01f8-40be-ba60-15054e705645-1750253452629.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Boulevard Royal - torre RDO",
+          "category": "Fachada",
+          "image": "https://rdo.com.br/wp-content/uploads/2023/05/boulevard_royal_fachada.jpg",
+          "source_url": "https://rdo.com.br/empreendimento/boulevard-royal/",
+          "source_label": "RDO"
+        },
+        {
+          "title": "Boulevard Royal - fachada aerea",
+          "category": "Fachada",
+          "image": "https://rdo.com.br/wp-content/uploads/2023/05/1-Copy.jpg",
+          "source_url": "https://rdo.com.br/empreendimento/boulevard-royal/",
+          "source_label": "RDO"
+        },
+        {
+          "title": "Boulevard Royal - fachada vertical",
+          "category": "Fachada",
+          "image": "https://rdo.com.br/wp-content/uploads/2023/05/2-Copy.jpg",
+          "source_url": "https://rdo.com.br/empreendimento/boulevard-royal/",
+          "source_label": "RDO"
+        },
+        {
+          "title": "Boulevard Royal - hall RDO",
+          "category": "Hall",
+          "image": "https://rdo.com.br/wp-content/uploads/2023/05/3-Copy.jpg",
+          "source_url": "https://rdo.com.br/empreendimento/boulevard-royal/",
+          "source_label": "RDO"
+        },
+        {
+          "title": "Boulevard Royal - piscina interna",
+          "category": "Piscina",
+          "image": "https://rdo.com.br/wp-content/uploads/2023/05/4-Copy.jpg",
+          "source_url": "https://rdo.com.br/empreendimento/boulevard-royal/",
+          "source_label": "RDO"
+        },
+        {
+          "title": "Boulevard Royal - deck piscina",
+          "category": "Piscina",
+          "image": "https://rdo.com.br/wp-content/uploads/2023/05/5-Copy.jpg",
+          "source_url": "https://rdo.com.br/empreendimento/boulevard-royal/",
+          "source_label": "RDO"
+        },
+        {
+          "title": "Boulevard Royal - eventos",
+          "category": "Eventos",
+          "image": "https://rdo.com.br/wp-content/uploads/2023/05/6-Copy.jpg",
+          "source_url": "https://rdo.com.br/empreendimento/boulevard-royal/",
+          "source_label": "RDO"
+        },
+        {
+          "title": "Boulevard Royal - pub",
+          "category": "Pub",
+          "image": "https://rdo.com.br/wp-content/uploads/2023/05/8-Copy.jpg",
+          "source_url": "https://rdo.com.br/empreendimento/boulevard-royal/",
+          "source_label": "RDO"
+        },
+        {
+          "title": "Boulevard Royal - jogos",
+          "category": "Jogos",
+          "image": "https://rdo.com.br/wp-content/uploads/2023/05/9-Copy.jpg",
+          "source_url": "https://rdo.com.br/empreendimento/boulevard-royal/",
+          "source_label": "RDO"
+        },
+        {
+          "title": "Boulevard Royal - pub arco",
+          "category": "Pub",
+          "image": "https://rdo.com.br/wp-content/uploads/2023/05/10-Copy.jpg",
+          "source_url": "https://rdo.com.br/empreendimento/boulevard-royal/",
+          "source_label": "RDO"
+        },
+        {
+          "title": "Boulevard Royal - gourmet lounge",
+          "category": "Gourmet",
+          "image": "https://rdo.com.br/wp-content/uploads/2023/05/11-Copy.jpg",
+          "source_url": "https://rdo.com.br/empreendimento/boulevard-royal/",
+          "source_label": "RDO"
+        },
+        {
+          "title": "Boulevard Royal - brinquedoteca",
+          "category": "Kids",
+          "image": "https://rdo.com.br/wp-content/uploads/2025/09/12-Copy.jpg",
+          "source_url": "https://rdo.com.br/empreendimento/boulevard-royal/",
+          "source_label": "RDO"
+        },
+        {
+          "title": "Boulevard Royal - kids apoio",
+          "category": "Kids",
+          "image": "https://rdo.com.br/wp-content/uploads/2025/09/13-Copy.jpg",
+          "source_url": "https://rdo.com.br/empreendimento/boulevard-royal/",
+          "source_label": "RDO"
+        },
+        {
+          "title": "Boulevard Royal - fitness",
+          "category": "Fitness",
+          "image": "https://rdo.com.br/wp-content/uploads/2025/09/14-Copy.jpg",
+          "source_url": "https://rdo.com.br/empreendimento/boulevard-royal/",
+          "source_label": "RDO"
+        },
+        {
+          "title": "Boulevard Royal - quadra",
+          "category": "Quadra",
+          "image": "https://rdo.com.br/wp-content/uploads/2025/09/15-Copy.jpg",
+          "source_url": "https://rdo.com.br/empreendimento/boulevard-royal/",
+          "source_label": "RDO"
+        },
+        {
+          "title": "Boulevard Royal - playground",
+          "category": "Playground",
+          "image": "https://rdo.com.br/wp-content/uploads/2025/09/16-Copy.jpg",
+          "source_url": "https://rdo.com.br/empreendimento/boulevard-royal/",
+          "source_label": "RDO"
+        },
+        {
+          "title": "Boulevard Royal - lounge externo RDO",
+          "category": "Convivencia",
+          "image": "https://rdo.com.br/wp-content/uploads/2025/09/17-Copy.jpg",
+          "source_url": "https://rdo.com.br/empreendimento/boulevard-royal/",
+          "source_label": "RDO"
+        },
+        {
+          "title": "Boulevard Royal - praca externa",
+          "category": "Convivencia",
+          "image": "https://rdo.com.br/wp-content/uploads/2025/09/18-Copy.jpg",
+          "source_url": "https://rdo.com.br/empreendimento/boulevard-royal/",
+          "source_label": "RDO"
+        },
+        {
+          "title": "Boulevard Royal - piscina lazer",
+          "category": "Piscina",
+          "image": "https://rdo.com.br/wp-content/uploads/2025/09/19-Copy.jpg",
+          "source_url": "https://rdo.com.br/empreendimento/boulevard-royal/",
+          "source_label": "RDO"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 119, Itapema",
+          "description": "Fontes comerciais variam entre Centro e Canto da Praia, mas convergem no eixo da Rua 119."
+        },
+        {
+          "icon": "Building2",
+          "title": "Empreendimento RDO",
+          "description": "A incorporadora apresenta o Boulevard Royal como seu segundo projeto em Itapema."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscinas e terraco",
+          "description": "A galeria mostra piscina coberta, piscina externa, deck e areas de descanso."
+        },
+        {
+          "icon": "Users",
+          "title": "Lazer amplo",
+          "description": "Kids, pub, jogos, fitness, gourmet, quadra, playground e eventos aparecem nas fontes."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fonte oficial predominante",
+          "description": "A maior parte da selecao vem da RDO, reduzindo risco de imagem relacionada."
+        },
+        {
+          "title": "Localizacao com ressalva",
+          "description": "A pagina registra a variacao entre Centro e Canto da Praia sem cravar bairro conflitante."
+        },
+        {
+          "title": "Galeria completa",
+          "description": "Fachada, hall, piscinas, gourmet, pub, kids, fitness, quadra e playground representam o condominio."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Boulevard Royal?",
+          "answer": "Em Itapema, no eixo da Rua 119; as fontes variam entre Centro e Canto da Praia para a regiao."
+        },
+        {
+          "question": "Quem e a incorporadora?",
+          "answer": "A RDO apresenta o Boulevard Royal como empreendimento proprio em Itapema."
+        },
+        {
+          "question": "Qual prazo apareceu nas fontes?",
+          "answer": "Versatil registrava previsao para novembro de 2025; a pagina trata o dado como registro de fonte."
+        },
+        {
+          "question": "Quais areas estao na galeria?",
+          "answer": "Fachada, hall, piscinas, gourmet, pub, jogos, kids, fitness, quadra, playground e convivencia externa."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/",
+        "https://rdo.com.br/empreendimento/boulevard-royal/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-boulevard-royal-EM12642",
+        "https://imobiliariaversatil.com.br/imovel/venda-apartamentos-02-dormitorio-em-itapema/boulevard-royal/6084",
+        "https://myside.com.br/apartamento-venda-boulevard-royal-residence-itapema-sc",
+        "https://siframar.com.br/empreendimento/boulevard-royal-residence/itapema/centro/275"
+      ],
+      "notes": "RDO foi a fonte visual principal. Como bairro e prazo aparecem com variacoes, a copy usa Rua 119/Itapema e registra a previsao de 2025 como dado historico de fonte."
+    },
+    {
+      "slug": "brava-bells",
+      "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2455/001-whatsapp-image-2026-03-30-at-155156-1-17754993751556.jpeg",
+      "description": "O Brava Bells fica na Rua Lindolf Bell, na Praia dos Amores, em Balneario Camboriu, com fontes como Attria e VSalles indicando o numero 96. Manica Marin posiciona o projeto na divisa de Balneario Camboriu com Itajai, aos pes do Morro do Careca, e informa entrega em julho de 2025; OceanPrime destaca piscina, eventos, espaco gourmet, convivencia integrada, box de praia e acesso para banhistas. A auditoria removeu a imagem gerada que estava como hero e tambem descartou fotos internas de unidade, mantendo fachada real, acesso, piscina e renders do proprio empreendimento.",
+      "seo_description": "Brava Bells na Praia dos Amores, Rua Lindolf Bell, com fachada real, acesso, piscina e apoio de praia perto do Morro do Careca.",
+      "gallery": [
+        {
+          "title": "Brava Bells - fachada real",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2455/001-whatsapp-image-2026-03-30-at-155156-1-17754993751556.jpeg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Brava Bells - acesso garagem",
+          "category": "Acesso",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2455/003-whatsapp-image-2026-03-30-at-155156-2-17754993751556.jpeg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Brava Bells - fachada frontal",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2455/004-whatsapp-image-2026-03-30-at-155156-4-17754993751557.jpeg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Brava Bells - fachada Manica",
+          "category": "Fachada",
+          "image": "https://cdn.vistahost.com.br/cli36621/vista.imobi/fotos/9109/iU45uR2_910968d848ca05adc.jpg",
+          "source_url": "https://manicamarin.com.br/imovel/empreendimento-praia-dos-amores-balneario-camboriu-sc-398988",
+          "source_label": "Manica Marin"
+        },
+        {
+          "title": "Brava Bells - fachada letreiro",
+          "category": "Fachada",
+          "image": "https://cdn.vistahost.com.br/cli36621/vista.imobi/fotos/4413/i23M039H4RJ37pTS39_441364885f3384cfd.jpg",
+          "source_url": "https://manicamarin.com.br/imovel/empreendimento-praia-dos-amores-balneario-camboriu-sc-398988",
+          "source_label": "Manica Marin"
+        },
+        {
+          "title": "Brava Bells - frente residencial",
+          "category": "Fachada",
+          "image": "https://cdn.vistahost.com.br/cli36621/vista.imobi/fotos/4413/i23M039H4RJ37pTS39_441364885f22ef8e9.jpg",
+          "source_url": "https://manicamarin.com.br/imovel/empreendimento-praia-dos-amores-balneario-camboriu-sc-398988",
+          "source_label": "Manica Marin"
+        },
+        {
+          "title": "Brava Bells - esquina fachada",
+          "category": "Fachada",
+          "image": "https://cdn.vistahost.com.br/cli36621/vista.imobi/fotos/4413/i23M039H4RJ37pTS39_441364885f2fc5cf5.jpg",
+          "source_url": "https://manicamarin.com.br/imovel/empreendimento-praia-dos-amores-balneario-camboriu-sc-398988",
+          "source_label": "Manica Marin"
+        },
+        {
+          "title": "Brava Bells - fachada sombra",
+          "category": "Fachada",
+          "image": "https://cdn.vistahost.com.br/cli36621/vista.imobi/fotos/4413/i23M039H4RJ37pTS39_441364885f2104e6d.jpg",
+          "source_url": "https://manicamarin.com.br/imovel/empreendimento-praia-dos-amores-balneario-camboriu-sc-398988",
+          "source_label": "Manica Marin"
+        },
+        {
+          "title": "Brava Bells - vista rua",
+          "category": "Fachada",
+          "image": "https://cdn.vistahost.com.br/cli36621/vista.imobi/fotos/4413/i23M039H4RJ37pTS39_441364885f2c0764b.jpg",
+          "source_url": "https://manicamarin.com.br/imovel/empreendimento-praia-dos-amores-balneario-camboriu-sc-398988",
+          "source_label": "Manica Marin"
+        },
+        {
+          "title": "Brava Bells - piscina",
+          "category": "Piscina",
+          "image": "https://publisher-techbins.b-cdn.net/SEM-1459/ppt_J2fs2bee3s8SQ1fLapzLElwb0RoT/eyJidWNrZXQiOiJpbW9ibGFuZC1waWN0dXJlcy12MiIsImtleSI6InNiOEpUdnhJRTRpL1ZNcTg2Z3k3L2U1NDM1Y2ViLThjY2YtNDNjZC04NGI3LTI4YTA1ZGZkMDc4Ny5qcGcifQ==.webp",
+          "source_url": "https://100porcentoimoveis.com.br/imovel/AP20040",
+          "source_label": "100 Porcento Imoveis"
+        },
+        {
+          "title": "Brava Bells - contexto aereo",
+          "category": "Aereo",
+          "image": "https://publisher-techbins.b-cdn.net/SEM-1459/ppt_J2fs2bee3s8SQ1fLapzLElwb0RoT/eyJidWNrZXQiOiJpbW9ibGFuZC1waWN0dXJlcy12MiIsImtleSI6InNiOEpUdnhJRTRpL1ZNcTg2Z3k3L2EzZjg0OGM3LTE4OTgtNGFkNy1hNDczLTViOTE3M2NiMDU1MS5qcGcifQ==.webp",
+          "source_url": "https://100porcentoimoveis.com.br/imovel/AP20040",
+          "source_label": "100 Porcento Imoveis"
+        },
+        {
+          "title": "Brava Bells - render fachada",
+          "category": "Fachada",
+          "image": "https://publisher-techbins.b-cdn.net/SEM-1459/ppt_J2fs2bee3s8SQ1fLapzLElwb0RoT/eyJidWNrZXQiOiJpbW9ibGFuZC1waWN0dXJlcy12MiIsImtleSI6InNiOEpUdnhJRTRpL1ZNcTg2Z3k3LzM5YWM4N2FmLTkzYTUtNDVhYy04MDE2LTIyNzdkN2IxMDljMC5qcGcifQ==.webp",
+          "source_url": "https://100porcentoimoveis.com.br/imovel/AP20040",
+          "source_label": "100 Porcento Imoveis"
+        },
+        {
+          "title": "Brava Bells - render acesso",
+          "category": "Fachada",
+          "image": "https://publisher-techbins.b-cdn.net/SEM-1459/ppt_J2fs2bee3s8SQ1fLapzLElwb0RoT/eyJidWNrZXQiOiJpbW9ibGFuZC1waWN0dXJlcy12MiIsImtleSI6InNiOEpUdnhJRTRpL1ZNcTg2Z3k3Lzk5NDdjMzY3LTljYTktNDk5ZS04MDJiLThiZWIxNGNlMTUwMS5qcGcifQ==.webp",
+          "source_url": "https://100porcentoimoveis.com.br/imovel/AP20040",
+          "source_label": "100 Porcento Imoveis"
+        },
+        {
+          "title": "Brava Bells - fachada conceitual",
+          "category": "Fachada",
+          "image": "https://publisher-techbins.b-cdn.net/SEM-1459/ppt_J2fs2bee3s8SQ1fLapzLElwb0RoT/eyJidWNrZXQiOiJpbW9ibGFuZC1waWN0dXJlcy12MiIsImtleSI6InNiOEpUdnhJRTRpL1ZNcTg2Z3k3LzQ3MDExMzk3LWZmMmUtNDY5Yy04NjU1LTk3ZTRmMzgyNjcwYi5qcGcifQ==.webp",
+          "source_url": "https://100porcentoimoveis.com.br/imovel/AP20040",
+          "source_label": "100 Porcento Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Praia dos Amores",
+          "description": "Rua Lindolf Bell, em trecho proximo a Praia Brava, Praia dos Amores e Morro do Careca."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e apoio praia",
+          "description": "OceanPrime cita piscina, box de praia e acesso para banhistas."
+        },
+        {
+          "icon": "Utensils",
+          "title": "Gourmet e eventos",
+          "description": "Fontes comerciais destacam espaco gourmet, eventos e convivencia integrada."
+        },
+        {
+          "icon": "Building2",
+          "title": "Fachada real como hero",
+          "description": "A imagem principal gerada foi substituida por foto real do empreendimento."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Hero gerado removido",
+          "description": "A aplicacao final troca a imagem artificial por fachada real do Brava Bells."
+        },
+        {
+          "title": "Localizacao bem definida",
+          "description": "A copy usa Rua Lindolf Bell, Praia dos Amores e divisa com Itajai como contexto principal."
+        },
+        {
+          "title": "Galeria conservadora",
+          "description": "Ficaram fachada, acesso, piscina e renders coerentes; interiores foram descartados."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Brava Bells?",
+          "answer": "Na Rua Lindolf Bell, Praia dos Amores, Balneario Camboriu; algumas fontes indicam numero 96."
+        },
+        {
+          "question": "Qual e o entorno?",
+          "answer": "Manica Marin descreve a regiao na divisa com Itajai, aos pes do Morro do Careca e perto da Praia Brava."
+        },
+        {
+          "question": "Quais areas aparecem nas fontes?",
+          "answer": "Piscina, eventos, espaco gourmet, box de praia e acesso para banhistas."
+        },
+        {
+          "question": "O que foi corrigido nas imagens?",
+          "answer": "A imagem gerada do hero e fotos internas foram substituidas por fachada real, acesso, piscina e renders do empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/",
+        "https://manicamarin.com.br/imovel/empreendimento-praia-dos-amores-balneario-camboriu-sc-398988",
+        "https://100porcentoimoveis.com.br/imovel/AP20040",
+        "https://www.chavesnamao.com.br/imovel/apartamento-a-venda-2-quartos-sc-balneario-camboriu-praia-dos-amores-120m2-RS1557000/id-34037207/",
+        "https://www.oceanprime.com.br/empreendimentos/brava-bells",
+        "https://www.attria.com.br/condominio/ed-brava-bells-praia-dos-amores-balneario-camboriu-sc",
+        "https://www.vsallesimoveis.com.br/imovel/apartamento-no-edificio-brava-bells-itajai-praia-brava-2-quartos-2-garagens-venda-ref-1813/"
+      ],
+      "notes": "Hero anterior era imagem gerada. A aplicacao usa fachada real do acervo/Manica, piscina da 100 Porcento e renders coerentes do Brava Bells."
+    }
+  ]
+}

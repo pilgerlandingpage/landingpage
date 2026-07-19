@@ -1,0 +1,1569 @@
+{
+  "batch_id": "development-media-curation-p1-batch1-20260719",
+  "generated_at": "2026-07-19T00:29:19.764Z",
+  "items": [
+    {
+      "slug": "le-blanc",
+      "hero_image": "https://www.rvempreendimentos.com.br/wp-content/uploads/2025/10/le-blanc-1.webp",
+      "description": "O Le Blanc Brava Residence e um empreendimento pronto para morar da RV Empreendimentos na Rua Delfim de Padua Peixoto, 580, Praia Brava, Itajai. A fonte oficial descreve torre unica com 50 residencias, plantas de 210 m2 a 321 m2 e rooftop com piscina de borda infinita, pool bar com churrasqueira, gourmet, eventos, sauna, jogos, brinquedoteca, academia, spa e deck. A pagina foi corrigida para mostrar fachada, rooftop, piscina, fitness, jogos e espacos sociais do condominio.",
+      "seo_description": "Le Blanc Brava Residence na Rua Delfim de Padua Peixoto, Praia Brava, Itajai, pronto para morar com rooftop e lazer completo.",
+      "gallery": [
+        {
+          "title": "Le Blanc - fachada Praia Brava",
+          "category": "Fachada",
+          "image": "https://www.rvempreendimentos.com.br/wp-content/uploads/2025/10/le-blanc-1.webp",
+          "source_url": "https://www.rvempreendimentos.com.br/empreendimento/le-blanc-residence/",
+          "source_label": "RV Empreendimentos"
+        },
+        {
+          "title": "Le Blanc - rooftop gourmet",
+          "category": "Rooftop",
+          "image": "https://www.rvempreendimentos.com.br/wp-content/uploads/2025/10/le-blanc-residence-2.jpg",
+          "source_url": "https://www.rvempreendimentos.com.br/empreendimento/le-blanc-residence/",
+          "source_label": "RV Empreendimentos"
+        },
+        {
+          "title": "Le Blanc - piscina infinita",
+          "category": "Piscina",
+          "image": "https://www.rvempreendimentos.com.br/wp-content/uploads/2025/10/le-blanc-residence-6.jpg",
+          "source_url": "https://www.rvempreendimentos.com.br/empreendimento/le-blanc-residence/",
+          "source_label": "RV Empreendimentos"
+        },
+        {
+          "title": "Le Blanc - borda com vista mar",
+          "category": "Piscina",
+          "image": "https://www.rvempreendimentos.com.br/wp-content/uploads/2025/10/le-blanc-residence-7.jpg",
+          "source_url": "https://www.rvempreendimentos.com.br/empreendimento/le-blanc-residence/",
+          "source_label": "RV Empreendimentos"
+        },
+        {
+          "title": "Le Blanc - deck panoramico",
+          "category": "Rooftop",
+          "image": "https://www.rvempreendimentos.com.br/wp-content/uploads/2025/10/le-blanc-residence-9.jpg",
+          "source_url": "https://www.rvempreendimentos.com.br/empreendimento/le-blanc-residence/",
+          "source_label": "RV Empreendimentos"
+        },
+        {
+          "title": "Le Blanc - fitness",
+          "category": "Fitness",
+          "image": "https://www.rvempreendimentos.com.br/wp-content/uploads/2025/10/le-blanc-residence-15.jpg",
+          "source_url": "https://www.rvempreendimentos.com.br/empreendimento/le-blanc-residence/",
+          "source_label": "RV Empreendimentos"
+        },
+        {
+          "title": "Le Blanc - jogos",
+          "category": "Jogos",
+          "image": "https://www.rvempreendimentos.com.br/wp-content/uploads/2025/10/le-blanc-residence-19.jpg",
+          "source_url": "https://www.rvempreendimentos.com.br/empreendimento/le-blanc-residence/",
+          "source_label": "RV Empreendimentos"
+        },
+        {
+          "title": "Le Blanc - brinquedoteca",
+          "category": "Infantil",
+          "image": "https://www.rvempreendimentos.com.br/wp-content/uploads/2025/10/le-blanc-residence-24.jpg",
+          "source_url": "https://www.rvempreendimentos.com.br/empreendimento/le-blanc-residence/",
+          "source_label": "RV Empreendimentos"
+        },
+        {
+          "title": "Le Blanc - eventos",
+          "category": "Eventos",
+          "image": "https://www.rvempreendimentos.com.br/wp-content/uploads/2025/10/le-blanc-residence-27.jpg",
+          "source_url": "https://www.rvempreendimentos.com.br/empreendimento/le-blanc-residence/",
+          "source_label": "RV Empreendimentos"
+        },
+        {
+          "title": "Le Blanc - torre pronta",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-1761741680.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-blanc-EM79520",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua Delfim de Padua Peixoto",
+          "description": "Endereco oficial na Praia Brava de Itajai, em eixo valorizado proximo ao mar, beach clubs e servicos da regiao."
+        },
+        {
+          "icon": "Building2",
+          "title": "Torre unica RV",
+          "description": "A RV Empreendimentos apresenta o projeto com 50 residencias e leitura boutique para o alto padrao da Brava."
+        },
+        {
+          "icon": "Waves",
+          "title": "Rooftop frente ao mar",
+          "description": "Piscina de borda infinita, deck, pool bar e gourmet reforcam a experiencia panoramica do empreendimento."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer de rotina",
+          "description": "Academia, jogos, brinquedoteca, spa, eventos e sauna completam a estrutura de uso diario."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Galeria do condominio",
+          "description": "As fotos finais vieram de RV e Imobille, priorizando fachada e areas comuns em vez de imagens internas de oferta."
+        },
+        {
+          "title": "Produto ja entregue",
+          "description": "Fontes comerciais e oficiais indicam Le Blanc como pronto para morar, com entrega divulgada em dezembro de 2023."
+        },
+        {
+          "title": "Localizacao precisa",
+          "description": "O texto agora informa o endereco oficial e evita descricoes genericas que nao diferenciavam o empreendimento."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Le Blanc Brava Residence?",
+          "answer": "Na Rua Delfim de Padua Peixoto, 580, Praia Brava, Itajai, conforme fonte oficial da RV Empreendimentos."
+        },
+        {
+          "question": "Quem assina o Le Blanc?",
+          "answer": "O empreendimento e da RV Empreendimentos, com torre unica e 50 residencias divulgadas pela incorporadora."
+        },
+        {
+          "question": "Quais areas aparecem na nova galeria?",
+          "answer": "Fachada, rooftop, piscina de borda infinita, deck, gourmet, eventos, fitness, jogos e brinquedoteca."
+        },
+        {
+          "question": "O que foi corrigido nesta pagina?",
+          "answer": "A galeria deixou de usar fotos de oferta interna e passou a apresentar imagens do empreendimento e das areas comuns."
+        }
+      ],
+      "sources": [
+        "https://www.rvempreendimentos.com.br/empreendimento/le-blanc-residence/",
+        "https://apto.vc/br/sc/itajai/praia-brava/le-blanc-brava-residence",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-le-blanc-EM79520",
+        "https://felicitanegocios.com.br/empreendimento/219/le-blanc/",
+        "https://maximoveis.com.br/empreendimento/1045/le-blanc-brava-residence/"
+      ],
+      "notes": "RV oficial confirma endereco, torre unica, 50 residencias, status pronto e rooftop completo; imagens finais priorizam RV e Imobille."
+    },
+    {
+      "slug": "bravaconceto",
+      "hero_image": "https://bravaconcetto.com.br/uploads/imagens/lg-galeria-2-2-378.jpg",
+      "description": "O Brava Concetto e um lancamento da Clarus Construtora na Avenida Carlos Drummond de Andrade, 111, Praia Brava, Itajai. O site oficial destaca Conceptual Design, arquitetura de Antonio Jose Goncalves, Frederico Carstens e Realiza, interiores por Debora Aguiar, paisagismo Ana Holzer e certificacao GBC Condominio. A comunicacao tambem cita biofilia, conforto termoacustico, umidade controlada e energia inteligente. Como a obra aparece em fase inicial na fonte oficial, a galeria foi tratada como perspectivas do empreendimento.",
+      "seo_description": "Brava Concetto na Avenida Carlos Drummond de Andrade, Praia Brava, Itajai, lancamento Clarus com design biofilico.",
+      "gallery": [
+        {
+          "title": "Brava Concetto - fachada render",
+          "category": "Render",
+          "image": "https://bravaconcetto.com.br/uploads/imagens/lg-galeria-2-2-378.jpg",
+          "source_url": "https://bravaconcetto.com.br/",
+          "source_label": "Brava Concetto"
+        },
+        {
+          "title": "Brava Concetto - torre frontal",
+          "category": "Render",
+          "image": "https://bravaconcetto.com.br/uploads/imagens/lg-galeria-2-2-323.jpg",
+          "source_url": "https://bravaconcetto.com.br/",
+          "source_label": "Brava Concetto"
+        },
+        {
+          "title": "Brava Concetto - base paisagistica",
+          "category": "Render",
+          "image": "https://bravaconcetto.com.br/uploads/imagens/lg-galeria-2-2-935.jpg",
+          "source_url": "https://bravaconcetto.com.br/",
+          "source_label": "Brava Concetto"
+        },
+        {
+          "title": "Brava Concetto - varandas",
+          "category": "Render",
+          "image": "https://bravaconcetto.com.br/uploads/imagens/lg-galeria-2-2-16.jpg",
+          "source_url": "https://bravaconcetto.com.br/",
+          "source_label": "Brava Concetto"
+        },
+        {
+          "title": "Brava Concetto - detalhe verde",
+          "category": "Render",
+          "image": "https://bravaconcetto.com.br/uploads/imagens/lg-galeria-2-2-1.jpg",
+          "source_url": "https://bravaconcetto.com.br/",
+          "source_label": "Brava Concetto"
+        },
+        {
+          "title": "Brava Concetto - hall render",
+          "category": "Hall",
+          "image": "https://bravaconcetto.com.br/uploads/imagens/lg-galeria-2-2-598.jpg",
+          "source_url": "https://bravaconcetto.com.br/",
+          "source_label": "Brava Concetto"
+        },
+        {
+          "title": "Brava Concetto - convivencia render",
+          "category": "Convivencia",
+          "image": "https://bravaconcetto.com.br/uploads/imagens/lg-galeria-2-2-925.jpg",
+          "source_url": "https://bravaconcetto.com.br/",
+          "source_label": "Brava Concetto"
+        },
+        {
+          "title": "Brava Concetto - area fitness",
+          "category": "Fitness",
+          "image": "https://bravaconcetto.com.br/uploads/imagens/lg-galeria-2-2-284.jpg",
+          "source_url": "https://bravaconcetto.com.br/",
+          "source_label": "Brava Concetto"
+        },
+        {
+          "title": "Brava Concetto - academia render",
+          "category": "Fitness",
+          "image": "https://bravaconcetto.com.br/uploads/imagens/lg-galeria-2-2-335.jpg",
+          "source_url": "https://bravaconcetto.com.br/",
+          "source_label": "Brava Concetto"
+        },
+        {
+          "title": "Brava Concetto - piscina render",
+          "category": "Piscina",
+          "image": "https://bravaconcetto.com.br/uploads/imagens/lg-galeria-2-2-908.jpg",
+          "source_url": "https://bravaconcetto.com.br/",
+          "source_label": "Brava Concetto"
+        },
+        {
+          "title": "Brava Concetto - area externa",
+          "category": "Convivencia",
+          "image": "https://bravaconcetto.com.br/uploads/imagens/lg-galeria-2-2-330.jpg",
+          "source_url": "https://bravaconcetto.com.br/",
+          "source_label": "Brava Concetto"
+        },
+        {
+          "title": "Brava Concetto - gourmet render",
+          "category": "Gourmet",
+          "image": "https://bravaconcetto.com.br/uploads/imagens/lg-galeria-2-2-859.jpg",
+          "source_url": "https://bravaconcetto.com.br/",
+          "source_label": "Brava Concetto"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro da Praia Brava",
+          "description": "Endereco oficial na Avenida Carlos Drummond de Andrade, 111, em ponto estrategico da Brava de Itajai."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Conceptual Design",
+          "description": "O projeto combina arquitetura autoral, interiores assinados e paisagismo com linguagem biofilica."
+        },
+        {
+          "icon": "Leaf",
+          "title": "GBC Condominio",
+          "description": "A comunicacao oficial destaca certificacao, energia inteligente e solucoes para conforto ambiental."
+        },
+        {
+          "icon": "Building2",
+          "title": "Clarus Construtora",
+          "description": "O empreendimento e apresentado pela Clarus com metragens amplas e programa residencial de alto padrao."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fase identificada",
+          "description": "A pagina informa que as imagens sao renders, evitando apresentar perspectivas como fotos de obra pronta."
+        },
+        {
+          "title": "Assinaturas de projeto",
+          "description": "Arquitetura, interiores e paisagismo foram citados com base nas fontes oficiais e comerciais."
+        },
+        {
+          "title": "Galeria coerente",
+          "description": "Foram removidas imagens internas de oferta e mantidos materiais de fachada, hall, lazer e convivencia do lancamento."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Brava Concetto?",
+          "answer": "Na Avenida Carlos Drummond de Andrade, 111, Praia Brava, Itajai, segundo o site oficial do empreendimento."
+        },
+        {
+          "question": "As imagens sao fotos reais?",
+          "answer": "Nao. Como a fonte oficial indica fase inicial de obra, a galeria foi rotulada como render e perspectiva do empreendimento."
+        },
+        {
+          "question": "Quem assina o projeto?",
+          "answer": "As fontes citam Clarus Construtora, arquitetura de Antonio Jose Goncalves, Frederico Carstens e Realiza, interiores Debora Aguiar e paisagismo Ana Holzer."
+        },
+        {
+          "question": "Qual certificacao foi citada?",
+          "answer": "O site oficial destaca GBC Condominio, alem de biofilia, conforto termoacustico, umidade controlada e energia inteligente."
+        }
+      ],
+      "sources": [
+        "https://bravaconcetto.com.br/",
+        "https://lancamento.invexo.com.br/sc/brava-concetto/",
+        "https://www.adamantenegocios.com.br/empreendimento/121/brava-concetto/",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-brava-concetto-itajai-praia-brava-4-quartos-3-garagens-venda-ref-2299/"
+      ],
+      "notes": "Site oficial informa endereco, Clarus, assinaturas, GBC Condominio e obra em fase inicial; imagens finais sao renders do empreendimento."
+    },
+    {
+      "slug": "number-one",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/number-one2-1744120862.jpg",
+      "description": "O Number One fica na Avenida Atlantica, 3924, Centro de Balneario Camboriu, em posicao frente mar na Praia Central. Imobille e Felicita citam lazer com piscina frente mar, salao de festas, sauna, brinquedoteca, espaco gourmet, academia, terraco e deck. A pagina foi limpa para destacar fachada, piscina e ambientes comuns do condominio, removendo imagens internas de ofertas que antes apareciam como galeria do empreendimento.",
+      "seo_description": "Number One frente mar na Avenida Atlantica, 3924, Centro de Balneario Camboriu, com piscina, deck, terraco e fitness.",
+      "gallery": [
+        {
+          "title": "Number One - fachada Atlantica",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/number-one2-1744120862.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-number-one-EM82576",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Number One - piscina frente mar",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/08042025110102472-1744120862.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-number-one-EM82576",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Number One - acesso social",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2025/number-one-16-1744120793.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-number-one-EM82576",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Number One - deck externo",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2025/number-one-15-1744120793.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-number-one-EM82576",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Number One - terraco com mar",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2025/number-one-11-1744120791.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-number-one-EM82576",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Number One - lounge panoramico",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2025/number-one-12-1744120791.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-number-one-EM82576",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Number One - estar aberto",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2025/number-one-13-1744120792.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-number-one-EM82576",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Number One - fitness",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2025/number-one-14-1744120792.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-number-one-EM82576",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Avenida Atlantica 3924",
+          "description": "Endereco frente mar em Balneario Camboriu, com acesso direto a Praia Central e servicos do Centro."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina com vista mar",
+          "description": "As fontes destacam piscina e terraco voltados para a orla, um diferencial claro do edificio."
+        },
+        {
+          "icon": "Users",
+          "title": "Areas sociais completas",
+          "description": "Saloes, gourmet, deck, sauna, brinquedoteca e fitness estruturam o uso comum do condominio."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Midia corrigida",
+          "description": "A nova selecao separa a apresentacao do empreendimento das fotos internas de ofertas comerciais."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Frente mar confirmado",
+          "description": "As fontes consultadas convergem no endereco da Avenida Atlantica e na posicao diante da Praia Central."
+        },
+        {
+          "title": "Galeria mais honesta",
+          "description": "Fachada, piscina, deck, terraco e fitness substituem imagens privadas que confundiam a leitura da pagina."
+        },
+        {
+          "title": "Descricao especifica",
+          "description": "A copy agora cita endereco, lazer e relacao com a orla, deixando de depender de beneficios genericos."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Number One?",
+          "answer": "Na Avenida Atlantica, 3924, Centro de Balneario Camboriu, em posicao frente mar na Praia Central."
+        },
+        {
+          "question": "Quais areas aparecem na galeria corrigida?",
+          "answer": "Fachada, piscina frente mar, acesso, deck, terraco, lounge e fitness."
+        },
+        {
+          "question": "Quais lazeres foram citados nas fontes?",
+          "answer": "Piscina, salao de festas, sauna, brinquedoteca, espaco gourmet, academia, terraco e deck."
+        },
+        {
+          "question": "Por que a pagina foi revisada?",
+          "answer": "Porque a galeria anterior trazia imagens internas de oferta, inadequadas para representar o condominio."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-number-one-EM82576",
+        "https://felicitanegocios.com.br/empreendimento/56/number-one/",
+        "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-number-one-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-382/",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-number-one-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-500/"
+      ],
+      "notes": "Imobille e Felicita confirmam Avenida Atlantica 3924, frente mar e lazer; imagens finais usam fachada e areas comuns."
+    },
+    {
+      "slug": "aquamarine-residence",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-1756121993.jpg",
+      "description": "O Aquamarine Residence esta na Rua Delfin de Padua Peixoto, 548, Praia Brava, Itajai, conforme a Construtora Oriente. A fonte oficial descreve arquitetura moderna, vista para a Praia Brava e cerca de 1000 m2 de lazer no terreo e mezanino, com piscina adulto semiolimpica com borda infinita, piscina infantil, saunas, zen spa, salao de festas, jogos, gourmet, academia, kids, home office, poker e varanda lounge. A galeria foi substituida por fachada, hall, piscina e areas comuns do empreendimento.",
+      "seo_description": "Aquamarine Residence na Rua Delfin de Padua Peixoto, Praia Brava, Itajai, com lazer de 1000 m2 e piscina infinita.",
+      "gallery": [
+        {
+          "title": "Aquamarine - fachada Praia Brava",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-1756121993.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/aquamarine-residence-EM49350",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aquamarine - eventos",
+          "category": "Eventos",
+          "image": "https://construtoraoriente.com.br/wp-content/uploads/2024/12/Salao-de-festas.webp",
+          "source_url": "https://construtoraoriente.com.br/aquamarine/",
+          "source_label": "Construtora Oriente"
+        },
+        {
+          "title": "Aquamarine - gourmet",
+          "category": "Gourmet",
+          "image": "https://construtoraoriente.com.br/wp-content/uploads/2024/12/Salao-de-festas-2.webp",
+          "source_url": "https://construtoraoriente.com.br/aquamarine/",
+          "source_label": "Construtora Oriente"
+        },
+        {
+          "title": "Aquamarine - jogos gourmet",
+          "category": "Jogos",
+          "image": "https://construtoraoriente.com.br/wp-content/uploads/2024/12/Salao-de-festas-3.webp",
+          "source_url": "https://construtoraoriente.com.br/aquamarine/",
+          "source_label": "Construtora Oriente"
+        },
+        {
+          "title": "Aquamarine - academia",
+          "category": "Fitness",
+          "image": "https://construtoraoriente.com.br/wp-content/uploads/2024/12/Academia.webp",
+          "source_url": "https://construtoraoriente.com.br/aquamarine/",
+          "source_label": "Construtora Oriente"
+        },
+        {
+          "title": "Aquamarine - kids",
+          "category": "Infantil",
+          "image": "https://construtoraoriente.com.br/wp-content/uploads/2024/12/Area-kids.webp",
+          "source_url": "https://construtoraoriente.com.br/aquamarine/",
+          "source_label": "Construtora Oriente"
+        },
+        {
+          "title": "Aquamarine - piscina externa",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/1405202411531117327-1715698391.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/aquamarine-residence-EM49350",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aquamarine - hall social",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2024/aquamarine-1-1715697968.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/aquamarine-residence-EM49350",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aquamarine - playground",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2024/aquamarine-8-1715697971.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/aquamarine-residence-EM49350",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aquamarine - fitness completo",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2024/aquamarine-13-1715697973.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/aquamarine-residence-EM49350",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aquamarine - piscina lateral",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2024/aquamarine-18-1715697974.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/aquamarine-residence-EM49350",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aquamarine - gourmet social",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2024/aquamarine-21-1715697975.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/aquamarine-residence-EM49350",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aquamarine - torre pronta",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2024/aquamarine-26-1715697976.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/aquamarine-residence-EM49350",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Praia Brava de Itajai",
+          "description": "Endereco oficial na Rua Delfin de Padua Peixoto, 548, um dos corredores nobres da Brava."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina semiolimpica",
+          "description": "A Oriente destaca piscina adulto com borda infinita, piscina infantil e vista para a Praia Brava."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer em dois niveis",
+          "description": "Terreo e mezanino concentram fitness, eventos, jogos, gourmet, kids, spa, poker, home office e lounge."
+        },
+        {
+          "icon": "Building2",
+          "title": "Construtora Oriente",
+          "description": "A fonte oficial confirma o empreendimento e seu programa de lazer, dando base mais segura a descricao."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fachada e lazer reais",
+          "description": "A nova galeria combina material oficial e Imobille com foco em fachada, piscina, hall e convivencia."
+        },
+        {
+          "title": "Area comum detalhada",
+          "description": "O texto agora lista os ambientes do condominio sem usar copy padrao ou informacao incompleta."
+        },
+        {
+          "title": "Endereco conferido",
+          "description": "A Rua Delfin de Padua Peixoto foi validada na fonte oficial antes da aplicacao."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Aquamarine Residence?",
+          "answer": "Na Rua Delfin de Padua Peixoto, 548, Praia Brava, Itajai, conforme a Construtora Oriente."
+        },
+        {
+          "question": "Quais areas de lazer foram confirmadas?",
+          "answer": "Piscinas adulto e infantil, saunas, zen spa, eventos, jogos, gourmet, academia, kids, home office, poker e varanda lounge."
+        },
+        {
+          "question": "A galeria mostra fotos internas privadas?",
+          "answer": "Nao. A curadoria prioriza fachada, hall, piscina e areas comuns do empreendimento."
+        },
+        {
+          "question": "Qual fonte principal foi usada?",
+          "answer": "A pagina oficial da Construtora Oriente foi usada como fonte principal, complementada por Imobille e paginas comerciais."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/aquamarine-residence-EM49350",
+        "https://construtoraoriente.com.br/aquamarine/",
+        "https://manicamarin.com.br/imovel/apartamento-praia-brava-itajai-sc-3-quartos-145m2-2427",
+        "https://www.jrbrokers.com.br/imovel/apartamento-no-edificio-aquamarine-residence-itajai-praia-brava-3-quartos-2-garagens-venda-ref-773/",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-aquamarine-residence-itajai-praia-brava-3-quartos-2-garagens-venda-ref-2483/"
+      ],
+      "notes": "Construtora Oriente confirma endereco, arquitetura e cerca de 1000 m2 de lazer; imagens finais sao de fachada e areas comuns."
+    },
+    {
+      "slug": "privilege-brava",
+      "hero_image": "https://cdn.imoview.com.br/bryann/Condominios/188/img-16.jpg?1784228755",
+      "description": "O Privilege Brava fica na Rua Virginia Angelo Severino, 59, Praia Brava, Itajai. Felicita informa o empreendimento como entregue e descreve plantas entre 94 m2 e 203,44 m2, enquanto Imobille e outras fontes confirmam lazer com piscina e espaco gourmet. A nova curadoria troca imagens internas de oferta por piscina, deck, playground, eventos, gourmet, jogos, academia, brinquedoteca e rooftop, deixando a pagina alinhada ao condominio.",
+      "seo_description": "Privilege Brava na Rua Virginia Angelo Severino, Praia Brava, Itajai, entregue com piscina, gourmet, jogos e rooftop.",
+      "gallery": [
+        {
+          "title": "Privilege Brava - piscina",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/188/img-16.jpg?1784228755",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/188/privilege-brava/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Privilege Brava - deck lazer",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/188/img-15.jpg?1784228755",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/188/privilege-brava/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Privilege Brava - playground",
+          "category": "Infantil",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/188/img-14.jpg?1784228755",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/188/privilege-brava/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Privilege Brava - eventos",
+          "category": "Eventos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/188/img-12.jpg?1784228755",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/188/privilege-brava/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Privilege Brava - gourmet",
+          "category": "Gourmet",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/188/img-10.jpg?1784228755",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/188/privilege-brava/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Privilege Brava - jogos",
+          "category": "Jogos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/188/img-5.jpg?1784228755",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/188/privilege-brava/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Privilege Brava - academia",
+          "category": "Fitness",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/188/img-3.jpg?1784228755",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/188/privilege-brava/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Privilege Brava - mesa de jogos",
+          "category": "Jogos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/188/img-41.jpg?1784228755",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/188/privilege-brava/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Privilege Brava - brinquedoteca",
+          "category": "Infantil",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/188/img-43.jpg?1784228755",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/188/privilege-brava/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Privilege Brava - rooftop piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/27112023165040386-1701114641.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-privilege-brava-EM32816",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Privilege Brava - rooftop lounge",
+          "category": "Rooftop",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2023/privilege-42-1701114544.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-privilege-brava-EM32816",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Privilege Brava - rooftop estar",
+          "category": "Rooftop",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2023/privilege-43-1701114545.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-privilege-brava-EM32816",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Privilege Brava - playground externo",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2023/privilege-41-1701114543.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-privilege-brava-EM32816",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua Virginia Angelo Severino",
+          "description": "Endereco consultado na Praia Brava de Itajai, com acesso ao eixo da Osvaldo Reis e a orla."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e rooftop",
+          "description": "A galeria confirma ambientes de piscina, deck e estar superior, reforcando o lazer externo."
+        },
+        {
+          "icon": "Users",
+          "title": "Estrutura familiar",
+          "description": "Playground, brinquedoteca, gourmet, eventos e jogos atendem convivencia adulta e infantil."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Academia no condominio",
+          "description": "A area fitness aparece na selecao final e complementa o programa de lazer."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Empreendimento entregue",
+          "description": "A fonte comercial Felicita informa o Privilege Brava como entregue na Praia Brava."
+        },
+        {
+          "title": "Fotos de uso comum",
+          "description": "A galeria agora mostra piscina, rooftop, lazer infantil, eventos, jogos e fitness."
+        },
+        {
+          "title": "Descricao menos generica",
+          "description": "Endereco, status, faixa de metragens e estrutura de lazer foram incorporados a copy."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Privilege Brava?",
+          "answer": "Na Rua Virginia Angelo Severino, 59, Praia Brava, Itajai, segundo Felicita e fontes comerciais."
+        },
+        {
+          "question": "O empreendimento esta entregue?",
+          "answer": "A fonte Felicita informa o Privilege Brava como entregue."
+        },
+        {
+          "question": "Quais areas aparecem na galeria?",
+          "answer": "Piscina, deck, playground, eventos, gourmet, jogos, academia, brinquedoteca e rooftop."
+        },
+        {
+          "question": "O que mudou na auditoria?",
+          "answer": "A curadoria removeu imagens internas de oferta e passou a apresentar espacos comuns do condominio."
+        }
+      ],
+      "sources": [
+        "https://felicitanegocios.com.br/empreendimento/188/privilege-brava/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-privilege-brava-EM32816",
+        "https://imoveisterra.net/empreendimento/63/privilege/",
+        "https://meufrentemar.com.br/empreendimento/privilege-brava-residence/sc/itajai/126829",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-privilege-brava-itajai-praia-brava-3-quartos-2-garagens-venda-ref-2120/"
+      ],
+      "notes": "Felicita confirma endereco, status entregue e metragens; Imobille complementa lazer. Imagens finais focam piscina e areas comuns."
+    },
+    {
+      "slug": "condominio-caledonia-private-village",
+      "hero_image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0916__Easy-Resize.com_.jpg",
+      "description": "O Condominio Caledonia Private Village e um condominio fechado pronto para morar em Camboriu, na regiao de Santa Regina. O site oficial posiciona o empreendimento a cerca de 7 km da Praia Central de Balneario Camboriu, entre praia e montanhas, com proposta contemporanea e consciencia socioambiental. A pagina residencial complementar destaca facil acesso a praias e BR-101, paisagens preservadas, lazer, conforto, seguranca e portaria 24h. A nova galeria usa imagens aereas, clube, piscina, quadras, playground e convivencia.",
+      "seo_description": "Condominio Caledonia Private Village em Camboriu, pronto para morar, com clube, piscina, quadras, playground e seguranca 24h.",
+      "gallery": [
+        {
+          "title": "Caledonia - vista aerea",
+          "category": "Aereo",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0916__Easy-Resize.com_.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - piscina clube",
+          "category": "Piscina",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0911__Easy-Resize.com_.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - areia esportiva",
+          "category": "Esporte",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0985__Easy-Resize.com_.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - quadra aberta",
+          "category": "Esporte",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0964__Easy-Resize.com_-1-787x383-c-default.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - clube e piscina",
+          "category": "Clube",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0906__Easy-Resize.com_-787x383-c-default.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - paisagem interna",
+          "category": "Entorno",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0972__Easy-Resize.com_-787x383-c-default.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - tenis",
+          "category": "Esporte",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0909__Easy-Resize.com_-787x383-c-default.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - playground",
+          "category": "Infantil",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0934__Easy-Resize.com_-787x383-c-default.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - clube social",
+          "category": "Clube",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0899__Easy-Resize.com_-787x383-c-default.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - deck piscina",
+          "category": "Piscina",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0927__Easy-Resize.com_-787x383-c-default.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - convivencia",
+          "category": "Convivencia",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/RB_0241__Easy-Resize.com_-787x383-c-default.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - piscina panoramica",
+          "category": "Piscina",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0927__Easy-Resize.com_.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia - clube externo",
+          "category": "Clube",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0995__Easy-Resize.com_.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Trees",
+          "title": "Entre praia e montanhas",
+          "description": "A fonte oficial destaca paisagens preservadas e distancia aproximada de 7 km da Praia Central de Balneario Camboriu."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Seguranca 24h",
+          "description": "A pagina residencial complementar informa condominio fechado com seguranca e portaria 24h."
+        },
+        {
+          "icon": "Users",
+          "title": "Clube completo",
+          "description": "Piscina, clube social, playground, convivencia e areas externas organizam a vida condominial."
+        },
+        {
+          "icon": "Trophy",
+          "title": "Estrutura esportiva",
+          "description": "Quadras, tenis e areia esportiva aparecem nas imagens oficiais do empreendimento."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Book oficial priorizado",
+          "description": "As imagens finais vieram do site do Caledonia e mostram o condominio, nao interiores privados."
+        },
+        {
+          "title": "Localizacao contextualizada",
+          "description": "A copy explica a relacao com Camboriu, Santa Regina, BR-101 e Balneario Camboriu."
+        },
+        {
+          "title": "Natureza e lazer",
+          "description": "A descricao combina paisagem, clube, esporte, piscina e seguranca, sem depender de beneficios padrao."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Caledonia Private Village?",
+          "answer": "Em Camboriu, na regiao de Santa Regina, com facil acesso a BR-101 e a Balneario Camboriu."
+        },
+        {
+          "question": "O condominio esta pronto?",
+          "answer": "O site oficial apresenta o Caledonia como pronto para morar."
+        },
+        {
+          "question": "Quais areas aparecem na nova galeria?",
+          "answer": "Vista aerea, clube, piscina, quadras, tenis, playground, deck e convivencia."
+        },
+        {
+          "question": "Ha seguranca 24h?",
+          "answer": "A pagina residencial complementar informa condominio fechado com seguranca e portaria 24h."
+        }
+      ],
+      "sources": [
+        "https://condominiocaledonia.com.br/",
+        "https://residencialcaledonia.com.br/",
+        "https://www.imobillenegocios.com.br/empreendimento/condominio-caledonia-EM26933",
+        "https://www.guilhermepilger.com/imovel/casa-no-condominio-caledonia-private-village-camboriu-santa-regina-4-quartos-4-garagens-venda-ref-1359/"
+      ],
+      "notes": "Fonte oficial confirma pronto para morar, distancia da Praia Central e conceito entre praia e montanhas; residencial complementar cita seguranca 24h."
+    },
+    {
+      "slug": "alameda-jardins",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/alameda-jardins-1-1679316170.webp",
+      "description": "O Alameda Jardins fica na Avenida Brasil, 180, Balneario Camboriu, em ponto proximo a Barra Norte e a cerca de 150 m da praia segundo fonte comercial. Imobille informa empreendimento FG com 169 m de altura e 47 pavimentos, alem de lazer com salao de festas, jogos, gourmet, piscina infantil, cinema, massagem, spa, kids, espelho d agua, garage band, deck, sauna umida, descanso e infinity pool. A galeria foi corrigida para fachada, piscina, hall, kids e fitness do edificio.",
+      "seo_description": "Alameda Jardins na Avenida Brasil, Balneario Camboriu, empreendimento FG com fachada, piscina, hall, kids e fitness.",
+      "gallery": [
+        {
+          "title": "Alameda Jardins - fachada",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/alameda-jardins-1-1679316170.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-alameda-jardins-EM89520",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Alameda Jardins - piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/img-6500-1666358808-1679316170.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-alameda-jardins-EM89520",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Alameda Jardins - piscina lateral",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/img-6503-1666358808.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-alameda-jardins-EM89520",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Alameda Jardins - kids",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/img-6529-1666358809.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-alameda-jardins-EM89520",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Alameda Jardins - academia",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/img-6539-1666358809.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-alameda-jardins-EM89520",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Alameda Jardins - hall lounge",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/img-6543-1666358810.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-alameda-jardins-EM89520",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Alameda Jardins - base frontal",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/img-6552-1666358810.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-alameda-jardins-EM89520",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Alameda Jardins - deck piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2026/thumb-img-6503-1666358808-1782833384.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-alameda-jardins-EM89520",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Alameda Jardins - brinquedoteca",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2026/thumb-img-6529-1666358809-1782833388.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-alameda-jardins-EM89520",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Alameda Jardins - fitness",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2026/thumb-img-6539-1666358809-1782833388.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-alameda-jardins-EM89520",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Alameda Jardins - lobby",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2026/thumb-img-6543-1666358810-1782833389.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-alameda-jardins-EM89520",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Avenida Brasil 180",
+          "description": "Endereco central em Balneario Camboriu, com proximidade da praia, Barra Norte e servicos da Avenida Brasil."
+        },
+        {
+          "icon": "Building2",
+          "title": "Assinatura FG",
+          "description": "Fonte comercial identifica o empreendimento como FG, com 169 m e 47 pavimentos."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e deck",
+          "description": "A galeria mostra piscina, deck e ambientes de lazer em area comum do edificio."
+        },
+        {
+          "icon": "Users",
+          "title": "Lazer variado",
+          "description": "Kids, fitness, hall, jogos, gourmet, cinema, spa, sauna e eventos aparecem nas fontes consultadas."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Galeria sem oferta privada",
+          "description": "Foram selecionadas imagens de fachada, piscina, hall, kids e academia do empreendimento."
+        },
+        {
+          "title": "Endereco revisado",
+          "description": "A Avenida Brasil, 180 foi mantida como referencia principal a partir da fonte Imobille."
+        },
+        {
+          "title": "Descricao enriquecida",
+          "description": "A pagina agora informa FG, altura, pavimentos e itens de lazer em vez de texto incompleto."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Alameda Jardins?",
+          "answer": "Na Avenida Brasil, 180, em Balneario Camboriu, proximo a Barra Norte e a praia."
+        },
+        {
+          "question": "Qual construtora aparece nas fontes?",
+          "answer": "A fonte Imobille identifica o Alameda Jardins como empreendimento FG."
+        },
+        {
+          "question": "Quais areas aparecem na galeria?",
+          "answer": "Fachada, piscina, deck, hall, kids, brinquedoteca e academia."
+        },
+        {
+          "question": "Quais itens de lazer foram citados?",
+          "answer": "Eventos, jogos, gourmet, piscina infantil, cinema, massagem, spa, kids, deck, sauna e infinity pool."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-alameda-jardins-EM89520",
+        "https://felicitanegocios.com.br/empreendimento/69/alameda-jardins/",
+        "https://imoveisterra.net/empreendimento/526/alameda-jardins-residence/",
+        "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-alameda-jardins-balneario-camboriu-barra-norte-3-quartos-2-garagens-venda-ref-34/"
+      ],
+      "notes": "Imobille confirma Avenida Brasil 180, FG, 169 m, 47 pavimentos e lazer amplo; imagens finais evitam fotos internas de ofertas."
+    },
+    {
+      "slug": "brava-22",
+      "hero_image": "https://static.wixstatic.com/media/8f12a4_2ee438c23cfa4275a070e5b370479a4d~mv2.jpg",
+      "description": "O Brava 22 e um empreendimento pronto para morar da Everest Empreendimentos na Rua Miguel Francisco Borges, 22, Praia Brava, Itajai. A fonte oficial descreve localizacao exclusiva, alto padrao, conceito diferenciado, uma residencia por andar, salao gourmet de festas e rooftop com spa. Imobille complementa a leitura de proximidade com o mar e com a vida noturna da Brava, preservando perfil residencial. A nova galeria usa fachada, hall, gourmet, rooftop, spa e estar superior.",
+      "seo_description": "Brava 22 na Rua Miguel Francisco Borges, Praia Brava, Itajai, pronto para morar com uma residencia por andar e rooftop.",
+      "gallery": [
+        {
+          "title": "Brava 22 - fachada vertical",
+          "category": "Fachada",
+          "image": "https://static.wixstatic.com/media/8f12a4_2ee438c23cfa4275a070e5b370479a4d~mv2.jpg",
+          "source_url": "https://www.everestempreendimentos.com/empreendimentos/brava-22",
+          "source_label": "Everest Empreendimentos"
+        },
+        {
+          "title": "Brava 22 - torre e entorno",
+          "category": "Fachada",
+          "image": "https://static.wixstatic.com/media/8f12a4_3656429322bf43b7830ae0058c1213c8~mv2.jpg",
+          "source_url": "https://www.everestempreendimentos.com/empreendimentos/brava-22",
+          "source_label": "Everest Empreendimentos"
+        },
+        {
+          "title": "Brava 22 - vista aerea",
+          "category": "Fachada",
+          "image": "https://static.wixstatic.com/media/8f12a4_be71bf068c3841a8987e8721bb25666f~mv2.jpg",
+          "source_url": "https://www.everestempreendimentos.com/empreendimentos/brava-22",
+          "source_label": "Everest Empreendimentos"
+        },
+        {
+          "title": "Brava 22 - base e fachada",
+          "category": "Fachada",
+          "image": "https://static.wixstatic.com/media/8f12a4_ecbadc4922b1493ea6ee520a390a526f~mv2.jpg",
+          "source_url": "https://www.everestempreendimentos.com/empreendimentos/brava-22",
+          "source_label": "Everest Empreendimentos"
+        },
+        {
+          "title": "Brava 22 - hall de acesso",
+          "category": "Hall",
+          "image": "https://static.wixstatic.com/media/8f12a4_bce0626a579d4c24ba6642bf84418a20~mv2.jpg",
+          "source_url": "https://www.everestempreendimentos.com/empreendimentos/brava-22",
+          "source_label": "Everest Empreendimentos"
+        },
+        {
+          "title": "Brava 22 - estar do hall",
+          "category": "Hall",
+          "image": "https://static.wixstatic.com/media/8f12a4_632547ff273f4104931e76fca41e8f14~mv2.jpg",
+          "source_url": "https://www.everestempreendimentos.com/empreendimentos/brava-22",
+          "source_label": "Everest Empreendimentos"
+        },
+        {
+          "title": "Brava 22 - gourmet superior",
+          "category": "Gourmet",
+          "image": "https://static.wixstatic.com/media/5a7559_e4749e62285f4ac9811c2aaabca2e4df~mv2.jpg",
+          "source_url": "https://www.everestempreendimentos.com/empreendimentos/brava-22",
+          "source_label": "Everest Empreendimentos"
+        },
+        {
+          "title": "Brava 22 - spa superior",
+          "category": "Rooftop",
+          "image": "https://static.wixstatic.com/media/8f12a4_7fe2ce36bd29495587439dffd817f611~mv2.jpg",
+          "source_url": "https://www.everestempreendimentos.com/empreendimentos/brava-22",
+          "source_label": "Everest Empreendimentos"
+        },
+        {
+          "title": "Brava 22 - lounge superior",
+          "category": "Rooftop",
+          "image": "https://static.wixstatic.com/media/8f12a4_17b61b836f134446bb87b117acc54206~mv2.jpg",
+          "source_url": "https://www.everestempreendimentos.com/empreendimentos/brava-22",
+          "source_label": "Everest Empreendimentos"
+        },
+        {
+          "title": "Brava 22 - gourmet render",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/gourmet-01-1664302386.jpeg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-22-EM70178",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Brava 22 - terraco social",
+          "category": "Rooftop",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2023/brava-22-20-1693234262.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-22-EM70178",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Brava 22 - churrasqueira superior",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2023/brava-22-22-1693234262.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-22-EM70178",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Brava 22 - fachada pronta",
+          "category": "Fachada",
+          "image": "https://cdn.vistahost.com.br/cli36621/vista.imobi/fotos/3192/ii5m4f_3192638f5982c4a5e.jpg",
+          "source_url": "https://manicamarin.com.br/imovel/empreendimento-praia-brava-de-itajai-itajai-sc-1531",
+          "source_label": "Manica Marin"
+        },
+        {
+          "title": "Brava 22 - acesso render",
+          "category": "Hall",
+          "image": "https://cdn.vistahost.com.br/cli36621/vista.imobi/fotos/3192/iu0s4r_3192638f59f98e3ea.jpg",
+          "source_url": "https://manicamarin.com.br/imovel/empreendimento-praia-brava-de-itajai-itajai-sc-1531",
+          "source_label": "Manica Marin"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua Miguel Francisco Borges 22",
+          "description": "Endereco oficial na Praia Brava de Itajai, em area proxima ao mar e a pontos de lazer da regiao."
+        },
+        {
+          "icon": "Building2",
+          "title": "Everest Empreendimentos",
+          "description": "A incorporadora apresenta o Brava 22 como projeto pronto para morar, de alto padrao e conceito diferenciado."
+        },
+        {
+          "icon": "Users",
+          "title": "Uma residencia por andar",
+          "description": "A fonte oficial destaca baixa densidade e privacidade, elemento importante para o posicionamento do edificio."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Rooftop com spa",
+          "description": "Gourmet superior, spa, lounge e terraco reforcam o uso social panoramico."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Material oficial como base",
+          "description": "A curadoria usa imagens da Everest e fontes comerciais do empreendimento para fachada e areas comuns."
+        },
+        {
+          "title": "Status pronto",
+          "description": "A fonte oficial apresenta o Brava 22 como pronto para morar."
+        },
+        {
+          "title": "Midia revisada",
+          "description": "Fotos internas de oferta deram lugar a fachada, acesso, rooftop e ambientes sociais do edificio."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Brava 22?",
+          "answer": "Na Rua Miguel Francisco Borges, 22, Praia Brava, Itajai, segundo a Everest Empreendimentos."
+        },
+        {
+          "question": "O Brava 22 esta pronto?",
+          "answer": "O site oficial da Everest apresenta o empreendimento como pronto para morar."
+        },
+        {
+          "question": "Quais diferenciais foram citados?",
+          "answer": "Uma residencia por andar, salao gourmet de festas e rooftop com spa."
+        },
+        {
+          "question": "Quais imagens foram mantidas?",
+          "answer": "Fachada, hall, acesso, gourmet superior, rooftop, spa e lounge, todas ligadas ao empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.everestempreendimentos.com/empreendimentos/brava-22",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-22-EM70178",
+        "https://manicamarin.com.br/imovel/empreendimento-praia-brava-de-itajai-itajai-sc-1531",
+        "https://www.guilhermepilger.com/imovel/apartamento-duplex-no-edificio-brava-22-itajai-praia-brava-3-quartos-3-garagens-venda-ref-205/"
+      ],
+      "notes": "Everest confirma endereco, status pronto, uma residencia por andar e rooftop com spa; imagens finais priorizam fachada e areas comuns."
+    },
+    {
+      "slug": "brava-center-residence",
+      "hero_image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/11/CENTER-1.png",
+      "description": "O Brava Center Residence e um empreendimento da Absoluta Incorporadora na Rua Conselheiro Julio Kumm, 118, no centro da Praia Brava, Itajai, a poucos metros do mar. A fonte oficial apresenta o projeto entre entregues e destaca espacos comerciais, residencias amplas e a primeira piscina semiolimpica em pavimento superior de Santa Catarina. Fontes comerciais complementam lazer com academia, brinquedoteca, piscinas, salao de festas, business, hall decorado e portaria. A galeria foi corrigida para fachada, piscina, fitness, lounge, gourmet e spa.",
+      "seo_description": "Brava Center Residence na Rua Conselheiro Julio Kumm, Praia Brava, Itajai, com fachada, piscina superior, fitness e gourmet.",
+      "gallery": [
+        {
+          "title": "Brava Center - fachada principal",
+          "category": "Fachada",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/11/CENTER-1.png",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-center-residence/",
+          "source_label": "Absoluta Incorporadora"
+        },
+        {
+          "title": "Brava Center - base do projeto",
+          "category": "Fachada",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/11/CENTER-3-900x450.jpg",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-center-residence/",
+          "source_label": "Absoluta Incorporadora"
+        },
+        {
+          "title": "Brava Center - piscina superior",
+          "category": "Piscina",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/11/Cobertura-30410.jpg",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-center-residence/",
+          "source_label": "Absoluta Incorporadora"
+        },
+        {
+          "title": "Brava Center - frente ajardinada",
+          "category": "Fachada",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/11/CENTER-3.jpg",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-center-residence/",
+          "source_label": "Absoluta Incorporadora"
+        },
+        {
+          "title": "Brava Center - academia",
+          "category": "Fitness",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/11/CENTER-5.jpg",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-center-residence/",
+          "source_label": "Absoluta Incorporadora"
+        },
+        {
+          "title": "Brava Center - lounge externo",
+          "category": "Convivencia",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/11/CENTER-10.jpg",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-center-residence/",
+          "source_label": "Absoluta Incorporadora"
+        },
+        {
+          "title": "Brava Center - fachada noturna",
+          "category": "Fachada",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/11/CENTER-11.jpg",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-center-residence/",
+          "source_label": "Absoluta Incorporadora"
+        },
+        {
+          "title": "Brava Center - piscina noturna",
+          "category": "Piscina",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/11/CENTER-12.jpg",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-center-residence/",
+          "source_label": "Absoluta Incorporadora"
+        },
+        {
+          "title": "Brava Center - borda com mar",
+          "category": "Piscina",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/11/CENTER-22.jpg",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-center-residence/",
+          "source_label": "Absoluta Incorporadora"
+        },
+        {
+          "title": "Brava Center - piscina azul",
+          "category": "Piscina",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/11/Cobertura-3041.jpg",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-center-residence/",
+          "source_label": "Absoluta Incorporadora"
+        },
+        {
+          "title": "Brava Center - gourmet superior",
+          "category": "Gourmet",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/11/Cobertura-3042.jpg",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-center-residence/",
+          "source_label": "Absoluta Incorporadora"
+        },
+        {
+          "title": "Brava Center - estar superior",
+          "category": "Convivencia",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/11/Cobertura-3043.jpg",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-center-residence/",
+          "source_label": "Absoluta Incorporadora"
+        },
+        {
+          "title": "Brava Center - spa superior",
+          "category": "Rooftop",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/11/Cobertura-3044.jpg",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-center-residence/",
+          "source_label": "Absoluta Incorporadora"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro da Praia Brava",
+          "description": "Endereco oficial na Rua Conselheiro Julio Kumm, 118, a poucos metros do mar."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina superior",
+          "description": "A Absoluta destaca piscina semiolimpica em pavimento superior, com vista e uso social diferenciado."
+        },
+        {
+          "icon": "Building2",
+          "title": "Uso misto na base",
+          "description": "A fonte oficial cita espacos comerciais junto a residencias amplas, fortalecendo a centralidade do projeto."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer completo",
+          "description": "Academia, brinquedoteca, piscinas, festas, business, hall e portaria aparecem nas fontes comerciais."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Informacao oficial atualizada",
+          "description": "A pagina usa a Absoluta como fonte principal e descreve a fase com cautela, sem inventar cronograma."
+        },
+        {
+          "title": "Galeria do empreendimento",
+          "description": "Fachada, piscina, academia, gourmet, lounge e spa substituem imagens internas de oferta."
+        },
+        {
+          "title": "Centralidade na Brava",
+          "description": "A copy reforca o posicionamento no centro da Praia Brava e a proximidade real com o mar."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Brava Center Residence?",
+          "answer": "Na Rua Conselheiro Julio Kumm, 118, Praia Brava, Itajai, conforme a Absoluta Incorporadora."
+        },
+        {
+          "question": "Qual e o diferencial de lazer citado?",
+          "answer": "A fonte oficial destaca piscina semiolimpica em pavimento superior, alem de areas sociais e fitness."
+        },
+        {
+          "question": "O projeto tem espacos comerciais?",
+          "answer": "Sim. A Absoluta cita espacos comerciais e residencias amplas no empreendimento."
+        },
+        {
+          "question": "O que foi ajustado na galeria?",
+          "answer": "A curadoria priorizou fachada, piscina, academia, gourmet, lounge e spa do empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.absolutaincorporadora.com.br/empreendimento/brava-center-residence/",
+        "https://felicitanegocios.com.br/empreendimento/324/brava-center-residence/",
+        "https://imoveisgodoy.com.br/imoveis/brava-center-residence-preco/",
+        "https://loft.com.br/condominio/brava-center-residence-praia-brava-de-itajai-itajai-sc/AZ6XSMVW",
+        "https://rafaelcassio.com.br/empreendimento/5678/brava-center-residence/"
+      ],
+      "notes": "Absoluta confirma Rua Conselheiro Julio Kumm 118, centro da Brava, espacos comerciais, residencias amplas e piscina semiolimpica superior."
+    },
+    {
+      "slug": "condominio-bella-vista-residence-club",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/17022026153326240-1771353206.jpg",
+      "description": "O Condominio Bella Vista Residence Club fica na Barra, em Balneario Camboriu, com fontes comerciais apontando endereco na Avenida Hermogenes de Assis Feijo, 621. Felicita e Imobille associam o empreendimento a residencias amplas, enquanto a 100 Porcento Imoveis lista lazer com piscina adulto e infantil, spa, academia, salao de festas, gourmet, bocha, campo de futebol e quadra poliesportiva. A galeria foi corrigida para acesso, piscina, clube, eventos, jogos, playground, esporte, bocha, gourmet e fitness.",
+      "seo_description": "Bella Vista Residence Club na Barra, Balneario Camboriu, com piscina, clube, eventos, esporte, bocha, gourmet e fitness.",
+      "gallery": [
+        {
+          "title": "Bella Vista - piscina clube",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/17022026153326240-1771353206.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-bella-vista-residence-club-EM72185",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Bella Vista - acesso principal",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2024/bella-vista-30-1718127224.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-bella-vista-residence-club-EM72185",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Bella Vista - piscina social",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2024/bella-vista-27-1718127223.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-bella-vista-residence-club-EM72185",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Bella Vista - piscina infantil",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2024/bella-vista-20-1718127220.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-bella-vista-residence-club-EM72185",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Bella Vista - lazer externo",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2024/bella-vista-25-1718127223.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-bella-vista-residence-club-EM72185",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Bella Vista - eventos",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2024/bella-vista-2-1718127212.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-bella-vista-residence-club-EM72185",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Bella Vista - jogos",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2024/bella-vista-1-1718127211.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-bella-vista-residence-club-EM72185",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Bella Vista - gourmet social",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2024/bella-vista-4-1718127212.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-bella-vista-residence-club-EM72185",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Bella Vista - playground",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2024/bella-vista-5-1718127213.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-bella-vista-residence-club-EM72185",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Bella Vista - esporte aberto",
+          "category": "Esporte",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2024/bella-vista-6-1718127214.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-bella-vista-residence-club-EM72185",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Bella Vista - quadra",
+          "category": "Esporte",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2024/bella-vista-7-1718127215.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-bella-vista-residence-club-EM72185",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Bella Vista - campo externo",
+          "category": "Esporte",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2024/bella-vista-9-1718127216.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-bella-vista-residence-club-EM72185",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Bella Vista - sede social",
+          "category": "Clube",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2024/bella-vista-13-1718127217.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-bella-vista-residence-club-EM72185",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Bella Vista - convivencia gourmet",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2024/bella-vista-15-1718127218.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-bella-vista-residence-club-EM72185",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Bella Vista - bocha e jogos",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2024/bella-vista-17-1718127219.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-bella-vista-residence-club-EM72185",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Bella Vista - academia",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2024/bella-vista-21-1718127221.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-bella-vista-residence-club-EM72185",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Bella Vista - estar gourmet",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2024/bella-vista-24-1718127222.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-bella-vista-residence-club-EM72185",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Barra de Balneario Camboriu",
+          "description": "As fontes comerciais posicionam o condominio na Avenida Hermogenes de Assis Feijo, 621."
+        },
+        {
+          "icon": "Trees",
+          "title": "Perfil reservado",
+          "description": "Fonte comercial descreve ambiente residencial com natureza e proposta mais reservada."
+        },
+        {
+          "icon": "Users",
+          "title": "Clube de lazer",
+          "description": "Piscinas, eventos, gourmet, playground, jogos e sede social estruturam o uso coletivo."
+        },
+        {
+          "icon": "Trophy",
+          "title": "Esporte e bem-estar",
+          "description": "Bocha, campo, quadra poliesportiva, academia e spa aparecem nas fontes e na curadoria visual."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Galeria de areas comuns",
+          "description": "A selecao final mostra acesso, piscinas, clube, eventos, jogos, esporte, gourmet e fitness."
+        },
+        {
+          "title": "Fontes cruzadas",
+          "description": "Imobille, Felicita, Solk e 100 Porcento foram usados para conferir endereco, perfil e lazer."
+        },
+        {
+          "title": "Pagina menos incompleta",
+          "description": "A copy agora descreve endereco, bairro, lazer e perfil residencial do condominio."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Bella Vista Residence Club?",
+          "answer": "Na Barra, em Balneario Camboriu; fontes comerciais apontam a Avenida Hermogenes de Assis Feijo, 621."
+        },
+        {
+          "question": "Quais areas de lazer foram listadas?",
+          "answer": "Piscinas adulto e infantil, spa, academia, eventos, gourmet, bocha, campo de futebol e quadra poliesportiva."
+        },
+        {
+          "question": "A galeria mostra interiores privados?",
+          "answer": "Nao. A curadoria final apresenta acesso, piscina, clube, eventos, jogos, playground, esporte, gourmet e fitness."
+        },
+        {
+          "question": "Qual fonte oficial foi usada?",
+          "answer": "O site oficial encontrado redirecionava para pagina suspensa, entao a curadoria usou fontes comerciais independentes."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/condominio-bella-vista-residence-club-EM72185",
+        "https://felicitanegocios.com.br/empreendimento/395/bella-vista-residence-club/",
+        "https://solkimoveis.com.br/empreendimento/959841/bella-vista/",
+        "https://100porcentoimoveis.com.br/imovel/T0037",
+        "https://www.guilhermepilger.com/imovel/casa-no-condominio-bella-vista-residence-club-balneario-camboriu-barra-4-quartos-4-garagens-venda-ref-2318/"
+      ],
+      "notes": "Site oficial apareceu suspenso; curadoria usa Imobille, Felicita, Solk e 100 Porcento. Endereco comercial: Hermogenes de Assis Feijo 621."
+    }
+  ]
+}

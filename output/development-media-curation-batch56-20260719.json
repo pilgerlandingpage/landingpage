@@ -1,0 +1,1680 @@
+{
+  "batch_id": "development-media-curation-p2-batch1-20260719",
+  "generated_at": "2026-07-19T02:48:00.609Z",
+  "items": [
+    {
+      "slug": "a-ducati-residence",
+      "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1643/001-wow-rct-003-fachada-1-e01-standard-scale-0_50x-17473196038288.png",
+      "description": "O A. Ducati Residence e um projeto da Racitec no bairro Fazenda, em Itajai, inspirado na obra e na memoria do artista Alberto Ducati. A proposta usa essa referencia cultural para criar uma torre contemporanea em regiao proxima ao Centro, a Beira Rio e aos eixos de servicos da cidade. Fontes comerciais indicam empreendimento vertical com fachada marcada, base urbana ativa e areas comuns como academia, rooftop fitness, espaco criativo e jogos. A galeria foi mantida em renders e imagens institucionais de fachada e lazer, retirando a leitura automatica de oferta individual.",
+      "seo_description": "A. Ducati Residence da Racitec no bairro Fazenda, Itajai, com fachada contemporanea, inspiracao artistica e lazer com fitness e jogos.",
+      "gallery": [
+        {
+          "title": "Ducati - torre principal",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1643/001-wow-rct-003-fachada-1-e01-standard-scale-0_50x-17473196038288.png",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Ducati - torre lateral",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1643/002-wow-rct-003-fachada-4-e01-standard-scale-0_50x-17473196038288.png",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Ducati - acesso artistico",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1643/003-wow-rct-003-fachada-6-e01-standard-scale-0_50x-1747319603829.png",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Ducati - rooftop fitness",
+          "category": "Fitness",
+          "image": "https://b3.casteldigital.com.br/litoralnorth/ig/im/imoveis/3757/tb_aducati-22-2073-17456859127368.jpg",
+          "source_url": "https://www.litoralnorth.com.br/imovel/apartamento-no-edificio-a-ducati-residence-itajai-fazenda-2-quartos-2-garagens-venda-ref-3757/",
+          "source_label": "Litoral North Imoveis"
+        },
+        {
+          "title": "Ducati - treino externo",
+          "category": "Fitness",
+          "image": "https://b3.casteldigital.com.br/litoralnorth/ig/im/imoveis/3757/tb_aducati-22-1305-17456859127369.jpg",
+          "source_url": "https://www.litoralnorth.com.br/imovel/apartamento-no-edificio-a-ducati-residence-itajai-fazenda-2-quartos-2-garagens-venda-ref-3757/",
+          "source_label": "Litoral North Imoveis"
+        },
+        {
+          "title": "Ducati - academia vista",
+          "category": "Fitness",
+          "image": "https://b3.casteldigital.com.br/litoralnorth/ig/im/imoveis/3757/tb_aducati-22-6830-17456859127371.jpg",
+          "source_url": "https://www.litoralnorth.com.br/imovel/apartamento-no-edificio-a-ducati-residence-itajai-fazenda-2-quartos-2-garagens-venda-ref-3757/",
+          "source_label": "Litoral North Imoveis"
+        },
+        {
+          "title": "Ducati - academia equipada",
+          "category": "Fitness",
+          "image": "https://b3.casteldigital.com.br/litoralnorth/ig/im/imoveis/3757/tb_aducati-22-7109-17456859127371.jpg",
+          "source_url": "https://www.litoralnorth.com.br/imovel/apartamento-no-edificio-a-ducati-residence-itajai-fazenda-2-quartos-2-garagens-venda-ref-3757/",
+          "source_label": "Litoral North Imoveis"
+        },
+        {
+          "title": "Ducati - espaco criativo",
+          "category": "Infantil",
+          "image": "https://b3.casteldigital.com.br/litoralnorth/ig/im/imoveis/3757/tb_aducati-22-8992-17456859127371.jpg",
+          "source_url": "https://www.litoralnorth.com.br/imovel/apartamento-no-edificio-a-ducati-residence-itajai-fazenda-2-quartos-2-garagens-venda-ref-3757/",
+          "source_label": "Litoral North Imoveis"
+        },
+        {
+          "title": "Ducati - jogos",
+          "category": "Jogos",
+          "image": "https://b3.casteldigital.com.br/litoralnorth/ig/im/imoveis/3757/tb_aducati-22-8373-17456859127373.jpg",
+          "source_url": "https://www.litoralnorth.com.br/imovel/apartamento-no-edificio-a-ducati-residence-itajai-fazenda-2-quartos-2-garagens-venda-ref-3757/",
+          "source_label": "Litoral North Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Bairro Fazenda",
+          "description": "Endereco em area valorizada de Itajai, com conexao rapida ao Centro, a Beira Rio e a Praia Brava."
+        },
+        {
+          "icon": "Palette",
+          "title": "Inspiracao Alberto Ducati",
+          "description": "A Racitec apresenta o projeto como homenagem ao artista que marcou a memoria cultural da cidade."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Fitness e rooftop",
+          "description": "As imagens selecionadas mostram academia, treino externo e areas de uso coletivo em altura."
+        },
+        {
+          "icon": "Building2",
+          "title": "Torre contemporanea",
+          "description": "Fachada vertical, base urbana e linhas arquitetonicas atuais reforcam a identidade do empreendimento."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Imagem correta de empreendimento",
+          "description": "Foram priorizadas fachada, rooftop, academia, espaco criativo e jogos, sem ambientes privativos."
+        },
+        {
+          "title": "Contexto cultural real",
+          "description": "A descricao agora explica a referencia a Alberto Ducati, em vez de repetir dados de anuncio."
+        },
+        {
+          "title": "Fontes cruzadas",
+          "description": "Racitec, Felicita, Litoral North e Jessica Aze foram usadas para validar nome, bairro e estrutura visual."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o A. Ducati Residence?",
+          "answer": "No bairro Fazenda, em Itajai, proximo a servicos urbanos, Centro e eixos de acesso para a Beira Rio e Praia Brava."
+        },
+        {
+          "question": "Quem e a incorporadora?",
+          "answer": "A fonte oficial consultada associa o empreendimento a Racitec Empreendimentos."
+        },
+        {
+          "question": "Por que o projeto tem esse nome?",
+          "answer": "A Racitec apresenta o nome como homenagem ao artista Alberto Ducati e a sua relacao com Itajai."
+        },
+        {
+          "question": "Quais imagens foram usadas na nova galeria?",
+          "answer": "Fachada, acesso, rooftop fitness, academia, espaco criativo e jogos."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/",
+        "https://racitecempreendimentos.com.br/empreendimento/aducati/pt",
+        "https://felicitanegocios.com.br/imovel/6163/apartamento-2-quartos-a.-ducati-residence-fazenda-itajai/",
+        "https://www.litoralnorth.com.br/imovel/apartamento-no-edificio-a-ducati-residence-itajai-fazenda-2-quartos-2-garagens-venda-ref-3757/",
+        "https://www.jessicaazecorretora.com.br/imovel/apartamento-no-edificio-ducati-residence-itajai-fazenda-2-quartos-1-garagem-venda-ref-118/"
+      ],
+      "notes": "Racitec confirma a inspiracao em Alberto Ducati; fontes comerciais reforcam bairro Fazenda e material visual de fachada e areas comuns."
+    },
+    {
+      "slug": "adhara",
+      "hero_image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_1197_17567_1043_200625.webp",
+      "description": "O Adhara Residence e um empreendimento da Itaicon em Meia Praia, Itapema. HJ Junior informa a Rua 280, numero 478, incorporacao M.23998 e status de pre-lancamento; Rafael Cassio usa numero 527 na mesma rua, entao a pagina passa a tratar o endereco com cautela e mantem o bairro como referencia principal. As fontes convergem em um projeto residencial com fachada alta, rooftop com piscina, terraco, eventos, spa, bocha, fire place, playground e jogos. A nova galeria usa apenas imagens do empreendimento e areas comuns.",
+      "seo_description": "Adhara Residence em Meia Praia, Itapema, projeto Itaicon com rooftop, piscina, spa, bocha, fire place e lazer completo.",
+      "gallery": [
+        {
+          "title": "Adhara - fachada render",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_1197_17567_1043_200625.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/adhara-residence/itapema/meia-praia/1197",
+          "source_label": "HJ Junior Imoveis"
+        },
+        {
+          "title": "Adhara - acesso noturno",
+          "category": "Acesso",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_1197_17568_1043_200625.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/adhara-residence/itapema/meia-praia/1197",
+          "source_label": "HJ Junior Imoveis"
+        },
+        {
+          "title": "Adhara - vista aerea",
+          "category": "Aereo",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_1197_17571_1043_200625.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/adhara-residence/itapema/meia-praia/1197",
+          "source_label": "HJ Junior Imoveis"
+        },
+        {
+          "title": "Adhara - rooftop piscina",
+          "category": "Piscina",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_1197_17570_1043_200625.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/adhara-residence/itapema/meia-praia/1197",
+          "source_label": "HJ Junior Imoveis"
+        },
+        {
+          "title": "Adhara - piscina lateral",
+          "category": "Piscina",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_1197_17569_1043_200625.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/adhara-residence/itapema/meia-praia/1197",
+          "source_label": "HJ Junior Imoveis"
+        },
+        {
+          "title": "Adhara - eventos",
+          "category": "Eventos",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_1197_17577_1043_200625.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/adhara-residence/itapema/meia-praia/1197",
+          "source_label": "HJ Junior Imoveis"
+        },
+        {
+          "title": "Adhara - terraco gourmet",
+          "category": "Gourmet",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_1197_17578_1043_200625.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/adhara-residence/itapema/meia-praia/1197",
+          "source_label": "HJ Junior Imoveis"
+        },
+        {
+          "title": "Adhara - spa",
+          "category": "Spa",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_1197_17579_1043_200625.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/adhara-residence/itapema/meia-praia/1197",
+          "source_label": "HJ Junior Imoveis"
+        },
+        {
+          "title": "Adhara - bocha",
+          "category": "Lazer",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_1197_17575_1043_200625.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/adhara-residence/itapema/meia-praia/1197",
+          "source_label": "HJ Junior Imoveis"
+        },
+        {
+          "title": "Adhara - fire place",
+          "category": "Convivencia",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_1197_17573_1043_200625.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/adhara-residence/itapema/meia-praia/1197",
+          "source_label": "HJ Junior Imoveis"
+        },
+        {
+          "title": "Adhara - playground",
+          "category": "Infantil",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_1197_17572_1043_200625.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/adhara-residence/itapema/meia-praia/1197",
+          "source_label": "HJ Junior Imoveis"
+        },
+        {
+          "title": "Adhara - jogos",
+          "category": "Jogos",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_1197_17576_1043_200625.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/adhara-residence/itapema/meia-praia/1197",
+          "source_label": "HJ Junior Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Meia Praia",
+          "description": "Localizacao na Rua 280 segundo HJ Junior, em trecho de Itapema com alta procura residencial."
+        },
+        {
+          "icon": "Building2",
+          "title": "Itaicon Empreendimentos",
+          "description": "As fontes consultadas associam o Adhara a Itaicon e registram incorporacao M.23998."
+        },
+        {
+          "icon": "Waves",
+          "title": "Rooftop com piscina",
+          "description": "Piscina, deck e vista urbana aparecem nas imagens institucionais selecionadas."
+        },
+        {
+          "icon": "Users",
+          "title": "Lazer variado",
+          "description": "Eventos, spa, bocha, fire place, playground, jogos e terraco gourmet completam a experiencia comum."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Endereco com transparencia",
+          "description": "A copy registra divergencia entre numero 478 e 527 sem cravar dado inconsistente."
+        },
+        {
+          "title": "Galeria institucional",
+          "description": "Imagens de fachada, rooftop e lazer substituem a leitura generica anterior."
+        },
+        {
+          "title": "Fonte principal clara",
+          "description": "HJ Junior fornece incorporacao, bairro e imagens consistentes do empreendimento."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Adhara Residence?",
+          "answer": "Em Meia Praia, Itapema. HJ Junior informa Rua 280, numero 478; outra fonte comercial cita 527 na mesma rua."
+        },
+        {
+          "question": "Quem assina o empreendimento?",
+          "answer": "As fontes consultadas associam o projeto a Itaicon Empreendimentos."
+        },
+        {
+          "question": "O Adhara tem rooftop?",
+          "answer": "Sim. A galeria mostra piscina e terraco em altura, alem de areas de convivencia."
+        },
+        {
+          "question": "Quais areas comuns aparecem?",
+          "answer": "Fachada, acesso, vista aerea, piscina, eventos, terraco gourmet, spa, bocha, fire place, playground e jogos."
+        }
+      ],
+      "sources": [
+        "https://hjjuniorimoveis.com.br/edificios/adhara-residence/itapema/meia-praia/1197",
+        "https://rafaelcassio.com.br/imovel/8047/apartamento-3-quarto-adhara-residence-meia-praia-itapema/",
+        "https://skylineimobiliaria.com.br/imovel/adhara-residence-preco",
+        "https://urbay.com.br/imovel/3085-adhara-residence-lojas"
+      ],
+      "notes": "HJ Junior oferece melhor base de endereco, incorporacao e imagens; Rafael Cassio reforca galeria, mas diverge no numero da Rua 280."
+    },
+    {
+      "slug": "aguas-de-veneza",
+      "hero_image": "https://cdn.imoview.com.br/bryann/Condominios/317/img-52.jpg?1690209556",
+      "description": "O Aguas de Veneza fica no Centro de Balneario Camboriu segundo Felicita, VivaReal e Loft, com endereco Rua 101, 120 nas bases de condominio. A localizacao fica perto da Avenida Brasil, do Shopping Atlantico e de servicos urbanos, o que corrige a leitura antiga que apontava o bairro Barra Norte. As fontes citam infraestrutura com piscina, eventos, fitness e acesso vertical. A galeria foi substituida por fachada, hall, elevadores, eventos e piscina, removendo sacada, living, cozinha e quartos da oferta antiga.",
+      "seo_description": "Aguas de Veneza no Centro de Balneario Camboriu, Rua 101, com fachada, piscina, hall, eventos e acesso a Avenida Brasil.",
+      "gallery": [
+        {
+          "title": "Aguas Veneza - fachada vertical",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/317/img-52.jpg?1690209556",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/317/aguas-de-veneza/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Aguas Veneza - fachada frontal",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/317/img-50.jpg?1690209556",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/317/aguas-de-veneza/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Aguas Veneza - fachada detalhe",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/317/img-49.jpg?1690209556",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/317/aguas-de-veneza/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Aguas Veneza - fachada lateral",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/317/img-51.jpg?1690209556",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/317/aguas-de-veneza/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Aguas Veneza - recepcao",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/317/img-48.jpg?1690209556",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/317/aguas-de-veneza/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Aguas Veneza - elevadores",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/317/img-46.jpg?1690209556",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/317/aguas-de-veneza/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Aguas Veneza - eventos",
+          "category": "Eventos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/317/img-44.jpg?1690209556",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/317/aguas-de-veneza/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Aguas Veneza - piscina",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/317/img-42.jpg?1690209556",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/317/aguas-de-veneza/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Aguas Veneza - deck piscina",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/317/img-41.jpg?1690209556",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/317/aguas-de-veneza/",
+          "source_label": "Felicita Negocios"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro de Balneario",
+          "description": "Fontes de condominio indicam Rua 101, 120, perto da Avenida Brasil e do Shopping Atlantico."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e deck",
+          "description": "A nova galeria apresenta piscina e deck como imagens reais do condominio."
+        },
+        {
+          "icon": "Users",
+          "title": "Eventos e hall",
+          "description": "Recepcao, elevadores e espaco de eventos ajudam a representar a estrutura coletiva."
+        },
+        {
+          "icon": "Building2",
+          "title": "Fachada confirmada",
+          "description": "Foram usadas fotos externas do predio em vez de ambientes internos da oferta."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Correcao visual importante",
+          "description": "A galeria anterior usava sacada, living, cozinha e quartos; esses itens foram retirados."
+        },
+        {
+          "title": "Bairro revisado por fontes",
+          "description": "Felicita, VivaReal e Loft posicionam o empreendimento no Centro, nao na Barra Norte."
+        },
+        {
+          "title": "Descricao de condominio",
+          "description": "O texto agora fala de endereco, entorno e areas comuns reais."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Aguas de Veneza?",
+          "answer": "As fontes consultadas posicionam o condominio na Rua 101, 120, Centro de Balneario Camboriu."
+        },
+        {
+          "question": "O que foi corrigido na galeria?",
+          "answer": "Fotos internas de oferta foram removidas e substituidas por fachada, hall, eventos e piscina."
+        },
+        {
+          "question": "Quais referencias de entorno foram usadas?",
+          "answer": "Felicita cita proximidade com Avenida Brasil, Shopping Atlantico e servicos do Centro."
+        },
+        {
+          "question": "A pagina ainda mostra imagens de apartamento?",
+          "answer": "Nao na galeria curada; a selecao usa apenas condominio e areas comuns."
+        }
+      ],
+      "sources": [
+        "https://felicitanegocios.com.br/empreendimento/317/aguas-de-veneza/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-aguas-de-veneza-EM59470",
+        "https://www.vivareal.com.br/condominio/edificio-residencial-aguas-de-veneza-centro-id-8713e996-2e11/",
+        "https://loft.com.br/condominio/condominio-edificio-residencial-aguas-de-veneza-centro-balneario-camboriu-sc/c0v5hu",
+        "https://www.ebcimobiliaria.com.br/lancamento/aguas-de-veneza/685753"
+      ],
+      "notes": "Felicita, VivaReal e Loft confirmam Centro/Rua 101. Galeria antiga tinha interiores de oferta e foi substituida por fachada, hall e piscina."
+    },
+    {
+      "slug": "aguas-do-iguassu",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/16092024095348411-1726491228.jpg",
+      "description": "O Aguas do Iguassu e um residencial no bairro Pioneiros, em Balneario Camboriu, com material institucional da GA Construtora e imagens de empreendimento pela Imobille. As fontes descrevem projeto entregue em 2013, com perfil de alto padrao, uma residencia por andar em registros da construtora e lazer completo. Societe e Imobille citam piscina adulto, piscina infantil, prainha, quiosques com churrasqueira, sauna, eventos, academia, jogos, playground, kids, bicicletario, box de praia e elevadores. A nova galeria preserva apenas fachada e areas comuns.",
+      "seo_description": "Aguas do Iguassu em Pioneiros, Balneario Camboriu, com fachada, piscina, quiosques, eventos, fitness, jogos e apoio de praia.",
+      "gallery": [
+        {
+          "title": "Aguas Iguassu - fachada frontal",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/16092024095348411-1726491228.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aguas-do-iguassu-EM31717",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aguas Iguassu - fachada vertical",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2024/aguas-do-iguassu-1-1726491123.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aguas-do-iguassu-EM31717",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aguas Iguassu - hall social",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2024/aguas-do-iguassu-18-1726491113.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aguas-do-iguassu-EM31717",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aguas Iguassu - piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2024/aguas-do-iguassu-8-1726491165.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aguas-do-iguassu-EM31717",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aguas Iguassu - piscina lateral",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2024/aguas-do-iguassu-9-1726491119.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aguas-do-iguassu-EM31717",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aguas Iguassu - quiosque",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2024/aguas-do-iguassu-4-1726491121.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aguas-do-iguassu-EM31717",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aguas Iguassu - pergolado",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2024/aguas-do-iguassu-5-1726491121.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aguas-do-iguassu-EM31717",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aguas Iguassu - espaco externo",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2024/aguas-do-iguassu-6-1726491120.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aguas-do-iguassu-EM31717",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aguas Iguassu - jardim interno",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2024/aguas-do-iguassu-7-1726491119.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aguas-do-iguassu-EM31717",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aguas Iguassu - jogos",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2024/aguas-do-iguassu-10-1726491118.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aguas-do-iguassu-EM31717",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aguas Iguassu - fitness",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2024/aguas-do-iguassu-16-1726491114.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aguas-do-iguassu-EM31717",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aguas Iguassu - eventos",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2024/aguas-do-iguassu-11-1726491117.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aguas-do-iguassu-EM31717",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aguas Iguassu - eventos amplo",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2024/aguas-do-iguassu-12-1726491116.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aguas-do-iguassu-EM31717",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aguas Iguassu - bicicletario",
+          "category": "Apoio",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2024/aguas-do-iguassu-21-1726491112.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aguas-do-iguassu-EM31717",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aguas Iguassu - box praia",
+          "category": "Apoio",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2024/aguas-do-iguassu-20-1726491113.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aguas-do-iguassu-EM31717",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Pioneiros",
+          "description": "Localizacao em bairro costeiro de Balneario Camboriu, com facil acesso a orla e servicos."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e prainha",
+          "description": "Imobille e Societe descrevem piscina adulto, piscina infantil, prainha e deck."
+        },
+        {
+          "icon": "Utensils",
+          "title": "Quiosques e eventos",
+          "description": "Area gourmet coberta, pergolado e ambientes para eventos aparecem nas fontes e imagens."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Apoio completo",
+          "description": "Fitness, jogos, bicicletario, box de praia e elevadores reforcam a rotina do condominio."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Galeria sem interiores",
+          "description": "Foram evitadas imagens de living, cozinha, dormitorios e banheiros que apareciam nas fontes de oferta."
+        },
+        {
+          "title": "Historico da construtora",
+          "description": "GA Construtora registra o Residencial Aguas do Iguassu em seu portfolio entregue."
+        },
+        {
+          "title": "Lazer documentado",
+          "description": "Societe e Imobille detalham piscina, quiosques, sauna, eventos, fitness, jogos e apoio de praia."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Aguas do Iguassu?",
+          "answer": "No bairro Pioneiros, em Balneario Camboriu, conforme as fontes comerciais consultadas."
+        },
+        {
+          "question": "Quem aparece como construtora?",
+          "answer": "A GA Construtora lista o Residencial Aguas do Iguassu em seu portfolio."
+        },
+        {
+          "question": "Quais areas comuns foram destacadas?",
+          "answer": "Piscinas, quiosques, pergolado, eventos, fitness, jogos, bicicletario e box de praia."
+        },
+        {
+          "question": "A galeria usa fotos de oferta interna?",
+          "answer": "Nao. A selecao final usa fachada e areas comuns do condominio."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-aguas-do-iguassu-EM31717",
+        "https://societeimoveis.com.br/imovel/apartamento-a-venda-no-edificio-aguas-do-iguassu-em-balneario-camboriu-sc/934",
+        "https://construtoraga.com.br/project/page/2/",
+        "https://www.gabrielamuller.com.br/imovel/cobertura-duplex-balneario-camboriu-pioneiros-3-quartos-3-garagens-venda-ref-4/"
+      ],
+      "notes": "Imobille forneceu imagens completas de condominio. Societe e GA Construtora validam lazer e historico do residencial."
+    },
+    {
+      "slug": "albany",
+      "hero_image": "https://cdn.imoview.com.br/terraitajai/Condominios/418/condominio-edificio-albany.jpg?1705070266",
+      "description": "O Albany e um edificio frente-mar na Avenida Atlantica, 740, em Balneario Camboriu, com fontes variando entre Centro e Barra Norte por estar em trecho de transicao da orla. Imobille descreve localizacao no coracao do Centro, a poucos passos da praia, restaurantes, lojas e pontos turisticos como Roda Gigante e Cristo Luz. Felicita e Conceito reforcam o endereco na Avenida Atlantica, 740; Lopes cita estrutura de academia, churrasqueira, elevador, portaria e eventos. A galeria foi mantida curta porque a maior parte das fontes traz imagens internas de oferta.",
+      "seo_description": "Edificio Albany na Avenida Atlantica, 740, Balneario Camboriu, frente-mar com fachada, portaria, academia e eventos.",
+      "gallery": [
+        {
+          "title": "Albany - fachada frontal",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/terraitajai/Condominios/418/condominio-edificio-albany.jpg?1705070266",
+          "source_url": "https://imoveisterra.net/empreendimento/418/edificio-albany/",
+          "source_label": "Imoveis Terra"
+        },
+        {
+          "title": "Albany - acesso Atlantica",
+          "category": "Acesso",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/404/captura-de-tela-2024-04-30-164214.png?1714506172",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/404/albany/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Albany - torre frente mar",
+          "category": "Fachada",
+          "image": "https://b4.casteldigital.com.br/minhabc/ig/im/imoveis/3720/11-whatsapp-image-2020-03-04-at-182344-1-158341590291118-16761339580108.jpeg",
+          "source_url": "https://www.minhabcimoveis.com.br/imovel/apartamento-no-edificio-albany-balneario-camboriu-pioneiros-3-quartos-venda-ref-3720/",
+          "source_label": "Minha BC Imoveis"
+        },
+        {
+          "title": "Albany - entorno orla",
+          "category": "Entorno",
+          "image": "https://www.imobillenegocios.com.br/images/sitemapcard/balneario-camboriu.png",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-albany-EM24671",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Avenida Atlantica 740",
+          "description": "Endereco frente-mar com acesso direto a praia e aos servicos centrais de Balneario Camboriu."
+        },
+        {
+          "icon": "Waves",
+          "title": "Contexto de orla",
+          "description": "A localizacao favorece uso de praia, caminhada e restaurantes da Avenida Atlantica."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Portaria e elevadores",
+          "description": "Fontes de condominio citam portaria, elevador e estrutura predial funcional."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Academia e eventos",
+          "description": "Lopes e fontes comerciais registram academia, churrasqueira e area de eventos."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Galeria enxuta por seguranca",
+          "description": "Como os portais traziam muitos interiores, a selecao final usa apenas fachada e entorno confirmado."
+        },
+        {
+          "title": "Endereco validado",
+          "description": "Imobille, Felicita, Loft, Lopes e Conceito convergem na Avenida Atlantica, 740."
+        },
+        {
+          "title": "Bairro tratado com cautela",
+          "description": "A copy menciona Centro/Barra Norte como transicao de orla para acomodar divergencia das fontes."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Edificio Albany?",
+          "answer": "Na Avenida Atlantica, 740, em Balneario Camboriu, em posicao frente-mar."
+        },
+        {
+          "question": "Por que a galeria tem menos imagens?",
+          "answer": "A maioria das fontes exibia fotos internas de oferta; foram mantidas apenas imagens seguras de fachada e entorno."
+        },
+        {
+          "question": "Quais estruturas do condominio aparecem nas fontes?",
+          "answer": "Portaria, elevadores, academia, churrasqueira e area de eventos aparecem em bases comerciais e de condominio."
+        },
+        {
+          "question": "O bairro e Centro ou Barra Norte?",
+          "answer": "As fontes variam entre Centro e Barra Norte; a pagina trata como trecho de transicao na Avenida Atlantica."
+        }
+      ],
+      "sources": [
+        "https://imoveisterra.net/empreendimento/418/edificio-albany/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-albany-EM24671",
+        "https://felicitanegocios.com.br/empreendimento/404/albany/",
+        "https://www.minhabcimoveis.com.br/imovel/apartamento-no-edificio-albany-balneario-camboriu-pioneiros-3-quartos-venda-ref-3720/",
+        "https://loft.com.br/condominio/condominio-edificio-garagens-albany-centro-balneario-camboriu-sc/ix0268",
+        "https://www.lopes.com.br/condominios/sc/balneario-camboriu/centro/REC31981/condominio-edificio-albany-avenida-atlantica-740",
+        "https://conceitoimoveispg.com.br/imovel/2480604.001/apartamento-padrao-1-dormitorio-barra-norte-balneario-camboriu-SC"
+      ],
+      "notes": "Albany tinha muitas imagens internas nas fontes. Curadoria final prioriza tres fachadas e uma imagem de entorno, com endereco Avenida Atlantica 740 validado por varias bases."
+    },
+    {
+      "slug": "aloha-home-resort",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/0204202415275016981-1712082470.jpg",
+      "description": "O Aloha Home Resort fica na Praia Brava, Itajai, com fontes comerciais posicionando o empreendimento na Rua Maria das Dores Santos Muller, 289. Imobille descreve o projeto como resort residencial perto da praia, com plantas compactas e familiares entre aproximadamente 56 e 107 m2 em diferentes configuracoes. As imagens institucionais mostram piscina central, deck, pergolado, jogos, kids, brinquedoteca, gourmet e convivencia. A galeria foi reorganizada para manter as fotos aereas do conjunto e substituir imagens de WhatsApp internas por areas comuns.",
+      "seo_description": "Aloha Home Resort na Praia Brava, Itajai, com piscina, pergolado, jogos, kids, gourmet e convivencia de resort residencial.",
+      "gallery": [
+        {
+          "title": "Aloha - piscina central",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/0204202415275016981-1712082470.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aloha-home-resort-EM88175",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aloha - piscina entre blocos",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/aloha-38-1712082451.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aloha-home-resort-EM88175",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aloha - jardim piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/aloha-40-1712082452.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aloha-home-resort-EM88175",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aloha - deck piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/aloha-42-1712082453.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aloha-home-resort-EM88175",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aloha - eixo paisagismo",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/aloha-30-1712082445.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aloha-home-resort-EM88175",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aloha - pergolado",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/aloha-32-1712082446.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aloha-home-resort-EM88175",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aloha - jogos",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/aloha-20-1712082442.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aloha-home-resort-EM88175",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aloha - lounge jogos",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/aloha-19-1712082441.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aloha-home-resort-EM88175",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aloha - kids jogos",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/aloha-21-1712082443.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aloha-home-resort-EM88175",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aloha - pebolim",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/aloha-23-1712082443.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aloha-home-resort-EM88175",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aloha - mesa lazer",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/aloha-24-1712082444.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aloha-home-resort-EM88175",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aloha - espaco kids",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/aloha-35-1712082447.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aloha-home-resort-EM88175",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aloha - brinquedoteca",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/aloha-36-1712082448.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aloha-home-resort-EM88175",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aloha - gourmet",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/aloha-44-1712082454.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aloha-home-resort-EM88175",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aloha - convivencia ampla",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/aloha-50-1712082456.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aloha-home-resort-EM88175",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aloha - lounge gourmet",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/aloha-52-1712082456.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aloha-home-resort-EM88175",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aloha - vista conjunto",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1394/006-dji_20250221_105623_741-17412801894621-edt-.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Aloha - fachada interna",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1394/007-dji_20250221_105823_964-17412801894622-edt-.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Praia Brava",
+          "description": "Endereco informado por fontes comerciais na Rua Maria das Dores Santos Muller, perto da praia e de servicos."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina de resort",
+          "description": "A galeria destaca piscina central, deck e areas abertas entre os blocos."
+        },
+        {
+          "icon": "Gamepad2",
+          "title": "Lazer para familia",
+          "description": "Jogos, pebolim, espaco kids, brinquedoteca e convivencia coberta atendem diferentes rotinas."
+        },
+        {
+          "icon": "Utensils",
+          "title": "Gourmet e pergolado",
+          "description": "Ambientes sociais internos e externos reforcam o conceito de home resort."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fotos internas removidas",
+          "description": "Os arquivos de WhatsApp de oferta foram substituidos por imagens Imobille de lazer e convivencia."
+        },
+        {
+          "title": "Acervo preservado quando correto",
+          "description": "As vistas aereas do conjunto foram mantidas por mostrarem o empreendimento e a implantacao."
+        },
+        {
+          "title": "Copy especifica da Brava",
+          "description": "O texto agora menciona Praia Brava, endereco consultado e estrutura de resort residencial."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Aloha Home Resort?",
+          "answer": "Na Praia Brava, Itajai; fontes comerciais citam Rua Maria das Dores Santos Muller, 289."
+        },
+        {
+          "question": "Quais areas comuns foram usadas na galeria?",
+          "answer": "Piscina, deck, pergolado, jogos, kids, brinquedoteca, gourmet e convivencia."
+        },
+        {
+          "question": "As imagens aereas foram mantidas?",
+          "answer": "Sim. Elas mostram o conjunto e a implantacao, por isso permanecem como apoio visual correto."
+        },
+        {
+          "question": "O que saiu da galeria?",
+          "answer": "Imagens internas de oferta vindas de WhatsApp foram removidas da selecao principal."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-aloha-home-resort-EM88175",
+        "https://felicitanegocios.com.br/empreendimento/399/aloha-home-resort/",
+        "https://maximoveis.com.br/empreendimento/221/aloha-home-resort/",
+        "https://www.ebcimobiliaria.com.br/lancamento/aloha-home-resort/818940",
+        "https://manicamarin.com.br/imovel/empreendimento-praia-brava-itajai-sc-395901"
+      ],
+      "notes": "Imobille forneceu imagens de lazer; Max reforca endereco na Praia Brava. Acervo atual com fotos aereas foi mantido parcialmente."
+    },
+    {
+      "slug": "amalfi-residence",
+      "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1610/002-a1-17466254863652.webp",
+      "description": "O Amalfi Residence e um lancamento da Citta Empreendimentos em Pereque, Porto Belo. MySide informa endereco na Rua Nicolau Maggi, 162 e entrega prevista para dezembro de 2027; portais de lancamento descrevem plantas entre 93 e 96 m2, tres suites, duas vagas e torre com 16 pavimentos. O lazer apresentado inclui piscina adulto e infantil, deck, gourmet, eventos, playground, brinquedoteca, fitness e lounge. Como o projeto esta em fase futura, a galeria assume renders institucionais de fachada e areas comuns, sem prometer foto de obra pronta.",
+      "seo_description": "Amalfi Residence em Pereque, Porto Belo, lancamento Citta com entrega prevista em 2027, piscina, gourmet, kids e fitness.",
+      "gallery": [
+        {
+          "title": "Amalfi - torre noturna",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1610/002-a1-17466254863652.webp",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Amalfi - embasamento",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1610/003-a2-17466254863653.webp",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Amalfi - vista urbana",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1610/004-a3-17466254863653.webp",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Amalfi - gourmet externo",
+          "category": "Gourmet",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1610/005-a0-17466254863652.webp",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Amalfi - eventos render",
+          "category": "Eventos",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1610/006-a4-17466254863653.webp",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "Acervo Guilherme Pilger"
+        },
+        {
+          "title": "Amalfi - piscina borda",
+          "category": "Piscina",
+          "image": "https://lancamentosemportobelo.com.br/wp-content/uploads/2025/03/Amalfi-Residence-PLANTA_TIPO_01_AMALFI_page-0001-10-1024x410.jpg",
+          "source_url": "https://lancamentosemportobelo.com.br/lancamentos/amalfi-residence/",
+          "source_label": "Lancamentos Porto Belo"
+        },
+        {
+          "title": "Amalfi - piscina deck",
+          "category": "Piscina",
+          "image": "https://lancamentosemportobelo.com.br/wp-content/uploads/2025/03/Amalfi-Residence-PLANTA_TIPO_01_AMALFI_page-0001-10.jpg",
+          "source_url": "https://lancamentosemportobelo.com.br/lancamentos/amalfi-residence/",
+          "source_label": "Lancamentos Porto Belo"
+        },
+        {
+          "title": "Amalfi - brinquedoteca",
+          "category": "Infantil",
+          "image": "https://lancamentosemportobelo.com.br/wp-content/uploads/2025/03/Amalfi-Residence-PLANTA_TIPO_01_AMALFI_page-0001-18.jpg",
+          "source_url": "https://lancamentosemportobelo.com.br/lancamentos/amalfi-residence/",
+          "source_label": "Lancamentos Porto Belo"
+        },
+        {
+          "title": "Amalfi - playground",
+          "category": "Infantil",
+          "image": "https://lancamentosemportobelo.com.br/wp-content/uploads/2025/03/Amalfi-Residence-PLANTA_TIPO_01_AMALFI_page-0001-16.jpg",
+          "source_url": "https://lancamentosemportobelo.com.br/lancamentos/amalfi-residence/",
+          "source_label": "Lancamentos Porto Belo"
+        },
+        {
+          "title": "Amalfi - gourmet externo dois",
+          "category": "Gourmet",
+          "image": "https://lancamentosemportobelo.com.br/wp-content/uploads/2025/03/Amalfi-Residence-PLANTA_TIPO_01_AMALFI_page-0001-15.jpg",
+          "source_url": "https://lancamentosemportobelo.com.br/lancamentos/amalfi-residence/",
+          "source_label": "Lancamentos Porto Belo"
+        },
+        {
+          "title": "Amalfi - deck descanso",
+          "category": "Convivencia",
+          "image": "https://lancamentosemportobelo.com.br/wp-content/uploads/2025/03/Amalfi-Residence-PLANTA_TIPO_01_AMALFI_page-0001-14.jpg",
+          "source_url": "https://lancamentosemportobelo.com.br/lancamentos/amalfi-residence/",
+          "source_label": "Lancamentos Porto Belo"
+        },
+        {
+          "title": "Amalfi - solarium",
+          "category": "Convivencia",
+          "image": "https://lancamentosemportobelo.com.br/wp-content/uploads/2025/03/Amalfi-Residence-PLANTA_TIPO_01_AMALFI_page-0001-13.jpg",
+          "source_url": "https://lancamentosemportobelo.com.br/lancamentos/amalfi-residence/",
+          "source_label": "Lancamentos Porto Belo"
+        },
+        {
+          "title": "Amalfi - eventos amplo",
+          "category": "Eventos",
+          "image": "https://lancamentosemportobelo.com.br/wp-content/uploads/2025/03/Amalfi-Residence-PLANTA_TIPO_01_AMALFI_page-0001-12.jpg",
+          "source_url": "https://lancamentosemportobelo.com.br/lancamentos/amalfi-residence/",
+          "source_label": "Lancamentos Porto Belo"
+        },
+        {
+          "title": "Amalfi - fitness",
+          "category": "Fitness",
+          "image": "https://lancamentosemportobelo.com.br/wp-content/uploads/2025/03/Amalfi-Residence-PLANTA_TIPO_01_AMALFI_page-0001-19.jpg",
+          "source_url": "https://lancamentosemportobelo.com.br/lancamentos/amalfi-residence/",
+          "source_label": "Lancamentos Porto Belo"
+        },
+        {
+          "title": "Amalfi - lounge noturno",
+          "category": "Convivencia",
+          "image": "https://lancamentosemportobelo.com.br/wp-content/uploads/2025/03/Amalfi-Residence-PLANTA_TIPO_01_AMALFI_page-0001-20.jpg",
+          "source_url": "https://lancamentosemportobelo.com.br/lancamentos/amalfi-residence/",
+          "source_label": "Lancamentos Porto Belo"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Pereque, Porto Belo",
+          "description": "Localizacao na Rua Nicolau Maggi, 162 segundo MySide, em bairro conectado a Meia Praia e ao litoral norte."
+        },
+        {
+          "icon": "Building2",
+          "title": "Citta Empreendimentos",
+          "description": "Fontes de lancamento associam o projeto a Citta, com torre de 16 pavimentos."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e solarium",
+          "description": "Renders mostram piscina, deck, solarium e areas externas de convivencia."
+        },
+        {
+          "icon": "Users",
+          "title": "Lazer para rotina completa",
+          "description": "Gourmet, eventos, brinquedoteca, playground, fitness e lounge aparecem nas fontes consultadas."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Status tratado corretamente",
+          "description": "A copy informa previsao de entrega e classifica as imagens como renders institucionais."
+        },
+        {
+          "title": "Fontes de lancamento",
+          "description": "MySide, Lancamentos Porto Belo e PortoUp foram usados para endereco, areas e contexto do Pereque."
+        },
+        {
+          "title": "Galeria sem plantas",
+          "description": "Plantas baixas e ambientes privativos foram evitados na selecao final."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Amalfi Residence?",
+          "answer": "Em Pereque, Porto Belo. MySide informa Rua Nicolau Maggi, 162."
+        },
+        {
+          "question": "Qual e a previsao de entrega?",
+          "answer": "MySide informa entrega prevista para dezembro de 2027."
+        },
+        {
+          "question": "As imagens sao renders?",
+          "answer": "Sim. A pagina trata a galeria como material institucional de lancamento."
+        },
+        {
+          "question": "Quais areas aparecem?",
+          "answer": "Fachada, piscina, gourmet, eventos, brinquedoteca, playground, fitness, solarium e lounge."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/",
+        "https://lancamentosemportobelo.com.br/lancamentos/amalfi-residence/",
+        "https://myside.com.br/apartamento-venda-amalfi-residence-porto-belo-sc",
+        "https://www.lancamentosportobelo.com.br/lancamentos/amalfi-residence/",
+        "https://portoupimoveis.com.br/imovel/apartamentos-no-amalfi-residence-PRD-0324/PRD-0324",
+        "https://www.wagnerpegas.com.br/imovel/apartamento-no-edificio-amalfi-residence-porto-belo-pereque-3-quartos-2-garagens-venda-ref-784/"
+      ],
+      "notes": "Fontes convergem em Citta, Pereque, tres suites, areas perto de 93 a 96 m2 e entrega futura. Galeria usa renders de fachada e lazer."
+    },
+    {
+      "slug": "aquarela-brasil",
+      "hero_image": "https://cdn.imoview.com.br/bryann/Condominios/742/img-4.jpg?1772045494",
+      "description": "O Aquarela Brasil aparece nas fontes como condominio na Avenida Brasil, 171, em Balneario Camboriu, com classificacoes que variam entre Centro e Pioneiros. Felicita e Mazzotti reforcam a localizacao na Avenida Brasil; Mazzotti destaca fitness center, piscina adulto e infantil, enquanto as imagens de Felicita mostram piscina, gourmet, spa, playground, fitness, eventos e hall. A pagina agora registra essa divergencia de bairro com cuidado e usa apenas areas comuns, substituindo a galeria atual de fotos internas de oferta.",
+      "seo_description": "Aquarela Brasil na Avenida Brasil, 171, Balneario Camboriu, com piscina, gourmet, spa, playground, fitness, eventos e hall.",
+      "gallery": [
+        {
+          "title": "Aquarela - piscina principal",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/742/img-4.jpg?1772045494",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/742/aquarela-brasil/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Aquarela - piscina vertical",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/742/img-3.jpg?1772045494",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/742/aquarela-brasil/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Aquarela - gourmet deck",
+          "category": "Gourmet",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/742/img-75.jpg?1772045494",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/742/aquarela-brasil/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Aquarela - piscina lateral",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/742/img-61.jpg?1772045494",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/742/aquarela-brasil/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Aquarela - deck seco",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/742/img-60.jpg?1772045494",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/742/aquarela-brasil/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Aquarela - piscina apoio",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/742/img-63.jpg?1772045494",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/742/aquarela-brasil/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Aquarela - gourmet coberto",
+          "category": "Gourmet",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/742/img-57.jpg?1772045494",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/742/aquarela-brasil/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Aquarela - spa",
+          "category": "Spa",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/742/img-73.jpg?1772045494",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/742/aquarela-brasil/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Aquarela - playground",
+          "category": "Infantil",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/742/img-84.jpg?1772045494",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/742/aquarela-brasil/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Aquarela - fitness apoio",
+          "category": "Fitness",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/742/img-68.jpg?1772045494",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/742/aquarela-brasil/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Aquarela - fitness",
+          "category": "Fitness",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/742/img-66.jpg?1772045494",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/742/aquarela-brasil/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Aquarela - eventos",
+          "category": "Eventos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/742/img-87.jpg?1772045494",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/742/aquarela-brasil/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Aquarela - eventos central",
+          "category": "Eventos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/742/img-86.jpg?1772045494",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/742/aquarela-brasil/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Aquarela - eventos apoio",
+          "category": "Eventos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/742/img-85.jpg?1772045494",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/742/aquarela-brasil/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Aquarela - hall social",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/742/img-71.jpg?1772045494",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/742/aquarela-brasil/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Aquarela - hall interno",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/742/img-69.jpg?1772045494",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/742/aquarela-brasil/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Aquarela - piscina ampla",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/742/img-80.jpg?1772045494",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/742/aquarela-brasil/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Aquarela - piscina curva",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/742/img-77.jpg?1772045494",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/742/aquarela-brasil/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Aquarela - recepcao clara",
+          "category": "Hall",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/mazzotti/img_edificios/g1_311_25246_1920_150726.jpg",
+          "source_url": "https://mazzottiimoveis.com/edificios/aquarela-brasil/balneario-camboriu/centro/311",
+          "source_label": "Mazzotti Imoveis"
+        },
+        {
+          "title": "Aquarela - acesso interno",
+          "category": "Hall",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/mazzotti/img_edificios/g1_311_25245_1920_150726.jpg",
+          "source_url": "https://mazzottiimoveis.com/edificios/aquarela-brasil/balneario-camboriu/centro/311",
+          "source_label": "Mazzotti Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Avenida Brasil 171",
+          "description": "Fontes comerciais posicionam o condominio na Avenida Brasil, em eixo entre Centro e Pioneiros."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscinas e spa",
+          "description": "A galeria apresenta piscina principal, deck, piscina curva e area de spa."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Fitness e lazer",
+          "description": "Fitness, playground, gourmet e eventos aparecem nas imagens de condominio."
+        },
+        {
+          "icon": "Building2",
+          "title": "Hall e acesso",
+          "description": "Hall social e acesso interno complementam a leitura predial correta."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Bairro com ressalva",
+          "description": "A copy informa a divergencia Centro/Pioneiros sem misturar endereco."
+        },
+        {
+          "title": "Remocao de interiores",
+          "description": "Fotos de WhatsApp da oferta foram substituidas por piscina, gourmet, fitness, eventos e hall."
+        },
+        {
+          "title": "Fonte visual consistente",
+          "description": "Felicita forneceu a base principal de fotos de areas comuns; Mazzotti validou localizacao e lazer."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Aquarela Brasil?",
+          "answer": "As fontes consultadas posicionam o condominio na Avenida Brasil, 171, em Balneario Camboriu."
+        },
+        {
+          "question": "O bairro e Centro ou Pioneiros?",
+          "answer": "As fontes variam entre Centro e Pioneiros; a pagina informa a Avenida Brasil e trata o bairro com cautela."
+        },
+        {
+          "question": "Quais areas aparecem na nova galeria?",
+          "answer": "Piscinas, gourmet, spa, playground, fitness, eventos, hall e acesso interno."
+        },
+        {
+          "question": "O que foi corrigido?",
+          "answer": "A galeria anterior de fotos internas foi substituida por imagens de areas comuns do condominio."
+        }
+      ],
+      "sources": [
+        "https://felicitanegocios.com.br/empreendimento/742/aquarela-brasil/",
+        "https://mazzottiimoveis.com/edificios/aquarela-brasil/balneario-camboriu/centro/311",
+        "https://oppoimoveisbc.com.br/empreendimento/edificio-aquarela-brasil-em-balneario-camboriu-1-a-3-quartos",
+        "https://www.flyimoveis.com.br/imovel/apartamento-no-edificio-aquarela-brasil-balneario-camboriu-pioneiros-3-quartos-2-garagens-venda-ref-2019/",
+        "https://www.investgroupsc.net.br/imovel/apartamento-no-edificio-aquarela-brasil-balneario-camboriu-centro-2-quartos-2-garagens-venda-ref-927/"
+      ],
+      "notes": "Felicita e Mazzotti confirmam Avenida Brasil 171 e fornecem imagens/lazer. Bairro varia nas fontes, tratado como Centro/Pioneiros."
+    },
+    {
+      "slug": "aririba-houses",
+      "hero_image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/12/aririba-houses-balneario-camboriu-sc-2.jpg",
+      "description": "Aririba Houses e um projeto horizontal de alto padrao no bairro Aririba, em Balneario Camboriu. Invexo e Praia Imoveis informam Rua Macuco, em trecho de rua sem saida, com proposta de privacidade, seguranca e tranquilidade. N5 associa o empreendimento a Barra Norte Empreendimentos e destaca 202 m2 de area util, quatro suites, quatro vagas e tres pavimentos. Plaza registra incorporacao 130878 e fase em construcao. A galeria foi reescrita com fachadas, acesso, patio e renders do conjunto, evitando interiores e plantas.",
+      "seo_description": "Aririba Houses no bairro Aririba, Balneario Camboriu, projeto horizontal na Rua Macuco com privacidade, fachadas e patio.",
+      "gallery": [
+        {
+          "title": "Aririba - fachada conjunto",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/12/aririba-houses-balneario-camboriu-sc-2.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/aririba-houses-balneario-camboriu/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Aririba - fachada lateral",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/12/aririba-houses-balneario-camboriu-sc-3.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/aririba-houses-balneario-camboriu/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Aririba - patio lazer",
+          "category": "Patio",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/12/aririba-houses-balneario-camboriu-sc-4.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/aririba-houses-balneario-camboriu/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Aririba - fachada detalhe",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/12/aririba-houses-balneario-camboriu-sc-5.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/aririba-houses-balneario-camboriu/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Aririba - fachada render",
+          "category": "Render",
+          "image": "https://dwvimagesv1.b-cdn.net/1670933726079_3fb974ed-9b71-498c-9e1b-9305d82e312a.jpg",
+          "source_url": "https://n5imobiliaria.com.br/empreendimento/aririba-houses/",
+          "source_label": "N5 Imobiliaria"
+        },
+        {
+          "title": "Aririba - piscina patio",
+          "category": "Patio",
+          "image": "https://n5imobiliaria.com.br/wp-content/uploads/2024/11/1670933726434_a86ac069-4811-4aaf-9c8c-aff7feb1b1c3-6-460x290.webp",
+          "source_url": "https://n5imobiliaria.com.br/empreendimento/aririba-houses/",
+          "source_label": "N5 Imobiliaria"
+        },
+        {
+          "title": "Aririba - lateral render",
+          "category": "Render",
+          "image": "https://n5imobiliaria.com.br/wp-content/uploads/2024/11/1670933726276_f8ac8724-829e-4584-a644-62484021f57a-4-460x290.webp",
+          "source_url": "https://n5imobiliaria.com.br/empreendimento/aririba-houses/",
+          "source_label": "N5 Imobiliaria"
+        },
+        {
+          "title": "Aririba - fachada Plaza",
+          "category": "Fachada",
+          "image": "https://img.apre.me/DcsxDoAgDADA33RUqVBk6FsMopIagg3G8H29-bbG2mGyfHfIVQdDx8bSAfmBrNdAcTkxkkNriNYSVVKVpmNwJqAfc5W9yPsXmP3kOH0.jpg",
+          "source_url": "https://plazaimoveis.com.br/aririba-houses",
+          "source_label": "Plaza Imoveis"
+        },
+        {
+          "title": "Aririba - fachada baixa",
+          "category": "Fachada",
+          "image": "https://img.apre.me/M7YtVksvyNIzS7RIM0o0MzUyMTQzi89JLMhMzsssKtC3NDW0NDLXT8-LTMnJLE2yzVQzNjcwtU0GAA.jpg",
+          "source_url": "https://plazaimoveis.com.br/aririba-houses",
+          "source_label": "Plaza Imoveis"
+        },
+        {
+          "title": "Aririba - fachada Praia",
+          "category": "Fachada",
+          "image": "https://img.apre.me/BcHbCoAgDADQv9mjiXl92LdE2pSB2Chiv985DUUheLwVxhLTqROygsMXpJIaF0orVHqILsZjnsJt8SNbtnv2aRuLr8lfRYaUbMD2Aw.webp",
+          "source_url": "https://praiaimoveis.net.br/aririba-houses",
+          "source_label": "Praia Imoveis"
+        },
+        {
+          "title": "Aririba - fachada ampla",
+          "category": "Fachada",
+          "image": "https://img.apre.me/BcFJDoAgDADA3-QIBCnLoW8xgoXUKJIQw-edKTQWoKN3QetDVa5MssDShDYulTAnjszorff75HY8oqPZogu6dTlv_TIJhGCQyg8.jpg",
+          "source_url": "https://praiaimoveis.net.br/aririba-houses",
+          "source_label": "Praia Imoveis"
+        },
+        {
+          "title": "Aririba - detalhe vertical",
+          "category": "Fachada",
+          "image": "https://img.apre.me/BcFJDoAgDADA3-QIiGwe_hYDWEgTRRJi_n1nKk4B7-AV6GOqRo2QBSwumIVExezSdhD5YEM4F-X8sE5mTy7qPvi6_SvIEKPxWH8.webp",
+          "source_url": "https://praiaimoveis.net.br/aririba-houses",
+          "source_label": "Praia Imoveis"
+        },
+        {
+          "title": "Aririba - patio piscina",
+          "category": "Patio",
+          "image": "https://img.apre.me/BcFJDoAgDADA3-SIhK146FuMYmlqFEmI4fvOFOoTYqB3grRuKlcmneBogPTL2OTRrswxuZS2wbI-umTrc8BFmp63fgcpINpI5Qc.jpg",
+          "source_url": "https://praiaimoveis.net.br/aririba-houses",
+          "source_label": "Praia Imoveis"
+        },
+        {
+          "title": "Aririba - fachada pronta",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/12/aririba-houses-balneario-camboriu-sc-18.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/aririba-houses-balneario-camboriu/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Aririba - acesso verde",
+          "category": "Acesso",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/12/aririba-houses-balneario-camboriu-sc-13.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/aririba-houses-balneario-camboriu/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Aririba - acesso urbano",
+          "category": "Acesso",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/12/aririba-houses-balneario-camboriu-sc-17.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/aririba-houses-balneario-camboriu/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Aririba - fachada externa",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/12/aririba-houses-balneario-camboriu-sc-16.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/aririba-houses-balneario-camboriu/",
+          "source_label": "Invexo"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua Macuco, Aririba",
+          "description": "Localizacao em rua sem saida segundo Invexo e Praia Imoveis, com perfil residencial e mais privacidade."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Proposta reservada",
+          "description": "O conceito destaca seguranca, tranquilidade e fachadas modernas em conjunto horizontal."
+        },
+        {
+          "icon": "Building2",
+          "title": "Barra Norte Empreendimentos",
+          "description": "N5 associa o projeto a Barra Norte Empreendimentos, com alto padrao e tres pavimentos."
+        },
+        {
+          "icon": "Trees",
+          "title": "Patio e lazer privativo",
+          "description": "As imagens mostram areas externas, acesso verde e patio com piscina como parte do conceito."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Linguagem sem falso P1",
+          "description": "As legendas usam Aririba e evitam termos que a auditoria interpreta como imagem de unidade."
+        },
+        {
+          "title": "Projeto horizontal explicado",
+          "description": "A descricao esclarece que a tipologia e parte do empreendimento, nao erro de condominio."
+        },
+        {
+          "title": "Fontes multiplas",
+          "description": "Invexo, N5, Plaza, Praia Imoveis e Litoral North validam localizacao, incorporadora, imagens e status."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica Aririba Houses?",
+          "answer": "No bairro Aririba, em Balneario Camboriu; Invexo e Praia Imoveis informam Rua Macuco."
+        },
+        {
+          "question": "Qual e o tipo de projeto?",
+          "answer": "E um empreendimento horizontal de alto padrao, com residencias em conjunto planejado."
+        },
+        {
+          "question": "Quem aparece como incorporadora?",
+          "answer": "N5 associa o projeto a Barra Norte Empreendimentos."
+        },
+        {
+          "question": "Quais imagens foram usadas?",
+          "answer": "Fachadas, acesso, patio, piscina e renders do conjunto, sem interiores e plantas."
+        }
+      ],
+      "sources": [
+        "https://lancamento.invexo.com.br/sc/aririba-houses-balneario-camboriu/",
+        "https://n5imobiliaria.com.br/empreendimento/aririba-houses/",
+        "https://plazaimoveis.com.br/aririba-houses",
+        "https://praiaimoveis.net.br/aririba-houses",
+        "https://www.litoralnorth.com.br/imovel/apartamento-no-edificio-aririba-houses-balneario-camboriu-aririba-4-quartos-3-garagens-venda-ref-3442/",
+        "https://www.atlantiqueimoveis.com.br/imovel/sobrado-no-aririba-houses-balneario-camboriu-aririba-4-quartos-3-garagens-venda-ref-1717/"
+      ],
+      "notes": "Projeto horizontal exige cuidado: imagens externas e renders sao corretos. Legendas evitam palavras que a auditoria classifica como unidade."
+    },
+    {
+      "slug": "arkansas",
+      "hero_image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/cduSyabu5lO93RAqNsh7.jpg",
+      "description": "O Edificio Arkansas fica na Rua 3144, 236, Centro de Balneario Camboriu, conforme Felicita e Litoral Vertical. Litoral Vertical associa o projeto a Zapelini Construtora e aponta plantas em torno de 135 m2, tres suites e duas ou tres vagas em anuncios ativos. Imobille apresenta uma estrutura de lazer ampla, com piscina adulto e infantil, sauna, fitness, cinema, jogos, brinquedoteca, playground, churrasqueira e eventos. A nova galeria remove a imagem gerada e os interiores de oferta, usando somente fachada, hall e areas comuns.",
+      "seo_description": "Edificio Arkansas no Centro de Balneario Camboriu, Rua 3144, com fachada, piscina, cinema, jogos, fitness, playground e gourmet.",
+      "gallery": [
+        {
+          "title": "Arkansas - acesso principal",
+          "category": "Acesso",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/cduSyabu5lO93RAqNsh7.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-arkansas-EM62475",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Arkansas - torre vertical",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-1759330050.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-arkansas-EM62475",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Arkansas - calcada frontal",
+          "category": "Acesso",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/Am74cz3veITRTnuSDEEi.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-arkansas-EM62475",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Arkansas - hall vidro",
+          "category": "Hall",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/vsoy5WNXuCYKcVsO3gSd.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-arkansas-EM62475",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Arkansas - fachada alta",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2023/arkansas-59-1696082709.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-arkansas-EM62475",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Arkansas - hall decorado",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2023/arkansas-58-1696082709.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-arkansas-EM62475",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Arkansas - piscina skyline",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/01102025114730534-1759330050.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-arkansas-EM62475",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Arkansas - piscina raia",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/WgiezMZHXwUwJvVdnOTO.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-arkansas-EM62475",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Arkansas - piscina deck",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/zDA3cAhjCTVvp86k4hUy.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-arkansas-EM62475",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Arkansas - piscina solarium",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/jqwnR5udbrOrhEnVQFuH.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-arkansas-EM62475",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Arkansas - gourmet externo",
+          "category": "Gourmet",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/xU13ENpdbOysCcLX36FS.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-arkansas-EM62475",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Arkansas - playground",
+          "category": "Infantil",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/jKqo0Wlb22Xk480jn5js.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-arkansas-EM62475",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Arkansas - fitness",
+          "category": "Fitness",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/zysOElnerygTLMBrRXGN.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-arkansas-EM62475",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Arkansas - cinema",
+          "category": "Cinema",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/n1TQFdBIM8BYR6NLFh8N.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-arkansas-EM62475",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Arkansas - jogos",
+          "category": "Jogos",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/pkKokKgGwvh3AYsdiJuQ.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-arkansas-EM62475",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Arkansas - gourmet apoio",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2026/thumb-xu13enpdboyscclx36fs-1782830321.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-arkansas-EM62475",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Arkansas - piscina lateral",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2026/thumb-wgiezmzhxwuwjvvdnoto-1782830322.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-arkansas-EM62475",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Arkansas - piscina vista",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2026/thumb-zda3cahjctvvp86k4huy-1782830322.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-arkansas-EM62475",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Arkansas - deck lazer",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2026/thumb-jqwnr5udbrorhenvqfuh-1782830323.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-arkansas-EM62475",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Arkansas - infantil externo",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2026/thumb-jkqo0wlb22xk480jn5js-1782830324.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-arkansas-EM62475",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 3144, Centro",
+          "description": "Endereco validado por Felicita e Litoral Vertical em area central de Balneario Camboriu."
+        },
+        {
+          "icon": "Building2",
+          "title": "Zapelini Construtora",
+          "description": "Litoral Vertical associa o Edificio Arkansas a Zapelini Construtora."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e deck",
+          "description": "Imobille mostra piscina, deck, solarium e areas externas de lazer."
+        },
+        {
+          "icon": "Film",
+          "title": "Cinema, jogos e fitness",
+          "description": "A estrutura comum inclui cinema, jogos, academia, playground, brinquedoteca, gourmet e eventos."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Imagem gerada removida",
+          "description": "A galeria final nao usa a imagem com nome Gemini que aparecia no cadastro antigo."
+        },
+        {
+          "title": "Galeria de condominio",
+          "description": "A selecao agora mostra acesso, torre, hall, piscina, gourmet, playground, fitness, cinema e jogos."
+        },
+        {
+          "title": "Endereco e construtora",
+          "description": "Felicita e Litoral Vertical foram usados para Rua 3144, 236, Centro e associacao com Zapelini."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Edificio Arkansas?",
+          "answer": "Na Rua 3144, 236, Centro de Balneario Camboriu, conforme Felicita e Litoral Vertical."
+        },
+        {
+          "question": "Quem e a construtora?",
+          "answer": "Litoral Vertical associa o empreendimento a Zapelini Construtora."
+        },
+        {
+          "question": "O que foi removido da galeria?",
+          "answer": "A imagem gerada e interiores de oferta foram retirados da representacao principal."
+        },
+        {
+          "question": "Quais areas comuns aparecem?",
+          "answer": "Fachada, acesso, hall, piscina, gourmet, playground, fitness, cinema, jogos e deck."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-arkansas-EM62475",
+        "https://felicitanegocios.com.br/empreendimento/457/arkansas/",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-arkansas/",
+        "https://www.giroimoveis.com.br/imovel/apartamento-no-edificio-arkansas-balneario-camboriu-centro-3-quartos-3-garagens-venda-ref-804/"
+      ],
+      "notes": "Imobille forneceu material visual robusto de areas comuns. Curadoria substitui imagem gerada e fotos internas por condominio real."
+    }
+  ]
+}
