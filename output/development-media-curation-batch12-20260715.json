@@ -1,0 +1,1008 @@
+{
+  "batch_id": "development-media-curation-batch12-20260715",
+  "generated_at": "2026-07-15T00:25:00.000Z",
+  "items": [
+    {
+      "slug": "sante-boutique-residence",
+      "hero_image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2024/12/sante-torre.jpg",
+      "description": "O Sante Boutique Residence e um empreendimento da Embraed no bairro Pioneiros, em Balneario Camboriu, com arquitetura vertical de alto padrao e lazer pensado para uso cotidiano. A pesquisa em fontes oficiais e portais especializados confirmou imagens de fachada, acesso, piscina, fitness, kids, playground, festas, sauna e outdoor lounge. A curadoria substitui fotos internas por registros do empreendimento e das areas compartilhadas, reforcando identidade arquitetonica, lazer e localizacao proxima ao eixo norte da cidade.",
+      "seo_description": "Conheca o Sante Boutique Residence, empreendimento Embraed no bairro Pioneiros, com fachada autoral, lazer completo e curadoria visual revisada.",
+      "gallery": [
+        {
+          "title": "Sante Boutique Residence - torre e fachada",
+          "category": "Empreendimento",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2024/12/sante-torre.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/sante-boutique-residence",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Sante Boutique Residence - acesso principal",
+          "category": "Acesso",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2024/12/sante-entrada.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/sante-boutique-residence",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Sante Boutique Residence - embasamento",
+          "category": "Fachada",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/sante-boutique-residence-fachada-embasamento-sante-boutique-residence.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/sante-boutique-residence",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Sante Boutique Residence - piscina",
+          "category": "Lazer",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/sante-boutique-residence-piscina-sante-boutique-residence.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/sante-boutique-residence",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Sante Boutique Residence - fitness",
+          "category": "Fitness",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/sante-boutique-residence-academia-sante-boutique-residence.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/sante-boutique-residence",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Sante Boutique Residence - kids",
+          "category": "Kids",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/sante-boutique-residence-brinquedoteca-sante-boutique-residence.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/sante-boutique-residence",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Sante Boutique Residence - outdoor lounge",
+          "category": "Lazer",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/sante-boutique-residence-outdoor-lounge-sante-boutique-residence.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/sante-boutique-residence",
+          "source_label": "Embraed"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Assinatura Embraed",
+          "description": "Projeto com linguagem arquitetonica de alto padrao e padrao construtivo associado a uma marca reconhecida em Balneario Camboriu."
+        },
+        {
+          "icon": "Waves",
+          "title": "Lazer para rotina completa",
+          "description": "Piscina, outdoor lounge, fitness, kids, playground, festas, sauna e espacos de descanso atendem diferentes momentos do dia."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Pioneiros",
+          "description": "Endereco no bairro Pioneiros, com acesso ao eixo norte, orla e servicos de Balneario Camboriu."
+        }
+      ],
+      "differentials": [
+        "Fachada vertical e embasamento com leitura de empreendimento boutique.",
+        "Curadoria visual baseada em imagens oficiais de fachada, acesso e lazer.",
+        "Areas compartilhadas variadas, incluindo piscina, fitness, kids, outdoor lounge e sauna."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Sante Boutique Residence?",
+          "answer": "O Sante Boutique Residence fica no bairro Pioneiros, em Balneario Camboriu."
+        },
+        {
+          "question": "Qual e o perfil do empreendimento?",
+          "answer": "E um empreendimento residencial vertical de alto padrao da Embraed, com proposta boutique e lazer completo."
+        },
+        {
+          "question": "As imagens desta pagina sao do empreendimento?",
+          "answer": "Sim. A galeria foi revisada com imagens de fachada, acesso, piscina, fitness, kids e areas de lazer do Sante Boutique Residence."
+        },
+        {
+          "question": "Quais areas de lazer foram identificadas?",
+          "answer": "A curadoria identificou piscina, fitness, kids, playground, festas, sauna, outdoor lounge e ambientes de convivencia."
+        }
+      ],
+      "sources": [
+        "https://www.embraed.com.br/pt-BR/empreendimento/sante-boutique-residence",
+        "https://santeboutiqueresidence.com/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-sante-boutique-residence-EM46506",
+        "https://myside.com.br/apartamento-venda-sante-boutique-residence-balneario-camboriu-sc"
+      ]
+    },
+    {
+      "slug": "sky-brava",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2023/automacao-nova-marco-liane0006-1698758092.jpg",
+      "description": "O Sky Brava e um empreendimento na Praia Brava, em Itajai, voltado a quem busca proximidade com a praia, vida urbana da Brava e lazer no proprio edificio. As fontes pesquisadas apresentam fachada contemporanea, areas de piscina, espacos gourmet, fitness e convivencia. A nova curadoria remove imagens internas e prioriza fachada, volumetria e estrutura compartilhada, alinhando a pagina ao empreendimento em vez de destacar ambientes privativos.",
+      "seo_description": "Conheca o Sky Brava, empreendimento na Praia Brava em Itajai, com fachada contemporanea, lazer e curadoria visual revisada.",
+      "gallery": [
+        {
+          "title": "Sky Brava - fachada principal",
+          "category": "Empreendimento",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2023/automacao-nova-marco-liane0006-1698758092.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sky-brava-EM69334",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sky Brava - volumetria",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2023/automacao-nova-marco-liane0009-1698758093.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sky-brava-EM69334",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sky Brava - piscina",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/real-estates-photo/February2022/pgMbpC7outxSmK1ubOu9.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sky-brava-EM69334",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sky Brava - lazer externo",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2023/automacao-nova-marco-liane0011-1698758095.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sky-brava-EM69334",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sky Brava - fitness",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2023/automacao-nova-marco-liane0001-1698758440.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sky-brava-EM69334",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sky Brava - gourmet",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2023/automacao-nova-marco-liane0007-1698758092.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sky-brava-EM69334",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sky Brava - convivencia",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2023/automacao-nova-marco-liane0008-1698758093.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sky-brava-EM69334",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Praia Brava",
+          "description": "Endereco em uma das regioes mais valorizadas de Itajai, com acesso a praia, gastronomia e servicos."
+        },
+        {
+          "icon": "Waves",
+          "title": "Lazer com piscina",
+          "description": "A curadoria identificou piscina, gourmet, fitness e areas de convivencia para rotina de lazer no edificio."
+        },
+        {
+          "icon": "Building2",
+          "title": "Fachada contemporanea",
+          "description": "Volumetria vertical com linguagem atual, adequada ao contexto urbano da Praia Brava."
+        }
+      ],
+      "differentials": [
+        "Imagens revisadas para destacar fachada e lazer compartilhado.",
+        "Localizacao na Praia Brava, entre Itajai e Balneario Camboriu.",
+        "Conjunto de lazer com piscina, gourmet, fitness e convivencia."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Sky Brava?",
+          "answer": "O Sky Brava fica na Praia Brava, em Itajai."
+        },
+        {
+          "question": "Qual e o diferencial de localizacao?",
+          "answer": "A Praia Brava combina proximidade com o mar, gastronomia, servicos e acesso rapido a Balneario Camboriu."
+        },
+        {
+          "question": "A galeria mostra o empreendimento?",
+          "answer": "Sim. As imagens foram revisadas para priorizar fachada, piscina, fitness, gourmet e areas compartilhadas do Sky Brava."
+        },
+        {
+          "question": "Quais fontes foram usadas na curadoria?",
+          "answer": "Foram consultados Imobille, MySide, Apto e Juliani para conferir midia e contexto do empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-sky-brava-EM69334",
+        "https://myside.com.br/apartamento-venda-sky-brava-residence-itajai-sc",
+        "https://apto.vc/br/sc/itajai/praia-brava/sky-brava-residence",
+        "https://www.julianiimoveis.com.br/condominio/21/"
+      ]
+    },
+    {
+      "slug": "the-spot-one",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2023/layout-fotos-site-010026-1688057308.jpg",
+      "description": "O The Spot One e um empreendimento conectado ao Balneario Shopping, em Balneario Camboriu, com proposta urbana, servicada e voltada a mobilidade, conveniencia e uso recorrente. A pesquisa cruzou Imobille, Almeida Junior, Terra e VivaStays para confirmar fachada, implantacao e areas de lazer. A nova curadoria evita imagens de ambientes privativos e destaca fachada, rooftop, piscina, convivencia e estrutura de apoio do empreendimento.",
+      "seo_description": "Conheca o The Spot One, empreendimento conectado ao Balneario Shopping, com proposta urbana, rooftop, lazer e servicos.",
+      "gallery": [
+        {
+          "title": "The Spot One - fachada",
+          "category": "Empreendimento",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2023/layout-fotos-site-010026-1688057308.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-the-spot-one-EM4151",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "The Spot One - implantacao urbana",
+          "category": "Implantacao",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2023/layout-fotos-site-010005-1688057264.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-the-spot-one-EM4151",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "The Spot One - rooftop",
+          "category": "Rooftop",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2023/layout-fotos-site-010000-1688057263.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-the-spot-one-EM4151",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "The Spot One - piscina elevada",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2023/layout-fotos-site-010004-1688057264.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-the-spot-one-EM4151",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "The Spot One - convivencia",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2023/layout-fotos-site-010018-1688057306.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-the-spot-one-EM4151",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "The Spot One - apoio compartilhado",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2023/layout-fotos-site-010021-1688057307.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-the-spot-one-EM4151",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "The Spot One - registro institucional",
+          "category": "Empreendimento",
+          "image": "https://almeidajunior.com.br/wp-content/uploads/2024/03/1esse.png",
+          "source_url": "https://almeidajunior.com.br/pt-br/the-spot-one-ajrealty-lanca-oficialmente-empreendimento-inedito-em-balneario-camboriu/",
+          "source_label": "Almeida Junior"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "ShoppingBag",
+          "title": "Conexao com shopping",
+          "description": "Empreendimento associado ao contexto do Balneario Shopping, com conveniencia urbana no entorno imediato."
+        },
+        {
+          "icon": "Building2",
+          "title": "Uso urbano flexivel",
+          "description": "Proposta voltada a praticidade, mobilidade e servicos, adequada a quem busca operacao simplificada em Balneario Camboriu."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Rooftop e lazer",
+          "description": "A curadoria visual destaca rooftop, piscina e areas de convivencia do empreendimento."
+        }
+      ],
+      "differentials": [
+        "Empreendimento com relacao direta com o Balneario Shopping.",
+        "Lazer elevado com rooftop, piscina e ambientes compartilhados.",
+        "Galeria revisada para remover imagens internas e reforcar a identidade do edificio."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o The Spot One?",
+          "answer": "O The Spot One fica em Balneario Camboriu, conectado ao contexto do Balneario Shopping."
+        },
+        {
+          "question": "Qual e a proposta do The Spot One?",
+          "answer": "A proposta e urbana e servicada, com foco em conveniencia, mobilidade e uso pratico no dia a dia."
+        },
+        {
+          "question": "Quais imagens foram priorizadas?",
+          "answer": "Foram priorizadas imagens de fachada, implantacao, rooftop, piscina e areas compartilhadas."
+        },
+        {
+          "question": "Quais fontes confirmam a curadoria?",
+          "answer": "A curadoria usa Imobille, Almeida Junior, Terra e VivaStays como referencias de midia e contexto."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-the-spot-one-EM4151",
+        "https://almeidajunior.com.br/pt-br/the-spot-one-ajrealty-lanca-oficialmente-empreendimento-inedito-em-balneario-camboriu/",
+        "https://imoveisterra.net/empreendimento/303/the-spot-one/",
+        "https://www.vivastays.co/pt/building/WG01I"
+      ]
+    },
+    {
+      "slug": "torre-esmeralda",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2022/automacao-nova-20001-1664567317.jpg",
+      "description": "A Torre Esmeralda e um empreendimento no Centro de Balneario Camboriu com fachada vertical, acesso marcado e um conjunto amplo de lazer. As fontes Imobille, Felicita e Apto mostram piscina, quadra, gourmet, jogos, fitness, kids e playground, alem de imagens externas do edificio. A curadoria troca fotos de ambientes privativos por registros de fachada, acesso e areas compartilhadas, deixando a pagina mais fiel ao condominio.",
+      "seo_description": "Conheca a Torre Esmeralda no Centro de Balneario Camboriu, com fachada vertical, acesso marcado e lazer completo.",
+      "gallery": [
+        {
+          "title": "Torre Esmeralda - fachada",
+          "category": "Empreendimento",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2022/automacao-nova-20001-1664567317.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-esmeralda-EM14758",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Torre Esmeralda - acesso",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2022/automacao-nova-20002-1664567318.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-esmeralda-EM14758",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Torre Esmeralda - piscina",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2022/automacao-nova-20005-1664567319.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-esmeralda-EM14758",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Torre Esmeralda - quadra",
+          "category": "Esporte",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2022/automacao-nova-20007-1664567319.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-esmeralda-EM14758",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Torre Esmeralda - gourmet",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2022/automacao-nova-20008-1664567320.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-esmeralda-EM14758",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Torre Esmeralda - fitness",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2022/automacao-nova-20010-1664567321.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-esmeralda-EM14758",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Torre Esmeralda - kids",
+          "category": "Kids",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2022/automacao-nova-20011-1664567321.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-esmeralda-EM14758",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro de Balneario Camboriu",
+          "description": "Localizacao central, adequada para quem prioriza acesso a servicos, praia e mobilidade urbana."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer diversificado",
+          "description": "Piscina, quadra, gourmet, jogos, fitness, kids e playground aparecem nas fontes consultadas."
+        },
+        {
+          "icon": "Building2",
+          "title": "Identidade vertical",
+          "description": "Fachada e acesso reforcam a presenca urbana do empreendimento no Centro."
+        }
+      ],
+      "differentials": [
+        "Lazer com esporte, piscina, fitness, kids e convivencia.",
+        "Fachada e acesso revisados como imagens principais da pagina.",
+        "Fontes cruzadas entre Imobille, Felicita e Apto para validar o contexto."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica a Torre Esmeralda?",
+          "answer": "A Torre Esmeralda fica no Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Quais areas de lazer aparecem na curadoria?",
+          "answer": "A curadoria inclui piscina, quadra, gourmet, fitness, kids e ambientes de convivencia."
+        },
+        {
+          "question": "A pagina ainda usa imagens de ambientes privativos?",
+          "answer": "Nao. A curadoria substitui a galeria por imagens do empreendimento e das areas compartilhadas."
+        },
+        {
+          "question": "Quais fontes foram consultadas?",
+          "answer": "Foram consultadas paginas da Imobille, Felicita e Apto."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-esmeralda-EM14758",
+        "https://felicitanegocios.com.br/empreendimento/275/torre-esmeralda/",
+        "https://apto.vc/br/sc/balneario-camboriu/centro/ed-torre-esmeralda"
+      ]
+    },
+    {
+      "slug": "acqualina",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2022/acqualina-50-1670867771.webp",
+      "description": "O Acqualina Residence e um empreendimento no Centro de Balneario Camboriu com fachada vertical, acesso elegante e areas compartilhadas de lazer. A pesquisa em Imobille, Litoral Vertical e Felicita confirmou imagens de fachada, piscina, fitness, cinema, gourmet, kids, sauna e espacos de descanso. A curadoria evita fotos internas e registros de outros empreendimentos relacionados, mantendo a pagina focada no Acqualina e em suas areas comuns.",
+      "seo_description": "Conheca o Acqualina Residence no Centro de Balneario Camboriu, com fachada vertical, piscina, fitness, cinema e lazer completo.",
+      "gallery": [
+        {
+          "title": "Acqualina Residence - fachada",
+          "category": "Empreendimento",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2022/acqualina-50-1670867771.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-acqualina-residence-EM78316",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Acqualina Residence - acesso",
+          "category": "Acesso",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/FXFCachYLoy1v2QmXI0m.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-acqualina-residence-EM78316",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Acqualina Residence - piscina",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/GoFGM698C2TL9xcN553Y.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-acqualina-residence-EM78316",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Acqualina Residence - fitness",
+          "category": "Fitness",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/Crd8y7cCDdJpVJoSsmXy.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-acqualina-residence-EM78316",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Acqualina Residence - cinema",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/lyBIx4n4QFmzdfrn8i4r.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-acqualina-residence-EM78316",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Acqualina Residence - gourmet",
+          "category": "Gourmet",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/oWamPhwQrLGRuPBE3lzT.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-acqualina-residence-EM78316",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Acqualina Residence - kids",
+          "category": "Kids",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/bA44UZSaIPCrvP5fz1M3.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-acqualina-residence-EM78316",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro",
+          "description": "Endereco central em Balneario Camboriu, com acesso facilitado a praia, comercio e servicos."
+        },
+        {
+          "icon": "Film",
+          "title": "Lazer completo",
+          "description": "A curadoria identificou piscina, cinema, fitness, gourmet, kids, sauna e ambientes de descanso."
+        },
+        {
+          "icon": "Building2",
+          "title": "Fachada reconhecivel",
+          "description": "A pagina passa a usar fachada e acesso do Acqualina como referencia principal."
+        }
+      ],
+      "differentials": [
+        "Curadoria filtrou imagens relacionadas a outros empreendimentos e manteve apenas registros do Acqualina.",
+        "Lazer interno e externo com piscina, cinema, fitness, gourmet e kids.",
+        "Localizacao central em Balneario Camboriu."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Acqualina Residence?",
+          "answer": "O Acqualina Residence fica no Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Quais imagens foram usadas?",
+          "answer": "Foram usadas imagens de fachada, acesso, piscina, fitness, cinema, gourmet e kids do empreendimento."
+        },
+        {
+          "question": "Havia imagens de outros empreendimentos na pesquisa?",
+          "answer": "Sim. A curadoria descartou imagens relacionadas a outros empreendimentos e manteve apenas registros aplicaveis ao Acqualina."
+        },
+        {
+          "question": "Quais fontes foram consultadas?",
+          "answer": "Foram consultadas Imobille, Litoral Vertical e Felicita."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-acqualina-residence-EM78316",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-acqualina-residence/",
+        "https://felicitanegocios.com.br/empreendimento/316/acqualina-residence/"
+      ]
+    },
+    {
+      "slug": "argos-residence",
+      "hero_image": "https://www.benveartt.com.br/uploads/imagens/crop_fachada-argos-residence-243.jpg",
+      "description": "O Argos Residence e um empreendimento residencial em Balneario Camboriu com fachada marcada e lazer variado. A pesquisa em Benveartt, Felicita e Maximoveis confirmou registros de fachada, piscina, gourmet, fitness, jogos, kids e ambientes de convivencia. A curadoria remove imagens internas e chamadas comerciais sem valor visual, mantendo a pagina concentrada em fachada, lazer e estrutura compartilhada.",
+      "seo_description": "Conheca o Argos Residence em Balneario Camboriu, com fachada marcada, piscina, gourmet, fitness, kids e lazer variado.",
+      "gallery": [
+        {
+          "title": "Argos Residence - fachada",
+          "category": "Empreendimento",
+          "image": "https://www.benveartt.com.br/uploads/imagens/crop_fachada-argos-residence-243.jpg",
+          "source_url": "https://www.benveartt.com.br/empreendimento/argos-residence",
+          "source_label": "Benveartt"
+        },
+        {
+          "title": "Argos Residence - piscina",
+          "category": "Lazer",
+          "image": "https://www.benveartt.com.br/uploads/imagens/800x600_argos-residence-14-1652.jpg",
+          "source_url": "https://www.benveartt.com.br/empreendimento/argos-residence",
+          "source_label": "Benveartt"
+        },
+        {
+          "title": "Argos Residence - gourmet",
+          "category": "Gourmet",
+          "image": "https://www.benveartt.com.br/uploads/imagens/800x600_argos-residence-14-5813.jpg",
+          "source_url": "https://www.benveartt.com.br/empreendimento/argos-residence",
+          "source_label": "Benveartt"
+        },
+        {
+          "title": "Argos Residence - jogos",
+          "category": "Lazer",
+          "image": "https://www.benveartt.com.br/uploads/imagens/800x600_argos-residence-14-4303.jpg",
+          "source_url": "https://www.benveartt.com.br/empreendimento/argos-residence",
+          "source_label": "Benveartt"
+        },
+        {
+          "title": "Argos Residence - fitness",
+          "category": "Fitness",
+          "image": "https://www.benveartt.com.br/uploads/imagens/800x600_argos-residence-14-6262.jpg",
+          "source_url": "https://www.benveartt.com.br/empreendimento/argos-residence",
+          "source_label": "Benveartt"
+        },
+        {
+          "title": "Argos Residence - kids",
+          "category": "Kids",
+          "image": "https://www.benveartt.com.br/uploads/imagens/800x600_argos-residence-14-4013.jpg",
+          "source_url": "https://www.benveartt.com.br/empreendimento/argos-residence",
+          "source_label": "Benveartt"
+        },
+        {
+          "title": "Argos Residence - convivencia",
+          "category": "Lazer",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/44/img-109.jpg?1696256027",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/44/argos-residence/",
+          "source_label": "Felicita"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Fachada identificada",
+          "description": "A pagina passa a usar registro de fachada do Argos Residence como imagem principal."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer variado",
+          "description": "Piscina, gourmet, fitness, jogos, kids e convivencia aparecem nas fontes consultadas."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Balneario Camboriu",
+          "description": "Endereco urbano em Balneario Camboriu, com acesso a servicos, praia e mobilidade da cidade."
+        }
+      ],
+      "differentials": [
+        "Curadoria excluiu imagens comerciais e internas sem relacao direta com o condominio.",
+        "Galeria com fachada e areas compartilhadas verificadas em mais de uma fonte.",
+        "Lazer com piscina, gourmet, fitness, jogos e kids."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Argos Residence?",
+          "answer": "O Argos Residence fica em Balneario Camboriu."
+        },
+        {
+          "question": "Quais areas foram destacadas?",
+          "answer": "Foram destacadas fachada, piscina, gourmet, jogos, fitness, kids e convivencia."
+        },
+        {
+          "question": "A galeria foi corrigida?",
+          "answer": "Sim. A galeria foi substituida por imagens do empreendimento e das areas compartilhadas."
+        },
+        {
+          "question": "Quais fontes foram usadas?",
+          "answer": "Foram usadas Benveartt, Felicita e Maximoveis como fontes de referencia."
+        }
+      ],
+      "sources": [
+        "https://www.benveartt.com.br/empreendimento/argos-residence",
+        "https://felicitanegocios.com.br/empreendimento/44/argos-residence/",
+        "https://maximoveis.com.br/empreendimento/583/argos-residence/"
+      ]
+    },
+    {
+      "slug": "atlantic-paradise",
+      "hero_image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/November2021/6qcCozfZoTwH0cqGxLNy.jpeg",
+      "description": "O Atlantic Paradise Towers e um empreendimento em Meia Praia, Itapema, com proposta residencial de alto padrao e lazer associado ao cotidiano de praia. A pesquisa encontrou poucas imagens institucionais do condominio, mas confirmou registros externos, piscina, lazer e ambientes compartilhados em Imobille e referencias complementares. A curadoria usa apenas as imagens aderentes ao empreendimento e remove fotos internas que estavam contaminando a pagina.",
+      "seo_description": "Conheca o Atlantic Paradise Towers em Meia Praia, Itapema, com registros de fachada, piscina e lazer revisados.",
+      "gallery": [
+        {
+          "title": "Atlantic Paradise Towers - fachada",
+          "category": "Empreendimento",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/November2021/6qcCozfZoTwH0cqGxLNy.jpeg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-atlantic-paradise-EM73166",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Atlantic Paradise Towers - piscina",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/November2021/XtOblNHmCGEMXbd4arCV.jpeg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-atlantic-paradise-EM73166",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Atlantic Paradise Towers - lazer",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/November2021/sJqNx51AaZRGjWRu0NL1.jpeg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-atlantic-paradise-EM73166",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Atlantic Paradise Towers - gourmet",
+          "category": "Gourmet",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/November2021/97Z61BzRHCd80pmnoJXb.jpeg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-atlantic-paradise-EM73166",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Atlantic Paradise Towers - convivencia",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/November2021/goeC4eXS4HBaPdXLjs2S.jpeg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-atlantic-paradise-EM73166",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Atlantic Paradise Towers - banner institucional",
+          "category": "Empreendimento",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/07042025150209700-1744048929.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-atlantic-paradise-EM73166",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Meia Praia",
+          "description": "Localizacao em Meia Praia, uma das regioes mais procuradas de Itapema."
+        },
+        {
+          "icon": "Waves",
+          "title": "Rotina de praia",
+          "description": "Empreendimento alinhado ao uso residencial de praia, com lazer e convivencia para estadias frequentes."
+        },
+        {
+          "icon": "Image",
+          "title": "Galeria enxuta e correta",
+          "description": "Foram mantidas apenas imagens aderentes ao empreendimento, evitando registros internos de ofertas especificas."
+        }
+      ],
+      "differentials": [
+        "Curadoria conservadora devido a disponibilidade limitada de midia institucional.",
+        "Foco em fachada, piscina, lazer e convivencia.",
+        "Pagina ajustada para deixar de depender de fotos internas das ofertas."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Atlantic Paradise Towers?",
+          "answer": "O Atlantic Paradise Towers fica em Meia Praia, Itapema."
+        },
+        {
+          "question": "Por que a galeria ficou mais enxuta?",
+          "answer": "Porque a pesquisa encontrou poucas imagens institucionais confiaveis; a curadoria manteve apenas registros aderentes ao empreendimento."
+        },
+        {
+          "question": "As fotos internas foram removidas?",
+          "answer": "Sim. A galeria foi revisada para evitar imagens de ofertas especificas."
+        },
+        {
+          "question": "Quais fontes foram consultadas?",
+          "answer": "Foram consultadas Imobille, Versatil e Viva Real."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-atlantic-paradise-EM73166",
+        "https://imobiliariaversatil.com.br/edificios/atlantic-paradise-towers/itapema/meia-praia/18",
+        "https://www.vivareal.com.br/condominio/residencial-atlantic-paradise-towers-meia-praia-id-1c2af288-63ab/"
+      ]
+    },
+    {
+      "slug": "barramares",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2024/barramares-fachada-1-1704746225.webp",
+      "description": "O Barramares e um empreendimento frente mar em Balneario Camboriu, com fachada identificada, acesso a rotina de orla e uma grande variedade de areas compartilhadas. A pesquisa na Imobille confirmou imagens de fachada, piscina, espacos gourmet, jogos, fitness, kids, playground e convivencia. A nova curadoria substitui fotos internas por imagens do edificio e do lazer, deixando a pagina mais adequada para uma busca por condominio.",
+      "seo_description": "Conheca o Barramares em Balneario Camboriu, empreendimento frente mar com fachada, piscina, gourmet, fitness e lazer revisados.",
+      "gallery": [
+        {
+          "title": "Barramares - fachada frente mar",
+          "category": "Empreendimento",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2024/barramares-fachada-1-1704746225.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-barramares-EM46093",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Barramares - fachada lateral",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2024/barramares-fachada-4-1704746226.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-barramares-EM46093",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Barramares - piscina",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2024/barramares-1-1-1715430421.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-barramares-EM46093",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Barramares - gourmet",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2024/barramares-5-1-1715430418.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-barramares-EM46093",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Barramares - fitness",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2024/barramares-15-1715430418.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-barramares-EM46093",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Barramares - jogos",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2024/barramares-16-1715430417.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-barramares-EM46093",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Barramares - kids",
+          "category": "Kids",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2024/barramares-24-1-1715430414.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-barramares-EM46093",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente mar",
+          "description": "Empreendimento associado a rotina de orla em Balneario Camboriu."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer amplo",
+          "description": "Piscina, gourmet, fitness, jogos, kids, playground e convivencia foram identificados nas imagens."
+        },
+        {
+          "icon": "Building2",
+          "title": "Fachada revisada",
+          "description": "A pagina passa a usar fachada e areas comuns como referencia visual principal."
+        }
+      ],
+      "differentials": [
+        "Fachada frente mar como imagem principal.",
+        "Galeria com lazer amplo e areas compartilhadas.",
+        "Midia validada principalmente em fonte especializada com grande volume de registros."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Barramares?",
+          "answer": "O Barramares fica em Balneario Camboriu, em contexto de frente mar."
+        },
+        {
+          "question": "Quais areas aparecem na galeria?",
+          "answer": "A galeria mostra fachada, piscina, gourmet, fitness, jogos, kids e areas de convivencia."
+        },
+        {
+          "question": "A pagina ainda usa fotos internas?",
+          "answer": "Nao. As imagens internas foram substituidas por registros do empreendimento e das areas compartilhadas."
+        },
+        {
+          "question": "Qual fonte principal foi usada?",
+          "answer": "A principal fonte visual usada foi a Imobille."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-barramares-EM46093",
+        "https://www.imobillenegocios.com.br/imoveis/apartamento-frente-mar-no-edificio-barramares-em-balneario-camboriu--IM63031"
+      ]
+    },
+    {
+      "slug": "bosque-de-taquaras",
+      "hero_image": "https://img.apre.me/BcFJDoAgDADA3-QIVNkufYvBoqSGYKMxfN8ZJp0Qke4JbagpB3uSCQu90PQyBRNW786MKcatFxUe8qgNK3qXbRtSu3w7CUTnAvEP.jpg",
+      "description": "O Bosque de Taquaras e um condominio horizontal em Praia das Taquaras, Balneario Camboriu, com perfil residencial reservado e forte relacao com vegetacao, ruas internas e tranquilidade do eixo sul. A disponibilidade publica de midia institucional e limitada, por isso a curadoria foi conservadora: removeu interiores e manteve apenas registros externos, implantacao, paisagismo e contexto visual do conjunto horizontal. A descricao tambem foi reescrita para refletir melhor o perfil de condominio, e nao uma oferta especifica.",
+      "seo_description": "Conheca o Bosque de Taquaras, condominio horizontal em Praia das Taquaras, com perfil reservado, ruas internas e area verde.",
+      "gallery": [
+        {
+          "title": "Bosque de Taquaras - acesso e paisagismo",
+          "category": "Condominio",
+          "image": "https://img.apre.me/BcFJDoAgDADA3-QIVNkufYvBoqSGYKMxfN8ZJp0Qke4JbagpB3uSCQu90PQyBRNW786MKcatFxUe8qgNK3qXbRtSu3w7CUTnAvEP.jpg",
+          "source_url": "https://desc.com.br/casa-a-venda-no-condominio-bosque-de-taquaras",
+          "source_label": "DESC"
+        },
+        {
+          "title": "Bosque de Taquaras - implantacao horizontal",
+          "category": "Implantacao",
+          "image": "https://img.apre.me/M7ItVksvyNIzNE5LMzA0sTA1NTI1i89JLMhMzsssKtA3Mba0NDHVT8-LTMnJLE2yzVQzMzAwtU0GAA.jpg",
+          "source_url": "https://desc.com.br/casa-a-venda-no-condominio-bosque-de-taquaras",
+          "source_label": "DESC"
+        },
+        {
+          "title": "Bosque de Taquaras - area verde",
+          "category": "Paisagismo",
+          "image": "https://img.apre.me/M7ItVksvyNIzT0xLSTRJNjZMMTE1i89JLMhMzsssKtA3tzC0NDXVT8-LTMnJLE2yzVQzMzAwtU0GAA.jpg",
+          "source_url": "https://desc.com.br/casa-a-venda-no-condominio-bosque-de-taquaras",
+          "source_label": "DESC"
+        },
+        {
+          "title": "Bosque de Taquaras - rua interna",
+          "category": "Condominio",
+          "image": "https://img.apre.me/M7ItVksvyNIzMkszMbU0NTU1NzU3i89JLMhMzsssKtA3NDEwNbPUT8-LTMnJLE2yzVQzMzAwtU0GAA.jpg",
+          "source_url": "https://desc.com.br/casa-a-venda-no-condominio-bosque-de-taquaras",
+          "source_label": "DESC"
+        },
+        {
+          "title": "Bosque de Taquaras - entorno arborizado",
+          "category": "Paisagismo",
+          "image": "https://img.apre.me/M7YtVksvyNJLNDQ3TDExSLMwNDczi89JLMhMzsssKtA3NTY0MbDQT8-LTMnJLE2yzVQzMzAwtU0GAA.jpg",
+          "source_url": "https://www.casamineira.com.br/venda/casa/praia-das-taquaras_balneario-camboriu_sc",
+          "source_label": "Casa Mineira"
+        },
+        {
+          "title": "Bosque de Taquaras - perfil residencial",
+          "category": "Condominio",
+          "image": "https://img.apre.me/M7EtVksvyNJLNDQ3TDExSLMwNDczi89JLMhMzsssKtA3NTY0MbDQT8-LTMnJLE2yzVQzMzAwtU0GAA.jpg",
+          "source_url": "https://www.casamineira.com.br/venda/casa/praia-das-taquaras_balneario-camboriu_sc",
+          "source_label": "Casa Mineira"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Trees",
+          "title": "Perfil reservado",
+          "description": "Condominio horizontal em Praia das Taquaras, com atmosfera residencial e menor exposicao urbana."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Eixo sul",
+          "description": "Localizacao em Praia das Taquaras, regiao associada a natureza, praias menores e rotina mais tranquila."
+        },
+        {
+          "icon": "Shield",
+          "title": "Convivio controlado",
+          "description": "Formato horizontal favorece privacidade, ruas internas e controle de acesso condominial."
+        }
+      ],
+      "differentials": [
+        "Curadoria conservadora por haver pouca midia institucional publica do condominio.",
+        "Remocao de imagens internas e foco em acesso, implantacao, ruas internas e paisagismo.",
+        "Descricao reposicionada para o perfil do condominio horizontal em Taquaras."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Bosque de Taquaras?",
+          "answer": "O Bosque de Taquaras fica em Praia das Taquaras, Balneario Camboriu."
+        },
+        {
+          "question": "Qual e o perfil do condominio?",
+          "answer": "E um condominio horizontal de perfil reservado, com contexto residencial e area verde."
+        },
+        {
+          "question": "Por que a curadoria foi conservadora?",
+          "answer": "Porque ha pouca midia institucional publica. Foram mantidas apenas imagens externas e de contexto do conjunto horizontal."
+        },
+        {
+          "question": "As fotos internas foram removidas?",
+          "answer": "Sim. A nova galeria evita ambientes internos e prioriza acesso, implantacao, paisagismo e ruas internas."
+        }
+      ],
+      "sources": [
+        "https://desc.com.br/casa-a-venda-no-condominio-bosque-de-taquaras",
+        "https://www.casamineira.com.br/venda/casa/praia-das-taquaras_balneario-camboriu_sc",
+        "https://www.imovelweb.com.br/casas-casa-de-condominio-venda-praia-das-taquaras.html"
+      ]
+    },
+    {
+      "slug": "boulevard-barra-park-residence",
+      "hero_image": "https://b3.casteldigital.com.br/guilhermepilger/ig/icp/imoveis/1710/20241212_134622-17486092811971-edt-.jpg",
+      "description": "O Boulevard Barra Park Residence e um condominio horizontal na Barra, em Balneario Camboriu, com perfil residencial, acesso controlado e contexto de ruas internas. Como a midia publica esta concentrada em ofertas especificas, a curadoria foi feita com criterio: sairam interiores e plantas, ficaram registros externos, fachada residencial, acesso, implantacao e contexto do conjunto. A copy foi atualizada para explicar o perfil horizontal do condominio sem tratar a pagina como anuncio de uma unica oferta.",
+      "seo_description": "Conheca o Boulevard Barra Park Residence, condominio horizontal na Barra, Balneario Camboriu, com acesso controlado e perfil residencial.",
+      "gallery": [
+        {
+          "title": "Boulevard Barra Park Residence - acesso externo",
+          "category": "Condominio",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/icp/imoveis/1710/20241212_134622-17486092811971-edt-.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/casa-em-condominio-no-boulevard-barra-park-residence-balneario-camboriu-barra-4-quartos-4-garagens-venda-ref-325/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Boulevard Barra Park Residence - fachada residencial",
+          "category": "Condominio",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/icp/imoveis/898/f-7-9-16863286110856.jpeg",
+          "source_url": "https://www.guilhermepilger.com/imovel/casa-em-condominio-no-boulevard-barra-park-residence-balneario-camboriu-barra-4-quartos-4-garagens-venda-ref-325/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Boulevard Barra Park Residence - perfil horizontal",
+          "category": "Implantacao",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/icp/imoveis/1316/f0a36707-a114-4999-be63-157a0e35f909-1733771260919.jpeg",
+          "source_url": "https://www.guilhermepilger.com/imovel/casa-em-condominio-no-boulevard-barra-park-residence-balneario-camboriu-barra-4-quartos-4-garagens-venda-ref-325/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Boulevard Barra Park Residence - rua interna",
+          "category": "Condominio",
+          "image": "https://b.casteldigital.com.br/lfbimoveis/ig/im/imoveis/1103/photo-2026-01-17-12-14-51_1-1772120077680.jpg",
+          "source_url": "https://www.lfbimoveis.com.br/imovel/casa-no-condominio-boulevard-barra-park-residence-balneario-camboriu-barra-3-quartos-2-garagens-venda-ref-1103/",
+          "source_label": "LFB Imoveis"
+        },
+        {
+          "title": "Boulevard Barra Park Residence - acesso interno",
+          "category": "Condominio",
+          "image": "https://b.casteldigital.com.br/lfbimoveis/ig/im/imoveis/1103/photo-2026-01-17-12-14-51-1772120077680.jpg",
+          "source_url": "https://www.lfbimoveis.com.br/imovel/casa-no-condominio-boulevard-barra-park-residence-balneario-camboriu-barra-3-quartos-2-garagens-venda-ref-1103/",
+          "source_label": "LFB Imoveis"
+        },
+        {
+          "title": "Boulevard Barra Park Residence - area externa",
+          "category": "Condominio",
+          "image": "https://b.casteldigital.com.br/lfbimoveis/ig/im/imoveis/1103/img_3516-1772120077680.jpeg",
+          "source_url": "https://www.lfbimoveis.com.br/imovel/casa-no-condominio-boulevard-barra-park-residence-balneario-camboriu-barra-3-quartos-2-garagens-venda-ref-1103/",
+          "source_label": "LFB Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Home",
+          "title": "Condominio horizontal",
+          "description": "Perfil residencial de baixa verticalizacao, com ruas internas e rotina mais reservada."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Barra",
+          "description": "Localizacao na Barra, com acesso ao eixo sul de Balneario Camboriu e a servicos do bairro."
+        },
+        {
+          "icon": "Shield",
+          "title": "Acesso controlado",
+          "description": "Formato condominial voltado a privacidade, controle de entrada e convivencia residencial."
+        }
+      ],
+      "differentials": [
+        "Curadoria revisada para retirar interiores e priorizar contexto externo do condominio.",
+        "Perfil horizontal na Barra, diferente dos empreendimentos verticais da orla central.",
+        "Descricao ajustada para apresentar o condominio, nao uma oferta especifica."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Boulevard Barra Park Residence?",
+          "answer": "O Boulevard Barra Park Residence fica na Barra, em Balneario Camboriu."
+        },
+        {
+          "question": "Qual e o perfil do condominio?",
+          "answer": "E um condominio horizontal, com perfil residencial, ruas internas e acesso controlado."
+        },
+        {
+          "question": "Por que foram usadas imagens externas de referencias?",
+          "answer": "A midia publica disponivel esta concentrada em ofertas especificas. A curadoria manteve apenas registros externos e de contexto condominial."
+        },
+        {
+          "question": "A pagina ainda usa imagens internas?",
+          "answer": "Nao. A curadoria remove imagens internas e prioriza acesso, implantacao e contexto externo."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/imovel/casa-em-condominio-no-boulevard-barra-park-residence-balneario-camboriu-barra-4-quartos-4-garagens-venda-ref-325/",
+        "https://www.lfbimoveis.com.br/imovel/casa-no-condominio-boulevard-barra-park-residence-balneario-camboriu-barra-3-quartos-2-garagens-venda-ref-1103/",
+        "https://www.lfbimoveis.com.br/imovel/casa-no-condominio-boulevard-barra-park-residence-balneario-camboriu-barra-4-quartos-4-garagens-venda-ref-1055/",
+        "https://abcorretordeimoveis.com.br/empreendimentos"
+      ]
+    }
+  ]
+}

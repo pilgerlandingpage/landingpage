@@ -1,0 +1,313 @@
+{
+  "generated_at": "2026-07-16T17:01:47.994Z",
+  "filters": {
+    "status": "published",
+    "slugs": [
+      "adolfo-blase"
+    ]
+  },
+  "totals": {
+    "landing_pages_analyzed": 1,
+    "development_pages": 1,
+    "P0": 1,
+    "P1": 0,
+    "P2": 0,
+    "OK": 0,
+    "hero_matches_unit_image": 1,
+    "gallery_matches_unit_image": 1,
+    "unit_label_gallery": 1,
+    "generic_description": 1,
+    "generic_benefits": 1,
+    "missing_development_copy": 1
+  },
+  "samples": {
+    "P0": [
+      {
+        "id": "56d28fff-2ad5-4c57-882c-f94f2e763934",
+        "slug": "adolfo-blase",
+        "title": "Adolfo Blase em Balneário Camboriú | Empreendimento Guilherme Pilger",
+        "status": "published",
+        "development_name": "Adolfo Blase",
+        "source_condominium_name": "Adolfo Blase",
+        "city": "Balneário Camboriú",
+        "location_name": "Barra Sul, Balneário Camboriú - SC",
+        "unit_count": 1,
+        "active_gallery_source": "content.custom_gallery",
+        "active_gallery_count": 8,
+        "active_gallery_unit_matches": 8,
+        "active_gallery_unit_match_ratio": 1,
+        "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/001-img_7794-1739824359892.jpeg",
+        "hero_matches_unit_image": true,
+        "hero_matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+        "unit_label_gallery": true,
+        "custom_gallery_count": 8,
+        "development_gallery_count": 8,
+        "unit_image_count": 8,
+        "generic_description": true,
+        "generic_benefits": true,
+        "missing_development_copy": true,
+        "thin_description": true,
+        "missing_benefits": false,
+        "missing_differentials": false,
+        "missing_faq": false,
+        "description_excerpt": "O Adolfo Blase reune 1 imovel ativo em Barra Sul, Balneário Camboriú - SC, com apartamento, faixa de valor R$ 3.800.000, metragens de 167m2 e configuracao de 3 suites.",
+        "benefit_excerpt": "Unidades reunidas As opcoes ativas do Adolfo Blase ficam centralizadas para comparacao rapida. Leitura de localizacao Contexto de Barra Sul, Balneário Camboriú - SC para...",
+        "faq_excerpt": "",
+        "search_queries": [
+          "\"Adolfo Blase\" empreendimento Balneário Camboriú",
+          "\"Adolfo Blase\" condominio Balneário Camboriú",
+          "\"Adolfo Blase\" construtora incorporadora",
+          "\"Adolfo Blase\" \"Barra Sul, Balneário Camboriú - SC\""
+        ],
+        "image_matches": [
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/001-img_7794-1739824359892.jpeg",
+            "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+              "1373",
+              "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/002-img_7793-1739824359892.jpeg",
+            "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+              "1373",
+              "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/003-img_7795-1739824359892.jpeg",
+            "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+              "1373",
+              "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/004-img_7792-1739824359892.jpeg",
+            "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+              "1373",
+              "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/005-img_7796-1739824359892.jpeg",
+            "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+              "1373",
+              "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/006-img_7798-1739824359892.jpeg",
+            "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+              "1373",
+              "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/007-img_7800-1739824359892.jpeg",
+            "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+              "1373",
+              "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/008-img_7802-1739824359892.jpeg",
+            "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+              "1373",
+              "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+            ]
+          }
+        ],
+        "aliases": [
+          "Adolfo Blase"
+        ],
+        "metadata": {
+          "version": "",
+          "generated_by": "generate-development-landing-pages",
+          "source_column": "condominium_name"
+        },
+        "created_at": "2026-07-06T16:00:16.987549+00:00",
+        "updated_at": "2026-07-06T16:06:23.177+00:00",
+        "priority": "P0",
+        "recommended_action": "Substituir hero e galeria por midia real do empreendimento antes de promover a pagina.",
+        "needs_web_research": true
+      }
+    ],
+    "P1": [],
+    "P2": []
+  },
+  "issues": [
+    {
+      "id": "56d28fff-2ad5-4c57-882c-f94f2e763934",
+      "slug": "adolfo-blase",
+      "title": "Adolfo Blase em Balneário Camboriú | Empreendimento Guilherme Pilger",
+      "status": "published",
+      "development_name": "Adolfo Blase",
+      "source_condominium_name": "Adolfo Blase",
+      "city": "Balneário Camboriú",
+      "location_name": "Barra Sul, Balneário Camboriú - SC",
+      "unit_count": 1,
+      "active_gallery_source": "content.custom_gallery",
+      "active_gallery_count": 8,
+      "active_gallery_unit_matches": 8,
+      "active_gallery_unit_match_ratio": 1,
+      "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/001-img_7794-1739824359892.jpeg",
+      "hero_matches_unit_image": true,
+      "hero_matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+      "unit_label_gallery": true,
+      "custom_gallery_count": 8,
+      "development_gallery_count": 8,
+      "unit_image_count": 8,
+      "generic_description": true,
+      "generic_benefits": true,
+      "missing_development_copy": true,
+      "thin_description": true,
+      "missing_benefits": false,
+      "missing_differentials": false,
+      "missing_faq": false,
+      "description_excerpt": "O Adolfo Blase reune 1 imovel ativo em Barra Sul, Balneário Camboriú - SC, com apartamento, faixa de valor R$ 3.800.000, metragens de 167m2 e configuracao de 3 suites.",
+      "benefit_excerpt": "Unidades reunidas As opcoes ativas do Adolfo Blase ficam centralizadas para comparacao rapida. Leitura de localizacao Contexto de Barra Sul, Balneário Camboriú - SC para...",
+      "faq_excerpt": "",
+      "search_queries": [
+        "\"Adolfo Blase\" empreendimento Balneário Camboriú",
+        "\"Adolfo Blase\" condominio Balneário Camboriú",
+        "\"Adolfo Blase\" construtora incorporadora",
+        "\"Adolfo Blase\" \"Barra Sul, Balneário Camboriú - SC\""
+      ],
+      "image_matches": [
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/001-img_7794-1739824359892.jpeg",
+          "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+            "1373",
+            "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/002-img_7793-1739824359892.jpeg",
+          "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+            "1373",
+            "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/003-img_7795-1739824359892.jpeg",
+          "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+            "1373",
+            "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/004-img_7792-1739824359892.jpeg",
+          "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+            "1373",
+            "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/005-img_7796-1739824359892.jpeg",
+          "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+            "1373",
+            "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/006-img_7798-1739824359892.jpeg",
+          "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+            "1373",
+            "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/007-img_7800-1739824359892.jpeg",
+          "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+            "1373",
+            "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/008-img_7802-1739824359892.jpeg",
+          "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+            "1373",
+            "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+          ]
+        }
+      ],
+      "aliases": [
+        "Adolfo Blase"
+      ],
+      "metadata": {
+        "version": "",
+        "generated_by": "generate-development-landing-pages",
+        "source_column": "condominium_name"
+      },
+      "created_at": "2026-07-06T16:00:16.987549+00:00",
+      "updated_at": "2026-07-06T16:06:23.177+00:00",
+      "priority": "P0",
+      "recommended_action": "Substituir hero e galeria por midia real do empreendimento antes de promover a pagina.",
+      "needs_web_research": true
+    }
+  ]
+}

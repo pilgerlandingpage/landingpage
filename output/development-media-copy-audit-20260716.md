@@ -1,64 +1,64 @@
 # Auditoria de midia e copy dos empreendimentos
 
-Gerado em: 2026-07-14T20:49:13.758Z
+Gerado em: 2026-07-16T19:59:24.050Z
 
 ## Totais
 
 - Landing pages analisadas: 800
 - Paginas de empreendimento: 800
-- P0 - imagem principal/galeria forte de unidade: 420
+- P0 - imagem principal/galeria forte de unidade: 136
 - P1 - galeria com sinais de unidade: 25
 - P2 - copy incompleta ou generica: 275
-- OK automatico: 80
-- Hero igual a imagem de unidade: 419
-- Galeria com imagem de unidade: 435
-- Descricao generica detectada: 720
-- Beneficios/diferenciais genericos detectados: 720
+- OK automatico: 364
+- Hero igual a imagem de unidade: 135
+- Galeria com imagem de unidade: 151
+- Descricao generica detectada: 436
+- Beneficios/diferenciais genericos detectados: 436
 
 ## Proximos lotes
 
 ### P0 - corrigir primeiro
 
-- epic-tower | Epic Tower | unidades=3 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- gran-place | Gran Place | unidades=3 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- harmony-ocean-front | Harmony Ocean Front | unidades=3 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- horizon | Horizon | unidades=3 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- horizon-residence | Horizon Residence | unidades=3 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- jade-ocean | Jade Ocean | unidades=3 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- lagom-pereque | Lagom Perequê | unidades=3 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- le-biarritz | Le Biarritz | unidades=3 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- le-blanc-residence | Le Blanc Residence | unidades=3 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- marbella | Marbella | unidades=3 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- marina-camboriu | Marina Camboriú | unidades=3 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- marine-palace-residence | Marine Palace Residence | unidades=3 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- neos | Neos | unidades=3 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- olimpia-residence | Olimpia Residence | unidades=3 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- pharos | Pharos | unidades=3 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- phoenix-tower | Phoenix Tower | unidades=3 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- porto-ribeiro-village | Porto Ribeiro Village | unidades=3 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- residencial-brescia | Residencial Bréscia | unidades=3 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- ristretto | Ristretto | unidades=3 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- riva-praia-brava | Riva Praia Brava | unidades=3 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- sante-boutique-residence | Sante Boutique Residence | unidades=3 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- sky-brava | Sky Brava | unidades=3 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- the-spot-one | The Spot One | unidades=3 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- torre-esmeralda | Torre Esmeralda | unidades=3 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- acqualina | Acqualina | unidades=2 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- argos-residence | Argos Residence | unidades=2 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- atlantic-paradise | Atlantic Paradise | unidades=2 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- barramares | Barramares | unidades=2 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- bosque-de-taquaras | Bosque de Taquaras | unidades=2 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- boulevard-barra-park-residence | Boulevard Barra Park Residence | unidades=2 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- brava-aikon | Brava Aikon | unidades=2 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- brava-coast-residence | Brava Coast Residence | unidades=2 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- brava-garden | Brava Garden | unidades=2 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- bravissima-private-residence | Bravíssima Private Residence | unidades=2 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- caledonia-private-village | Caledônia Private Village | unidades=2 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- cartier-cna-residence | Cartier CNA Residence | unidades=2 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- celina-garden | Celina Garden | unidades=2 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- chacara-flora | Chácara Flora | unidades=2 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- charmant-residence | Charmant Residence | unidades=2 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
-- cond-empresarial-cunha | Cond. Empresarial Cunha | unidades=2 | hero_unidade=sim | galeria_unidade=14/14 | copy_generica=sim
+- adolfo-blase | Adolfo Blase | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- le-jardim-residence | Le Jardim Residence | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- mario-quintana-residence | Mario Quintana Residence | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- milano-exclusive-residence | Milano Exclusive Residence | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- montreal | Montreal | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- montreux | Montreux | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- morada-ilhas-marianas | Morada Ilhas Marianas | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- muller-ocean-club | Muller Ocean Club | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- mykonos-residence | Mykonos Residence | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- navepark | Navepark | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- new-york | New York | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- newport-beach | Newport Beach | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- nina-schurmann | Nina Schurmann | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- north-shore | North Shore | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- opera | Ópera | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- origem | Origem | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- palm-beach | Palm Beach | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- paraiso | Paraíso | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- paramount-tower | Paramount Tower | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- parque-do-lago | Parque do Lago | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- petit-chateau | Petit Château | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- petropolis | Petrópolis | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- place-vendome | Place Vendôme | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- plaza | Plaza | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- pontal-di-vitta-residence | Pontal di Vitta Residence | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- porta-do-sol | Porta do Sol | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- porto-di-napoli | Porto Di Napoli | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- porto-riviera | Porto Riviera | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- porto-riviera-condominio | Porto Riviera Condomínio | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- principado-de-monaco | Principado de Mônaco | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- punta-sal-residence | Punta Sal Residence | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- recanto | Recanto | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- redentor | Redentor | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- renaissance | Renaissance | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- reserva-yacht-golf | Reserva Yacht & Golf | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- residencial-aririba | Residencial Ariribá | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- residencial-aya | Residencial AYA | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- residencial-cybila | Residencial Cybila | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- residencial-ios | Residencial IOS | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
+- residencial-jk-399 | Residencial JK 399 | unidades=1 | hero_unidade=sim | galeria_unidade=8/8 | copy_generica=sim
 
 ### P1 - revisar galeria
 

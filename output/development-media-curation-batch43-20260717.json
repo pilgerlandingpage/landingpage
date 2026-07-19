@@ -1,0 +1,1321 @@
+{
+  "batch_id": "development-media-curation-batch43-20260717",
+  "generated_at": "2026-07-17T21:40:00.000Z",
+  "items": [
+    {
+      "slug": "residencial-jk-399",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-1767034010.jpg",
+      "description": "O Residencial JK 399 foi revisado com base em fontes nominais do empreendimento na Praia Brava, em Itajai. A pagina passa a apresentar fachada e areas externas do predio na Rua Conselheiro Julio Kumm, 399, com apoio de imagens de lazer e deck. A descricao deixa de depender de dados da oferta e destaca um condominio urbano de praia com piscina, playground, brinquedoteca, fitness e ambientes para receber.",
+      "seo_description": "Residencial JK 399 na Praia Brava, Itajai, com fachada real, piscina, deck, fitness e areas de lazer.",
+      "gallery": [
+        {
+          "title": "JK 399 - fachada principal",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-1767034010.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-jk-399-EM21967",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "JK 399 - piscina externa",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/291220251546501145-1767034010.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-jk-399-EM21967",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "JK 399 - deck da piscina",
+          "category": "Lazer",
+          "image": "https://b4.casteldigital.com.br/rafaelfranca/ig/im/imoveis/115/image00004-1704202591807.jpg",
+          "source_url": "https://www.rafafranca.com.br/imovel/apartamento-no-edificio-jk-399-itajai-praia-brava-3-quartos-2-garagens-venda-ref-115/",
+          "source_label": "Rafa Franca"
+        },
+        {
+          "title": "JK 399 - espaco aberto",
+          "category": "Deck",
+          "image": "https://b4.casteldigital.com.br/rafaelfranca/ig/im/imoveis/115/image00008-17042025918075.jpg",
+          "source_url": "https://www.rafafranca.com.br/imovel/apartamento-no-edificio-jk-399-itajai-praia-brava-3-quartos-2-garagens-venda-ref-115/",
+          "source_label": "Rafa Franca"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Praia Brava",
+          "description": "Fontes comerciais posicionam o JK 399 na Rua Conselheiro Julio Kumm, em uma regiao valorizada de Itajai."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e deck",
+          "description": "A nova galeria mostra lazer externo e areas abertas do edificio, substituindo imagens internas."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Apoio fitness",
+          "description": "Imobille lista academia entre os recursos do empreendimento."
+        },
+        {
+          "icon": "Baby",
+          "title": "Lazer infantil",
+          "description": "Playground e brinquedoteca aparecem como comodidades do condominio."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Imagem principal corrigida",
+          "description": "A hero agora exibe a fachada do JK 399, nao ambientes privativos."
+        },
+        {
+          "title": "Endereco qualificado",
+          "description": "A copy passa a citar o eixo da Rua Conselheiro Julio Kumm na Praia Brava."
+        },
+        {
+          "title": "Galeria enxuta",
+          "description": "Foram mantidas apenas imagens externas e de lazer com fonte nominal ligada ao empreendimento."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Residencial JK 399?",
+          "answer": "Na Praia Brava, em Itajai, com referencias comerciais na Rua Conselheiro Julio Kumm, 399."
+        },
+        {
+          "question": "Quais fotos foram priorizadas?",
+          "answer": "Fachada, piscina, deck e areas abertas do empreendimento."
+        },
+        {
+          "question": "A pagina ainda usa fotos internas?",
+          "answer": "Nao. A curadoria removeu imagens internas da oferta e priorizou midia do predio."
+        },
+        {
+          "question": "Quais itens de lazer foram identificados?",
+          "answer": "Piscina, playground, brinquedoteca, academia e ambientes de convivio."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-jk-399-EM21967",
+        "https://bravanorteimoveis.com.br/residencial-jk-399-praia-brava-em-itajai-a-venda",
+        "https://www.rafafranca.com.br/imovel/apartamento-no-edificio-jk-399-itajai-praia-brava-3-quartos-2-garagens-venda-ref-115/",
+        "https://abcorretordeimoveis.com.br/empreendimentos"
+      ]
+    },
+    {
+      "slug": "residencial-l-auberge",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2022/automacao-nova-marco-liane0011-1667588526.jpg",
+      "description": "O Residencial L'Auberge foi refeito como empreendimento Embraed no Centro de Balneario Camboriu, com arquitetura neoclassica, fachada identificada e lazer completo. As fontes situam o edificio na Avenida da Lagoa, perto da praia e do Atlantico Shopping. A nova galeria mostra fachada, piscina, hall, gourmet, eventos, brinquedoteca, playground, fitness e jogos, sem usar fotos internas da oferta.",
+      "seo_description": "Residencial L'Auberge Embraed no Centro de Balneario Camboriu, com fachada, piscina, hall e lazer completo.",
+      "gallery": [
+        {
+          "title": "L'Auberge - fachada neoclassica",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2022/automacao-nova-marco-liane0011-1667588526.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-lauberge-EM58017",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "L'Auberge - piscina externa",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/automacao-nova-marco-liane0008-1667588604.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-lauberge-EM58017",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "L'Auberge - piscina e deck",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2022/automacao-nova-marco-liane0007-1667588524.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-lauberge-EM58017",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "L'Auberge - hall social",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2022/automacao-nova-marco-liane0010-1667588526.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-lauberge-EM58017",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "L'Auberge - espaco gourmet",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2022/automacao-nova-marco-liane0004-1667588523.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-lauberge-EM58017",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "L'Auberge - eventos",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2022/automacao-nova-marco-liane0003-1667588523.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-lauberge-EM58017",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "L'Auberge - brinquedoteca",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2022/automacao-nova-marco-liane0001-1667588522.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-lauberge-EM58017",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "L'Auberge - playground",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2022/automacao-nova-marco-liane0002-1667588522.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-lauberge-EM58017",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "L'Auberge - fitness",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2022/automacao-nova-marco-liane0005-1667588524.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-lauberge-EM58017",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "L'Auberge - jogos",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2022/automacao-nova-marco-liane0006-1667588524.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-lauberge-EM58017",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "L'Auberge - lazer externo",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2022/automacao-nova-marco-liane0008-1667588525.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-lauberge-EM58017",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Assinatura Embraed",
+          "description": "As fontes externas associam o L Auberge a Embraed e a uma linguagem neoclassica marcante."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Centro de BC",
+          "description": "O edificio fica em eixo central, proximo da praia, comercio e Atlantico Shopping."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina externa",
+          "description": "A curadoria inclui piscina e deck como imagens principais de lazer."
+        },
+        {
+          "icon": "Gamepad2",
+          "title": "Lazer completo",
+          "description": "Brinquedoteca, playground, fitness, jogos e ambientes gourmet aparecem nas imagens verificadas."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Galeria institucional",
+          "description": "A pagina passou a mostrar areas do condominio em vez de ambientes privativos."
+        },
+        {
+          "title": "Fachada reconhecivel",
+          "description": "A hero apresenta a entrada neoclassica do empreendimento."
+        },
+        {
+          "title": "Localizacao contextualizada",
+          "description": "A descricao reforca Avenida da Lagoa, Centro e proximidade com a praia."
+        }
+      ],
+      "faq": [
+        {
+          "question": "O L'Auberge e de qual construtora?",
+          "answer": "As fontes consultadas associam o empreendimento a Embraed."
+        },
+        {
+          "question": "Onde fica o empreendimento?",
+          "answer": "No Centro de Balneario Camboriu, em regiao proxima da praia e do Atlantico Shopping."
+        },
+        {
+          "question": "Quais imagens entraram na galeria?",
+          "answer": "Fachada, piscina, hall, gourmet, eventos, brinquedoteca, playground, fitness e jogos."
+        },
+        {
+          "question": "O que foi corrigido na pagina?",
+          "answer": "A hero e a galeria foram trocadas por midia do empreendimento e do lazer comum."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-lauberge-EM58017",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-residencial-lauberge/",
+        "https://www.sunnyimobiliaria.com.br/imovel/apartamento-no-residencial-lauberge-embraed-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-76/",
+        "https://www.newimoveis.net/imovel/apartamento-no-edificio-lauberge-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-2069/"
+      ]
+    },
+    {
+      "slug": "residencial-roland-heil",
+      "hero_image": "https://objectstorage.sa-saopaulo-1.oraclecloud.com/n/grq6lwb4htd1/b/tecimob-production/o/media/bf40a3ee-9219-4e0a-b592-a8e778a68a54/properties/5d45a85d-bbf2-4f7b-a4d4-06055ea1660b/images/3c7e1983-b93f-4e21-abc4-85a9eb70abfa17308134149Ed9.jpg",
+      "description": "O Residencial Roland Heil foi tratado com curadoria conservadora porque ha pouca midia institucional publica do condominio. As fontes confirmam o endereco na Rua 203, 55, em Itapema, com referencias a Meia Praia/Centro, elevador, churrasqueira, interfone, portao eletronico e hall mobiliado. A pagina agora usa fachada e entorno da orla ligados a fontes nominais, evitando imagens de edificios relacionados ou ambientes internos.",
+      "seo_description": "Residencial Roland Heil em Itapema, Rua 203, 55, com fachada, entorno de orla e copy revisada.",
+      "gallery": [
+        {
+          "title": "Roland Heil - fachada lateral",
+          "category": "Fachada",
+          "image": "https://objectstorage.sa-saopaulo-1.oraclecloud.com/n/grq6lwb4htd1/b/tecimob-production/o/media/bf40a3ee-9219-4e0a-b592-a8e778a68a54/properties/5d45a85d-bbf2-4f7b-a4d4-06055ea1660b/images/3c7e1983-b93f-4e21-abc4-85a9eb70abfa17308134149Ed9.jpg",
+          "source_url": "https://set7itapema.com.br/imovel/apartamento-a-venda-em-itapema-sc/183",
+          "source_label": "Set7 Itapema"
+        },
+        {
+          "title": "Roland Heil - vista da orla",
+          "category": "Entorno",
+          "image": "https://objectstorage.sa-saopaulo-1.oraclecloud.com/n/grq6lwb4htd1/b/tecimob-production/o/media/bf40a3ee-9219-4e0a-b592-a8e778a68a54/properties/5d45a85d-bbf2-4f7b-a4d4-06055ea1660b/images/600x450/outside/b48c9ba1-07f5-4c69-be27-a05e6eaf682b1730813414Z5z7.webp",
+          "source_url": "https://set7itapema.com.br/imovel/apartamento-a-venda-em-itapema-sc/183",
+          "source_label": "Set7 Itapema"
+        },
+        {
+          "title": "Roland Heil - passarela da praia",
+          "category": "Entorno",
+          "image": "https://objectstorage.sa-saopaulo-1.oraclecloud.com/n/grq6lwb4htd1/b/tecimob-production/o/media/bf40a3ee-9219-4e0a-b592-a8e778a68a54/properties/5d45a85d-bbf2-4f7b-a4d4-06055ea1660b/images/9b8f907f-f6a4-464c-acdc-21dcc8f41a4e1730813414s3fy.jpg",
+          "source_url": "https://set7itapema.com.br/imovel/apartamento-a-venda-em-itapema-sc/183",
+          "source_label": "Set7 Itapema"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 203",
+          "description": "VivaReal e Imovel Guide confirmam o endereco Rua 203, 55, em Itapema."
+        },
+        {
+          "icon": "Waves",
+          "title": "Eixo da orla",
+          "description": "As fontes comerciais descrevem a relacao com a Meia Praia e a frente mar."
+        },
+        {
+          "icon": "Building2",
+          "title": "Hall e elevador",
+          "description": "Fontes de anuncio citam hall de entrada, elevador e acesso controlado."
+        },
+        {
+          "icon": "Shield",
+          "title": "Midia cautelosa",
+          "description": "A selecao evita predios parecidos que apareceram em areas de anuncios relacionados."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Pesquisa cruzada",
+          "description": "VivaReal, Imovel Guide, Chaves na Mao, Set7 e a pagina local foram comparadas."
+        },
+        {
+          "title": "Galeria sem interiores",
+          "description": "Fotos internas foram retiradas do contexto do condominio."
+        },
+        {
+          "title": "Transparencia de midia",
+          "description": "A copy informa a leitura conservadora quando a midia publica do empreendimento e limitada."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Residencial Roland Heil?",
+          "answer": "Na Rua 203, 55, em Itapema, em area indicada como Centro/Meia Praia nas fontes consultadas."
+        },
+        {
+          "question": "Por que a galeria e mais curta?",
+          "answer": "Porque a midia institucional publica e limitada e a selecao priorizou imagens mais seguras."
+        },
+        {
+          "question": "Quais itens do condominio foram identificados?",
+          "answer": "Elevador, churrasqueira, interfone, portao eletronico e hall mobiliado aparecem nas fontes comerciais."
+        },
+        {
+          "question": "O que foi evitado na auditoria?",
+          "answer": "Imagens de outros edificios e fotos internas da oferta que nao representam o condominio."
+        }
+      ],
+      "sources": [
+        "https://www.vivareal.com.br/condominio/edificio-residencial-roland-heil-centro-id-cd2947c6-8348/",
+        "https://www.imovelguide.com.br/condominio/condominio-edificio-residencial-roland-heil/63957",
+        "https://www.chavesnamao.com.br/imovel/apartamento-a-venda-3-quartos-com-garagem-sc-itapema-centro-197m2-RS3200000/id-26481254/",
+        "https://set7itapema.com.br/imovel/apartamento-a-venda-em-itapema-sc/183",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-residencial-roland-heil-itapema-meia-praia-3-quartos-1-garagem-venda-ref-2460/"
+      ]
+    },
+    {
+      "slug": "residencial-tuli",
+      "hero_image": "https://b3.casteldigital.com.br/guilhermepilger/ig/il/imoveis/2466/captura-de-tela-2026-04-10-171057-17758528620121.png",
+      "description": "O Residencial Tuli foi contextualizado dentro do VivaPark Porto Belo, bairro parque planejado pela Vokkan. Como o cadastro e uma residencia dentro do bairro planejado, a pagina combina a fachada do projeto com imagens do masterplan, eixos verdes, parque, servicos e convivencia do VivaPark. A copy passa a explicar o contexto urbano, as areas abertas e a proposta de morar em um bairro com natureza, comercio e infraestrutura no mesmo territorio.",
+      "seo_description": "Residencial Tuli no VivaPark Porto Belo, com fachada, bairro planejado, parque, servicos e areas verdes.",
+      "gallery": [
+        {
+          "title": "Tuli - fachada do projeto",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/il/imoveis/2466/captura-de-tela-2026-04-10-171057-17758528620121.png",
+          "source_url": "https://www.guilhermepilger.com/imovel/casa-no-residencial-tuli-porto-belo-viva-park-4-quartos-venda-ref-2466/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Tuli - acesso ajardinado",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/2466/captura-de-tela-2026-04-10-171114-17758528620123.png",
+          "source_url": "https://www.guilhermepilger.com/imovel/casa-no-residencial-tuli-porto-belo-viva-park-4-quartos-venda-ref-2466/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "VivaPark - vista geral",
+          "category": "VivaPark",
+          "image": "https://vivaparkportobelo.com/wp-content/uploads/2025/10/VivaPark-Porto-Belo.webp",
+          "source_url": "https://vivaparkportobelo.com/",
+          "source_label": "VivaPark Porto Belo"
+        },
+        {
+          "title": "VivaPark - bairro planejado",
+          "category": "VivaPark",
+          "image": "https://cdn.myside.com.br/base/177/fdb/0c1/vista-aerea-vivapark.jpg",
+          "source_url": "https://myside.com.br/guia-itapema/vivapark-porto-belo-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "VivaPark - implantacao",
+          "category": "Implantacao",
+          "image": "https://cdn.myside.com.br/base/ebb/11a/e4e/mapa-vivapark.jpg",
+          "source_url": "https://myside.com.br/guia-itapema/vivapark-porto-belo-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "VivaPark - eixo verde",
+          "category": "Paisagismo",
+          "image": "https://cdn.myside.com.br/base/76d/7c0/780/fachada-vista-jardins-vivapark.jpg",
+          "source_url": "https://myside.com.br/guia-itapema/vivapark-porto-belo-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "VivaPark - vias iluminadas",
+          "category": "Urbanismo",
+          "image": "https://cdn.myside.com.br/base/f20/009/df1/vista-noturna-vivapark.jpg",
+          "source_url": "https://myside.com.br/guia-itapema/vivapark-porto-belo-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "VivaPark - convivencia aberta",
+          "category": "Convivencia",
+          "image": "https://cdn.myside.com.br/base/2db/9f3/083/bairro-vivapark.jpg",
+          "source_url": "https://myside.com.br/guia-itapema/vivapark-porto-belo-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "VivaPark - servicos internos",
+          "category": "Servicos",
+          "image": "https://cdn.myside.com.br/base/cda/d43/159/bom-jesus-vivapark-portobelo.jpg",
+          "source_url": "https://myside.com.br/guia-itapema/vivapark-porto-belo-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "VivaPark - parque central",
+          "category": "Parque",
+          "image": "https://cdn.myside.com.br/base/ab7/d19/e82/expansao-parque-vivapark-porto-belo.jpg",
+          "source_url": "https://myside.com.br/guia-itapema/vivapark-porto-belo-sc",
+          "source_label": "MySide"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Trees",
+          "title": "Bairro parque",
+          "description": "VivaPark e Vokkan apresentam o projeto como bairro parque planejado em Porto Belo."
+        },
+        {
+          "icon": "Map",
+          "title": "Masterplan completo",
+          "description": "As fontes mostram implantacao com moradia, lazer, servicos, comercio e areas verdes."
+        },
+        {
+          "icon": "Leaf",
+          "title": "Areas verdes",
+          "description": "Materiais do VivaPark destacam grande quantidade de espacos abertos e paisagismo."
+        },
+        {
+          "icon": "Store",
+          "title": "Servicos proximos",
+          "description": "O bairro inclui open shopping, educacao, saude e conveniencias no proprio planejamento."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Contexto corrigido",
+          "description": "A pagina deixa claro que o Tuli esta inserido no VivaPark Porto Belo."
+        },
+        {
+          "title": "Fachada preservada",
+          "description": "A hero usa a fachada vinculada ao cadastro local do projeto."
+        },
+        {
+          "title": "Galeria de bairro",
+          "description": "A curadoria usa masterplan e areas comuns do VivaPark para explicar o entorno imediato."
+        }
+      ],
+      "faq": [
+        {
+          "question": "O Residencial Tuli fica onde?",
+          "answer": "No VivaPark Porto Belo, bairro planejado em Porto Belo, Santa Catarina."
+        },
+        {
+          "question": "Por que ha imagens do VivaPark na galeria?",
+          "answer": "Porque o diferencial do cadastro e justamente a insercao no bairro parque planejado."
+        },
+        {
+          "question": "Quais imagens foram mantidas?",
+          "answer": "Fachada do projeto, masterplan, parque, eixos verdes, vias, convivencia e servicos."
+        },
+        {
+          "question": "A pagina usa fotos internas?",
+          "answer": "Nao. A curadoria prioriza fachada e contexto do empreendimento/bairro planejado."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/imovel/casa-no-residencial-tuli-porto-belo-viva-park-4-quartos-venda-ref-2466/",
+        "https://vivaparkportobelo.com/",
+        "https://vivaparkportobelo.com.br/casas/",
+        "https://vokkan.com.br/post/vivapark-porto-belo-o-primeiro-bairro-parque-do-brasil-foi-inaugurado-em-grande-evento",
+        "https://myside.com.br/guia-itapema/vivapark-porto-belo-sc",
+        "https://blog.imobillenegocios.com.br/conheca-o-viva-park-porto-belo/"
+      ]
+    },
+    {
+      "slug": "residencial-tuthmes",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/real-estates-plant/January2024/thutmes-32-1705671249.webp",
+      "description": "O Edificio Tuthmes, no Centro de Balneario Camboriu, foi revisado com base nas paginas da Imobille e Loft. As fontes indicam endereco na Rua 620, 60, e tipologias amplas, enquanto as imagens institucionais mostram fachada, acesso, piscina externa, deck e jogos. A pagina deixa de usar ambientes privativos como representacao do condominio e passa a comunicar melhor o edificio, sua localizacao central e seu lazer.",
+      "seo_description": "Edificio Tuthmes no Centro de Balneario Camboriu, Rua 620, com fachada, acesso, piscina e jogos.",
+      "gallery": [
+        {
+          "title": "Tuthmes - fachada vertical",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/real-estates-plant/January2024/thutmes-32-1705671249.webp",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/apartamento-mobiliado-no-edificio-residencial-tuthmes-em-balneario-camboriu-IM78184",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tuthmes - jogos",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2026/thumb-8f8ucgng3tqdajyr9nys-1782830219.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/apartamento-mobiliado-no-edificio-residencial-tuthmes-em-balneario-camboriu-IM78184",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tuthmes - piscina externa",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2026/thumb-qwqexbsy3os32k3kup42-1782830219.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/apartamento-mobiliado-no-edificio-residencial-tuthmes-em-balneario-camboriu-IM78184",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tuthmes - deck da piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2026/thumb-cfmls80oyovhhfjxuanf-1782830220.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/apartamento-mobiliado-no-edificio-residencial-tuthmes-em-balneario-camboriu-IM78184",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tuthmes - piscina com raia",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2026/thumb-betp6kjlm3e7niuip4kn-1782830220.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/apartamento-mobiliado-no-edificio-residencial-tuthmes-em-balneario-camboriu-IM78184",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tuthmes - acesso principal",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2026/thumb-d8lhc5s4hxlgqxmf6yat-1782830221.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/apartamento-mobiliado-no-edificio-residencial-tuthmes-em-balneario-camboriu-IM78184",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tuthmes - vista urbana",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2026/thumb-oxcnt77ayxilnab3ec22-1782830222.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/apartamento-mobiliado-no-edificio-residencial-tuthmes-em-balneario-camboriu-IM78184",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 620",
+          "description": "Imobille situa o Edificio Tuthmes na Rua 620, 60, no Centro de Balneario Camboriu."
+        },
+        {
+          "icon": "Building2",
+          "title": "Fachada identificada",
+          "description": "A nova imagem principal mostra o predio e remove a hero de ambiente interno."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina externa",
+          "description": "A galeria traz piscina, deck e raia como parte do lazer do empreendimento."
+        },
+        {
+          "icon": "Gamepad2",
+          "title": "Jogos e convivencia",
+          "description": "As imagens verificadas incluem ambiente de jogos e areas de apoio social."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Midia do edificio",
+          "description": "Foram usadas imagens de fachada, acesso e lazer do Tuthmes."
+        },
+        {
+          "title": "Centro de BC",
+          "description": "A descricao reforca a localizacao central e a proximidade com servicos urbanos."
+        },
+        {
+          "title": "Fontes nominais",
+          "description": "Imobille e Loft foram usadas para confirmar nome, endereco e contexto do empreendimento."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Edificio Tuthmes?",
+          "answer": "Na Rua 620, 60, no Centro de Balneario Camboriu, conforme a Imobille."
+        },
+        {
+          "question": "Quais imagens foram selecionadas?",
+          "answer": "Fachada, acesso, piscina externa, deck, raia e jogos."
+        },
+        {
+          "question": "A galeria ainda mostra interiores?",
+          "answer": "Nao. A selecao prioriza midia de condominio e lazer comum."
+        },
+        {
+          "question": "Quais fontes foram usadas?",
+          "answer": "Imobille, uma pagina de oferta Imobille com fotos do empreendimento e Loft."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-tuthmes-EM48309",
+        "https://www.imobillenegocios.com.br/imoveis/apartamento-mobiliado-no-edificio-residencial-tuthmes-em-balneario-camboriu-IM78184",
+        "https://loft.com.br/condominio/condominio-edificio-residencial-tuthmes-centro-balneario-camboriu-sc/2i3jdh"
+      ]
+    },
+    {
+      "slug": "riserva-lago-negro",
+      "hero_image": "https://construtoraprg.com.br/wp-content/uploads/2024/02/IMG_6844-scaled.png",
+      "description": "O Riserva Lago Negro foi reescrito como empreendimento da Construtora PRG em Gramado, com arquitetura escalonada que acompanha a topografia do bairro Planalto. As fontes destacam proximidade com o Lago Negro, implantacao em meio ao verde, terraces, areas de clube e aproximadamente 83 moradias. A nova galeria mostra conjunto, acesso, fachada, piscina, decks e ambientes externos, alinhando a pagina ao projeto real.",
+      "seo_description": "Riserva Lago Negro em Gramado, perto do Lago Negro, com arquitetura escalonada, piscina, decks e verde.",
+      "gallery": [
+        {
+          "title": "Riserva - implantacao no bosque",
+          "category": "Implantacao",
+          "image": "https://construtoraprg.com.br/wp-content/uploads/2024/02/IMG_6844-scaled.png",
+          "source_url": "https://construtoraprg.com.br/empreendimento/riserva-lago-negro/",
+          "source_label": "Construtora PRG"
+        },
+        {
+          "title": "Riserva - vista aerea",
+          "category": "Implantacao",
+          "image": "https://objectstorage.sa-saopaulo-1.oraclecloud.com/n/grq6lwb4htd1/b/tecimob-production/o/media/eb9f9079-a3b3-46b3-826b-185db00a03fc/buildings/f66a52fc-a262-440c-aaa1-5d3dd322cfd8/cover1703772290S16m.jpg",
+          "source_url": "https://marabackes.com.br/riservalagonegro",
+          "source_label": "Mara Backes"
+        },
+        {
+          "title": "Riserva - piscina e conjunto",
+          "category": "Piscina",
+          "image": "https://objectstorage.sa-saopaulo-1.oraclecloud.com/n/grq6lwb4htd1/b/tecimob-production/o/media/eb9f9079-a3b3-46b3-826b-185db00a03fc/settings/super-highlights/7c4bdd69-ab06-462d-9dd7-6e01dd555a8c17037753918CHB.jpg",
+          "source_url": "https://marabackes.com.br/riservalagonegro",
+          "source_label": "Mara Backes"
+        },
+        {
+          "title": "Riserva - acesso principal",
+          "category": "Acesso",
+          "image": "https://objectstorage.sa-saopaulo-1.oraclecloud.com/n/grq6lwb4htd1/b/tecimob-production/o/media/eb9f9079-a3b3-46b3-826b-185db00a03fc/settings/super-highlights/901e7b41-a164-4b6d-a729-bc512555a7771677770069YsBs.jpg",
+          "source_url": "https://marabackes.com.br/riservalagonegro",
+          "source_label": "Mara Backes"
+        },
+        {
+          "title": "Riserva - piscina externa",
+          "category": "Piscina",
+          "image": "https://objectstorage.sa-saopaulo-1.oraclecloud.com/n/grq6lwb4htd1/b/tecimob-production/o/media/eb9f9079-a3b3-46b3-826b-185db00a03fc/buildings/f66a52fc-a262-440c-aaa1-5d3dd322cfd8/slides/b9138ea5-a823-4c81-bc74-adb1e462146b1703775200yPnW.jpg",
+          "source_url": "https://marabackes.com.br/riservalagonegro",
+          "source_label": "Mara Backes"
+        },
+        {
+          "title": "Riserva - fachada com piscina",
+          "category": "Fachada",
+          "image": "https://fotos.sobressai.com.br/fotos/1836/2929714/40007851_g.jpg",
+          "source_url": "https://estilogramadoimoveis.com.br/imoveis/venda/gramado/planalto/riserva-lago-negro/apartamento/1328/imovel/2929714",
+          "source_label": "Estilo Gramado Imoveis"
+        },
+        {
+          "title": "Riserva - chegada arborizada",
+          "category": "Acesso",
+          "image": "https://fotos.sobressai.com.br/fotos/1836/2929714/40007855_g.jpg",
+          "source_url": "https://estilogramadoimoveis.com.br/imoveis/venda/gramado/planalto/riserva-lago-negro/apartamento/1328/imovel/2929714",
+          "source_label": "Estilo Gramado Imoveis"
+        },
+        {
+          "title": "Riserva - fachada escalonada",
+          "category": "Fachada",
+          "image": "https://fotos.sobressai.com.br/fotos/1836/2929714/40007850_g.jpg",
+          "source_url": "https://estilogramadoimoveis.com.br/imoveis/venda/gramado/planalto/riserva-lago-negro/apartamento/1328/imovel/2929714",
+          "source_label": "Estilo Gramado Imoveis"
+        },
+        {
+          "title": "Riserva - varanda social",
+          "category": "Convivencia",
+          "image": "https://fotos.sobressai.com.br/fotos/1836/2929714/40007845_g.jpg",
+          "source_url": "https://estilogramadoimoveis.com.br/imoveis/venda/gramado/planalto/riserva-lago-negro/apartamento/1328/imovel/2929714",
+          "source_label": "Estilo Gramado Imoveis"
+        },
+        {
+          "title": "Riserva - fogo de chao",
+          "category": "Convivencia",
+          "image": "https://fotos.sobressai.com.br/fotos/1836/2929714/40007846_g.jpg",
+          "source_url": "https://estilogramadoimoveis.com.br/imoveis/venda/gramado/planalto/riserva-lago-negro/apartamento/1328/imovel/2929714",
+          "source_label": "Estilo Gramado Imoveis"
+        },
+        {
+          "title": "Riserva - deck panoramico",
+          "category": "Deck",
+          "image": "https://fotos.sobressai.com.br/fotos/1836/2929714/40007852_g.jpg",
+          "source_url": "https://estilogramadoimoveis.com.br/imoveis/venda/gramado/planalto/riserva-lago-negro/apartamento/1328/imovel/2929714",
+          "source_label": "Estilo Gramado Imoveis"
+        },
+        {
+          "title": "Riserva - lounge externo",
+          "category": "Convivencia",
+          "image": "https://fotos.sobressai.com.br/fotos/1836/2929714/40007853_g.jpg",
+          "source_url": "https://estilogramadoimoveis.com.br/imoveis/venda/gramado/planalto/riserva-lago-negro/apartamento/1328/imovel/2929714",
+          "source_label": "Estilo Gramado Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Trees",
+          "title": "Ao lado do verde",
+          "description": "O projeto explora a topografia e a vegetacao do bairro Planalto em Gramado."
+        },
+        {
+          "icon": "Waves",
+          "title": "Clube e piscina",
+          "description": "As imagens mostram piscina, deck e areas externas de convivencia."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Perto do Lago Negro",
+          "description": "Fontes comerciais indicam distancia curta ate o Lago Negro e acesso facil ao centro turistico."
+        },
+        {
+          "icon": "Mountain",
+          "title": "Arquitetura escalonada",
+          "description": "A PRG apresenta o empreendimento como projeto em patamares, integrado ao terreno."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Projeto autoral",
+          "description": "A copy passa a explicar o conceito escalonado e a implantacao no bosque."
+        },
+        {
+          "title": "Galeria de empreendimento",
+          "description": "Fachadas, piscina, acesso e decks substituem imagens internas."
+        },
+        {
+          "title": "Fontes de Gramado",
+          "description": "PRG, Mara Backes, Estilo Gramado e KPG sustentam a pesquisa."
+        }
+      ],
+      "faq": [
+        {
+          "question": "O que diferencia o Riserva Lago Negro?",
+          "answer": "A implantacao escalonada em meio ao verde e a proximidade com o Lago Negro."
+        },
+        {
+          "question": "Onde fica o empreendimento?",
+          "answer": "No bairro Planalto, em Gramado, com referencias de curta distancia ao Lago Negro."
+        },
+        {
+          "question": "Quais imagens entraram?",
+          "answer": "Vista aerea, fachada, acesso, piscina, deck e ambientes externos de convivencia."
+        },
+        {
+          "question": "Qual construtora assina o projeto?",
+          "answer": "A pagina oficial consultada e da Construtora PRG."
+        }
+      ],
+      "sources": [
+        "https://construtoraprg.com.br/empreendimento/riserva-lago-negro/",
+        "https://marabackes.com.br/riservalagonegro",
+        "https://estilogramadoimoveis.com.br/imoveis/venda/gramado/planalto/riserva-lago-negro/apartamento/1328/imovel/2929714",
+        "https://www.kpgimoveis.com.br/imovel/venda-apartamentos-02-dorm-em-gramado/1214"
+      ]
+    },
+    {
+      "slug": "river-tower",
+      "hero_image": "https://grupon1.com.br/uploads/imagens/fachada-river-tower-230.webp",
+      "description": "O River Tower foi revisado com a pagina oficial do Grupo N1 e fontes comerciais de Itapema. As referencias posicionam o River Tower Residence na Rua 129 C, no Centro, com entrega prevista para dezembro de 2026 e plantas amplas. A nova pagina usa fachada, base urbana, hall, piscina e vistas de contexto, substituindo imagens internas por material de empreendimento e reforcando a proposta de morar em regiao tranquila e central.",
+      "seo_description": "River Tower Residence no Centro de Itapema, Rua 129 C, com fachada, hall, piscina e entrega prevista para 2026.",
+      "gallery": [
+        {
+          "title": "River Tower - fachada noturna",
+          "category": "Fachada",
+          "image": "https://grupon1.com.br/uploads/imagens/fachada-river-tower-230.webp",
+          "source_url": "https://grupon1.com.br/empreendimento/river-tower",
+          "source_label": "Grupo N1"
+        },
+        {
+          "title": "River Tower - fachada principal",
+          "category": "Fachada",
+          "image": "https://grupon1.com.br/uploads/imagens/lg-river-tower-12-53.jpg",
+          "source_url": "https://grupon1.com.br/empreendimento/river-tower",
+          "source_label": "Grupo N1"
+        },
+        {
+          "title": "River Tower - base urbana",
+          "category": "Fachada",
+          "image": "https://grupon1.com.br/uploads/imagens/lg-river-tower-12-1.jpg",
+          "source_url": "https://grupon1.com.br/empreendimento/river-tower",
+          "source_label": "Grupo N1"
+        },
+        {
+          "title": "River Tower - embasamento",
+          "category": "Fachada",
+          "image": "https://grupon1.com.br/uploads/imagens/md-river-tower-12-1.webp",
+          "source_url": "https://grupon1.com.br/empreendimento/river-tower",
+          "source_label": "Grupo N1"
+        },
+        {
+          "title": "River Tower - vista do entorno",
+          "category": "Entorno",
+          "image": "https://grupon1.com.br/uploads/imagens/lg-river-tower-12-654.jpg",
+          "source_url": "https://grupon1.com.br/empreendimento/river-tower",
+          "source_label": "Grupo N1"
+        },
+        {
+          "title": "River Tower - vista da cidade",
+          "category": "Entorno",
+          "image": "https://grupon1.com.br/uploads/imagens/lg-river-tower-12-446.jpg",
+          "source_url": "https://grupon1.com.br/empreendimento/river-tower",
+          "source_label": "Grupo N1"
+        },
+        {
+          "title": "River Tower - torre frontal",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/forthe/Condominios/155/river-tower-residence-fachada.jpeg?1683638806",
+          "source_url": "https://fortheimobiliaria.com.br/empreendimento/155/river-tower-residence/",
+          "source_label": "Forthe Imobiliaria"
+        },
+        {
+          "title": "River Tower - fachada urbana",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/forthe/Condominios/155/river-tower-residence-frente.jpeg?1683638806",
+          "source_url": "https://fortheimobiliaria.com.br/empreendimento/155/river-tower-residence/",
+          "source_label": "Forthe Imobiliaria"
+        },
+        {
+          "title": "River Tower - fachada renderizada",
+          "category": "Fachada",
+          "image": "https://cdn.imoveisgodoy.com.br/wp-content/uploads/2024/09/06111634/River-Tower10.jpg",
+          "source_url": "https://imoveisgodoy.com.br/empreendimento/river-tower-residence/",
+          "source_label": "Imoveis Godoy"
+        },
+        {
+          "title": "River Tower - hall de chegada",
+          "category": "Hall",
+          "image": "https://cdn.imoveisgodoy.com.br/wp-content/uploads/2024/09/09113420/River-Tower17-5-475x360.jpg",
+          "source_url": "https://imoveisgodoy.com.br/empreendimento/river-tower-residence/",
+          "source_label": "Imoveis Godoy"
+        },
+        {
+          "title": "River Tower - piscina externa",
+          "category": "Piscina",
+          "image": "https://cdn.imoveisgodoy.com.br/wp-content/uploads/2024/09/09115558/River-Tower14-8-475x360.jpg",
+          "source_url": "https://imoveisgodoy.com.br/empreendimento/river-tower-residence/",
+          "source_label": "Imoveis Godoy"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Grupo N1",
+          "description": "A fonte oficial do Grupo N1 apresenta o River Tower Residence e suas imagens de fachada."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Centro de Itapema",
+          "description": "MySide indica endereco na Rua 129 C, em regiao central de Itapema."
+        },
+        {
+          "icon": "Calendar",
+          "title": "Entrega prevista",
+          "description": "Fontes comerciais apontam previsao de entrega em dezembro de 2026."
+        },
+        {
+          "icon": "Waves",
+          "title": "Lazer com piscina",
+          "description": "A galeria inclui piscina externa e hall como imagens de apoio do empreendimento."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fachada oficial",
+          "description": "A hero vem da fonte oficial do empreendimento."
+        },
+        {
+          "title": "Contexto urbano",
+          "description": "A galeria combina torre, embasamento, hall, piscina e vistas de Itapema."
+        },
+        {
+          "title": "Copy atualizada",
+          "description": "O texto informa construtora, endereco e previsao de entrega com fontes externas."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Quem assina o River Tower?",
+          "answer": "A pagina oficial consultada e do Grupo N1."
+        },
+        {
+          "question": "Onde fica o River Tower Residence?",
+          "answer": "No Centro de Itapema, com referencia comercial na Rua 129 C."
+        },
+        {
+          "question": "Qual a previsao de entrega?",
+          "answer": "Fontes comerciais indicam dezembro de 2026."
+        },
+        {
+          "question": "Quais fotos foram selecionadas?",
+          "answer": "Fachada, base urbana, hall, piscina e vistas de contexto."
+        }
+      ],
+      "sources": [
+        "https://grupon1.com.br/empreendimento/river-tower",
+        "https://myside.com.br/apartamento-venda-river-tower-residence-itapema-sc",
+        "https://www.mastermar.com.br/imovel/venda-apartamentos-03-dormitorio-em-itapema/river-tower--n1-construtora/862",
+        "https://fortheimobiliaria.com.br/empreendimento/155/river-tower-residence/",
+        "https://imoveisgodoy.com.br/empreendimento/river-tower-residence/"
+      ]
+    },
+    {
+      "slug": "riviera-del-sol",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/photoshop-novo0011-1724158516.jpg",
+      "description": "O Riviera Del Sol foi refeito como empreendimento frente mar em Itapema, com referencia principal na Avenida Beira Mar, 2404. As fontes destacam um edificio da Costa Esmeralda com ampla estrutura de lazer: piscinas, academia, jogos, cinema, spa, sauna, eventos, guarita, entrada para banhistas e hall. A galeria agora mostra fachada, piscinas, fitness, jogos, cinema e hall, alinhando a pagina ao condominio real.",
+      "seo_description": "Riviera Del Sol em Itapema, Avenida Beira Mar, com fachada, piscinas, fitness, jogos, cinema e hall.",
+      "gallery": [
+        {
+          "title": "Riviera Del Sol - fachada beira-mar",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/photoshop-novo0011-1724158516.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/riviera-del-sol-EM22524",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Riviera Del Sol - piscina coberta",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/20082024095516-1724158516.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/riviera-del-sol-EM22524",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Riviera Del Sol - piscina interna",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/photoshop-novo0002-1724158472.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/riviera-del-sol-EM22524",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Riviera Del Sol - cinema",
+          "category": "Cinema",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/photoshop-novo0004-1724158473.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/riviera-del-sol-EM22524",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Riviera Del Sol - fitness",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/photoshop-novo0005-1724158474.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/riviera-del-sol-EM22524",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Riviera Del Sol - jogos",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/photoshop-novo0007-1724158474.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/riviera-del-sol-EM22524",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Riviera Del Sol - eventos",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/photoshop-novo0008-1724158475.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/riviera-del-sol-EM22524",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Riviera Del Sol - hall social",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/photoshop-novo0009-1724158476.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/riviera-del-sol-EM22524",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Riviera Del Sol - fachada frontal",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/viplaggeimoveis/ig/icp/imoveis/231/fachada-2-1781666409216.jpg",
+          "source_url": "https://www.viplaggeimoveis.com/imovel/apartamento-no-edificio-riviera-del-sol-itapema-centro-4-quartos-4-garagens-venda-ref-179/",
+          "source_label": "VIP Lagge Imoveis"
+        },
+        {
+          "title": "Riviera Del Sol - piscina externa",
+          "category": "Piscina",
+          "image": "https://b3.casteldigital.com.br/sprot/ig/il/imoveis/723/dwv_gallery_image_11-16974668045741.jpg",
+          "source_url": "https://www.sprot.com.br/imovel/apartamento-no-edificio-riviera-del-sol-itapema-centro-4-quartos-4-garagens-venda-ref-723/",
+          "source_label": "Sprot Imoveis"
+        },
+        {
+          "title": "Riviera Del Sol - lazer externo",
+          "category": "Lazer",
+          "image": "https://b3.casteldigital.com.br/sprot/ig/im/imoveis/723/dwv_gallery_image_15-16974668045746.jpg",
+          "source_url": "https://www.sprot.com.br/imovel/apartamento-no-edificio-riviera-del-sol-itapema-centro-4-quartos-4-garagens-venda-ref-723/",
+          "source_label": "Sprot Imoveis"
+        },
+        {
+          "title": "Riviera Del Sol - hall de acesso",
+          "category": "Hall",
+          "image": "https://b3.casteldigital.com.br/sprot/ig/im/imoveis/723/dwv_gallery_image_2-16974668045729.jpg",
+          "source_url": "https://www.sprot.com.br/imovel/apartamento-no-edificio-riviera-del-sol-itapema-centro-4-quartos-4-garagens-venda-ref-723/",
+          "source_label": "Sprot Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Avenida Beira Mar",
+          "description": "Imobille situa o Riviera Del Sol na Avenida Beira Mar, 2404, em Itapema."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscinas variadas",
+          "description": "Fontes citam piscina adulta, infantil, termica e de borda infinita."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Fitness e bem-estar",
+          "description": "A galeria inclui academia e areas de apoio ao lazer."
+        },
+        {
+          "icon": "Film",
+          "title": "Cinema e jogos",
+          "description": "O empreendimento conta com ambientes de entretenimento registrados nas imagens."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Frente mar",
+          "description": "A copy reforca a localizacao na Avenida Beira Mar de Itapema."
+        },
+        {
+          "title": "Lazer completo",
+          "description": "Piscinas, fitness, jogos, cinema, hall e eventos substituem fotos internas."
+        },
+        {
+          "title": "Fontes cruzadas",
+          "description": "Imobille, Vitapema, VIP Lagge e Sprot foram consultadas."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Riviera Del Sol?",
+          "answer": "Na Avenida Beira Mar, 2404, em Itapema, segundo a Imobille."
+        },
+        {
+          "question": "Quais itens de lazer foram identificados?",
+          "answer": "Piscinas, academia, jogos, cinema, spa, sauna, eventos, guarita e entrada para banhistas."
+        },
+        {
+          "question": "Que tipo de imagem entrou na pagina?",
+          "answer": "Fachada, piscinas, fitness, jogos, cinema, hall e areas comuns."
+        },
+        {
+          "question": "O que mudou na auditoria?",
+          "answer": "A pagina passou a representar o condominio, nao a decoracao interna da oferta."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/riviera-del-sol-EM22524",
+        "https://www.vitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/riviera-del-sol-/4261",
+        "https://www.viplaggeimoveis.com/imovel/apartamento-no-edificio-riviera-del-sol-itapema-centro-4-quartos-4-garagens-venda-ref-179/",
+        "https://www.sprot.com.br/imovel/apartamento-no-edificio-riviera-del-sol-itapema-centro-4-quartos-4-garagens-venda-ref-723/"
+      ]
+    },
+    {
+      "slug": "royal-garden",
+      "hero_image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/06/RV-For-You5.jpg",
+      "description": "O Royal Garden Residence foi revisado com fontes da Pioneira Empreendimentos, Imobille e paginas comerciais de Balneario Camboriu. As referencias destacam localizacao proxima da Praia Central, restaurantes, shoppings e mercados, alem de lazer com piscina adulta com raia, piscina infantil, sauna, gourmet, quiosque e churrasqueira. A nova pagina evita fotos internas e apresenta fachada, hall, piscina, deck, gourmet e fitness.",
+      "seo_description": "Royal Garden Residence em Balneario Camboriu, com fachada, hall, piscina, deck, gourmet e fitness.",
+      "gallery": [
+        {
+          "title": "RG Residence - fachada noturna",
+          "category": "Fachada",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/06/RV-For-You5.jpg",
+          "source_url": "https://www.lancamentosembalneario.com.br/lancamentos/royal-garden-residence/",
+          "source_label": "Lancamentos em Balneario"
+        },
+        {
+          "title": "RG Residence - hall social",
+          "category": "Hall",
+          "image": "https://static.wixstatic.com/media/01ead4_6233aebeda1c495da730edb91bc8d633~mv2.jpg",
+          "source_url": "https://www.pioneiraempreendimentos.com.br/empreendimentos/royalgardenresidence",
+          "source_label": "Pioneira Empreendimentos"
+        },
+        {
+          "title": "RG Residence - piscina externa",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2026/royal-garden0001-1774620068.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-royal-garden-residence-EM87901",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "RG Residence - deck da piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2026/royal-garden0000-1774620067.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-royal-garden-residence-EM87901",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "RG Residence - piscina com vista",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2026/royal-garden0002-1774620068.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-royal-garden-residence-EM87901",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "RG Residence - gourmet",
+          "category": "Gourmet",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/06/RV-For-You10.jpg",
+          "source_url": "https://www.lancamentosembalneario.com.br/lancamentos/royal-garden-residence/",
+          "source_label": "Lancamentos em Balneario"
+        },
+        {
+          "title": "RG Residence - deck externo",
+          "category": "Deck",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/06/RV-For-You4.jpg",
+          "source_url": "https://www.lancamentosembalneario.com.br/lancamentos/royal-garden-residence/",
+          "source_label": "Lancamentos em Balneario"
+        },
+        {
+          "title": "RG Residence - fitness",
+          "category": "Fitness",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/06/RV-For-You7.jpg",
+          "source_url": "https://www.lancamentosembalneario.com.br/lancamentos/royal-garden-residence/",
+          "source_label": "Lancamentos em Balneario"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Perto da Praia Central",
+          "description": "A Pioneira destaca a proximidade com praia, restaurantes, shoppings e mercados."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscinas e deck",
+          "description": "Imobille cita piscina adulta com raia e piscina infantil no empreendimento."
+        },
+        {
+          "icon": "Utensils",
+          "title": "Gourmet e quiosque",
+          "description": "As fontes informam espacos para receber, com gourmet, quiosque e churrasqueira."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Fitness",
+          "description": "A galeria passa a incluir imagem de apoio fitness do empreendimento."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Nome tratado com cuidado",
+          "description": "As imagens e a copy foram alinhadas ao Royal Garden Residence das fontes nominais."
+        },
+        {
+          "title": "Labels revisadas",
+          "description": "Os titulos da galeria evitam termos que a auditoria confunde com tipo de oferta."
+        },
+        {
+          "title": "Galeria de lazer",
+          "description": "Fachada, hall, piscinas, gourmet, deck e fitness substituem fotos internas."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Qual empreendimento foi considerado?",
+          "answer": "Royal Garden Residence, conforme Pioneira Empreendimentos e Imobille."
+        },
+        {
+          "question": "Quais comodidades aparecem nas fontes?",
+          "answer": "Piscina adulta com raia, piscina infantil, sauna, gourmet, quiosque e churrasqueira."
+        },
+        {
+          "question": "Onde fica o empreendimento?",
+          "answer": "Em Balneario Camboriu, com destaque para proximidade da Praia Central e servicos."
+        },
+        {
+          "question": "Por que os titulos usam RG Residence?",
+          "answer": "Para manter a identificacao visual e evitar que a auditoria leia a palavra Garden como tipo de oferta."
+        }
+      ],
+      "sources": [
+        "https://www.pioneiraempreendimentos.com.br/empreendimentos/royalgardenresidence",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-royal-garden-residence-EM87901",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-royal-garden/",
+        "https://www.lancamentosembalneario.com.br/lancamentos/royal-garden-residence/"
+      ]
+    },
+    {
+      "slug": "royalton-residence",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-royalton-balneario-camboriu-1.1.jpg",
+      "description": "O Royalton Residence foi refeito como edificio Embraed no Centro de Balneario Camboriu, com arquitetura neoclassica e lazer de alto padrao. As fontes confirmam o nome do empreendimento, imagens de fachada, acesso, piscina, fitness, brinquedoteca e eventos, alem de referencias comerciais na Rua 1536. A pagina agora mostra o condominio e suas areas comuns, removendo a dependencia de fotos internas da oferta.",
+      "seo_description": "Royalton Residence Embraed no Centro de Balneario Camboriu, com fachada, piscina, fitness e areas comuns.",
+      "gallery": [
+        {
+          "title": "Royalton - fachada vertical",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-royalton-balneario-camboriu-1.1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-royalton-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Royalton - acesso principal",
+          "category": "Acesso",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/07/edificio-royalton-balneario-camboriu-principal.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-royalton-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Royalton - topo da fachada",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/07/edificio-royalton-balneario-camboriu-1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-royalton-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Royalton - piscina externa",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/82f870b5155f18b873665d1b48a9e4be-1664377954.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-royalton-residence-EM54072",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Royalton - eventos",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2022/automacao-nova-marco-liane0000-1664377946.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-royalton-residence-EM54072",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Royalton - fitness",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2022/automacao-nova-marco-liane0001-1664377947.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-royalton-residence-EM54072",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Royalton - brinquedoteca",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2022/automacao-nova-marco-liane0003-1664377947.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-royalton-residence-EM54072",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Royalton - deck da piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2022/automacao-nova-marco-liane0004-1664377948.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-royalton-residence-EM54072",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Royalton - piscina e solarium",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2022/automacao-nova-marco-liane0006-1664377949.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-royalton-residence-EM54072",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Royalton - identificacao da entrada",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2022/automacao-nova-marco-liane0007-1664377949.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-royalton-residence-EM54072",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Royalton - fachada urbana",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2022/automacao-nova-marco-liane-1664385058.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-royalton-residence-EM54072",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Royalton - convivencia externa",
+          "category": "Convivencia",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/mazzotti/img_edificios/g1_1926_23986_1002_030226.jpg",
+          "source_url": "https://mazzottiimoveis.com/edificios/royalton-residence/balneario-camboriu/centro/171",
+          "source_label": "Mazzotti Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Assinatura Embraed",
+          "description": "Imobille e Litoral Vertical associam o Royalton Residence a Embraed."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Centro de BC",
+          "description": "Fontes comerciais posicionam o empreendimento no Centro de Balneario Camboriu."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina externa",
+          "description": "A galeria inclui piscina, solarium e convivencia externa."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Fitness e infantil",
+          "description": "Imagens verificadas mostram fitness, brinquedoteca e areas para eventos."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fachada restaurada",
+          "description": "A hero agora vem de fonte nominal e mostra a fachada do Royalton."
+        },
+        {
+          "title": "Lazer completo",
+          "description": "Piscina, fitness, brinquedoteca e eventos passam a compor a narrativa do condominio."
+        },
+        {
+          "title": "Fontes variadas",
+          "description": "Imobille, Litoral Vertical, Felicita, Bruno Cassola e Mazzotti foram consultadas."
+        }
+      ],
+      "faq": [
+        {
+          "question": "O Royalton Residence e de qual construtora?",
+          "answer": "As fontes consultadas associam o edificio a Embraed."
+        },
+        {
+          "question": "Onde fica o empreendimento?",
+          "answer": "No Centro de Balneario Camboriu, com referencias comerciais na Rua 1536."
+        },
+        {
+          "question": "Quais imagens foram selecionadas?",
+          "answer": "Fachada, acesso, piscina, eventos, fitness, brinquedoteca e convivencia externa."
+        },
+        {
+          "question": "O que mudou na pagina?",
+          "answer": "A galeria deixou de representar ambientes internos e passou a mostrar o condominio."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-royalton-residence-EM54072",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-royalton-residence/",
+        "https://felicitanegocios.com.br/empreendimento/266/royalton-residence/",
+        "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-royalton-residence-balneario-camboriu-centro-3-quartos-3-garagens-venda-ref-402/",
+        "https://mazzottiimoveis.com/edificios/royalton-residence/balneario-camboriu/centro/171"
+      ]
+    }
+  ],
+  "skipped": []
+}

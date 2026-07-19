@@ -1,0 +1,981 @@
+{
+  "batch_id": "development-media-curation-batch52-20260718",
+  "generated_at": "2026-07-18T23:20:24.061Z",
+  "items": [
+    {
+      "slug": "residencial-letras-gregas",
+      "hero_image": "https://casadoturista.com.br/wp-content/uploads/2015/11/banner_21.jpg",
+      "description": "O Residencial Letras Gregas aparece nas fontes comerciais como condominio frente mar no Araca, proximo ao Caixa d'Aco, em Porto Belo. O cadastro Pilger associa o nome a uma area de 406 m2 anunciada no condominio, mas nao foi encontrado book publico confiavel com fotos proprias do empreendimento. Por isso, a pagina foi corrigida para usar imagens de contexto real do Caixa d'Aco e do Araca, deixando claro o entorno nautico sem apresentar foto de lote como fachada.",
+      "seo_description": "Residencial Letras Gregas no Araca, Porto Belo, com contexto frente mar no Caixa d'Aco e galeria transparente de entorno nautico.",
+      "gallery": [
+        {
+          "title": "Letras Gregas - Caixa d'Aco",
+          "category": "Entorno",
+          "image": "https://casadoturista.com.br/wp-content/uploads/2015/11/banner_21.jpg",
+          "source_url": "https://casadoturista.com.br/caixa-daco-um-ponto-turistico-imperdivel-de-porto-belo/",
+          "source_label": "Casa do Turista"
+        },
+        {
+          "title": "Letras Gregas - enseada do Caixa d'Aco",
+          "category": "Entorno",
+          "image": "https://cdn.myside.com.br/base/210/b7e/c74/praia-caixa-daco-pbelo.jpg",
+          "source_url": "https://myside.com.br/guia-itapema/praia-caixa-d-aco-porto-belo-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Letras Gregas - acesso nautico",
+          "category": "Localizacao",
+          "image": "https://cdn.myside.com.br/base/694/8bd/44c/bar-flutuante-caixa-d-aco.jpg",
+          "source_url": "https://myside.com.br/guia-itapema/praia-caixa-d-aco-porto-belo-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Letras Gregas - vista do Araca",
+          "category": "Entorno",
+          "image": "https://cdn.myside.com.br/base/abe/8e0/3e3/caixa-da-aco-porto-belo.jpg",
+          "source_url": "https://myside.com.br/guia-itapema/praia-caixa-d-aco-porto-belo-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Letras Gregas - costa de Porto Belo",
+          "category": "Localizacao",
+          "image": "https://static.wixstatic.com/media/0ae6e7_c2df504ed1c344ffad83ced670dbf43af000.jpg",
+          "source_url": "https://www.visiteportobelosc.com.br/caixa-da%C3%A7o",
+          "source_label": "Visite Porto Belo"
+        },
+        {
+          "title": "Letras Gregas - baia preservada",
+          "category": "Entorno",
+          "image": "https://static.wixstatic.com/media/0ae6e7_72508cf44ceb46f2aadf93b673a40146~mv2.jpg",
+          "source_url": "https://www.visiteportobelosc.com.br/caixa-da%C3%A7o",
+          "source_label": "Visite Porto Belo"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Araca e Caixa d'Aco",
+          "description": "As fontes posicionam o condominio em area costeira de Porto Belo ligada a enseada, barcos e acesso ao mar."
+        },
+        {
+          "icon": "Waves",
+          "title": "Frente mar contextual",
+          "description": "A comunicacao comercial aponta frente mar; a galeria mostra o entorno real do Caixa d'Aco em vez de imagem interna."
+        },
+        {
+          "icon": "Anchor",
+          "title": "Vocacao nautica",
+          "description": "A regiao e descrita por fontes turisticas como ponto de aguas claras, ancoragem e circulacao por trilha ou mar."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Midia transparente",
+          "description": "Como nao ha book publico confiavel do condominio, as imagens foram tratadas como entorno e nao como fotos de fachada."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Correcao conservadora",
+          "description": "A foto de oferta deixou de comandar a pagina; o foco agora e o contexto costeiro confirmado por fontes externas."
+        },
+        {
+          "title": "Entorno de alto apelo",
+          "description": "Caixa d'Aco e Araca reforcam natureza, mar calmo, barcos e uma leitura mais precisa da localizacao."
+        },
+        {
+          "title": "Sem promessa visual indevida",
+          "description": "A pagina explica a ausencia de book oficial e evita usar imagens de outro produto como se fossem do condominio."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Residencial Letras Gregas?",
+          "answer": "As fontes comerciais posicionam o Residencial Letras Gregas no Araca, em Porto Belo, proximo ao Caixa d'Aco."
+        },
+        {
+          "question": "A galeria mostra o condominio pronto?",
+          "answer": "Nao. Como nao foi encontrado book publico confiavel do condominio, a galeria mostra o entorno real do Caixa d'Aco e do Araca."
+        },
+        {
+          "question": "Por que a imagem anterior foi substituida?",
+          "answer": "Porque a imagem vinculada ao cadastro era da oferta especifica e nao servia como apresentacao segura do empreendimento."
+        },
+        {
+          "question": "Quais fontes foram usadas?",
+          "answer": "Cadastro Pilger para associacao do nome e fontes de turismo/localizacao para contextualizar o Caixa dAco e o Araca."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/imovel/terreno-no-residencial-letras-gregas-porto-belo-araca-venda-ref-2589/",
+        "https://guilhermepilger.ai/residencial-letras-gregas",
+        "https://www.visiteportobelosc.com.br/caixa-da%C3%A7o",
+        "https://turismo.portobelo.sc.gov.br/post-10243/",
+        "https://www.guiaviagensbrasil.com/galerias/sc/fotos-praia-caixa-d-aco/",
+        "https://casadoturista.com.br/caixa-daco-um-ponto-turistico-imperdivel-de-porto-belo/",
+        "https://myside.com.br/guia-itapema/praia-caixa-d-aco-porto-belo-sc"
+      ]
+    },
+    {
+      "slug": "targan-by-porsche-consulting",
+      "hero_image": "https://i.uai.com.br/Mp3gkVcRGuR640FdKx8vtd_-7r4=/800x446/smart/imgsapp2.uai.com.br/app/noticia_133890394703/2026/07/07/386412/targan-assinado-por-leo-maia_1_53445.jpeg",
+      "description": "O Targan e apresentado em fontes de imprensa como pre-lancamento da ABC.inc no Canto da Praia, Itapema, com gestao Powered by Porsche Consulting. A divulgacao cita 189 m de altura, 56 pavimentos, 88 residencias, penthouses ate 540 m2, duas areas comerciais, heliponto homologado, pavimento para colecao de veiculos, gastronomia internacional no rooftop e proposta wellness living. Como nao ha galeria fotografica publica de obra pronta, as imagens foram rotuladas como estudos de imprensa e conceito, substituindo fotos de oferta privada.",
+      "seo_description": "Targan no Canto da Praia, Itapema, pre-lancamento ABC.inc Powered by Porsche Consulting com 189 m, rooftop e wellness living.",
+      "gallery": [
+        {
+          "title": "Targan - estudo de assinatura",
+          "category": "Conceito",
+          "image": "https://i.uai.com.br/Mp3gkVcRGuR640FdKx8vtd_-7r4=/800x446/smart/imgsapp2.uai.com.br/app/noticia_133890394703/2026/07/07/386412/targan-assinado-por-leo-maia_1_53445.jpeg",
+          "source_url": "https://www.uai.com.br/app/noticia/mundo-corporativo/2026/07/07/noticia-mundo-corporativo%2C386412/nova-demanda-redefine-o-mercado-imobiliario-de-alto-padrao.shtml",
+          "source_label": "UAI"
+        },
+        {
+          "title": "Targan - perspectiva de torre",
+          "category": "Conceito",
+          "image": "https://blog.imobiliariacri.com.br/wp-content/uploads/2026/07/Gemini_Generated_Image_9xrpji9xrpji9xrp.png",
+          "source_url": "https://blog.imobiliariacri.com.br/targan-itapema-pre-lancamento-da-abc-inc-no-canto-da-praia-com-gestao-powered-by-porsche-consulting/",
+          "source_label": "Imobiliaria CRI"
+        },
+        {
+          "title": "Targan - skyline do lancamento",
+          "category": "Conceito",
+          "image": "https://blog.imobiliariacri.com.br/wp-content/uploads/2026/07/Gemini_Generated_Image_9xrpji9xrpji9xrp-1-1024x580.png",
+          "source_url": "https://blog.imobiliariacri.com.br/targan-itapema-pre-lancamento-da-abc-inc-no-canto-da-praia-com-gestao-powered-by-porsche-consulting/",
+          "source_label": "Imobiliaria CRI"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Pre-lancamento ABC.inc",
+          "description": "A imprensa local associa o projeto a ABC.inc no Canto da Praia, com gestao Powered by Porsche Consulting."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Projeto de marca forte",
+          "description": "As fontes citam arquitetura Leo Maia, paisagismo Burle Marx, interiores Fernanda Marques e iluminacao Mingrone."
+        },
+        {
+          "icon": "Plane",
+          "title": "Mobilidade e colecionismo",
+          "description": "A divulgacao menciona heliponto homologado e pavimento voltado a colecao de veiculos."
+        },
+        {
+          "icon": "Waves",
+          "title": "Rooftop e wellness",
+          "description": "A comunicacao do lancamento destaca gastronomia internacional no rooftop e proposta de bem-estar."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fase bem identificada",
+          "description": "A pagina informa que o empreendimento ainda esta em pre-lancamento e que a midia disponivel e conceitual."
+        },
+        {
+          "title": "Canto da Praia",
+          "description": "A localizacao em Itapema conecta o projeto a um eixo de marina, mar e valorizacao do alto padrao."
+        },
+        {
+          "title": "Dados sem extrapolar",
+          "description": "A descricao evita inventar tabela, cronograma ou plantas detalhadas, pois as fontes indicam que isso ainda nao esta publico."
+        }
+      ],
+      "faq": [
+        {
+          "question": "O que e o Targan?",
+          "answer": "Um pre-lancamento anunciado para o Canto da Praia, Itapema, pela ABC.inc, com gestao Powered by Porsche Consulting."
+        },
+        {
+          "question": "As imagens sao fotos reais do edificio?",
+          "answer": "Nao. As imagens disponiveis publicamente foram tratadas como estudos de imprensa e conceito, porque nao ha foto de obra pronta."
+        },
+        {
+          "question": "Quais numeros foram divulgados?",
+          "answer": "A imprensa cita 189 m, 56 pavimentos, 88 residencias, penthouses ate 540 m2, rooftop, heliponto e pavimento para colecao de veiculos."
+        },
+        {
+          "question": "Ja existe tabela publica?",
+          "answer": "As fontes consultadas indicam que tabela, plantas completas e cronograma oficial ainda nao estavam publicos."
+        }
+      ],
+      "sources": [
+        "https://blog.imobiliariacri.com.br/targan-itapema-pre-lancamento-da-abc-inc-no-canto-da-praia-com-gestao-powered-by-porsche-consulting/",
+        "https://portalvv8.com.br/noticia/64676/nova-demanda-redefine-o-mercado-imobiliario-de-alto-padrao",
+        "https://www.uai.com.br/app/noticia/mundo-corporativo/2026/07/07/noticia-mundo-corporativo%2C386412/nova-demanda-redefine-o-mercado-imobiliario-de-alto-padrao.shtml",
+        "https://abcincembralot.com.br/"
+      ]
+    },
+    {
+      "slug": "green-hills",
+      "hero_image": "https://cdn.imoview.com.br/bryann/Imoveis/3797/cc5ui-1-1724251669.jpg?1761770527",
+      "description": "O Green Hills Residence aparece nas fontes na Avenida do Estado Dalmo Vieira, 1837, em Balneario Camboriu, com divulgacao ligada a Cechinel Construtora. As fontes variam entre Aririba e Pioneiros para o bairro, mas convergem no eixo da Avenida do Estado e na proximidade com praia, mercados, farmacia e servicos. A nova galeria usa fachada, acesso, hall, piscina, fitness, coworking, kids e eventos do empreendimento, removendo o protagonismo de fotos internas de ofertas.",
+      "seo_description": "Green Hills Residence na Avenida do Estado Dalmo Vieira, Balneario Camboriu, com fachada, acesso, piscina, fitness e areas sociais.",
+      "gallery": [
+        {
+          "title": "Green Hills - fachada principal",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Imoveis/3797/cc5ui-1-1724251669.jpg?1761770527",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/3797/green-hills/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Green Hills - torre residencial",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2024/imagens-site-50019-1715620889.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-green-hills--EM73921",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Green Hills - acesso da base",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2024/imagens-site-50017-1715620888.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-green-hills--EM73921",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Green Hills - fachada ao entardecer",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2024/imagens-site-50018-1715620888.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-green-hills--EM73921",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Green Hills - estar social",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2024/imagens-site-50002-1715620803.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-green-hills--EM73921",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Green Hills - espaco kids",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2024/imagens-site-50004-1715620804.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-green-hills--EM73921",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Green Hills - coworking",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2024/imagens-site-50005-1715620804.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-green-hills--EM73921",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Green Hills - hall social",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2024/imagens-site-50006-1715620805.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-green-hills--EM73921",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Green Hills - piscina coberta",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2024/imagens-site-50007-1715620805.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-green-hills--EM73921",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Green Hills - fitness",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2024/imagens-site-50008-1715620806.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-green-hills--EM73921",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Green Hills - gourmet",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2024/imagens-site-50010-1715620806.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-green-hills--EM73921",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Green Hills - eventos",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2024/imagens-site-50011-1715620807.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-green-hills--EM73921",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Green Hills - area fitness",
+          "category": "Fitness",
+          "image": "https://cdn.imoview.com.br/bryann/Imoveis/3797/ejy1z-15-1724251669.jpg?1761770527",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/3797/green-hills/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Green Hills - academia",
+          "category": "Fitness",
+          "image": "https://cdn.imoview.com.br/bryann/Imoveis/3797/lw8tij-14-1724251669.jpg?1761770527",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/3797/green-hills/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Green Hills - cardio",
+          "category": "Fitness",
+          "image": "https://cdn.imoview.com.br/bryann/Imoveis/3797/xnjza-13-1724251670.jpg?1761770527",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/3797/green-hills/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Green Hills - hall decorado",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Imoveis/3797/q7wsi-12-1724251670.jpg?1761770527",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/3797/green-hills/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Green Hills - spa",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/bryann/Imoveis/3797/knv9f-11-1724251670.jpg?1761770527",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/3797/green-hills/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Green Hills - piscina interna",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Imoveis/3797/j83mf-10-1724251670.jpg?1761770527",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/3797/green-hills/",
+          "source_label": "Felicita Negocios"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Avenida do Estado",
+          "description": "Endereco recorrente nas fontes, no eixo Dalmo Vieira 1837, com conexao rapida a praia, comercio e servicos."
+        },
+        {
+          "icon": "Building2",
+          "title": "Cechinel Construtora",
+          "description": "Fontes especializadas associam o Green Hills a Cechinel e a um projeto residencial em construcao."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Fitness e bem-estar",
+          "description": "A galeria confirma academia, cardio, spa, piscina interna e ambientes voltados a rotina ativa."
+        },
+        {
+          "icon": "Users",
+          "title": "Uso social completo",
+          "description": "Hall, coworking, kids, gourmet e eventos ampliam a experiencia do condominio alem da moradia."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Galeria do empreendimento",
+          "description": "Foram priorizadas imagens de fachada, acesso e lazer, sem rotulos ou fotos de oferta privada."
+        },
+        {
+          "title": "Localizacao pratica",
+          "description": "A Avenida do Estado favorece mobilidade para o Centro, Praia dos Amores, comercio e servicos cotidianos."
+        },
+        {
+          "title": "Fontes cruzadas",
+          "description": "Imobille, Felicita, MySide, Mazzotti e Godoy foram usados para conferir endereco, construtora e fase."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Green Hills?",
+          "answer": "Na Avenida do Estado Dalmo Vieira, 1837, em Balneario Camboriu, segundo as fontes consultadas."
+        },
+        {
+          "question": "Qual construtora aparece nas fontes?",
+          "answer": "As fontes associam o empreendimento a Cechinel Construtora."
+        },
+        {
+          "question": "Quais areas aparecem na nova galeria?",
+          "answer": "Fachada, acesso, hall, piscina, academia, coworking, espaco kids, gourmet e eventos."
+        },
+        {
+          "question": "Por que o bairro foi descrito com cautela?",
+          "answer": "Porque as fontes consultadas variam entre Aririba e Pioneiros, embora apontem o mesmo eixo da Avenida do Estado."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-green-hills--EM73921",
+        "https://felicitanegocios.com.br/empreendimento/3797/green-hills/",
+        "https://myside.com.br/apartamento-venda-green-hills-residence-balneario-camboriu-sc",
+        "https://mazzottiimoveis.com/edificios/green-hills/balneario-camboriu/pioneiros/1579",
+        "https://imoveisgodoy.com.br/imoveis/edificio-green-hills-cechinel/"
+      ]
+    },
+    {
+      "slug": "hamptons-village",
+      "hero_image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/11/hamptons-fachada-site.jpg",
+      "description": "O Hamptons Village e um empreendimento Embraed no Centro de Balneario Camboriu, divulgado na Rua 3700 e a cerca de 400 m do mar. A pagina oficial informa status 100% comercializado, tres ou quatro suites e ate tres vagas, enquanto fontes de mercado apontam entrega em 2022, uma torre, 64 residencias e lazer com mais de 1.700 m2. A nova curadoria privilegia imagens oficiais de fachada, outdoor grill, eventos, academia, campo society, teen lounge, pub e convivencias, substituindo fotos de interiores privados.",
+      "seo_description": "Hamptons Village by Embraed no Centro de Balneario Camboriu, Rua 3700, a 400 m do mar, com fachada e lazer completo.",
+      "gallery": [
+        {
+          "title": "Hamptons Village - fachada Embraed",
+          "category": "Fachada",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/11/hamptons-fachada-site.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/hamptons-br-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Hamptons Village - outdoor grill",
+          "category": "Gourmet",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2022/09/outdoor-grill-com-forno-de-pizza-e-charbroiler.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/hamptons-br-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Hamptons Village - salao de festas",
+          "category": "Eventos",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/hamptons-village-hamptons-village-salao-de-festas.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/hamptons-br-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Hamptons Village - academia",
+          "category": "Fitness",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/hamptons-village-hamptons-village-academia.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/hamptons-br-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Hamptons Village - campo society",
+          "category": "Esporte",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/hamptons-village-hamptons-village-campo-society.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/hamptons-br-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Hamptons Village - teen lounge",
+          "category": "Convivencia",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/hamptons-village-hamptons-village-espaco-teen.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/hamptons-br-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Hamptons Village - estar relax",
+          "category": "Convivencia",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/hamptons-village-hamptons-village-estar-relax.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/hamptons-br-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Hamptons Village - detalhe da fachada",
+          "category": "Fachada",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/hamptons-village-hamptons-village-fachada-detalhe-1.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/hamptons-br-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Hamptons Village - base residencial",
+          "category": "Fachada",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/hamptons-village-hamptons-village-fachada-detalhe.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/hamptons-br-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Hamptons Village - jogos e pub",
+          "category": "Jogos",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/hamptons-village-hamptons-village-jogos-e-pub.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/hamptons-br-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Hamptons Village - gourmet externo",
+          "category": "Gourmet",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/hamptons-village-hamptons-village-outdoor-grill.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/hamptons-br-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Hamptons Village - torre concluida",
+          "category": "Fachada",
+          "image": "https://cdn.imoveisgodoy.com.br/wp-content/uploads/2022/10/02124920/Hamptons-Village.jpeg",
+          "source_url": "https://imoveisgodoy.com.br/empreendimento/hamptons-village-embraed/",
+          "source_label": "Imoveis Godoy"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Assinatura Embraed",
+          "description": "A incorporadora apresenta o Hamptons Village como empreendimento inspirado nos Hamptons, em Nova York."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Centro a 400 m do mar",
+          "description": "Fontes oficiais e comerciais posicionam o projeto na Rua 3700, com acesso pratico a praia e servicos."
+        },
+        {
+          "icon": "Users",
+          "title": "Lazer amplo",
+          "description": "Outdoor grill, eventos, pub, teen lounge, campo society, academia e estar relax reforcam a vida condominial."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Operacao estruturada",
+          "description": "Fontes comerciais citam portaria equipada, acesso com biometria, Wi-Fi em areas comuns e entrada de banhistas com lava-pes."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Imagem oficial como base",
+          "description": "A galeria usa prioritariamente material da Embraed e complementa com fachada externa de fonte independente."
+        },
+        {
+          "title": "Lazer de uso diario",
+          "description": "A variedade de ambientes atende festa, treino, jogos, esporte, relaxamento e convivencia familiar."
+        },
+        {
+          "title": "Entrega consolidada",
+          "description": "Fontes de mercado indicam entrega em 2022, deixando a pagina alinhada a um condominio ja reconhecido."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Hamptons Village?",
+          "answer": "Na Rua 3700, Centro de Balneario Camboriu, a cerca de 400 m do mar segundo as fontes consultadas."
+        },
+        {
+          "question": "Quem assina o Hamptons Village?",
+          "answer": "A Embraed apresenta o empreendimento em sua pagina oficial."
+        },
+        {
+          "question": "Quais areas aparecem na nova galeria?",
+          "answer": "Fachada, outdoor grill, salao de festas, academia, campo society, teen lounge, pub, gourmet externo e estar relax."
+        },
+        {
+          "question": "O que mudou na auditoria?",
+          "answer": "Fotos internas de oferta foram substituidas por imagens do condominio e suas areas comuns."
+        }
+      ],
+      "sources": [
+        "https://www.embraed.com.br/pt-BR/empreendimento/hamptons-br-village",
+        "https://hamptonsbc.com.br/",
+        "https://imoveisgodoy.com.br/empreendimento/hamptons-village-embraed/",
+        "https://www.vgimobiliaria.com.br/blog-hamptons-village-novo-empreendimento-em-balneario-camboriu",
+        "https://apto.vc/br/sc/balneario-camboriu/centro/hamptons-village"
+      ]
+    },
+    {
+      "slug": "biarritz-residence",
+      "hero_image": "https://cdn.imoview.com.br/bryann/Condominios/108/biarritz-felicita-balneario-camboriu-61.jpg?1669748885",
+      "description": "O Biarritz Residence fica na Rua 1926, numero 236, no Centro de Balneario Camboriu. Fontes comerciais associam o edificio a Macon Empreendimentos, indicam entrega em 2020 e destacam posicao proxima a Terceira Avenida, praia, supermercados, padarias, restaurantes e comercio central. A nova galeria usa fachada, piscina, deck, hall, lobby, brinquedoteca e playground do condominio, afastando imagens de interiores privados que vinham contaminando a pagina.",
+      "seo_description": "Biarritz Residence na Rua 1926, Centro de Balneario Camboriu, com fachada, piscina, hall, brinquedoteca e playground.",
+      "gallery": [
+        {
+          "title": "Biarritz Residence - fachada principal",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/108/biarritz-felicita-balneario-camboriu-61.jpg?1669748885",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/108/biarritz-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Biarritz Residence - torre central",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/108/biarritz-felicita-balneario-camboriu-62.jpg?1669748885",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/108/biarritz-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Biarritz Residence - piscina externa",
+          "category": "Piscina",
+          "image": "https://dbatkwuiwvpoxjjqfdfz.storage.supabase.co/storage/v1/object/public/hunter-storage/account/86/condominium/1be00342-fe85-4ba6-ad9c-01dd189e1a95/media/LEISURE_PICTURE/41_4e69d1f5-faae-4f4f-99b1-eb8d3c2bb903.jpeg",
+          "source_url": "https://www.oceanprime.com.br/empreendimentos/biarritz",
+          "source_label": "Ocean Prime"
+        },
+        {
+          "title": "Biarritz Residence - deck da piscina",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/108/biarritz-felicita-balneario-camboriu-11.jpg?1669748885",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/108/biarritz-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Biarritz Residence - hall de entrada",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/108/biarritz-felicita-balneario-camboriu-58.jpg?1669748885",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/108/biarritz-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Biarritz Residence - lobby social",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/108/biarritz-felicita-balneario-camboriu-55.jpg?1669748885",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/108/biarritz-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Biarritz Residence - circulacao social",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/108/biarritz-felicita-balneario-camboriu-59.jpg?1669748885",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/108/biarritz-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Biarritz Residence - lounge do hall",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/108/biarritz-felicita-balneario-camboriu-57.jpg?1669748885",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/108/biarritz-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Biarritz Residence - brinquedoteca",
+          "category": "Infantil",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/108/biarritz-felicita-balneario-camboriu.jpg?1669748885",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/108/biarritz-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Biarritz Residence - playground",
+          "category": "Infantil",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/108/biarritz-felicita-balneario-camboriu-12.jpg?1669748885",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/108/biarritz-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Biarritz Residence - fachada urbana",
+          "category": "Fachada",
+          "image": "https://static.arboimoveis.com.br/COND0274_TONADR/20220712_1658021721663959530.jpg",
+          "source_url": "https://tonadri.com.br/condominios/biarritz-residence",
+          "source_label": "Tonadri"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro bem conectado",
+          "description": "Rua 1926, proxima a Terceira Avenida, praia, comercio, gastronomia e servicos do dia a dia."
+        },
+        {
+          "icon": "Building2",
+          "title": "Entrega consolidada",
+          "description": "Fontes comerciais informam entrega em 2020 e associacao a Macon Empreendimentos."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e deck",
+          "description": "A curadoria confirma area externa de piscina com deck e espreguicadeiras."
+        },
+        {
+          "icon": "Baby",
+          "title": "Ambientes familiares",
+          "description": "Brinquedoteca, playground, hall e lobby deixam o condominio mais completo para diferentes rotinas."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fachada real em destaque",
+          "description": "A primeira impressao da pagina voltou a mostrar o edificio e nao fotos internas de ofertas."
+        },
+        {
+          "title": "Lazer urbano",
+          "description": "Piscina, hall e areas infantis reforcam um condominio compacto e funcional no Centro."
+        },
+        {
+          "title": "Fontes convergentes",
+          "description": "Felicita, Ocean Prime, Oppo, Tonadri e Loft foram usados para conferir endereco, entrega e lazer."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Biarritz Residence?",
+          "answer": "Na Rua 1926, numero 236, no Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Quem aparece associado ao empreendimento?",
+          "answer": "Fontes comerciais associam o Biarritz Residence a Macon Empreendimentos."
+        },
+        {
+          "question": "Quais ambientes foram selecionados?",
+          "answer": "Fachada, piscina, deck, hall, lobby, brinquedoteca e playground."
+        },
+        {
+          "question": "Qual foi a correcao principal?",
+          "answer": "A galeria deixou de priorizar imagens internas e passou a representar o condominio real."
+        }
+      ],
+      "sources": [
+        "https://felicitanegocios.com.br/empreendimento/108/biarritz-residence/",
+        "https://oppoimoveisbc.com.br/empreendimento/edificio-biarritz-em-balneario-camboriu-lazer-completo",
+        "https://www.oceanprime.com.br/empreendimentos/biarritz",
+        "https://tonadri.com.br/condominios/biarritz-residence",
+        "https://loft.com.br/condominio/condominio-edificio-biarritz-residence-centro-balneario-camboriu-sc/1VG37U1Q"
+      ]
+    },
+    {
+      "slug": "ed-lagom",
+      "hero_image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/3423/i41N87z4wF4877_342361c4d70e1626f.jpg",
+      "description": "O Lagom fica na Rua 902, numero 514, no Centro de Balneario Camboriu. Fontes comerciais associam o projeto ao Grupo Formiga, em fase de construcao, com previsao divulgada para outubro de 2025, e citam alarme, elevadores, hall decorado, medidores individuais, piscina adulta, rooftop e salao de festas. A selecao final ficou conservadora: fachada, base e estar externo, descartando imagens ambigueas de cozinha e interiores para evitar confusao com areas privativas.",
+      "seo_description": "Lagom na Rua 902, Centro de Balneario Camboriu, projeto Grupo Formiga com fachada, rooftop, piscina e salao de festas.",
+      "gallery": [
+        {
+          "title": "Lagom - fachada principal",
+          "category": "Fachada",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/3423/i41N87z4wF4877_342361c4d70e1626f.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/3688/lagom/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Lagom - volumetria lateral",
+          "category": "Fachada",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/3423/i41N87z4wF4877_342361c4d70c9362a.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/3688/lagom/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Lagom - base residencial",
+          "category": "Fachada",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/3423/i41N87z4wF4877_342361c4d6f8d7fc6.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/3688/lagom/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Lagom - perspectiva urbana",
+          "category": "Fachada",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/3423/i41N87z4wF4877_342361c4d6fccb8e3.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/3688/lagom/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Lagom - estar externo",
+          "category": "Convivencia",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/3423/i41N87z4wF4877_342361c4d6fddf562.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/3688/lagom/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Lagom - fachada no Centro",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Imoveis/4987/jni1fl-5c3b76264148b33a8bbb49c776f602c761fd45ffba07dcdc3cccd42bfed59b17-1733751695.jpg?1761774510",
+          "source_url": "https://felicitanegocios.com.br/imovel/4987/apartamento-3-quartos-centro-balneario-camboriu/",
+          "source_label": "Felicita Negocios"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 902 no Centro",
+          "description": "Endereco central em Balneario Camboriu, com acesso facil a servicos, praia e eixos de mobilidade."
+        },
+        {
+          "icon": "Building2",
+          "title": "Grupo Formiga",
+          "description": "Fontes comerciais associam o Lagom ao Grupo Formiga e a uma obra em andamento."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e rooftop",
+          "description": "As fontes citam piscina adulta, rooftop e salao de festas como pontos de lazer do empreendimento."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Selecao visual prudente",
+          "description": "A curadoria privilegia fachada e convivencia externa, removendo imagens que poderiam parecer internas privadas."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Galeria enxuta e coerente",
+          "description": "Foram mantidas imagens com melhor relacao com o edificio, base e area comum externa."
+        },
+        {
+          "title": "Dados objetivos",
+          "description": "Endereco, construtora associada, fase e itens de lazer foram descritos a partir de fontes comerciais cruzadas."
+        },
+        {
+          "title": "Fase em construcao",
+          "description": "A pagina agora informa a fase divulgada sem apresentar imagens como se o empreendimento estivesse concluido."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Lagom?",
+          "answer": "Na Rua 902, numero 514, no Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Quem aparece ligado ao projeto?",
+          "answer": "Fontes comerciais associam o Lagom ao Grupo Formiga."
+        },
+        {
+          "question": "Quais itens de lazer foram citados?",
+          "answer": "Piscina adulta, rooftop, salao de festas, hall decorado e estrutura com elevadores e medidores individuais."
+        },
+        {
+          "question": "Por que a galeria ficou mais enxuta?",
+          "answer": "Porque imagens ambigueas de cozinha e interiores foram descartadas para manter somente fachada e area comum segura."
+        }
+      ],
+      "sources": [
+        "https://grupoesmeraldaimobiliaria.com.br/edificios/lagom/balneario-camboriu/centro/1572",
+        "https://vgimobiliaria.com.br/empreendimento/3688/lagom/",
+        "https://myside.com.br/apartamento-venda-lagom-balneario-camboriu-sc",
+        "https://felicitanegocios.com.br/imovel/4987/apartamento-3-quartos-centro-balneario-camboriu/",
+        "https://solkimoveis.com.br/imovel/AP24105177/apartamento-3-quartos-lagom-centro-balneario-camboriu/"
+      ]
+    },
+    {
+      "slug": "iconic-tower",
+      "hero_image": "https://iconictower.com.br/wp-content/uploads/2024/04/ICONIC-TOWER-1.webp",
+      "description": "O Iconic Tower e apresentado pela FG Empreendimentos na Rua 1500, Centro de Balneario Camboriu, com design autentico e espacos envolventes. Fontes de mercado indicam obra em andamento, lancamento em 2023, entrega prevista para dezembro de 2027, plantas amplas de alto padrao e lazer completo. A nova curadoria abre com imagem oficial da torre e organiza acesso, base, piscinas, jardim elevado, jogos, hall, gourmet, lounge, fitness e estar suspenso, substituindo fotos internas de ofertas.",
+      "seo_description": "Iconic Tower by FG na Rua 1500, Centro de Balneario Camboriu, com fachada, piscinas, hall, gourmet, jogos e fitness.",
+      "gallery": [
+        {
+          "title": "Iconic Tower - skyline FG",
+          "category": "Fachada",
+          "image": "https://iconictower.com.br/wp-content/uploads/2024/04/ICONIC-TOWER-1.webp",
+          "source_url": "https://iconictower.com.br/",
+          "source_label": "Iconic Tower"
+        },
+        {
+          "title": "Iconic Tower - torre no Centro",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/11/iconic-tower-balneario-camboriu-sc-2.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/iconic-tower/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Iconic Tower - vista urbana",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/11/iconic-tower-balneario-camboriu-sc-1.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/iconic-tower/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Iconic Tower - acesso da base",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2022/automacao-nova-20021-1671456696.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-iconic-tower-EM25969",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Iconic Tower - base e piscina",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2022/automacao-nova-20022-1671456696.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-iconic-tower-EM25969",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Iconic Tower - piscina elevada",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2022/automacao-nova-20027-1671456698.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-iconic-tower-EM25969",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Iconic Tower - jardim elevado",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2022/automacao-nova-20014-1671456694.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-iconic-tower-EM25969",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Iconic Tower - piscina interna",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2022/automacao-nova-20007-1671456694.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-iconic-tower-EM25969",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Iconic Tower - jogos",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2022/automacao-nova-20015-1671456694.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-iconic-tower-EM25969",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Iconic Tower - hall curvo",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2022/automacao-nova-20017-1671456695.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-iconic-tower-EM25969",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Iconic Tower - gourmet social",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2022/automacao-nova-20018-1671456695.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-iconic-tower-EM25969",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Iconic Tower - lounge bar",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2022/automacao-nova-20020-1671456696.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-iconic-tower-EM25969",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Iconic Tower - fitness panoramico",
+          "category": "Fitness",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/11/iconic-tower-balneario-camboriu-sc-12.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/iconic-tower/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Iconic Tower - estar suspenso",
+          "category": "Convivencia",
+          "image": "https://b3.casteldigital.com.br/litoralnorth/ig/im/imoveis/3124/fg_iconic_detalhe_quiosque_balanco_final_crop-17012119068685.jpg",
+          "source_url": "https://www.litoralnorth.com.br/imovel/apartamento-no-edificio-iconic-tower-balneario-camboriu-centro-4-quartos-3-garagens-venda-ref-3124/",
+          "source_label": "litoralnorth.com.br"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "FG Empreendimentos",
+          "description": "O site oficial apresenta o Iconic Tower como projeto da FG para Balneario Camboriu."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Rua 1500 no Centro",
+          "description": "Endereco confirmado por fontes oficiais e especializadas, em eixo central de alto valor urbano."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscinas e lazer elevado",
+          "description": "A galeria mostra piscina elevada, piscina interna, jardim, lounge, jogos, gourmet e estar suspenso."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Rotina completa",
+          "description": "Fitness panoramico, hall, acesso qualificado e ambientes sociais reforcam a proposta de alto padrao."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Imagem oficial no hero",
+          "description": "A pagina passa a abrir com material do Iconic Tower e nao com fotos de interiores privados."
+        },
+        {
+          "title": "Design reconhecivel",
+          "description": "A torre alta, base marcada e lazer elevado criam assinatura visual coerente com a comunicacao da FG."
+        },
+        {
+          "title": "Fontes tecnicas e comerciais",
+          "description": "Site oficial, Imobille, Invexo, Apto.vc e CTBUH foram usados para conferir endereco, autoria e fase."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Iconic Tower?",
+          "answer": "Na Rua 1500, Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Quem desenvolve o Iconic Tower?",
+          "answer": "O site oficial apresenta o Iconic Tower como projeto da FG Empreendimentos."
+        },
+        {
+          "question": "Qual e a fase divulgada?",
+          "answer": "Fontes de mercado indicam obra em andamento, lancamento em 2023 e entrega prevista para dezembro de 2027."
+        },
+        {
+          "question": "Quais imagens foram priorizadas?",
+          "answer": "Fachada, acesso, base, piscinas, jardim elevado, jogos, hall, gourmet, lounge, fitness e convivencia."
+        }
+      ],
+      "sources": [
+        "https://iconictower.com.br/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-iconic-tower-EM25969",
+        "https://lancamento.invexo.com.br/sc/iconic-tower/",
+        "https://apto.vc/br/sc/balneario-camboriu/centro/iconic-tower",
+        "https://www.skyscrapercenter.com/building/iconic-tower/49678",
+        "https://www.litoralnorth.com.br/imovel/apartamento-no-edificio-iconic-tower-balneario-camboriu-centro-4-quartos-3-garagens-venda-ref-3124/"
+      ]
+    }
+  ]
+}

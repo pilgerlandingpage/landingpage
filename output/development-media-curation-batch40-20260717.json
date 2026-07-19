@@ -1,0 +1,1450 @@
+{
+  "batch_id": "development-media-curation-batch40-20260717",
+  "generated_at": "2026-07-17T13:40:00.000Z",
+  "items": [
+    {
+      "slug": "mario-quintana-residence",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2025/03/edificio-poeta-mario-quintana-balneario-camboriu-1.jpg",
+      "description": "O Mario Quintana Residence foi revisado com foco no edificio em Pioneiros, regiao de Balneario Camboriu proxima ao mar e a vias de acesso da Barra Norte. A pagina deixa de usar interiores da oferta e passa a destacar a fachada real, a escala residencial e a leitura de condominio para quem busca uma referencia visual mais fiel antes de avaliar disponibilidades.",
+      "seo_description": "Conheca o Mario Quintana Residence em Balneario Camboriu, com imagens de fachada e leitura real do edificio.",
+      "gallery": [
+        {
+          "title": "Mario Quintana Residence - fachada principal",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/03/edificio-poeta-mario-quintana-balneario-camboriu-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-poeta-mario-quintana/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Mario Quintana Residence - vista vertical",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/03/edificio-poeta-mario-quintana-balneario-camboriu-2.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-poeta-mario-quintana/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Mario Quintana Residence - torre na quadra mar",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/03/edificio-poeta-mario-quintana-balneario-camboriu-2.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-poeta-mario-quintana/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Mario Quintana Residence - frente urbana",
+          "category": "Acesso",
+          "image": "https://objectstorage.sa-saopaulo-1.oraclecloud.com/n/grq6lwb4htd1/b/tecimob-production/o/media/8b083b7d-9ae7-468d-91e0-ddf239924e16/properties/33ad2d2a-79cf-4015-93be-5122a170ef61/images/9983cf0a-7537-48ee-9f8e-7a09e92dd46c1730733109aA38.jpg",
+          "source_url": "https://lucastonin.com.br/imovel/apartamento-2-quartos-sendo-1-suites-poeta-mario-quintana-quadra-mar-balneario-camboriu/P062-BCB",
+          "source_label": "Lucas Tonin"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Pioneiros perto do mar",
+          "description": "Endereco em regiao valorizada de Balneario Camboriu, com acesso rapido a orla e servicos da Barra Norte."
+        },
+        {
+          "icon": "Building2",
+          "title": "Fachada identificada",
+          "description": "A nova midia mostra o edificio e sua frente urbana, em vez de ambientes privativos da oferta."
+        },
+        {
+          "icon": "Compass",
+          "title": "Quadra mar",
+          "description": "As fontes consultadas posicionam o empreendimento em area de facil conexao com a praia."
+        },
+        {
+          "icon": "Eye",
+          "title": "Consulta mais clara",
+          "description": "A pagina passa a apresentar primeiro o condominio, deixando a disponibilidade para a etapa de atendimento."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Galeria corrigida",
+          "description": "Hero e galeria foram substituidos por imagens externas do edificio."
+        },
+        {
+          "title": "Recorte conservador",
+          "description": "Como havia pouca midia publica de lazer, a curadoria manteve apenas fachadas e acesso verificaveis."
+        },
+        {
+          "title": "Contexto de bairro",
+          "description": "A copy agora reforca Pioneiros, Barra Norte e proximidade com a orla."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Mario Quintana Residence?",
+          "answer": "Em Balneario Camboriu, na regiao de Pioneiros/Barra Norte, com referencias publicas de quadra mar."
+        },
+        {
+          "question": "Que imagens entraram na pagina?",
+          "answer": "Fachada principal, vista vertical da torre e frente urbana do edificio."
+        },
+        {
+          "question": "Por que a galeria ficou mais enxuta?",
+          "answer": "Porque foram mantidas apenas imagens do empreendimento que puderam ser conferidas visualmente."
+        },
+        {
+          "question": "Qual foi a principal correcao?",
+          "answer": "A pagina deixou de destacar fotos internas e passou a mostrar o edificio real."
+        }
+      ],
+      "sources": [
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-poeta-mario-quintana/",
+        "https://lucastonin.com.br/imovel/apartamento-2-quartos-sendo-1-suites-poeta-mario-quintana-quadra-mar-balneario-camboriu/P062-BCB"
+      ]
+    },
+    {
+      "slug": "milano-exclusive-residence",
+      "hero_image": "https://alempreendimentos.com.br/wp-content/uploads/2019/11/Externa-A-03-min-1024x705.jpg",
+      "description": "O Milano Exclusive Residence, da AL Empreendimentos, foi tratado como empreendimento frente mar no Canto da Praia, em Itapema. A curadoria substitui fotos internas por fachada, implantacao na orla, hall e circulacao social, reforcando o perfil boutique do projeto, com poucas residencias, elevadores dedicados e acabamento voltado ao alto padrao.",
+      "seo_description": "Milano Exclusive Residence em Itapema: fachada frente mar, hall e detalhes reais do empreendimento boutique.",
+      "gallery": [
+        {
+          "title": "Milano Exclusive Residence - frente mar",
+          "category": "Fachada",
+          "image": "https://alempreendimentos.com.br/wp-content/uploads/2019/11/Externa-A-03-min-1024x705.jpg",
+          "source_url": "https://alempreendimentos.com.br/milano-exclusive-residence-o-luxo-de-viver-bem/",
+          "source_label": "AL Empreendimentos"
+        },
+        {
+          "title": "Milano Exclusive Residence - fachada",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/confidere/img_vendas/m1_4158_95001_1702_120923.jpg",
+          "source_url": "https://www.imobiliariaconfidere.com.br/imovel/venda-apartamento-04-dormitorio-em-itapema/milano-exclusive-residence/4158",
+          "source_label": "Confidere Imoveis"
+        },
+        {
+          "title": "Milano Exclusive Residence - vista da torre",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/confidere/img_vendas/g1_4158_95001_1702_120923.jpg",
+          "source_url": "https://www.imobiliariaconfidere.com.br/imovel/venda-apartamento-04-dormitorio-em-itapema/milano-exclusive-residence/4158",
+          "source_label": "Confidere Imoveis"
+        },
+        {
+          "title": "Milano Exclusive Residence - detalhe externo",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/confidere/img_vendas/p1_4158_95001_1702_120923.jpg",
+          "source_url": "https://www.imobiliariaconfidere.com.br/imovel/venda-apartamento-04-dormitorio-em-itapema/milano-exclusive-residence/4158",
+          "source_label": "Confidere Imoveis"
+        },
+        {
+          "title": "Milano Exclusive Residence - implantacao na orla",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/confidere/img_vendas/g1_4158_95010_1703_120923.jpg",
+          "source_url": "https://www.imobiliariaconfidere.com.br/imovel/venda-apartamento-04-dormitorio-em-itapema/milano-exclusive-residence/4158",
+          "source_label": "Confidere Imoveis"
+        },
+        {
+          "title": "Milano Exclusive Residence - entorno costeiro",
+          "category": "Entorno",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/confidere/img_vendas/i1_4158_95011_1703_120923.jpg",
+          "source_url": "https://www.imobiliariaconfidere.com.br/imovel/venda-apartamento-04-dormitorio-em-itapema/milano-exclusive-residence/4158",
+          "source_label": "Confidere Imoveis"
+        },
+        {
+          "title": "Milano Exclusive Residence - hall social",
+          "category": "Hall",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/confidere/img_vendas/g1_4158_95014_1703_120923.jpg",
+          "source_url": "https://www.imobiliariaconfidere.com.br/imovel/venda-apartamento-04-dormitorio-em-itapema/milano-exclusive-residence/4158",
+          "source_label": "Confidere Imoveis"
+        },
+        {
+          "title": "Milano Exclusive Residence - entrada social",
+          "category": "Hall",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/confidere/img_vendas/i1_4158_95014_1703_120923.jpg",
+          "source_url": "https://www.imobiliariaconfidere.com.br/imovel/venda-apartamento-04-dormitorio-em-itapema/milano-exclusive-residence/4158",
+          "source_label": "Confidere Imoveis"
+        },
+        {
+          "title": "Milano Exclusive Residence - elevadores",
+          "category": "Circulacao",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/confidere/img_vendas/g1_4158_95022_1703_120923.jpg",
+          "source_url": "https://www.imobiliariaconfidere.com.br/imovel/venda-apartamento-04-dormitorio-em-itapema/milano-exclusive-residence/4158",
+          "source_label": "Confidere Imoveis"
+        },
+        {
+          "title": "Milano Exclusive Residence - apoio social",
+          "category": "Circulacao",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/confidere/img_vendas/p1_4158_95022_1703_120923.jpg",
+          "source_url": "https://www.imobiliariaconfidere.com.br/imovel/venda-apartamento-04-dormitorio-em-itapema/milano-exclusive-residence/4158",
+          "source_label": "Confidere Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente mar em Itapema",
+          "description": "Implantacao no Canto da Praia, com presenca direta na orla e vista costeira."
+        },
+        {
+          "icon": "Building2",
+          "title": "Projeto boutique",
+          "description": "As fontes apontam um empreendimento de baixa densidade, com poucas residencias e alto padrao."
+        },
+        {
+          "icon": "DoorOpen",
+          "title": "Hall e acesso revisados",
+          "description": "A nova galeria inclui hall, elevadores e fachada, dando contexto real ao condominio."
+        },
+        {
+          "icon": "Car",
+          "title": "Estrutura privativa",
+          "description": "Fontes comerciais citam vagas e deposito, compondo o posicionamento premium do edificio."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Imagem institucional",
+          "description": "Hero retirado da AL Empreendimentos e complementado por imagens de fachada e hall."
+        },
+        {
+          "title": "Localizacao valorizada",
+          "description": "A copy diferencia o Canto da Praia e a condicao frente mar."
+        },
+        {
+          "title": "Menos ruido de oferta",
+          "description": "A pagina passa a vender o empreendimento antes dos detalhes de disponibilidade."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Milano Exclusive Residence?",
+          "answer": "No Canto da Praia, em Itapema, com referencias de empreendimento frente mar."
+        },
+        {
+          "question": "Qual construtora aparece nas fontes?",
+          "answer": "A AL Empreendimentos e citada como fonte principal do projeto."
+        },
+        {
+          "question": "Quais imagens foram usadas?",
+          "answer": "Fachada, implantacao na orla, hall social, entrada e elevadores."
+        },
+        {
+          "question": "O que mudou na pagina?",
+          "answer": "A midia passou a mostrar o empreendimento e nao ambientes internos da oferta."
+        }
+      ],
+      "sources": [
+        "https://alempreendimentos.com.br/milano-exclusive-residence-o-luxo-de-viver-bem/",
+        "https://www.imobiliariaconfidere.com.br/imovel/venda-apartamento-04-dormitorio-em-itapema/milano-exclusive-residence/4158",
+        "https://www.imobiliariafrasson.com.br/imovel/exclusividade-e-alto-padrao-a-beira-mar/30"
+      ]
+    },
+    {
+      "slug": "montreal",
+      "hero_image": "https://www.invictaimoveisbc.com.br/imgs/600x315-destaque-center:big-4ceabc61be6271e832f4a4b218077e7a.jpeg",
+      "description": "O Montreal foi revisado como edificio frente mar no Centro de Balneario Camboriu, com referencias publicas na Avenida Atlantica e na Barra Norte. A curadoria remove a dependencia das fotos internas e usa somente imagens externas do predio, preservando um perfil objetivo para um condominio tradicional em localizacao rara na orla.",
+      "seo_description": "Edificio Montreal no Centro de Balneario Camboriu, com fachada real e acesso na Avenida Atlantica.",
+      "gallery": [
+        {
+          "title": "Montreal - fachada na Avenida Atlantica",
+          "category": "Fachada",
+          "image": "https://www.invictaimoveisbc.com.br/imgs/600x315-destaque-center:big-4ceabc61be6271e832f4a4b218077e7a.jpeg",
+          "source_url": "https://www.invictaimoveisbc.com.br/detalhes-imovel/1289-predio-venda-barra-norte-balneario-camboriu-sc.html",
+          "source_label": "Invicta Imoveis"
+        },
+        {
+          "title": "Montreal - vista da torre",
+          "category": "Fachada",
+          "image": "https://www.invictaimoveisbc.com.br/uploads/imovel/galeria/big-4ceabc61be6271e832f4a4b218077e7a.jpeg",
+          "source_url": "https://www.invictaimoveisbc.com.br/detalhes-imovel/1289-predio-venda-barra-norte-balneario-camboriu-sc.html",
+          "source_label": "Invicta Imoveis"
+        },
+        {
+          "title": "Montreal - base urbana",
+          "category": "Fachada",
+          "image": "https://www.invictaimoveisbc.com.br/uploads/imovel/galeria/big-16f3a7a40f54e266dc1bed2297272323.jpeg",
+          "source_url": "https://www.invictaimoveisbc.com.br/detalhes-imovel/1289-predio-venda-barra-norte-balneario-camboriu-sc.html",
+          "source_label": "Invicta Imoveis"
+        },
+        {
+          "title": "Montreal - acesso no Centro",
+          "category": "Acesso",
+          "image": "https://www.invictaimoveisbc.com.br/uploads/imovel/galeria/big-a4b3d5ecd39769dae6f9184702e081cf.jpg",
+          "source_url": "https://www.invictaimoveisbc.com.br/detalhes-imovel/1289-predio-venda-barra-norte-balneario-camboriu-sc.html",
+          "source_label": "Invicta Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Avenida Atlantica",
+          "description": "Endereco de orla no Centro de Balneario Camboriu, com leitura direta da Barra Norte."
+        },
+        {
+          "icon": "Building2",
+          "title": "Predio tradicional",
+          "description": "Fonte cadastral aponta historico consolidado do condominio na cidade."
+        },
+        {
+          "icon": "Eye",
+          "title": "Fachada verificada",
+          "description": "A nova galeria usa imagens externas obtidas de fonte independente da oferta ativa."
+        },
+        {
+          "icon": "Waves",
+          "title": "Frente mar",
+          "description": "A comunicacao reforca a relacao com a orla, sem misturar fotos de ambientes privativos."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Curadoria conservadora",
+          "description": "Foram usadas apenas quatro imagens externas claramente relacionadas ao edificio."
+        },
+        {
+          "title": "Copy objetiva",
+          "description": "A descricao agora contextualiza Centro, Avenida Atlantica e Barra Norte."
+        },
+        {
+          "title": "Menos risco visual",
+          "description": "A pagina deixa de herdar imagens internas da oferta vinculada."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Montreal?",
+          "answer": "No Centro de Balneario Camboriu, com referencias publicas na Avenida Atlantica."
+        },
+        {
+          "question": "As imagens mostram areas internas?",
+          "answer": "Nao. A curadoria manteve fachada, base urbana e acesso externo."
+        },
+        {
+          "question": "Por que usar uma galeria curta?",
+          "answer": "Porque as fontes localizadas para lazer eram insuficientes; foi melhor manter imagens externas verificadas."
+        },
+        {
+          "question": "Qual foi o ganho da revisao?",
+          "answer": "A pagina passou a apresentar o condominio real antes de qualquer leitura de disponibilidade."
+        }
+      ],
+      "sources": [
+        "https://www.invictaimoveisbc.com.br/detalhes-imovel/1289-predio-venda-barra-norte-balneario-camboriu-sc.html",
+        "https://loft.com.br/condominio/condominio-edificio-montreal-centro-balneario-camboriu-sc/XIB6Z7XC",
+        "https://www.econodata.com.br/consulta-empresa/76698125000107-condominio-edificio-montreal"
+      ]
+    },
+    {
+      "slug": "north-shore",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-north-shore-balneario-camboriu-1.jpg",
+      "description": "O North Shore Residence foi revisado como empreendimento vertical em Balneario Camboriu, com fachada, lobby e lazer agora separados das imagens da oferta. A pagina passa a comunicar a torre, os ambientes sociais, a piscina, o deck e o pub do condominio, trazendo uma leitura mais completa para quem avalia o empreendimento no Centro/Barra Sul.",
+      "seo_description": "North Shore Residence em Balneario Camboriu, com fachada, lobby, piscina, deck e pub do condominio.",
+      "gallery": [
+        {
+          "title": "North Shore - fachada principal",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-north-shore-balneario-camboriu-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-north-shore/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "North Shore - fachada vertical",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-north-shore-balneario-camboriu-2.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-north-shore/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "North Shore - torre em perspectiva",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/441/img-83.jpg?1703249423",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/441/north-shore-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "North Shore - lobby social",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/441/img-81.jpg?1703249423",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/441/north-shore-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "North Shore - estar de recepcao",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/441/img-80.jpg?1703249423",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/441/north-shore-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "North Shore - piscina externa",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2022/img-9459-1660767208.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-north-shore-EM58325",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "North Shore - gourmet da piscina",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2022/img-9455-1660767208.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-north-shore-EM58325",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "North Shore - deck de lazer",
+          "category": "Deck",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2022/img-9461-1660767209.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-north-shore-EM58325",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "North Shore - terraco externo",
+          "category": "Deck",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2022/img-9462-1660767209.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-north-shore-EM58325",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "North Shore - pub",
+          "category": "Pub",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2022/img-9467-1660767210.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-north-shore-EM58325",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "North Shore - jogos",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2022/img-9468-1660767211.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-north-shore-EM58325",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "North Shore - ambiente gourmet",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2022/img-9471-1660767211.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-north-shore-EM58325",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Torre identificada",
+          "description": "Fachadas de fontes externas mostram o predio antes de qualquer detalhe de disponibilidade."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e deck",
+          "description": "A galeria inclui piscina, deck externo e areas de convivencia do lazer."
+        },
+        {
+          "icon": "Martini",
+          "title": "Pub e jogos",
+          "description": "Ambientes sociais aparecem na curadoria para reforcar o uso comum do empreendimento."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Centro de Balneario",
+          "description": "A copy posiciona o North Shore na regiao central, com leitura de acesso a orla e servicos."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Galeria robusta",
+          "description": "Foram combinadas fotos de fachada, hall e lazer para substituir imagens privativas."
+        },
+        {
+          "title": "Fontes independentes",
+          "description": "Litoral Vertical, Imobille e Felicita sustentam a selecao visual."
+        },
+        {
+          "title": "Lazer legivel",
+          "description": "Piscina, deck, gourmet, pub e jogos ficam claros na experiencia da pagina."
+        }
+      ],
+      "faq": [
+        {
+          "question": "O que aparece na nova galeria do North Shore?",
+          "answer": "Fachada, lobby, piscina, deck, gourmet, pub e jogos."
+        },
+        {
+          "question": "As imagens sao do condominio?",
+          "answer": "Sim. Foram escolhidas imagens externas e de areas comuns de fontes do empreendimento."
+        },
+        {
+          "question": "Onde o empreendimento esta posicionado?",
+          "answer": "Em Balneario Camboriu, com leitura de Centro/Barra Sul nas fontes imobiliarias."
+        },
+        {
+          "question": "Qual foi a correcao principal?",
+          "answer": "Trocar midias da oferta por imagens do empreendimento e melhorar a descricao do condominio."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-north-shore-EM58325",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-north-shore/",
+        "https://felicitanegocios.com.br/empreendimento/441/north-shore-residence/"
+      ]
+    },
+    {
+      "slug": "opera",
+      "hero_image": "https://img.apre.me/DcwxDsMwCADA3zCC46hDK-EYYlkuVVIQpvL3m_2ma_wLyoNtwfg6HiKFdUHlCcM-uNX9WctGfYScNLtmdLfwm0MupTjwsoZ2-sKwaUpOotf0zDcrlP2e2x8.jpg",
+      "description": "O Opera foi corrigido como empreendimento da CNA em Meia Praia, Itapema, sem confundir com empreendimentos de nome parecido em Balneario Camboriu. A selecao evita URLs assinadas da pagina oficial e usa imagens estaveis de fachada, acesso, hall e eventos, enquanto a copy reforca Rua 283, entrega prevista para dezembro de 2026, torre de alto padrao e lazer de perfil completo.",
+      "seo_description": "Opera CNA em Meia Praia, Itapema: fachada, acesso, hall e eventos com imagens estaveis do empreendimento.",
+      "gallery": [
+        {
+          "title": "Opera - fachada principal",
+          "category": "Fachada",
+          "image": "https://img.apre.me/DcwxDsMwCADA3zCC46hDK-EYYlkuVVIQpvL3m_2ma_wLyoNtwfg6HiKFdUHlCcM-uNX9WctGfYScNLtmdLfwm0MupTjwsoZ2-sKwaUpOotf0zDcrlP2e2x8.jpg",
+          "source_url": "https://jsobrinho.com.br/opera",
+          "source_label": "JSobrinho Imoveis"
+        },
+        {
+          "title": "Opera - torre em destaque",
+          "category": "Fachada",
+          "image": "https://img.apre.me/DcZJDoAgDADA33hsWeJBEx6DhGANpE1b-69zmlxsG-JATPlIIWIfWidaJ9curPJ31EWoFyxuwPNVhkZe3RBPE-e70BZy2Ev7AA.jpg",
+          "source_url": "https://jsobrinho.com.br/opera",
+          "source_label": "JSobrinho Imoveis"
+        },
+        {
+          "title": "Opera - vista da torre",
+          "category": "Fachada",
+          "image": "https://img.apre.me/DcwxDsMgDADA33i0KahDIvkxDkLEVVIs44rvN9tNV9kWpDePBf1reIgk1gWZJ3T7YMlly_lFrbtcNJuGNxtuD7vcSn7gPSqO6_cDq4bEJNqnRZyskMoz1z8.jpg",
+          "source_url": "https://jsobrinho.com.br/opera",
+          "source_label": "JSobrinho Imoveis"
+        },
+        {
+          "title": "Opera - fachada vertical",
+          "category": "Fachada",
+          "image": "https://img.apre.me/DcwxDsMwCADA3zCC6yhDK-EYYlkuVVIQpvL3m_2ma_wLys62YHwdD5HCuqDyhOEf3Ov2rOVBfYScNLtmdLfwm0MupTjwsoZ2-sKwaUpOotf0zDcrlO2e2x8.jpg",
+          "source_url": "https://jsobrinho.com.br/opera",
+          "source_label": "JSobrinho Imoveis"
+        },
+        {
+          "title": "Opera - acesso ornamentado",
+          "category": "Acesso",
+          "image": "https://img.apre.me/DcxBDgIxCADA33CE2o0xmvAYtmkqZlcIxfT77m1O09gXlDvbgvF13EUK64LKE4Z-8FG3Zy036iPkoNk1o7uFXxxyKsWOpzW04xeGTVNyEr2mZ75ZoWzX3P4.jpg",
+          "source_url": "https://jsobrinho.com.br/opera",
+          "source_label": "JSobrinho Imoveis"
+        },
+        {
+          "title": "Opera - base urbana",
+          "category": "Fachada",
+          "image": "https://img.apre.me/DcwxDsMwCADA3zCC66hDKvEYYlkuVVIQpvL3m_2ma_wLypNtwfg6HiKFdUHlCcM-uNdtr_VBfYScNLtmdLfwm0MupTjwsoZ2-sKwaUpOotf0zDcrlO2e2x8.jpg",
+          "source_url": "https://jsobrinho.com.br/opera",
+          "source_label": "JSobrinho Imoveis"
+        },
+        {
+          "title": "Opera - portico de entrada",
+          "category": "Acesso",
+          "image": "https://img.apre.me/DcwxDsMwCADA3zCCE6tDK-EYYlkuVVIQpvL3m_2ma_wLyoNtwfg6HiKFdcHOE4Z-cKv1uZeN_gg5aXbN6G7hN4dcSnHgZQ3t-IVh05ScRK-pmW9WKPWe2x8.jpg",
+          "source_url": "https://jsobrinho.com.br/opera",
+          "source_label": "JSobrinho Imoveis"
+        },
+        {
+          "title": "Opera - frente neoclassica",
+          "category": "Fachada",
+          "image": "https://img.apre.me/DcwxDsMwCADA3zCCG6tDK-EYYlkOVVIQpvL3m_2ma_wLypNtwfg67iKFdcHGE4Z-sNb62sqD_gg5aXbN6G7hN4dcSrHjZQ3t-IVh05ScRO-pmQcrlHrP7Q8.jpg",
+          "source_url": "https://jsobrinho.com.br/opera",
+          "source_label": "JSobrinho Imoveis"
+        },
+        {
+          "title": "Opera - lobby social",
+          "category": "Hall",
+          "image": "https://img.apre.me/DcwxDsMwCADA3zCCGytDK-EYYlkuVVIQpvL3m_2ma_wLys62YHwdD5HCumDjCcM-uNf63MqD_gg5aXbN6G7hN4dcSnHgZQ3t-IVh05ScRK-pmW9WKPWe2x8.jpg",
+          "source_url": "https://jsobrinho.com.br/opera",
+          "source_label": "JSobrinho Imoveis"
+        },
+        {
+          "title": "Opera - estar de recepcao",
+          "category": "Hall",
+          "image": "https://img.apre.me/DcxBDgIxCADA33CEuo0xmvAYtmkqZlcIxfT77m1O09gXlDvbgvF13EUK64KNJwz-4KPW51Zu1EfIQbNrRncLvzjkVIodT2toxy8Mm6bkJHpNz3yzQqnX3P4.jpg",
+          "source_url": "https://jsobrinho.com.br/opera",
+          "source_label": "JSobrinho Imoveis"
+        },
+        {
+          "title": "Opera - ambiente de eventos",
+          "category": "Eventos",
+          "image": "https://cnaconstrutora.com.br/wp-content/uploads/2023/09/festas_site_1.png",
+          "source_url": "https://cnaconstrutora.com.br/lancamentos/107",
+          "source_label": "CNA Construtora"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Meia Praia",
+          "description": "Fontes do empreendimento posicionam o Opera na Rua 283, em Itapema."
+        },
+        {
+          "icon": "Building2",
+          "title": "CNA Construtora",
+          "description": "A pagina passa a identificar o projeto correto, assinado pela CNA."
+        },
+        {
+          "icon": "CalendarClock",
+          "title": "Entrega prevista",
+          "description": "Fontes comerciais indicam previsao de entrega para dezembro de 2026."
+        },
+        {
+          "icon": "DoorOpen",
+          "title": "Hall e acesso",
+          "description": "A nova galeria mostra fachada, portico, hall e eventos do empreendimento."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Sem link expiravel",
+          "description": "Imagens assinadas da CNA foram descartadas quando podiam expirar, mantendo URLs estaveis."
+        },
+        {
+          "title": "Empreendimento correto",
+          "description": "A copy distingue o Opera CNA de projetos homonimos em outras cidades."
+        },
+        {
+          "title": "Visual neoclassico",
+          "description": "Fachada e portico reforcam a linguagem arquitetonica do empreendimento."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Qual Opera foi auditado?",
+          "answer": "O Opera da CNA Construtora, em Meia Praia, Itapema."
+        },
+        {
+          "question": "Por que algumas imagens oficiais nao entraram?",
+          "answer": "Porque estavam em URLs assinadas e poderiam expirar, criando risco de imagem quebrada."
+        },
+        {
+          "question": "Quais imagens entraram?",
+          "answer": "Fachada, torre, portico, base urbana, hall e ambiente de eventos."
+        },
+        {
+          "question": "Qual informacao de prazo foi usada?",
+          "answer": "Fontes consultadas indicam entrega prevista para dezembro de 2026."
+        }
+      ],
+      "sources": [
+        "https://cnaconstrutora.com.br/lancamentos/107",
+        "https://myside.com.br/apartamento-venda-opera-cna-itapema-sc",
+        "https://jsobrinho.com.br/opera"
+      ]
+    },
+    {
+      "slug": "origem",
+      "hero_image": "https://neuhausinc.com.br/wp-content/uploads/2025/02/Neuhaus_Origem-3300_Fachada.jpg",
+      "description": "O Origem 3300 foi revisado com imagens oficiais da Neuhaus para evidenciar o empreendimento na Rua 3300, no Centro de Balneario Camboriu. Como as demais imagens publicas misturavam ambientes privativos, a curadoria manteve fachada e volumetria da torre, atualizando a copy com foco em localizacao urbana, assinatura da incorporadora e proposta contemporanea do projeto.",
+      "seo_description": "Origem 3300 da Neuhaus em Balneario Camboriu, com fachada oficial e leitura urbana da torre.",
+      "gallery": [
+        {
+          "title": "Origem 3300 - fachada principal",
+          "category": "Fachada",
+          "image": "https://neuhausinc.com.br/wp-content/uploads/2025/02/Neuhaus_Origem-3300_Fachada.jpg",
+          "source_url": "https://neuhausinc.com.br/origem-3300/",
+          "source_label": "Neuhaus"
+        },
+        {
+          "title": "Origem 3300 - fachada dia",
+          "category": "Fachada",
+          "image": "https://neuhausinc.com.br/wp-content/uploads/2025/02/Neuhaus_Origem_Fachada_Dia.jpg",
+          "source_url": "https://neuhausinc.com.br/origem-3300/",
+          "source_label": "Neuhaus"
+        },
+        {
+          "title": "Origem 3300 - vista vertical",
+          "category": "Fachada",
+          "image": "https://neuhausinc.com.br/wp-content/uploads/2025/02/Neuhaus_Origem_Fachada_Dia-731x1024.jpg",
+          "source_url": "https://neuhausinc.com.br/origem-3300/",
+          "source_label": "Neuhaus"
+        },
+        {
+          "title": "Origem 3300 - torre urbana",
+          "category": "Fachada",
+          "image": "https://neuhausinc.com.br/wp-content/uploads/2025/02/Neuhaus_Origem_Fachada_Dia-768x1075.jpg",
+          "source_url": "https://neuhausinc.com.br/origem-3300/",
+          "source_label": "Neuhaus"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 3300",
+          "description": "Endereco no Centro de Balneario Camboriu, em malha urbana com servicos e acesso a praia."
+        },
+        {
+          "icon": "Building2",
+          "title": "Neuhaus",
+          "description": "Imagens oficiais da incorporadora foram usadas para corrigir a apresentacao visual."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Projeto contemporaneo",
+          "description": "A fachada evidencia linguagem atual e implantacao urbana de alto padrao."
+        },
+        {
+          "icon": "Eye",
+          "title": "Curadoria precisa",
+          "description": "A galeria ficou focada em fachadas para evitar imagens internas da oferta."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fonte oficial",
+          "description": "A midia veio da Neuhaus, reduzindo risco de imagem desalinhada."
+        },
+        {
+          "title": "Foco no edificio",
+          "description": "A pagina apresenta a torre antes de tratar das disponibilidades."
+        },
+        {
+          "title": "Sem interior privativo",
+          "description": "Imagens de cozinha e terraco privativo foram descartadas da selecao final."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Origem 3300?",
+          "answer": "Na Rua 3300, no Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Qual fonte de imagem foi usada?",
+          "answer": "A pagina oficial da Neuhaus."
+        },
+        {
+          "question": "Por que ha poucas imagens?",
+          "answer": "Porque apenas fachadas oficiais eram seguras para representar o empreendimento sem misturar ambientes privativos."
+        },
+        {
+          "question": "O que foi melhorado na copy?",
+          "answer": "A descricao passou a destacar localizacao, incorporadora e linguagem do projeto."
+        }
+      ],
+      "sources": [
+        "https://neuhausinc.com.br/origem-3300/",
+        "https://myside.com.br/apartamento-venda-origem-3300-balneario-camboriu-sc",
+        "https://lancamento.invexo.com.br/sc/origem-3300-balneario-camboriu/"
+      ]
+    },
+    {
+      "slug": "palm-beach",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/w4hnwisvjm6zujldccq0-1673722645.jpg",
+      "description": "O Palm Beach foi revisado como empreendimento entregue no Centro de Balneario Camboriu, com foco em fachada, hall e lazer. A nova galeria mostra piscina, deck, playground, gourmet, eventos, jogos, cinema, brinquedoteca, fitness e area esportiva, corrigindo o uso anterior de imagens da oferta e dando uma leitura mais completa do condominio.",
+      "seo_description": "Palm Beach em Balneario Camboriu, com fachada, hall, piscina, gourmet, cinema, fitness e lazer real.",
+      "gallery": [
+        {
+          "title": "Palm Beach - fachada principal",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/w4hnwisvjm6zujldccq0-1673722645.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-palm-beach-EM96263",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Palm Beach - fachada vertical",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/729/img-78.jpg?1739551172",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/729/palm-beach",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Palm Beach - hall social",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/729/img-77.jpg?1739551172",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/729/palm-beach",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Palm Beach - recepcao ajardinada",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/729/img-76.jpg?1739551172",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/729/palm-beach",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Palm Beach - piscina externa",
+          "category": "Piscina",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/2249/iztB0bDty85_224960e06dcb7b62a.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/2513/palm-beach/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Palm Beach - deck da piscina",
+          "category": "Deck",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/2249/iztB0bDty85_224960e06dcf2d4ad.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/2513/palm-beach/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Palm Beach - piscina e estar externo",
+          "category": "Piscina",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/2249/iztB0bDty85_224960e06dca95740.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/2513/palm-beach/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Palm Beach - playground",
+          "category": "Playground",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/2249/iztB0bDty85_224960e06dce392da.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/2513/palm-beach/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Palm Beach - gourmet social",
+          "category": "Gourmet",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/2249/iztB0bDty85_224960e06dd0eec64.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/2513/palm-beach/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Palm Beach - eventos",
+          "category": "Eventos",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/2249/iztB0bDty85_224960e06dc8a801a.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/2513/palm-beach/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Palm Beach - jogos",
+          "category": "Jogos",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/2249/iztB0bDty85_224960e06dc7bff43.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/2513/palm-beach/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Palm Beach - cinema",
+          "category": "Cinema",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/2249/iztB0bDty85_224960e06dd1c6ac6.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/2513/palm-beach/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Palm Beach - brinquedoteca",
+          "category": "Brinquedoteca",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/2249/iztB0bDty85_224960e06dcc7f382.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/2513/palm-beach/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Palm Beach - fitness",
+          "category": "Fitness",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/2249/iztB0bDty85_224960e06dc6cf8c1.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/2513/palm-beach/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Palm Beach - espaco esportivo",
+          "category": "Esporte",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/2249/iztB0bDty85_224960e06ea19eb10.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/2513/palm-beach/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Palm Beach - acesso externo",
+          "category": "Acesso",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/2249/iztB0bDty85_224960e06e9fce567.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/2513/palm-beach/",
+          "source_label": "VG Imobiliaria"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro de Balneario",
+          "description": "Fontes do empreendimento posicionam o Palm Beach em regiao central, proxima a orla."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e deck",
+          "description": "A galeria passa a mostrar lazer externo real do condominio."
+        },
+        {
+          "icon": "Gamepad2",
+          "title": "Lazer completo",
+          "description": "Eventos, jogos, cinema, brinquedoteca, fitness e espaco esportivo entram na comunicacao."
+        },
+        {
+          "icon": "DoorOpen",
+          "title": "Hall revisado",
+          "description": "Hall e recepcao substituem fotos de ambientes privativos da oferta."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Boa cobertura visual",
+          "description": "O empreendimento tinha material publico suficiente para uma galeria ampla de areas comuns."
+        },
+        {
+          "title": "Fontes complementares",
+          "description": "Imobille, Felicita, Cecpas e VG ajudaram a conferir fachada e lazer."
+        },
+        {
+          "title": "Mais decisao na pagina",
+          "description": "A pessoa visitante agora entende o lazer antes de acionar o atendimento."
+        }
+      ],
+      "faq": [
+        {
+          "question": "O Palm Beach fica onde?",
+          "answer": "No Centro de Balneario Camboriu, com referencias de proximidade da orla."
+        },
+        {
+          "question": "Quais areas comuns aparecem?",
+          "answer": "Piscina, deck, playground, gourmet, eventos, jogos, cinema, brinquedoteca, fitness e esporte."
+        },
+        {
+          "question": "As imagens de dormitorios foram usadas?",
+          "answer": "Nao. A curadoria retirou imagens de ambientes privativos da selecao final."
+        },
+        {
+          "question": "Qual foi a principal melhoria?",
+          "answer": "A pagina passou a representar o condominio com uma galeria completa de fachada e lazer."
+        }
+      ],
+      "sources": [
+        "https://cecpas.com.br/palmbeach",
+        "https://felicitanegocios.com.br/empreendimento/729/palm-beach",
+        "https://vgimobiliaria.com.br/empreendimento/2513/palm-beach/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-palm-beach-EM96263"
+      ]
+    },
+    {
+      "slug": "paraiso",
+      "hero_image": "https://blog.danisaucedoimoveis.com.br/wp-content/uploads/2023/06/IMG_1233-1-scaled-1-768x1024.jpg",
+      "description": "O Edificio Paraiso foi revisado como condominio frente mar na Avenida Atlantica, no Centro de Balneario Camboriu. A pagina passa a destacar fachada, piscina, deck, solarium, lounge, quadra, gourmet e eventos, com fontes que mostram o empreendimento e suas areas comuns em vez de imagens internas da oferta.",
+      "seo_description": "Edificio Paraiso frente mar em Balneario Camboriu, com fachada, piscina, deck, quadra e gourmet.",
+      "gallery": [
+        {
+          "title": "Paraiso - fachada na Avenida Atlantica",
+          "category": "Fachada",
+          "image": "https://blog.danisaucedoimoveis.com.br/wp-content/uploads/2023/06/IMG_1233-1-scaled-1-768x1024.jpg",
+          "source_url": "https://blog.danisaucedoimoveis.com.br/conheca-o-edificio-paraiso-em-balneario-camboriu/",
+          "source_label": "Dani Saucedo Imoveis"
+        },
+        {
+          "title": "Paraiso - torre frente mar",
+          "category": "Fachada",
+          "image": "https://blog.danisaucedoimoveis.com.br/wp-content/uploads/2023/06/IMG_1233-1-scaled-1.jpg",
+          "source_url": "https://blog.danisaucedoimoveis.com.br/conheca-o-edificio-paraiso-em-balneario-camboriu/",
+          "source_label": "Dani Saucedo Imoveis"
+        },
+        {
+          "title": "Paraiso - fachada renovada",
+          "category": "Fachada",
+          "image": "https://blog.danisaucedoimoveis.com.br/wp-content/uploads/2023/06/IMG_1233-1-scaled-1-1200x900.jpg",
+          "source_url": "https://blog.danisaucedoimoveis.com.br/conheca-o-edificio-paraiso-em-balneario-camboriu/",
+          "source_label": "Dani Saucedo Imoveis"
+        },
+        {
+          "title": "Paraiso - piscina frente mar",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/1308202409571517162-1723553835.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/apartamento-frente-mar-no-centro-no-edificio-paraiso-em-balneario-camboriu-EM43637",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Paraiso - deck da piscina",
+          "category": "Deck",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/paraiso-53-1723553724.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/apartamento-frente-mar-no-centro-no-edificio-paraiso-em-balneario-camboriu-EM43637",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Paraiso - lazer externo",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/paraiso-44-1723553721.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/apartamento-frente-mar-no-centro-no-edificio-paraiso-em-balneario-camboriu-EM43637",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Paraiso - solarium",
+          "category": "Deck",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/paraiso-57-1723553725.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/apartamento-frente-mar-no-centro-no-edificio-paraiso-em-balneario-camboriu-EM43637",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Paraiso - gourmet externo",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/paraiso-54-1723553725.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/apartamento-frente-mar-no-centro-no-edificio-paraiso-em-balneario-camboriu-EM43637",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Paraiso - lounge coberto",
+          "category": "Lounge",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/paraiso-43-1723553720.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/apartamento-frente-mar-no-centro-no-edificio-paraiso-em-balneario-camboriu-EM43637",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Paraiso - quadra esportiva",
+          "category": "Esporte",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/paraiso-45-1723553721.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/apartamento-frente-mar-no-centro-no-edificio-paraiso-em-balneario-camboriu-EM43637",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Paraiso - gourmet social",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/paraiso-47-1723553722.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/apartamento-frente-mar-no-centro-no-edificio-paraiso-em-balneario-camboriu-EM43637",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Paraiso - eventos",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/paraiso-48-1723553722.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/apartamento-frente-mar-no-centro-no-edificio-paraiso-em-balneario-camboriu-EM43637",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Paraiso - area de praia",
+          "category": "Piscina",
+          "image": "https://betaimages.lopes.com.br/realestate/sml/v1/REO836928/20706B6892C90C45981F4553A43EBCB5.JPG",
+          "source_url": "https://www.lopes.com.br/condominios/sc/balneario-camboriu/centro/REC27131/condominio-edificio-paraiso-avenida-atlantica-1230",
+          "source_label": "lopes.com.br"
+        },
+        {
+          "title": "Paraiso - terraco externo",
+          "category": "Deck",
+          "image": "https://betaimages.lopes.com.br/realestate/sml/v1/REO835906/4A7BA86DDB82CCB68E2ACAE815640D7A.JPEG",
+          "source_url": "https://www.lopes.com.br/condominios/sc/balneario-camboriu/centro/REC27131/condominio-edificio-paraiso-avenida-atlantica-1230",
+          "source_label": "lopes.com.br"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Avenida Atlantica",
+          "description": "Endereco frente mar no Centro de Balneario Camboriu, uma das localizacoes mais reconhecidas da cidade."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e solarium",
+          "description": "A nova galeria mostra lazer externo com piscina, deck e solarium junto a orla."
+        },
+        {
+          "icon": "Volleyball",
+          "title": "Quadra esportiva",
+          "description": "O condominio conta com area esportiva registrada nas fontes visuais."
+        },
+        {
+          "icon": "Utensils",
+          "title": "Gourmet e eventos",
+          "description": "Ambientes sociais entram na pagina para contextualizar a experiencia do edificio."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Frente mar evidenciada",
+          "description": "A curadoria usa fachada e lazer para reforcar a Avenida Atlantica."
+        },
+        {
+          "title": "Midia de areas comuns",
+          "description": "Piscina, deck, quadra, gourmet e eventos substituem imagens da oferta."
+        },
+        {
+          "title": "Copy mais util",
+          "description": "A descricao agora comunica localizacao, lazer e carater consolidado do edificio."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Edificio Paraiso?",
+          "answer": "Na Avenida Atlantica, no Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Que areas comuns aparecem?",
+          "answer": "Piscina, deck, solarium, lounge, quadra, gourmet e eventos."
+        },
+        {
+          "question": "A fachada foi atualizada?",
+          "answer": "Sim. A nova selecao inclui fachada frente mar e vista da torre."
+        },
+        {
+          "question": "Por que a pagina foi corrigida?",
+          "answer": "Para representar o condominio e nao apenas a oferta ativa vinculada."
+        }
+      ],
+      "sources": [
+        "https://blog.danisaucedoimoveis.com.br/conheca-o-edificio-paraiso-em-balneario-camboriu/",
+        "https://www.imobillenegocios.com.br/empreendimento/apartamento-frente-mar-no-centro-no-edificio-paraiso-em-balneario-camboriu-EM43637",
+        "https://www.lopes.com.br/condominios/sc/balneario-camboriu/centro/REC27131/condominio-edificio-paraiso-avenida-atlantica-1230",
+        "https://prosperitaimoveisenegocios.com.br/apartamento-a-venda-frente-mar-no-edificio-paraiso-em-balneario-camboriu"
+      ]
+    },
+    {
+      "slug": "paramount-tower",
+      "hero_image": "https://krcon.com.br/wp-content/uploads/2024/04/dji-0027-1.jpg",
+      "description": "O Paramount Tower foi revisado com prioridade para a fonte oficial da KRCON em Meia Praia, Itapema. A pagina deixa de depender de imagens internas e passa a mostrar fachada neoclassica, entrada, portaria, lobby, piscina, deck e playground, reforcando a localizacao na Rua 313 e o perfil de alto padrao quadra mar.",
+      "seo_description": "Paramount Tower em Meia Praia, Itapema: fachada, entrada, lobby, piscina, deck e playground.",
+      "gallery": [
+        {
+          "title": "Paramount Tower - vista aerea",
+          "category": "Fachada",
+          "image": "https://krcon.com.br/wp-content/uploads/2024/04/dji-0027-1.jpg",
+          "source_url": "https://krcon.com.br/empreendimento/paramount-tower/",
+          "source_label": "KRCON"
+        },
+        {
+          "title": "Paramount Tower - fachada neoclassica",
+          "category": "Fachada",
+          "image": "https://krcon.com.br/wp-content/uploads/2024/04/dsc01563.jpg",
+          "source_url": "https://krcon.com.br/empreendimento/paramount-tower/",
+          "source_label": "KRCON"
+        },
+        {
+          "title": "Paramount Tower - entrada principal",
+          "category": "Acesso",
+          "image": "https://krcon.com.br/wp-content/uploads/2024/04/dsc01545.jpg",
+          "source_url": "https://krcon.com.br/empreendimento/paramount-tower/",
+          "source_label": "KRCON"
+        },
+        {
+          "title": "Paramount Tower - portaria social",
+          "category": "Acesso",
+          "image": "https://krcon.com.br/wp-content/uploads/2024/04/dsc01577.jpg",
+          "source_url": "https://krcon.com.br/empreendimento/paramount-tower/",
+          "source_label": "KRCON"
+        },
+        {
+          "title": "Paramount Tower - lobby social",
+          "category": "Hall",
+          "image": "https://krcon.com.br/wp-content/uploads/2024/04/dsc01478.jpg",
+          "source_url": "https://krcon.com.br/empreendimento/paramount-tower/",
+          "source_label": "KRCON"
+        },
+        {
+          "title": "Paramount Tower - detalhe do lobby",
+          "category": "Hall",
+          "image": "https://krcon.com.br/wp-content/uploads/2024/04/dsc01480.jpg",
+          "source_url": "https://krcon.com.br/empreendimento/paramount-tower/",
+          "source_label": "KRCON"
+        },
+        {
+          "title": "Paramount Tower - estar de recepcao",
+          "category": "Hall",
+          "image": "https://krcon.com.br/wp-content/uploads/2024/04/dsc01496.jpg",
+          "source_url": "https://krcon.com.br/empreendimento/paramount-tower/",
+          "source_label": "KRCON"
+        },
+        {
+          "title": "Paramount Tower - terraco com piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/0612202411432317184-1733496203.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-paramount-tower--EM41147",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Paramount Tower - deck social",
+          "category": "Deck",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2024/photoshop-novo-1-copia0012-1733495967.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-paramount-tower--EM41147",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Paramount Tower - piscina elevada",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2024/photoshop-novo-1-copia0014-1733495968.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-paramount-tower--EM41147",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Paramount Tower - piscina externa",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2024/photoshop-novo-1-copia0015-1733495968.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-paramount-tower--EM41147",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Paramount Tower - lazer infantil",
+          "category": "Playground",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2024/photoshop-novo-1-copia0008-1733495965.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-paramount-tower--EM41147",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Paramount Tower - estar externo",
+          "category": "Deck",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2024/photoshop-novo-1-copia0011-1733495966.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-paramount-tower--EM41147",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Paramount Tower - playground elevado",
+          "category": "Playground",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2024/photoshop-novo-1-copia0013-1733495967.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-paramount-tower--EM41147",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 313",
+          "description": "Fontes do empreendimento posicionam o Paramount Tower em Meia Praia, Itapema."
+        },
+        {
+          "icon": "Building2",
+          "title": "KRCON",
+          "description": "A galeria usa imagens oficiais para fachada, entrada, portaria e lobby."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina elevada",
+          "description": "O lazer externo aparece com piscina, deck e estar em terraco."
+        },
+        {
+          "icon": "Baby",
+          "title": "Lazer infantil",
+          "description": "Playground e areas de convivencia completam a leitura do condominio."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fonte oficial dominante",
+          "description": "As imagens principais vieram da KRCON, com complemento de lazer da Imobille."
+        },
+        {
+          "title": "Arquitetura clara",
+          "description": "Fachada neoclassica, entrada e lobby comunicam o padrao do empreendimento."
+        },
+        {
+          "title": "Quadra mar contextualizada",
+          "description": "A copy reforca Meia Praia e a posicao proxima da orla."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Paramount Tower?",
+          "answer": "Na Rua 313, em Meia Praia, Itapema."
+        },
+        {
+          "question": "Qual construtora aparece como fonte?",
+          "answer": "A KRCON e a fonte oficial usada para fachada, entrada e lobby."
+        },
+        {
+          "question": "Que lazer aparece na galeria?",
+          "answer": "Piscina, deck, playground e areas externas de convivencia."
+        },
+        {
+          "question": "Qual foi a correcao aplicada?",
+          "answer": "Substituicao de fotos da oferta por imagens do empreendimento e das areas comuns."
+        }
+      ],
+      "sources": [
+        "https://krcon.com.br/empreendimento/paramount-tower/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-paramount-tower--EM41147",
+        "https://myside.com.br/apartamento-venda-paramount-tower-itapema-sc"
+      ]
+    },
+    {
+      "slug": "parque-do-lago",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/2508202511423617383-1756132956.jpg",
+      "description": "O Parque do Lago foi revisado como condominio fechado em Camboriu, com foco em portaria, lago central, clube, piscinas, quadras, jardins e vias internas. A pagina deixa de se apoiar em imagem de casa ou oferta especifica e passa a apresentar a infraestrutura do residencial, incluindo reserva verde, lazer amplo e controle de acesso.",
+      "seo_description": "Parque do Lago em Camboriu, com portaria, lago, clube, piscina, quadras, jardins e vias internas.",
+      "gallery": [
+        {
+          "title": "Parque do Lago - lago central",
+          "category": "Lago",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/2508202511423617383-1756132956.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/parque-do-lago-residencial--EM77487",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Parque do Lago - portaria principal",
+          "category": "Portaria",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1716/ip7nyeqv2t7c22wc_13350658b1b4dee059.jpg?1713416009",
+          "source_url": "https://maximoveis.com.br/empreendimento/1716/parque-do-lago/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Parque do Lago - eixo paisagistico",
+          "category": "Paisagismo",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1716/ip7nyeqv2t7c22wc_13350658b1b50af362.jpg?1713416009",
+          "source_url": "https://maximoveis.com.br/empreendimento/1716/parque-do-lago/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Parque do Lago - lago e areas verdes",
+          "category": "Lago",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1716/ip7nyeqv2t7c22wc_13350658b1b5383a8c.jpg?1713416009",
+          "source_url": "https://maximoveis.com.br/empreendimento/1716/parque-do-lago/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Parque do Lago - clube externo",
+          "category": "Clube",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1716/ip7nyeqv2t7c22wc_13350658b1b561e791.jpg?1713416009",
+          "source_url": "https://maximoveis.com.br/empreendimento/1716/parque-do-lago/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Parque do Lago - clube e jardins",
+          "category": "Clube",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1716/ip7nyeqv2t7c22wc_13350658b1b58f1a87.jpg?1713416009",
+          "source_url": "https://maximoveis.com.br/empreendimento/1716/parque-do-lago/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Parque do Lago - piscina do clube",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1716/ip7nyeqv2t7c22wc_13350658b1b5b72d4d.jpg?1713416009",
+          "source_url": "https://maximoveis.com.br/empreendimento/1716/parque-do-lago/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Parque do Lago - clube social",
+          "category": "Clube",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1716/ip7nyeqv2t7c22wc_13350658b1b5dc2f41.jpg?1713416009",
+          "source_url": "https://maximoveis.com.br/empreendimento/1716/parque-do-lago/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Parque do Lago - deck da piscina",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1716/ip7nyeqv2t7c22wc_13350658b1b605c16e.jpg?1713416009",
+          "source_url": "https://maximoveis.com.br/empreendimento/1716/parque-do-lago/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Parque do Lago - implantacao do lago",
+          "category": "Lago",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1716/ip7nyeqv2t7c22wc_13350658b1b62a637a.jpg?1713416009",
+          "source_url": "https://maximoveis.com.br/empreendimento/1716/parque-do-lago/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Parque do Lago - acesso ajardinado",
+          "category": "Acesso",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1716/ip7nyeqv2t7c22wc_13350658b1b67cbfb3.jpg?1713416009",
+          "source_url": "https://maximoveis.com.br/empreendimento/1716/parque-do-lago/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Parque do Lago - vista aerea",
+          "category": "Paisagismo",
+          "image": "https://cdn.midiati.com.br/pisettaimoveis/uploads/empreendimento/fotos/225/90be3b_anotacao_2023_08_04_112338.jpg?width=770&height=481&aspect_ratio=16:9",
+          "source_url": "https://www.pisettaimoveis.com.br/empreendimentos/condominio-fechado/condominio-fechado-concluido-em-camboriu-centro-condominio-parque-do-lago-6",
+          "source_label": "Pisetta Imoveis"
+        },
+        {
+          "title": "Parque do Lago - portico social",
+          "category": "Portaria",
+          "image": "https://cdn.midiati.com.br/pisettaimoveis/uploads/empreendimento/fotos/58/550c07_pl8.jpg?width=770&height=481&aspect_ratio=16:9",
+          "source_url": "https://www.pisettaimoveis.com.br/empreendimentos/condominio-fechado/condominio-fechado-concluido-em-camboriu-centro-condominio-parque-do-lago-6",
+          "source_label": "Pisetta Imoveis"
+        },
+        {
+          "title": "Parque do Lago - quadras e piscina",
+          "category": "Esporte",
+          "image": "https://cdn.midiati.com.br/pisettaimoveis/uploads/empreendimento/fotos/222/e6f773_anotacao_2023_08_04_112534.jpg?width=770&height=481&aspect_ratio=16:9",
+          "source_url": "https://www.pisettaimoveis.com.br/empreendimentos/condominio-fechado/condominio-fechado-concluido-em-camboriu-centro-condominio-parque-do-lago-6",
+          "source_label": "Pisetta Imoveis"
+        },
+        {
+          "title": "Parque do Lago - lazer do clube",
+          "category": "Clube",
+          "image": "https://cdn.midiati.com.br/pisettaimoveis/uploads/empreendimento/fotos/223/adb2ee_anotacao_2023_08_04_112508.jpg?width=770&height=481&aspect_ratio=16:9",
+          "source_url": "https://www.pisettaimoveis.com.br/empreendimentos/condominio-fechado/condominio-fechado-concluido-em-camboriu-centro-condominio-parque-do-lago-6",
+          "source_label": "Pisetta Imoveis"
+        },
+        {
+          "title": "Parque do Lago - lago panoramico",
+          "category": "Lago",
+          "image": "https://cdn.midiati.com.br/pisettaimoveis/uploads/empreendimento/fotos/226/017d7f_anotacao_2023_08_04_112413.jpg?width=770&height=481&aspect_ratio=16:9",
+          "source_url": "https://www.pisettaimoveis.com.br/empreendimentos/condominio-fechado/condominio-fechado-concluido-em-camboriu-centro-condominio-parque-do-lago-6",
+          "source_label": "Pisetta Imoveis"
+        },
+        {
+          "title": "Parque do Lago - espelho dagua",
+          "category": "Lago",
+          "image": "https://cdn.midiati.com.br/pisettaimoveis/uploads/empreendimento/fotos/228/cdf0c3_anotacao_2023_08_04_112218.jpg?width=770&height=481&aspect_ratio=16:9",
+          "source_url": "https://www.pisettaimoveis.com.br/empreendimentos/condominio-fechado/condominio-fechado-concluido-em-camboriu-centro-condominio-parque-do-lago-6",
+          "source_label": "Pisetta Imoveis"
+        },
+        {
+          "title": "Parque do Lago - acesso interno",
+          "category": "Acesso",
+          "image": "https://cdn.imoview.com.br/terraitajai/Condominios/451/1677533747214-e3abfed3-ba80-4f02-ae35-b0b91a59ab65.jpg?1707398635",
+          "source_url": "https://imoveisterra.net/empreendimento/451/parque-do-lago/",
+          "source_label": "Imoveis Terra"
+        },
+        {
+          "title": "Parque do Lago - panorama geral",
+          "category": "Paisagismo",
+          "image": "https://cdn.imoview.com.br/terraitajai/Condominios/451/parque-do-lago-site-aerea.jpg?1707398635",
+          "source_url": "https://imoveisterra.net/empreendimento/451/parque-do-lago/",
+          "source_label": "Imoveis Terra"
+        },
+        {
+          "title": "Parque do Lago - caminho do lago",
+          "category": "Lago",
+          "image": "https://cdn.imoview.com.br/terraitajai/Condominios/451/parque-do-lago-site-lago.jpg?1707398635",
+          "source_url": "https://imoveisterra.net/empreendimento/451/parque-do-lago/",
+          "source_label": "Imoveis Terra"
+        },
+        {
+          "title": "Parque do Lago - trilha verde",
+          "category": "Paisagismo",
+          "image": "https://cdn.imoview.com.br/terraitajai/Condominios/451/1677533751232-d632e5ae-1613-4b1a-9d5d-95d0f373ca42.jpg?1707398635",
+          "source_url": "https://imoveisterra.net/empreendimento/451/parque-do-lago/",
+          "source_label": "Imoveis Terra"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Shield",
+          "title": "Portaria e controle",
+          "description": "A nova galeria destaca acesso principal e estrutura de chegada do residencial."
+        },
+        {
+          "icon": "Waves",
+          "title": "Lago central",
+          "description": "O lago e o paisagismo passam a ser o eixo visual da pagina."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Clube completo",
+          "description": "Piscinas, quadras, convivencia e areas verdes aparecem de forma organizada."
+        },
+        {
+          "icon": "Trees",
+          "title": "Reserva verde",
+          "description": "Fontes do residencial citam grande area preservada e implantacao integrada a natureza."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Sem imagem de oferta",
+          "description": "A curadoria retirou qualquer dependencia visual de casa, terreno ou cadastro especifico."
+        },
+        {
+          "title": "Galeria de infraestrutura",
+          "description": "Portaria, lago, clube, piscina, quadras e paisagismo mostram o condominio."
+        },
+        {
+          "title": "Copy alinhada ao residencial",
+          "description": "A descricao comunica Camboriu, controle de acesso e lazer do Parque do Lago."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Parque do Lago?",
+          "answer": "Em Camboriu, com referencias publicas para a Rua Joaquim Garcia e acesso regional pela BR-101."
+        },
+        {
+          "question": "Que imagens entraram?",
+          "answer": "Portaria, lago, clube, piscinas, quadras, jardins, vias internas e panoramas do residencial."
+        },
+        {
+          "question": "A pagina usa imagens de casa?",
+          "answer": "Nao. A curadoria foi feita para mostrar a infraestrutura do condominio."
+        },
+        {
+          "question": "Qual foi a melhoria de descricao?",
+          "answer": "A copy agora valoriza o residencial fechado, o lazer e a relacao com areas verdes."
+        }
+      ],
+      "sources": [
+        "https://parquedolagocamboriu.com.br/",
+        "https://www.imobillenegocios.com.br/empreendimento/parque-do-lago-residencial--EM77487",
+        "https://maximoveis.com.br/empreendimento/1716/parque-do-lago/",
+        "https://www.pisettaimoveis.com.br/empreendimentos/condominio-fechado/condominio-fechado-concluido-em-camboriu-centro-condominio-parque-do-lago-6",
+        "https://imoveisterra.net/empreendimento/451/parque-do-lago/"
+      ]
+    }
+  ],
+  "skipped": []
+}

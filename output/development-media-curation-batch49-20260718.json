@@ -1,0 +1,1682 @@
+{
+  "batch_id": "development-media-curation-batch49-20260718",
+  "generated_at": "2026-07-18T22:05:00.000Z",
+  "items": [
+    {
+      "slug": "vision-tower",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-vision-tower-balneario-camboriu-1.jpg",
+      "description": "O Vision Tower fica no Centro de Balneario Camboriu, na Rua 1001, 120, em quadra mar e esquina com a Avenida Brasil. Sort e Litoral Vertical apontam obra da FG Empreendimentos, 37 pavimentos, pronto para morar, portaria 24h e lazer completo em 4 pavimentos. A curadoria substitui fotos internas por fachada, piscina na cobertura, solario, playground, brinquedoteca, jogos, fitness, cinema, gourmet e areas sociais do edificio.",
+      "seo_description": "Vision Tower no Centro de Balneario Camboriu, obra FG em quadra mar, com fachada, piscina na cobertura, fitness, cinema e lazer em 4 pavimentos.",
+      "gallery": [
+        {
+          "title": "Vision Tower - fachada principal",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-vision-tower-balneario-camboriu-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-vision-tower/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Vision Tower - base da torre",
+          "category": "Fachada",
+          "image": "https://b4.casteldigital.com.br/brunocassola/ig/il/imoveis/66/vision-tower-fachada-balneario-camboriu-fg-empreendimentos-16619030151136.jpg",
+          "source_url": "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-vision-tower-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-66/",
+          "source_label": "Bruno Cassola"
+        },
+        {
+          "title": "Vision Tower - torre completa",
+          "category": "Fachada",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1742587344/enterprises_vision-tower_1742587283/enterprise_vision-tower_1742587283.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/vision-tower",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Vision Tower - terraco panoramico",
+          "category": "Piscina",
+          "image": "https://b4.casteldigital.com.br/brunocassola/ig/il/imoveis/66/photo-2023-06-02-13-22-26-1688743049518.jpeg",
+          "source_url": "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-vision-tower-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-66/",
+          "source_label": "Bruno Cassola"
+        },
+        {
+          "title": "Vision Tower - piscina superior",
+          "category": "Piscina",
+          "image": "https://b4.casteldigital.com.br/brunocassola/ig/il/imoveis/66/vision-tower-fachada-balneario-camboriu-fg-empreendimentos-rooftop-16619030151139.jpg",
+          "source_url": "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-vision-tower-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-66/",
+          "source_label": "Bruno Cassola"
+        },
+        {
+          "title": "Vision Tower - solario da piscina",
+          "category": "Piscina",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1699885700/enterprises/49/vision_tower_5_medium.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/vision-tower",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Vision Tower - acesso do lazer",
+          "category": "Acesso",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/November2021/rcxHZoOSz7DRqYO0Z1ad.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-vision-tower-EM55530",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Vision Tower - estar externo",
+          "category": "Convivencia",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/November2021/kfuF85Z3F7OxUhc7hbfe.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-vision-tower-EM55530",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Vision Tower - playground",
+          "category": "Infantil",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/November2021/YDNcwONSqf9F2j4RHwEa.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-vision-tower-EM55530",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Vision Tower - brinquedoteca",
+          "category": "Infantil",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1699885704/enterprises/49/vision_tower_6_medium.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/vision-tower",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Vision Tower - jogos",
+          "category": "Jogos",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1699885711/enterprises/49/vision_tower_8_medium.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/vision-tower",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Vision Tower - academia",
+          "category": "Fitness",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1699885715/enterprises/49/vision_tower_9_medium.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/vision-tower",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Vision Tower - fitness equipado",
+          "category": "Fitness",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/November2021/R9r89HhnuuR6SHbKb5KY.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-vision-tower-EM55530",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Vision Tower - gourmet comum",
+          "category": "Gourmet",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/November2021/aP8qkls1BMvjwyQnd5PE.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-vision-tower-EM55530",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Vision Tower - massagem e spa",
+          "category": "Wellness",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/November2021/3wV0ctWKodGrX6TXJkQl.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-vision-tower-EM55530",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Quadra mar no Centro",
+          "description": "Rua 1001 com Avenida Brasil, perto da orla e do eixo comercial mais pratico de Balneario Camboriu."
+        },
+        {
+          "icon": "Building2",
+          "title": "Obra FG",
+          "description": "As fontes posicionam o Vision Tower como empreendimento da FG Empreendimentos."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina na cobertura",
+          "description": "Piscina superior com solario e vista aparece como ponto central do lazer."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer em 4 pavimentos",
+          "description": "Gourmet, eventos, jogos, brinquedoteca, playground, fitness e cinema completam a estrutura."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Galeria institucional",
+          "description": "A pagina agora abre com fachada e areas comuns, nao com interiores de oferta."
+        },
+        {
+          "title": "Enderecamento confirmado",
+          "description": "Sort e Litoral Vertical reforcam Rua 1001, 120, no Centro de Balneario Camboriu."
+        },
+        {
+          "title": "Rotina urbana e praia",
+          "description": "Avenida Brasil, quadra mar e lazer alto criam uma experiencia de uso bem definida."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Vision Tower?",
+          "answer": "Na Rua 1001, 120, Centro de Balneario Camboriu, em quadra mar e esquina com a Avenida Brasil."
+        },
+        {
+          "question": "Quem assina o empreendimento?",
+          "answer": "As fontes consultadas indicam FG Empreendimentos."
+        },
+        {
+          "question": "Quais imagens entraram?",
+          "answer": "Fachada, base, piscina, solario, playground, brinquedoteca, jogos, fitness, gourmet e spa."
+        },
+        {
+          "question": "Qual foi a correcao visual?",
+          "answer": "Foram removidas imagens internas de oferta, priorizando fotos e renders do condominio."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-vision-tower-EM55530",
+        "https://sortinvestimentos.com.br/empreendimentos/vision-tower",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-vision-tower/",
+        "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-vision-tower-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-66/",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-vision-tower-balneario-camboriu-centro-4-quartos-3-garagens-venda-ref-2502/"
+      ]
+    },
+    {
+      "slug": "vista-paradiso-residence",
+      "hero_image": "https://cdn.vistahost.com.br/cli15921/vista.imobi/fotos/724/isx2eE60f4jYD706_7245e67ad9561cc0.jpg",
+      "description": "O Vista Paradiso Residence e um empreendimento Santer entregue em Penha, no bairro Bacia da Vovo, com endereco na Rua Joaquim Antonio Simao, 225. A fonte oficial destaca mais de 1.800 m2 de lazer, piscina semiolimpica com borda infinita, game point, cozinha gastronomica, sunset village, outdoor living, relax deck, espelho d agua, heliponto de emergencia, acesso biometrico e monitoramento por cameras. A galeria foi refeita com fachada, rooftop, hall, piscina, cinema, brinquedoteca, spa e ambientes comuns.",
+      "seo_description": "Vista Paradiso Residence em Penha, empreendimento Santer entregue, com fachada, rooftop, piscina com borda infinita, hall, cinema, spa e lazer completo.",
+      "gallery": [
+        {
+          "title": "Vista Paradiso - fachada vertical",
+          "category": "Fachada",
+          "image": "https://cdn.vistahost.com.br/cli15921/vista.imobi/fotos/724/isx2eE60f4jYD706_7245e67ad9561cc0.jpg",
+          "source_url": "https://rafaelcassio.com.br/empreendimento/724/vista-paradiso-santer/",
+          "source_label": "Rafael Cassio"
+        },
+        {
+          "title": "Vista Paradiso - rooftop ao entardecer",
+          "category": "Rooftop",
+          "image": "https://santerempreendimentos.com.br/wp-content/uploads/elementor/thumbs/DJI_0610-HDR-scaled-qw8k1ajvorq9n555y6mao1t2o5c6ly34sgvr0tboxs.jpg",
+          "source_url": "https://santerempreendimentos.com.br/empreendimentos/vista-paradiso/",
+          "source_label": "Santer Empreendimentos"
+        },
+        {
+          "title": "Vista Paradiso - piscina panoramica",
+          "category": "Piscina",
+          "image": "https://cdn.vistahost.com.br/cli15921/vista.imobi/fotos/724/in5neLuL_724619ce2a8d1a03.jpg",
+          "source_url": "https://rafaelcassio.com.br/empreendimento/724/vista-paradiso-santer/",
+          "source_label": "Rafael Cassio"
+        },
+        {
+          "title": "Vista Paradiso - implantacao noturna",
+          "category": "Fachada",
+          "image": "https://santerempreendimentos.com.br/wp-content/uploads/elementor/thumbs/DJI_0633-scaled-qw8k2mhndbjw397j69c9p7pkysrwiidfz25ihxcm4g.jpg",
+          "source_url": "https://santerempreendimentos.com.br/empreendimentos/vista-paradiso/",
+          "source_label": "Santer Empreendimentos"
+        },
+        {
+          "title": "Vista Paradiso - lounge externo",
+          "category": "Convivencia",
+          "image": "https://cdn.vistahost.com.br/cli15921/vista.imobi/fotos/724/isx2eE60f4jYD706_7245e67ad8bdc6f5.jpg",
+          "source_url": "https://rafaelcassio.com.br/empreendimento/724/vista-paradiso-santer/",
+          "source_label": "Rafael Cassio"
+        },
+        {
+          "title": "Vista Paradiso - hall de entrada",
+          "category": "Hall",
+          "image": "https://santerempreendimentos.com.br/wp-content/uploads/elementor/thumbs/DSC05652-scaled-qw8k434m01jy5f32mw3dkufe8dkghk6euaopdf6kg0.jpg",
+          "source_url": "https://santerempreendimentos.com.br/empreendimentos/vista-paradiso/",
+          "source_label": "Santer Empreendimentos"
+        },
+        {
+          "title": "Vista Paradiso - escada do hall",
+          "category": "Hall",
+          "image": "https://santerempreendimentos.com.br/wp-content/uploads/elementor/thumbs/DSC05655-scaled-qw8k5ad6qf74zhc9mes7rjilk3ncbmy2c8p1g5eghs.jpg",
+          "source_url": "https://santerempreendimentos.com.br/empreendimentos/vista-paradiso/",
+          "source_label": "Santer Empreendimentos"
+        },
+        {
+          "title": "Vista Paradiso - jogos e estar",
+          "category": "Jogos",
+          "image": "https://santerempreendimentos.com.br/wp-content/uploads/elementor/thumbs/DSC05659-scaled-qw8k6jhfugwwgriqayab384q2lgyl3x6ig0chfjk74.jpg",
+          "source_url": "https://santerempreendimentos.com.br/empreendimentos/vista-paradiso/",
+          "source_label": "Santer Empreendimentos"
+        },
+        {
+          "title": "Vista Paradiso - cinema",
+          "category": "Cinema",
+          "image": "https://santerempreendimentos.com.br/wp-content/uploads/elementor/thumbs/DSC05698-scaled-qw8kkfjkubxg1bcd6yftxpxy3l08c32dr72nsmy48w.jpg",
+          "source_url": "https://santerempreendimentos.com.br/empreendimentos/vista-paradiso/",
+          "source_label": "Santer Empreendimentos"
+        },
+        {
+          "title": "Vista Paradiso - brinquedoteca",
+          "category": "Infantil",
+          "image": "https://santerempreendimentos.com.br/wp-content/uploads/elementor/thumbs/DSC05703-scaled-qw8klnpzrjlx6zk70zjaowsm0oyhduxrl9qhcn4m4g.jpg",
+          "source_url": "https://santerempreendimentos.com.br/empreendimentos/vista-paradiso/",
+          "source_label": "Santer Empreendimentos"
+        },
+        {
+          "title": "Vista Paradiso - spa",
+          "category": "Wellness",
+          "image": "https://santerempreendimentos.com.br/wp-content/uploads/elementor/thumbs/DSC05704-scaled-qw8kmznrg3fjn3mk9299q2p4bce7af82rv08tr5jb4.jpg",
+          "source_url": "https://santerempreendimentos.com.br/empreendimentos/vista-paradiso/",
+          "source_label": "Santer Empreendimentos"
+        },
+        {
+          "title": "Vista Paradiso - vista aerea",
+          "category": "Fachada",
+          "image": "https://santerempreendimentos.com.br/wp-content/uploads/2021/07/IMG-01-HORIZONTAL.jpg",
+          "source_url": "https://santerempreendimentos.com.br/empreendimentos/vista-paradiso/",
+          "source_label": "Santer Empreendimentos"
+        },
+        {
+          "title": "Vista Paradiso - piscina externa",
+          "category": "Piscina",
+          "image": "https://santerempreendimentos.com.br/wp-content/uploads/2021/07/IMG-04-HORIZONTAL.jpg",
+          "source_url": "https://santerempreendimentos.com.br/empreendimentos/vista-paradiso/",
+          "source_label": "Santer Empreendimentos"
+        },
+        {
+          "title": "Vista Paradiso - jogos decorado",
+          "category": "Jogos",
+          "image": "https://santerempreendimentos.com.br/wp-content/uploads/2021/07/IMG-06-HORIZONTAL.jpg",
+          "source_url": "https://santerempreendimentos.com.br/empreendimentos/vista-paradiso/",
+          "source_label": "Santer Empreendimentos"
+        },
+        {
+          "title": "Vista Paradiso - eventos gourmet",
+          "category": "Eventos",
+          "image": "https://santerempreendimentos.com.br/wp-content/uploads/2021/07/IMG-07-HORIZONTAL.jpg",
+          "source_url": "https://santerempreendimentos.com.br/empreendimentos/vista-paradiso/",
+          "source_label": "Santer Empreendimentos"
+        },
+        {
+          "title": "Vista Paradiso - ambiente infantil",
+          "category": "Infantil",
+          "image": "https://santerempreendimentos.com.br/wp-content/uploads/2021/07/IMG-09-HORIZONTAL.jpg",
+          "source_url": "https://santerempreendimentos.com.br/empreendimentos/vista-paradiso/",
+          "source_label": "Santer Empreendimentos"
+        },
+        {
+          "title": "Vista Paradiso - apoio wellness",
+          "category": "Wellness",
+          "image": "https://santerempreendimentos.com.br/wp-content/uploads/2021/07/IMG-10-HORIZONTAL.jpg",
+          "source_url": "https://santerempreendimentos.com.br/empreendimentos/vista-paradiso/",
+          "source_label": "Santer Empreendimentos"
+        },
+        {
+          "title": "Vista Paradiso - piscina com torre",
+          "category": "Piscina",
+          "image": "https://revistause.com.br/wp-content/uploads/2024/05/Lancamento-Vista-Paradiso-4.jpg",
+          "source_url": "https://revistause.com.br/vista-paradiso-com-30-andares-e-padrao-elevado-e-agora-o-edificio-mais-alto-de-penha/",
+          "source_label": "Revista USE"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Bacia da Vovo",
+          "description": "A pagina oficial posiciona o empreendimento em Penha, na Rua Joaquim Antonio Simao, 225."
+        },
+        {
+          "icon": "Waves",
+          "title": "Mais de 1.800 m2 de lazer",
+          "description": "O lazer inclui piscina semiolimpica com borda infinita, relax deck e espelho d agua."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Acesso e monitoramento",
+          "description": "A fonte oficial cita acesso biometrico, monitoramento por cameras e cabine para delivery."
+        },
+        {
+          "icon": "Film",
+          "title": "Areas para toda a familia",
+          "description": "Cinema, brinquedoteca, jogos, cozinha gastronomica e ambientes externos ampliam o uso diario."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Empreendimento entregue",
+          "description": "Santer informa status entregue para o Vista Paradiso Residence."
+        },
+        {
+          "title": "Lazer alto e completo",
+          "description": "A galeria destaca rooftop, piscina, espacos sociais e ambientes wellness."
+        },
+        {
+          "title": "Fotos do condominio",
+          "description": "A selecao evita decorados e concentra a pagina nas estruturas comuns."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Vista Paradiso Residence?",
+          "answer": "Na Rua Joaquim Antonio Simao, 225, bairro Bacia da Vovo, em Penha."
+        },
+        {
+          "question": "Qual e o status do empreendimento?",
+          "answer": "A pagina da Santer informa que o Vista Paradiso Residence esta entregue."
+        },
+        {
+          "question": "O que compoe o lazer?",
+          "answer": "Piscina com borda infinita, game point, cozinha gastronomica, sunset village, outdoor living, cinema, brinquedoteca e spa."
+        },
+        {
+          "question": "Quais imagens foram priorizadas?",
+          "answer": "Fachada, rooftop, piscina, hall, cinema, brinquedoteca, spa e convivencia."
+        }
+      ],
+      "sources": [
+        "https://santerempreendimentos.com.br/empreendimentos/vista-paradiso/",
+        "https://myside.com.br/apartamento-venda-vista-paradiso-residences-penha-sc",
+        "https://grupoesmeraldaimobiliaria.com.br/edificios/vista-paradiso-residence/penha/centro/1613",
+        "https://rafaelcassio.com.br/empreendimento/724/vista-paradiso-santer/",
+        "https://revistause.com.br/vista-paradiso-com-30-andares-e-padrao-elevado-e-agora-o-edificio-mais-alto-de-penha/"
+      ]
+    },
+    {
+      "slug": "viva-360-by-procave",
+      "hero_image": "https://procave.com.br/wp-content/uploads/2025/04/viva-imagem-destacada.png",
+      "description": "O Viva 360 by Procave fica em Balneario Camboriu e a pagina oficial informa 2.804,13 m2 de lazer distribuidos no 6o e no 34o andar. No 6o pavimento aparecem eventos, varanda gourmet, piscina externa aquecida, piscina coberta, jogos, teen, playground, solarium, praca do fogo, gazebo, padel, quadra esportiva, redario e pet place. No 34o andar entram academia, funcional, sauna seca, sauna umida, repouso, massagem, piscinas e beauty space. A curadoria usa imagens oficiais de acesso, lobby, lazer e skyline do empreendimento.",
+      "seo_description": "Viva 360 by Procave em Balneario Camboriu, com 2.804,13 m2 de lazer no 6o e 34o andar, acesso, lobby, piscinas, quadras e fitness.",
+      "gallery": [
+        {
+          "title": "Viva 360 - fachada e acesso",
+          "category": "Fachada",
+          "image": "https://procave.com.br/wp-content/uploads/2025/04/viva-imagem-destacada.png",
+          "source_url": "https://procave.com.br/empreendimento/viva-360/",
+          "source_label": "Procave"
+        },
+        {
+          "title": "Viva 360 - acesso social",
+          "category": "Acesso",
+          "image": "https://procave.com.br/wp-content/uploads/2025/04/PROCAVE_VIVA-360-03-ACESSO_DESFOQUE_HR1-redim.jpg",
+          "source_url": "https://procave.com.br/empreendimento/viva-360/",
+          "source_label": "Procave"
+        },
+        {
+          "title": "Viva 360 - lobby",
+          "category": "Hall",
+          "image": "https://procave.com.br/wp-content/uploads/2025/04/PROCAVE_VIVA-360-05-LOBBY_HR0-1-scaled.jpg",
+          "source_url": "https://procave.com.br/empreendimento/viva-360/",
+          "source_label": "Procave"
+        },
+        {
+          "title": "Viva 360 - eventos principal",
+          "category": "Eventos",
+          "image": "https://procave.com.br/wp-content/uploads/2025/04/PROCAVE_VIVA-360-06-SALAO-DE-FESTAS-01_HR01-1-scaled.jpg",
+          "source_url": "https://procave.com.br/empreendimento/viva-360/",
+          "source_label": "Procave"
+        },
+        {
+          "title": "Viva 360 - eventos gourmet",
+          "category": "Eventos",
+          "image": "https://procave.com.br/wp-content/uploads/2025/04/PROCAVE_VIVA-360-07-SALAO-DE-FESTA-02_HR0-scaled.jpg",
+          "source_url": "https://procave.com.br/empreendimento/viva-360/",
+          "source_label": "Procave"
+        },
+        {
+          "title": "Viva 360 - varanda gourmet",
+          "category": "Gourmet",
+          "image": "https://procave.com.br/wp-content/uploads/2025/04/PROCAVE_VIVA-360-08-VARANDA-GOURMET_HR0-scaled.jpg",
+          "source_url": "https://procave.com.br/empreendimento/viva-360/",
+          "source_label": "Procave"
+        },
+        {
+          "title": "Viva 360 - piscina elevada",
+          "category": "Piscina",
+          "image": "https://procave.com.br/wp-content/uploads/2025/04/PROCAVE_VIVA-360-09-PISCINA_HR0-1-scaled.jpg",
+          "source_url": "https://procave.com.br/empreendimento/viva-360/",
+          "source_label": "Procave"
+        },
+        {
+          "title": "Viva 360 - piscina do setimo",
+          "category": "Piscina",
+          "image": "https://procave.com.br/wp-content/uploads/2025/04/PROCAVE_VIVA-360-10-PISCINA-7-PAV_HR0-scaled.jpg",
+          "source_url": "https://procave.com.br/empreendimento/viva-360/",
+          "source_label": "Procave"
+        },
+        {
+          "title": "Viva 360 - jogos",
+          "category": "Jogos",
+          "image": "https://procave.com.br/wp-content/uploads/2025/04/PROCAVE_VIVA-360-11-SALA-DE-JOGOS_HR0-scaled.jpg",
+          "source_url": "https://procave.com.br/empreendimento/viva-360/",
+          "source_label": "Procave"
+        },
+        {
+          "title": "Viva 360 - eventos kids",
+          "category": "Infantil",
+          "image": "https://procave.com.br/wp-content/uploads/2025/04/PROCAVE_VIVA-360-12-SALAO-DE-FESTAS-KIDS_HR0-1-scaled.jpg",
+          "source_url": "https://procave.com.br/empreendimento/viva-360/",
+          "source_label": "Procave"
+        },
+        {
+          "title": "Viva 360 - praca do fogo",
+          "category": "Convivencia",
+          "image": "https://procave.com.br/wp-content/uploads/2025/04/PROCAVE_VIVA-360-13-SOLARIUM-PRACA-DO-FOGO_HR1-1-scaled.jpg",
+          "source_url": "https://procave.com.br/empreendimento/viva-360/",
+          "source_label": "Procave"
+        },
+        {
+          "title": "Viva 360 - deck da piscina",
+          "category": "Piscina",
+          "image": "https://procave.com.br/wp-content/uploads/2025/04/PROCAVE_VIVA-360-16-DECK-PISCINA-2_HR0-scaled.jpg",
+          "source_url": "https://procave.com.br/empreendimento/viva-360/",
+          "source_label": "Procave"
+        },
+        {
+          "title": "Viva 360 - brinquedoteca",
+          "category": "Infantil",
+          "image": "https://procave.com.br/wp-content/uploads/2025/04/PROCAVE_VIVA-360-15-BRINQUEDOTECA_HR0-1-scaled.jpg",
+          "source_url": "https://procave.com.br/empreendimento/viva-360/",
+          "source_label": "Procave"
+        },
+        {
+          "title": "Viva 360 - quadras",
+          "category": "Esporte",
+          "image": "https://procave.com.br/wp-content/uploads/2025/04/PROCAVE_VIVA-360-14-QUADRAS_HR0-scaled.jpg",
+          "source_url": "https://procave.com.br/empreendimento/viva-360/",
+          "source_label": "Procave"
+        },
+        {
+          "title": "Viva 360 - deck panoramico",
+          "category": "Piscina",
+          "image": "https://procave.com.br/wp-content/uploads/2025/04/PROCAVE_VIVA-360-26-DECK-PISCINA_HR1-1-scaled.jpg",
+          "source_url": "https://procave.com.br/empreendimento/viva-360/",
+          "source_label": "Procave"
+        },
+        {
+          "title": "Viva 360 - piscina do alto",
+          "category": "Piscina",
+          "image": "https://procave.com.br/wp-content/uploads/2025/04/PROCAVE_VIVA-360-35-PISCINA-NOVO-LAYOUT_HR0-scaled.jpg",
+          "source_url": "https://procave.com.br/empreendimento/viva-360/",
+          "source_label": "Procave"
+        },
+        {
+          "title": "Viva 360 - academia vista mar",
+          "category": "Fitness",
+          "image": "https://procave.com.br/wp-content/uploads/2025/04/PROCAVE_VIVA-360-36-ACADEMIA-NOVO-LAYOUT_CAMB_HR0-scaled.jpg",
+          "source_url": "https://procave.com.br/empreendimento/viva-360/",
+          "source_label": "Procave"
+        },
+        {
+          "title": "Viva 360 - fitness funcional",
+          "category": "Fitness",
+          "image": "https://procave.com.br/wp-content/uploads/2025/04/PROCAVE_VIVA-360-37-ACADEMIA-02-NOVO-LAYOUT_HR0b-scaled.jpg",
+          "source_url": "https://procave.com.br/empreendimento/viva-360/",
+          "source_label": "Procave"
+        },
+        {
+          "title": "Viva 360 - torre no skyline",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-360-1749557788.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/-edificio-viva-360-by-procave--EM94318",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Assinatura Procave",
+          "description": "A curadoria usa a pagina oficial da incorporadora como base principal de imagem e informacao."
+        },
+        {
+          "icon": "Waves",
+          "title": "Lazer em dois niveis",
+          "description": "A estrutura se distribui no 6o e no 34o andar, com piscinas, decks e areas sociais."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Wellness no alto",
+          "description": "Academia, funcional, saunas, repouso, massagem, piscinas e beauty space ficam no 34o andar."
+        },
+        {
+          "icon": "Users",
+          "title": "Convivencia completa",
+          "description": "Eventos, varanda gourmet, jogos, teen, playground, padel, quadra, redario e pet place ampliam o uso do condominio."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Galeria oficial",
+          "description": "A selecao visual concentra imagens oficiais Procave e remove imagens de interiores privados."
+        },
+        {
+          "title": "2.804,13 m2 de lazer",
+          "description": "O dado oficial ajuda a explicar a escala do empreendimento."
+        },
+        {
+          "title": "Vista e infraestrutura",
+          "description": "A copy conecta skyline, areas elevadas e lazer em diferentes pavimentos."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Quem desenvolve o Viva 360?",
+          "answer": "A fonte principal e a pagina oficial da Procave."
+        },
+        {
+          "question": "Qual e a area de lazer informada?",
+          "answer": "A Procave informa 2.804,13 m2 de lazer."
+        },
+        {
+          "question": "Em quais pavimentos fica o lazer?",
+          "answer": "A pagina oficial cita o 6o e o 34o andar."
+        },
+        {
+          "question": "Quais imagens foram mantidas?",
+          "answer": "Fachada, acesso, lobby, eventos, gourmet, piscinas, deck, brinquedoteca, quadras e fitness."
+        }
+      ],
+      "sources": [
+        "https://procave.com.br/empreendimento/viva-360/",
+        "https://www.imobillenegocios.com.br/empreendimento/-edificio-viva-360-by-procave--EM94318",
+        "https://myside.com.br/apartamento-venda-viva-360-balneario-camboriu-sc",
+        "https://blog.guilhermepilger.com/viva-360-by-procave-o-lancamento-mais-esperado-de-balneario-camboriu/",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-viva-360-by-procave-balneario-camboriu-centro-4-quartos-3-garagens-venda-ref-1590/"
+      ]
+    },
+    {
+      "slug": "windsor-village",
+      "hero_image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2021/01/windsor-village.jpg",
+      "description": "O Windsor Village e um empreendimento Embraed no Centro de Balneario Camboriu, 100% comercializado, com arquitetura de inspiracao britanica e localizacao a menos de 300 m da praia. A pagina oficial cita 30 pavimentos, 2 residencias por andar e mais de 1.000 m2 de lazer. A curadoria consolida fachada, acesso, hall, piscina, playground, quadra, spa, brinquedoteca e ambientes sociais, removendo imagens de ofertas privadas.",
+      "seo_description": "Windsor Village da Embraed no Centro de Balneario Camboriu, a menos de 300 m da praia, com fachada, hall, piscina, quadra e lazer completo.",
+      "gallery": [
+        {
+          "title": "Windsor Village - fachada principal",
+          "category": "Fachada",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2021/01/windsor-village.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/windsor-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Windsor Village - torre completa",
+          "category": "Fachada",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2021/01/windsor-village-fachada.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/windsor-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Windsor Village - base vertical",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-windsor-village-balneario-camboriu-1.2.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-windsor-village/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Windsor Village - chegada externa",
+          "category": "Acesso",
+          "image": "https://b2.casteldigital.com.br/amandaalmeidaimoveis/ig/il/imoveis/11/20220317_085315-17309188988679.jpg",
+          "source_url": "https://www.amandaalmeidaimoveis.com.br/imovel/apartamento-no-edificio-windsor-village-balneario-camboriu-centro-3-quartos-3-garagens-venda-ref-11/",
+          "source_label": "Amanda Almeida Imoveis"
+        },
+        {
+          "title": "Windsor Village - portaria social",
+          "category": "Portaria",
+          "image": "https://b2.casteldigital.com.br/amandaalmeidaimoveis/ig/im/imoveis/11/windsor-village-9-17320394062743.jpg",
+          "source_url": "https://www.amandaalmeidaimoveis.com.br/imovel/apartamento-no-edificio-windsor-village-balneario-camboriu-centro-3-quartos-3-garagens-venda-ref-11/",
+          "source_label": "Amanda Almeida Imoveis"
+        },
+        {
+          "title": "Windsor Village - estar da piscina",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/81/img-62.jpg?1711046317",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/81/windsor-village/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Windsor Village - playground externo",
+          "category": "Infantil",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/81/img-57.jpg?1711046317",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/81/windsor-village/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Windsor Village - piscina com deck",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/81/img-61.jpg?1711046317",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/81/windsor-village/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Windsor Village - piscina e solario",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/81/img-59.jpg?1711046317",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/81/windsor-village/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Windsor Village - quadra recreativa",
+          "category": "Esporte",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/81/img-60.jpg?1711046317",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/81/windsor-village/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Windsor Village - hall decorado",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/81/img-63.jpg?1711046317",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/81/windsor-village/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Windsor Village - estar do hall",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/81/img-65.jpg?1711046317",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/81/windsor-village/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Windsor Village - convivencia social",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/81/img-64.jpg?1711046317",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/81/windsor-village/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Windsor Village - quadra superior",
+          "category": "Esporte",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/windsor-village-win-12-quadra-ef.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/windsor-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Windsor Village - spa",
+          "category": "Wellness",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/windsor-village-win-13-spa-ef.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/windsor-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Windsor Village - brinquedoteca",
+          "category": "Infantil",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/windsor-village-win-10-brinquedoteca-ef.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/windsor-village",
+          "source_label": "Embraed"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Menos de 300 m da praia",
+          "description": "A pagina oficial da Embraed destaca a proximidade com a orla de Balneario Camboriu."
+        },
+        {
+          "icon": "Landmark",
+          "title": "Estilo britanico",
+          "description": "A arquitetura usa uma releitura atemporal do estilo britanico, com fachada marcante."
+        },
+        {
+          "icon": "Waves",
+          "title": "Mais de 1.000 m2 de lazer",
+          "description": "Piscina, deck, spa, playground, quadra e brinquedoteca reforcam o uso comum."
+        },
+        {
+          "icon": "Building2",
+          "title": "30 pavimentos",
+          "description": "A ficha oficial informa 30 pavimentos e 2 residencias por andar."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Assinatura Embraed",
+          "description": "A curadoria usa a pagina oficial da construtora como fonte principal."
+        },
+        {
+          "title": "Fachada reconhecivel",
+          "description": "A nova galeria destaca a torre e sua identidade arquitetonica."
+        },
+        {
+          "title": "Lazer real do predio",
+          "description": "Piscina, quadra, spa, brinquedoteca e hall substituem interiores de oferta."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Windsor Village?",
+          "answer": "No Centro de Balneario Camboriu, a menos de 300 m da praia segundo a Embraed."
+        },
+        {
+          "question": "Quem e a construtora?",
+          "answer": "A pagina oficial apresenta o empreendimento na carteira da Embraed."
+        },
+        {
+          "question": "Quantos pavimentos tem?",
+          "answer": "A ficha oficial cita 30 pavimentos."
+        },
+        {
+          "question": "Quais fotos foram usadas?",
+          "answer": "Fachada, acesso, hall, piscina, playground, quadra, spa, brinquedoteca e convivencia."
+        }
+      ],
+      "sources": [
+        "https://www.embraed.com.br/pt-BR/empreendimento/windsor-village",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-windsor-village/",
+        "https://felicitanegocios.com.br/empreendimento/81/windsor-village/",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-windsor-village-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-211/",
+        "https://www.amandaalmeidaimoveis.com.br/imovel/apartamento-no-edificio-windsor-village-balneario-camboriu-centro-3-quartos-3-garagens-venda-ref-11/"
+      ]
+    },
+    {
+      "slug": "y-our-private-residence",
+      "hero_image": "https://img.apre.me/BcFRCoAgDADQ2_xTN1HRj50lylQWYqMIr997hXUBOr4X9KkGIzWWBY5f6HqZWtF7nxpWynEbu0qZ8qgNHjMFsn3KOeQ7WCAlDFx_.jpg",
+      "description": "O Y.OUR Private Residence fica na Praia Brava, Itajai, na Rua Renato Melim Cunha, em proposta compacta e exclusiva da Ar TriangulARe. As fontes indicam 1 torre, 6 pavimentos, apenas 3 residencias, 1 por andar, 120 m do mar e entrega prevista para maio de 2027. A Brava Norte complementa com piscina aquecida com tratamento a sal, reconhecimento facial, infraestrutura para carros eletricos e ambientes de convivencia, trabalho e descanso. Como havia imagens internas de oferta, a galeria foi reduzida para fachada, base, placa de obra e renders externos.",
+      "seo_description": "Y.OUR Private Residence na Praia Brava, Itajai, a 120 m do mar, com projeto exclusivo, fachada autoral e entrega prevista para maio de 2027.",
+      "gallery": [
+        {
+          "title": "Y.OUR - fachada destaque",
+          "category": "Fachada",
+          "image": "https://img.apre.me/BcFRCoAgDADQ2_xTN1HRj50lylQWYqMIr997hXUBOr4X9KkGIzWWBY5f6HqZWtF7nxpWynEbu0qZ8qgNHjMFsn3KOeQ7WCAlDFx_.jpg",
+          "source_url": "https://bravanorteimoveis.com.br/your-private-residence-duplex-na-praia-brava-itajai",
+          "source_label": "Brava Norte Imoveis"
+        },
+        {
+          "title": "Y.OUR - torre frontal",
+          "category": "Fachada",
+          "image": "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtuxt+0N1UvU0hue4mYrSSmySA3Iek14jCiEGoyJDUr4Tr2tPzWsju85gdgfPET3iduLZ0Z9cXHhp4dsJnSU3pdIKPHVdaqXysokTzE6MaEntv-V4xkg8VgUq8eceF7HQuyxr8WvTB8TW8V6-bXGV7O89HR9o47l9MqBG1U1ByqR9Q9JGypDLdaOenJpi9yWxNWAZ8vJq+TqjzwtiOK59nSeUyO3cb51URUaJf1-aKA+9jrwcLou-TCwSW3hrDkec3f8vtBcFNmaQHkBCVHORL4xe9zoLO0qP-PRmFN1c7obCd-fa3Nf33S-+jJiWOsrgt1bKdfZpoA8S2A2EHHjRnLyFRsVL3+LeLr1KrOGnK6Q==.jpg",
+          "source_url": "https://www.viniciussantini.com/empreendimento/y-our-private-residence-apartamentos-duplex-itajai-4-quartos-264-a-265-m/24282801-CBJO",
+          "source_label": "Vinicius Santini"
+        },
+        {
+          "title": "Y.OUR - fachada vertical",
+          "category": "Fachada",
+          "image": "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtuxt+0N1UvU0hue4mYrSSmySA3Iek14jCiEGoyJDUr4Tr2tPzWsju85gdgfPET3iduLZ0Z9cXHhp4dsJnSU3pdIKPHVdaqXysokTzE6MaEntv-V4xkg8VgUq8eceF7HQuyxr8WvTB8TW8V6-bXGV7O89HR9o47l9MqBG1U1ByqR9Q9JG2ozrBZrT0PpW61WIYQklkpNCiTqzwi82OZ5htFvpqLHoC91cXWaoQmvqIQKNz8k8NqufBERmHlELVhPYgYMf+HIVXmaYEkwjcTbUY7xeywIzBjfOqPB-SMFc58+yX+ve1OvfxHfqndjrhoqsi2L73apgLFqzoHWhCEDo1MD0AqUq2ubmF4k35IGDJpE8=.jpg",
+          "source_url": "https://www.viniciussantini.com/empreendimento/y-our-private-residence-apartamentos-duplex-itajai-4-quartos-264-a-265-m/24282801-CBJO",
+          "source_label": "Vinicius Santini"
+        },
+        {
+          "title": "Y.OUR - fachada com ceu aberto",
+          "category": "Fachada",
+          "image": "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu35NlfNEyC0vrvElYYSgvxDW89q+zdqzjE-Hz6nylenCyejAAdfO0KY5iqffLlK9n49faccXM0JwVvh3Sy7AYaO7ISMPiDnQ-2KTHuBfT05KxT4TkAd81Fukf6j13VMs5hOHOvXFpBCcQYfmKA11QPlLCdkx8QdQ8Bi1SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0QdtNm6cEiFnETbdH4xizwI2Rgvb+O06CN1Vp-bqa-PS4P-uhTvvzOUqeobcg2diKf-l9a5qoCiQJEGZ4M3BJqRO29rnGsACzMWqH.jpg",
+          "source_url": "https://www.viniciussantini.com/empreendimento/y-our-private-residence-apartamentos-duplex-itajai-4-quartos-264-a-265-m/24282801-CBJO",
+          "source_label": "Vinicius Santini"
+        },
+        {
+          "title": "Y.OUR - base frontal",
+          "category": "Fachada",
+          "image": "https://www.chavesnamao.com.br/imn/0850x0450/N/60/imoveis/664666/30537022/sc-itajai-praia-brava-rua-renato-merlim-cunha-apartamento-a-venda-4-quartos-6819f57b-1.jpg",
+          "source_url": "https://www.chavesnamao.com.br/imovel/apartamento-a-venda-4-quartos-com-garagem-sc-itajai-praia-brava-264m2-RS6347760/id-30537022/",
+          "source_label": "Chaves na Mao"
+        },
+        {
+          "title": "Y.OUR - acesso externo",
+          "category": "Acesso",
+          "image": "https://www.chavesnamao.com.br/imn/0640x0400/N/imoveis/664666/30537022/sc-itajai-praia-brava-rua-renato-merlim-cunha-apartamento-a-venda-4-quartos-6819f57b-1.jpg",
+          "source_url": "https://www.chavesnamao.com.br/imovel/apartamento-a-venda-4-quartos-com-garagem-sc-itajai-praia-brava-264m2-RS6347760/id-30537022/",
+          "source_label": "Chaves na Mao"
+        },
+        {
+          "title": "Y.OUR - torre e palmeiras",
+          "category": "Fachada",
+          "image": "https://www.chavesnamao.com.br/imn/1200x0800/N/70/imoveis/664666/30537022/sc-itajai-praia-brava-rua-renato-merlim-cunha-apartamento-a-venda-4-quartos-6819f57b-1.jpg",
+          "source_url": "https://www.chavesnamao.com.br/imovel/apartamento-a-venda-4-quartos-com-garagem-sc-itajai-praia-brava-264m2-RS6347760/id-30537022/",
+          "source_label": "Chaves na Mao"
+        },
+        {
+          "title": "Y.OUR - base iluminada",
+          "category": "Fachada",
+          "image": "https://www.chavesnamao.com.br/imn/1200x0800/N/70/imoveis/664666/30537022/sc-itajai-praia-brava-rua-renato-merlim-cunha-apartamento-a-venda-4-quartos-681e812e-2.jpg",
+          "source_url": "https://www.chavesnamao.com.br/imovel/apartamento-a-venda-4-quartos-com-garagem-sc-itajai-praia-brava-264m2-RS6347760/id-30537022/",
+          "source_label": "Chaves na Mao"
+        },
+        {
+          "title": "Y.OUR - fachada lateral",
+          "category": "Fachada",
+          "image": "https://www.chavesnamao.com.br/imn/1200x0800/N/70/imoveis/664666/30537022/sc-itajai-praia-brava-rua-renato-merlim-cunha-apartamento-a-venda-4-quartos-681e812e-4.jpg",
+          "source_url": "https://www.chavesnamao.com.br/imovel/apartamento-a-venda-4-quartos-com-garagem-sc-itajai-praia-brava-264m2-RS6347760/id-30537022/",
+          "source_label": "Chaves na Mao"
+        },
+        {
+          "title": "Y.OUR - volume externo",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/1998/maria_externas_img-9-17586488121089.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-garden-no-edificio-your-private-residence-itajai-praia-brava-4-quartos-2-garagens-venda-ref-1998/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Y.OUR - placa de obra",
+          "category": "Obra",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/il/imoveis/1998/placa-obra-17586488121089.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-garden-no-edificio-your-private-residence-itajai-praia-brava-4-quartos-2-garagens-venda-ref-1998/",
+          "source_label": "Guilherme Pilger"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Praia Brava a 120 m do mar",
+          "description": "Fontes do empreendimento destacam a curta distancia ate a orla da Praia Brava."
+        },
+        {
+          "icon": "Building2",
+          "title": "Projeto reservado",
+          "description": "A proposta reune 1 torre, 6 pavimentos e apenas 3 residencias, com 1 por andar."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina aquecida",
+          "description": "A Brava Norte cita piscina aquecida com tratamento a sal como parte da estrutura."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Tecnologia de acesso",
+          "description": "Reconhecimento facial e infraestrutura para carros eletricos aparecem nas fontes pesquisadas."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Galeria conservadora",
+          "description": "Foram mantidos renders externos e placa de obra, evitando quartos e ambientes privados."
+        },
+        {
+          "title": "Endereco confirmado",
+          "description": "Imobille e Brava Norte apontam Rua Renato Melim Cunha, Praia Brava."
+        },
+        {
+          "title": "Exclusividade de baixa densidade",
+          "description": "A copy destaca o formato de poucas residencias em vez de tratar como oferta isolada."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Y.OUR Private Residence?",
+          "answer": "Na Rua Renato Melim Cunha, Praia Brava, Itajai."
+        },
+        {
+          "question": "Qual e a distancia ate o mar?",
+          "answer": "As fontes consultadas indicam aproximadamente 120 m do mar."
+        },
+        {
+          "question": "Qual e a previsao de entrega?",
+          "answer": "A Ar TriangulARe informa entrega prevista para maio de 2027."
+        },
+        {
+          "question": "Por que a galeria ficou mais enxuta?",
+          "answer": "Porque as melhores imagens confiaveis eram externas; interiores de oferta foram retirados."
+        }
+      ],
+      "sources": [
+        "https://artriangulare.com.br/empreendimento/your-praia-brava",
+        "https://bravanorteimoveis.com.br/your-private-residence-duplex-na-praia-brava-itajai",
+        "https://www.imobillenegocios.com.br/empreendimento/your-private-residence-EM22568",
+        "https://www.chavesnamao.com.br/imovel/apartamento-a-venda-4-quartos-com-garagem-sc-itajai-praia-brava-264m2-RS6347760/id-30537022/",
+        "https://www.guilhermepilger.com/imovel/apartamento-garden-no-edificio-your-private-residence-itajai-praia-brava-4-quartos-2-garagens-venda-ref-1998/",
+        "https://www.viniciussantini.com/empreendimento/y-our-private-residence-apartamentos-duplex-itajai-4-quartos-264-a-265-m/24282801-CBJO"
+      ]
+    },
+    {
+      "slug": "zenith-tower",
+      "hero_image": "https://cdn.imoview.com.br/bryann/Condominios/1019/1653575250357-fc3a58b7-11b0-4376-888d-b79e46fa7b31.jpg?1758716767",
+      "description": "O Zenith Tower e um empreendimento da BenveArtt no Centro de Balneario Camboriu, na Rua 3850, 4111. A pagina oficial informa area privativa de 180 m2, 4 dormitorios, 3 vagas, previsao de entrega julho de 2025 e obra com andamento total em 100%. A curadoria visual prioriza fachada, piscina, lobby, fitness, jogos e areas de convivencia, deixando fora imagens privadas de oferta.",
+      "seo_description": "Zenith Tower da BenveArtt no Centro de Balneario Camboriu, Rua 3850, com fachada, piscina, lobby, fitness, jogos e entrega prevista para julho de 2025.",
+      "gallery": [
+        {
+          "title": "Zenith Tower - fachada noturna",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/1019/1653575250357-fc3a58b7-11b0-4376-888d-b79e46fa7b31.jpg?1758716767",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/1019/zenith-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Zenith Tower - torre iluminada",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/mazzotti/img_edificios/g1_1113_12314_1127_260522.jpg",
+          "source_url": "https://mazzottiimoveis.com/edificios/zenith-tower/balneario-camboriu/centro/1113",
+          "source_label": "Mazzotti Imoveis"
+        },
+        {
+          "title": "Zenith Tower - fachada completa",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/zenith-tower-balneario-camboriu-sc-5.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/zenith-tower-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Zenith Tower - base vertical",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/zenith-tower-balneario-camboriu-sc-3.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/zenith-tower-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Zenith Tower - acesso da torre",
+          "category": "Fachada",
+          "image": "https://www.benveartt.com.br/uploads/imagens/crop_fachada-zenith-tower-54.jpg",
+          "source_url": "https://www.benveartt.com.br/empreendimento/zenith-tower",
+          "source_label": "BenveArtt"
+        },
+        {
+          "title": "Zenith Tower - skyline do projeto",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/il/imoveis/582/ben-zen-03-fachada-voo-ef-16548071228877.jpeg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-zenith-tower-balneario-camboriu-centro-4-quartos-3-garagens-venda-ref-582/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Zenith Tower - piscina real",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/291020251008411173-1761743321.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-zenith-tower-EM62532",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Zenith Tower - piscina renderizada",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/1019/1653575259947-624c5ca1-315f-4439-8ffc-be9eeb114c36.jpg?1758716767",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/1019/zenith-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Zenith Tower - piscina noturna",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/1019/1653575240786-7ae94b1e-d9a7-4c1e-b5c5-9dd287b45d36.jpg?1758716767",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/1019/zenith-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Zenith Tower - hall amplo",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/1019/1653575478369-00e4affd-d33b-444d-b774-258a577fea3f.jpg?1758716767",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/1019/zenith-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Zenith Tower - convivencia premium",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/1019/1653575254460-5c70d910-3731-4dbf-8f6d-8debe9425ae0.jpg?1758716767",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/1019/zenith-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Zenith Tower - lobby do empreendimento",
+          "category": "Hall",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/zenith-tower-balneario-camboriu-sc-11.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/zenith-tower-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Zenith Tower - academia panoramica",
+          "category": "Fitness",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/zenith-tower-balneario-camboriu-sc-14.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/zenith-tower-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Zenith Tower - fitness equipado",
+          "category": "Fitness",
+          "image": "https://www.benveartt.com.br/uploads/imagens/800x600_zenith-tower-30-5490.jpg",
+          "source_url": "https://www.benveartt.com.br/empreendimento/zenith-tower",
+          "source_label": "BenveArtt"
+        },
+        {
+          "title": "Zenith Tower - jogos premium",
+          "category": "Jogos",
+          "image": "https://www.benveartt.com.br/uploads/imagens/800x600_zenith-tower-30-7757.jpg",
+          "source_url": "https://www.benveartt.com.br/empreendimento/zenith-tower",
+          "source_label": "BenveArtt"
+        },
+        {
+          "title": "Zenith Tower - jogos decorado",
+          "category": "Jogos",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/zenith-tower-balneario-camboriu-sc-17.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/zenith-tower-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 3850 no Centro",
+          "description": "A pagina oficial localiza o Zenith Tower na Rua 3850, 4111, em Balneario Camboriu."
+        },
+        {
+          "icon": "Building2",
+          "title": "BenveArtt",
+          "description": "O empreendimento aparece na carteira da BenveArtt Construtora e Incorporadora."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e skyline",
+          "description": "A galeria combina piscina, vistas renderizadas e imagens externas da torre."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer completo",
+          "description": "Lobby, convivencia, academia e jogos organizam a experiencia das areas comuns."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Dados oficiais atualizados",
+          "description": "A copy considera a previsao de entrega e andamento publicados pela BenveArtt."
+        },
+        {
+          "title": "Fachadas cruzadas",
+          "description": "Foram comparadas imagens de BenveArtt, Felicita, Mazzotti, Invexo, Fly e Pilger."
+        },
+        {
+          "title": "Sem interiores privados",
+          "description": "A pagina passa a explicar o empreendimento, nao uma oferta especifica."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Zenith Tower?",
+          "answer": "Na Rua 3850, 4111, Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Quem e a construtora?",
+          "answer": "A fonte oficial e da BenveArtt Construtora e Incorporadora."
+        },
+        {
+          "question": "Qual previsao de entrega aparece na fonte oficial?",
+          "answer": "Julho de 2025."
+        },
+        {
+          "question": "Quais imagens foram usadas?",
+          "answer": "Fachada, piscina, lobby, convivencia, academia e jogos."
+        }
+      ],
+      "sources": [
+        "https://www.benveartt.com.br/empreendimento/zenith-tower",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-zenith-tower-EM62532",
+        "https://felicitanegocios.com.br/empreendimento/1019/zenith-tower/",
+        "https://mazzottiimoveis.com/edificios/zenith-tower/balneario-camboriu/centro/1113",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-zenith-tower-balneario-camboriu-centro-4-quartos-3-garagens-venda-ref-582/",
+        "https://lancamento.invexo.com.br/sc/zenith-tower-balneario-camboriu/"
+      ]
+    },
+    {
+      "slug": "zimmermann",
+      "hero_image": "https://fotos2.fra1.cdn.digitaloceanspaces.com/Fotos/2215/3449466/45388033.jpg",
+      "description": "O Residencial Zimmermann fica na Rua 238, 165, em Meia Praia, Itapema, com Zimmermann Construtora associada nas fontes. Grupo Esmeralda lista academia, bar, boliche, box de praia, brinquedoteca, espaco gourmet, guarita, hall decorado, hidromassagem, mini-golfe, piscinas adulto, aquecida e infantil, playground, jogos, eventos e sauna. Como a pesquisa encontrou poucas fotos confiaveis do condominio, a galeria foi mantida enxuta com fachada e piscina.",
+      "seo_description": "Residencial Zimmermann em Meia Praia, Itapema, na Rua 238, 165, com fachada, piscina, hall decorado, gourmet, academia, jogos e lazer completo.",
+      "gallery": [
+        {
+          "title": "Zimmermann - fachada principal",
+          "category": "Fachada",
+          "image": "https://fotos2.fra1.cdn.digitaloceanspaces.com/Fotos/2215/3449466/45388033.jpg",
+          "source_url": "https://imoveishubi.com.br/imoveis/venda/itapema/meia-praia/edificio-zimmermann/apartamento/ap2501114/imovel/3449466",
+          "source_label": "Hubi Imoveis"
+        },
+        {
+          "title": "Zimmermann - detalhe da fachada",
+          "category": "Fachada",
+          "image": "https://imoveishubi.com.br/api/og-image?url=https%3A%2F%2Ffotos2.fra1.cdn.digitaloceanspaces.com%2FFotos%2F2215%2F3449466%2F45388033.jpg",
+          "source_url": "https://imoveishubi.com.br/imoveis/venda/itapema/meia-praia/edificio-zimmermann/apartamento/ap2501114/imovel/3449466",
+          "source_label": "Hubi Imoveis"
+        },
+        {
+          "title": "Zimmermann - piscina interna",
+          "category": "Piscina",
+          "image": "https://fotos2.fra1.cdn.digitaloceanspaces.com/Fotos/2215/3449466/45388042.jpg",
+          "source_url": "https://imoveishubi.com.br/imoveis/venda/itapema/meia-praia/edificio-zimmermann/apartamento/ap2501114/imovel/3449466",
+          "source_label": "Hubi Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 238 em Meia Praia",
+          "description": "Grupo Esmeralda e Viva Real posicionam o condominio na Rua 238, 165."
+        },
+        {
+          "icon": "Building2",
+          "title": "Zimmermann Construtora",
+          "description": "A fonte do Grupo Esmeralda relaciona o edificio a Zimmermann Construtora."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscinas e wellness",
+          "description": "As fontes citam piscinas adulto, aquecida e infantil, hidromassagem e sauna."
+        },
+        {
+          "icon": "Gamepad2",
+          "title": "Lazer amplo",
+          "description": "Academia, boliche, mini-golfe, brinquedoteca, gourmet, jogos e eventos completam a estrutura."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Curadoria prudente",
+          "description": "A galeria ficou menor para evitar fotos internas ou imagens de imobiliaria sem relacao direta."
+        },
+        {
+          "title": "Endereco validado",
+          "description": "Rua 238, 165, Meia Praia, aparece em mais de uma fonte."
+        },
+        {
+          "title": "Beneficios completos",
+          "description": "Mesmo com poucas fotos, a descricao registra os itens de lazer listados pelas fontes."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Residencial Zimmermann?",
+          "answer": "Na Rua 238, 165, Meia Praia, Itapema."
+        },
+        {
+          "question": "Quais itens de lazer aparecem nas fontes?",
+          "answer": "Academia, boliche, brinquedoteca, gourmet, hidromassagem, piscinas, playground, jogos, eventos e sauna."
+        },
+        {
+          "question": "Por que ha menos fotos na galeria?",
+          "answer": "Porque a pesquisa encontrou poucas imagens confiaveis do condominio; foi melhor manter so fachada e piscina."
+        },
+        {
+          "question": "Qual foi a correcao feita?",
+          "answer": "A pagina deixou de depender de interiores de oferta e passou a mostrar imagens do edificio."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-zimmermann-EM54993",
+        "https://grupoesmeraldaimobiliaria.com.br/edificios/residencial-zimmermann/itapema/meia-praia/1062",
+        "https://www.vivareal.com.br/condominio/residencial-zimmermann-meia-praia-id-dafb58a5-8db3/",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-zimmermann-itapema-meia-praia-4-quartos-2-garagens-venda-ref-1832/",
+        "https://imoveishubi.com.br/imoveis/venda/itapema/meia-praia/edificio-zimmermann/apartamento/ap2501114/imovel/3449466"
+      ]
+    },
+    {
+      "slug": "143-mayfair-home-boutique",
+      "hero_image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_558_6524_1154_060922.webp",
+      "description": "O 143 Mayfair, da ABC.inc & Embralot, fica no Centro de Itapema, na Rua 143, e consta como entregue. A fonte oficial informa 1 torre, 26 pavimentos, apenas 20 residencias, arquitetura assinada por Leo Maia, paisagismo por Jordi Castan, fachada biofilica com irrigacao automatizada, elevador automotivo, rooftop no 26o pavimento com vista 360 graus e lazer no 6o pavimento com piscina, jogos, sauna, academia e fireplace. A galeria agora valoriza fachada, base, rooftop, piscina, hall, fitness e ambientes sociais.",
+      "seo_description": "143 Mayfair no Centro de Itapema, ABC.inc & Embralot, entregue, com fachada biofilica, rooftop 360 graus, piscina, sauna e academia.",
+      "gallery": [
+        {
+          "title": "143 Mayfair - fachada principal",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_558_6524_1154_060922.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/143-mayfair-home-boutique/558",
+          "source_label": "HJ Junior Imoveis"
+        },
+        {
+          "title": "143 Mayfair - fachada biofilica",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_558_6523_1154_060922.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/143-mayfair-home-boutique/558",
+          "source_label": "HJ Junior Imoveis"
+        },
+        {
+          "title": "143 Mayfair - base noturna",
+          "category": "Fachada",
+          "image": "https://www.verabernardes.com.br/fotos/g/i9pP1w75f2m38_50603685edb2f71d7a.webp?token=Ym5Fb09SSTVuMmpFSVVLYTVyNUp5Uk1ad2dQYXBNS1V2a08rOEpHOEFlTFRpdlNnaFNlTGZwTEtCTnVjQUxhbHI0bnlybTV2TGVERW5oTkI2MHBTQ3AxVEdwVXJJVXRIWCtWdjZOeVdSNnkxeU5vaDRhTjhPckl4VGFYaVh5eUU=",
+          "source_url": "https://www.verabernardes.com.br/empreendimento/venda/50603/143-mayfair-centro-itapema/",
+          "source_label": "Vera Bernardes"
+        },
+        {
+          "title": "143 Mayfair - acesso principal",
+          "category": "Acesso",
+          "image": "https://www.verabernardes.com.br/fotos/g/i9pP1w75f2m38_50603685edb21b44d9.webp?token=Ym5Fb09SSTVuMmpFSVVLYTVyNUp5Uk1ad2dQYXBNS1V2a08rOEpHOEFlTFRpdlNnaFNlTGZwTEtCTnVjQUxhbHI0bnlybTV2TGVERW5oTkI2MHBTQ3AxVEdwVXJJVXRIWCtWdjZOeVdSNnovNTVteXduMTdqZkZTRGFEU3l2dlg=",
+          "source_url": "https://www.verabernardes.com.br/empreendimento/venda/50603/143-mayfair-centro-itapema/",
+          "source_label": "Vera Bernardes"
+        },
+        {
+          "title": "143 Mayfair - rooftop com vista",
+          "category": "Rooftop",
+          "image": "https://abcincembralot.com.br/wp-content/uploads/2026/04/ABC-Empreendimentos_01.jpg",
+          "source_url": "https://abcincembralot.com.br/143-mayfair/",
+          "source_label": "ABC.inc & Embralot"
+        },
+        {
+          "title": "143 Mayfair - piscina elevada",
+          "category": "Piscina",
+          "image": "https://abcincembralot.com.br/wp-content/uploads/2026/04/ABC-Empreendimentos_16.jpg",
+          "source_url": "https://abcincembralot.com.br/143-mayfair/",
+          "source_label": "ABC.inc & Embralot"
+        },
+        {
+          "title": "143 Mayfair - eventos gourmet",
+          "category": "Eventos",
+          "image": "https://abcincembralot.com.br/wp-content/uploads/2026/04/ABC-Empreendimentos_15.jpg",
+          "source_url": "https://abcincembralot.com.br/143-mayfair/",
+          "source_label": "ABC.inc & Embralot"
+        },
+        {
+          "title": "143 Mayfair - convivencia do lazer",
+          "category": "Convivencia",
+          "image": "https://abcincembralot.com.br/wp-content/uploads/2026/04/ABC-Empreendimentos_14.jpg",
+          "source_url": "https://abcincembralot.com.br/143-mayfair/",
+          "source_label": "ABC.inc & Embralot"
+        },
+        {
+          "title": "143 Mayfair - academia",
+          "category": "Fitness",
+          "image": "https://abcincembralot.com.br/wp-content/uploads/2026/04/ABC-Empreendimentos_12.jpg",
+          "source_url": "https://abcincembralot.com.br/143-mayfair/",
+          "source_label": "ABC.inc & Embralot"
+        },
+        {
+          "title": "143 Mayfair - deck do rooftop",
+          "category": "Rooftop",
+          "image": "https://abcincembralot.com.br/wp-content/uploads/2026/04/ABC-Empreendimentos_11.jpg",
+          "source_url": "https://abcincembralot.com.br/143-mayfair/",
+          "source_label": "ABC.inc & Embralot"
+        },
+        {
+          "title": "143 Mayfair - spa no rooftop",
+          "category": "Wellness",
+          "image": "https://abcincembralot.com.br/wp-content/uploads/2026/04/ABC-Empreendimentos_10.jpg",
+          "source_url": "https://abcincembralot.com.br/143-mayfair/",
+          "source_label": "ABC.inc & Embralot"
+        },
+        {
+          "title": "143 Mayfair - gourmet aberto",
+          "category": "Gourmet",
+          "image": "https://abcincembralot.com.br/wp-content/uploads/2026/04/ABC-Empreendimentos_09.jpg",
+          "source_url": "https://abcincembralot.com.br/143-mayfair/",
+          "source_label": "ABC.inc & Embralot"
+        },
+        {
+          "title": "143 Mayfair - hall de entrada",
+          "category": "Hall",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_558_6526_1154_060922.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/143-mayfair-home-boutique/558",
+          "source_label": "HJ Junior Imoveis"
+        },
+        {
+          "title": "143 Mayfair - lounge vista mar",
+          "category": "Convivencia",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_558_6537_1155_060922.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/143-mayfair-home-boutique/558",
+          "source_label": "HJ Junior Imoveis"
+        },
+        {
+          "title": "143 Mayfair - rooftop noturno",
+          "category": "Rooftop",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/il/imoveis/1003/dwv_gallery_image_0-16962721382619.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-143-mayfair-home-boutique-itapema-centro-4-quartos-3-garagens-venda-ref-1003/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "143 Mayfair - piscina com mar",
+          "category": "Piscina",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/golden/img_vendas/g1_3688_80628_1012_120421.jpg",
+          "source_url": "https://www.goldenitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/143-mayfair/3688",
+          "source_label": "Golden Itapema"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 143 no Centro",
+          "description": "A fonte oficial posiciona o empreendimento no Centro de Itapema."
+        },
+        {
+          "icon": "Leaf",
+          "title": "Fachada biofilica",
+          "description": "O projeto cita sistema automatizado de irrigacao e paisagismo assinado por Jordi Castan."
+        },
+        {
+          "icon": "Building2",
+          "title": "Apenas 20 residencias",
+          "description": "A baixa densidade reforca exclusividade e privacidade."
+        },
+        {
+          "icon": "Waves",
+          "title": "Rooftop 360 graus",
+          "description": "O 26o pavimento reune vista 360 graus, gourmet e spa, alem do lazer no 6o pavimento."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Projeto autoral",
+          "description": "A arquitetura e assinada por Leo Maia, segundo a pagina oficial."
+        },
+        {
+          "title": "Lazer em dois pavimentos",
+          "description": "O 6o pavimento concentra piscina, jogos, sauna, academia e fireplace; o 26o recebe o rooftop."
+        },
+        {
+          "title": "Galeria corrigida",
+          "description": "A nova selecao explica fachada e areas comuns em vez de ambientes de oferta."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o 143 Mayfair?",
+          "answer": "Na Rua 143, Centro de Itapema."
+        },
+        {
+          "question": "Quem assina o empreendimento?",
+          "answer": "A fonte oficial apresenta ABC.inc & Embralot."
+        },
+        {
+          "question": "Quantos pavimentos tem?",
+          "answer": "A pagina oficial informa 26 pavimentos."
+        },
+        {
+          "question": "O que ha no rooftop?",
+          "answer": "Vista 360 graus, gourmet e spa, conforme a fonte oficial."
+        }
+      ],
+      "sources": [
+        "https://abcincembralot.com.br/143-mayfair/",
+        "https://myside.com.br/apartamento-venda-143-mayfair-itapema-sc",
+        "https://hjjuniorimoveis.com.br/edificios/143-mayfair-home-boutique/558",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-143-mayfair-home-boutique-itapema-centro-4-quartos-3-garagens-venda-ref-1003/",
+        "https://www.goldenitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/143-mayfair/3688",
+        "https://jsobrinho.com.br/143-mayfair-itapema",
+        "https://www.verabernardes.com.br/empreendimento/venda/50603/143-mayfair-centro-itapema/"
+      ]
+    },
+    {
+      "slug": "beach-village",
+      "hero_image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_1071_20513_1518_070526.jpg",
+      "description": "O Beach Village Residence fica na Rua 315, 222, em Meia Praia, Itapema, com Krauss Construtora citada pela Versatil. A fonte informa 18 residencias, 12 pavimentos, 2 por andar, 2 elevadores, hall decorado, entrada para banhistas, box de praia, gerador, piscina infantil, playground, jogos, eventos, sauna, academia e gourmet. A curadoria troca interiores por fachada, entrada, hall, fitness, piscina e areas infantis.",
+      "seo_description": "Beach Village Residence em Meia Praia, Itapema, Rua 315, com fachada, hall decorado, piscina, academia, playground, sauna, gourmet e eventos.",
+      "gallery": [
+        {
+          "title": "Beach Village - fachada principal",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_1071_20513_1518_070526.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/beach-village-residence/itapema/meia-praia/1071",
+          "source_label": "Imobiliaria Versatil"
+        },
+        {
+          "title": "Beach Village - fachada alternativa",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_1096_16355_1511_290125.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/beach-village-residence/itapema/1096",
+          "source_label": "HJ Junior Imoveis"
+        },
+        {
+          "title": "Beach Village - acesso social",
+          "category": "Acesso",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_1071_20514_1518_070526.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/beach-village-residence/itapema/meia-praia/1071",
+          "source_label": "Imobiliaria Versatil"
+        },
+        {
+          "title": "Beach Village - hall decorado",
+          "category": "Hall",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_1071_20515_1518_070526.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/beach-village-residence/itapema/meia-praia/1071",
+          "source_label": "Imobiliaria Versatil"
+        },
+        {
+          "title": "Beach Village - estar do hall",
+          "category": "Hall",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnsWk7zvQ3oElYGrBLXvNpQOqvGlH25XfG9aS_hLMfHr8SlKnl6mKt87gG4GROrHK0X4vCuAsMEFxqEs4nCBplz2RvujDIzDkQJjExuA0UEEP-Dznhf-M/.jpg",
+          "source_url": "https://portoupimoveis.com.br/imovel/apartamentos-no-beach-village-PRD-0390/PRD-0390",
+          "source_label": "Porto UP Imoveis"
+        },
+        {
+          "title": "Beach Village - academia",
+          "category": "Fitness",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_1071_20516_1518_070526.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/beach-village-residence/itapema/meia-praia/1071",
+          "source_label": "Imobiliaria Versatil"
+        },
+        {
+          "title": "Beach Village - playground",
+          "category": "Infantil",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_1071_20518_1519_070526.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/beach-village-residence/itapema/meia-praia/1071",
+          "source_label": "Imobiliaria Versatil"
+        },
+        {
+          "title": "Beach Village - piscina externa",
+          "category": "Piscina",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnsWk7zvQ3oElYGrBLXvNpQOqvGlH25XfG9aS_hLMfHr8SlKnl6mKt87gG4GROrHK0X4vCuAsMEFyaKz8WihdWx-NttMeHtYfsJT7JQwgU5yD5pKdehjI/.jpg",
+          "source_url": "https://portoupimoveis.com.br/imovel/apartamentos-no-beach-village-PRD-0390/PRD-0390",
+          "source_label": "Porto UP Imoveis"
+        },
+        {
+          "title": "Beach Village - ambiente infantil",
+          "category": "Infantil",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/siframar/img_edificios/g1_583_8752_1506_080626.jpg",
+          "source_url": "https://siframar.com.br/empreendimento/beach-village/itapema/meia-praia/637",
+          "source_label": "Siframar"
+        },
+        {
+          "title": "Beach Village - brinquedoteca",
+          "category": "Infantil",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/siframar/img_edificios/i1_583_8752_1506_080626.jpg",
+          "source_url": "https://siframar.com.br/empreendimento/beach-village/itapema/meia-praia/637",
+          "source_label": "Siframar"
+        },
+        {
+          "title": "Beach Village - entrada social",
+          "category": "Acesso",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_1096_16354_1510_290125.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/beach-village-residence/itapema/1096",
+          "source_label": "HJ Junior Imoveis"
+        },
+        {
+          "title": "Beach Village - lobby decorado",
+          "category": "Hall",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_1096_16353_1510_290125.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/beach-village-residence/itapema/1096",
+          "source_label": "HJ Junior Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 315 em Meia Praia",
+          "description": "A Versatil posiciona o Beach Village Residence na Rua 315, 222."
+        },
+        {
+          "icon": "Building2",
+          "title": "Perfil reservado",
+          "description": "A fonte cita 18 residencias, 12 pavimentos e 2 por andar."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e apoio de praia",
+          "description": "Piscina infantil, entrada para banhistas e box de praia fortalecem a rotina perto do mar."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer completo",
+          "description": "Academia, playground, jogos, eventos, sauna e gourmet aparecem nas fontes do edificio."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Construtora identificada",
+          "description": "A Versatil relaciona o empreendimento a Krauss Construtora."
+        },
+        {
+          "title": "Fotos comuns priorizadas",
+          "description": "Fachada, acesso, hall, fitness, piscina e areas infantis substituem interiores privados."
+        },
+        {
+          "title": "Endereco claro",
+          "description": "A copy agora registra Rua 315, 222, em Meia Praia."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Beach Village Residence?",
+          "answer": "Na Rua 315, 222, Meia Praia, Itapema."
+        },
+        {
+          "question": "Quem e a construtora citada?",
+          "answer": "A Versatil informa Krauss Construtora."
+        },
+        {
+          "question": "Quais areas aparecem na galeria?",
+          "answer": "Fachada, acesso, hall, academia, piscina, playground e brinquedoteca."
+        },
+        {
+          "question": "O que foi retirado?",
+          "answer": "Imagens internas de oferta que nao representavam o condominio."
+        }
+      ],
+      "sources": [
+        "https://imobiliariaversatil.com.br/edificios/beach-village-residence/itapema/meia-praia/1071",
+        "https://hjjuniorimoveis.com.br/edificios/beach-village-residence/itapema/1096",
+        "https://myside.com.br/apartamento-venda-beach-village-itapema-sc",
+        "https://siframar.com.br/empreendimento/beach-village/itapema/meia-praia/637",
+        "https://portoupimoveis.com.br/imovel/apartamentos-no-beach-village-PRD-0390/PRD-0390",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-beach-village-itapema-meia-praia-4-quartos-3-garagens-venda-ref-1769/"
+      ]
+    },
+    {
+      "slug": "condominio-logistico-campo-grande-ms",
+      "hero_image": "https://brlogcampogrande.com.br/wp-content/uploads/2025/11/BRLOG-RENDER-04-PORTARIA-02.jpg",
+      "description": "O BR LOG Campo Grande e um condominio logistico e empresarial na BR-262, a 7 km de Campo Grande, projetado para conectar empresas as rotas da celulose e bioceanica. A pagina oficial destaca seguranca e portaria 24h, asfalto para caminhoes e area de manobra, estacionamento e balanca para caminhoes, espaco gourmet, campo de futebol, reuniao, auditorio, coworking e areas modulaveis a partir de 1.000 m2. A galeria usa renders oficiais de portaria, balanca, implantacao, apoio corporativo, convivencia e vistas aereas.",
+      "seo_description": "BR LOG Campo Grande na BR-262, a 7 km de Campo Grande, com portaria 24h, balanca, vias internas, patio, auditorio, coworking e apoio logistico.",
+      "gallery": [
+        {
+          "title": "BR LOG Campo Grande - portaria principal",
+          "category": "Portaria",
+          "image": "https://brlogcampogrande.com.br/wp-content/uploads/2025/11/BRLOG-RENDER-04-PORTARIA-02.jpg",
+          "source_url": "https://brlogcampogrande.com.br/",
+          "source_label": "BR LOG Campo Grande"
+        },
+        {
+          "title": "BR LOG Campo Grande - balanca de acesso",
+          "category": "Balanca",
+          "image": "https://brlogcampogrande.com.br/wp-content/uploads/2025/11/BRLOG-RENDER-01-BALANCA-01.jpg",
+          "source_url": "https://brlogcampogrande.com.br/",
+          "source_label": "BR LOG Campo Grande"
+        },
+        {
+          "title": "BR LOG Campo Grande - portaria coberta",
+          "category": "Portaria",
+          "image": "https://brlogcampogrande.com.br/wp-content/uploads/2025/11/BRLOG-RENDER-05-PORTARIA-01.jpg",
+          "source_url": "https://brlogcampogrande.com.br/",
+          "source_label": "BR LOG Campo Grande"
+        },
+        {
+          "title": "BR LOG Campo Grande - implantacao viaria",
+          "category": "Implantacao",
+          "image": "https://brlogcampogrande.com.br/wp-content/uploads/2025/11/BRLOG-RENDER-07-GERAL-02.jpg",
+          "source_url": "https://brlogcampogrande.com.br/",
+          "source_label": "BR LOG Campo Grande"
+        },
+        {
+          "title": "BR LOG Campo Grande - auditorio",
+          "category": "Apoio",
+          "image": "https://brlogcampogrande.com.br/wp-content/uploads/2025/11/BRLOG-RENDER-02-AUDITORIO-02.jpg",
+          "source_url": "https://brlogcampogrande.com.br/",
+          "source_label": "BR LOG Campo Grande"
+        },
+        {
+          "title": "BR LOG Campo Grande - acesso monitorado",
+          "category": "Acesso",
+          "image": "https://brlogcampogrande.com.br/wp-content/uploads/2025/11/BRLOG-RENDER-03-PORTARIA-04.jpg",
+          "source_url": "https://brlogcampogrande.com.br/",
+          "source_label": "BR LOG Campo Grande"
+        },
+        {
+          "title": "BR LOG Campo Grande - gourmet de apoio",
+          "category": "Convivencia",
+          "image": "https://brlogcampogrande.com.br/wp-content/uploads/2025/11/BRLOG-RENDER-06-GOURMET-03.jpg",
+          "source_url": "https://brlogcampogrande.com.br/",
+          "source_label": "BR LOG Campo Grande"
+        },
+        {
+          "title": "BR LOG Campo Grande - patio operacional",
+          "category": "Infraestrutura",
+          "image": "https://brlogcampogrande.com.br/wp-content/uploads/2025/11/BRLOG-portfolio-02-A10.jpg",
+          "source_url": "https://brlogcampogrande.com.br/",
+          "source_label": "BR LOG Campo Grande"
+        },
+        {
+          "title": "BR LOG Campo Grande - patio interno",
+          "category": "Infraestrutura",
+          "image": "https://brlogcampogrande.com.br/wp-content/uploads/2025/11/BRLOG-portfolio-03-A08.jpg",
+          "source_url": "https://brlogcampogrande.com.br/",
+          "source_label": "BR LOG Campo Grande"
+        },
+        {
+          "title": "BR LOG Campo Grande - campo de futebol",
+          "category": "Esporte",
+          "image": "https://brlogcampogrande.com.br/wp-content/uploads/2025/11/BRLOG-RENDER-08-CAMPO-FUTEBOL-01.jpg",
+          "source_url": "https://brlogcampogrande.com.br/",
+          "source_label": "BR LOG Campo Grande"
+        },
+        {
+          "title": "BR LOG Campo Grande - vias internas",
+          "category": "Infraestrutura",
+          "image": "https://brlogcampogrande.com.br/wp-content/uploads/2025/11/BRLOG-portfolio-04-A04.jpg",
+          "source_url": "https://brlogcampogrande.com.br/",
+          "source_label": "BR LOG Campo Grande"
+        },
+        {
+          "title": "BR LOG Campo Grande - acesso pela BR",
+          "category": "Acesso",
+          "image": "https://brlogcampogrande.com.br/wp-content/uploads/2025/11/BRLOG-portfolio-05-A01.jpg",
+          "source_url": "https://brlogcampogrande.com.br/",
+          "source_label": "BR LOG Campo Grande"
+        },
+        {
+          "title": "BR LOG Campo Grande - vista aerea",
+          "category": "Implantacao",
+          "image": "https://brlogcampogrande.com.br/wp-content/uploads/2025/11/BRLOG-portfolio-06-DJI_0377.jpg",
+          "source_url": "https://brlogcampogrande.com.br/",
+          "source_label": "BR LOG Campo Grande"
+        },
+        {
+          "title": "BR LOG Campo Grande - obra e infraestrutura",
+          "category": "Implantacao",
+          "image": "https://brlogcampogrande.com.br/wp-content/uploads/2025/11/BRLOG-portfolio-01-DJI_0374.jpg",
+          "source_url": "https://brlogcampogrande.com.br/",
+          "source_label": "BR LOG Campo Grande"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "BR-262 estrategica",
+          "description": "A pagina oficial posiciona o condominio a 7 km de Campo Grande, na rota da celulose e rota bioceanica."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Portaria 24h",
+          "description": "Seguranca e portaria 24h aparecem como pilares da proposta operacional."
+        },
+        {
+          "icon": "Truck",
+          "title": "Manobra para caminhoes",
+          "description": "Asfalto para caminhoes, area de manobra, estacionamento e balanca atendem a operacao logistica."
+        },
+        {
+          "icon": "Briefcase",
+          "title": "Apoio empresarial",
+          "description": "Auditorio, coworking, reuniao, gourmet e campo de futebol ampliam a estrutura de suporte."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Primeiro da capital",
+          "description": "Fontes regionais apresentam o BR LOG como primeiro condominio logistico e empresarial de Campo Grande."
+        },
+        {
+          "title": "Galeria 100% institucional",
+          "description": "As imagens sao renders e vistas do proprio empreendimento, sem fotos de produto imobiliario residencial."
+        },
+        {
+          "title": "Infraestrutura clara",
+          "description": "A copy detalha portaria, balanca, vias, patio e apoios, que sao os pontos decisivos para operacao."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o BR LOG Campo Grande?",
+          "answer": "Na BR-262, a 7 km de Campo Grande, Mato Grosso do Sul."
+        },
+        {
+          "question": "Qual e o perfil do empreendimento?",
+          "answer": "Condominio logistico e empresarial com seguranca, portaria, vias internas, balanca e estrutura de apoio."
+        },
+        {
+          "question": "Quais imagens foram usadas?",
+          "answer": "Portaria, balanca, implantacao, auditorio, gourmet, patio, campo, vias internas e vista aerea."
+        },
+        {
+          "question": "Quais rotas sao citadas?",
+          "answer": "A fonte oficial cita conexao com a rota da celulose e a rota bioceanica."
+        }
+      ],
+      "sources": [
+        "https://brlogcampogrande.com.br/",
+        "https://brloglogistico.com.br/",
+        "https://www.guilhermepilger.com/imovel/terreno-campo-grande-br-262-venda-ref-2635/",
+        "https://www.campograndenews.com.br/conteudo-patrocinado/campo-grande-aprova-o-primeiro-condominio-empresarial-e-logistico-da-capital",
+        "https://redeuno.com.br/imovel/uno-rede-imobiliaria-ms-condominio-logistico-em-campo-grande-ms-na-br-262-lotes-br-log-jardim-noroeste-349",
+        "https://www.encontracampogrande.com.br/sobre/br-log-primeiro-condominio-logistico-de-campo-grande/"
+      ]
+    }
+  ]
+}

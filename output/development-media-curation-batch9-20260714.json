@@ -1,0 +1,1154 @@
+{
+  "batch_id": "development-media-curation-batch9-20260714",
+  "generated_at": "2026-07-14T23:45:00.000Z",
+  "items": [
+    {
+      "slug": "brava-arts",
+      "hero_image": "https://mendes.life/wp-content/uploads/2025/02/brava-arts-fachada-3.webp",
+      "description": "O Brava Arts e um empreendimento da Mendes na Praia Brava, em Itajai, localizado na Rua Delfim Mario de Padua Peixoto, 1128, a uma quadra do mar. O projeto ficou conhecido pela assinatura de Romero Britto, com arte aplicada na fachada e nos ambientes comuns. As fontes pesquisadas citam tres torres, 15 pavimentos, dois residenciais por andar em cada torre, dois elevadores por torre, hall com pe-direito duplo, portaria automatizada e lazer distribuido entre mezanino, primeiro pavimento e rooftop, incluindo beach pool, sky fitness, kids pool, pool bar, beauty lounge, solarium, brinquedoteca, festas, jogos e clube do whisky.",
+      "seo_description": "Conheca o Brava Arts, empreendimento Mendes na Praia Brava assinado por Romero Britto, com tres torres e lazer no rooftop.",
+      "gallery": [
+        {
+          "title": "Brava Arts - fachada assinada",
+          "category": "Empreendimento",
+          "image": "https://mendes.life/wp-content/uploads/2025/02/brava-arts-fachada-3.webp",
+          "source_url": "https://mendes.life/brava-arts/",
+          "source_label": "Mendes"
+        },
+        {
+          "title": "Brava Arts - piscina no rooftop",
+          "category": "Lazer",
+          "image": "https://mendes.life/wp-content/uploads/2025/02/brava-arts-mendes-empreendimentos-1.webp",
+          "source_url": "https://mendes.life/brava-arts/",
+          "source_label": "Mendes"
+        },
+        {
+          "title": "Brava Arts - borda da piscina",
+          "category": "Lazer",
+          "image": "https://mendes.life/wp-content/uploads/2025/02/brava-arts-mendes-empreendimentos-2.webp",
+          "source_url": "https://mendes.life/brava-arts/",
+          "source_label": "Mendes"
+        },
+        {
+          "title": "Brava Arts - spa com vista",
+          "category": "Lazer",
+          "image": "https://mendes.life/wp-content/uploads/2025/02/brava-arts-mendes-empreendimentos-4.webp",
+          "source_url": "https://mendes.life/brava-arts/",
+          "source_label": "Mendes"
+        },
+        {
+          "title": "Brava Arts - ambiente fitness",
+          "category": "Lazer",
+          "image": "https://mendes.life/wp-content/uploads/2025/02/brava-arts-mendes-empreendimentos-6.webp",
+          "source_url": "https://mendes.life/brava-arts/",
+          "source_label": "Mendes"
+        },
+        {
+          "title": "Brava Arts - espaco kids",
+          "category": "Lazer",
+          "image": "https://mendes.life/wp-content/uploads/2025/02/brava-arts-mendes-empreendimentos-16.webp",
+          "source_url": "https://mendes.life/brava-arts/",
+          "source_label": "Mendes"
+        },
+        {
+          "title": "Brava Arts - ambiente de jogos",
+          "category": "Lazer",
+          "image": "https://mendes.life/wp-content/uploads/2025/02/brava-arts-mendes-empreendimentos-17.webp",
+          "source_url": "https://mendes.life/brava-arts/",
+          "source_label": "Mendes"
+        },
+        {
+          "title": "Brava Arts - hall de chegada",
+          "category": "Acesso",
+          "image": "https://mendes.life/wp-content/uploads/2025/02/brava-arts-mendes-empreendimentos-13.webp",
+          "source_url": "https://mendes.life/brava-arts/",
+          "source_label": "Mendes"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Palette",
+          "title": "Assinatura Romero Britto",
+          "description": "Arte aplicada na fachada e nos ambientes comuns cria identidade rara na Praia Brava."
+        },
+        {
+          "icon": "Waves",
+          "title": "Uma quadra do mar",
+          "description": "Endereco na Rua Delfim Mario de Padua Peixoto, perto da orla e dos servicos da Praia Brava."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer em diferentes niveis",
+          "description": "Mezanino, primeiro pavimento e rooftop organizam piscina, fitness, kids, festas e areas de relaxamento."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Mendes Empreendimentos",
+          "description": "As fontes atribuem o projeto a Mendes, construtora presente na Praia Brava."
+        },
+        {
+          "title": "Estrutura em tres torres",
+          "description": "A configuracao citada inclui tres torres, dois elevadores por torre e dois residenciais por andar."
+        },
+        {
+          "title": "Entrega consolidada",
+          "description": "Fontes de mercado citam entrega em 2021, permitindo avaliar fachada e areas comuns prontas."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Brava Arts?",
+          "answer": "Fica na Rua Delfim Mario de Padua Peixoto, 1128, na Praia Brava, em Itajai."
+        },
+        {
+          "question": "Quem assina o conceito artistico do Brava Arts?",
+          "answer": "O empreendimento e divulgado como projeto assinado por Romero Britto, com arte na fachada e nos ambientes comuns."
+        },
+        {
+          "question": "Quais areas de lazer aparecem nas fontes?",
+          "answer": "As fontes citam beach pool, sky fitness, kids pool, pool bar, beauty lounge, solarium, brinquedoteca, festas, jogos e clube do whisky."
+        },
+        {
+          "question": "O Brava Arts esta pronto?",
+          "answer": "As fontes consultadas citam entrega em 2021."
+        }
+      ],
+      "sources": [
+        "https://mendes.life/brava-arts/",
+        "https://bravaarts.com.br/o-lazer/",
+        "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/edificio-brava-arts/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-arts-EM39409",
+        "https://felicitanegocios.com.br/empreendimento/200/brava-arts/"
+      ]
+    },
+    {
+      "slug": "brava-arts-by-romero-britto",
+      "hero_image": "https://mendes.life/wp-content/uploads/2025/02/brava-arts-fachada-3.webp",
+      "description": "O Brava Arts by Romero Britto identifica o mesmo empreendimento artistico da Mendes na Praia Brava, em Itajai, com fachada marcada pelos tracos coloridos do artista. A pesquisa aponta endereco na Rua Delfim Mario de Padua Peixoto, 1128, a uma quadra do mar, tres torres, 15 pavimentos, dois residenciais por andar em cada torre, hall com pe-direito duplo e portaria automatizada. A estrutura de lazer combina Espaco Sky, mezanino e rooftop, com beach pool, sky fitness, kids pool, pool bar, beauty lounge, solarium, brinquedoteca, festas, jogos, playground e clube do whisky.",
+      "seo_description": "Conheca o Brava Arts by Romero Britto na Praia Brava, projeto Mendes com fachada artistica, rooftop, beach pool e lazer distribuido entre mezanino e cobertura.",
+      "gallery": [
+        {
+          "title": "Brava Arts by Romero Britto - fachada",
+          "category": "Empreendimento",
+          "image": "https://mendes.life/wp-content/uploads/2025/02/brava-arts-fachada-3.webp",
+          "source_url": "https://mendes.life/brava-arts/",
+          "source_label": "Mendes"
+        },
+        {
+          "title": "Brava Arts by Romero Britto - rooftop",
+          "category": "Lazer",
+          "image": "https://mendes.life/wp-content/uploads/2025/02/brava-arts-mendes-empreendimentos-1.webp",
+          "source_url": "https://mendes.life/brava-arts/",
+          "source_label": "Mendes"
+        },
+        {
+          "title": "Brava Arts by Romero Britto - piscina",
+          "category": "Lazer",
+          "image": "https://mendes.life/wp-content/uploads/2025/02/brava-arts-mendes-empreendimentos-3.webp",
+          "source_url": "https://mendes.life/brava-arts/",
+          "source_label": "Mendes"
+        },
+        {
+          "title": "Brava Arts by Romero Britto - spa",
+          "category": "Lazer",
+          "image": "https://mendes.life/wp-content/uploads/2025/02/brava-arts-mendes-empreendimentos-4.webp",
+          "source_url": "https://mendes.life/brava-arts/",
+          "source_label": "Mendes"
+        },
+        {
+          "title": "Brava Arts by Romero Britto - fitness",
+          "category": "Lazer",
+          "image": "https://mendes.life/wp-content/uploads/2025/02/brava-arts-mendes-empreendimentos-6.webp",
+          "source_url": "https://mendes.life/brava-arts/",
+          "source_label": "Mendes"
+        },
+        {
+          "title": "Brava Arts by Romero Britto - kids",
+          "category": "Lazer",
+          "image": "https://mendes.life/wp-content/uploads/2025/02/brava-arts-mendes-empreendimentos-16.webp",
+          "source_url": "https://mendes.life/brava-arts/",
+          "source_label": "Mendes"
+        },
+        {
+          "title": "Brava Arts by Romero Britto - jogos",
+          "category": "Lazer",
+          "image": "https://mendes.life/wp-content/uploads/2025/02/brava-arts-mendes-empreendimentos-17.webp",
+          "source_url": "https://mendes.life/brava-arts/",
+          "source_label": "Mendes"
+        },
+        {
+          "title": "Brava Arts by Romero Britto - acesso",
+          "category": "Acesso",
+          "image": "https://mendes.life/wp-content/uploads/2025/02/brava-arts-mendes-empreendimentos-13.webp",
+          "source_url": "https://mendes.life/brava-arts/",
+          "source_label": "Mendes"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Palette",
+          "title": "Identidade artistica unica",
+          "description": "O conceito visual assinado por Romero Britto diferencia fachada, hall e ambientes comuns."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Praia Brava a poucos passos",
+          "description": "Endereco a uma quadra do mar, em trecho valorizado de Itajai."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Rooftop funcional",
+          "description": "O Espaco Sky concentra piscina, fitness, relaxamento, solarium e areas de convivencia."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Projeto tematico de arte",
+          "description": "A proposta inclui a presenca do artista na narrativa de fachada e ambientacao."
+        },
+        {
+          "title": "Lazer em camadas",
+          "description": "Mezanino, primeiro pavimento e rooftop distribuem usos sociais, infantis e de bem-estar."
+        },
+        {
+          "title": "Controle de acesso",
+          "description": "As fontes citam portaria automatizada e sistema de seguranca no empreendimento."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Brava Arts e Brava Arts by Romero Britto sao o mesmo empreendimento?",
+          "answer": "As fontes tratam Brava Arts e Brava Arts by Romero Britto como o projeto da Mendes na Praia Brava assinado por Romero Britto."
+        },
+        {
+          "question": "Qual e o endereco do Brava Arts by Romero Britto?",
+          "answer": "O endereco pesquisado e Rua Delfim Mario de Padua Peixoto, 1128, Praia Brava, Itajai."
+        },
+        {
+          "question": "Quais sao os destaques de lazer?",
+          "answer": "Espaco Sky, beach pool, sky fitness, kids pool, beauty lounge, solarium, brinquedoteca, festas, jogos e playground."
+        },
+        {
+          "question": "Quem construiu o empreendimento?",
+          "answer": "As fontes consultadas atribuem a obra a Mendes Empreendimentos."
+        }
+      ],
+      "sources": [
+        "https://mendes.life/brava-arts/",
+        "https://bravaarts.com.br/o-lazer/",
+        "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/edificio-brava-arts/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-arts-EM39409",
+        "https://felicitanegocios.com.br/empreendimento/200/brava-arts/"
+      ]
+    },
+    {
+      "slug": "brava-beach-internacional-reserva-corais",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2023/03/brava-beach-internacional-reserva-corais-praia-brava-itajai-1.jpg",
+      "description": "O Brava Beach Internacional - Reserva Corais e um condominio fechado frente-mar na Praia Brava, em Itajai, localizado na Avenida Jose Medeiros Vieira. As fontes consultadas descrevem quatro torres, estacionamento no subsolo, portaria 24h, obra do Grupo Brava Beach e entrega em 2014. A proposta tem perfil de resort residencial, com ampla area de lazer voltada ao mar: piscina com borda infinita, bar molhado, piscina interna aquecida, hidromassagens, saunas, academia, beauty center, spa externo, festas, gourmet, cinema, jogos, brinquedoteca, espaco teen, playground, mini golf, minimercado e servico de bar na praia.",
+      "seo_description": "Conheca o Brava Beach Internacional Reserva Corais, condominio fechado frente-mar na Praia Brava com torres residenciais, portaria 24h e lazer de resort.",
+      "gallery": [
+        {
+          "title": "Reserva Corais - fachada frente-mar",
+          "category": "Empreendimento",
+          "image": "https://litoralvertical.com/wp-content/uploads/2023/03/brava-beach-internacional-reserva-corais-praia-brava-itajai-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/brava-beach-internacional-reserva-corais/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Reserva Corais - piscina externa",
+          "category": "Lazer",
+          "image": "https://litoralvertical.com/wp-content/uploads/2023/03/brava-beach-internacional-reserva-corais-praia-brava-itajai-2.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/brava-beach-internacional-reserva-corais/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Reserva Corais - borda infinita",
+          "category": "Lazer",
+          "image": "https://litoralvertical.com/wp-content/uploads/2023/03/brava-beach-internacional-reserva-corais-praia-brava-itajai-4.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/brava-beach-internacional-reserva-corais/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Reserva Corais - playground",
+          "category": "Lazer",
+          "image": "https://litoralvertical.com/wp-content/uploads/2023/03/brava-beach-internacional-reserva-corais-praia-brava-itajai-9.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/brava-beach-internacional-reserva-corais/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Reserva Corais - mini golf",
+          "category": "Lazer",
+          "image": "https://litoralvertical.com/wp-content/uploads/2023/03/brava-beach-internacional-reserva-corais-praia-brava-itajai-11.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/brava-beach-internacional-reserva-corais/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Reserva Corais - piscina aquecida",
+          "category": "Lazer",
+          "image": "https://litoralvertical.com/wp-content/uploads/2023/03/brava-beach-internacional-reserva-corais-praia-brava-itajai-17.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/brava-beach-internacional-reserva-corais/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Reserva Corais - fitness",
+          "category": "Lazer",
+          "image": "https://litoralvertical.com/wp-content/uploads/2023/03/brava-beach-internacional-reserva-corais-praia-brava-itajai-22.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/brava-beach-internacional-reserva-corais/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Reserva Corais - cinema",
+          "category": "Lazer",
+          "image": "https://litoralvertical.com/wp-content/uploads/2023/03/brava-beach-internacional-reserva-corais-praia-brava-itajai-28.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/brava-beach-internacional-reserva-corais/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente-mar na Praia Brava",
+          "description": "A implantacao coloca lazer e circulacao principal diretamente conectados ao mar."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Condominio fechado",
+          "description": "Portaria 24h e estacionamento no subsolo reforcam controle de acesso e praticidade."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer de perfil resort",
+          "description": "Piscinas, spa, saunas, cinema, mini golf, brinquedoteca e bar na praia ampliam a experiencia condominial."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Grupo Brava Beach",
+          "description": "O projeto e associado ao grupo formado por Ciaplan, FG, Riviera e J.A. Russi."
+        },
+        {
+          "title": "Quatro torres",
+          "description": "A estrutura combina torres de frente para o mar e torres posteriores dentro do mesmo complexo."
+        },
+        {
+          "title": "Entrega consolidada",
+          "description": "A fonte Litoral Vertical cita entrega em 2014, com areas comuns ja maduras."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Reserva Corais?",
+          "answer": "Fica na Avenida Jose Medeiros Vieira, na Praia Brava, em Itajai."
+        },
+        {
+          "question": "O Reserva Corais e frente-mar?",
+          "answer": "Sim. As fontes consultadas descrevem o Brava Beach Internacional - Reserva Corais como condominio fechado frente-mar."
+        },
+        {
+          "question": "Quais construtoras aparecem ligadas ao Brava Beach Group?",
+          "answer": "As fontes citam Ciaplan, FG Empreendimentos, Riviera Empreendimentos e Construtora e Incorporadora J.A. Russi."
+        },
+        {
+          "question": "Quais areas de lazer se destacam?",
+          "answer": "Piscina com borda infinita, bar molhado, piscina aquecida, saunas, spa, academia, cinema, mini golf, playground, brinquedoteca e servico de bar na praia."
+        }
+      ],
+      "sources": [
+        "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/brava-beach-internacional-reserva-corais/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-beach-corais-EM72202"
+      ]
+    },
+    {
+      "slug": "brava-palace-residence",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachadass-1756818819.jpg",
+      "description": "O Brava Palace Residence e um projeto da Construtora Bascara na Rua Carlos Alberto Niehus, 44, na Praia Brava, em Itajai, a poucos metros do mar. As fontes pesquisadas citam entrega em dezembro de 2022, 11 pavimentos, dois residenciais por andar, hall de entrada com pe-direito duplo, guarita, box de praia e fachada em pele de vidro. O lazer e mais reservado, com piscina e espaco gourmet, reforcando uma proposta de baixa densidade, privacidade e rotina pratica perto da praia.",
+      "seo_description": "Conheca o Brava Palace Residence, projeto Bascara na Praia Brava entregue em 2022, com 11 pavimentos, hall duplo, piscina, gourmet e box de praia.",
+      "gallery": [
+        {
+          "title": "Brava Palace - fachada da torre",
+          "category": "Empreendimento",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachadass-1756818819.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-palace-residence-EM33453",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Brava Palace - fachada frontal",
+          "category": "Empreendimento",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2022/brava-palace-39-1671283486.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-palace-residence-EM33453",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Brava Palace - piscina",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/sCZZNnnCk7Iu0C51vYXP.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-palace-residence-EM33453",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Brava Palace - piscina vista superior",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/OErWiotMLVnXqOcTjRnj.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-palace-residence-EM33453",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Brava Palace - hall principal",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2022/brava-palace-35-1671283483.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-palace-residence-EM33453",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Brava Palace - hall com pe-direito duplo",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2022/brava-palace-36-1671283485.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-palace-residence-EM33453",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Perto do mar",
+          "description": "Endereco na Praia Brava, a poucos metros da orla."
+        },
+        {
+          "icon": "KeyRound",
+          "title": "Baixa densidade",
+          "description": "Dois residenciais por andar em 11 pavimentos favorecem privacidade."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Acesso com guarita",
+          "description": "Hall com pe-direito duplo, guarita e box de praia completam a estrutura condominial."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Construtora Bascara",
+          "description": "As fontes atribuem o projeto a Bascara, construtora atuante na Praia Brava."
+        },
+        {
+          "title": "Fachada em pele de vidro",
+          "description": "O desenho da fachada reforca o perfil contemporaneo do edificio."
+        },
+        {
+          "title": "Entrega recente",
+          "description": "Fontes citam entrega em dezembro de 2022."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Brava Palace Residence?",
+          "answer": "Fica na Rua Carlos Alberto Niehus, 44, na Praia Brava, em Itajai."
+        },
+        {
+          "question": "Quem e a construtora do Brava Palace?",
+          "answer": "As fontes consultadas apontam a Construtora Bascara como responsavel pelo projeto."
+        },
+        {
+          "question": "Quais areas de lazer o Brava Palace oferece?",
+          "answer": "As fontes destacam piscina e espaco gourmet."
+        },
+        {
+          "question": "Quando o Brava Palace foi entregue?",
+          "answer": "As fontes citam entrega em dezembro de 2022."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-palace-residence-EM33453",
+        "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/edificio-brava-palace-residence/",
+        "https://felicitanegocios.com.br/empreendimento/327/brava-palace-residence/"
+      ]
+    },
+    {
+      "slug": "bravo-by-arthur-casas",
+      "hero_image": "https://abcincembralot.com.br/wp-content/uploads/2026/01/ARC00134-HDR.jpg",
+      "description": "O Bravo by Arthur Casas, tambem divulgado como Bravo Residences by Arthur Casas, e um empreendimento frente-mar da ABC.inc & Embralot na Praia Brava, em Itajai. A fonte oficial informa projeto entregue, assinatura do Studio Arthur Casas, apenas seis residencias, quatro suites com vista para o mar, spa aquecido em cada residencia, quatro vagas, 323 m2 de area privativa e Personal System. Fontes de mercado reforcam uma residencia por andar, terreno de esquina frente-mar, paisagismo Cardin e cobertura de lazer com academia, sauna, piscina com visor transparente e area gourmet.",
+      "seo_description": "Conheca o Bravo by Arthur Casas, frente-mar na Praia Brava, com seis residencias, arquitetura autoral e lazer na cobertura.",
+      "gallery": [
+        {
+          "title": "Bravo by Arthur Casas - fachada frente-mar",
+          "category": "Empreendimento",
+          "image": "https://abcincembralot.com.br/wp-content/uploads/2026/01/ARC00134-HDR.jpg",
+          "source_url": "https://abcincembralot.com.br/bravo-residences/",
+          "source_label": "ABC.inc & Embralot"
+        },
+        {
+          "title": "Bravo by Arthur Casas - acesso ajardinado",
+          "category": "Acesso",
+          "image": "https://abcincembralot.com.br/wp-content/uploads/2026/01/ARC09988-HDR.jpg",
+          "source_url": "https://abcincembralot.com.br/bravo-residences/",
+          "source_label": "ABC.inc & Embralot"
+        },
+        {
+          "title": "Bravo by Arthur Casas - galeria de acesso",
+          "category": "Acesso",
+          "image": "https://abcincembralot.com.br/wp-content/uploads/2026/01/ARC09983-HDR.jpg",
+          "source_url": "https://abcincembralot.com.br/bravo-residences/",
+          "source_label": "ABC.inc & Embralot"
+        },
+        {
+          "title": "Bravo by Arthur Casas - paisagismo",
+          "category": "Acesso",
+          "image": "https://abcincembralot.com.br/wp-content/uploads/2026/01/ARC00004-HDR.jpg",
+          "source_url": "https://abcincembralot.com.br/bravo-residences/",
+          "source_label": "ABC.inc & Embralot"
+        },
+        {
+          "title": "Bravo by Arthur Casas - hall autoral",
+          "category": "Acesso",
+          "image": "https://abcincembralot.com.br/wp-content/uploads/2026/01/ARC09973-HDR.jpg",
+          "source_url": "https://abcincembralot.com.br/bravo-residences/",
+          "source_label": "ABC.inc & Embralot"
+        },
+        {
+          "title": "Bravo by Arthur Casas - lazer com vista",
+          "category": "Lazer",
+          "image": "https://abcincembralot.com.br/wp-content/uploads/2026/01/ARC00159-HDR.jpg",
+          "source_url": "https://abcincembralot.com.br/bravo-residences/",
+          "source_label": "ABC.inc & Embralot"
+        },
+        {
+          "title": "Bravo by Arthur Casas - piscina",
+          "category": "Lazer",
+          "image": "https://abcincembralot.com.br/wp-content/uploads/2026/01/ARC00149-HDR.jpg",
+          "source_url": "https://abcincembralot.com.br/bravo-residences/",
+          "source_label": "ABC.inc & Embralot"
+        },
+        {
+          "title": "Bravo by Arthur Casas - solarium",
+          "category": "Lazer",
+          "image": "https://abcincembralot.com.br/wp-content/uploads/2026/01/ARC00144-HDR.jpg",
+          "source_url": "https://abcincembralot.com.br/bravo-residences/",
+          "source_label": "ABC.inc & Embralot"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente-mar em terreno de esquina",
+          "description": "A implantacao mira vista aberta e presenca direta na orla da Praia Brava."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Arquitetura autoral",
+          "description": "Arthur Casas assina arquitetura, interiores e linguagem de design do empreendimento."
+        },
+        {
+          "icon": "KeyRound",
+          "title": "Apenas seis residencias",
+          "description": "A baixa densidade reforca privacidade e exclusividade."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Studio Arthur Casas",
+          "description": "A assinatura autoral e o principal diferencial de posicionamento do Bravo."
+        },
+        {
+          "title": "Paisagismo Cardin",
+          "description": "Fontes de mercado citam paisagismo assinado por Cardin."
+        },
+        {
+          "title": "Cobertura de lazer",
+          "description": "Academia, sauna, piscina com visor e area gourmet ocupam o topo do edificio."
+        }
+      ],
+      "faq": [
+        {
+          "question": "O Bravo by Arthur Casas e frente-mar?",
+          "answer": "Sim. As fontes o descrevem como empreendimento frente-mar na Praia Brava, em Itajai."
+        },
+        {
+          "question": "Quem assina o projeto?",
+          "answer": "A arquitetura e divulgada como assinatura do Studio Arthur Casas."
+        },
+        {
+          "question": "Quantas residencias existem no Bravo?",
+          "answer": "A fonte oficial informa apenas seis residencias."
+        },
+        {
+          "question": "Quais areas comuns se destacam?",
+          "answer": "As fontes citam cobertura de lazer com academia, sauna, piscina com visor e area gourmet."
+        }
+      ],
+      "sources": [
+        "https://abcincembralot.com.br/bravo-residences/",
+        "https://www.imobiliariacri.com.br/empreendimento/bravo-by-arthur-casas-EMP00463",
+        "https://felicitanegocios.com.br/empreendimento/259/bravo-residences-by-arthur-casas/"
+      ]
+    },
+    {
+      "slug": "celine",
+      "hero_image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_751_10865_1616_080223.webp",
+      "description": "O Celine e um empreendimento Dallo no Canto da Praia, em Itapema, com implantacao frente-mar e arquitetura de forte presenca na orla. As fontes consultadas citam 44 pavimentos, 69 residenciais de alto padrao, dois residenciais por andar, hall decorado, tres elevadores e aproximadamente 2.500 m2 de lazer. A area comum inclui piscina adulto, piscina infantil, piscina coberta aquecida, deck, sauna seca e umida, hidrospa, festas, confraria, jogos com pub, praca de fogo, gourmet, playground, brinquedoteca, espaco pet e academia.",
+      "seo_description": "Conheca o Celine, empreendimento Dallo frente-mar no Canto da Praia em Itapema, com 44 pavimentos, hall decorado, tres elevadores e lazer completo.",
+      "gallery": [
+        {
+          "title": "Celine - fachada frente-mar",
+          "category": "Empreendimento",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_751_10865_1616_080223.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/celine/itapema/canto-da-praia/751",
+          "source_label": "H.J. Junior"
+        },
+        {
+          "title": "Celine - torre na orla",
+          "category": "Empreendimento",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_751_10866_1616_080223.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/celine/itapema/canto-da-praia/751",
+          "source_label": "H.J. Junior"
+        },
+        {
+          "title": "Celine - vista da fachada",
+          "category": "Empreendimento",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_751_10864_1616_080223.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/celine/itapema/canto-da-praia/751",
+          "source_label": "H.J. Junior"
+        },
+        {
+          "title": "Celine - base e acesso",
+          "category": "Acesso",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_751_10863_1616_080223.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/celine/itapema/canto-da-praia/751",
+          "source_label": "H.J. Junior"
+        },
+        {
+          "title": "Celine - jardim frente-mar",
+          "category": "Lazer",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_751_10853_1615_080223.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/celine/itapema/canto-da-praia/751",
+          "source_label": "H.J. Junior"
+        },
+        {
+          "title": "Celine - deck externo",
+          "category": "Lazer",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_751_10852_1615_080223.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/celine/itapema/canto-da-praia/751",
+          "source_label": "H.J. Junior"
+        },
+        {
+          "title": "Celine - lounge externo",
+          "category": "Lazer",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_751_10856_1616_080223.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/celine/itapema/canto-da-praia/751",
+          "source_label": "H.J. Junior"
+        },
+        {
+          "title": "Celine - piscina coberta",
+          "category": "Lazer",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_751_10858_1616_080223.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/celine/itapema/canto-da-praia/751",
+          "source_label": "H.J. Junior"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente-mar no Canto da Praia",
+          "description": "A posicao na orla de Itapema entrega vista aberta e acesso direto ao cotidiano da praia."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Padrao Dallo",
+          "description": "As fontes relacionam o empreendimento ao padrao construtivo da Dallo."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer de 2.500 m2",
+          "description": "Piscinas, spa, saunas, fitness, festas, kids, pet e gourmet compoem a estrutura condominial."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "44 pavimentos",
+          "description": "As fontes citam torre alta com 44 pavimentos na paisagem do Canto da Praia."
+        },
+        {
+          "title": "Dois residenciais por andar",
+          "description": "A distribuicao reforca o perfil de alto padrao e privacidade."
+        },
+        {
+          "title": "Lazer completo frente ao mar",
+          "description": "O conjunto de areas comuns foi pensado para aproveitar a conexao visual com a orla."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Celine?",
+          "answer": "Fica no Canto da Praia, em Itapema, em implantacao frente-mar."
+        },
+        {
+          "question": "Quem e a construtora do Celine?",
+          "answer": "As fontes consultadas apontam a Dallo Empreendimentos."
+        },
+        {
+          "question": "Quantos pavimentos o Celine possui?",
+          "answer": "Fontes de mercado citam 44 pavimentos."
+        },
+        {
+          "question": "Quais areas de lazer aparecem nas fontes?",
+          "answer": "Piscina adulto, piscina infantil, piscina coberta aquecida, spa, saunas, academia, festas, confraria, jogos com pub, gourmet, playground, brinquedoteca e espaco pet."
+        }
+      ],
+      "sources": [
+        "https://www.dallo.com.br/empreendimento/celine/",
+        "https://hjjuniorimoveis.com.br/edificios/celine/itapema/canto-da-praia/751",
+        "https://litoralvertical.com/venda/itapema/apartamentos/edificio-celine/",
+        "https://www.vitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/celine/5431"
+      ]
+    },
+    {
+      "slug": "chateau-de-florence",
+      "hero_image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/42813/images/xxl/_c70341de836130170611743510029301.jpg",
+      "description": "O Chateau de Florence e um empreendimento frente-mar na Avenida Nereu Ramos, em Itapema, com proposta de baixa densidade e lazer elevado. As fontes consultadas citam 15 pavimentos, 32 residenciais, tres por andar, hall decorado, sistema de seguranca, guarita, portaria 24h, isolamento acustico nas lajes e gerador para areas comuns e elevadores. O lazer combina piscina aquecida, piscina com borda infinita, rooftop bistro, bar bistro, gourmet, brinquedoteca, academia, jogos, terraco, acesso direto para a praia e entrada para banhistas.",
+      "seo_description": "Conheca o Chateau de Florence, empreendimento frente-mar em Itapema com 15 pavimentos, rooftop bistro e piscina com borda infinita.",
+      "gallery": [
+        {
+          "title": "Chateau de Florence - vista frente-mar",
+          "category": "Empreendimento",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/42813/images/xxl/_c70341de836130170611743510029301.jpg",
+          "source_url": "https://myside.com.br/apartamento-venda-chateau-de-florence-itapema-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Chateau de Florence - fachada na orla",
+          "category": "Empreendimento",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/42813/images/xxl/_130f1a8e350220170611745710754736.jpg",
+          "source_url": "https://myside.com.br/apartamento-venda-chateau-de-florence-itapema-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Chateau de Florence - piscina externa",
+          "category": "Lazer",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/42813/images/xxl/_2c048d74817295170611792110955438.jpg",
+          "source_url": "https://myside.com.br/apartamento-venda-chateau-de-florence-itapema-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Chateau de Florence - piscina aquecida",
+          "category": "Lazer",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/42813/images/xxl/_708be71b546089170611793510048996.jpg",
+          "source_url": "https://myside.com.br/apartamento-venda-chateau-de-florence-itapema-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Chateau de Florence - ambiente de jogos",
+          "category": "Lazer",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/42813/images/xxl/_941c377c885146170611801310337284.jpg",
+          "source_url": "https://myside.com.br/apartamento-venda-chateau-de-florence-itapema-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Chateau de Florence - base da fachada",
+          "category": "Empreendimento",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/42813/images/xxl/_87db7e71045065170611769110075840.jpg",
+          "source_url": "https://myside.com.br/apartamento-venda-chateau-de-florence-itapema-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Chateau de Florence - portico de acesso",
+          "category": "Acesso",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/42813/images/xxl/_1485100314091617061177041079293.jpg",
+          "source_url": "https://myside.com.br/apartamento-venda-chateau-de-florence-itapema-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Chateau de Florence - detalhe da entrada",
+          "category": "Acesso",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/42813/images/xxl/_026a39ae203670170611767710309448.jpg",
+          "source_url": "https://myside.com.br/apartamento-venda-chateau-de-florence-itapema-sc",
+          "source_label": "MySide"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente-mar em Itapema",
+          "description": "A localizacao na Avenida Nereu Ramos posiciona o empreendimento junto a orla."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Seguranca e controle",
+          "description": "Guarita, portaria 24h e sistema de seguranca aparecem nas fontes consultadas."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Rooftop bistro",
+          "description": "Piscina com borda infinita, rooftop, bar bistro e gourmet criam uma experiencia elevada de lazer."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "15 pavimentos",
+          "description": "A torre e citada com 15 pavimentos e apenas 32 residenciais."
+        },
+        {
+          "title": "Conforto acustico",
+          "description": "As fontes citam isolamento acustico nas lajes."
+        },
+        {
+          "title": "Gerador para areas comuns",
+          "description": "O empreendimento e divulgado com gerador para areas comuns e elevadores."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Chateau de Florence?",
+          "answer": "Fica na Avenida Nereu Ramos, em Itapema, em posicao frente-mar segundo as fontes consultadas."
+        },
+        {
+          "question": "Quantos pavimentos tem o Chateau de Florence?",
+          "answer": "As fontes citam 15 pavimentos."
+        },
+        {
+          "question": "Quais recursos de seguranca sao citados?",
+          "answer": "Guarita, portaria 24h e sistema de seguranca aparecem nas fontes pesquisadas."
+        },
+        {
+          "question": "Quais areas de lazer se destacam?",
+          "answer": "Piscina aquecida, piscina com borda infinita, rooftop bistro, bar bistro, gourmet, brinquedoteca, academia, jogos e terraco."
+        }
+      ],
+      "sources": [
+        "https://myside.com.br/apartamento-venda-chateau-de-florence-itapema-sc",
+        "https://litoralvertical.com/venda/itapema/apartamentos/edificio-chateau-de-florence/",
+        "https://www.vitapema.com.br/imovel/venda-apartamentos-03-dormitorio-em-itapema/chateau-de-florence/1461",
+        "https://gouveialancamentos.imb.br/imovel/chateau-de-florence/D-616808"
+      ]
+    },
+    {
+      "slug": "condominio-horizontal-costa-azul",
+      "hero_image": "https://cdn.imoview.com.br/bryann/Condominios/332/1622033544218376132.jpg?1690553888",
+      "description": "O Condominio Horizontal Costa Azul fica no Costao da Praia do Estaleiro, em Balneario Camboriu, com acesso pela Avenida Rodesindo Pavan, 1800. As fontes consultadas descrevem um condominio fechado, retirado e exclusivo, em meio a natureza, com bela vista para o mar e seguranca 24h. Diferente dos edificios verticais da orla central, a proposta aqui e horizontal, com baixa densidade, ruas internas arborizadas, portaria controlada e uma relacao direta com a paisagem da Interpraias.",
+      "seo_description": "Conheca o Condominio Horizontal Costa Azul, no Costao da Praia do Estaleiro em Balneario Camboriu, com vista mar, natureza preservada e seguranca 24h.",
+      "gallery": [
+        {
+          "title": "Costa Azul - vista aerea do costao",
+          "category": "Entorno",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/332/1622033544218376132.jpg?1690553888",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/332/condominio-horizontal-costa-azul/",
+          "source_label": "Felicita"
+        },
+        {
+          "title": "Costa Azul - identidade de acesso",
+          "category": "Acesso",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/332/733987767.jpg?1690553888",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/332/condominio-horizontal-costa-azul/",
+          "source_label": "Felicita"
+        },
+        {
+          "title": "Costa Azul - portaria e acesso",
+          "category": "Acesso",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/332/2022-11-22.jpg?1690553888",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/332/condominio-horizontal-costa-azul/",
+          "source_label": "Felicita"
+        },
+        {
+          "title": "Costa Azul - entrada arborizada",
+          "category": "Acesso",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/332/2-137.jpg?1690553888",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/332/condominio-horizontal-costa-azul/",
+          "source_label": "Felicita"
+        },
+        {
+          "title": "Costa Azul - entorno verde",
+          "category": "Entorno",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/332/1622033560397464828.jpg?1690553888",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/332/condominio-horizontal-costa-azul/",
+          "source_label": "Felicita"
+        },
+        {
+          "title": "Costa Azul - vista aerea das residencias",
+          "category": "Entorno",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/332/1622033538927367613.jpg?1690553888",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/332/condominio-horizontal-costa-azul/",
+          "source_label": "Felicita"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "TreePine",
+          "title": "Natureza do Estaleiro",
+          "description": "O condominio fica em meio ao verde do Costao, com relacao forte com a paisagem da Interpraias."
+        },
+        {
+          "icon": "Waves",
+          "title": "Vista para o mar",
+          "description": "A implantacao no costao cria vistas abertas para a Praia do Estaleiro."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Seguranca 24h",
+          "description": "Fontes de mercado citam condominio fechado com seguranca 24h."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Perfil horizontal",
+          "description": "A baixa densidade diferencia o Costa Azul dos empreendimentos verticais da regiao central."
+        },
+        {
+          "title": "Endereco na Interpraias",
+          "description": "A Avenida Rodesindo Pavan conecta o condominio as praias do sul de Balneario Camboriu."
+        },
+        {
+          "title": "Ambiente reservado",
+          "description": "As fontes descrevem o empreendimento como retirado, exclusivo e cercado por natureza."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Condominio Horizontal Costa Azul?",
+          "answer": "Fica na Avenida Rodesindo Pavan, 1800, na Praia do Estaleiro, em Balneario Camboriu."
+        },
+        {
+          "question": "O Costa Azul e um condominio fechado?",
+          "answer": "Sim. As fontes consultadas descrevem o Costa Azul como condominio fechado."
+        },
+        {
+          "question": "O condominio tem vista para o mar?",
+          "answer": "As fontes destacam vista para o mar e localizacao no Costao da Praia do Estaleiro."
+        },
+        {
+          "question": "Qual e o perfil do Costa Azul?",
+          "answer": "E um condominio horizontal reservado, com baixa densidade, natureza, portaria controlada e seguranca 24h."
+        }
+      ],
+      "sources": [
+        "https://felicitanegocios.com.br/empreendimento/332/condominio-horizontal-costa-azul/",
+        "https://felicitanegocios.com.br/imovel/2226/unknow-type-5-quartos-condominio-horizontal-costa-azul-praia-do-estaleiro-balneario-camboriu/",
+        "https://www.umovi.com.br/imovel/casa-em-condominio-a-venda-4-quartos-com-garagem-santa-catarina-balneario-camboriu-praia-do-estaleiro-524m2-id-535-rodrigo-medeiros"
+      ]
+    },
+    {
+      "slug": "cyano-mare-residence",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/cyano-mare-2-1723821216.webp",
+      "description": "O Cyano Mare Residence fica no Centro de Balneario Camboriu, a cerca de 200 metros da orla da Praia Central e proximo ao Shopping Atlantico. A Imobille descreve o empreendimento com uma torre, 33 pavimentos, um residencial por andar, quatro pavimentos de garagem e lazer de 618 m2. A area comum inclui piscina adulto, piscina infantil, festas, jogos, brinquedoteca, gourmet e academia, em uma proposta de alto padrao para quem busca privacidade vertical e rotina urbana perto da Avenida Brasil.",
+      "seo_description": "Conheca o Cyano Mare Residence, no Centro de Balneario Camboriu, a 200 m da orla, com um residencial por andar e lazer de 618 m2.",
+      "gallery": [
+        {
+          "title": "Cyano Mare - fachada da torre",
+          "category": "Empreendimento",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/cyano-mare-2-1723821216.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-cyano-mare-residence-EM50455",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Cyano Mare - piscina externa",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/16082024121336434-1723821216.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-cyano-mare-residence-EM50455",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Cyano Mare - base da fachada",
+          "category": "Empreendimento",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/cyano-mare-4-1723821028.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-cyano-mare-residence-EM50455",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Cyano Mare - deck da piscina",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/cyano-mare-11-1723821025.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-cyano-mare-residence-EM50455",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Cyano Mare - hall",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/cyano-mare-5-1723821027.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-cyano-mare-residence-EM50455",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Cyano Mare - gourmet externo",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/cyano-mare-9-1723821026.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-cyano-mare-residence-EM50455",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Cyano Mare - playground",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/cyano-mare-7-1723821027.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-cyano-mare-residence-EM50455",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Cyano Mare - fitness",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/cyano-mare-25-1-1723821155.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-cyano-mare-residence-EM50455",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro de Balneario Camboriu",
+          "description": "A localizacao fica perto da orla, da Avenida Brasil e do Shopping Atlantico."
+        },
+        {
+          "icon": "KeyRound",
+          "title": "Um residencial por andar",
+          "description": "A configuracao informada reforca privacidade nos pavimentos."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer de 618 m2",
+          "description": "Piscinas, gourmet, festas, brinquedoteca, jogos e academia compoem o pavimento de lazer."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "33 pavimentos",
+          "description": "A fonte Imobille descreve uma torre com 33 pavimentos."
+        },
+        {
+          "title": "Perto da Praia Central",
+          "description": "O empreendimento e divulgado a cerca de 200 metros da orla."
+        },
+        {
+          "title": "Garagens em quatro pavimentos",
+          "description": "A estrutura de garagem citada ajuda a organizar o uso cotidiano do edificio."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Cyano Mare Residence?",
+          "answer": "Fica no Centro de Balneario Camboriu, proximo a Avenida Brasil e a cerca de 200 metros da orla."
+        },
+        {
+          "question": "Quantos pavimentos tem o Cyano Mare?",
+          "answer": "A Imobille informa uma torre com 33 pavimentos."
+        },
+        {
+          "question": "O Cyano Mare tem um residencial por andar?",
+          "answer": "Sim. A fonte consultada cita um residencial por andar."
+        },
+        {
+          "question": "Quais areas de lazer aparecem nas fontes?",
+          "answer": "Piscina adulto, piscina infantil, festas, jogos, brinquedoteca, gourmet e academia."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-cyano-mare-residence-EM50455",
+        "https://www.oceanprime.com.br/empreendimentos/cyano-mare-residence"
+      ]
+    },
+    {
+      "slug": "edify-one",
+      "hero_image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/354125/images/xxl/_1c65cef3508408169472044510401029.jpg",
+      "description": "O Edify One e um projeto da Edify em Itapema, em posicao frente-mar, com entrega prevista para dezembro de 2028. A MySide informa 41 pavimentos e 2.700 m2 de lazer distribuidos em dois andares, incluindo academia com pe-direito duplo e vista para o mar. As fontes tambem listam festas, piscina adulto, piscina infantil, piscina aquecida, piscina com borda, deck molhado, sauna, spa, gourmet, fitness, kids, pet place, pub, massagem, jogos, adega gourmet, lounge, garagem planejada pela Garage Plan e carregador para veiculo eletrico.",
+      "seo_description": "Conheca o Edify One, projeto frente-mar em Itapema com 41 pavimentos, 2.700 m2 de lazer e entrega prevista para dezembro de 2028.",
+      "gallery": [
+        {
+          "title": "Edify One - torre e orla",
+          "category": "Empreendimento",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/354125/images/xxl/_1c65cef3508408169472044510401029.jpg",
+          "source_url": "https://myside.com.br/apartamento-venda-edify-one-itapema-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Edify One - piscina frente-mar",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/0508202511523117890-1754405551.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-edify-one-EM87017",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Edify One - implantacao na orla",
+          "category": "Empreendimento",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/foto-destaque-535x596px-1754405551.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-edify-one-EM87017",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Edify One - lazer frente-mar",
+          "category": "Lazer",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/354125/images/xxl/_6e4243f5251650169472046410988001.jpg",
+          "source_url": "https://myside.com.br/apartamento-venda-edify-one-itapema-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Edify One - spa",
+          "category": "Lazer",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/354125/images/xxl/_be1bc799297308169472046710577229.jpg",
+          "source_url": "https://myside.com.br/apartamento-venda-edify-one-itapema-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Edify One - vista panoramica",
+          "category": "Entorno",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/354125/images/xxl/_123b7f02961804169472039510721390.jpg",
+          "source_url": "https://myside.com.br/apartamento-venda-edify-one-itapema-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Edify One - fachada lateral",
+          "category": "Empreendimento",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/354125/images/xxl/_8ed36a84186856169956260510306320.jpg",
+          "source_url": "https://myside.com.br/apartamento-venda-edify-one-itapema-sc",
+          "source_label": "MySide"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente-mar em Itapema",
+          "description": "A proposta valoriza a relacao direta com a praia e a vista da orla."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "2.700 m2 de lazer",
+          "description": "Dois andares concentram piscinas, fitness, spa, sauna, pub, kids, pet, lounge e gourmet."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Projeto para 2028",
+          "description": "A entrega prevista permite acompanhar a obra com planejamento de medio prazo."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "41 pavimentos",
+          "description": "A MySide informa torre com 41 pavimentos."
+        },
+        {
+          "title": "Academia com vista mar",
+          "description": "A area fitness e citada com pe-direito duplo e vista para a orla."
+        },
+        {
+          "title": "Garagem planejada",
+          "description": "As fontes mencionam projeto de garagem pela Garage Plan e carregador para veiculo eletrico."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Edify One?",
+          "answer": "As fontes consultadas posicionam o Edify One frente-mar em Itapema."
+        },
+        {
+          "question": "Quando o Edify One deve ser entregue?",
+          "answer": "A MySide informa entrega prevista para dezembro de 2028."
+        },
+        {
+          "question": "Qual e o tamanho da area de lazer?",
+          "answer": "A MySide informa 2.700 m2 de lazer em dois andares."
+        },
+        {
+          "question": "Quais areas comuns aparecem nas fontes?",
+          "answer": "Piscinas, sauna, spa, gourmet, fitness, kids, pet place, pub, massagem, jogos, adega gourmet, lounge e deck molhado."
+        }
+      ],
+      "sources": [
+        "https://myside.com.br/apartamento-venda-edify-one-itapema-sc",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-edify-one-EM87017"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1341 @@
+{
+  "batch_id": "development-media-curation-batch35-20260716",
+  "generated_at": "2026-07-16T15:20:00.000Z",
+  "notes": [
+    "Lote 35 P0 auditado com foco em fotos reais de empreendimento/condominio e copy enriquecida.",
+    "Adolfo Blase voltou a ser pesquisado neste lote, mas as fontes abertas confiaveis seguem trazendo somente interiores de oferta ou imagens nao relacionadas.",
+    "Para evitar nova troca por imagem inadequada, Adolfo Blase ficou pendente para captura externa/manual ou fonte validada do condominio."
+  ],
+  "skipped": [
+    {
+      "slug": "adolfo-blase",
+      "reason": "Sem midia publica confiavel de fachada/areas comuns; fontes abertas encontradas mostram interiores da oferta ou imagens nao relacionadas.",
+      "sources_checked": [
+        "https://guilhermepilger.ai/adolfo-blase",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-adolfo-blase-balneario-camboriu-barra-sul-3-quartos-2-garagens-venda-ref-1373/",
+        "https://guilhermepilger.ai/imovel/apartamento-no-ed-adolfo-blase-em-balneario-camboriu/detalhes",
+        "https://www.chavesnamao.com.br/imovel/apartamento-a-venda-3-quartos-com-garagem-sc-balneario-camboriu-centro-RS3500000/id-39851119/"
+      ]
+    }
+  ],
+  "items": [
+    {
+      "slug": "invictus",
+      "hero_image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n8--enurLTn_BauwCaRR0HBNYaV7dfbh_83etczwEg/Fachada+empreendimento+de+esquina+l+Invictus+Residence.jpg",
+      "description": "O Invictus Residence foi revisado como empreendimento de alto padrao em Itapema, com referencia na Rua 133 e leitura de localizacao entre a regiao central e Meia Praia. Imobille registra plantas de 185 m2, quatro suites e tres vagas, enquanto a Potencial destaca vista para o mar e lazer completo com piscina aquecida adulto e infantil, SPA, pub com lareira, salao de festas, jogos, brinquedoteca, academia e cinema. A galeria agora prioriza fachada e areas comuns do condominio.",
+      "seo_description": "Conheca o Invictus Residence em Itapema, com fachada, piscina, SPA, academia, cinema e areas de lazer do empreendimento.",
+      "gallery": [
+        {
+          "title": "Invictus Residence - fachada de esquina",
+          "category": "Fachada",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n8--enurLTn_BauwCaRR0HBNYaV7dfbh_83etczwEg/Fachada+empreendimento+de+esquina+l+Invictus+Residence.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/empreendimento/invictus-residence-CO99362",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "Invictus Residence - torre principal",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_84_23186_1637_150626.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/invictus-residence/itapema/centro/84",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Invictus Residence - lazer elevado",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/pronto-1666640525.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-invictus-residence-EM12401",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Invictus Residence - gourmet",
+          "category": "Gourmet",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/December2021/gpmsKEMDmCawqUkp4WEq.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-invictus-residence-EM12401",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Invictus Residence - jogos",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/December2021/UN2BTyssWhar7cbHU2g1.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-invictus-residence-EM12401",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Invictus Residence - kids",
+          "category": "Kids",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/December2021/qDbRbvP4waZ2FLXeODfm.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-invictus-residence-EM12401",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Invictus Residence - piscina",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/December2021/5QTn2JyCzQn9hjBZSknH.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-invictus-residence-EM12401",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Invictus Residence - spa",
+          "category": "Spa",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/December2021/reRk4Z2sWRM5ddgRKqcN.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-invictus-residence-EM12401",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Invictus Residence - pub",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/December2021/J9oaczEPOXomORoMtjy8.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-invictus-residence-EM12401",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Invictus Residence - cinema",
+          "category": "Cinema",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/December2021/tOkGKmSPX8Uwt7R13sVY.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-invictus-residence-EM12401",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Vista para o mar em Itapema",
+          "description": "A Potencial posiciona o empreendimento em Itapema com leitura de vista para o mar."
+        },
+        {
+          "icon": "Ruler",
+          "title": "Plantas amplas",
+          "description": "A Imobille registra plantas de 185 m2, quatro suites e tres vagas."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer completo",
+          "description": "As fontes citam piscina aquecida adulto e infantil, SPA, pub, festas, jogos, brinquedoteca, academia e cinema."
+        },
+        {
+          "icon": "Building2",
+          "title": "Galeria do condominio",
+          "description": "A curadoria substitui fotos internas por fachada e ambientes coletivos do Invictus Residence."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Endereco valorizado em Itapema",
+          "description": "A Rua 133 conecta facil acesso urbano e proximidade com a orla."
+        },
+        {
+          "title": "Ambientes para receber",
+          "description": "Pub, festas, gourmet e jogos reforcam o perfil social do empreendimento."
+        },
+        {
+          "title": "Conforto para todas as idades",
+          "description": "Cinema, brinquedoteca, piscina infantil e SPA ampliam o uso das areas comuns."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Invictus Residence?",
+          "answer": "As fontes consultadas indicam o empreendimento na Rua 133, em Itapema - SC."
+        },
+        {
+          "question": "Qual e o perfil das plantas?",
+          "answer": "A Imobille registra unidades de 185 m2, quatro suites e tres vagas."
+        },
+        {
+          "question": "Quais areas de lazer foram conferidas?",
+          "answer": "Piscina aquecida adulto e infantil, SPA, pub, festas, jogos, brinquedoteca, academia e cinema."
+        },
+        {
+          "question": "O que mudou nesta auditoria?",
+          "answer": "A pagina passou a usar fachada e areas comuns reais do empreendimento no lugar de imagens internas."
+        }
+      ],
+      "sources": [
+        "https://www.potencialimoveis.com.br/empreendimento/invictus-residence-CO99362",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-invictus-residence-EM12401",
+        "https://imobiliariaversatil.com.br/edificios/invictus-residence/itapema/centro/84",
+        "https://francaferrazimoveis.com.br/edificios/invictus-residence/itapema/84"
+      ]
+    },
+    {
+      "slug": "jardim-das-alamandas",
+      "hero_image": "https://www.norbertocorretor.com.br/miniatura/norberto/1/100298/1000/1000/90/43063412.jpg",
+      "description": "O Jardim das Alamandas foi revisado como empreendimento em Meia Praia, Itapema, com endereco informado pela Zaad na Rua 232, numero 45, segunda quadra do mar. A fonte classifica o edificio como semi-novo e lista estrutura de lazer e seguranca com academia, brinquedoteca, cinema, circuito de TV, elevador, espaco gourmet, hall, piscinas adulto e infantil, playground, portaria, saloes de festas e jogos, spa e zeladoria. A galeria foi refeita com fachada, piscina e areas comuns encontradas em fontes externas.",
+      "seo_description": "Conheca o Jardim das Alamandas em Meia Praia, Itapema, com fachada, piscina e areas comuns reais do condominio.",
+      "gallery": [
+        {
+          "title": "Jardim das Alamandas - fachada",
+          "category": "Fachada",
+          "image": "https://www.norbertocorretor.com.br/miniatura/norberto/1/100298/1000/1000/90/43063412.jpg",
+          "source_url": "https://www.norbertocorretor.com.br/imovel/97201/jardim-das-alamandas-temporada",
+          "source_label": "Norberto Corretor"
+        },
+        {
+          "title": "Jardim das Alamandas - torre e vista",
+          "category": "Fachada",
+          "image": "https://www.norbertocorretor.com.br/miniatura/norberto/1/100298/1000/1000/90/1765806274297736.jpg",
+          "source_url": "https://www.norbertocorretor.com.br/imovel/97201/jardim-das-alamandas-temporada",
+          "source_label": "Norberto Corretor"
+        },
+        {
+          "title": "Jardim das Alamandas - entrada",
+          "category": "Acesso",
+          "image": "https://live.staticflickr.com/7227/7211572178_982f876953_z.jpg",
+          "source_url": "https://www.flickr.com/photos/79843063@N07/albums/72157629760853634",
+          "source_label": "Flickr"
+        },
+        {
+          "title": "Jardim das Alamandas - piscina",
+          "category": "Piscina",
+          "image": "https://live.staticflickr.com/5080/7211572022_45b45966f7_z.jpg",
+          "source_url": "https://www.flickr.com/photos/79843063@N07/albums/72157629760853634",
+          "source_label": "Flickr"
+        },
+        {
+          "title": "Jardim das Alamandas - deck",
+          "category": "Piscina",
+          "image": "https://live.staticflickr.com/7090/7211572892_587165df51_z.jpg",
+          "source_url": "https://www.flickr.com/photos/79843063@N07/albums/72157629760853634",
+          "source_label": "Flickr"
+        },
+        {
+          "title": "Jardim das Alamandas - espaco social",
+          "category": "Lazer",
+          "image": "https://live.staticflickr.com/5035/7211572766_e5d28db98e_z.jpg",
+          "source_url": "https://www.flickr.com/photos/79843063@N07/albums/72157629760853634",
+          "source_label": "Flickr"
+        },
+        {
+          "title": "Jardim das Alamandas - ambiente gourmet",
+          "category": "Gourmet",
+          "image": "https://live.staticflickr.com/5231/7211572460_50f7dd75ab_z.jpg",
+          "source_url": "https://www.flickr.com/photos/79843063@N07/albums/72157629760853634",
+          "source_label": "Flickr"
+        },
+        {
+          "title": "Jardim das Alamandas - convivencia",
+          "category": "Lazer",
+          "image": "https://live.staticflickr.com/8001/7211572556_be65059fa8_z.jpg",
+          "source_url": "https://www.flickr.com/photos/79843063@N07/albums/72157629760853634",
+          "source_label": "Flickr"
+        },
+        {
+          "title": "Jardim das Alamandas - recreacao",
+          "category": "Lazer",
+          "image": "https://live.staticflickr.com/5342/7211571884_396b78f5a9_z.jpg",
+          "source_url": "https://www.flickr.com/photos/79843063@N07/albums/72157629760853634",
+          "source_label": "Flickr"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Segunda quadra do mar",
+          "description": "A Zaad informa endereco na Rua 232, numero 45, Meia Praia, em Itapema."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Estrutura e seguranca",
+          "description": "A lista de caracteristicas inclui circuito de TV, portaria, portao eletronico e zeladoria."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer familiar",
+          "description": "As fontes citam academia, brinquedoteca, cinema, piscinas, playground, festas, jogos e spa."
+        },
+        {
+          "icon": "Image",
+          "title": "Fotos externas revisadas",
+          "description": "A nova selecao combina fachada, piscina e ambientes de convivencia do empreendimento."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Meia Praia com praticidade",
+          "description": "A segunda quadra do mar facilita o uso de praia, comercio e servicos do bairro."
+        },
+        {
+          "title": "Condominio com lazer variado",
+          "description": "A combinacao de piscinas, cinema, spa, kids e espacos sociais amplia o conforto no dia a dia."
+        },
+        {
+          "title": "Auditoria visual cuidadosa",
+          "description": "Imagens de oferta interna foram substituidas por registros de fachada e uso comum."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Jardim das Alamandas?",
+          "answer": "A Zaad informa endereco na Rua 232, numero 45, Meia Praia, Itapema - SC."
+        },
+        {
+          "question": "O condominio fica perto do mar?",
+          "answer": "A fonte consultada posiciona o empreendimento na segunda quadra do mar."
+        },
+        {
+          "question": "Quais comodidades foram verificadas?",
+          "answer": "Academia, brinquedoteca, cinema, piscinas, playground, portaria, gourmet, festas, jogos, spa e zeladoria."
+        },
+        {
+          "question": "Por que a galeria foi trocada?",
+          "answer": "A auditoria identificou fotos de oferta e atualizou a pagina com imagens ligadas ao empreendimento."
+        }
+      ],
+      "sources": [
+        "https://zaaditapema.com.br/edificios/jardim-das-alamandas/itapema/meia-praia/261",
+        "https://www.norbertocorretor.com.br/imovel/97201/jardim-das-alamandas-temporada",
+        "https://www.flickr.com/photos/79843063@N07/albums/72157629760853634"
+      ]
+    },
+    {
+      "slug": "joia-do-oceano",
+      "hero_image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n9O-Bvn38zsCWluy5MXxLWDObXs6t_bh203MHGsv30/Fachada+completa+empreendimento+l+J%C3%B3ia+do+Oceano+Residencial.jpg",
+      "description": "O Joia do Oceano foi atualizado como empreendimento entregue em 2018 em Meia Praia, Itapema. A Potencial informa plantas em torno de 187 m2, tres residencias por andar, dois elevadores, hall decorado e mobiliado, medidores individuais, CFTV, sensores de presenca e reaproveitamento de agua da chuva. A area de lazer supera 900 m2 e inclui piscinas, academia, salao de festas, jogos, playground, brinquedoteca, mini quadra, sauna, SPA, mini golf e quiosque com churrasqueira. A galeria agora mostra fachada e lazer do condominio.",
+      "seo_description": "Conheca o Joia do Oceano em Meia Praia, Itapema, com fachada, lazer de mais de 900 m2 e areas comuns reais.",
+      "gallery": [
+        {
+          "title": "Joia do Oceano - fachada completa",
+          "category": "Fachada",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n9O-Bvn38zsCWluy5MXxLWDObXs6t_bh203MHGsv30/Fachada+completa+empreendimento+l+J%C3%B3ia+do+Oceano+Residencial.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/empreendimento/edificio-joia-do-oceano-CO98328",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "Joia do Oceano - spa",
+          "category": "Spa",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n8-h--VFMubA5kqveMXzwuEgoOsJ9fbgE83akRqsUc/SPA+J%C3%B3ia+do+Oceano+Residencial.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/empreendimento/edificio-joia-do-oceano-CO98328",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "Joia do Oceano - quadra e playground",
+          "category": "Lazer",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n9O8Bcg0rjn_52gzZnkO8zPTrnh493bhXg3csjh5dw/Quadra+poliesportiva+e+playground+l+J%C3%B3ia+do+Oceano+Residencial.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/empreendimento/edificio-joia-do-oceano-CO98328",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "Joia do Oceano - descanso",
+          "category": "Lazer",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n_-hhWVqEfiixmoBpkQysyLPIRkXtPbiwc3m5R7AcE/Espa%C3%A7o+de+descanso+l+J%C3%B3ia+do+Oceano+Residencial.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/empreendimento/edificio-joia-do-oceano-CO98328",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "Joia do Oceano - fachada frontal",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_896_12142_1535_250924.jpeg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/joia-do-oceano/itapema/meia-praia/1180",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Joia do Oceano - detalhe da torre",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/i1_896_12142_1535_250924.jpeg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/joia-do-oceano/itapema/meia-praia/1180",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Joia do Oceano - base do predio",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/m1_896_12142_1535_250924.jpeg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/joia-do-oceano/itapema/meia-praia/1180",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Joia do Oceano - acesso",
+          "category": "Acesso",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_896_12144_1535_250924.jpeg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/joia-do-oceano/itapema/meia-praia/1180",
+          "source_label": "Versatil"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "CalendarCheck",
+          "title": "Empreendimento entregue",
+          "description": "A Potencial registra entrega do Joia do Oceano em 2018."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Mais de 900 m2 de lazer",
+          "description": "A fonte cita piscinas, academia, festas, jogos, playground, brinquedoteca, mini quadra, sauna, SPA, mini golf e quiosque."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Infraestrutura de condominio",
+          "description": "Hall decorado, dois elevadores, medidores individuais, CFTV, sensores e reaproveitamento de agua da chuva foram informados."
+        },
+        {
+          "icon": "Building2",
+          "title": "Tres residencias por andar",
+          "description": "A Potencial destaca organizacao com tres residencias por pavimento."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Lazer extenso em Meia Praia",
+          "description": "O conjunto de areas comuns atende descanso, esporte, criancas e convivencia."
+        },
+        {
+          "title": "Operacao ja consolidada",
+          "description": "Como empreendimento entregue, a pagina passa a valorizar estrutura existente e localizacao."
+        },
+        {
+          "title": "Imagens alinhadas ao predio",
+          "description": "A curadoria troca cenas internas por fachada, acesso e lazer do Joia do Oceano."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Joia do Oceano?",
+          "answer": "As fontes consultadas localizam o empreendimento em Meia Praia, Itapema - SC."
+        },
+        {
+          "question": "Quando o Joia do Oceano foi entregue?",
+          "answer": "A Potencial informa entrega em 2018."
+        },
+        {
+          "question": "Qual e o tamanho da area de lazer?",
+          "answer": "A Potencial informa mais de 900 m2 de lazer."
+        },
+        {
+          "question": "Quais imagens foram priorizadas?",
+          "answer": "Fachada, acesso, SPA, playground, quadra e ambientes de descanso do condominio."
+        }
+      ],
+      "sources": [
+        "https://www.potencialimoveis.com.br/empreendimento/edificio-joia-do-oceano-CO98328",
+        "https://imobiliariaversatil.com.br/edificios/joia-do-oceano/itapema/meia-praia/1180",
+        "https://elloimob.com.br/empreendimento/edificio-joia-do-oceano-itapema-meia-praia/105",
+        "https://elizeteimoveisdeluxo.com.br/edificios/joia-do-oceano/itapema/meia-praia/1180"
+      ]
+    },
+    {
+      "slug": "kos",
+      "hero_image": "https://b5.casteldigital.com.br/brisamarimoveis/ig/il/imoveis/248/kos-daxo-1-17489990213465.jpg",
+      "description": "O KOS foi revisado como empreendimento Daxo no Centro de Balneario Picarras, com referencia na Avenida Nereu Ramos e cerca de 160 metros da Praia de Picarras segundo a MySide. A Daxo apresenta projeto arquitetonico de Baggio Schiavon, interiores Casaba e paisagismo de Renata Tilli, com areas de 215 m2, 240 m2 e 463 m2. MySide informa entrega prevista para dezembro de 2028, 20 pavimentos, duas residencias por andar, elevadores privativos e lazer com piscinas externas, cobertas e aquecidas, SPA, playground, jogos, academia, lounge externo e festas com sacada.",
+      "seo_description": "Conheca o KOS by Daxo em Balneario Picarras, com fachada, piscinas, SPA e lazer real do empreendimento.",
+      "gallery": [
+        {
+          "title": "KOS by Daxo - fachada",
+          "category": "Fachada",
+          "image": "https://b5.casteldigital.com.br/brisamarimoveis/ig/il/imoveis/248/kos-daxo-1-17489990213465.jpg",
+          "source_url": "https://www.brisamarimoveis.com.br/imovel/apartamento-no-edificio-kos-daxo-balneario-picarras-centro-3-quartos-2-garagens-venda-ref-248/",
+          "source_label": "Brisamar Imoveis"
+        },
+        {
+          "title": "KOS by Daxo - perspectiva principal",
+          "category": "Fachada",
+          "image": "https://lancamentos.anageimoveis.com.br/wp-content/uploads/2025/05/banner-desktop-2.png",
+          "source_url": "https://lancamentos.anageimoveis.com.br/lancamento/kos/",
+          "source_label": "Anage Lancamentos"
+        },
+        {
+          "title": "KOS by Daxo - torre e base",
+          "category": "Fachada",
+          "image": "https://lancamentos.anageimoveis.com.br/wp-content/uploads/2025/05/imagem-em-destaque-2.png",
+          "source_url": "https://lancamentos.anageimoveis.com.br/lancamento/kos/",
+          "source_label": "Anage Lancamentos"
+        },
+        {
+          "title": "KOS by Daxo - piscina externa",
+          "category": "Piscina",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/10/lancamento-kos-balneario-picarras-daxo-3.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/kos-balneario-picarras/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "KOS by Daxo - lazer com agua",
+          "category": "Piscina",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/10/lancamento-kos-balneario-picarras-daxo-2.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/kos-balneario-picarras/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "KOS by Daxo - playground",
+          "category": "Playground",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/10/lancamento-kos-balneario-picarras-daxo-5.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/kos-balneario-picarras/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "KOS by Daxo - lounge externo",
+          "category": "Lazer",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/10/lancamento-kos-balneario-picarras-daxo-6.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/kos-balneario-picarras/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "KOS by Daxo - festas",
+          "category": "Eventos",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/10/lancamento-kos-balneario-picarras-daxo-7.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/kos-balneario-picarras/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "KOS by Daxo - fitness",
+          "category": "Fitness",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/10/lancamento-kos-balneario-picarras-daxo-8.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/kos-balneario-picarras/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "KOS by Daxo - jogos",
+          "category": "Lazer",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/10/lancamento-kos-balneario-picarras-daxo-9.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/kos-balneario-picarras/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "KOS by Daxo - vista externa",
+          "category": "Fachada",
+          "image": "https://b5.casteldigital.com.br/brisamarimoveis/ig/im/imoveis/248/kos-daxo-3-1748999021347.jpg",
+          "source_url": "https://www.brisamarimoveis.com.br/imovel/apartamento-no-edificio-kos-daxo-balneario-picarras-centro-3-quartos-2-garagens-venda-ref-248/",
+          "source_label": "Brisamar Imoveis"
+        },
+        {
+          "title": "KOS by Daxo - detalhe externo",
+          "category": "Fachada",
+          "image": "https://b5.casteldigital.com.br/brisamarimoveis/ig/il/imoveis/248/kos-daxo-3-1748999021347.jpg",
+          "source_url": "https://www.brisamarimoveis.com.br/imovel/apartamento-no-edificio-kos-daxo-balneario-picarras-centro-3-quartos-2-garagens-venda-ref-248/",
+          "source_label": "Brisamar Imoveis"
+        },
+        {
+          "title": "KOS by Daxo - embasamento",
+          "category": "Fachada",
+          "image": "https://b5.casteldigital.com.br/brisamarimoveis/ig/il/imoveis/248/kos-daxo-4-17489990213471.jpg",
+          "source_url": "https://www.brisamarimoveis.com.br/imovel/apartamento-no-edificio-kos-daxo-balneario-picarras-centro-3-quartos-2-garagens-venda-ref-248/",
+          "source_label": "Brisamar Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Award",
+          "title": "Assinatura Daxo",
+          "description": "A pagina oficial da Daxo associa o KOS a Baggio Schiavon, Casaba e Renata Tilli."
+        },
+        {
+          "icon": "Waves",
+          "title": "A 160 metros da praia",
+          "description": "A MySide posiciona o empreendimento a cerca de 160 metros da Praia de Picarras."
+        },
+        {
+          "icon": "Building2",
+          "title": "Duas residencias por andar",
+          "description": "MySide informa 20 pavimentos, duas residencias por pavimento e elevadores privativos."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer de alto padrao",
+          "description": "As fontes citam piscinas externas, cobertas e aquecidas, SPA, playground, jogos, academia, lounge externo e festas."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Projeto autoral em Picarras",
+          "description": "A combinacao de arquitetura, interiores e paisagismo reforca a proposta de moradia sofisticada no litoral."
+        },
+        {
+          "title": "Tipologias amplas",
+          "description": "A Daxo informa areas de 215 m2, 240 m2 e 463 m2."
+        },
+        {
+          "title": "Galeria orientada ao empreendimento",
+          "description": "A pagina passa a mostrar fachada, piscinas e ambientes coletivos do KOS."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o KOS by Daxo?",
+          "answer": "A MySide indica endereco na Avenida Nereu Ramos, Centro, Balneario Picarras - SC."
+        },
+        {
+          "question": "Qual a distancia ate a praia?",
+          "answer": "A MySide informa aproximadamente 160 metros da Praia de Picarras."
+        },
+        {
+          "question": "Quando esta prevista a entrega?",
+          "answer": "A MySide registra entrega prevista para dezembro de 2028."
+        },
+        {
+          "question": "Quem assina o projeto?",
+          "answer": "A Daxo cita Baggio Schiavon na arquitetura, Casaba nos interiores e Renata Tilli no paisagismo."
+        }
+      ],
+      "sources": [
+        "https://www.daxo.com.br/portfolio/kos-balneario-picarras-sc/12/",
+        "https://myside.com.br/apartamento-venda-kos-por-daxo-balneario-picarras-sc",
+        "https://lancamentos.anageimoveis.com.br/lancamento/kos/",
+        "https://lancamento.invexo.com.br/sc/kos-balneario-picarras/",
+        "https://www.brisamarimoveis.com.br/imovel/apartamento-no-edificio-kos-daxo-balneario-picarras-centro-3-quartos-2-garagens-venda-ref-248/"
+      ]
+    },
+    {
+      "slug": "l-atelier-concept-homes",
+      "hero_image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2021/08/fachada-latelier-itapema-embraed-1.jpg",
+      "description": "O L Atelier Concept Homes foi revisado com base na pagina oficial da Embraed em Itapema. A incorporadora informa empreendimento em construcao, quadra mar, acesso pela Rua 267, aproximadamente 100 metros do mar, registro de incorporacao R3-67205, quatro suites e ate tres vagas. A ficha tecnica aponta cerca de 195 metros de altura, 61 pavimentos, 49 pavimentos tipo, duas coberturas duplex, cinco pavimentos de garagem, tres pavimentos de lazer e quatro elevadores. A nova galeria mostra fachada, terraco, piscina, quadra, playground e areas comuns.",
+      "seo_description": "Conheca o L Atelier Concept Homes da Embraed em Itapema, com fachada, lazer e dados oficiais do empreendimento.",
+      "gallery": [
+        {
+          "title": "L Atelier Concept Homes - fachada",
+          "category": "Fachada",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2021/08/fachada-latelier-itapema-embraed-1.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/latelier-concept-homes",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "L Atelier Concept Homes - fachada em voo",
+          "category": "Fachada",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2022/08/embla-38-fachada-voo-cama-high.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/latelier-concept-homes",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "L Atelier Concept Homes - terraco de eventos",
+          "category": "Eventos",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2021/08/embla-11-terraco-festas-1920x1080-1.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/latelier-concept-homes",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "L Atelier Concept Homes - piscina descoberta",
+          "category": "Piscina",
+          "image": "https://betaimages.lopes.com.br/realestate/med/REB304099/piscina-descoberta.jpg",
+          "source_url": "https://www.lopes.com.br/lancamento/REM18199/latelier-concept-homes-embraed-itapema-meia-praia",
+          "source_label": "Lopes"
+        },
+        {
+          "title": "L Atelier Concept Homes - quadra society",
+          "category": "Esporte",
+          "image": "https://betaimages.lopes.com.br/realestate/med/REB304099/quadra-society.jpg",
+          "source_url": "https://www.lopes.com.br/lancamento/REM18199/latelier-concept-homes-embraed-itapema-meia-praia",
+          "source_label": "Lopes"
+        },
+        {
+          "title": "L Atelier Concept Homes - playground",
+          "category": "Playground",
+          "image": "https://betaimages.lopes.com.br/realestate/med/REB304099/playground.jpg",
+          "source_url": "https://www.lopes.com.br/lancamento/REM18199/latelier-concept-homes-embraed-itapema-meia-praia",
+          "source_label": "Lopes"
+        },
+        {
+          "title": "L Atelier Concept Homes - lazer externo",
+          "category": "Lazer",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnsWk7zvQ3oElYGrBLXvNpQOqvGlH25XfG9aS_hLMfHr8SlKnl6mKt87gG4GROrHK0X4vCuAsMEFwq3ctvdGKnsZeTSAgLtcJrKbyxygoUFJz-M0ioRPg/.jpg",
+          "source_url": "https://portoupimoveis.com.br/imovel/apartamentos-no-l-atelier-concept-homes-PRD-0363/PRD-0363",
+          "source_label": "PortoUP Imoveis"
+        },
+        {
+          "title": "L Atelier Concept Homes - piscina elevada",
+          "category": "Piscina",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnsWk7zvQ3oElYGrBLXvNpQOqvGlH25XfG9aS_hLMfHr8SlKnl6mKt87gG4GROrHK0X4vCuAsMEFyaW7tnB2enC-3gCLwJjEprJLSCuggU6ST--CyqMU0/.jpg",
+          "source_url": "https://portoupimoveis.com.br/imovel/apartamentos-no-l-atelier-concept-homes-PRD-0363/PRD-0363",
+          "source_label": "PortoUP Imoveis"
+        },
+        {
+          "title": "L Atelier Concept Homes - deck",
+          "category": "Piscina",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnsWk7zvQ3oElYGrBLXvNpQOqvGlH25XfG9aS_hLMfHr8SlKnl6mKt87gG4GROrHK0X4vCuAsMEFxqETGe99FgP5eaSb3Jycft0TGBgwgU7wH-VeYdhMw/.jpg",
+          "source_url": "https://portoupimoveis.com.br/imovel/apartamentos-no-l-atelier-concept-homes-PRD-0363/PRD-0363",
+          "source_label": "PortoUP Imoveis"
+        },
+        {
+          "title": "L Atelier Concept Homes - boulevard",
+          "category": "Lazer",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnsWk7zvQ3oElYGrBLXvNpQOqvGlH25XfG9aS_hLMfHr8SlKnl6mKt87gG4GROrHK0X4vCuAsMEFzqEsaUjNUsz5biMDT4TIPk1bdCggoUFP3-JO5-0BY/.jpg",
+          "source_url": "https://portoupimoveis.com.br/imovel/apartamentos-no-l-atelier-concept-homes-PRD-0363/PRD-0363",
+          "source_label": "PortoUP Imoveis"
+        },
+        {
+          "title": "L Atelier Concept Homes - gourmet",
+          "category": "Gourmet",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnsWk7zvQ3oElYGrBLXvNpQOqvGlH25XfG9aS_hLMfHr8SlKnl6mKt87gG4GROrHK0X4vCuAsMEFzqrAmcipxkMxGVCQGEzkObIjzGNg0U6Gr-UnazLPk/.jpg",
+          "source_url": "https://portoupimoveis.com.br/imovel/apartamentos-no-l-atelier-concept-homes-PRD-0363/PRD-0363",
+          "source_label": "PortoUP Imoveis"
+        },
+        {
+          "title": "L Atelier Concept Homes - fitness",
+          "category": "Fitness",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnsWk7zvQ3oElYGrBLXvNpQOqvGlH25XfG9aS_hLMfHr8SlKnl6mKt87gG4GROrHK0X4vCuAsMEFya0jgUgpyixREZAczLNYifqj3CTwkU7U_-U0xuTb4/.jpg",
+          "source_url": "https://portoupimoveis.com.br/imovel/apartamentos-no-l-atelier-concept-homes-PRD-0363/PRD-0363",
+          "source_label": "PortoUP Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Award",
+          "title": "Empreendimento Embraed",
+          "description": "A pagina oficial associa o projeto a Embraed, com registro de incorporacao R3-67205."
+        },
+        {
+          "icon": "Waves",
+          "title": "Quadra mar em Itapema",
+          "description": "A Embraed informa acesso pela Rua 267 e aproximadamente 100 metros do mar."
+        },
+        {
+          "icon": "Building2",
+          "title": "Cerca de 195 metros",
+          "description": "A ficha tecnica cita 61 pavimentos, 49 pavimentos tipo, cinco garagens, tres pavimentos de lazer e quatro elevadores."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer em tres pavimentos",
+          "description": "As fontes citam festas, gourmet, grill, raia, playground, kids, quadra, piscinas, jogos, coworking, fitness, sauna e spa."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Alto padrao em Meia Praia",
+          "description": "A proposta combina quatro suites, quadra mar e estrutura vertical de grande porte."
+        },
+        {
+          "title": "Tecnologia e seguranca",
+          "description": "A Embraed cita biometria, reconhecimento facial, gerador, cameras, BMS e infraestrutura para carro eletrico."
+        },
+        {
+          "title": "Curadoria oficializada",
+          "description": "A galeria passa a usar fachadas e areas de lazer de fontes oficiais e de mercado."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o L Atelier Concept Homes?",
+          "answer": "A Embraed informa acesso pela Rua 267, em Itapema - SC, a aproximadamente 100 metros do mar."
+        },
+        {
+          "question": "Qual e a situacao da obra?",
+          "answer": "A pagina oficial classifica o empreendimento como em construcao."
+        },
+        {
+          "question": "Quantos pavimentos o projeto tem?",
+          "answer": "A ficha tecnica da Embraed informa 61 pavimentos e cerca de 195 metros de altura."
+        },
+        {
+          "question": "Quais areas de lazer foram usadas na curadoria?",
+          "answer": "Piscina, terraco de eventos, quadra society, playground, boulevard, gourmet e fitness."
+        }
+      ],
+      "sources": [
+        "https://www.embraed.com.br/pt-BR/empreendimento/latelier-concept-homes",
+        "https://www.lopes.com.br/lancamento/REM18199/latelier-concept-homes-embraed-itapema-meia-praia",
+        "https://portoupimoveis.com.br/imovel/apartamentos-no-l-atelier-concept-homes-PRD-0363/PRD-0363",
+        "https://www.myside.com.br/apartamento-venda-latelier-concept-homes-itapema-sc"
+      ]
+    },
+    {
+      "slug": "la-belle",
+      "hero_image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_1651_21365_0958_130526.jpg",
+      "description": "O Edificio La Belle foi revisado como empreendimento frente mar em Meia Praia, Itapema. A Imobille informa endereco na Rua 323, numero 32, plantas de 180 m2 a 200 m2, quatro dormitorios, quatro suites e tres vagas. A Potencial complementa com areas privativas de 196 m2 a 206 m2, oito andares, apenas duas residencias por andar, dois elevadores, alto padrao de acabamento e lazer mobiliado com piscina com vista para o mar, academia, salao de festas, espaco gourmet com churrasqueira, brinquedoteca e jogos. A galeria agora mostra fachada e areas comuns.",
+      "seo_description": "Conheca o Edificio La Belle em Meia Praia, Itapema, frente mar com fachada, piscina e lazer do condominio.",
+      "gallery": [
+        {
+          "title": "La Belle - fachada frente mar",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_1651_21365_0958_130526.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/la-belle/itapema/meia-praia/1651",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "La Belle - piscina frente mar",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/090820241438431383-1723225123.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-la-belle--EM60558",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "La Belle - fachada e piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/teste-1746204847.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-la-belle--EM60558",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "La Belle - eventos",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20002-1666290645.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-la-belle--EM60558",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "La Belle - gourmet",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20003-1666290645.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-la-belle--EM60558",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "La Belle - jogos",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20004-1666290645.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-la-belle--EM60558",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "La Belle - brinquedoteca",
+          "category": "Kids",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20005-1666290646.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-la-belle--EM60558",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "La Belle - fitness",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20006-1666290646.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-la-belle--EM60558",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "La Belle - hall",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20007-1666290646.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-la-belle--EM60558",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "La Belle - acesso",
+          "category": "Acesso",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_1651_21363_0958_130526.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/la-belle/itapema/meia-praia/1651",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "La Belle - recepcao",
+          "category": "Hall",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_1651_21364_0958_130526.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/la-belle/itapema/meia-praia/1651",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "La Belle - convivencia",
+          "category": "Lazer",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_1651_21366_0958_130526.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/la-belle/itapema/meia-praia/1651",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "La Belle - espaco decorado",
+          "category": "Lazer",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_1651_21407_0959_130526.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/la-belle/itapema/meia-praia/1651",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "La Belle - ambiente gourmet",
+          "category": "Gourmet",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_1651_21412_0959_130526.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/la-belle/itapema/meia-praia/1651",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "La Belle - lazer interno",
+          "category": "Lazer",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_1651_21405_0959_130526.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/la-belle/itapema/meia-praia/1651",
+          "source_label": "Versatil"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente mar em Meia Praia",
+          "description": "A Potencial destaca a localizacao frente mar; a Imobille informa a Rua 323, numero 32."
+        },
+        {
+          "icon": "Ruler",
+          "title": "Plantas amplas",
+          "description": "A Imobille informa 180 m2 a 200 m2, quatro suites e tres vagas."
+        },
+        {
+          "icon": "Building2",
+          "title": "Baixa densidade",
+          "description": "A Potencial registra oito andares, duas residencias por pavimento e dois elevadores."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer mobiliado",
+          "description": "As fontes citam piscina com vista para o mar, academia, festas, gourmet com churrasqueira, brinquedoteca e jogos."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Exclusividade na orla",
+          "description": "O baixo numero de residencias por andar reforca privacidade em uma localizacao frente mar."
+        },
+        {
+          "title": "Estrutura pronta para receber",
+          "description": "Gourmet, festas, jogos e piscina sustentam o uso social do condominio."
+        },
+        {
+          "title": "Galeria corrigida",
+          "description": "A selecao substitui imagens privativas por fachada, piscina, hall e lazer do La Belle."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Edificio La Belle?",
+          "answer": "A Imobille informa endereco na Rua 323, numero 32, Meia Praia, Itapema - SC."
+        },
+        {
+          "question": "O La Belle e frente mar?",
+          "answer": "A Potencial apresenta o empreendimento como frente mar em Meia Praia."
+        },
+        {
+          "question": "Qual e o perfil das plantas?",
+          "answer": "A Imobille informa plantas de 180 m2 a 200 m2, quatro suites e tres vagas."
+        },
+        {
+          "question": "Quais areas de lazer aparecem na auditoria?",
+          "answer": "Piscina frente mar, academia, eventos, gourmet, jogos, brinquedoteca, hall e areas de convivencia."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-la-belle--EM60558",
+        "https://www.potencialimoveis.com.br/empreendimento/la-belle-frente-mar-CO113735",
+        "https://imobiliariaversatil.com.br/edificios/la-belle/itapema/meia-praia/1651"
+      ]
+    },
+    {
+      "slug": "la-rivieira",
+      "hero_image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n--iRjn0cQRixAryRwVAkUNjoJhL9bbi9Y33AyA1uM/Fachada+La+Rivi%C3%A8re+Residencial.jpg",
+      "description": "A pagina La Rivieira foi revisada com fontes do La Riviere Residencial, correspondente ao endereco cadastrado na Rua 323, em Meia Praia. A Potencial descreve o empreendimento como frente mar, entre Itapema e Porto Belo, no final de Meia Praia, com conexao visual entre rio e mar e lazer diversificado. A Imobille informa plantas de 140 m2 a 187 m2, tres suites, tres a quatro vagas e referencia na Rua 323 B, numero 94. A nova galeria usa fachada, acesso, hall, eventos, jogos, brinquedoteca, academia e piscinas.",
+      "seo_description": "Conheca o La Riviere Residencial em Meia Praia, Itapema, frente mar com fachada, piscina e lazer do condominio.",
+      "gallery": [
+        {
+          "title": "La Riviere - fachada frente mar",
+          "category": "Fachada",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n--iRjn0cQRixAryRwVAkUNjoJhL9bbi9Y33AyA1uM/Fachada+La+Rivi%C3%A8re+Residencial.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/empreendimento/la-riviere-residencial-CO94453",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "La Riviere - acesso principal",
+          "category": "Acesso",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n_-eWFpL88be9ukPmukzAwJOT2q2dnbgo83NgjWljA/Acesso+principal+La+Rivi%C3%A8re+Residencial.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/empreendimento/la-riviere-residencial-CO94453",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "La Riviere - hall de entrada",
+          "category": "Hall",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n_O-efiVrXqgdLcPeOqzAN1uMuQ09nbnrw2hsgOE5I/Hall+de+entrada+decorado+La+Rivi%C3%A8re+Residencial.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/empreendimento/la-riviere-residencial-CO94453",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "La Riviere - recepcao",
+          "category": "Hall",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n_OTm1p201jdJuqyp-nTA9xR0Ge29TbgMs3PMbj_S4/Porta+do+hall+de+entrada+La+Rivi%C3%A8re+Residencial.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/empreendimento/la-riviere-residencial-CO94453",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "La Riviere - eventos",
+          "category": "Eventos",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n8-fW_nULbqf28lRWVnzkNzNYNgKdvbgpk3J55OtBE/Sal%C3%A3o+de+festas+decorado+com+cozinha++La+Rivi%C3%A8re+Residencial.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/empreendimento/la-riviere-residencial-CO94453",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "La Riviere - gourmet",
+          "category": "Gourmet",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n8--9ya3rPmgdyoDylpwED_RMhtUtTbigs3t3-u_xs/Amplo+sal%C3%A3o+de+festas+com+mesas+para+convidados.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/empreendimento/la-riviere-residencial-CO94453",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "La Riviere - jogos",
+          "category": "Lazer",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n_-i9csEgaW_RNcSOvrwzrNhkoZV9TbjXk3wjzx0Vk/Sala+de+jogos+com+mesa+de+snooker+La+Rivi%C3%A8re+Residencial.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/empreendimento/la-riviere-residencial-CO94453",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "La Riviere - brinquedoteca",
+          "category": "Kids",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n8-9xSTGLHsgeEsQOlsuLR3QzkU4dTbgGI3DCPPXy8/Brinquedoteca+La+Rivi%C3%A8re+Residencial.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/empreendimento/la-riviere-residencial-CO94453",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "La Riviere - fitness",
+          "category": "Fitness",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n8-TBvsFU5qBJ3Ws5DsQ7z6PjmT69Xbhjc2zTV4ovQ/Acadamia+completa+Sala+de+jogos+com+espa%C3%A7o+gourmet+integrado+La+Rivi%C3%A8re+Residencial.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/empreendimento/la-riviere-residencial-CO94453",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "La Riviere - piscina",
+          "category": "Piscina",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n--exkjrUQU-53aTSPhDLT7sYER193bgm420SyO13I/Piscina+externa+condominial+Sala+de+jogos+com+espa%C3%A7o+gourmet+integrado+La+Rivi%C3%A8re+Residencial.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/empreendimento/la-riviere-residencial-CO94453",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "La Riviere - deck da piscina",
+          "category": "Piscina",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n_-dt9l2zEsi5BgRW2jwQT7Tk3iq93bhNo3hYvKgHU/Piscina+com+deck+Sala+de+jogos+com+espa%C3%A7o+gourmet+integrado+La+Rivi%C3%A8re+Residencial.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/empreendimento/la-riviere-residencial-CO94453",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "La Riviere - solarium",
+          "category": "Piscina",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n_OjpforcIWMxmowyurMLRyzTKTW9rbhyY3GYiXVC8/Espregui%C3%A7adeiras+externas+Sala+de+jogos+com+espa%C3%A7o+gourmet+integrado+La+Rivi%C3%A8re+Residencial.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/empreendimento/la-riviere-residencial-CO94453",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "La Riviere - fachada noturna",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/300420250848074118-1746013687.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/residencial-la-riviere-EM86767",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "La Riviere - lazer interno",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/February2023/img-43-1675801100-1675864382.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/residencial-la-riviere-EM86767",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente mar em Meia Praia",
+          "description": "A Potencial descreve o empreendimento como frente mar no final de Meia Praia."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Rua 323 / 323 B",
+          "description": "As fontes consultadas indicam referencia na Rua 323 e Rua 323 B, em Meia Praia, Itapema."
+        },
+        {
+          "icon": "Ruler",
+          "title": "Plantas de 140 m2 a 187 m2",
+          "description": "A Imobille informa plantas entre 140 m2 e 187 m2, tres suites e tres a quatro vagas."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer completo",
+          "description": "A curadoria confirma piscina, eventos, gourmet, jogos, brinquedoteca, academia, sauna e hall."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Posicao entre rio e mar",
+          "description": "A Potencial destaca a conexao do empreendimento com o mar e o rio no final de Meia Praia."
+        },
+        {
+          "title": "Ambientes coletivos completos",
+          "description": "A selecao visual mostra desde acesso e hall ate piscina, fitness e areas sociais."
+        },
+        {
+          "title": "Alias cadastral tratado",
+          "description": "A curadoria alinha o cadastro La Rivieira com fontes do La Riviere Residencial."
+        }
+      ],
+      "faq": [
+        {
+          "question": "La Rivieira e La Riviere se referem ao mesmo empreendimento?",
+          "answer": "Nesta auditoria, o cadastro La Rivieira foi tratado como variacao do La Riviere Residencial, pois as fontes e enderecos apontam para a Rua 323/323 B em Meia Praia."
+        },
+        {
+          "question": "Onde fica o empreendimento?",
+          "answer": "As fontes indicam Meia Praia, Itapema, com referencia na Rua 323 e Rua 323 B."
+        },
+        {
+          "question": "Quais metragens aparecem nas fontes?",
+          "answer": "A Imobille informa plantas de 140 m2 a 187 m2."
+        },
+        {
+          "question": "Quais imagens foram trocadas?",
+          "answer": "A galeria passou a usar fachada, acesso, hall, piscina, eventos, jogos, brinquedoteca e academia."
+        }
+      ],
+      "sources": [
+        "https://www.potencialimoveis.com.br/empreendimento/la-riviere-residencial-CO94453",
+        "https://www.imobillenegocios.com.br/empreendimento/residencial-la-riviere-EM86767",
+        "https://dallo.com.br/empreendimento/residencial-la-riviere-itapema-meia-praia/209",
+        "https://fabricioarantes.com.br/edificios/la-riviere-residence/itapema/meia-praia/1180"
+      ]
+    },
+    {
+      "slug": "la-riviere",
+      "hero_image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n--iRjn0cQRixAryRwVAkUNjoJhL9bbi9Y33AyA1uM/Fachada+La+Rivi%C3%A8re+Residencial.jpg",
+      "description": "O La Riviere Residencial foi revisado como empreendimento frente mar em Meia Praia, Itapema. A Potencial destaca localizacao no final de Meia Praia, entre Itapema e Porto Belo, com conexao entre rio e mar e lazer diversificado. A Imobille registra endereco na Rua 323 B, numero 94, plantas de 140 m2 a 187 m2, tres suites, tres a quatro vagas e opcoes de lazer com piscina, salao de festas, jogos, academia, sauna umida e hall. A galeria foi refeita com fachada, acesso, hall e areas comuns reais.",
+      "seo_description": "Conheca o La Riviere Residencial em Meia Praia, Itapema, frente mar com fachada, piscina, hall e lazer.",
+      "gallery": [
+        {
+          "title": "La Riviere Residencial - fachada frente mar",
+          "category": "Fachada",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n--iRjn0cQRixAryRwVAkUNjoJhL9bbi9Y33AyA1uM/Fachada+La+Rivi%C3%A8re+Residencial.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/empreendimento/la-riviere-residencial-CO94453",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "La Riviere Residencial - fachada noturna",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/300420250848074118-1746013687.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/residencial-la-riviere-EM86767",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "La Riviere Residencial - piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/teste-1746013687.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/residencial-la-riviere-EM86767",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "La Riviere Residencial - acesso",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/February2023/img-65-1675800398-1675864480.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/residencial-la-riviere-EM86767",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "La Riviere Residencial - hall",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/February2023/img-60-1675801102-1675864380.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/residencial-la-riviere-EM86767",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "La Riviere Residencial - recepcao",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/February2023/img-59-1675801102-1675864380.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/residencial-la-riviere-EM86767",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "La Riviere Residencial - eventos",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/February2023/img-57-1675801101-1675864380.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/residencial-la-riviere-EM86767",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "La Riviere Residencial - gourmet",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/February2023/img-56-1675801101-1675864381.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/residencial-la-riviere-EM86767",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "La Riviere Residencial - jogos",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/February2023/img-50-1675801100-1675864381.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/residencial-la-riviere-EM86767",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "La Riviere Residencial - brinquedoteca",
+          "category": "Kids",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/February2023/img-46-1675801100-1675864381.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/residencial-la-riviere-EM86767",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "La Riviere Residencial - fitness",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/February2023/img-43-1675801100-1675864382.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/residencial-la-riviere-EM86767",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "La Riviere Residencial - deck",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/February2023/img-38-1675801099-1675864382.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/residencial-la-riviere-EM86767",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente mar no final de Meia Praia",
+          "description": "A Potencial descreve o La Riviere como frente mar, entre Itapema e Porto Belo."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Rua 323 B, numero 94",
+          "description": "A Imobille informa endereco na Rua 323 B, numero 94, em Meia Praia."
+        },
+        {
+          "icon": "Ruler",
+          "title": "140 m2 a 187 m2",
+          "description": "A Imobille registra plantas de 140 m2 a 187 m2, tres suites e tres a quatro vagas."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer com piscina e sauna",
+          "description": "As fontes citam piscina, festas, jogos, academia, sauna umida e hall."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Paisagem de rio e mar",
+          "description": "A localizacao indicada pela Potencial valoriza a conexao visual entre rio, praia e orla."
+        },
+        {
+          "title": "Estrutura social completa",
+          "description": "A pagina agora mostra ambientes de acesso, convivencia, esporte e piscina do condominio."
+        },
+        {
+          "title": "Textos baseados em fontes",
+          "description": "Descricao, beneficios e FAQ foram reescritos com dados de Potencial e Imobille."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o La Riviere Residencial?",
+          "answer": "A Imobille informa endereco na Rua 323 B, numero 94, Meia Praia, Itapema - SC."
+        },
+        {
+          "question": "O empreendimento e frente mar?",
+          "answer": "A Potencial apresenta o La Riviere Residencial como frente mar."
+        },
+        {
+          "question": "Quais areas comuns foram verificadas?",
+          "answer": "Piscina, hall, festas, jogos, academia, sauna umida, gourmet e brinquedoteca."
+        },
+        {
+          "question": "Qual foi a correcao da auditoria?",
+          "answer": "A galeria passou a usar imagens do empreendimento, removendo o foco em imagens internas de oferta."
+        }
+      ],
+      "sources": [
+        "https://www.potencialimoveis.com.br/empreendimento/la-riviere-residencial-CO94453",
+        "https://www.imobillenegocios.com.br/empreendimento/residencial-la-riviere-EM86767",
+        "https://dallo.com.br/empreendimento/residencial-la-riviere-itapema-meia-praia/209",
+        "https://fabricioarantes.com.br/edificios/la-riviere-residence/itapema/meia-praia/1180"
+      ]
+    },
+    {
+      "slug": "la-victoria-residence",
+      "hero_image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n--RZSSqkImipIgCOkQREULQ0JvLdLbhvg3jniQiMs/Fachada+completa+l+La+Victoria+Residence.jpg",
+      "description": "O La Victoria Residence foi revisado como empreendimento em Meia Praia, Itapema, com referencia cadastral na Rua 319. A Potencial informa tipologias de 120 m2 a 150 m2, tres a quatro suites, duas a tres vagas, alto padrao de acabamento e proximidade com o mar. A mesma fonte descreve area de lazer com piscina adulto e infantil, espaco zen, hidromassagem, playground, salao de festas e jogos. A galeria agora usa fachada, acesso, detalhes do empreendimento e piscina obtidos em fontes externas.",
+      "seo_description": "Conheca o La Victoria Residence em Meia Praia, Itapema, com fachada, acesso, piscina e lazer do condominio.",
+      "gallery": [
+        {
+          "title": "La Victoria Residence - fachada",
+          "category": "Fachada",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n--RZSSqkImipIgCOkQREULQ0JvLdLbhvg3jniQiMs/Fachada+completa+l+La+Victoria+Residence.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/empreendimento/la-victoria-residence-CO99367",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "La Victoria Residence - torre principal",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_230_10419_1053_070123.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/la-victoria-residence/itapema/230",
+          "source_label": "HJ Junior Imoveis"
+        },
+        {
+          "title": "La Victoria Residence - vista lateral",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_230_12325_1411_240323.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/la-victoria-residence/itapema/230",
+          "source_label": "HJ Junior Imoveis"
+        },
+        {
+          "title": "La Victoria Residence - acesso",
+          "category": "Acesso",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_230_12352_1413_240323.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/la-victoria-residence/itapema/230",
+          "source_label": "HJ Junior Imoveis"
+        },
+        {
+          "title": "La Victoria Residence - detalhe externo",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_230_10416_1053_070123.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/la-victoria-residence/itapema/230",
+          "source_label": "HJ Junior Imoveis"
+        },
+        {
+          "title": "La Victoria Residence - entrada",
+          "category": "Acesso",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_230_10417_1053_070123.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/la-victoria-residence/itapema/230",
+          "source_label": "HJ Junior Imoveis"
+        },
+        {
+          "title": "La Victoria Residence - piscina",
+          "category": "Piscina",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_230_10435_1054_070123.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/la-victoria-residence/itapema/230",
+          "source_label": "HJ Junior Imoveis"
+        },
+        {
+          "title": "La Victoria Residence - deck da piscina",
+          "category": "Piscina",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_230_12328_1411_240323.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/la-victoria-residence/itapema/230",
+          "source_label": "HJ Junior Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Meia Praia, Itapema",
+          "description": "A Potencial localiza o empreendimento em Meia Praia; o cadastro interno informa referencia na Rua 319."
+        },
+        {
+          "icon": "Ruler",
+          "title": "120 m2 a 150 m2",
+          "description": "A Potencial registra tipologias de 120 m2 a 150 m2, com tres a quatro suites."
+        },
+        {
+          "icon": "Car",
+          "title": "Duas a tres vagas",
+          "description": "A fonte consultada informa configuracoes com duas a tres vagas de garagem."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer com piscina e hidromassagem",
+          "description": "A Potencial cita piscina adulto e infantil, espaco zen, hidromassagem, playground, festas e jogos."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Proximidade com o mar",
+          "description": "A comunicacao da Potencial destaca localizacao perto da praia em Meia Praia."
+        },
+        {
+          "title": "Acabamento de alto padrao",
+          "description": "A fonte apresenta o empreendimento com design inspirado e acabamento superior."
+        },
+        {
+          "title": "Galeria corrigida",
+          "description": "A curadoria prioriza fachada, acesso e piscina do La Victoria Residence."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o La Victoria Residence?",
+          "answer": "As fontes localizam o empreendimento em Meia Praia, Itapema; o cadastro interno usa a Rua 319 como referencia."
+        },
+        {
+          "question": "Qual e o perfil das plantas?",
+          "answer": "A Potencial informa 120 m2 a 150 m2, tres a quatro suites e duas a tres vagas."
+        },
+        {
+          "question": "Quais areas de lazer foram conferidas?",
+          "answer": "Piscina adulto e infantil, espaco zen, hidromassagem, playground, festas e jogos."
+        },
+        {
+          "question": "O que mudou na pagina?",
+          "answer": "Hero e galeria foram substituidos por imagens externas e areas comuns do empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.potencialimoveis.com.br/empreendimento/la-victoria-residence-CO99367",
+        "https://hjjuniorimoveis.com.br/edificios/la-victoria-residence/itapema/230",
+        "https://www.vivareal.com.br/imoveis-lancamento/la-victoria-residence-2568977479/",
+        "https://www.imobiliariaforcast.com.br/empreendimento/la-victoria-residence/16"
+      ]
+    }
+  ]
+}

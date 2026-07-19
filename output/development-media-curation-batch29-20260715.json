@@ -1,0 +1,1056 @@
+{
+  "batch_id": "development-media-curation-batch29-20260715",
+  "generated_at": "2026-07-15T23:25:00.000Z",
+  "items": [
+    {
+      "slug": "crystal-tower",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2023/03/edificio-diamond-crystal-tower-balneario-camboriu-2.jpg",
+      "description": "O Crystal Tower foi revisado com base nas referencias publicas do Diamond Crystal Tower e da SPE Crystal Tower Empreendimentos, associadas a Rua 1201, 432, no Centro de Balneario Camboriu. As fontes posicionam o empreendimento entre eixos centrais da cidade e publicam fachada, implantacao e ambientes comuns do edificio. A galeria foi trocada para imagens externas e areas de lazer do empreendimento, removendo a leitura de fotos internas da oferta ativa.",
+      "seo_description": "Conheca o Crystal Tower, no Centro de Balneario Camboriu, com fachada e lazer revisados em fontes externas.",
+      "gallery": [
+        {
+          "title": "Crystal Tower - fachada central",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2023/03/edificio-diamond-crystal-tower-balneario-camboriu-2.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-diamond-crystal-tower/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Crystal Tower - torre residencial",
+          "category": "Fachada",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/4005/ivuK1uWBPE547B2_4005632de84d53f6b.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/4270/diamond-crystal-tower",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Crystal Tower - lazer gourmet",
+          "category": "Gourmet",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/4005/iq75ne_4005630e76b6599f4.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/4270/diamond-crystal-tower",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Crystal Tower - piscina elevada",
+          "category": "Piscina",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/4005/iq75ne_4005630e76bb1b1ae.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/4270/diamond-crystal-tower",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Crystal Tower - salao social",
+          "category": "Social",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/4005/iq75ne_4005630e76bf3cc27.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/4270/diamond-crystal-tower",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Crystal Tower - jogos sociais",
+          "category": "Jogos",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/4005/iq75ne_4005630e76c31da15.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/4270/diamond-crystal-tower",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Crystal Tower - fitness",
+          "category": "Fitness",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/4005/iq75ne_4005630e76c009537.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/4270/diamond-crystal-tower",
+          "source_label": "VG Imobiliaria"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro de Balneario Camboriu",
+          "description": "Felicita, VG e Econodata associam o empreendimento a Rua 1201, 432, no Centro da cidade."
+        },
+        {
+          "icon": "Building2",
+          "title": "Fachada identificada",
+          "description": "A nova selecao usa fachada e imagens do Diamond Crystal Tower publicadas por fontes externas."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer urbano",
+          "description": "As fontes visuais indicam piscina, salao social, gourmet, jogos e fitness no contexto do edificio."
+        }
+      ],
+      "differentials": [
+        "Hero substituido por imagem externa vinculada ao Diamond Crystal Tower.",
+        "Galeria troca fotos internas por fachada, piscina e ambientes comuns.",
+        "Copy passa a registrar endereco e aliases usados pelas fontes de mercado."
+      ],
+      "faq": [
+        {
+          "question": "Qual nome aparece nas fontes externas?",
+          "answer": "As fontes encontradas usam principalmente Diamond Crystal Tower, enquanto a pagina auditada usa Crystal Tower."
+        },
+        {
+          "question": "Onde fica o empreendimento?",
+          "answer": "Felicita, VG e Econodata associam o empreendimento a Rua 1201, 432, Centro, Balneario Camboriu."
+        },
+        {
+          "question": "O que mudou nas imagens?",
+          "answer": "Foram priorizadas fachada, lazer e ambientes comuns publicados por fontes externas."
+        },
+        {
+          "question": "Por que a revisao foi conservadora?",
+          "answer": "Como ha variacao de nomenclatura, a curadoria usa apenas imagens ligadas ao Diamond Crystal Tower e a SPE Crystal Tower."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-crystal-tower-balneario-camboriu-centro-3-quartos-3-garagens-venda-ref-1705/",
+        "https://felicitanegocios.com.br/empreendimento/433/diamond-crystal-tower",
+        "https://vgimobiliaria.com.br/empreendimento/4270/diamond-crystal-tower",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-diamond-crystal-tower/",
+        "https://www.econodata.com.br/consulta-empresa/41370671000202-crystal-tower-empreendimentos-spe-ltda"
+      ]
+    },
+    {
+      "slug": "cybila",
+      "hero_image": "https://cdn.imoview.com.br/bryann/Condominios/615/captura-de-tela-2024-06-10-091207.png?1718028978",
+      "description": "O Cybila foi revisado como empreendimento frente mar na Barra Sul, em Balneario Camboriu. Imobille e Felicita indicam Avenida Atlantica, regiao da Barra Sul, com padrao residencial elevado, plantas amplas, gas central, medidores individuais e apenas uma residencia por pavimento em fontes de mercado. A Invicta reforca que o condominio tem estrutura enxuta, com salao de festas como lazer confirmado. A galeria agora prioriza fachada e contexto de orla, evitando imagens internas da oferta ativa.",
+      "seo_description": "Conheca o Cybila, frente mar na Barra Sul, Balneario Camboriu, com fachada e salao de festas revisados.",
+      "gallery": [
+        {
+          "title": "Cybila - fachada frente mar",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/615/captura-de-tela-2024-06-10-091207.png?1718028978",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/615/residencial-cybila",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Cybila - salao de festas",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/real-estates-photo/February2026/cybila-24-1770034344.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-cybila-EM20015",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Cybila - orla da Barra Sul",
+          "category": "Localizacao",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/real-estates-photo/February2026/cybila-23-1770034343.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-cybila-EM20015",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Cybila - fachada residencial",
+          "category": "Fachada",
+          "image": "https://www.invictaimoveisbc.com.br/uploads/imovel/galeria/big-8df3949515098fcfe59ade564c20f1d8.jpg",
+          "source_url": "https://www.invictaimoveisbc.com.br/detalhes-imovel/518-apartamento-alto-padrao-venda-centro-balneario-camboriu-sc.html",
+          "source_label": "Invicta Imoveis"
+        },
+        {
+          "title": "Cybila - frente Atlantica",
+          "category": "Localizacao",
+          "image": "https://www.imobillenegocios.com.br/images/enterprise/bg-enterprise.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-cybila-EM20015",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente mar na Barra Sul",
+          "description": "Imobille posiciona o Cybila na Avenida Atlantica, em frente ao mar, na regiao da Barra Sul."
+        },
+        {
+          "icon": "Layers",
+          "title": "Um por pavimento",
+          "description": "A Felicita descreve o empreendimento com apenas uma residencia por andar."
+        },
+        {
+          "icon": "PartyPopper",
+          "title": "Saloes de apoio social",
+          "description": "Fontes externas citam salao de festas e espaco gourmet como pontos de convivencia."
+        }
+      ],
+      "differentials": [
+        "Hero trocado para fachada do Residencial Cybila publicada em fonte externa.",
+        "Galeria reduzida de forma conservadora para fachada, salao e localizacao frente mar.",
+        "Descricao corrige o perfil do empreendimento sem prometer lazer nao confirmado."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Cybila?",
+          "answer": "As fontes posicionam o empreendimento na Avenida Atlantica, Barra Sul, em Balneario Camboriu."
+        },
+        {
+          "question": "Qual e o perfil do empreendimento?",
+          "answer": "Empreendimento residencial frente mar, com plantas amplas e apenas uma residencia por pavimento segundo a Felicita."
+        },
+        {
+          "question": "Quais itens foram confirmados?",
+          "answer": "Hall, gas central, medidores individuais, portao eletronico e salao de festas aparecem nas fontes pesquisadas."
+        },
+        {
+          "question": "Por que a galeria e mais curta?",
+          "answer": "A revisao evitou fotos internas de oferta e manteve somente imagens mais seguras do edificio e da localizacao."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-cybila-balneario-camboriu-centro-3-quartos-1-garagem-venda-ref-1336/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-cybila-EM20015",
+        "https://felicitanegocios.com.br/empreendimento/615/residencial-cybila",
+        "https://www.invictaimoveisbc.com.br/detalhes-imovel/518-apartamento-alto-padrao-venda-centro-balneario-camboriu-sc.html",
+        "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-cybila-balneario-camboriu-centro-4-quartos-2-garagens-venda-ref-542/",
+        "https://nobilitaimobiliaria.com.br/apartamento-com-3-suites-no-edificio-cybila"
+      ]
+    },
+    {
+      "slug": "dalcelis",
+      "hero_image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/2150/i8Am1m8Q09T_21505f8ef62c1c2dd.jpg",
+      "description": "O Dalcelis foi revisado como empreendimento da Embraed na Rua 1200, 181, quadra mar no Centro de Balneario Camboriu. A Imobille descreve torre com 41 pavimentos, aproximadamente 140 metros de altura, 70 residencias e duas por pavimento, alem de portaria 24h. Fontes externas publicam lazer completo com piscina, playground, salao de festas, jogos, sauna, espaco zen, quadra, gourmet, academia, churrasqueira, cinema, massagem, kids, solarium e ofuro. A nova galeria usa fachada, acesso e areas comuns reais do condominio.",
+      "seo_description": "Conheca o Dalcelis, Embraed quadra mar no Centro de Balneario Camboriu, com lazer completo.",
+      "gallery": [
+        {
+          "title": "Dalcelis - torre quadra mar",
+          "category": "Fachada",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/2150/i8Am1m8Q09T_21505f8ef62c1c2dd.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/2414/dalcelis",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Dalcelis - piscina",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/279/edificio-dalcelis-balneario-camboriu-qma3389-8.jpg?1690568117",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/279/dalcelis",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Dalcelis - acesso social",
+          "category": "Acesso",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/279/edificio-dalcelis-balneario-camboriu-qma3389-3.jpg?1690568117",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/279/dalcelis",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Dalcelis - gourmet",
+          "category": "Gourmet",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/279/edificio-dalcelis-balneario-camboriu-qma3389-18.jpg?1690568117",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/279/dalcelis",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Dalcelis - salao social",
+          "category": "Social",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/279/edificio-dalcelis-balneario-camboriu-qma3389-15.jpg?1690568117",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/279/dalcelis",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Dalcelis - cinema",
+          "category": "Cinema",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/279/edificio-dalcelis-balneario-camboriu-qma3389-25.jpg?1690568117",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/279/dalcelis",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Dalcelis - pub social",
+          "category": "Jogos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/279/edificio-dalcelis-balneario-camboriu-qma3389-22.jpg?1690568117",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/279/dalcelis",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Dalcelis - playground",
+          "category": "Kids",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/2150/i8Am1m8Q09T_21505f8ef6293594e.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/2414/dalcelis",
+          "source_label": "VG Imobiliaria"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Quadra mar no Centro",
+          "description": "Imobille e Viva Real informam endereco na Rua 1200, 181, em Balneario Camboriu."
+        },
+        {
+          "icon": "Building2",
+          "title": "Assinatura Embraed",
+          "description": "A Imobille associa o Dalcelis a Embraed e descreve torre com 41 pavimentos."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer completo",
+          "description": "As fontes citam piscina, sauna, quadra, gourmet, academia, cinema, kids e saloes sociais."
+        }
+      ],
+      "differentials": [
+        "Hero substituido por fachada/implantacao do Dalcelis em fonte externa.",
+        "Galeria usa piscina, acesso, gourmet, saloes e lazer real do empreendimento.",
+        "Descricao adiciona endereco, construtora, porte da torre e lista de lazer confirmada."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Dalcelis?",
+          "answer": "As fontes apontam Rua 1200, 181, no Centro de Balneario Camboriu, em posicao quadra mar."
+        },
+        {
+          "question": "Quem assina o empreendimento?",
+          "answer": "A Imobille associa o Dalcelis a Embraed."
+        },
+        {
+          "question": "Quais areas comuns foram identificadas?",
+          "answer": "Piscina, gourmet, saloes, cinema, pub, playground, sauna, academia, kids, solarium e ofuro aparecem nas fontes."
+        },
+        {
+          "question": "O que mudou na pagina?",
+          "answer": "Fotos internas da oferta foram substituidas por fachada e areas comuns publicadas por fontes externas."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/imovel/apartamento-no-ed-dalcellis-em-balneario-camboriu-centro-4-quartos-4-garagens-venda-ref-892/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-dalcelis-EM46467",
+        "https://felicitanegocios.com.br/empreendimento/279/dalcelis",
+        "https://vgimobiliaria.com.br/empreendimento/2414/dalcelis",
+        "https://www.vivareal.com.br/condominio/edificio-dalcelis-residence-centro-id-a655f1e3-3c94/"
+      ]
+    },
+    {
+      "slug": "dimora-del-sole",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/31012026104604298-1769867164.jpg",
+      "description": "O Dimora Del Sole foi revisado como empreendimento no Centro de Balneario Camboriu, entre a Avenida Brasil e a Avenida Atlantica, a cerca de 250 metros da Praia Central segundo a Imobille. Fontes externas indicam Rua 1911, 29, tambem associada a Avenida Brasil, com tres residencias por pavimento e plantas na faixa de 135 a 138 m2. A estrutura de lazer confirmada inclui salao de festas, quiosque com churrasqueira, piscina adulto e infantil, sala de jogos e fitness. A galeria foi corrigida com fachada, piscina, hall e lazer do edificio.",
+      "seo_description": "Conheca o Dimora Del Sole, no Centro de Balneario Camboriu, com piscina, fitness e salao de festas.",
+      "gallery": [
+        {
+          "title": "Dimora Del Sole - piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/31012026104604298-1769867164.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-dimora-del-sole-residencial-EM28353",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Dimora Del Sole - fachada",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-dimora-del-sole-1769867164.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-dimora-del-sole-residencial-EM28353",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Dimora Del Sole - hall social",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2026/dimora-del-sole0010-1769867117.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-dimora-del-sole-residencial-EM28353",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Dimora Del Sole - salao de festas",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2026/dimora-del-sole0003-1769867112.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-dimora-del-sole-residencial-EM28353",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Dimora Del Sole - fitness",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2026/dimora-del-sole0004-1769867113.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-dimora-del-sole-residencial-EM28353",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Dimora Del Sole - jogos",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2026/dimora-del-sole0006-1769867115.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-dimora-del-sole-residencial-EM28353",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Dimora Del Sole - area de piscina",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/667/1594215966400-c5d77eaa77a7be614f4235ab81cb29125c9031dc97f8e45aff7b93f05564cbc8-1024.jpg?1726688102",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/667/dimora-del-sole",
+          "source_label": "Felicita Negocios"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro, perto da Praia Central",
+          "description": "A Imobille posiciona o empreendimento entre Avenida Brasil e Avenida Atlantica, a cerca de 250 m da orla."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscinas adulto e infantil",
+          "description": "A estrutura de lazer confirmada inclui piscina adulto, piscina infantil e quiosque com churrasqueira."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Jogos e fitness",
+          "description": "Fontes externas citam sala de jogos, fitness e salao de festas."
+        }
+      ],
+      "differentials": [
+        "Hero trocado para piscina do empreendimento, extraida da pagina de empreendimento.",
+        "Galeria substitui fotos internas por fachada, hall, piscina, salao, jogos e fitness.",
+        "Copy adiciona endereco, proximidade da orla, tipologia de pavimento e lazer confirmado."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Dimora Del Sole?",
+          "answer": "Fontes externas indicam Rua 1911, 29, no Centro, entre Avenida Brasil e Avenida Atlantica."
+        },
+        {
+          "question": "A que distancia fica da praia?",
+          "answer": "A Imobille informa cerca de 250 metros ate a Praia Central de Balneario Camboriu."
+        },
+        {
+          "question": "Quais areas de lazer foram confirmadas?",
+          "answer": "Salao de festas, quiosque com churrasqueira, piscina adulto e infantil, jogos e fitness."
+        },
+        {
+          "question": "O que foi corrigido na midia?",
+          "answer": "A pagina passou a usar imagens de piscina, fachada, hall e lazer do empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-dimora-del-sole-balneario-camboriu-centro-3-quartos-4-garagens-venda-ref-1703/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-dimora-del-sole-residencial-EM28353",
+        "https://felicitanegocios.com.br/empreendimento/667/dimora-del-sole",
+        "https://maximoveis.com.br/empreendimento/1204/dimora-del-sole/",
+        "https://www.ebcimobiliaria.com.br/lancamento/dimora-del-sole/660227",
+        "https://www.flyimoveis.com.br/imovel/apartamento-no-edificio-dimora-del-sole-balneario-camboriu-barra-norte-3-quartos-3-garagens-venda-ref-1605/"
+      ]
+    },
+    {
+      "slug": "dolce-vitta-residence",
+      "hero_image": "https://cdn.imoview.com.br/bryann/Condominios/65/dolce-vitta-felicita-balneario-camboriu-41.jpg?1680814301",
+      "description": "O Dolce Vitta Residence foi revisado como empreendimento da FG Empreendimentos no Centro de Balneario Camboriu, com referencias de endereco na Avenida Brasil e Rua 2300. Sort Investimentos descreve o edificio a uma quadra do mar, enquanto Felicita e Mazzotti publicam fachada e ampla estrutura comum. As fontes citam salao de festas, jogos, cinema, sauna seca e umida, academia, piscina, ofuro, portaria 24h, quadra esportiva, bar molhado e hall decorado. A galeria agora usa fachada, lobby e lazer do condominio.",
+      "seo_description": "Conheca o Dolce Vitta Residence, FG no Centro de Balneario Camboriu, com lazer completo a uma quadra do mar.",
+      "gallery": [
+        {
+          "title": "Dolce Vitta - fachada FG",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/65/dolce-vitta-felicita-balneario-camboriu-41.jpg?1680814301",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/65/dolce-vitta-fg-empreendimentos",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Dolce Vitta - hall decorado",
+          "category": "Acesso",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/65/dolce-vitta-felicita-balneario-camboriu-40.jpg?1680814301",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/65/dolce-vitta-fg-empreendimentos",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Dolce Vitta - cinema",
+          "category": "Cinema",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1716242506/enterprise_295/enterprise_dolce-vitta-residence-2_1716242505.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/dolce-vitta-residence",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Dolce Vitta - fitness",
+          "category": "Fitness",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1716242506/enterprise_295/enterprise_dolce-vitta-residence-0_1716242505.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/dolce-vitta-residence",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Dolce Vitta - coworking",
+          "category": "Social",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1716242506/enterprise_295/enterprise_dolce-vitta-residence-1_1716242505.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/dolce-vitta-residence",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Dolce Vitta - piscina",
+          "category": "Piscina",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1716242508/enterprise_295/enterprise_dolce-vitta-residence-4_1716242506.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/dolce-vitta-residence",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Dolce Vitta - jogos",
+          "category": "Jogos",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1716242512/enterprise_295/enterprise_dolce-vitta-residence-8_1716242510.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/dolce-vitta-residence",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Dolce Vitta - salao de festas",
+          "category": "Eventos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/65/dolce-vitta-felicita-balneario-camboriu-4.jpg?1680814301",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/65/dolce-vitta-fg-empreendimentos",
+          "source_label": "Felicita Negocios"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "FG Empreendimentos",
+          "description": "Sort Investimentos e Felicita associam o Dolce Vitta Residence a FG Empreendimentos."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Centro, uma quadra do mar",
+          "description": "A Sort Investimentos descreve o empreendimento no Centro de Balneario Camboriu, a uma quadra da praia."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer completo",
+          "description": "As fontes citam piscina, cinema, sauna, academia, jogos, salao de festas, quadra e hall decorado."
+        }
+      ],
+      "differentials": [
+        "Hero substituido por fachada do Dolce Vitta publicada pela Felicita.",
+        "Galeria prioriza fachada, hall, piscina, cinema, fitness, jogos e salao de festas.",
+        "Descricao incorpora construtora, posicao perto do mar e lazer confirmado por fontes externas."
+      ],
+      "faq": [
+        {
+          "question": "Quem e a construtora do Dolce Vitta Residence?",
+          "answer": "Sort Investimentos e Felicita associam o empreendimento a FG Empreendimentos."
+        },
+        {
+          "question": "Onde fica o Dolce Vitta?",
+          "answer": "As fontes posicionam o edificio no Centro de Balneario Camboriu, com referencias a Avenida Brasil e Rua 2300."
+        },
+        {
+          "question": "Quais areas comuns aparecem nas fontes?",
+          "answer": "Piscina, cinema, academia, jogos, salao de festas, sauna, quadra, bar molhado e hall decorado."
+        },
+        {
+          "question": "O que foi corrigido?",
+          "answer": "A curadoria substituiu fotos de oferta por fachada e areas comuns do condominio."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-dolce-vitta-residence-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-807/",
+        "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-dolce-vitta-residence-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-206/",
+        "https://sortinvestimentos.com.br/empreendimentos/dolce-vitta-residence",
+        "https://mazzottiimoveis.com/edificios/dolce-vitta-residence/balneario-camboriu/centro/383",
+        "https://felicitanegocios.com.br/empreendimento/65/dolce-vitta-fg-empreendimentos",
+        "https://www.vivareal.com.br/condominio/edificio-dolce-vitta-residence-centro-id-14e1a264-ee78/",
+        "https://www.lopes.com.br/condominios/sc/balneario-camboriu/centro/REC28151/condominio-edificio-dolce-vitta-residence-r-2300-190"
+      ]
+    },
+    {
+      "slug": "dom-alfonso",
+      "hero_image": "https://b4.casteldigital.com.br/brunocassola/ig/il/imoveis/106/dom-alfonso-4-suites-decorado-frente-mar-venda-centro-balneario-camboriu-av-atlantica-16654378805382.jpg",
+      "description": "O Dom Alfonso foi revisado como edificio frente mar na Avenida Atlantica, Centro de Balneario Camboriu. A Imobiliaria Conexao informa Avenida Atlantica, 1606, em posicao proxima ao Shopping Atlantico, Avenida Brasil, bares e restaurantes. Fontes de mercado descrevem o empreendimento como alto padrao frente mar, com aproximadamente 212 m2 nas ofertas publicadas e assinatura associada a Cechinel em anuncios externos. Como ha menos paginas puras de empreendimento, a curadoria foi conservadora e manteve fachada, acesso e piscina, evitando interiores da oferta ativa.",
+      "seo_description": "Conheca o Dom Alfonso, frente mar na Avenida Atlantica, Centro de Balneario Camboriu.",
+      "gallery": [
+        {
+          "title": "Dom Alfonso - fachada Atlantica",
+          "category": "Fachada",
+          "image": "https://b4.casteldigital.com.br/brunocassola/ig/il/imoveis/106/dom-alfonso-4-suites-decorado-frente-mar-venda-centro-balneario-camboriu-av-atlantica-16654378805382.jpg",
+          "source_url": "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-dom-alfonso-balneario-camboriu-centro-4-quartos-4-garagens-venda-ref-106/",
+          "source_label": "Bruno Cassola"
+        },
+        {
+          "title": "Dom Alfonso - frente mar",
+          "category": "Localizacao",
+          "image": "https://b4.casteldigital.com.br/brunocassola/ig/il/imoveis/115/dom-alfonso-4-suites-decorado-frente-mar-venda-centro-balneario-camboriu-av-atlantica-16751765806867.jpg",
+          "source_url": "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-dom-alfonso-balneario-camboriu-centro-4-quartos-4-garagens-venda-ref-115/",
+          "source_label": "Bruno Cassola"
+        },
+        {
+          "title": "Dom Alfonso - hall social",
+          "category": "Acesso",
+          "image": "https://b4.casteldigital.com.br/brunocassola/ig/il/imoveis/106/dom-alfonso-4-suites-decorado-frente-mar-venda-centro-balneario-camboriu-hall-16654378805386.jpg",
+          "source_url": "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-dom-alfonso-balneario-camboriu-centro-4-quartos-4-garagens-venda-ref-106/",
+          "source_label": "Bruno Cassola"
+        },
+        {
+          "title": "Dom Alfonso - piscina externa",
+          "category": "Piscina",
+          "image": "https://www.invictaimoveisbc.com.br/imgs/600x315-destaque-center:big-ef2a049e87135ec421de565ab890bd5e.jpg",
+          "source_url": "https://www.invictaimoveisbc.com.br/detalhes-imovel/419-apartamento-alto-padrao-venda-centro-balneario-camboriu-sc.html",
+          "source_label": "Invicta Imoveis"
+        },
+        {
+          "title": "Dom Alfonso - deck de lazer",
+          "category": "Lazer",
+          "image": "https://www.invictaimoveisbc.com.br/uploads/imovel/galeria/big-f4dec19d7d5130aa1001150bee3b6a99.jpg",
+          "source_url": "https://www.invictaimoveisbc.com.br/detalhes-imovel/419-apartamento-alto-padrao-venda-centro-balneario-camboriu-sc.html",
+          "source_label": "Invicta Imoveis"
+        },
+        {
+          "title": "Dom Alfonso - acesso a orla",
+          "category": "Localizacao",
+          "image": "https://www.invictaimoveisbc.com.br/uploads/imovel/galeria/big-309a4cbcc29546a49429d37219df41f8.jpg",
+          "source_url": "https://www.invictaimoveisbc.com.br/detalhes-imovel/419-apartamento-alto-padrao-venda-centro-balneario-camboriu-sc.html",
+          "source_label": "Invicta Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente mar na Atlantica",
+          "description": "A Imobiliaria Conexao informa endereco na Avenida Atlantica, 1606, no Centro de Balneario Camboriu."
+        },
+        {
+          "icon": "ShoppingBag",
+          "title": "Proximo ao Shopping Atlantico",
+          "description": "A fonte local destaca proximidade do Shopping Atlantico, Avenida Brasil, bares e restaurantes."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Curadoria conservadora",
+          "description": "A galeria usa fachada, hall, piscina e contexto de orla para evitar fotos internas da oferta ativa."
+        }
+      ],
+      "differentials": [
+        "Hero trocado para fachada frente mar do Dom Alfonso.",
+        "Galeria limitada a acesso, piscina e contexto externo por falta de pagina pura do empreendimento.",
+        "Descricao adiciona endereco, entorno e criterio de seguranca da curadoria."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Dom Alfonso?",
+          "answer": "A Imobiliaria Conexao informa Avenida Atlantica, 1606, Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Qual e o perfil do edificio?",
+          "answer": "Fontes de mercado descrevem o Dom Alfonso como empreendimento alto padrao frente mar."
+        },
+        {
+          "question": "Por que foram usadas poucas imagens?",
+          "answer": "A revisao foi conservadora porque havia menos fontes puras de empreendimento; foram mantidas fachada, hall, piscina e orla."
+        },
+        {
+          "question": "O que mudou na pagina?",
+          "answer": "Foram removidas leituras de interior de oferta e adicionadas informacoes de endereco e entorno."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-dom-alfonso-balneario-camboriu-centro-4-quartos-4-garagens-venda-ref-972/",
+        "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-dom-alfonso-balneario-camboriu-centro-4-quartos-4-garagens-venda-ref-115/",
+        "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-dom-alfonso-balneario-camboriu-centro-4-quartos-4-garagens-venda-ref-106/",
+        "https://tonadri.com.br/imovel/apartamento-frente-mar-venda-ed-dom-alfonso-balneario-camboriu-centro-4-dormitorios-4-suites--AP0404_TONADR",
+        "https://bc.imobiliariaconexao.com.br/imovel/venda/apartamento/balneario-camboriu/centro/1541",
+        "https://www.invictaimoveisbc.com.br/detalhes-imovel/419-apartamento-alto-padrao-venda-centro-balneario-camboriu-sc.html"
+      ]
+    },
+    {
+      "slug": "domo",
+      "hero_image": "https://domo.construtoratalita.com.br/wp-content/uploads/2023/03/DOMO-TALITA-CONSTRUTORA-BANNER-02.jpg",
+      "description": "O Domo foi revisado como empreendimento da Construtora Talita na Praia Brava, Itajai. A pagina oficial posiciona o DOMO na Avenida Jose Medeiros Vieira, e a MySide informa o numero 796, com entrega em agosto de 2025 e plantas de 169, 212 e 261 m2. A Imobille descreve o edificio em quadra mar, com tres suites e projeto voltado a elegancia, espaco e localizacao privilegiada. A curadoria agora usa imagens oficiais de fachada, paisagismo, acesso, hall e ambientes comuns do empreendimento.",
+      "seo_description": "Conheca o Domo, Construtora Talita na Praia Brava, Itajai, com projeto smart em quadra mar.",
+      "gallery": [
+        {
+          "title": "Domo - fachada oficial",
+          "category": "Fachada",
+          "image": "https://domo.construtoratalita.com.br/wp-content/uploads/2023/03/DOMO-TALITA-CONSTRUTORA-BANNER-02.jpg",
+          "source_url": "https://domo.construtoratalita.com.br/",
+          "source_label": "Construtora Talita"
+        },
+        {
+          "title": "Domo - fachada noturna",
+          "category": "Fachada",
+          "image": "https://domo.construtoratalita.com.br/wp-content/uploads/2023/03/DOMO-TALITA-CONSTRUTORA-BANNER-03.jpg",
+          "source_url": "https://domo.construtoratalita.com.br/",
+          "source_label": "Construtora Talita"
+        },
+        {
+          "title": "Domo - piscina e deck",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/090620251716481106-1749500208.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edifico-domo-na-praia-brava-itajai-EM23126",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Domo - paisagismo externo",
+          "category": "Lazer",
+          "image": "https://cdn.imoview.com.br/bryann/Imoveis/5537/9alev-1650304142337-2b7ef532-9b0b-47c7-ae0a-dd02587f4055-1749562726.jpeg?1761776957",
+          "source_url": "https://felicitanegocios.com.br/imovel/5537/apartamento-4-quartos-praia-brava-itajai/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Domo - hall principal",
+          "category": "Acesso",
+          "image": "https://cdn.imoview.com.br/bryann/Imoveis/5537/gqfgo-1649783560714-1d6ebf39-cebf-4176-b951-3d44ecb7b108-1749562726.jpg?1761776957",
+          "source_url": "https://felicitanegocios.com.br/imovel/5537/apartamento-4-quartos-praia-brava-itajai/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Domo - lounge social",
+          "category": "Social",
+          "image": "https://cdn.imoview.com.br/bryann/Imoveis/5537/g8o2j-1649783560344-713cbe9e-8701-40bc-a09e-f2f4fd63b69a-1749562726.jpg?1761776957",
+          "source_url": "https://felicitanegocios.com.br/imovel/5537/apartamento-4-quartos-praia-brava-itajai/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Domo - pergolado externo",
+          "category": "Gourmet",
+          "image": "https://cdn.imoview.com.br/bryann/Imoveis/5537/32qv2-1650304142256-909db5f9-ca5b-4a29-b5c7-37ff2f964145-1749562726.jpg?1761776957",
+          "source_url": "https://felicitanegocios.com.br/imovel/5537/apartamento-4-quartos-praia-brava-itajai/",
+          "source_label": "Felicita Negocios"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Praia Brava, Itajai",
+          "description": "A pagina oficial e a MySide posicionam o Domo na Avenida Jose Medeiros Vieira, Praia Brava."
+        },
+        {
+          "icon": "Cpu",
+          "title": "Projeto smart",
+          "description": "A comunicacao oficial apresenta o Domo como empreendimento smart na Praia Brava."
+        },
+        {
+          "icon": "Waves",
+          "title": "Quadra mar",
+          "description": "A Imobille descreve o empreendimento em quadra mar, com acesso privilegiado a Praia Brava."
+        }
+      ],
+      "differentials": [
+        "Hero substituido por fachada oficial da Construtora Talita.",
+        "Galeria usa fachada, piscina, paisagismo, hall e areas sociais do empreendimento.",
+        "Descricao adiciona endereco, entrega, metragens de referencia e posicionamento smart."
+      ],
+      "faq": [
+        {
+          "question": "Quem e a construtora do Domo?",
+          "answer": "A pagina oficial do empreendimento e da Construtora Talita."
+        },
+        {
+          "question": "Onde fica o Domo?",
+          "answer": "A MySide informa Avenida Jose Medeiros Vieira, 796, Praia Brava, Itajai."
+        },
+        {
+          "question": "Quando foi prevista a entrega?",
+          "answer": "A MySide informa entrega em agosto de 2025."
+        },
+        {
+          "question": "O que foi corrigido nas imagens?",
+          "answer": "A galeria passou a priorizar imagens oficiais de fachada, lazer, hall e paisagismo do empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/imovel/cobertura-no-edificio-domo-itajai-praia-brava-4-quartos-4-garagens-venda-ref-91/",
+        "https://domo.construtoratalita.com.br/",
+        "https://www.imobillenegocios.com.br/empreendimento/edifico-domo-na-praia-brava-itajai-EM23126",
+        "https://myside.com.br/apartamento-venda-domo-itajai-sc",
+        "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-domo-itajai-praia-brava-3-quartos-3-garagens-venda-ref-918/",
+        "https://felicitanegocios.com.br/imovel/5537/apartamento-4-quartos-praia-brava-itajai/"
+      ]
+    },
+    {
+      "slug": "dubai-tower-residence",
+      "hero_image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_339_22022_1733_200526.jpg",
+      "description": "O Dubai Tower Residence foi revisado como empreendimento de alto padrao em Meia Praia, Itapema. A Imobiliaria Versatil informa endereco na Rua 264, 52, proximo a Avenida Nereu Ramos e ao McDonalds, e identifica a Du Art Empreendimentos como responsavel. A Imobille descreve plantas de 187 a 229 m2, ate quatro suites, master com hidromassagem, living, sacada com churrasqueira e ate tres vagas. Fontes externas destacam arquitetura contemporanea, pele de vidro e localizacao junto ao eixo principal de Itapema. A galeria agora usa fachada, lobby e circulacoes do edificio.",
+      "seo_description": "Conheca o Dubai Tower Residence, em Meia Praia, Itapema, com fachada em pele de vidro e alto padrao.",
+      "gallery": [
+        {
+          "title": "Dubai Tower - fachada principal",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_339_22022_1733_200526.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/dubai-tower-residence/itapema/meia-praia/339",
+          "source_label": "Imobiliaria Versatil"
+        },
+        {
+          "title": "Dubai Tower - torre em pele de vidro",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/26112024114708969-1732632428.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-dubai-tower-residence-EM31448",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Dubai Tower - lobby",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/photoshop-novo-1-copia0047-1732632414.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-dubai-tower-residence-EM31448",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Dubai Tower - fachada vertical",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/photoshop-novo-1-copia0048-1732632415.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-dubai-tower-residence-EM31448",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Dubai Tower - base do edificio",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_339_22023_1733_200526.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/dubai-tower-residence/itapema/meia-praia/339",
+          "source_label": "Imobiliaria Versatil"
+        },
+        {
+          "title": "Dubai Tower - hall decorado",
+          "category": "Acesso",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_339_22024_1733_200526.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/dubai-tower-residence/itapema/meia-praia/339",
+          "source_label": "Imobiliaria Versatil"
+        },
+        {
+          "title": "Dubai Tower - circulacao social",
+          "category": "Social",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_339_22025_1733_200526.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/dubai-tower-residence/itapema/meia-praia/339",
+          "source_label": "Imobiliaria Versatil"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Meia Praia, Itapema",
+          "description": "A Versatil informa Rua 264, 52, proxima a Avenida Nereu Ramos e ao eixo de servicos da Meia Praia."
+        },
+        {
+          "icon": "Building2",
+          "title": "Du Art Empreendimentos",
+          "description": "Versatil e Skyscraper Center associam o Dubai Tower Residence a Du Art Empreendimentos."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Alto padrao em pele de vidro",
+          "description": "CRI e demais fontes destacam arquitetura contemporanea, pele de vidro e acabamento refinado."
+        }
+      ],
+      "differentials": [
+        "Hero substituido por fachada externa do Dubai Tower Residence.",
+        "Galeria remove interiores e mantem fachada, lobby e circulacao social.",
+        "Descricao adiciona endereco, incorporadora, areas de referencia e diferenciais arquitetonicos."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Dubai Tower Residence?",
+          "answer": "A Imobiliaria Versatil informa Rua 264, 52, em Meia Praia, Itapema."
+        },
+        {
+          "question": "Quem e a incorporadora?",
+          "answer": "Versatil e Skyscraper Center associam o empreendimento a Du Art Empreendimentos."
+        },
+        {
+          "question": "Quais caracteristicas aparecem nas fontes?",
+          "answer": "Plantas amplas, ate quatro suites, sacada com churrasqueira, fachada em pele de vidro e alto padrao."
+        },
+        {
+          "question": "O que mudou nas imagens?",
+          "answer": "A galeria passou a usar fachada, lobby e circulacoes do edificio, evitando ambientes internos da oferta."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/imovel/apartamento-duplex-no-edificio-dubai-tower-residence-em-meia-praia-itapemasc-5-quartos-4-garagens-venda-ref-2276/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-dubai-tower-residence-EM31448",
+        "https://imobiliariaversatil.com.br/edificios/dubai-tower-residence/itapema/meia-praia/339",
+        "https://www.vitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/dubai-tower-residence/4536",
+        "https://www.imobiliariacri.com.br/imovel/cri-day-apartamento-com-4-suites-no-dubai-tower-na-meia-praia-em-itapema-IM00502",
+        "https://tottalimoveis.com.br/imovel/venda-apartamentos-04-dorm-em-itapema/dubai-tower-residence/1786",
+        "https://www.skyscrapercenter.com/building/dubai-tower-residence/40588"
+      ]
+    },
+    {
+      "slug": "ed-brava-sixteen",
+      "hero_image": "https://cdn.imoview.com.br/bryann/Condominios/651/1679928191531-963e2db8-a00d-4e15-b4cf-8f9b5b8c1a09.jpg?1722974537",
+      "description": "O Brava Sixteen foi revisado como empreendimento na Praia Brava, Itajai, com endereco informado pela Felicita na Rua Conselheiro Julio Kumm, 612. Litoral Vertical e Lemur apresentam o edificio como projeto de alto padrao, com lazer no rooftop e estrutura comum completa. As fontes citam academia, brinquedoteca, espaco gourmet, piscina adulta, sala de jogos, rooftop gourmet, hall decorado, elevador inteligente, cubo energetico, armarios delivery e pe-direito alto. A galeria foi trocada para fachada, fitness, gourmet, rooftop, piscina, lobby e spa.",
+      "seo_description": "Conheca o Brava Sixteen, na Praia Brava, Itajai, com rooftop, piscina, gourmet e academia.",
+      "gallery": [
+        {
+          "title": "Brava Sixteen - fachada noturna",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/651/1679928191531-963e2db8-a00d-4e15-b4cf-8f9b5b8c1a09.jpg?1722974537",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/651/brava-sixteen",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Brava Sixteen - fachada vertical",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/651/1679928190481-e850d87e-bdfc-4250-8d09-e19c77959d6e.jpg?1722974537",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/651/brava-sixteen",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Brava Sixteen - academia",
+          "category": "Fitness",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/651/1679928188478-2a6d5c5a-d7e7-4ea8-b64f-abcd7dd41c41.jpg?1722974537",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/651/brava-sixteen",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Brava Sixteen - gourmet",
+          "category": "Gourmet",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/651/1679928193853-1669dd90-6023-4f0a-a4c0-e52fa1c33a6e.jpg?1722974537",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/651/brava-sixteen",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Brava Sixteen - rooftop gourmet",
+          "category": "Rooftop",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/651/1679928219386-720ec810-539d-4bf7-879c-e8537beaacd8.jpg?1722974537",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/651/brava-sixteen",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Brava Sixteen - piscina",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/651/1679928204734-c3ddd8b8-99ef-4757-806e-bc5285978623.jpg?1722974537",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/651/brava-sixteen",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Brava Sixteen - hall decorado",
+          "category": "Acesso",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/651/1679928213299-66f87c97-e033-4d28-85f7-65ce1836dd6e.jpg?1722974537",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/651/brava-sixteen",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Brava Sixteen - spa",
+          "category": "Bem-estar",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/651/1679928215321-31d91bc6-197c-441c-a813-d6341d901598.jpg?1722974537",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/651/brava-sixteen",
+          "source_label": "Felicita Negocios"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Praia Brava, Itajai",
+          "description": "A Felicita informa endereco na Rua Conselheiro Julio Kumm, 612, Praia Brava."
+        },
+        {
+          "icon": "Umbrella",
+          "title": "Rooftop gourmet",
+          "description": "Lemur e Felicita publicam rooftop gourmet, piscina e areas sociais do empreendimento."
+        },
+        {
+          "icon": "Gauge",
+          "title": "Infraestrutura moderna",
+          "description": "As fontes citam elevador inteligente, cubo energetico, armarios delivery e pe-direito alto."
+        }
+      ],
+      "differentials": [
+        "Hero substituido por fachada noturna do Brava Sixteen.",
+        "Galeria usa academia, gourmet, rooftop, piscina, hall e spa do empreendimento.",
+        "Descricao adiciona endereco, lazer no rooftop e infraestrutura operacional citada nas fontes."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Brava Sixteen?",
+          "answer": "A Felicita informa Rua Conselheiro Julio Kumm, 612, Praia Brava, Itajai."
+        },
+        {
+          "question": "Quais areas comuns foram confirmadas?",
+          "answer": "Academia, brinquedoteca, espaco gourmet, piscina, jogos, rooftop gourmet, hall e spa aparecem nas fontes."
+        },
+        {
+          "question": "Quais diferenciais operacionais aparecem?",
+          "answer": "Elevador inteligente, cubo energetico, armarios delivery e pe-direito alto sao citados pela Lemur."
+        },
+        {
+          "question": "O que mudou na galeria?",
+          "answer": "Fotos internas foram trocadas por fachada e areas comuns publicadas em fontes de empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-brava-sixteen-itajai-balneario-santa-clara-3-quartos-2-garagens-venda-ref-1506/",
+        "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/edificio-brava-sixteen/",
+        "https://felicitanegocios.com.br/empreendimento/651/brava-sixteen",
+        "https://lemur.net.br/apartamento-no-edificio-brava-sixteen-em-itajai-sc",
+        "https://www.mercattobrava.com.br/imovel/apartamento-novo-com-03-suites-13222-m-a-venda-no-ed-brava-sixteen-residences-na-praia-brava-em-itajai-sc/8094",
+        "https://www.chavesnamao.com.br/imovel/apartamento-para-alugar-3-quartos-com-garagem-sc-itajai-praia-brava-98m2-RS13000/id-38351360/"
+      ]
+    },
+    {
+      "slug": "ed-le-majestic",
+      "hero_image": "https://cdn.imoview.com.br/bryann/Condominios/33/img-53.jpg?1739449156",
+      "description": "O Ed. Le Majestic foi revisado como empreendimento da FG Empreendimentos na Avenida Brasil, 3551, Centro de Balneario Camboriu, conforme Felicita. A Imobille e o Litoral Vertical descrevem area de lazer completa, com duas areas de festas, gourmet, piscina adulto e infantil, quadra poliesportiva, sauna seca e umida, academia, massagem, jogos, brinquedoteca e cinema. O Grupo ODP registra a entrega pela FG e destaca o edificio como maior area de lazer da Avenida Brasil, com 37 pavimentos, mais de 33 mil m2 e 99 unidades. A galeria agora usa fachada, piscina, hall e lazer comum.",
+      "seo_description": "Conheca o Ed. Le Majestic, FG na Avenida Brasil, Centro de Balneario Camboriu, com lazer completo.",
+      "gallery": [
+        {
+          "title": "Le Majestic - fachada Avenida Brasil",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/33/img-53.jpg?1739449156",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/33/le-majestic/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Le Majestic - piscina central",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/le-majestic-18-1680790364.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-majestic-EM87783",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Le Majestic - hall principal",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2023/le-majestic-26-1680789901.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-majestic-EM87783",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Le Majestic - lobby social",
+          "category": "Social",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2023/le-majestic-27-1680789901.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-majestic-EM87783",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Le Majestic - deck da piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2023/le-majestic-19-1680789898.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-majestic-EM87783",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Le Majestic - circulacao externa",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2023/le-majestic-14-1680789895.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-majestic-EM87783",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Le Majestic - playground",
+          "category": "Kids",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2023/le-majestic-12-1680789894.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-majestic-EM87783",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "FG Empreendimentos",
+          "description": "Felicita e Grupo ODP associam o Le Majestic a FG Empreendimentos."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Avenida Brasil, Centro",
+          "description": "A Felicita informa endereco na Avenida Brasil, 3551, Centro de Balneario Camboriu."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Grande area de lazer",
+          "description": "Grupo ODP destaca o empreendimento como maior area de lazer da Avenida Brasil na entrega pela FG."
+        }
+      ],
+      "differentials": [
+        "Hero substituido por fachada do Le Majestic publicada pela Felicita.",
+        "Galeria usa piscina, hall, lobby, deck e playground do empreendimento.",
+        "Descricao adiciona construtora, endereco, porte do edificio e lazer completo confirmado."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Le Majestic?",
+          "answer": "A Felicita informa Avenida Brasil, 3551, Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Quem assina o empreendimento?",
+          "answer": "Felicita e Grupo ODP associam o Le Majestic a FG Empreendimentos."
+        },
+        {
+          "question": "Quais areas comuns foram confirmadas?",
+          "answer": "Piscinas, gourmet, festas, quadra, sauna, academia, massagem, jogos, brinquedoteca e cinema."
+        },
+        {
+          "question": "Qual dado de porte foi encontrado?",
+          "answer": "O Grupo ODP cita 37 pavimentos, mais de 33 mil m2 e 99 unidades na ficha tecnica."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/imovel/apartamento-no-ed-le-majestic-4-quartos-4-garagens-aluguel-ref-2108/",
+        "https://felicitanegocios.com.br/empreendimento/33/le-majestic/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-le-majestic-EM87783",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-le-majestic/",
+        "https://grupoodp.com.br/en/conheca-a-ficha-tecnica-do-edificio-maior-area-de-lazer-da-avenida-brasil-em-balneario-camboriu/",
+        "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-le-majestic-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-41/"
+      ]
+    }
+  ]
+}

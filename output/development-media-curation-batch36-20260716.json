@@ -1,0 +1,1394 @@
+{
+  "batch_id": "development-media-curation-batch36-20260716",
+  "generated_at": "2026-07-16T17:35:00.000Z",
+  "notes": [
+    "Lote 36 P0 auditado com foco em midia real de empreendimento/condominio.",
+    "Adolfo Blase permanece como pendencia 35A por falta de foto publica confiavel de fachada/areas comuns.",
+    "Le Jardim Residence foi pesquisado, mas ficou pendente porque as imagens encontradas em fonte externa estavam identificadas como Doha Tower ou misturavam Le Jardim/Le Jardin com enderecos divergentes.",
+    "Lisboa e Lumen Tower receberam galerias menores para evitar imagens de outros predios detectadas nas fontes."
+  ],
+  "skipped": [
+    {
+      "slug": "le-jardim-residence",
+      "reason": "Fontes abertas misturam Le Jardim/Le Jardin e enderecos divergentes; imagens da Potencial estavam identificadas como Doha Tower. Nao aplicado para evitar troca por imagem errada.",
+      "sources_checked": [
+        "https://www.guilhermepilger.com/imovel/apartamento-no-ed-dolce-vita-em-itapema-centro-4-quartos-3-garagens-venda-ref-1301/",
+        "https://www.potencialimoveis.com.br/empreendimento/le-jardim-residence-CO151832",
+        "https://litoralvertical.com/pre-lancamento/itapema/apartamentos/edificio-le-jardim-residence/",
+        "https://www.dallo.com.br/empreendimento/le-jardin/",
+        "https://myside.com.br/apartamento-venda-le-jardin-itapema-sc"
+      ]
+    }
+  ],
+  "items": [
+    {
+      "slug": "las-salinas-residences",
+      "hero_image": "https://b5.casteldigital.com.br/prconsultor/ig/il/imoveis/183/1_orla_sal_fachada_c2_blue_pf-17618357793978.jpg",
+      "description": "O Las Salinas Residences foi revisado como empreendimento da Orla Construtora no Centro de Balneario Camboriu, com endereco de referencia na Rua 2870, 280. A Felicita informa plantas de 173,6 m2 a 353,74 m2, quatro suites e tres a quatro vagas. Fontes de lancamento registram torre unica, 27 a 32 pavimentos conforme ficha consultada, duas residencias por andar em parte da comunicacao, entrega prevista para marco de 2027 e lazer com piscina adulto e infantil, academia, festas, gourmet, playground, brinquedoteca, sauna, jogos, pet place, bicicletario, coworking e hall decorado. A galeria passa a mostrar fachadas e areas comuns do empreendimento.",
+      "seo_description": "Conheca o Las Salinas Residences no Centro de Balneario Camboriu, com fachadas, lazer e dados do empreendimento.",
+      "gallery": [
+        {
+          "title": "Las Salinas Residences - fachada principal",
+          "category": "Fachada",
+          "image": "https://b5.casteldigital.com.br/prconsultor/ig/il/imoveis/183/1_orla_sal_fachada_c2_blue_pf-17618357793978.jpg",
+          "source_url": "https://www.prconsultor.com.br/imovel/apartamento-no-edificio-las-salinas-residences-balneario-camboriu-centro-4-quartos-3-garagens-venda-ref-183/",
+          "source_label": "PR Consultor"
+        },
+        {
+          "title": "Las Salinas Residences - torre",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/538/3c1c935af9b161df12701ef23cb85275ed37471136d78666b32dec567b088398.jpg?1709921553",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/538/las-salinas-residences/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Las Salinas Residences - fachada noturna",
+          "category": "Fachada",
+          "image": "https://www.brianreis.com.br/wp-content/uploads/2025/04/las-salinas.webp",
+          "source_url": "https://www.lancamentosembalneario.com.br/lancamentos/las-salinas-residences/",
+          "source_label": "Lancamentos em Balneario"
+        },
+        {
+          "title": "Las Salinas Residences - perspectiva externa",
+          "category": "Fachada",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/06/RV-For-You5.jpg",
+          "source_url": "https://www.lancamentosembalneario.com.br/lancamentos/las-salinas-residences/",
+          "source_label": "Lancamentos em Balneario"
+        },
+        {
+          "title": "Las Salinas Residences - espaco gourmet",
+          "category": "Gourmet",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/06/RV-For-You12.jpg",
+          "source_url": "https://www.lancamentosembalneario.com.br/lancamentos/las-salinas-residences/",
+          "source_label": "Lancamentos em Balneario"
+        },
+        {
+          "title": "Las Salinas Residences - eventos",
+          "category": "Eventos",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/06/RV-For-You13.jpg",
+          "source_url": "https://www.lancamentosembalneario.com.br/lancamentos/las-salinas-residences/",
+          "source_label": "Lancamentos em Balneario"
+        },
+        {
+          "title": "Las Salinas Residences - lounge",
+          "category": "Lazer",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/06/RV-For-You10.jpg",
+          "source_url": "https://www.lancamentosembalneario.com.br/lancamentos/las-salinas-residences/",
+          "source_label": "Lancamentos em Balneario"
+        },
+        {
+          "title": "Las Salinas Residences - garagem eletrificada",
+          "category": "Garagem",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/06/RV-For-You15.jpg",
+          "source_url": "https://www.lancamentosembalneario.com.br/lancamentos/las-salinas-residences/",
+          "source_label": "Lancamentos em Balneario"
+        },
+        {
+          "title": "Las Salinas Residences - piscina",
+          "category": "Piscina",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/06/RV-For-You4.jpg",
+          "source_url": "https://www.lancamentosembalneario.com.br/lancamentos/las-salinas-residences/",
+          "source_label": "Lancamentos em Balneario"
+        },
+        {
+          "title": "Las Salinas Residences - fitness",
+          "category": "Fitness",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/06/RV-For-You7.jpg",
+          "source_url": "https://www.lancamentosembalneario.com.br/lancamentos/las-salinas-residences/",
+          "source_label": "Lancamentos em Balneario"
+        },
+        {
+          "title": "Las Salinas Residences - lavanderia compartilhada",
+          "category": "Servicos",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/06/RV-For-You9.jpg",
+          "source_url": "https://www.lancamentosembalneario.com.br/lancamentos/las-salinas-residences/",
+          "source_label": "Lancamentos em Balneario"
+        },
+        {
+          "title": "Las Salinas Residences - piscina externa",
+          "category": "Piscina",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/06/RV-For-You3.jpg",
+          "source_url": "https://www.lancamentosembalneario.com.br/lancamentos/las-salinas-residences/",
+          "source_label": "Lancamentos em Balneario"
+        },
+        {
+          "title": "Las Salinas Residences - base iluminada",
+          "category": "Fachada",
+          "image": "https://b5.casteldigital.com.br/prconsultor/ig/il/imoveis/183/3_orla_sal_fachada_c8_blue_c-1761835779398.jpg",
+          "source_url": "https://www.prconsultor.com.br/imovel/apartamento-no-edificio-las-salinas-residences-balneario-camboriu-centro-4-quartos-3-garagens-venda-ref-183/",
+          "source_label": "PR Consultor"
+        },
+        {
+          "title": "Las Salinas Residences - implantacao noturna",
+          "category": "Fachada",
+          "image": "https://b5.casteldigital.com.br/prconsultor/ig/il/imoveis/183/5_orla_sal_fotomontagem_735_pf-1761835779398.jpg",
+          "source_url": "https://www.prconsultor.com.br/imovel/apartamento-no-edificio-las-salinas-residences-balneario-camboriu-centro-4-quartos-3-garagens-venda-ref-183/",
+          "source_label": "PR Consultor"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro de Balneario Camboriu",
+          "description": "Felicita localiza o empreendimento na Rua 2870, 280, Centro."
+        },
+        {
+          "icon": "Ruler",
+          "title": "Plantas amplas",
+          "description": "A fonte registra 173,6 m2 a 353,74 m2, quatro suites e tres a quatro vagas."
+        },
+        {
+          "icon": "Waves",
+          "title": "Proximo da praia",
+          "description": "A comunicacao de lancamento posiciona o projeto a cerca de 450 metros da Praia Central."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer completo",
+          "description": "As fontes citam piscina, academia, festas, gourmet, playground, brinquedoteca, sauna, jogos, pet place e coworking."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Projeto Orla Construtora",
+          "description": "A pagina de lancamento associa o Las Salinas Residences a Orla Construtora."
+        },
+        {
+          "title": "Galeria realinhada",
+          "description": "A curadoria substitui imagens de oferta por fachada, piscina, fitness e areas comuns."
+        },
+        {
+          "title": "Ficha mais completa",
+          "description": "O texto agora apresenta metragens, vagas, endereco, lazer e previsao de entrega com fontes externas."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Las Salinas Residences?",
+          "answer": "A Felicita informa endereco na Rua 2870, 280, Centro, Balneario Camboriu - SC."
+        },
+        {
+          "question": "Quem e a construtora?",
+          "answer": "A fonte Lancamentos em Balneario associa o projeto a Orla Construtora."
+        },
+        {
+          "question": "Qual e o perfil das plantas?",
+          "answer": "Felicita informa quatro suites, 173,6 m2 a 353,74 m2 e tres a quatro vagas."
+        },
+        {
+          "question": "Quais areas de lazer foram revisadas?",
+          "answer": "Piscina, academia, festas, gourmet, playground, brinquedoteca, sauna, jogos, pet place, bicicletario e coworking."
+        }
+      ],
+      "sources": [
+        "https://felicitanegocios.com.br/empreendimento/538/las-salinas-residences/",
+        "https://www.lancamentosembalneario.com.br/lancamentos/las-salinas-residences/",
+        "https://www.prconsultor.com.br/imovel/apartamento-no-edificio-las-salinas-residences-balneario-camboriu-centro-4-quartos-3-garagens-venda-ref-183/"
+      ]
+    },
+    {
+      "slug": "le-grand-parc-residence",
+      "hero_image": "https://static.kazullo.com.br/234/photos/properties/2341013/hres/FACHADA-1_fhd.webp?v=20260128054752",
+      "description": "O Le Grand Parc Residence foi revisado como empreendimento Pasqualotto no Centro de Itapema, com endereco informado pela Versatil na Rua 135, numero 137, em frente a Praca da Concha. A mesma fonte classifica o edificio como usado e lista estrutura de condominio com academia, brinquedoteca, cinema, circuito interno de cameras, dois elevadores, gourmet, fitness, guarita, hall decorado, ofuro, piscinas adulto, infantil, aquecida e coberta, playground, portaria 24h, jogos, festas, sauna, convivencia e zeladoria. A nova galeria usa fachada e areas comuns verificadas.",
+      "seo_description": "Conheca o Le Grand Parc Residence no Centro de Itapema, com fachada, hall, brinquedoteca e lazer do condominio.",
+      "gallery": [
+        {
+          "title": "Le Grand Parc Residence - fachada",
+          "category": "Fachada",
+          "image": "https://static.kazullo.com.br/234/photos/properties/2341013/hres/FACHADA-1_fhd.webp?v=20260128054752",
+          "source_url": "https://conceitoimoveissc.com.br/imovel/2341013.001/apartamento-padrao-4-dormitorios-centro-itapema-SC",
+          "source_label": "Conceito Imoveis SC"
+        },
+        {
+          "title": "Le Grand Parc Residence - fachada frontal",
+          "category": "Fachada",
+          "image": "https://static.kazullo.com.br/234/photos/properties/2341013/lres/FACHADA-1_card.webp",
+          "source_url": "https://conceitoimoveissc.com.br/imovel/2341013.001/apartamento-padrao-4-dormitorios-centro-itapema-SC",
+          "source_label": "Conceito Imoveis SC"
+        },
+        {
+          "title": "Le Grand Parc Residence - brinquedoteca",
+          "category": "Kids",
+          "image": "https://static.kazullo.com.br/234/photos/properties/2341013/hres/BRINQUEDOTECA-1_fhd.webp?v=20260128054752",
+          "source_url": "https://conceitoimoveissc.com.br/imovel/2341013.001/apartamento-padrao-4-dormitorios-centro-itapema-SC",
+          "source_label": "Conceito Imoveis SC"
+        },
+        {
+          "title": "Le Grand Parc Residence - churrasqueira",
+          "category": "Gourmet",
+          "image": "https://static.kazullo.com.br/234/photos/properties/2341013/hres/CHURRASQUEIRA-2_fhd.webp?v=20260128054752",
+          "source_url": "https://conceitoimoveissc.com.br/imovel/2341013.001/apartamento-padrao-4-dormitorios-centro-itapema-SC",
+          "source_label": "Conceito Imoveis SC"
+        },
+        {
+          "title": "Le Grand Parc Residence - gourmet",
+          "category": "Gourmet",
+          "image": "https://static.kazullo.com.br/234/photos/properties/2341013/hres/CHURRASQUEIRA_fhd.webp?v=20260128054752",
+          "source_url": "https://conceitoimoveissc.com.br/imovel/2341013.001/apartamento-padrao-4-dormitorios-centro-itapema-SC",
+          "source_label": "Conceito Imoveis SC"
+        },
+        {
+          "title": "Le Grand Parc Residence - escadaria do hall",
+          "category": "Hall",
+          "image": "https://static.kazullo.com.br/234/photos/properties/2341013/hres/ESCADARIA-HALL_fhd.webp?v=20260128054752",
+          "source_url": "https://conceitoimoveissc.com.br/imovel/2341013.001/apartamento-padrao-4-dormitorios-centro-itapema-SC",
+          "source_label": "Conceito Imoveis SC"
+        },
+        {
+          "title": "Le Grand Parc Residence - hall",
+          "category": "Hall",
+          "image": "https://static.kazullo.com.br/234/photos/properties/2341013/hres/HALL_fhd.webp?v=20260128054752",
+          "source_url": "https://conceitoimoveissc.com.br/imovel/2341013.001/apartamento-padrao-4-dormitorios-centro-itapema-SC",
+          "source_label": "Conceito Imoveis SC"
+        },
+        {
+          "title": "Le Grand Parc Residence - hall decorado",
+          "category": "Hall",
+          "image": "https://static.kazullo.com.br/234/photos/properties/2341013/hres/HALL2_fhd.webp?v=20260128054752",
+          "source_url": "https://conceitoimoveissc.com.br/imovel/2341013.001/apartamento-padrao-4-dormitorios-centro-itapema-SC",
+          "source_label": "Conceito Imoveis SC"
+        },
+        {
+          "title": "Le Grand Parc Residence - lobby",
+          "category": "Hall",
+          "image": "https://static.kazullo.com.br/234/photos/properties/2341013/hres/HALL3_fhd.webp?v=20260128054752",
+          "source_url": "https://conceitoimoveissc.com.br/imovel/2341013.001/apartamento-padrao-4-dormitorios-centro-itapema-SC",
+          "source_label": "Conceito Imoveis SC"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Em frente a Praca da Concha",
+          "description": "A Versatil informa endereco na Rua 135, 137, Centro de Itapema."
+        },
+        {
+          "icon": "Award",
+          "title": "Pasqualotto Construtora",
+          "description": "A ficha da Versatil associa o empreendimento a Pasqualotto Construtora."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer variado",
+          "description": "A fonte cita piscinas, cinema, brinquedoteca, gourmet, fitness, jogos, festas, sauna e convivencia."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Infraestrutura de seguranca",
+          "description": "Guarita, portaria 24h, circuito interno de cameras e porteiro eletronico aparecem na ficha."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Centro de Itapema",
+          "description": "A localizacao combina vida urbana, servicos e acesso rapido a praia central."
+        },
+        {
+          "title": "Areas comuns revisadas",
+          "description": "A galeria prioriza fachada, hall e lazer, evitando imagens internas de oferta."
+        },
+        {
+          "title": "Condominio consolidado",
+          "description": "A ficha externa classifica o edificio como usado, com estrutura de condominio completa."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Le Grand Parc Residence?",
+          "answer": "A Versatil informa Rua 135, numero 137, Centro, Itapema - SC."
+        },
+        {
+          "question": "Qual construtora esta associada ao edificio?",
+          "answer": "A ficha consultada associa o empreendimento a Pasqualotto Construtora."
+        },
+        {
+          "question": "Quais areas comuns aparecem nas fontes?",
+          "answer": "Piscinas, academia, cinema, brinquedoteca, gourmet, hall, playground, jogos, festas e sauna."
+        },
+        {
+          "question": "O que foi corrigido?",
+          "answer": "Hero e galeria foram trocados para fotos de fachada e areas comuns do condominio."
+        }
+      ],
+      "sources": [
+        "https://imobiliariaversatil.com.br/edificios/le-grand-parc-residence/itapema/centro/216",
+        "https://conceitoimoveissc.com.br/imovel/2341013.001/apartamento-padrao-4-dormitorios-centro-itapema-SC",
+        "https://www.vivareal.com.br/condominio/le-grand-parc-residence-centro-id-20d07fd8-acdf/"
+      ]
+    },
+    {
+      "slug": "le-majestic-residence",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/le-majestic-18-1680790364.webp",
+      "description": "O Le Majestic Residence foi revisado como empreendimento FG em Balneario Camboriu, com endereco informado pela Imobille na Avenida Brasil, 3551. A fonte registra quadra mar, plantas de 128 m2 a 365 m2, tres ou cinco dormitorios, tres ou cinco suites e duas ou cinco vagas. A pagina tambem lista lazer com piscina, festas, sauna, brinquedoteca, gourmet, piscina infantil, academia, cinema e massagem, alem de texto editorial destacando mais de 3.000 m2 de entretenimento, hall social, mezanino, espelho d agua, box de praia e acesso para banhistas. A galeria foi refeita com fotos de areas comuns.",
+      "seo_description": "Conheca o Le Majestic Residence na Avenida Brasil, Balneario Camboriu, com lazer e areas comuns do condominio.",
+      "gallery": [
+        {
+          "title": "Le Majestic Residence - piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/le-majestic-18-1680790364.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-majestic-EM87783",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Le Majestic Residence - acesso ao lazer",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/le-majestic-32-1680789903-1703599626.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-majestic-EM87783",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Le Majestic Residence - area externa",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2023/le-majestic-32-1680789903.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-majestic-EM87783",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Le Majestic Residence - hall social",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2023/le-majestic-26-1680789901.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-majestic-EM87783",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Le Majestic Residence - lobby",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2023/le-majestic-27-1680789901.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-majestic-EM87783",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Le Majestic Residence - deck da piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2023/le-majestic-19-1680789898.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-majestic-EM87783",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Le Majestic Residence - piscina externa",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2023/le-majestic-20-1680789898.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-majestic-EM87783",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Le Majestic Residence - piscina elevada",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2023/le-majestic-18-1680789897.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-majestic-EM87783",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Le Majestic Residence - lazer descoberto",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2023/le-majestic-21-1680789899.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-majestic-EM87783",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Le Majestic Residence - terraco",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2023/le-majestic-14-1680789895.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-majestic-EM87783",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Le Majestic Residence - playground",
+          "category": "Playground",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2023/le-majestic-12-1680789894.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-majestic-EM87783",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Le Majestic Residence - convivencia",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2023/le-majestic-17-1680789897.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-majestic-EM87783",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Avenida Brasil, 3551",
+          "description": "A Imobille informa endereco na Avenida Brasil, em Balneario Camboriu."
+        },
+        {
+          "icon": "Waves",
+          "title": "Quadra mar",
+          "description": "A ficha da Imobille posiciona o empreendimento como quadra mar."
+        },
+        {
+          "icon": "Ruler",
+          "title": "128 m2 a 365 m2",
+          "description": "A fonte lista plantas de 128 m2 a 365 m2, com duas a cinco vagas."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer amplo",
+          "description": "A Imobille cita piscina, festas, sauna, brinquedoteca, gourmet, academia, cinema e massagem."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "FG Empreendimentos",
+          "description": "A comunicacao editorial da Imobille associa o Le Majestic a FG Empreendimentos."
+        },
+        {
+          "title": "Area social expressiva",
+          "description": "O texto da fonte destaca mais de 3.000 m2 de entretenimento e areas comuns decoradas."
+        },
+        {
+          "title": "Galeria sem sala comercial",
+          "description": "A auditoria remove o foco de imagens da oferta comercial e usa ambientes do condominio."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Le Majestic Residence?",
+          "answer": "A Imobille informa Avenida Brasil, 3551, Balneario Camboriu - SC."
+        },
+        {
+          "question": "O empreendimento e quadra mar?",
+          "answer": "Sim, a ficha da Imobille classifica o edificio como quadra mar."
+        },
+        {
+          "question": "Quais opcoes de lazer constam na fonte?",
+          "answer": "Piscina, festas, sauna, brinquedoteca, gourmet, piscina infantil, academia, cinema e massagem."
+        },
+        {
+          "question": "Qual foi a correcao visual?",
+          "answer": "A galeria agora mostra areas comuns do edificio, nao a sala comercial cadastrada."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-le-majestic-EM87783",
+        "https://loft.com.br/condominio/condominio-le-majestic-residence-centro-balneario-camboriu-sc/15at3mc"
+      ]
+    },
+    {
+      "slug": "le-portier",
+      "hero_image": "https://cdn.imoview.com.br/bryann/Condominios/166/le-portier-felicita-balneario-camboriu.jpg?1670505656",
+      "description": "O Le Portier foi revisado como empreendimento HPIO em Balneario Camboriu, quadra mar e proximo da praia. A Imobille informa Avenida Brasil, 67, plantas de 151 m2 a 331 m2, tres ou quatro dormitorios, tres ou quatro suites e tres ou quatro vagas. O texto editorial da fonte indica hall social na Rua 2600, acesso pela Rua 2700, entrega em dezembro de 2017, dois apartamentos por andar e lazer com piscina adulto e infantil, festas, academia, spa, cinema, playground, bar ingles, espaco saude e terraco. A nova galeria usa fachada, hall, piscina, gourmet e cinema do empreendimento.",
+      "seo_description": "Conheca o Le Portier em Balneario Camboriu, quadra mar com fachada, hall, piscina, cinema e lazer do condominio.",
+      "gallery": [
+        {
+          "title": "Le Portier - fachada principal",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/166/le-portier-felicita-balneario-camboriu.jpg?1670505656",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/166/le-portier/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Le Portier - acesso externo",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/166/le-portier-felicita-balneario-camboriu-2.jpg?1670505656",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/166/le-portier/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Le Portier - hall social",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/166/le-portier-felicita-balneario-camboriu-7.jpg?1670505656",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/166/le-portier/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Le Portier - entrada decorada",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/166/le-portier-felicita-balneario-camboriu-4.jpg?1670505656",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/166/le-portier/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Le Portier - lobby",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/166/le-portier-felicita-balneario-camboriu-5.jpg?1670505656",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/166/le-portier/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Le Portier - lounge",
+          "category": "Lazer",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/166/le-portier-felicita-balneario-camboriu-6.jpg?1670505656",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/166/le-portier/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Le Portier - lazer externo",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/1510202511195553-1760537995.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-portier-EM13764",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Le Portier - fachada lateral",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-recuperado-1760538324.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-portier-EM13764",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Le Portier - bicicletario",
+          "category": "Servicos",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/f8q834jSbaVrRETHiM7N.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-portier-EM13764",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Le Portier - piscina com vista",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/WE69HumrToLECEx1dku5.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-portier-EM13764",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Le Portier - gourmet",
+          "category": "Gourmet",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/KvXxBj0jVvfbjqg1kCMu.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-portier-EM13764",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Le Portier - cozinha gourmet",
+          "category": "Gourmet",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/e5jXCVbhtA1X4VhOzGcl.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-portier-EM13764",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Le Portier - gourmet da piscina",
+          "category": "Gourmet",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/OA6ZqTsrROvSHbeD0vFR.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-portier-EM13764",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Le Portier - piscina",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/cuD6EFa9GGnLAfHDKtNy.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-portier-EM13764",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Le Portier - piscina externa",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/s4t1GsGoA7WSu7ErQtsP.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-portier-EM13764",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Le Portier - area descoberta",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/1FJ2ik8k7AUk7bVfm7py.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-portier-EM13764",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Le Portier - espelho d agua",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/gFTaDxbsO8JM8aldXwlP.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-portier-EM13764",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Le Portier - deck da piscina",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/bLciJla7iYRNlLKTxDKc.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-portier-EM13764",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Le Portier - cinema",
+          "category": "Cinema",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/wPh8duZUJWzDrtHGnapK.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-portier-EM13764",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Quadra mar",
+          "description": "A Imobille classifica o Le Portier como quadra mar em Balneario Camboriu."
+        },
+        {
+          "icon": "Ruler",
+          "title": "151 m2 a 331 m2",
+          "description": "A fonte informa plantas de 151 m2 a 331 m2, com tres ou quatro suites."
+        },
+        {
+          "icon": "Building2",
+          "title": "Dois por andar",
+          "description": "O texto editorial da Imobille informa apenas dois apartamentos por andar."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer familiar",
+          "description": "Piscinas, festas, academia, spa, cinema, playground, bar ingles, espaco saude e terraco aparecem nas fontes."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "HPIO em Balneario Camboriu",
+          "description": "A Imobille associa o empreendimento a HPIO Empreendimentos."
+        },
+        {
+          "title": "Entrega consolidada",
+          "description": "O texto editorial registra entrega em dezembro de 2017."
+        },
+        {
+          "title": "Imagem do condominio",
+          "description": "A nova galeria substitui fotos internas por fachada e espacos coletivos."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Le Portier?",
+          "answer": "A Imobille informa Avenida Brasil, 67; o texto editorial cita hall social na Rua 2600."
+        },
+        {
+          "question": "Quando foi entregue?",
+          "answer": "A Imobille registra entrega em dezembro de 2017."
+        },
+        {
+          "question": "Quais areas comuns foram usadas?",
+          "answer": "Fachada, hall, piscina, gourmet, bicicletario, lazer externo e cinema."
+        },
+        {
+          "question": "Qual e o perfil das plantas?",
+          "answer": "A fonte informa 151 m2 a 331 m2, tres ou quatro suites e tres ou quatro vagas."
+        }
+      ],
+      "sources": [
+        "https://felicitanegocios.com.br/empreendimento/166/le-portier/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-le-portier-EM13764",
+        "https://loft.com.br/condominio/condominio-le-portier-residence-centro-balneario-camboriu-sc/6vo1f7"
+      ]
+    },
+    {
+      "slug": "le-visage-divinite",
+      "hero_image": "https://cdn.imoview.com.br/bryann/Condominios/309/lvd-a.jpeg?1689626354",
+      "description": "O Le Visage Divinite foi revisado como home club de alto padrao no Centro de Balneario Camboriu, na Avenida Alvin Bauer. A Imobille informa plantas de 160 m2 a 179 m2, quatro suites e duas ou quatro vagas, com endereco na Avenida Alvin Bauer, 100. A Felicita traz referencia na Rua Alvin Bauer, 96, menos de 80 metros da praia, e descreve ambientes como atrio, festas, gourmet, lounge bar, music pub, snooker, games, baby room, adventure kids, academia, business center, garden, praca de fogo, solarium, piscinas adulto, infantil e aquecida, massagem, sauna e spa. A galeria agora mostra fachada e lazer.",
+      "seo_description": "Conheca o Le Visage Divinite em Balneario Camboriu, com fachada, hall, piscinas e lazer completo do home club.",
+      "gallery": [
+        {
+          "title": "Le Visage Divinite - fachada diurna",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/309/lvd-a.jpeg?1689626354",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/309/le-visage-divinite/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Le Visage Divinite - fachada iluminada",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20022-1664816543.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-visage-divinite-EM95361",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Le Visage Divinite - atrio",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/309/lvd-b-hall.jpeg?1689626354",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/309/le-visage-divinite/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Le Visage Divinite - fitness",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20000-1664816538.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-le-visage-divinite-EM95361",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Le Visage Divinite - piscina externa",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/309/lvd-l-1-m-piscinas-externas-3.jpeg?1689626354",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/309/le-visage-divinite/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Le Visage Divinite - piscina adulto",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/309/lvd-l-1-m-piscinas-externas-2.jpeg?1689626354",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/309/le-visage-divinite/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Le Visage Divinite - solarium",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/309/lvd-l-1-m-piscinas-externas-1.jpeg?1689626354",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/309/le-visage-divinite/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Le Visage Divinite - patio verde",
+          "category": "Lazer",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/309/lvd-l-1-i-espaco-gardem-2.jpeg?1689626354",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/309/le-visage-divinite/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Le Visage Divinite - praca de fogo",
+          "category": "Lazer",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/309/lvd-l-1-h-praca-do-fogo-1.jpeg?1689626354",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/309/le-visage-divinite/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Le Visage Divinite - playground",
+          "category": "Playground",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/309/lvd-l-1-l-playground.jpeg?1689626354",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/309/le-visage-divinite/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Le Visage Divinite - piscina interna",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/309/lvd-l-3-e-piscina-interna.jpeg?1689626354",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/309/le-visage-divinite/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Le Visage Divinite - academia",
+          "category": "Fitness",
+          "image": "https://cdn.imoveisgodoy.com.br/wp-content/uploads/2024/08/08161318/apartamento-no-le-visage-divinite-em-balneario-camboriu-neriah-imoveis-especiais-academia.jpg",
+          "source_url": "https://imoveisgodoy.com.br/imoveis/edificio-le-visage-divinite-em-balneario-camboriu/",
+          "source_label": "imoveisgodoy.com.br"
+        },
+        {
+          "title": "Le Visage Divinite - brinquedoteca",
+          "category": "Kids",
+          "image": "https://cdn.imoveisgodoy.com.br/wp-content/uploads/2024/08/08161337/apartamento-no-le-visage-divinite-em-balneario-camboriu-neriah-imoveis-especiais-brinquedoteca.jpg",
+          "source_url": "https://imoveisgodoy.com.br/imoveis/edificio-le-visage-divinite-em-balneario-camboriu/",
+          "source_label": "imoveisgodoy.com.br"
+        },
+        {
+          "title": "Le Visage Divinite - massagem",
+          "category": "Spa",
+          "image": "https://cdn.imoveisgodoy.com.br/wp-content/uploads/2024/08/08161350/apartamento-no-le-visage-divinite-em-balneario-camboriu-neriah-imoveis-especiais-espaco-de-massagem.jpg",
+          "source_url": "https://imoveisgodoy.com.br/imoveis/edificio-le-visage-divinite-em-balneario-camboriu/",
+          "source_label": "imoveisgodoy.com.br"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Alvin Bauer, Centro",
+          "description": "As fontes indicam Avenida/Rua Alvin Bauer, no Centro de Balneario Camboriu."
+        },
+        {
+          "icon": "Waves",
+          "title": "Menos de 80 metros da praia",
+          "description": "A Felicita posiciona o empreendimento a menos de 80 metros da praia."
+        },
+        {
+          "icon": "Building2",
+          "title": "Um por andar",
+          "description": "A Imobille descreve exclusividade de um apartamento por andar em seu texto editorial."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Home club completo",
+          "description": "Piscinas, music pub, games, adventure kids, business center, garden, spa, sauna e academia aparecem nas fontes."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Rosecon Empreendimentos",
+          "description": "A Imobille associa o edificio a Rosecon Empreendimentos."
+        },
+        {
+          "title": "Tres andares de lazer",
+          "description": "O texto editorial da Imobille cita tres andares de lazer e cinco de garagem."
+        },
+        {
+          "title": "Curadoria visual ampla",
+          "description": "Foram selecionadas imagens de fachada, atrio, piscinas, kids, fitness e spa."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Le Visage Divinite?",
+          "answer": "A Imobille informa Avenida Alvin Bauer, 100, Centro, Balneario Camboriu - SC."
+        },
+        {
+          "question": "Qual e o perfil das plantas?",
+          "answer": "A Imobille informa 160 m2 a 179 m2, quatro suites e duas ou quatro vagas."
+        },
+        {
+          "question": "Quais areas de lazer foram conferidas?",
+          "answer": "Piscinas, fitness, adventure kids, garden, praca de fogo, spa, sauna, games, music pub e business center."
+        },
+        {
+          "question": "O que mudou nesta auditoria?",
+          "answer": "Hero e galeria foram trocados para imagens do home club e da fachada."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-le-visage-divinite-EM95361",
+        "https://felicitanegocios.com.br/empreendimento/309/le-visage-divinite/",
+        "https://imoveisgodoy.com.br/imoveis/edificio-le-visage-divinite-em-balneario-camboriu/"
+      ]
+    },
+    {
+      "slug": "lemos-torres",
+      "hero_image": "https://optimaempreendimentos.com.br/wp-content/uploads/2023/08/Lemos-Fachada-min.jpg",
+      "description": "O Lemos Torres foi revisado como empreendimento da Optima no Centro de Balneario Camboriu, com endereco na Rua 904. A pagina oficial informa lancamento com entrega prevista para julho de 2028, a cerca de 500 metros da Praia Central, com apartamentos de 134 m2 a 268 m2 e opcoes de tres a quatro suites. A MySide complementa com torre unica de 23 pavimentos, 26 residencias, dois apartamentos por andar, ate quatro vagas e lazer com festas, gourmet, fire place, academia, piscina aquecida, infantil e adulto com lounge e bar molhado, playground, brinquedoteca e pet place. A galeria foi refeita com fachada, hall e lazer.",
+      "seo_description": "Conheca o Lemos Torres da Optima no Centro de Balneario Camboriu, com fachada, hall, piscina e lazer.",
+      "gallery": [
+        {
+          "title": "Lemos Torres - fachada oficial",
+          "category": "Fachada",
+          "image": "https://optimaempreendimentos.com.br/wp-content/uploads/2023/08/Lemos-Fachada-min.jpg",
+          "source_url": "https://optimaempreendimentos.com.br/lemos-torres/",
+          "source_label": "Optima Empreendimentos"
+        },
+        {
+          "title": "Lemos Torres - torre",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/12/lemos-torres-balneario-camboriu-sc-3.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/lemos-torres-balneario-camboriu/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Lemos Torres - fachada frontal",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/12/lemos-torres-balneario-camboriu-sc-8.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/lemos-torres-balneario-camboriu/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Lemos Torres - implantacao urbana",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/12/lemos-torres-balneario-camboriu-sc-17.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/lemos-torres-balneario-camboriu/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Lemos Torres - detalhe da fachada",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/932/1674253975841-d26d139f-8efa-42a4-a6d7-6a8aa2ff91cb.jpeg?1751641029",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/932/lemos-torres/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Lemos Torres - base do predio",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/932/1674253980267-6a78bf67-bd8c-4000-8276-ce7c0df1d543.jpeg?1751641029",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/932/lemos-torres/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Lemos Torres - embasamento",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/932/1674253981920-986af433-6ce7-48fe-9dc0-5feface4ac8d.jpeg?1751641029",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/932/lemos-torres/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Lemos Torres - vista inferior",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/932/1674253977890-2c912e38-cb22-499f-bf47-769ef3bd2898.jpeg?1751641029",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/932/lemos-torres/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Lemos Torres - hall",
+          "category": "Hall",
+          "image": "https://optimaempreendimentos.com.br/wp-content/uploads/2023/08/Hall-A-02-min-1-min.jpg",
+          "source_url": "https://optimaempreendimentos.com.br/lemos-torres/",
+          "source_label": "Optima Empreendimentos"
+        },
+        {
+          "title": "Lemos Torres - piscina",
+          "category": "Piscina",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/12/lemos-torres-balneario-camboriu-sc-24.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/lemos-torres-balneario-camboriu/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Lemos Torres - playground",
+          "category": "Playground",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/12/lemos-torres-balneario-camboriu-sc-26.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/lemos-torres-balneario-camboriu/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Lemos Torres - piscina coberta",
+          "category": "Piscina",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/12/lemos-torres-balneario-camboriu-sc-25.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/lemos-torres-balneario-camboriu/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Lemos Torres - kids",
+          "category": "Kids",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/12/lemos-torres-balneario-camboriu-sc-23.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/lemos-torres-balneario-camboriu/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Lemos Torres - deck da piscina",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/932/1680207109507-0abcf7a2-7ee9-4c32-8704-f1ac4c511b3b.jpg?1751641029",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/932/lemos-torres/",
+          "source_label": "Felicita Negocios"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Award",
+          "title": "Optima Empreendimentos",
+          "description": "A pagina oficial apresenta o Lemos Torres como empreendimento da Optima."
+        },
+        {
+          "icon": "Waves",
+          "title": "500 metros da Praia Central",
+          "description": "A Optima informa localizacao a cerca de 500 metros da Praia Central."
+        },
+        {
+          "icon": "Building2",
+          "title": "Torre unica",
+          "description": "A MySide informa torre unica com 23 pavimentos, 26 residencias e dois apartamentos por andar."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer com piscinas e bar",
+          "description": "As fontes citam piscinas adulto, infantil e aquecida, lounge, bar molhado, festas, gourmet, academia, kids e pet place."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Centro de Balneario Camboriu",
+          "description": "A localizacao na Rua 904 combina praia, shopping, servicos e vida urbana."
+        },
+        {
+          "title": "Tipologias de 134 m2 a 268 m2",
+          "description": "A Optima informa apartamentos amplos com tres a quatro suites."
+        },
+        {
+          "title": "Galeria do lancamento",
+          "description": "A selecao privilegia fachada, hall, piscina, playground e areas comuns."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Lemos Torres?",
+          "answer": "A Optima informa Rua 904, 86, Centro, Balneario Camboriu - SC; a MySide registra Rua 904, 92."
+        },
+        {
+          "question": "Quando esta prevista a entrega?",
+          "answer": "A pagina oficial informa julho de 2028; a MySide registra dezembro de 2026, entao a pagina usa a previsao oficial como referencia principal."
+        },
+        {
+          "question": "Qual e o perfil das plantas?",
+          "answer": "As fontes informam 134 m2 a 268 m2, com tres a quatro suites e ate quatro vagas."
+        },
+        {
+          "question": "Quais areas comuns foram aplicadas?",
+          "answer": "Fachada, hall, piscina, playground, kids e deck da piscina."
+        }
+      ],
+      "sources": [
+        "https://optimaempreendimentos.com.br/lemos-torres/",
+        "https://myside.com.br/apartamento-venda-lemos-torres-balneario-camboriu-sc",
+        "https://lancamento.invexo.com.br/sc/lemos-torres-balneario-camboriu/",
+        "https://felicitanegocios.com.br/empreendimento/932/lemos-torres/"
+      ]
+    },
+    {
+      "slug": "lisboa",
+      "hero_image": "https://b3.casteldigital.com.br/litoralnorth/ig/il/imoveis/4021/image-17684228497438.png",
+      "description": "O Lisboa foi revisado como Edificio Lisboa Residence no bairro Nacoes, em Balneario Camboriu. A Loft informa endereco na Rua Portugal, 262, e apresenta a fachada do condominio. Como as fontes abertas confiaveis oferecem poucas imagens de areas comuns, a curadoria usa uma galeria curta e fiel, com a fachada confirmada em anuncio externo. A pagina deixa de usar imagens geradas ou de interior da oferta e passa a descrever o empreendimento pelo endereco, bairro e contexto residencial, sem inventar lazer que nao foi confirmado nas fontes consultadas.",
+      "seo_description": "Conheca o Edificio Lisboa Residence no bairro Nacoes, Balneario Camboriu, com fachada e endereco verificados.",
+      "gallery": [
+        {
+          "title": "Edificio Lisboa Residence - fachada",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/litoralnorth/ig/il/imoveis/4021/image-17684228497438.png",
+          "source_url": "https://www.litoralnorth.com.br/imovel/apartamento-no-edificio-lisboa-balneario-camboriu-nacoes-1-quarto-1-garagem-venda-ref-4021/",
+          "source_label": "Litoral North"
+        },
+        {
+          "title": "Edificio Lisboa Residence - fachada lateral",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/litoralnorth/ig/im/imoveis/4021/image-17684228497438.png",
+          "source_url": "https://www.litoralnorth.com.br/imovel/apartamento-no-edificio-lisboa-balneario-camboriu-nacoes-1-quarto-1-garagem-venda-ref-4021/",
+          "source_label": "Litoral North"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua Portugal, 262",
+          "description": "A Loft localiza o Edificio Lisboa Residence na Rua Portugal, no bairro Nacoes."
+        },
+        {
+          "icon": "Building2",
+          "title": "Bairro Nacoes",
+          "description": "A pagina passa a contextualizar o condominio em uma regiao residencial de Balneario Camboriu."
+        },
+        {
+          "icon": "Image",
+          "title": "Fachada verificada",
+          "description": "A curadoria usa apenas imagens externas vinculadas ao Edificio Lisboa Residence."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Curadoria conservadora",
+          "description": "A galeria foi mantida curta porque nao havia fonte publica confiavel de lazer do condominio."
+        },
+        {
+          "title": "Sem imagem gerada",
+          "description": "A imagem gerada que estava no cadastro foi substituida por foto de fachada."
+        },
+        {
+          "title": "Endereco confirmado",
+          "description": "A Loft confirma Rua Portugal, 262, Nacoes, Balneario Camboriu - SC."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Edificio Lisboa Residence?",
+          "answer": "A Loft informa Rua Portugal, 262, bairro Nacoes, Balneario Camboriu - SC."
+        },
+        {
+          "question": "A galeria tem areas de lazer?",
+          "answer": "Nao foram encontradas imagens publicas confiaveis de lazer; por isso a galeria usa somente fachada."
+        },
+        {
+          "question": "O que foi corrigido?",
+          "answer": "A pagina deixou de usar imagem gerada e passou a usar fachada real associada ao condominio."
+        },
+        {
+          "question": "Quais fontes foram usadas?",
+          "answer": "Loft para endereco e fachada, Litoral North para imagem externa e Econodata para apoio de identificacao cadastral."
+        }
+      ],
+      "sources": [
+        "https://loft.com.br/condominio/condominio-edificio-lisboa-residence-nacoes-balneario-camboriu-sc/15D5RI9T",
+        "https://www.litoralnorth.com.br/imovel/apartamento-no-edificio-lisboa-balneario-camboriu-nacoes-1-quarto-1-garagem-venda-ref-4021/",
+        "https://www.econodata.com.br/consulta-empresa/35518979000179-condominio-edificio-lisboa-residence"
+      ]
+    },
+    {
+      "slug": "lumen-tower",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2025/05/edificio-lumen-tower-itapema-fachada.jpg",
+      "description": "O Lumen Tower foi revisado como empreendimento Pasqualotto quadra mar no Centro de Itapema, com referencia na Avenida Nereu Ramos, esquina com Rua 161. Litoral Vertical informa 49 pavimentos, tres apartamentos por andar, cinco elevadores, terreo com salas comerciais, guarita 24h e home club com mais de 2.800 m2. Sea House complementa com entrega prevista para dezembro de 2028, inicio de obra em dezembro de 2023, fachada contemporanea 100% pastilhada e pele de vidro, cinco elevadores, gerador nas areas comuns, ponto de recarga para carros eletricos e lazer de 2.873 m2 com piscinas, spa, saunas, jogos, festas, bistro gourmet, brinquedoteca, playground, academia, pet e bar molhado.",
+      "seo_description": "Conheca o Lumen Tower em Itapema, empreendimento Pasqualotto quadra mar com fachada, lojas e home club.",
+      "gallery": [
+        {
+          "title": "Lumen Tower - fachada",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/05/edificio-lumen-tower-itapema-fachada.jpg",
+          "source_url": "https://litoralvertical.com/pre-lancamento/itapema/apartamentos/edificio-lumen-tower/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Lumen Tower - torre e base",
+          "category": "Fachada",
+          "image": "https://sistema.seahouseimoveis.com.br/content/dr2T9QJRZgZl1vS6/img/products_imgs/453/9463lg.jpg",
+          "source_url": "https://www.seahouseimoveis.com.br/imovel/Lumen-Tower-CT072",
+          "source_label": "Sea House"
+        },
+        {
+          "title": "Lumen Tower - base da torre",
+          "category": "Fachada",
+          "image": "https://sistema.seahouseimoveis.com.br/content/dr2T9QJRZgZl1vS6/img/products_imgs/453/9453lg.jpg",
+          "source_url": "https://www.seahouseimoveis.com.br/imovel/Lumen-Tower-CT072",
+          "source_label": "Sea House"
+        },
+        {
+          "title": "Lumen Tower - skyline da orla",
+          "category": "Contexto",
+          "image": "https://sistema.seahouseimoveis.com.br/content/dr2T9QJRZgZl1vS6/img/products_imgs/453/9460lg.jpg",
+          "source_url": "https://www.seahouseimoveis.com.br/imovel/Lumen-Tower-CT072",
+          "source_label": "Sea House"
+        },
+        {
+          "title": "Lumen Tower - implantacao na orla",
+          "category": "Contexto",
+          "image": "https://sistema.seahouseimoveis.com.br/content/dr2T9QJRZgZl1vS6/img/products_imgs/453/9452lg.jpg",
+          "source_url": "https://www.seahouseimoveis.com.br/imovel/Lumen-Tower-CT072",
+          "source_label": "Sea House"
+        },
+        {
+          "title": "Lumen Tower - piscina",
+          "category": "Piscina",
+          "image": "https://sistema.seahouseimoveis.com.br/content/dr2T9QJRZgZl1vS6/img/products_imgs/453/9472lg.jpg",
+          "source_url": "https://www.seahouseimoveis.com.br/imovel/Lumen-Tower-CT072",
+          "source_label": "Sea House"
+        },
+        {
+          "title": "Lumen Tower - piscina com fachada",
+          "category": "Piscina",
+          "image": "https://s01.jetimgs.com/tnkmRAUvb9lyowtNQAKTCBdHY9Df8go0isf66zWVmwPl239VMU0ubh2BFLNt4KReDUd6WYoUTqbT6cJl7UKGcfmA41MuCAc-k2JQc4VEWePD3tPXmzvfb8YmhXCDLAmLz8_fP04Y8_v1sMWMZYDfFbUrw69-iAtQDke2KSQ8UKUIGRTo9-Sq/07lumen-piscinafachadajpeg.webp",
+          "source_url": "https://www.gnattaimoveis.com.br/lancamento/lumen-tower/308552",
+          "source_label": "Gnatta Imoveis"
+        },
+        {
+          "title": "Lumen Tower - lojas na base",
+          "category": "Fachada",
+          "image": "https://iarebrokers.fsn1.your-objectstorage.com/sites/8/2025/10/17094751/fachada-lumen-tower-lojas-pasqualotto-construtora.webp",
+          "source_url": "https://sc.iarebrokers.com.br/imoveis/itapema/centro/loja/31062/lumen-tower-lojas-loja-com-7777-m%C2%B2-em-centro/",
+          "source_label": "sc.iarebrokers.com.br"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Award",
+          "title": "Pasqualotto no Centro",
+          "description": "Litoral Vertical associa o Lumen Tower a Pasqualotto Construtora."
+        },
+        {
+          "icon": "Waves",
+          "title": "Quadra mar",
+          "description": "As fontes posicionam o empreendimento como quadra mar no Centro de Itapema."
+        },
+        {
+          "icon": "Building2",
+          "title": "49 pavimentos",
+          "description": "Litoral Vertical e Sea House informam 49 pavimentos e cinco elevadores."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Home club de grande porte",
+          "description": "As fontes citam mais de 2.800 m2 de lazer com piscinas, spa, saunas, festas, gourmet, kids, academia, pet e bar molhado."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Entrega prevista para 2028",
+          "description": "A Sea House registra entrega prevista para dezembro de 2028."
+        },
+        {
+          "title": "Base comercial",
+          "description": "O projeto inclui terreo com salas comerciais e fachada voltada para a Avenida Nereu Ramos."
+        },
+        {
+          "title": "Galeria enxuta e segura",
+          "description": "Foram removidas imagens de outros empreendimentos detectadas na fonte de lojas."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Lumen Tower?",
+          "answer": "As fontes indicam Avenida Nereu Ramos, esquina com Rua 161, Centro, Itapema - SC."
+        },
+        {
+          "question": "Quando esta prevista a entrega?",
+          "answer": "A Sea House informa entrega prevista para dezembro de 2028."
+        },
+        {
+          "question": "Quantos pavimentos tem?",
+          "answer": "Litoral Vertical e Sea House informam 49 pavimentos."
+        },
+        {
+          "question": "Quais imagens foram usadas?",
+          "answer": "Fachada, base comercial, contexto de orla e piscina associada ao empreendimento."
+        }
+      ],
+      "sources": [
+        "https://litoralvertical.com/pre-lancamento/itapema/apartamentos/edificio-lumen-tower/",
+        "https://www.seahouseimoveis.com.br/imovel/Lumen-Tower-CT072",
+        "https://www.gnattaimoveis.com.br/lancamento/lumen-tower/308552",
+        "https://sc.iarebrokers.com.br/imoveis/itapema/centro/loja/31062/lumen-tower-lojas-loja-com-7777-m%C2%B2-em-centro/"
+      ]
+    },
+    {
+      "slug": "lumiere",
+      "hero_image": "https://b5.casteldigital.com.br/jkleinimoveis/ig/il/imoveis/61/fachada-mar-lumiere-residente-itapema-pasqualotto-17703977726897.jpg",
+      "description": "O Lumiere foi revisado como La Lumiere Residence em Meia Praia, Itapema, empreendimento frente mar associado a Pasqualotto nas imagens de mercado. A Imobille destaca localizacao a poucos metros da orla e infraestrutura de lazer com piscina adulto, piscina infantil, piscina aquecida, spa, sauna umida, espaco zen, academia, playground, brinquedoteca, deck bar, bar ingles, poker, jogos, festas, gourmet, pista de cooper, quadra de squash e boliche. A mesma fonte informa plantas com 208 m2 privativos, quatro suites, escritorio, lavabo, living, sacada com churrasqueira, quatro vagas e uma vaga para motocicleta. A galeria agora mostra fachadas, piscinas e lazer do condominio.",
+      "seo_description": "Conheca o Lumiere Residence em Meia Praia, Itapema, frente mar com fachadas, piscinas, spa e lazer completo.",
+      "gallery": [
+        {
+          "title": "Lumiere Residence - fachada frente mar",
+          "category": "Fachada",
+          "image": "https://b5.casteldigital.com.br/jkleinimoveis/ig/il/imoveis/61/fachada-mar-lumiere-residente-itapema-pasqualotto-17703977726897.jpg",
+          "source_url": "https://www.jkleinimoveis.com.br/imovel/apartamento-no-edificio-lumiere-residence-itapema-meia-praia-3-quartos-2-garagens-venda-ref-58/",
+          "source_label": "J Klein Imoveis"
+        },
+        {
+          "title": "Lumiere Residence - torre na orla",
+          "category": "Fachada",
+          "image": "https://imobase.nyc3.cdn.digitaloceanspaces.com/imoveis/ventura-imoveis/1520657eac49006fad1ccb38d392ca72.jpg",
+          "source_url": "https://wrnegociosimobiliarios.com.br/imovel/edificio-lumiere-residence-itapema-sc",
+          "source_label": "WR Negocios Imobiliarios"
+        },
+        {
+          "title": "Lumiere Residence - fachada mar",
+          "category": "Fachada",
+          "image": "https://b5.casteldigital.com.br/jkleinimoveis/ig/im/imoveis/61/fachada-mar-lumiere-residente-itapema-pasqualotto-17703977726897.jpg",
+          "source_url": "https://www.jkleinimoveis.com.br/imovel/apartamento-no-edificio-lumiere-residence-itapema-meia-praia-3-quartos-2-garagens-venda-ref-58/",
+          "source_label": "J Klein Imoveis"
+        },
+        {
+          "title": "Lumiere Residence - fachada rodovia",
+          "category": "Fachada",
+          "image": "https://b5.casteldigital.com.br/jkleinimoveis/ig/il/imoveis/61/fachada-rodovia-lumiere-residente-itapema-pasqualotto-17703977726899.jpg",
+          "source_url": "https://www.jkleinimoveis.com.br/imovel/apartamento-no-edificio-lumiere-residence-itapema-meia-praia-3-quartos-2-garagens-venda-ref-58/",
+          "source_label": "J Klein Imoveis"
+        },
+        {
+          "title": "Lumiere Residence - torre",
+          "category": "Fachada",
+          "image": "https://b5.casteldigital.com.br/jkleinimoveis/ig/il/imoveis/61/fachada-torre-lumiere-residente-itapema-pasqualotto-17703977726899.jpg",
+          "source_url": "https://www.jkleinimoveis.com.br/imovel/apartamento-no-edificio-lumiere-residence-itapema-meia-praia-3-quartos-2-garagens-venda-ref-58/",
+          "source_label": "J Klein Imoveis"
+        },
+        {
+          "title": "Lumiere Residence - piscina aquecida",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/real-estates-photo/June2022/065L1GGHET0JXdlgec2b.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/la-lumiere-residence-EM77957",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Lumiere Residence - jardim externo",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/automacao-nova-2-1663695338.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/la-lumiere-residence-EM77957",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Lumiere Residence - pub",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/February2022/9JEO23PwRMwbjdWY0rD1.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/la-lumiere-residence-EM77957",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Lumiere Residence - area ajardinada",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/February2022/34xBDAQUDxtNayTcnaSr.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/la-lumiere-residence-EM77957",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Lumiere Residence - piscina externa",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/February2022/gS6u5cfGBBEMDv57RfKX.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/la-lumiere-residence-EM77957",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Lumiere Residence - piscina interna",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/February2022/80lf4fpORiTm8bH2cF9o.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/la-lumiere-residence-EM77957",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Lumiere Residence - spa",
+          "category": "Spa",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/February2022/DbuqUIm444jB155RyeZu.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/la-lumiere-residence-EM77957",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Lumiere Residence - sauna",
+          "category": "Spa",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/February2022/eyBzJNIvEV09l7gMcrzF.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/la-lumiere-residence-EM77957",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Lumiere Residence - fitness",
+          "category": "Fitness",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/February2022/HhkKV7EmbBsq33SRs6sn.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/la-lumiere-residence-EM77957",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Lumiere Residence - boliche",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/February2022/kJHZmtxctWg9DBjVicl1.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/la-lumiere-residence-EM77957",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Lumiere Residence - playground",
+          "category": "Playground",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/February2022/kjUiOQoAuUsT16iISw2p.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/la-lumiere-residence-EM77957",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Lumiere Residence - gourmet",
+          "category": "Gourmet",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/February2022/gyjRXDmx0LKY3ELl56a7.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/la-lumiere-residence-EM77957",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Lumiere Residence - piscina com vista",
+          "category": "Piscina",
+          "image": "https://imobase.nyc3.cdn.digitaloceanspaces.com/imoveis/ventura-imoveis/128041706621937.jpg?v=140753",
+          "source_url": "https://wrnegociosimobiliarios.com.br/imovel/edificio-lumiere-residence-itapema-sc",
+          "source_label": "WR Negocios Imobiliarios"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente mar em Meia Praia",
+          "description": "As imagens e textos de mercado posicionam o Lumiere Residence na orla de Meia Praia."
+        },
+        {
+          "icon": "Ruler",
+          "title": "208 m2 privativos",
+          "description": "A Imobille informa plantas com 208 m2, quatro suites, escritorio e quatro vagas."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "18 opcoes de lazer",
+          "description": "A Imobille lista piscinas, spa, sauna, zen, academia, playground, brinquedoteca, bares, poker, jogos, festas, gourmet, cooper, squash e boliche."
+        },
+        {
+          "icon": "Building2",
+          "title": "Galeria completa",
+          "description": "A curadoria traz fachadas, piscinas, spa, fitness, playground, boliche e gourmet do condominio."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Pasqualotto na orla",
+          "description": "As imagens de mercado associam o Lumiere Residence a Pasqualotto e ao eixo frente mar de Itapema."
+        },
+        {
+          "title": "Lazer acima da media",
+          "description": "Boliche, quadra de squash, deck bar, bar ingles e piscinas reforcam o perfil de resort urbano."
+        },
+        {
+          "title": "Correcao de imagem gerada",
+          "description": "A imagem gerada anterior foi substituida por fotos reais de fachada e areas comuns."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Lumiere Residence?",
+          "answer": "As fontes consultadas localizam o empreendimento em Meia Praia, Itapema, junto a orla."
+        },
+        {
+          "question": "Qual e o tamanho das plantas?",
+          "answer": "A Imobille informa 208 m2 privativos, quatro suites, quatro vagas e uma vaga para motocicleta."
+        },
+        {
+          "question": "Quais areas de lazer foram revisadas?",
+          "answer": "Piscinas, spa, sauna, fitness, playground, boliche, gourmet, jardim externo e pub."
+        },
+        {
+          "question": "O que mudou na auditoria?",
+          "answer": "Hero e galeria foram trocados por imagens reais de fachada e lazer do condominio."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/la-lumiere-residence-EM77957",
+        "https://www.jkleinimoveis.com.br/imovel/apartamento-no-edificio-lumiere-residence-itapema-meia-praia-3-quartos-2-garagens-venda-ref-58/",
+        "https://wrnegociosimobiliarios.com.br/imovel/edificio-lumiere-residence-itapema-sc"
+      ]
+    }
+  ]
+}

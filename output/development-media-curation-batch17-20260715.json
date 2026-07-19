@@ -1,0 +1,1493 @@
+{
+  "batch_id": "development-media-curation-batch17-20260715",
+  "generated_at": "2026-07-15T18:00:00.000Z",
+  "items": [
+    {
+      "slug": "linea",
+      "hero_image": "https://rzempreendimentos.com.br/wp-content/uploads/2025/08/RZI_LIN_Fachada_Observador_EF-1-scaled.webp",
+      "description": "O Linea e um empreendimento da RZilli no Centro de Balneario Camboriu, na Rua 2450, com proposta de conforto urbano e lazer em diferentes cotas do edificio. A nova curadoria remove fotos internas de ofertas e reposiciona a pagina com fachada, rooftop, hall, piscinas, fitness, mini golfe, ambientes kids, eventos e jogos gourmet. A leitura do condominio fica mais fiel ao produto: endereco central, vista para o mar e areas comuns completas para rotina e lazer.",
+      "seo_description": "Conheca o Linea, empreendimento no Centro de Balneario Camboriu com rooftop, piscinas, mini golfe, fitness e hall de alto padrao.",
+      "gallery": [
+        {
+          "title": "Linea - fachada observador",
+          "category": "Fachada",
+          "image": "https://rzempreendimentos.com.br/wp-content/uploads/2025/08/RZI_LIN_Fachada_Observador_EF-1-scaled.webp",
+          "source_url": "https://rzempreendimentos.com.br/empreendimento/linea/",
+          "source_label": "RZilli"
+        },
+        {
+          "title": "Linea - fotomontagem superior",
+          "category": "Fachada",
+          "image": "https://rzempreendimentos.com.br/wp-content/uploads/2025/08/RZI_LIN_Fotomontagem_Superior_EF-scaled.webp",
+          "source_url": "https://rzempreendimentos.com.br/empreendimento/linea/",
+          "source_label": "RZilli"
+        },
+        {
+          "title": "Linea - embasamento",
+          "category": "Acesso",
+          "image": "https://rzempreendimentos.com.br/wp-content/uploads/2025/08/RZI_LIN_Embasamento_EF-scaled.webp",
+          "source_url": "https://rzempreendimentos.com.br/empreendimento/linea/",
+          "source_label": "RZilli"
+        },
+        {
+          "title": "Linea - hall de entrada",
+          "category": "Hall",
+          "image": "https://rzempreendimentos.com.br/wp-content/uploads/2025/08/RZI_LIN_-Hall-de-entrada_EF-scaled.webp",
+          "source_url": "https://rzempreendimentos.com.br/empreendimento/linea/",
+          "source_label": "RZilli"
+        },
+        {
+          "title": "Linea - piscina panoramica",
+          "category": "Piscina",
+          "image": "https://rzempreendimentos.com.br/wp-content/uploads/2025/08/RZI_LIN_-Piscina-angulo-extra_EF-scaled.webp",
+          "source_url": "https://rzempreendimentos.com.br/empreendimento/linea/",
+          "source_label": "RZilli"
+        },
+        {
+          "title": "Linea - piscinas integradas",
+          "category": "Piscina",
+          "image": "https://rzempreendimentos.com.br/wp-content/uploads/2025/08/RZI_LIN_-Piscinas-Angulo-1_EF-scaled.webp",
+          "source_url": "https://rzempreendimentos.com.br/empreendimento/linea/",
+          "source_label": "RZilli"
+        },
+        {
+          "title": "Linea - lazer externo",
+          "category": "Lazer",
+          "image": "https://rzempreendimentos.com.br/wp-content/uploads/2025/08/RZI_LIN_-Lazer-inferior-externo_EF-scaled.webp",
+          "source_url": "https://rzempreendimentos.com.br/empreendimento/linea/",
+          "source_label": "RZilli"
+        },
+        {
+          "title": "Linea - area externa de eventos",
+          "category": "Eventos",
+          "image": "https://rzempreendimentos.com.br/wp-content/uploads/2025/08/RZI_LIN_Area-externa-do-Salao-de-festas_EF-scaled.webp",
+          "source_url": "https://rzempreendimentos.com.br/empreendimento/linea/",
+          "source_label": "RZilli"
+        },
+        {
+          "title": "Linea - mini golfe",
+          "category": "Lazer",
+          "image": "https://rzempreendimentos.com.br/wp-content/uploads/2025/08/RZI_LIN_Golf_EF-scaled.webp",
+          "source_url": "https://rzempreendimentos.com.br/empreendimento/linea/",
+          "source_label": "RZilli"
+        },
+        {
+          "title": "Linea - playground e brinquedoteca",
+          "category": "Kids",
+          "image": "https://rzempreendimentos.com.br/wp-content/uploads/2025/08/RZI_LIN_-Playground-mostrando-Brinquedoteca_EF-scaled.webp",
+          "source_url": "https://rzempreendimentos.com.br/empreendimento/linea/",
+          "source_label": "RZilli"
+        },
+        {
+          "title": "Linea - jogos gourmet",
+          "category": "Jogos",
+          "image": "https://rzempreendimentos.com.br/wp-content/uploads/2025/08/RZI_LIN_-Sala-de-Jogos-gourmet_EF-scaled.webp",
+          "source_url": "https://rzempreendimentos.com.br/empreendimento/linea/",
+          "source_label": "RZilli"
+        },
+        {
+          "title": "Linea - ambiente de eventos",
+          "category": "Eventos",
+          "image": "https://rzempreendimentos.com.br/wp-content/uploads/2025/08/RZI_LIN_-Salao-de-festas_EF-scaled.webp",
+          "source_url": "https://rzempreendimentos.com.br/empreendimento/linea/",
+          "source_label": "RZilli"
+        },
+        {
+          "title": "Linea - fitness com vista",
+          "category": "Fitness",
+          "image": "https://rzempreendimentos.com.br/wp-content/uploads/2025/08/RZI_LIN_-Academia_EF_002-scaled.webp",
+          "source_url": "https://rzempreendimentos.com.br/empreendimento/linea/",
+          "source_label": "RZilli"
+        },
+        {
+          "title": "Linea - rooftop",
+          "category": "Rooftop",
+          "image": "https://rzempreendimentos.com.br/wp-content/uploads/2025/08/RZI_LIN_Rooftop_EF-scaled.webp",
+          "source_url": "https://rzempreendimentos.com.br/empreendimento/linea/",
+          "source_label": "RZilli"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro de Balneario",
+          "description": "Endereco na Rua 2450, com acesso pratico a praia, servicos e rotina urbana do Centro."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer em varias cotas",
+          "description": "Piscinas, mini golfe, pet place, kids, eventos, jogos gourmet, sauna, ofuro e fitness com vista para o mar."
+        },
+        {
+          "icon": "Building2",
+          "title": "Visual fiel ao projeto",
+          "description": "Fachada, hall, rooftop e convivencia substituem os interiores de ofertas que distorciam a pagina."
+        }
+      ],
+      "differentials": [
+        "Galeria revisada com imagens oficiais da RZilli para fachada e lazer.",
+        "Copy reposicionada para endereco central, rooftop e infraestrutura comum.",
+        "Interiores de ofertas deixam de representar o condominio."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Linea?",
+          "answer": "O Linea fica na Rua 2450, no Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Quais areas de lazer foram destacadas?",
+          "answer": "A curadoria destaca piscinas, rooftop, mini golfe, pet place, kids, eventos, jogos gourmet, sauna, ofuro e fitness."
+        },
+        {
+          "question": "O que mudou na pagina?",
+          "answer": "A pagina passou a usar imagens do empreendimento e das areas comuns, removendo fotos internas de ofertas."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, acesso, hall, piscina, lazer, eventos e outras areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://rzempreendimentos.com.br/empreendimento/linea/"
+      ]
+    },
+    {
+      "slug": "lorena-cristina",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2025/lorena-cristina-15-1749502279.webp",
+      "description": "O Lorena Cristina fica no Centro de Balneario Camboriu, na Rua 1001, a cerca de 300 m da Praia Central, com acesso direto a orla e entorno completo de servicos. A pagina passa a destacar as imagens do condominio: fachada, piscina com deck, academia, cinema, spa, gourmet, jogos e areas externas. A copy reforca a conveniencia de morar perto da praia sem confundir o empreendimento com fotos internas de ofertas.",
+      "seo_description": "Conheca o Lorena Cristina, no Centro de Balneario Camboriu, a cerca de 300 m da Praia Central e com lazer completo.",
+      "gallery": [
+        {
+          "title": "Lorena Cristina - fachada",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2025/lorena-cristina-15-1749502279.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-lorena-cristina-EM17952",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Lorena Cristina - torre",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-1752064533.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-lorena-cristina-EM17952",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Lorena Cristina - piscina com deck",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/09072025094124618-1752064884.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-lorena-cristina-EM17952",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Lorena Cristina - fitness",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2025/lorena-cristina-10-1749502285.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-lorena-cristina-EM17952",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Lorena Cristina - jogos",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2025/lorena-cristina-11-1749502286.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-lorena-cristina-EM17952",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Lorena Cristina - wellness",
+          "category": "Wellness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2025/lorena-cristina-12-1749502286.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-lorena-cristina-EM17952",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Lorena Cristina - lounge externo",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2025/lorena-cristina-6-1749502283.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-lorena-cristina-EM17952",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Lorena Cristina - piscina e quiosque",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2025/lorena-cristina-4-1749502282.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-lorena-cristina-EM17952",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Lorena Cristina - gourmet externo",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2025/lorena-cristina-5-1749502283.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-lorena-cristina-EM17952",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Lorena Cristina - deck da piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2025/lorena-cristina-1-1749502280.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-lorena-cristina-EM17952",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Lorena Cristina - piscina circular",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2025/lorena-cristina-2-1749502281.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-lorena-cristina-EM17952",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Lorena Cristina - piscina com raia",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2025/lorena-cristina-3-1749502281.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-lorena-cristina-EM17952",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "A 300 m da Praia Central",
+          "description": "Endereco na Rua 1001, com acesso direto a orla e ao miolo de servicos do Centro."
+        },
+        {
+          "icon": "Waves",
+          "title": "Lazer variado",
+          "description": "Piscinas, deck, academia, cinema, spa, gourmet, jogos e areas externas para uso diario."
+        },
+        {
+          "icon": "Camera",
+          "title": "Galeria do condominio",
+          "description": "As imagens agora mostram fachada e lazer, deixando os interiores de ofertas fora da narrativa principal."
+        }
+      ],
+      "differentials": [
+        "Fachada e areas comuns assumem o lugar das fotos internas.",
+        "Texto reforca Centro, Praia Central e estrutura de lazer.",
+        "Fotos selecionadas mostram piscina, fitness, jogos, spa e gourmet externo."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Lorena Cristina?",
+          "answer": "Fica na Rua 1001, no Centro de Balneario Camboriu, a cerca de 300 m da Praia Central."
+        },
+        {
+          "question": "Quais itens de lazer aparecem na curadoria?",
+          "answer": "A curadoria mostra piscina, deck, academia, jogos, wellness, gourmet, lounge externo e quiosque."
+        },
+        {
+          "question": "Por que a galeria foi revisada?",
+          "answer": "Porque a pagina precisava representar o condominio, nao os interiores das ofertas disponiveis."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, piscina, fitness, jogos, wellness, convivencia e outras areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-lorena-cristina-EM17952"
+      ]
+    },
+    {
+      "slug": "luminare-residencial",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/real-estates-photo/April2026/edificio-luminare-0000-1776963919.jpg",
+      "description": "O Luminare Residencial, da Aikon, esta na Avenida do Estado 2461, em Balneario Camboriu, com plantas amplas, 3 suites e lazer com piscina, fitness, coworking, eventos, jogos, bicicletario e hall. A nova curadoria prioriza fachada, implantacao e areas comuns, usando imagens do empreendimento para substituir interiores de oferta. A pagina passa a comunicar melhor a proposta urbana do condominio e sua conexao com o eixo Barra Norte e Nacoes.",
+      "seo_description": "Conheca o Luminare Residencial, Aikon em Balneario Camboriu, com piscina, fitness, coworking, jogos e hall.",
+      "gallery": [
+        {
+          "title": "Luminare - fachada e embasamento",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/real-estates-photo/April2026/edificio-luminare-0000-1776963919.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/luminare-EM63531",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Luminare - torre noturna",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/teste-1746190926.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/luminare-EM63531",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Luminare - skyline",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/real-estates-photo/July2026/thumb-luminare-1772128378-1772216804-1783388801.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/luminare-EM63531",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Luminare - piscina e lounge",
+          "category": "Piscina",
+          "image": "https://sistema.imogestao.com.br/fotos/401/331529/5672024-73172a.jpg",
+          "source_url": "https://www.cocaimoveis.com.br/impressao-imovel/958",
+          "source_label": "Cocai Imoveis"
+        },
+        {
+          "title": "Luminare - piscina do lazer",
+          "category": "Piscina",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/1601/w2-17464585079847.webp",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-luminare-residencial-balneario-camboriu-nacoes-3-quartos-3-garagens-venda-ref-1601/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Luminare - acesso molhado",
+          "category": "Piscina",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/1601/w4-17464585079847.webp",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-luminare-residencial-balneario-camboriu-nacoes-3-quartos-3-garagens-venda-ref-1601/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Luminare - lazer externo",
+          "category": "Lazer",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/1601/w5-17464585079848.webp",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-luminare-residencial-balneario-camboriu-nacoes-3-quartos-3-garagens-venda-ref-1601/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Luminare - solarium",
+          "category": "Convivencia",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/1601/w6-17464585079848.webp",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-luminare-residencial-balneario-camboriu-nacoes-3-quartos-3-garagens-venda-ref-1601/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Luminare - pergolado",
+          "category": "Convivencia",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/1601/w7-17464585079848.webp",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-luminare-residencial-balneario-camboriu-nacoes-3-quartos-3-garagens-venda-ref-1601/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Luminare - paisagismo",
+          "category": "Paisagismo",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/1601/w8-17464585079849.webp",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-luminare-residencial-balneario-camboriu-nacoes-3-quartos-3-garagens-venda-ref-1601/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Luminare - terraco",
+          "category": "Convivencia",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/1601/w9-17464585079849.webp",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-luminare-residencial-balneario-camboriu-nacoes-3-quartos-3-garagens-venda-ref-1601/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Luminare - kids externo",
+          "category": "Kids",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/1601/w10-1746458507985.webp",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-luminare-residencial-balneario-camboriu-nacoes-3-quartos-3-garagens-venda-ref-1601/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Luminare - brinquedoteca",
+          "category": "Kids",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/1601/w11-1746458507985.webp",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-luminare-residencial-balneario-camboriu-nacoes-3-quartos-3-garagens-venda-ref-1601/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Luminare - ambiente kids",
+          "category": "Kids",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/1601/w12-1746458507985.webp",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-luminare-residencial-balneario-camboriu-nacoes-3-quartos-3-garagens-venda-ref-1601/",
+          "source_label": "Guilherme Pilger"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Endereco conectado",
+          "description": "Avenida do Estado 2461, com leitura pratica para Centro, Barra Norte, Nacoes e orla."
+        },
+        {
+          "icon": "BriefcaseBusiness",
+          "title": "Lazer com coworking",
+          "description": "Piscina, fitness, eventos, jogos, bicicletario, coworking e hall fortalecem a rotina do condominio."
+        },
+        {
+          "icon": "Building2",
+          "title": "Projeto mais claro",
+          "description": "Fachada, piscina, terracos e kids entram na galeria para substituir imagens internas de oferta."
+        }
+      ],
+      "differentials": [
+        "Curadoria combina imagens de fachada, piscina, terracos e kids.",
+        "Copy corrige o foco para Aikon, Avenida do Estado e lazer compartilhado.",
+        "Pagina deixa de depender de fotos internas de cadastro."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Luminare Residencial?",
+          "answer": "Fica na Avenida do Estado 2461, em Balneario Camboriu, no eixo entre Barra Norte e Nacoes."
+        },
+        {
+          "question": "Quais itens de lazer foram priorizados?",
+          "answer": "Piscina, fitness, coworking, eventos, jogos, bicicletario, hall, terracos e areas kids."
+        },
+        {
+          "question": "Qual foi o ajuste visual?",
+          "answer": "A galeria passa a mostrar o empreendimento e suas areas comuns, removendo interiores de oferta."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, piscina, lazer, convivencia, paisagismo, kids e outras areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/luminare-EM63531",
+        "https://www.cocaimoveis.com.br/impressao-imovel/958",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-luminare-residencial-balneario-camboriu-nacoes-3-quartos-3-garagens-venda-ref-1601/"
+      ]
+    },
+    {
+      "slug": "mar-belle-residence",
+      "hero_image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/312030/images/_2f254e66315511166793236510911059.webp",
+      "description": "O Mar Belle Residence e um empreendimento RTeixeira no Centro de Balneario Camboriu, na Rua 3900, a cerca de 160 m da Praia Central. Com torre unica e perfil exclusivo, a pagina agora usa imagens de fachada, acesso, hall, gourmet, solarium e lazer, retirando fotos internas que nao representavam o condominio. A copy valoriza a escala boutique do projeto, a proximidade da praia e os ambientes de convivencia.",
+      "seo_description": "Conheca o Mar Belle Residence, RTeixeira no Centro de Balneario Camboriu, a cerca de 160 m da Praia Central.",
+      "gallery": [
+        {
+          "title": "Mar Belle - acesso principal",
+          "category": "Acesso",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/312030/images/_2f254e66315511166793236510911059.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-mar-belle-residence-balneario-camboriu-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Mar Belle - fachada vertical",
+          "category": "Fachada",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/companyconstruction/529/images/_41b0db49144057166456643410802975.jpg",
+          "source_url": "https://myside.com.br/apartamento-venda-mar-belle-residence-balneario-camboriu-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Mar Belle - fachada detalhe",
+          "category": "Fachada",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/312030/images/_bf201d5473489716679323661013211.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-mar-belle-residence-balneario-camboriu-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Mar Belle - piscina superior",
+          "category": "Piscina",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/312030/images/_09def3eb940605166793208810326079.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-mar-belle-residence-balneario-camboriu-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Mar Belle - hall",
+          "category": "Hall",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/312030/images/_219ece62098274166793234610845838.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-mar-belle-residence-balneario-camboriu-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Mar Belle - terraco de convivencia",
+          "category": "Convivencia",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/312030/images/_6524341b365883166793234910733447.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-mar-belle-residence-balneario-camboriu-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Mar Belle - gourmet",
+          "category": "Gourmet",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/312030/images/_40826945890944166793234710532725.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-mar-belle-residence-balneario-camboriu-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Mar Belle - jantar gourmet",
+          "category": "Gourmet",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/312030/images/_2f29b6e3160196166793234810198829.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-mar-belle-residence-balneario-camboriu-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Mar Belle - solarium",
+          "category": "Wellness",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/312030/images/_6df18258170316166793234810308398.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-mar-belle-residence-balneario-camboriu-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Mar Belle - lounge externo",
+          "category": "Convivencia",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/312030/images/_435d6ab1969031166793234910853602.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-mar-belle-residence-balneario-camboriu-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Mar Belle - piscina e skyline",
+          "category": "Piscina",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/312030/images/_64986d86093354173281649910849341.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-mar-belle-residence-balneario-camboriu-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Mar Belle - torre",
+          "category": "Fachada",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/312030/images/_bb4abc56176873166394410110321875.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-mar-belle-residence-balneario-camboriu-sc",
+          "source_label": "MySide"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Torre unica",
+          "description": "Projeto boutique da RTeixeira, com perfil exclusivo e leitura residencial de alto padrao."
+        },
+        {
+          "icon": "MapPin",
+          "title": "160 m da Praia Central",
+          "description": "Localizacao na Rua 3900, perto da orla, restaurantes e conveniencias do Centro."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer boutique",
+          "description": "Hall, gourmet, solarium, lounge e piscina entram na pagina como referencia visual do empreendimento."
+        }
+      ],
+      "differentials": [
+        "Galeria complementada com prancha extra para reduzir fotos internas.",
+        "Texto reforca RTeixeira, torre unica, Rua 3900 e proximidade da praia.",
+        "Fachada, acesso, hall e lazer assumem o protagonismo da pagina."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Mar Belle Residence?",
+          "answer": "Fica na Rua 3900, 114, no Centro de Balneario Camboriu, a cerca de 160 m da Praia Central."
+        },
+        {
+          "question": "Quem assina o empreendimento?",
+          "answer": "O empreendimento e da RTeixeira Construtora."
+        },
+        {
+          "question": "O que a curadoria destacou?",
+          "answer": "Fachada, acesso, hall, gourmet, solarium, lounge externo e piscina, evitando fotos internas de oferta."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza acesso, fachada, piscina, hall, convivencia, gourmet e outras areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://myside.com.br/apartamento-venda-mar-belle-residence-balneario-camboriu-sc"
+      ]
+    },
+    {
+      "slug": "mirage-residence",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20015-1665409475.jpg",
+      "description": "O Mirage Residence e frente mar na Praia Brava, na Rua Martim Pescador 65, com proposta de resort residencial e grande variedade de lazer. A curadoria troca fotos de oferta por imagens do proprio empreendimento: fachada, piscinas, acesso, fitness, gourmet, cinema, spa, sauna, kids, mini golf e ambientes de descanso. A pagina passa a destacar a experiencia do condominio de frente para a praia e sua infraestrutura completa.",
+      "seo_description": "Conheca o Mirage Residence, frente mar na Praia Brava, com piscina, spa, sauna, cinema, fitness e lazer resort.",
+      "gallery": [
+        {
+          "title": "Mirage - fachada frente mar",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20015-1665409475.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-mirage-residence-EM66573",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Mirage - piscina externa",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20000-1665409470.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-mirage-residence-EM66573",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Mirage - acesso iluminado",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20002-1665409470.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-mirage-residence-EM66573",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Mirage - implantacao na orla",
+          "category": "Localizacao",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20004-1665409471.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-mirage-residence-EM66573",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Mirage - vista do complexo",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20005-1665409471.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-mirage-residence-EM66573",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Mirage - piscina com vista",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20006-1665409472.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-mirage-residence-EM66573",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Mirage - piscina lateral",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20007-1665409472.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-mirage-residence-EM66573",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Mirage - wellness",
+          "category": "Wellness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20008-1665409472.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-mirage-residence-EM66573",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Mirage - cinema",
+          "category": "Cinema",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20009-1665409473.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-mirage-residence-EM66573",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Mirage - gourmet",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20010-1665409473.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-mirage-residence-EM66573",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Mirage - mini golf",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20011-1665409474.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-mirage-residence-EM66573",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Mirage - brinquedoteca",
+          "category": "Kids",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20012-1665409474.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-mirage-residence-EM66573",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Mirage - fitness",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20013-1665409474.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-mirage-residence-EM66573",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Mirage - piscina aquecida",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20014-1665409475.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-mirage-residence-EM66573",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Mirage - bar molhado",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20016-1665409475.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-mirage-residence-EM66573",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Mirage - jogos",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20017-1665409476.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-mirage-residence-EM66573",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Mirage - eventos",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20018-1665409476.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-mirage-residence-EM66573",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente mar na Praia Brava",
+          "description": "Endereco na Rua Martim Pescador 65, com a praia como eixo principal da experiencia."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer de resort",
+          "description": "Piscinas, bar molhado, spa, sauna, cinema, kids, mini golf, gourmet, jogos e fitness."
+        },
+        {
+          "icon": "Camera",
+          "title": "Imagem correta do condominio",
+          "description": "A galeria agora privilegia fachada, lazer e areas comuns do Mirage."
+        }
+      ],
+      "differentials": [
+        "Curadoria usa imagens do empreendimento na Praia Brava e descarta interiores de oferta.",
+        "Copy reforca frente mar, resort residencial e lazer completo.",
+        "Fotos selecionadas cobrem piscina, cinema, wellness, kids, gourmet e fitness."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Mirage Residence?",
+          "answer": "Fica na Rua Martim Pescador 65, na Praia Brava, em Itajai."
+        },
+        {
+          "question": "O Mirage e frente mar?",
+          "answer": "Sim. As fontes consultadas identificam o empreendimento como frente mar na Praia Brava."
+        },
+        {
+          "question": "Quais areas aparecem na galeria?",
+          "answer": "Fachada, piscinas, acesso, cinema, gourmet, mini golf, kids, fitness, spa, jogos e eventos."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, piscina, acesso, localizacao, wellness, cinema e outras areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-mirage-residence-EM66573"
+      ]
+    },
+    {
+      "slug": "new-york-apartaments",
+      "hero_image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/new-york-apartments-nyo-04-embasamento-ef-c.jpg",
+      "description": "O New York Apartments e um empreendimento Embraed quadra mar em Balneario Camboriu, 100% comercializado, com 51 pavimentos, 86 residencias, 14 espacos comerciais, 4 elevadores e hall/lazer com pe-direito duplo. A curadoria remove imagens internas de oferta e destaca fachada, embasamento, piscinas, terracos, wellness, eventos, gourmet, pub/jogos e fitness. A pagina fica alinhada ao padrao Embraed e ao uso real do condominio.",
+      "seo_description": "Conheca o New York Apartments, Embraed quadra mar em Balneario Camboriu, com 51 pavimentos e lazer completo.",
+      "gallery": [
+        {
+          "title": "New York - embasamento urbano",
+          "category": "Fachada",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/new-york-apartments-nyo-04-embasamento-ef-c.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/new-york-apartments",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "New York - fachada oeste",
+          "category": "Fachada",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/new-york-apartments-nyo-02-fachada-oeste-ef-b.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/new-york-apartments",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "New York - fachada leste",
+          "category": "Fachada",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/new-york-apartments-nyo-01-fachada-leste-ef.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/new-york-apartments",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "New York - piscina aerea",
+          "category": "Piscina",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/new-york-apartments-nyo-13-vista-aerea-piscina-ef.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/new-york-apartments",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "New York - fachada com placa",
+          "category": "Fachada",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/new-york-apartments-nyo-15-fachada-oeste-placa-ef-b.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/new-york-apartments",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "New York - piscina superior",
+          "category": "Piscina",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/new-york-apartments-nyo-12-vista-piscina-cobertura-ef-b.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/new-york-apartments",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "New York - piscina infantil",
+          "category": "Piscina",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/new-york-apartments-nyo-03-piscina-infantil-ef.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/new-york-apartments",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "New York - deck da piscina",
+          "category": "Piscina",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/new-york-apartments-nyo-05-deck-piscina-ef-b.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/new-york-apartments",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "New York - piscina adulto",
+          "category": "Piscina",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/new-york-apartments-nyo-06-piscina-adulto-ef-c.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/new-york-apartments",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "New York - playground",
+          "category": "Kids",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/new-york-apartments-nyo-08-playground-ef.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/new-york-apartments",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "New York - praca externa",
+          "category": "Convivencia",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/new-york-apartments-nyo-10-praca-externa-ef.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/new-york-apartments",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "New York - terraco jogos",
+          "category": "Jogos",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/new-york-apartments-nyo-14-terraco-jogos-ef-b.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/new-york-apartments",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "New York - sauna seca",
+          "category": "Wellness",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/new-york-apartments-nyo-17-sauna-seca-ef.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/new-york-apartments",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "New York - sauna umida",
+          "category": "Wellness",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/new-york-apartments-nyo-18-sauna-umida-ef.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/new-york-apartments",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "New York - eventos",
+          "category": "Eventos",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/new-york-apartments-nyo-20-salao-de-festas-ef-b.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/new-york-apartments",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "New York - gourmet",
+          "category": "Gourmet",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/new-york-apartments-nyo-21-gourmet-ef.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/new-york-apartments",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "New York - pub jogos",
+          "category": "Jogos",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/new-york-apartments-nyo-22-jogos-pub-ef-c.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/new-york-apartments",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "New York - piscina termica",
+          "category": "Piscina",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/new-york-apartments-nyo-23-piscina-termica-ef.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/new-york-apartments",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "New York - spa",
+          "category": "Wellness",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/new-york-apartments-nyo-24-spa-ef-c.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/new-york-apartments",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "New York - fitness",
+          "category": "Fitness",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/new-york-apartments-nyo-25-academia-ef-c.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/new-york-apartments",
+          "source_label": "Embraed"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Assinatura Embraed",
+          "description": "Empreendimento quadra mar, 100% comercializado, com 51 pavimentos e padrao Embraed."
+        },
+        {
+          "icon": "Waves",
+          "title": "Lazer vertical completo",
+          "description": "Piscinas, sauna, spa, fitness, gourmet, pub, jogos, playground e terracos."
+        },
+        {
+          "icon": "Camera",
+          "title": "Galeria oficial",
+          "description": "Imagens Embraed de fachada e areas comuns substituem os interiores de oferta."
+        }
+      ],
+      "differentials": [
+        "Galeria reposicionada com imagens oficiais Embraed.",
+        "Copy destaca quadra mar, 51 pavimentos, 86 residencias e lazer com pe-direito duplo.",
+        "Fotos internas deixam de ser a referencia visual da pagina."
+      ],
+      "faq": [
+        {
+          "question": "Quem assina o New York Apartments?",
+          "answer": "O New York Apartments e um empreendimento Embraed em Balneario Camboriu."
+        },
+        {
+          "question": "O empreendimento e quadra mar?",
+          "answer": "Sim. A ficha da Embraed informa localizacao quadra mar."
+        },
+        {
+          "question": "Quantos pavimentos possui?",
+          "answer": "A ficha tecnica informa 51 pavimentos, 86 residencias, 14 espacos comerciais e 4 elevadores."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, piscina, kids, convivencia, jogos, wellness e outras areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.embraed.com.br/pt-BR/empreendimento/new-york-apartments"
+      ]
+    },
+    {
+      "slug": "ocean-breeze-residence",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/sem-titulo-1-1665426054.jpg",
+      "description": "O Ocean Breeze Residence fica no Centro de Balneario Camboriu, na Rua 2070, com 3 ou 4 suites, 3 vagas e areas de lazer como piscina, eventos, jogos, sauna, brinquedoteca, quiosque, academia, churrasqueira, lounge, cinema, spa, hidromassagem e bar. A nova curadoria usa imagens do condominio para representar piscina, deck, gourmet, playground, fitness e convivencia, retirando os interiores de oferta que dominavam a pagina.",
+      "seo_description": "Conheca o Ocean Breeze Residence, no Centro de Balneario Camboriu, com piscina, sauna, cinema, spa e fitness.",
+      "gallery": [
+        {
+          "title": "Ocean Breeze - lazer e skyline",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/sem-titulo-1-1665426054.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ocean-breeze-EM14132",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ocean Breeze - piscina externa",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-marco-liane0003-1666723433.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ocean-breeze-EM14132",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ocean Breeze - lounge envidracado",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-marco-liane0008-1666723435.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ocean-breeze-EM14132",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ocean Breeze - fachada iluminada",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-marco-liane0005-1666723434.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ocean-breeze-EM14132",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ocean Breeze - implantacao praia",
+          "category": "Localizacao",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-marco-liane0006-1666723434.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ocean-breeze-EM14132",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ocean Breeze - frente praia",
+          "category": "Localizacao",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-marco-liane0004-1666723433.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ocean-breeze-EM14132",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ocean Breeze - deck externo",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-marco-liane0007-1666723434.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ocean-breeze-EM14132",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ocean Breeze - borda da piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-marco-liane0010-1666723435.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ocean-breeze-EM14132",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ocean Breeze - wellness",
+          "category": "Wellness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-marco-liane0000-1666723432.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ocean-breeze-EM14132",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 2070 no Centro",
+          "description": "Localizacao central, com servicos, praia e conveniencias no raio de rotina."
+        },
+        {
+          "icon": "Waves",
+          "title": "Lazer com wellness",
+          "description": "Piscina, sauna, spa, hidromassagem, cinema, fitness, jogos, gourmet e areas kids."
+        },
+        {
+          "icon": "Camera",
+          "title": "Fotos do empreendimento",
+          "description": "Piscina, fachada e ambientes comuns passam a representar a pagina."
+        }
+      ],
+      "differentials": [
+        "Selecao removeu setas, placeholders e fotos internas de oferta.",
+        "Copy reforca Centro, Rua 2070 e infraestrutura de lazer.",
+        "Galeria prioriza piscina, fachada, lounge, wellness e localizacao."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Ocean Breeze Residence?",
+          "answer": "Fica na Rua 2070, no Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Quais itens de lazer foram considerados?",
+          "answer": "Piscina, eventos, jogos, sauna, brinquedoteca, quiosque, academia, lounge, cinema, spa e bar."
+        },
+        {
+          "question": "O que mudou na galeria?",
+          "answer": "A galeria passou a destacar fachada, piscina, deck, wellness e areas comuns do empreendimento."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza piscina, convivencia, fachada, localizacao, wellness e outras areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-ocean-breeze-EM14132"
+      ]
+    },
+    {
+      "slug": "ocean-tower",
+      "hero_image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/wNijvhEKZn3uyPmFBq6D.jpg",
+      "description": "O Ocean Tower esta na Rua Jose Manir Lucca 23, no bairro Pioneiros, em Balneario Camboriu, perto da Barra Norte e da orla. A pagina foi reorganizada para mostrar lazer e estrutura do condominio: piscina com deck, playground, brinquedoteca, fitness, jogos, gourmet, cinema, sauna, spa, quadra e areas externas. A copy passa a comunicar o empreendimento em vez de depender de fotos internas das ofertas.",
+      "seo_description": "Conheca o Ocean Tower, em Pioneiros, Balneario Camboriu, com piscina, kids, fitness, jogos, gourmet e cinema.",
+      "gallery": [
+        {
+          "title": "Ocean Tower - lazer panoramico",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/wNijvhEKZn3uyPmFBq6D.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ocean-tower-EM14623",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ocean Tower - piscina com deck",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/pL5oePF3DPZeoUqWBmql.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ocean-tower-EM14623",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ocean Tower - piscina externa",
+          "category": "Piscina",
+          "image": "https://b.casteldigital.com.br/flyimoveis/ig/im/imoveis/1379/img-20240314-wa0045-17105375693761.jpg",
+          "source_url": "https://www.flyimoveis.com.br/imovel/apartamento-no-edificio-ocean-tower-balneario-camboriu-pioneiros-4-quartos-2-garagens-venda-ref-1379/",
+          "source_label": "Fly Imoveis"
+        },
+        {
+          "title": "Ocean Tower - raia externa",
+          "category": "Piscina",
+          "image": "https://b.casteldigital.com.br/flyimoveis/ig/im/imoveis/1379/img-20240314-wa0044-17105375693763.jpg",
+          "source_url": "https://www.flyimoveis.com.br/imovel/apartamento-no-edificio-ocean-tower-balneario-camboriu-pioneiros-4-quartos-2-garagens-venda-ref-1379/",
+          "source_label": "Fly Imoveis"
+        },
+        {
+          "title": "Ocean Tower - patio de convivencia",
+          "category": "Convivencia",
+          "image": "https://b.casteldigital.com.br/flyimoveis/ig/im/imoveis/1379/img-20240314-wa0043-17105375693765.jpg",
+          "source_url": "https://www.flyimoveis.com.br/imovel/apartamento-no-edificio-ocean-tower-balneario-camboriu-pioneiros-4-quartos-2-garagens-venda-ref-1379/",
+          "source_label": "Fly Imoveis"
+        },
+        {
+          "title": "Ocean Tower - quiosque gourmet",
+          "category": "Gourmet",
+          "image": "https://b.casteldigital.com.br/flyimoveis/ig/im/imoveis/1379/img-20240314-wa0042-17105375693766.jpg",
+          "source_url": "https://www.flyimoveis.com.br/imovel/apartamento-no-edificio-ocean-tower-balneario-camboriu-pioneiros-4-quartos-2-garagens-venda-ref-1379/",
+          "source_label": "Fly Imoveis"
+        },
+        {
+          "title": "Ocean Tower - fitness",
+          "category": "Fitness",
+          "image": "https://b.casteldigital.com.br/flyimoveis/ig/im/imoveis/1379/img-20240314-wa0047-17105375693759.jpg",
+          "source_url": "https://www.flyimoveis.com.br/imovel/apartamento-no-edificio-ocean-tower-balneario-camboriu-pioneiros-4-quartos-2-garagens-venda-ref-1379/",
+          "source_label": "Fly Imoveis"
+        },
+        {
+          "title": "Ocean Tower - jogos",
+          "category": "Jogos",
+          "image": "https://b.casteldigital.com.br/flyimoveis/ig/im/imoveis/1379/img-20240314-wa0048-17105375693757.jpg",
+          "source_url": "https://www.flyimoveis.com.br/imovel/apartamento-no-edificio-ocean-tower-balneario-camboriu-pioneiros-4-quartos-2-garagens-venda-ref-1379/",
+          "source_label": "Fly Imoveis"
+        },
+        {
+          "title": "Ocean Tower - brinquedoteca",
+          "category": "Kids",
+          "image": "https://b.casteldigital.com.br/flyimoveis/ig/im/imoveis/1379/img-20240314-wa0032-17105375693755.jpg",
+          "source_url": "https://www.flyimoveis.com.br/imovel/apartamento-no-edificio-ocean-tower-balneario-camboriu-pioneiros-4-quartos-2-garagens-venda-ref-1379/",
+          "source_label": "Fly Imoveis"
+        },
+        {
+          "title": "Ocean Tower - playground",
+          "category": "Kids",
+          "image": "https://b.casteldigital.com.br/flyimoveis/ig/im/imoveis/1379/img-20240314-wa0046-1710537569376.jpg",
+          "source_url": "https://www.flyimoveis.com.br/imovel/apartamento-no-edificio-ocean-tower-balneario-camboriu-pioneiros-4-quartos-2-garagens-venda-ref-1379/",
+          "source_label": "Fly Imoveis"
+        },
+        {
+          "title": "Ocean Tower - cinema",
+          "category": "Cinema",
+          "image": "https://b.casteldigital.com.br/flyimoveis/ig/im/imoveis/1379/img-20240314-wa0039-17105375693767.jpg",
+          "source_url": "https://www.flyimoveis.com.br/imovel/apartamento-no-edificio-ocean-tower-balneario-camboriu-pioneiros-4-quartos-2-garagens-venda-ref-1379/",
+          "source_label": "Fly Imoveis"
+        },
+        {
+          "title": "Ocean Tower - bilhar",
+          "category": "Jogos",
+          "image": "https://b.casteldigital.com.br/flyimoveis/ig/im/imoveis/1379/img-20240314-wa0038-17105375693769.jpg",
+          "source_url": "https://www.flyimoveis.com.br/imovel/apartamento-no-edificio-ocean-tower-balneario-camboriu-pioneiros-4-quartos-2-garagens-venda-ref-1379/",
+          "source_label": "Fly Imoveis"
+        },
+        {
+          "title": "Ocean Tower - lounge externo",
+          "category": "Convivencia",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/XpGl317t29RFXCyDRCY9.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ocean-tower-EM14623",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ocean Tower - jogos internos",
+          "category": "Jogos",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/x3PKQCKau9pFeKC7ulRn.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ocean-tower-EM14623",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ocean Tower - academia",
+          "category": "Fitness",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/SrvH4oL0xuRVtkxc8GQS.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ocean-tower-EM14623",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ocean Tower - area kids",
+          "category": "Kids",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/KB3KweckqapEiO3kBQHp.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ocean-tower-EM14623",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Pioneiros e Barra Norte",
+          "description": "Endereco na Rua Jose Manir Lucca 23, com acesso facil a orla e ao eixo norte de Balneario Camboriu."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer para rotina completa",
+          "description": "Piscina com deck, fitness, kids, jogos, gourmet, cinema, spa, sauna e quadra."
+        },
+        {
+          "icon": "Camera",
+          "title": "Prancha extra validada",
+          "description": "A selecao final usou candidatos adicionais para priorizar areas comuns e reduzir fotos internas."
+        }
+      ],
+      "differentials": [
+        "Foi gerada prancha extra para encontrar mais fotos de lazer e condominio.",
+        "Texto atualizado com endereco em Pioneiros e lista real de areas comuns.",
+        "Galeria final evita interiores e privilegia piscina, kids, fitness, jogos, gourmet e cinema."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Ocean Tower?",
+          "answer": "Fica na Rua Jose Manir Lucca 23, no bairro Pioneiros, em Balneario Camboriu."
+        },
+        {
+          "question": "Quais areas comuns foram usadas?",
+          "answer": "Piscina, patio externo, quiosque gourmet, fitness, brinquedoteca, playground, jogos e cinema."
+        },
+        {
+          "question": "Por que houve prancha extra?",
+          "answer": "A primeira extracao tinha muitas fotos internas; a prancha extra ajudou a selecionar mais imagens do condominio."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza piscina, convivencia, gourmet, fitness, jogos, kids e outras areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-ocean-tower-EM14623",
+        "https://www.flyimoveis.com.br/imovel/apartamento-no-edificio-ocean-tower-balneario-camboriu-pioneiros-4-quartos-2-garagens-venda-ref-1379/"
+      ]
+    },
+    {
+      "slug": "ocean-wind-residence",
+      "hero_image": "https://www.raymundiconstrucoes.com.br/uploads/imagens/fachada-ocean-wind-praia-brava-itajai-222.webp",
+      "description": "O Ocean Wind Residence, da Raymundi, esta pronto na Praia Brava de Itajai, a 135 m da praia, na Rua Delfim Mario de Padua Peixoto. Entregue em setembro de 2024, combina 3 suites, 3 vagas e 154 a 168 m2 com lazer de piscinas, sauna seca e umida, academia, eventos, pub, brinquedoteca, jogos e spa com ofuro. A galeria agora mostra fachada, placa, hall, piscina, wellness, sauna e fitness do empreendimento.",
+      "seo_description": "Conheca o Ocean Wind Residence, Raymundi na Praia Brava, a 135 m da praia, com piscinas, sauna, spa e fitness.",
+      "gallery": [
+        {
+          "title": "Ocean Wind - fachada",
+          "category": "Fachada",
+          "image": "https://www.raymundiconstrucoes.com.br/uploads/imagens/fachada-ocean-wind-praia-brava-itajai-222.webp",
+          "source_url": "https://www.raymundiconstrucoes.com.br/empreendimento/ocean-wind-praia-brava-itajai",
+          "source_label": "Raymundi"
+        },
+        {
+          "title": "Ocean Wind - placa de acesso",
+          "category": "Acesso",
+          "image": "https://www.raymundiconstrucoes.com.br/uploads/imagens/lg-ocean-wind-praia-brava-itajai-34-357.png",
+          "source_url": "https://www.raymundiconstrucoes.com.br/empreendimento/ocean-wind-praia-brava-itajai",
+          "source_label": "Raymundi"
+        },
+        {
+          "title": "Ocean Wind - hall principal",
+          "category": "Hall",
+          "image": "https://www.raymundiconstrucoes.com.br/uploads/imagens/lg-ocean-wind-praia-brava-itajai-34-804.png",
+          "source_url": "https://www.raymundiconstrucoes.com.br/empreendimento/ocean-wind-praia-brava-itajai",
+          "source_label": "Raymundi"
+        },
+        {
+          "title": "Ocean Wind - hall com escada",
+          "category": "Hall",
+          "image": "https://www.raymundiconstrucoes.com.br/uploads/imagens/lg-ocean-wind-praia-brava-itajai-34-494.png",
+          "source_url": "https://www.raymundiconstrucoes.com.br/empreendimento/ocean-wind-praia-brava-itajai",
+          "source_label": "Raymundi"
+        },
+        {
+          "title": "Ocean Wind - hall vertical",
+          "category": "Hall",
+          "image": "https://www.raymundiconstrucoes.com.br/uploads/imagens/lg-ocean-wind-praia-brava-itajai-34-7.png",
+          "source_url": "https://www.raymundiconstrucoes.com.br/empreendimento/ocean-wind-praia-brava-itajai",
+          "source_label": "Raymundi"
+        },
+        {
+          "title": "Ocean Wind - piscina externa",
+          "category": "Piscina",
+          "image": "https://www.raymundiconstrucoes.com.br/uploads/imagens/lg-ocean-wind-praia-brava-itajai-34-586.png",
+          "source_url": "https://www.raymundiconstrucoes.com.br/empreendimento/ocean-wind-praia-brava-itajai",
+          "source_label": "Raymundi"
+        },
+        {
+          "title": "Ocean Wind - piscina lateral",
+          "category": "Piscina",
+          "image": "https://www.raymundiconstrucoes.com.br/uploads/imagens/lg-ocean-wind-praia-brava-itajai-34-263.png",
+          "source_url": "https://www.raymundiconstrucoes.com.br/empreendimento/ocean-wind-praia-brava-itajai",
+          "source_label": "Raymundi"
+        },
+        {
+          "title": "Ocean Wind - deck da piscina",
+          "category": "Piscina",
+          "image": "https://www.raymundiconstrucoes.com.br/uploads/imagens/lg-ocean-wind-praia-brava-itajai-34-783.png",
+          "source_url": "https://www.raymundiconstrucoes.com.br/empreendimento/ocean-wind-praia-brava-itajai",
+          "source_label": "Raymundi"
+        },
+        {
+          "title": "Ocean Wind - wellness com madeira",
+          "category": "Wellness",
+          "image": "https://www.raymundiconstrucoes.com.br/uploads/imagens/lg-ocean-wind-praia-brava-itajai-34-620.png",
+          "source_url": "https://www.raymundiconstrucoes.com.br/empreendimento/ocean-wind-praia-brava-itajai",
+          "source_label": "Raymundi"
+        },
+        {
+          "title": "Ocean Wind - spa interno",
+          "category": "Wellness",
+          "image": "https://www.raymundiconstrucoes.com.br/uploads/imagens/lg-ocean-wind-praia-brava-itajai-34-726.png",
+          "source_url": "https://www.raymundiconstrucoes.com.br/empreendimento/ocean-wind-praia-brava-itajai",
+          "source_label": "Raymundi"
+        },
+        {
+          "title": "Ocean Wind - sauna iluminada",
+          "category": "Wellness",
+          "image": "https://www.raymundiconstrucoes.com.br/uploads/imagens/lg-ocean-wind-praia-brava-itajai-34-763.png",
+          "source_url": "https://www.raymundiconstrucoes.com.br/empreendimento/ocean-wind-praia-brava-itajai",
+          "source_label": "Raymundi"
+        },
+        {
+          "title": "Ocean Wind - piscina coberta",
+          "category": "Piscina",
+          "image": "https://www.raymundiconstrucoes.com.br/uploads/imagens/lg-ocean-wind-praia-brava-itajai-34-89.png",
+          "source_url": "https://www.raymundiconstrucoes.com.br/empreendimento/ocean-wind-praia-brava-itajai",
+          "source_label": "Raymundi"
+        },
+        {
+          "title": "Ocean Wind - sauna seca",
+          "category": "Wellness",
+          "image": "https://www.raymundiconstrucoes.com.br/uploads/imagens/lg-ocean-wind-praia-brava-itajai-34-404.png",
+          "source_url": "https://www.raymundiconstrucoes.com.br/empreendimento/ocean-wind-praia-brava-itajai",
+          "source_label": "Raymundi"
+        },
+        {
+          "title": "Ocean Wind - sauna umida",
+          "category": "Wellness",
+          "image": "https://www.raymundiconstrucoes.com.br/uploads/imagens/lg-ocean-wind-praia-brava-itajai-34-260.png",
+          "source_url": "https://www.raymundiconstrucoes.com.br/empreendimento/ocean-wind-praia-brava-itajai",
+          "source_label": "Raymundi"
+        },
+        {
+          "title": "Ocean Wind - fitness",
+          "category": "Fitness",
+          "image": "https://www.raymundiconstrucoes.com.br/uploads/imagens/lg-ocean-wind-praia-brava-itajai-34-57.png",
+          "source_url": "https://www.raymundiconstrucoes.com.br/empreendimento/ocean-wind-praia-brava-itajai",
+          "source_label": "Raymundi"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "135 m da Praia Brava",
+          "description": "Empreendimento entregue em setembro de 2024, com endereco na Rua Delfim Mario de Padua Peixoto."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Wellness completo",
+          "description": "Piscinas, sauna seca e umida, spa com ofuro, fitness, eventos, pub, brinquedoteca e jogos."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Condominio pronto",
+          "description": "Obra concluida, seguranca 24 horas e galeria com imagens reais das areas comuns."
+        }
+      ],
+      "differentials": [
+        "Curadoria usa imagens oficiais Raymundi de fachada, hall, piscina, sauna e fitness.",
+        "Copy reforca entrega em setembro de 2024 e proximidade de 135 m da praia.",
+        "Pagina passa a comunicar o condominio pronto, nao interiores de oferta."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Ocean Wind Residence?",
+          "answer": "Fica na Rua Delfim Mario de Padua Peixoto, na Praia Brava, em Itajai."
+        },
+        {
+          "question": "Quando foi entregue?",
+          "answer": "A fonte da Raymundi informa entrega em setembro de 2024 e obra 100% concluida."
+        },
+        {
+          "question": "Quais areas de lazer aparecem?",
+          "answer": "Piscinas, hall, spa, sauna seca, sauna umida, wellness e fitness."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, acesso, hall, piscina, wellness, fitness e outras areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.raymundiconstrucoes.com.br/empreendimento/ocean-wind-praia-brava-itajai"
+      ]
+    },
+    {
+      "slug": "opera-tower",
+      "hero_image": "https://construtorafjc.com.br/wp-content/uploads/2023/04/fachada-opera.jpg",
+      "description": "O Opera Tower e um empreendimento da Construtora FJC no Centro de Balneario Camboriu, em rua reta ao mar, com 41 pavimentos, 69 residencias, 2 por andar, box de praia, bicicletario e lazer com piscina, sauna, pub, quadra, pet e academia. A curadoria substitui interiores de ofertas por fachada e areas comuns, deixando a pagina focada no condominio. O conjunto visual agora comunica verticalidade, lazer e conveniencia central.",
+      "seo_description": "Conheca o Opera Tower, FJC no Centro de Balneario Camboriu, com 41 pavimentos, piscina, pub, quadra e academia.",
+      "gallery": [
+        {
+          "title": "Opera Tower - fachada",
+          "category": "Fachada",
+          "image": "https://construtorafjc.com.br/wp-content/uploads/2023/04/fachada-opera.jpg",
+          "source_url": "https://construtorafjc.com.br/opera-tower/",
+          "source_label": "Construtora FJC"
+        },
+        {
+          "title": "Opera Tower - torre",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-1750686183.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-opera-tower-EM65944",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Opera Tower - piscina e lazer",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/23062025104303387-1750686183.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-opera-tower-EM65944",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Opera Tower - piscina externa",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/August2021/MdOygN35JhpwlAvZ9c66.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-opera-tower-EM65944",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Opera Tower - gourmet",
+          "category": "Gourmet",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/August2021/Xmqgqd826Sd7DON8IOmb.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-opera-tower-EM65944",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Opera Tower - jogos",
+          "category": "Jogos",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/August2021/nFTiod1n0Cz6PGcKv6kv.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-opera-tower-EM65944",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Opera Tower - pet place",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/August2021/oiwGlYWH2p0vGQ9fo1wO.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-opera-tower-EM65944",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Opera Tower - playground",
+          "category": "Kids",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/August2021/uYyE6p51q8kZGr6OD66U.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-opera-tower-EM65944",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Opera Tower - fitness",
+          "category": "Fitness",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/August2021/2qqEUnYxiOOpJBKswSw8.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-opera-tower-EM65944",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Opera Tower - quadra",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/August2021/uLpEjFa0VTSwEr5bQgBQ.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-opera-tower-EM65944",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "41 pavimentos",
+          "description": "Projeto FJC com 69 residencias, 2 por andar, box de praia e bicicletario."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Rua reta ao mar",
+          "description": "Localizacao central em Balneario Camboriu, com leitura pratica para praia e servicos."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer completo",
+          "description": "Piscina, sauna, pub, quadra, pet place, academia, gourmet, jogos e kids."
+        }
+      ],
+      "differentials": [
+        "Galeria revisada com fachada e areas comuns do Opera Tower.",
+        "Copy reforca FJC, 41 pavimentos, rua reta ao mar e lazer do condominio.",
+        "Interiores de oferta foram removidos da narrativa principal."
+      ],
+      "faq": [
+        {
+          "question": "Quem assina o Opera Tower?",
+          "answer": "O Opera Tower e um empreendimento da Construtora FJC."
+        },
+        {
+          "question": "Quantos pavimentos possui?",
+          "answer": "A FJC informa 41 pavimentos, 69 residencias e 2 por andar."
+        },
+        {
+          "question": "Quais areas comuns foram destacadas?",
+          "answer": "Piscina, gourmet, jogos, pet place, playground, fitness e quadra."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, piscina, gourmet, jogos, lazer, kids e outras areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://construtorafjc.com.br/opera-tower/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-opera-tower-EM65944"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1458 @@
+{
+  "batch_id": "development-media-curation-batch44-20260717",
+  "generated_at": "2026-07-17T23:10:00.000Z",
+  "items": [
+    {
+      "slug": "sain-john",
+      "hero_image": "https://centralcorretor.s3.sa-east-1.amazonaws.com/protected/us-east-1:c19b00f3-4d13-c113-dcdd-8a86f2516d1f/28f11e94-9c9d-4de9-88b0-69e51e363013_xl.webp",
+      "description": "O Sain John foi revisado como Saint John, empreendimento da JA Russi em Itapema. A curadoria prioriza imagens oficiais e fontes nominais para mostrar a torre, a base arquitetonica, o acesso e a relacao com a orla, substituindo midia interna por material do projeto. A copy passa a explicar o edificio com foco em endereco urbano de praia, assinatura construtiva e apresentacao visual coerente com o condominio.",
+      "seo_description": "Saint John em Itapema, com fachada oficial, acesso, base arquitetonica e contexto de orla.",
+      "gallery": [
+        {
+          "title": "Saint John - fachada iluminada",
+          "category": "Fachada",
+          "image": "https://centralcorretor.s3.sa-east-1.amazonaws.com/protected/us-east-1:c19b00f3-4d13-c113-dcdd-8a86f2516d1f/28f11e94-9c9d-4de9-88b0-69e51e363013_xl.webp",
+          "source_url": "https://www.stjohn.com.br/",
+          "source_label": "Saint John"
+        },
+        {
+          "title": "Saint John - torre diurna",
+          "category": "Fachada",
+          "image": "https://centralcorretor.s3.sa-east-1.amazonaws.com/protected/us-east-1:c19b00f3-4d48-c991-6807-6f2d38e510f4/3ed87192-13da-4fc1-902e-9b57ec58367c_xl.webp",
+          "source_url": "https://jarussi.com.br/empreendimentos/Saint-John_6776F059D1DFE",
+          "source_label": "JA Russi"
+        },
+        {
+          "title": "Saint John - acesso ajardinado",
+          "category": "Acesso",
+          "image": "https://centralcorretor.s3.sa-east-1.amazonaws.com/protected/us-east-1:0a29d542-aa00-4b2d-b26f-e76af4199d66/34b9b489-4b25-42a1-aada-90a77f8c1917_xl.webp",
+          "source_url": "https://jarussi.com.br/empreendimentos/Saint-John_6776F059D1DFE",
+          "source_label": "JA Russi"
+        },
+        {
+          "title": "Saint John - base arquitetonica",
+          "category": "Fachada",
+          "image": "https://centralcorretor.s3.sa-east-1.amazonaws.com/protected/us-east-1:5d89ea9c-4a19-4644-802e-f9cba9062df3/8c092f48-e787-4774-b44d-20c4cd244095_xl.webp",
+          "source_url": "https://jarussi.com.br/empreendimentos/Saint-John_6776F059D1DFE",
+          "source_label": "JA Russi"
+        },
+        {
+          "title": "Saint John - fachada lateral",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/04/edificio-saint-john-itapema-fachada.jpg",
+          "source_url": "https://litoralvertical.com/pre-lancamento/itapema/apartamentos/edificio-saint-john/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Saint John - composicao do projeto",
+          "category": "Projeto",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/04/edificio-saint-john-itapema-1.avif",
+          "source_url": "https://litoralvertical.com/pre-lancamento/itapema/apartamentos/edificio-saint-john/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Saint John - orla e identidade",
+          "category": "Entorno",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/04/edificio-saint-john-itapema-22.avif",
+          "source_url": "https://litoralvertical.com/pre-lancamento/itapema/apartamentos/edificio-saint-john/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Fonte oficial",
+          "description": "A hero e parte da galeria usam imagens do site oficial Saint John e da JA Russi."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Itapema central",
+          "description": "As fontes posicionam o empreendimento em Itapema, com leitura de praia e vida urbana."
+        },
+        {
+          "icon": "Waves",
+          "title": "Contexto de orla",
+          "description": "A galeria inclui material visual que mostra a relacao do projeto com o litoral."
+        },
+        {
+          "icon": "Landmark",
+          "title": "Arquitetura vertical",
+          "description": "As imagens destacam torre esbelta, embasamento e acesso com tratamento arquitetonico."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Hero corrigida",
+          "description": "A imagem principal passa a mostrar a fachada do Saint John."
+        },
+        {
+          "title": "Fontes nominais",
+          "description": "Site oficial, JA Russi e Litoral Vertical foram usados para cruzar midia e contexto."
+        },
+        {
+          "title": "Galeria sem interiores",
+          "description": "A selecao evita fotos privativas e privilegia fachada, acesso e entorno."
+        }
+      ],
+      "faq": [
+        {
+          "question": "O Sain John e o mesmo Saint John?",
+          "answer": "A auditoria encontrou fontes nominais para Saint John, associadas a JA Russi em Itapema."
+        },
+        {
+          "question": "Quais imagens entraram na pagina?",
+          "answer": "Fachada, torre, base arquitetonica, acesso e contexto de orla."
+        },
+        {
+          "question": "Por que a pagina foi reescrita?",
+          "answer": "Para substituir texto generico por descricao ligada ao projeto e a sua apresentacao real."
+        },
+        {
+          "question": "As fotos internas foram mantidas?",
+          "answer": "Nao. A curadoria prioriza midia do empreendimento e evita ambientes privativos."
+        }
+      ],
+      "sources": [
+        "https://www.stjohn.com.br/",
+        "https://jarussi.com.br/empreendimentos/Saint-John_6776F059D1DFE",
+        "https://litoralvertical.com/pre-lancamento/itapema/apartamentos/edificio-saint-john/"
+      ]
+    },
+    {
+      "slug": "san-carlo-residence",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-san-carlo-balneario-camboriu-1.0.jpg",
+      "description": "O San Carlo Residence foi revisado com fontes de Balneario Camboriu que mostram fachada, acesso, hall e um lazer bem documentado. A galeria agora apresenta piscina, deck, jogos, brinquedoteca, fitness, cinema, playground e ambientes de convivencia, em vez de imagens internas de oferta. A pagina passa a comunicar o condominio como um predio central com estrutura completa para rotina, descanso e receber convidados.",
+      "seo_description": "San Carlo Residence em Balneario Camboriu, com fachada, piscina, hall, cinema, fitness e areas infantis.",
+      "gallery": [
+        {
+          "title": "San Carlo - fachada principal",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-san-carlo-balneario-camboriu-1.0.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-san-carlo/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "San Carlo - piscina externa",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/san-carlo-41-deck-piscina-jpg-1664990977.jpeg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-san-carlo-residence-EM7966",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "San Carlo - deck da piscina",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/NqSbmGxLilV79g2phGSF.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-san-carlo-residence-EM7966",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "San Carlo - piscina noturna",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/7Ni2k8exTHFC0NpmlV3I.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-san-carlo-residence-EM7966",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "San Carlo - jogos",
+          "category": "Jogos",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/GgUBWEs1NevZhglhgxhv.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-san-carlo-residence-EM7966",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "San Carlo - convivencia interna",
+          "category": "Convivencia",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/iuNxvuyfbYpx7BHPUfgN.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-san-carlo-residence-EM7966",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "San Carlo - brinquedoteca",
+          "category": "Infantil",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/EgCBVR2dfjWynbDnHaUZ.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-san-carlo-residence-EM7966",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "San Carlo - fitness",
+          "category": "Fitness",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/YEmPuaPRrY5PR6oj7h8x.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-san-carlo-residence-EM7966",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "San Carlo - cinema",
+          "category": "Cinema",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/719KJeM1W78pY1nrIAHK.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-san-carlo-residence-EM7966",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "San Carlo - lazer visto do alto",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/Qmbg1GkDUgOLwZNcfmhR.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-san-carlo-residence-EM7966",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "San Carlo - acesso urbano",
+          "category": "Acesso",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/gv4t9yz5g885bmBuaeai.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-san-carlo-residence-EM7966",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "San Carlo - hall social",
+          "category": "Hall",
+          "image": "https://www.ersempreendimentos.com.br/index.php/img/width/0/0/wrap/larg/1680/alt/1000/sharpen/32/jpg-quality/85/file/empreendimentos/12/0-hall.jpg",
+          "source_url": "https://www.ersempreendimentos.com.br/empreendimentos/titulo/san-carlo/",
+          "source_label": "ERS Empreendimentos"
+        },
+        {
+          "title": "San Carlo - piscina ampliada",
+          "category": "Piscina",
+          "image": "https://www.ersempreendimentos.com.br/index.php/img/width/0/0/wrap/larg/1680/alt/1000/sharpen/32/jpg-quality/85/file/empreendimentos/12/4-piscina.jpg",
+          "source_url": "https://www.ersempreendimentos.com.br/empreendimentos/titulo/san-carlo/",
+          "source_label": "ERS Empreendimentos"
+        },
+        {
+          "title": "San Carlo - playground",
+          "category": "Infantil",
+          "image": "https://www.ersempreendimentos.com.br/index.php/img/width/0/0/wrap/larg/1680/alt/1000/sharpen/32/jpg-quality/85/file/empreendimentos/12/5-playground.jpg",
+          "source_url": "https://www.ersempreendimentos.com.br/empreendimentos/titulo/san-carlo/",
+          "source_label": "ERS Empreendimentos"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Piscina e deck",
+          "description": "As fontes da Imobille e ERS mostram piscina externa, deck e lazer no nivel comum."
+        },
+        {
+          "icon": "Gamepad2",
+          "title": "Jogos e cinema",
+          "description": "A nova galeria inclui ambientes de entretenimento do empreendimento."
+        },
+        {
+          "icon": "Baby",
+          "title": "Lazer infantil",
+          "description": "Brinquedoteca e playground aparecem nas imagens verificadas."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Fitness",
+          "description": "A academia do condominio foi mantida como item de apoio ao dia a dia."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fachada identificada",
+          "description": "A hero mostra o predio e a galeria reforca o acesso urbano."
+        },
+        {
+          "title": "Lazer completo",
+          "description": "Piscina, cinema, jogos, fitness e areas infantis compoem a narrativa."
+        },
+        {
+          "title": "Midia cruzada",
+          "description": "Imobille, Litoral Vertical e ERS sustentam a selecao visual."
+        }
+      ],
+      "faq": [
+        {
+          "question": "O que foi corrigido no San Carlo?",
+          "answer": "A pagina recebeu fachada e imagens de areas comuns do empreendimento."
+        },
+        {
+          "question": "Quais recursos aparecem na galeria?",
+          "answer": "Piscina, deck, jogos, brinquedoteca, fitness, cinema, playground e hall."
+        },
+        {
+          "question": "As imagens sao de fontes nominais?",
+          "answer": "Sim. Foram usadas Imobille, Litoral Vertical e ERS Empreendimentos."
+        },
+        {
+          "question": "Por que a descricao mudou?",
+          "answer": "Para explicar o condominio e seu lazer, nao a oferta especifica."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-san-carlo-residence-EM7966",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-san-carlo/",
+        "https://www.ersempreendimentos.com.br/empreendimentos/titulo/san-carlo/"
+      ]
+    },
+    {
+      "slug": "san-diego",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2025/san-diego-8-1750079577.webp",
+      "description": "O San Diego foi alinhado ao Boulevard San Diego, em Pioneiros, Balneario Camboriu. As fontes consultadas mostram fachada, acesso envidracado, piscina, deck, solarium, pergolado e gourmet, permitindo trocar a pagina para um recorte de condominio. A nova descricao valoriza a localizacao na regiao norte da cidade, o lazer compacto e a leitura de predio pronto para quem busca rotina perto da praia e dos servicos do bairro.",
+      "seo_description": "San Diego Boulevard em Pioneiros, Balneario Camboriu, com fachada, piscina, deck e gourmet.",
+      "gallery": [
+        {
+          "title": "San Diego - fachada frontal",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2025/san-diego-8-1750079577.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-san-diego-boulevard-EM40009",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "San Diego - torre e acesso",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2025/san-diego-7-1750079576.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-san-diego-boulevard-EM40009",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "San Diego - piscina reservada",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/849/img-4-1.jpg?1764953083",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/849/boulevard-san-diego/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "San Diego - piscina externa",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/849/img-6-1.jpg?1764953083",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/849/boulevard-san-diego/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "San Diego - deck com espreguicadeiras",
+          "category": "Deck",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/849/img-8-1.jpg?1764953083",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/849/boulevard-san-diego/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "San Diego - solarium",
+          "category": "Deck",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/849/img-9-1.jpg?1764953083",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/849/boulevard-san-diego/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "San Diego - pergolado externo",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/849/img-11-1.jpg?1764953083",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/849/boulevard-san-diego/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "San Diego - terraco de lazer",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/849/img-13-1.jpg?1764953083",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/849/boulevard-san-diego/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "San Diego - acesso envidracado",
+          "category": "Acesso",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/849/img-14-1.jpg?1764953083",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/849/boulevard-san-diego/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "San Diego - espaco gourmet",
+          "category": "Gourmet",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/849/img-19-1.jpg?1764953083",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/849/boulevard-san-diego/",
+          "source_label": "Felicita Negocios"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Pioneiros",
+          "description": "A auditoria posiciona o San Diego no bairro Pioneiros, em Balneario Camboriu."
+        },
+        {
+          "icon": "Building2",
+          "title": "Fachada recuperada",
+          "description": "A hero vem da pagina nominal do empreendimento na Imobille."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e solarium",
+          "description": "A galeria mostra piscina, deck e areas abertas de lazer."
+        },
+        {
+          "icon": "Utensils",
+          "title": "Gourmet de apoio",
+          "description": "O conjunto visual inclui ambiente gourmet para encontros do condominio."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Identificacao ajustada",
+          "description": "A copy passa a tratar o cadastro como Boulevard San Diego."
+        },
+        {
+          "title": "Galeria de condominio",
+          "description": "Foram mantidas fachada, acesso e areas externas em vez de interiores."
+        },
+        {
+          "title": "Fonte dupla",
+          "description": "Imobille e Felicita foram usadas para validar imagens e nome."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Qual San Diego foi considerado?",
+          "answer": "As fontes encontradas apontam para o Boulevard San Diego, no bairro Pioneiros."
+        },
+        {
+          "question": "Que imagens foram selecionadas?",
+          "answer": "Fachada, acesso envidracado, piscina, deck, solarium, pergolado e gourmet."
+        },
+        {
+          "question": "A pagina ainda depende de fotos internas?",
+          "answer": "Nao. A selecao foi feita com foco no empreendimento e no lazer comum."
+        },
+        {
+          "question": "Quais fontes sustentam a revisao?",
+          "answer": "Imobille e Felicita Negocios."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-san-diego-boulevard-EM40009",
+        "https://felicitanegocios.com.br/empreendimento/849/boulevard-san-diego/"
+      ]
+    },
+    {
+      "slug": "san-paolo-residenziale",
+      "hero_image": "https://www.ersempreendimentos.com.br/index.php/img/width/0/0/wrap/larg/1680/alt/1000/jpg-quality/85/file/empreendimentos/16/03-erssanfachadaef.jpg",
+      "description": "O San Paolo Residenziale foi revisado com fontes da ERS, Litoral Vertical e Invexo. A pagina agora apresenta a torre, a implantacao urbana, a relacao com o skyline de Balneario Camboriu e areas de lazer como piscina, deck, jogos, fitness e eventos. A descricao substitui o texto generico por uma leitura do empreendimento, destacando arquitetura vertical, localizacao central e estrutura social voltada a conforto e convivencia.",
+      "seo_description": "San Paolo Residenziale em Balneario Camboriu, com fachada, piscina, deck, jogos, fitness e eventos.",
+      "gallery": [
+        {
+          "title": "San Paolo - fachada vertical",
+          "category": "Fachada",
+          "image": "https://www.ersempreendimentos.com.br/index.php/img/width/0/0/wrap/larg/1680/alt/1000/jpg-quality/85/file/empreendimentos/16/03-erssanfachadaef.jpg",
+          "source_url": "https://www.ersempreendimentos.com.br/empreendimentos/titulo/san-paolo-residenziale-2/",
+          "source_label": "ERS Empreendimentos"
+        },
+        {
+          "title": "San Paolo - implantacao costeira",
+          "category": "Implantacao",
+          "image": "https://www.ersempreendimentos.com.br/index.php/img/width/0/0/wrap/larg/1680/alt/1000/sharpen/32/jpg-quality/85/file/empreendimentos/16/01-ers_san_ph_implantacao_r01.jpg",
+          "source_url": "https://www.ersempreendimentos.com.br/empreendimentos/titulo/san-paolo-residenziale-2/",
+          "source_label": "ERS Empreendimentos"
+        },
+        {
+          "title": "San Paolo - skyline de contexto",
+          "category": "Entorno",
+          "image": "https://www.ersempreendimentos.com.br/index.php/img/width/0/0/wrap/larg/1680/alt/1000/sharpen/32/jpg-quality/85/file/empreendimentos/16/02-ers_san_fotomontagem_ef.jpg",
+          "source_url": "https://www.ersempreendimentos.com.br/empreendimentos/titulo/san-paolo-residenziale-2/",
+          "source_label": "ERS Empreendimentos"
+        },
+        {
+          "title": "San Paolo - base e torre",
+          "category": "Fachada",
+          "image": "https://www.ersempreendimentos.com.br/index.php/img/width/0/0/wrap/larg/1680/alt/1000/sharpen/32/jpg-quality/85/file/empreendimentos/16/03-ers_san_fachada_ef.jpg",
+          "source_url": "https://www.ersempreendimentos.com.br/empreendimentos/titulo/san-paolo-residenziale-2/",
+          "source_label": "ERS Empreendimentos"
+        },
+        {
+          "title": "San Paolo - torre urbana",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2024/06/edificio-san-paolo-balneario-camboriu-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-san-paolo/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "San Paolo - deck panoramico",
+          "category": "Deck",
+          "image": "https://litoralvertical.com/wp-content/uploads/2024/06/edificio-san-paolo-balneario-camboriu-principal.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-san-paolo/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "San Paolo - piscina externa",
+          "category": "Piscina",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/01/san-paolo-residenziale-balneario-camboriu-sc-9.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/san-paolo-residenziale-balneario-camboriu/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "San Paolo - piscina e borda",
+          "category": "Piscina",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/01/san-paolo-residenziale-balneario-camboriu-sc-8.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/san-paolo-residenziale-balneario-camboriu/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "San Paolo - jogos",
+          "category": "Jogos",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/01/san-paolo-residenziale-balneario-camboriu-sc-12.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/san-paolo-residenziale-balneario-camboriu/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "San Paolo - fitness",
+          "category": "Fitness",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/01/san-paolo-residenziale-balneario-camboriu-sc-11.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/san-paolo-residenziale-balneario-camboriu/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "San Paolo - eventos",
+          "category": "Eventos",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/01/san-paolo-residenziale-balneario-camboriu-sc-10.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/san-paolo-residenziale-balneario-camboriu/",
+          "source_label": "Invexo"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Torre marcante",
+          "description": "As fontes mostram uma fachada vertical e base arquitetonica bem definida."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Centro de BC",
+          "description": "A copy reforca o contexto central e a proximidade com a malha urbana da cidade."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e deck",
+          "description": "A galeria inclui piscina externa e deck com vista."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Fitness e eventos",
+          "description": "Jogos, fitness e ambiente para eventos completam a estrutura de lazer."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Narrativa de projeto",
+          "description": "A pagina passa a explicar fachada, implantacao e lazer."
+        },
+        {
+          "title": "Imagens verificadas",
+          "description": "ERS, Litoral Vertical e Invexo foram priorizadas na selecao."
+        },
+        {
+          "title": "Sem interiores de oferta",
+          "description": "A nova galeria troca fotos privativas por imagens do predio e das areas comuns."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Quais fontes foram usadas no San Paolo?",
+          "answer": "ERS Empreendimentos, Litoral Vertical e Invexo."
+        },
+        {
+          "question": "Que fotos entraram na pagina?",
+          "answer": "Fachada, implantacao, skyline, deck, piscina, jogos, fitness e eventos."
+        },
+        {
+          "question": "O que mudou na descricao?",
+          "answer": "Ela passou a tratar arquitetura, localizacao e lazer do empreendimento."
+        },
+        {
+          "question": "A hero foi corrigida?",
+          "answer": "Sim. A imagem principal mostra a torre do San Paolo Residenziale."
+        }
+      ],
+      "sources": [
+        "https://www.ersempreendimentos.com.br/empreendimentos/titulo/san-paolo-residenziale-2/",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/san-paolo-residenziale/",
+        "https://lancamento.invexo.com.br/sc/san-paolo-residenziale-balneario-camboriu/",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-san-paolo/"
+      ]
+    },
+    {
+      "slug": "santana",
+      "hero_image": "https://www.chavesnamao.com.br/imn/1200x0800/N/70/imoveis/124219/18082547/sc-balneario-camboriu-centro-rua-1301-cobertura-a-venda-3-quartos-65f034e0-1.jpg",
+      "description": "O Edificio Residencial Santana foi reescrito com base em fontes que confirmam o endereco Rua 1301, 395, no Centro de Balneario Camboriu, e citam academia, churrasqueira, espaco gourmet, piscina, elevador e hall. A midia publica de fachada institucional e limitada; por isso a curadoria ficou conservadora, usando apenas uma imagem externa vinculada ao endereco e evitando interiores. A pagina deve receber nova foto de fachada quando houver fonte oficial ou registro proprio.",
+      "seo_description": "Edificio Residencial Santana no Centro de Balneario Camboriu, Rua 1301, com copy revisada e midia conservadora.",
+      "gallery": [
+        {
+          "title": "Santana - area externa com vista",
+          "category": "Externo",
+          "image": "https://www.chavesnamao.com.br/imn/1200x0800/N/70/imoveis/124219/18082547/sc-balneario-camboriu-centro-rua-1301-cobertura-a-venda-3-quartos-65f034e0-1.jpg",
+          "source_url": "https://www.chavesnamao.com.br/imovel/cobertura-a-venda-3-quartos-com-garagem-sc-balneario-camboriu-centro-183m2-RS3500000/id-18082547/",
+          "source_label": "Chaves na Mao"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 1301",
+          "description": "Loft, ZAP e VivaReal confirmam o endereco Rua 1301, 395, no Centro de Balneario Camboriu."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Academia",
+          "description": "ZAP e VivaReal citam academia entre as caracteristicas do condominio."
+        },
+        {
+          "icon": "Utensils",
+          "title": "Gourmet e churrasqueira",
+          "description": "As fontes comerciais informam espaco gourmet e churrasqueira."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina citada",
+          "description": "VivaReal lista piscina e elevador como recursos do edificio."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Copy honesta",
+          "description": "O texto registra a falta de fachada publica confiavel e evita prometer imagem inexistente."
+        },
+        {
+          "title": "Endereco validado",
+          "description": "Fontes de condominio confirmam Rua 1301, 395, Centro."
+        },
+        {
+          "title": "Galeria minima",
+          "description": "A selecao evita o conjunto de interiores encontrado nas paginas de oferta."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Edificio Residencial Santana?",
+          "answer": "Na Rua 1301, 395, Centro de Balneario Camboriu, conforme Loft, ZAP e VivaReal."
+        },
+        {
+          "question": "Quais comodidades foram identificadas?",
+          "answer": "Academia, churrasqueira, espaco gourmet, piscina, elevador e hall aparecem nas fontes consultadas."
+        },
+        {
+          "question": "Por que a galeria e curta?",
+          "answer": "Porque nao foi encontrada uma fachada institucional confiavel em fonte publica aberta."
+        },
+        {
+          "question": "Qual o proximo cuidado para esta pagina?",
+          "answer": "Substituir a imagem atual por foto propria ou oficial da fachada quando estiver disponivel."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-santana-EM29658",
+        "https://loft.com.br/condominio/edificio-residencial-santana-centro-balneario-camboriu-sc/NS2AU9L6",
+        "https://www.zapimoveis.com.br/condominio/sc-balneario-camboriu-centro-edificio-residencial-santana-id-6cd4ea36-2ebc/",
+        "https://www.vivareal.com.br/condominio/edificio-residencial-santana-centro-id-6cd4ea36-2ebc/",
+        "https://www.chavesnamao.com.br/imovel/cobertura-a-venda-3-quartos-com-garagem-sc-balneario-camboriu-centro-183m2-RS3500000/id-18082547/"
+      ]
+    },
+    {
+      "slug": "santelmo",
+      "hero_image": "https://cdn.imoview.com.br/bryann/Condominios/647/1-8.jpg?1722267921",
+      "description": "O Santelmo foi corrigido para San Telmo, empreendimento encontrado em fontes da TEX, Litoral Vertical, Imobille e Felicita. A nova pagina combina fachada, piscina, deck, gourmet, lounge e areas externas, mostrando o condominio em vez de imagens internas. A descricao passa a valorizar a arquitetura vertical em Balneario Camboriu, o lazer elevado e a leitura contemporanea do projeto, com nomenclatura alinhada as fontes pesquisadas.",
+      "seo_description": "San Telmo em Balneario Camboriu, com fachada, piscina, deck, gourmet e areas externas.",
+      "gallery": [
+        {
+          "title": "San Telmo - fachada renderizada",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/647/1-8.jpg?1722267921",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/647/san-telmo/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "San Telmo - piscina externa",
+          "category": "Piscina",
+          "image": "https://pages.greatpages.com.br/www.texempreendimentos.com.br-san-telmo/1732283442/imagens/desktop/71048-048aa93a576fa7ca542f8bb0de9fdc78.png",
+          "source_url": "https://texempreendimentos.com.br/san-telmo",
+          "source_label": "TEX Empreendimentos"
+        },
+        {
+          "title": "San Telmo - gourmet",
+          "category": "Gourmet",
+          "image": "https://pages.greatpages.com.br/www.texempreendimentos.com.br-san-telmo/1732283442/imagens/desktop/348367_1_1698175399653819a75a163.jpg",
+          "source_url": "https://texempreendimentos.com.br/san-telmo",
+          "source_label": "TEX Empreendimentos"
+        },
+        {
+          "title": "San Telmo - deck alto",
+          "category": "Deck",
+          "image": "https://pages.greatpages.com.br/www.texempreendimentos.com.br-san-telmo/1732283442/imagens/desktop/348367_1_1698175399653819a75a156.jpg",
+          "source_url": "https://texempreendimentos.com.br/san-telmo",
+          "source_label": "TEX Empreendimentos"
+        },
+        {
+          "title": "San Telmo - lounge externo",
+          "category": "Convivencia",
+          "image": "https://pages.greatpages.com.br/www.texempreendimentos.com.br-san-telmo/1732283442/imagens/mobile/348367_1_1698175399653819a767b007364581329109740.jpg",
+          "source_url": "https://texempreendimentos.com.br/san-telmo",
+          "source_label": "TEX Empreendimentos"
+        },
+        {
+          "title": "San Telmo - fachada vertical",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-san-telmo-balneario-camboriu-2-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-san-telmo/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "San Telmo - torre urbana",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-san-telmo-balneario-camboriu-1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-san-telmo/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "San Telmo - lazer com piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/19012026094610436-1768826770.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-san-telmo-EM86756",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "San Telmo - piscina vista do alto",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/647/1-5.jpg?1722267921",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/647/san-telmo/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "San Telmo - deck da piscina",
+          "category": "Deck",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/647/1-4.jpg?1722267921",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/647/san-telmo/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "San Telmo - area externa",
+          "category": "Externo",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/647/1-3.jpg?1722267921",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/647/san-telmo/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "San Telmo - varanda de convivencia",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/647/1-10.jpg?1722267921",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/647/san-telmo/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "San Telmo - terraco com vista",
+          "category": "Deck",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/647/1-9.jpg?1722267921",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/647/san-telmo/",
+          "source_label": "Felicita Negocios"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Nome ajustado",
+          "description": "A auditoria encontrou o empreendimento como San Telmo nas fontes nominais."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e deck",
+          "description": "A galeria mostra piscina, deck alto e areas abertas de lazer."
+        },
+        {
+          "icon": "Utensils",
+          "title": "Gourmet",
+          "description": "A fonte oficial da TEX inclui ambiente gourmet na apresentacao visual."
+        },
+        {
+          "icon": "Sun",
+          "title": "Terracos externos",
+          "description": "As imagens destacam espacos abertos para descanso e convivencia."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Identidade corrigida",
+          "description": "A pagina passa a usar San Telmo como referencia de pesquisa."
+        },
+        {
+          "title": "Fachada e lazer",
+          "description": "Hero, galeria e copy foram alinhadas ao empreendimento."
+        },
+        {
+          "title": "Fontes variadas",
+          "description": "TEX, Litoral Vertical, Imobille e Felicita foram cruzadas."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Santelmo e San Telmo?",
+          "answer": "As fontes encontradas tratam o empreendimento como San Telmo."
+        },
+        {
+          "question": "Quais imagens foram selecionadas?",
+          "answer": "Fachada, piscina, deck, gourmet, lounge e terracos externos."
+        },
+        {
+          "question": "A pagina ainda usa fotos internas?",
+          "answer": "Nao. A curadoria prioriza imagens do condominio e do lazer."
+        },
+        {
+          "question": "Qual fonte oficial foi usada?",
+          "answer": "A pagina da TEX Empreendimentos para San Telmo."
+        }
+      ],
+      "sources": [
+        "https://texempreendimentos.com.br/san-telmo",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-san-telmo/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-san-telmo-EM86756",
+        "https://felicitanegocios.com.br/empreendimento/647/san-telmo/"
+      ]
+    },
+    {
+      "slug": "santorini",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/photoshop-novo0007-1724684027.jpg",
+      "description": "O Santorini foi revisado com foco no Edificio Residencial Santorini em Itapema, usando a fonte da Imobille como base principal e descartando projetos homonimos que apareceram na pesquisa. A galeria passa a mostrar fachada frente mar, piscina coberta, deck, lounge, fitness, playground, jogos e eventos. A descricao agora reforca Meia Praia, relacao com a orla e estrutura de lazer completa, sem depender de fotos internas.",
+      "seo_description": "Edificio Residencial Santorini em Itapema, Meia Praia, com fachada frente mar, piscina, fitness e jogos.",
+      "gallery": [
+        {
+          "title": "Santorini - fachada frente mar",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/photoshop-novo0007-1724684027.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-santorini-em-itapema-EM63097",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Santorini - piscina coberta",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/26082024115347710-1724684027.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-santorini-em-itapema-EM63097",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Santorini - piscina e deck",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2023/automacao-nova-2-200001-1674508035.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-santorini-em-itapema-EM63097",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Santorini - lounge da piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2023/automacao-nova-2-200000-1674508034.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-santorini-em-itapema-EM63097",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Santorini - fitness",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/photoshop-novo0002-1724683952.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-santorini-em-itapema-EM63097",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Santorini - playground",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/photoshop-novo0003-1724683952.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-santorini-em-itapema-EM63097",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Santorini - jogos",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/photoshop-novo0004-1724683952.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-santorini-em-itapema-EM63097",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Santorini - eventos",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/photoshop-novo0005-1724683953.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-santorini-em-itapema-EM63097",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Santorini - torre e mar",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/photoshop-novo0007-1724683954.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-santorini-em-itapema-EM63097",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Meia Praia",
+          "description": "A fonte principal posiciona o Santorini em Itapema, com leitura direta de orla."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina coberta",
+          "description": "A galeria apresenta piscina coberta, deck e lounge de apoio."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Fitness e jogos",
+          "description": "Fitness e jogos foram mantidos como comodidades visuais do condominio."
+        },
+        {
+          "icon": "Baby",
+          "title": "Playground",
+          "description": "A area infantil aparece na selecao de imagens do empreendimento."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Homonimos descartados",
+          "description": "A curadoria evitou usar imagens de outros Santorini encontrados na web."
+        },
+        {
+          "title": "Fachada frente mar",
+          "description": "A hero mostra a torre em relacao ao litoral de Itapema."
+        },
+        {
+          "title": "Lazer documentado",
+          "description": "Piscina, deck, fitness, jogos, playground e eventos compoem a galeria."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Qual Santorini foi usado?",
+          "answer": "O Edificio Residencial Santorini em Itapema, com fonte principal na Imobille."
+        },
+        {
+          "question": "Por que outras fontes foram evitadas?",
+          "answer": "Porque havia projetos homonimos e imagens que nao correspondiam ao cadastro."
+        },
+        {
+          "question": "Quais fotos entraram?",
+          "answer": "Fachada, piscina, deck, lounge, fitness, playground, jogos e eventos."
+        },
+        {
+          "question": "A pagina ficou sem interiores?",
+          "answer": "Sim. A selecao privilegia midia do empreendimento e do lazer comum."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-santorini-em-itapema-EM63097",
+        "https://hjjuniorimoveis.com.br/edificios/santorini-residence/itapema/meia-praia/202"
+      ]
+    },
+    {
+      "slug": "saveiro-residence",
+      "hero_image": "https://cdn.uso.com.br/918070/2023/10/empre_f2516020b0c1ad321d2941295efc0158.jpg",
+      "description": "O Saveiro Residence foi revisado como empreendimento frente mar em Balneario Camboriu, com fontes que indicam Avenida Atlantica e uma estrutura de lazer completa. A curadoria evita imagens internas da oferta e prioriza fachada, base envidracada, acesso, deck frente mar, convivencia externa e piscina coberta. A copy passa a explicar melhor o condominio, sua relacao com a orla e os recursos de lazer, com cuidado para nao misturar projetos ou casas genericas que apareceram nos resultados.",
+      "seo_description": "Saveiro Residence em Balneario Camboriu, frente mar, com fachada, deck, convivencia externa e piscina coberta.",
+      "gallery": [
+        {
+          "title": "Saveiro - fachada principal",
+          "category": "Fachada",
+          "image": "https://cdn.uso.com.br/918070/2023/10/empre_f2516020b0c1ad321d2941295efc0158.jpg",
+          "source_url": "https://meufrentemar.com.br/empreendimentos",
+          "source_label": "Meu Frente Mar"
+        },
+        {
+          "title": "Saveiro - torre frente mar",
+          "category": "Fachada",
+          "image": "https://b4.casteldigital.com.br/camboriuaptos/ig/il/imoveis/1466/a-15458458799198-avr-1545845955.jpg",
+          "source_url": "https://www.camboriuapartamentos.com.br/imovel/apartamento-no-edificio-saveiro-residence-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-1466/",
+          "source_label": "Camboriu Apartamentos"
+        },
+        {
+          "title": "Saveiro - fachada vertical",
+          "category": "Fachada",
+          "image": "https://b4.casteldigital.com.br/camboriuaptos/ig/im/imoveis/1466/a-15458458799198-avr-1545845955.jpg",
+          "source_url": "https://www.camboriuapartamentos.com.br/imovel/apartamento-no-edificio-saveiro-residence-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-1466/",
+          "source_label": "Camboriu Apartamentos"
+        },
+        {
+          "title": "Saveiro - base envidracada",
+          "category": "Fachada",
+          "image": "https://s01.jetimgs.com/tnnAwYXphKBPiW3sr35S56TSBu41PCPMXJgG4UpLuMhmB5uKGXsEydyXaxruLCKtnCpS7try6lvqAePA6t-VAqFWAhoV88JKqYJobgI-sVTbTnxFUnlAaeqdoQi8_RjwmimWRdPcSj0MBls6tBLJzV1De1v5AjnHMHS4e6BnsUjONLcxeiAyZT8-/1jpeg.webp",
+          "source_url": "https://www.ebcimobiliaria.com.br/lancamento/saveiro-residence/667256",
+          "source_label": "EBC Imobiliaria"
+        },
+        {
+          "title": "Saveiro - acesso lateral",
+          "category": "Acesso",
+          "image": "https://s01.jetimgs.com/tnkmRP8rL9lyowt5DUFJtssd0nYgI0sea_xpLhUwIluE0Xz_Jq9SWoKb1cwTrj-9J9keHYw-LxhjNZ5cpE99rafJ5og96qVgjWvAzQlFqycVKaPm4O1DFuIqphwPLtsxB1DxsqOD__TIZMYvGJk8t9o9y72j0KI2mbV2idPl5d4mNCe2ADsQjQ/iphone024jpg.webp",
+          "source_url": "https://www.ebcimobiliaria.com.br/lancamento/saveiro-residence/667256",
+          "source_label": "EBC Imobiliaria"
+        },
+        {
+          "title": "Saveiro - deck frente mar",
+          "category": "Deck",
+          "image": "https://b4.casteldigital.com.br/camboriuaptos/ig/il/imoveis/1466/1-15502596456737.png",
+          "source_url": "https://www.camboriuapartamentos.com.br/imovel/apartamento-no-edificio-saveiro-residence-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-1466/",
+          "source_label": "Camboriu Apartamentos"
+        },
+        {
+          "title": "Saveiro - convivencia externa",
+          "category": "Convivencia",
+          "image": "https://s01.jetimgs.com/tnkmRI8rL8l6oztx5Z_WYlp4k_f2mjrAWlkONskQELqR4GFPGfWzE_92x0PhM4UGzuls1txq24dkZI785guz76ilNMwQ502UW_i0Os8EcYO7-GyrzbhOnLO-M3oId3PhpcGieF4-evSObIbJCF1JsBk1sUj3zoFxjt-zGKJsmgOejOLvqAhfY3U/iphone016jpg.webp",
+          "source_url": "https://www.ebcimobiliaria.com.br/lancamento/saveiro-residence/667256",
+          "source_label": "EBC Imobiliaria"
+        },
+        {
+          "title": "Saveiro - deck com vista",
+          "category": "Deck",
+          "image": "https://s01.jetimgs.com/tnnAwYXphKBPiW3sr35S56TSBu41PCPMXJgG4UpLuMhmB5uKGXsEydyXaxruLCKtnCpS7try6lvqAePA6t-VAqFWAhoV88JKqYJobgI-sVTbTnxFUnlAaeqdoQi8_RjwmimWRdPcSj0MBls6tHGlSq1rf-z-FU3H57yfu8-c-jAaNLDcemTiN0W0/iphone017jpg.webp",
+          "source_url": "https://www.ebcimobiliaria.com.br/lancamento/saveiro-residence/667256",
+          "source_label": "EBC Imobiliaria"
+        },
+        {
+          "title": "Saveiro - piscina coberta",
+          "category": "Piscina",
+          "image": "https://b4.casteldigital.com.br/camboriuaptos/ig/im/imoveis/1466/saveiro-23-15313897655696-15458460111138-avr-1545846112.jpg",
+          "source_url": "https://www.camboriuapartamentos.com.br/imovel/apartamento-no-edificio-saveiro-residence-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-1466/",
+          "source_label": "Camboriu Apartamentos"
+        },
+        {
+          "title": "Saveiro - piscina aquecida",
+          "category": "Piscina",
+          "image": "https://b4.casteldigital.com.br/camboriuaptos/ig/il/imoveis/1466/saveiro-23-15313897655696-15458460111138-avr-1545846112.jpg",
+          "source_url": "https://www.camboriuapartamentos.com.br/imovel/apartamento-no-edificio-saveiro-residence-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-1466/",
+          "source_label": "Camboriu Apartamentos"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Frente mar",
+          "description": "As fontes comerciais associam o Saveiro Residence a Avenida Atlantica em Balneario Camboriu."
+        },
+        {
+          "icon": "Building2",
+          "title": "Fachada real",
+          "description": "A nova hero e a galeria mostram a torre e a base do empreendimento."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina coberta",
+          "description": "Camboriu Apartamentos e outras fontes mostram piscina coberta e aquecida."
+        },
+        {
+          "icon": "Sun",
+          "title": "Deck externo",
+          "description": "A selecao inclui decks e areas abertas com vista para a orla."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fontes filtradas",
+          "description": "Foram descartadas imagens de casas e materiais genericos que apareceram no rastreamento."
+        },
+        {
+          "title": "Galeria de fachada e lazer",
+          "description": "A selecao mostra torre, acesso, deck e piscina, nao interiores."
+        },
+        {
+          "title": "Contexto frente mar",
+          "description": "A descricao reforca a posicao de orla e a estrutura de lazer do condominio."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Saveiro Residence?",
+          "answer": "As fontes comerciais posicionam o empreendimento na Avenida Atlantica, em Balneario Camboriu."
+        },
+        {
+          "question": "Quais imagens foram priorizadas?",
+          "answer": "Fachada, base envidracada, acesso, deck externo e piscina coberta."
+        },
+        {
+          "question": "O que foi evitado na auditoria?",
+          "answer": "Imagens internas e fotos de casas ou projetos nao relacionados."
+        },
+        {
+          "question": "Quais comodidades aparecem nas fontes?",
+          "answer": "Piscina coberta/aquecida, academia, jogos, cinema, solarium e area de lazer completa sao citados em paginas comerciais."
+        }
+      ],
+      "sources": [
+        "https://meufrentemar.com.br/empreendimentos",
+        "https://www.ebcimobiliaria.com.br/lancamento/saveiro-residence/667256",
+        "https://www.camboriuapartamentos.com.br/imovel/apartamento-no-edificio-saveiro-residence-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-1466/",
+        "https://www.flyimoveis.com.br/imovel/cobertura-duplex-no-edificio-saveiro-residence-balneario-camboriu-centro-3-quartos-8-garagens-venda-ref-691/"
+      ]
+    },
+    {
+      "slug": "sea-s-palace",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-sea-s-palace-1769262403.jpg",
+      "description": "O Sea's Palace foi revisado com fontes da Imobille, Litoral Vertical e Felicita, removendo imagens de empreendimentos relacionados que apareciam na busca. A pagina agora mostra acesso, hall, jardim interno, piscinas, playground, jogos, fitness, deck e fachada. A nova descricao destaca o condominio no Centro de Balneario Camboriu como um edificio de lazer amplo, com forte presenca de areas comuns e facil leitura visual para o visitante.",
+      "seo_description": "Sea's Palace Residence em Balneario Camboriu, com acesso, hall, piscinas, jogos, fitness e fachada.",
+      "gallery": [
+        {
+          "title": "Sea's Palace - acesso principal",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-sea-s-palace-1769262403.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-seas-palace-residence-EM85113",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sea's Palace - hall ajardinado",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2023/automacao-nova-marco-liane0005-1692121430.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-seas-palace-residence-EM85113",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sea's Palace - jardim interno",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2023/automacao-nova-marco-liane0004-1692121429.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-seas-palace-residence-EM85113",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sea's Palace - piscina externa",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2023/automacao-nova-marco-liane0007-1692121431.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-seas-palace-residence-EM85113",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sea's Palace - piscina coberta",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2023/automacao-nova-marco-liane0006-1692121430.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-seas-palace-residence-EM85113",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sea's Palace - lounge da piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2023/automacao-nova-marco-liane0017-1692121425.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-seas-palace-residence-EM85113",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sea's Palace - playground",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2023/automacao-nova-marco-liane0018-1692121426.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-seas-palace-residence-EM85113",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sea's Palace - jogos",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2023/automacao-nova-marco-liane0019-1692121427.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-seas-palace-residence-EM85113",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sea's Palace - sinuca",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2023/automacao-nova-marco-liane0020-1692121428.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-seas-palace-residence-EM85113",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sea's Palace - fitness",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2023/automacao-nova-marco-liane0010-1692121432.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-seas-palace-residence-EM85113",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sea's Palace - fachada vertical",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-seas-palace-balneario-camboriu-2.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-seas-palace/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Sea's Palace - piscina com deck",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/310/piscina-2-1.jpg?1689691460",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/310/seas-palace/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Sea's Palace - hall de entrada",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/310/hall-2.jpg?1689691460",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/310/seas-palace/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Sea's Palace - convivencia da piscina",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/310/quiosque-externo.jpg?1689691460",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/310/seas-palace/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Sea's Palace - deck externo",
+          "category": "Deck",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/310/piscina-5.jpg?1689691460",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/310/seas-palace/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Sea's Palace - espelho d agua",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/310/piscina-2.jpg?1689691460",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/310/seas-palace/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Sea's Palace - ambiente de jogos",
+          "category": "Jogos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/310/salo-de-jogos-5.jpg?1689691460",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/310/seas-palace/",
+          "source_label": "Felicita Negocios"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Piscinas variadas",
+          "description": "A galeria mostra piscina externa, piscina coberta, lounge e deck."
+        },
+        {
+          "icon": "Gamepad2",
+          "title": "Jogos e sinuca",
+          "description": "Os ambientes de jogos foram mantidos para representar o lazer do condominio."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Fitness",
+          "description": "A academia aparece em fonte nominal do empreendimento."
+        },
+        {
+          "icon": "Baby",
+          "title": "Playground",
+          "description": "A area infantil ajuda a completar a leitura de lazer familiar."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Projeto correto",
+          "description": "Imagens de Sea Tower e outros relacionados foram descartadas."
+        },
+        {
+          "title": "Acesso reconhecivel",
+          "description": "A hero mostra a entrada do Sea's Palace."
+        },
+        {
+          "title": "Galeria ampla",
+          "description": "Hall, piscinas, jogos, fitness, playground e fachada substituem fotos internas."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Quais fontes foram usadas no Sea's Palace?",
+          "answer": "Imobille, Litoral Vertical e Felicita."
+        },
+        {
+          "question": "O que entrou na galeria?",
+          "answer": "Acesso, hall, jardim interno, piscinas, playground, jogos, fitness, deck e fachada."
+        },
+        {
+          "question": "Havia risco de confusao com outro projeto?",
+          "answer": "Sim. A busca trouxe imagens de Sea Tower, que foram descartadas."
+        },
+        {
+          "question": "A pagina ficou alinhada ao condominio?",
+          "answer": "Sim. A curadoria usa imagens de areas comuns e fachada do Sea's Palace."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-seas-palace-residence-EM85113",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-seas-palace/",
+        "https://felicitanegocios.com.br/empreendimento/310/seas-palace/"
+      ]
+    },
+    {
+      "slug": "serendipity",
+      "hero_image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/serendipity-village.png",
+      "description": "O Serendipity foi revisado como Serendipity Village, empreendimento Embraed no Centro de Balneario Camboriu. A pagina agora usa imagens oficiais e fontes nominais para mostrar fachada, hall, fitness, quadra, piscina, gourmet, brinquedoteca, kids club, playground e areas externas. A descricao deixa de ser generica e passa a comunicar um condominio com forte assinatura de lazer, arquitetura vertical e padrao de acabamento associado a Embraed.",
+      "seo_description": "Serendipity Village Embraed em Balneario Camboriu, com fachada, hall, piscina, fitness, quadra e lazer infantil.",
+      "gallery": [
+        {
+          "title": "Serendipity - fachada Embraed",
+          "category": "Fachada",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/serendipity-village.png",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/serendipity-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Serendipity - hall social",
+          "category": "Hall",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/12/ser-1.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/serendipity-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Serendipity - fitness",
+          "category": "Fitness",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/serendipity-village-serendipity-village-lazer-20.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/serendipity-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Serendipity - quadra esportiva",
+          "category": "Esporte",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/serendipity-village-serendipity-village-lazer-10.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/serendipity-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Serendipity - gourmet externo",
+          "category": "Gourmet",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/serendipity-village-serendipity-village-lazer-12.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/serendipity-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Serendipity - apoio gourmet",
+          "category": "Gourmet",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/serendipity-village-serendipity-village-lazer-13.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/serendipity-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Serendipity - esporte e deck",
+          "category": "Esporte",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/serendipity-village-serendipity-village-lazer-11.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/serendipity-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Serendipity - gourmet interno",
+          "category": "Gourmet",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/serendipity-village-serendipity-village-lazer-15.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/serendipity-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Serendipity - piscina externa",
+          "category": "Piscina",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/serendipity-village-serendipity-village-lazer-14.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/serendipity-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Serendipity - brinquedoteca",
+          "category": "Infantil",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/serendipity-village-serendipity-village-lazer-18.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/serendipity-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Serendipity - kids club",
+          "category": "Infantil",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/serendipity-village-serendipity-village-lazer-17.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/serendipity-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Serendipity - varanda gourmet",
+          "category": "Gourmet",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/serendipity-village-serendipity-village-lazer-16.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/serendipity-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Serendipity - estar externo",
+          "category": "Convivencia",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/serendipity-village-serendipity-village-lazer-21.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/serendipity-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Serendipity - piscina panoramica",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/sem-titulo-1-1665426175.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-serendipity-village-EM25734",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Serendipity - piscina e fachada",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-marco-liane0006-1665164484.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-serendipity-village-EM25734",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Serendipity - deck da piscina",
+          "category": "Deck",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-marco-liane0003-1665164483.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-serendipity-village-EM25734",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Serendipity - quadra aberta",
+          "category": "Esporte",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-marco-liane0001-1665164482.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-serendipity-village-EM25734",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Serendipity - playground",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-marco-liane0004-1665164483.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-serendipity-village-EM25734",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Serendipity - espaco infantil",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-marco-liane0016-1665164487.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-serendipity-village-EM25734",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Assinatura Embraed",
+          "description": "A fonte oficial da Embraed sustenta a hero e parte da galeria."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e deck",
+          "description": "A nova selecao mostra piscina externa, deck e areas abertas de lazer."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Fitness e esporte",
+          "description": "Fitness e quadra esportiva aparecem nas imagens verificadas."
+        },
+        {
+          "icon": "Baby",
+          "title": "Lazer infantil",
+          "description": "Brinquedoteca, kids club e playground compoem a experiencia familiar."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fonte oficial priorizada",
+          "description": "Embraed foi usada como referencia principal de imagem e contexto."
+        },
+        {
+          "title": "Galeria robusta",
+          "description": "Fachada, hall, piscina, fitness, quadra, gourmet e infantil substituem interiores."
+        },
+        {
+          "title": "Copy premium",
+          "description": "A descricao agora reforca assinatura, lazer e padrao do empreendimento."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Qual empreendimento foi considerado?",
+          "answer": "Serendipity Village, associado a Embraed em Balneario Camboriu."
+        },
+        {
+          "question": "Quais areas aparecem na galeria?",
+          "answer": "Fachada, hall, fitness, quadra, piscina, gourmet, brinquedoteca, kids club e playground."
+        },
+        {
+          "question": "As imagens vieram de fonte oficial?",
+          "answer": "A hero e diversas imagens vieram da pagina oficial da Embraed."
+        },
+        {
+          "question": "O que mudou na pagina?",
+          "answer": "A pagina passou a representar o condominio e seu lazer, nao fotos internas de oferta."
+        }
+      ],
+      "sources": [
+        "https://www.embraed.com.br/pt-BR/empreendimento/serendipity-village",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-serendipity-village-EM25734",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-serendipity-village/",
+        "https://felicitanegocios.com.br/empreendimento/530/serendipity-village/"
+      ]
+    }
+  ],
+  "skipped": []
+}

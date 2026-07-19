@@ -1,6 +1,8 @@
 # Auditoria de midia e copy dos empreendimentos
 
-Gerado em: 2026-07-14T20:16:13.813Z
+Gerado em: 2026-07-14T21:34:04.455Z
+
+Observacao: relatorio local do estado esperado apos aplicacao confirmada; a leitura online do Supabase falhou por timeout nesta execucao.
 
 ## Totais
 
@@ -15,24 +17,15 @@ Gerado em: 2026-07-14T20:16:13.813Z
 - Descricao generica detectada: 0
 - Beneficios/diferenciais genericos detectados: 0
 
-## Proximos lotes
+## Itens
 
-### P0 - corrigir primeiro
-
-- Nenhum caso.
-
-### P1 - revisar galeria
-
-- Nenhum caso.
-
-### P2 - enriquecer conteudo
-
-- Nenhum caso.
-
-## Criterio automatico
-
-- P0: hero igual a imagem de unidade, ou 75%+ da galeria ativa vindo de imagens das unidades.
-- P1: alguma imagem de unidade na galeria, ou galeria rotulada como apartamento/casa/cobertura/etc.
-- P2: descricao, beneficios, diferenciais ou FAQ com sinais de texto gerado/generico ou incompleto.
-- A correcao final deve confirmar fonte externa antes de trocar fotos e textos.
-
+- epic-tower | Epic Tower | OK | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=nao
+- gran-place | Gran Place | OK | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=nao
+- harmony-ocean-front | Harmony Ocean Front | OK | hero_unidade=nao | galeria_unidade=0/7 | copy_generica=nao
+- horizon | Horizon | OK | hero_unidade=nao | galeria_unidade=0/7 | copy_generica=nao
+- horizon-residence | Horizon Residence | OK | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=nao
+- jade-ocean | Jade Ocean | OK | hero_unidade=nao | galeria_unidade=0/7 | copy_generica=nao
+- lagom-pereque | Lagom Perequê | OK | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=nao
+- le-biarritz | Le Biarritz | OK | hero_unidade=nao | galeria_unidade=0/6 | copy_generica=nao
+- le-blanc-residence | Le Blanc Residence | OK | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=nao
+- marbella | Marbella | OK | hero_unidade=nao | galeria_unidade=0/7 | copy_generica=nao

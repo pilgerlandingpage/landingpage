@@ -1,0 +1,1342 @@
+{
+  "batch_id": "development-media-curation-batch41-20260717",
+  "generated_at": "2026-07-17T14:35:00.000Z",
+  "items": [
+    {
+      "slug": "petit-chateau",
+      "hero_image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n8-DpQeEkojM9JaQeRqQMSMgIUUpNDbiX43955lum4/Fachada+-+Petit+Chateau.jpg",
+      "description": "O Petit Chateau foi revisado como empreendimento frente mar no Centro/Canto da Praia, em Itapema, com foco no padrao boutique e na baixa densidade do edificio. A nova pagina deixa de usar interiores da oferta e passa a mostrar fachada, torre, piscina aquecida, fitness, brinquedoteca e jardim externo, destacando o carater pe na areia e a estrutura de lazer do condominio.",
+      "seo_description": "Petit Chateau em Itapema: fachada frente mar, piscina aquecida, fitness, brinquedoteca e jardim externo.",
+      "gallery": [
+        {
+          "title": "Petit Chateau - fachada frente mar",
+          "category": "Fachada",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n8-DpQeEkojM9JaQeRqQMSMgIUUpNDbiX43955lum4/Fachada+-+Petit+Chateau.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/imoveis/petit-chateau-3-suites-centro-itapema-IM6378",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "Petit Chateau - torre vertical",
+          "category": "Fachada",
+          "image": "https://b5.casteldigital.com.br/voweimobiliaria/ig/il/imoveis/145/da99a44fd3146e7b2e39b1a839394a56d04c4285c6a8d34bbda000170baef443-1735914788327.jpg",
+          "source_url": "https://www.voweimobiliaria.com.br/imovel/apartamento-no-edificio-petit-chateau-itapema-centro-3-quartos-3-garagens-venda-ref-145/",
+          "source_label": "Vowe Imobiliaria"
+        },
+        {
+          "title": "Petit Chateau - piscina aquecida",
+          "category": "Piscina",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n_--pXuF8GYf9dqvZNhtcP7vEIcpNHbhAE3JCOmS_0/Piscina+-+Petit+Chateau.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/imoveis/petit-chateau-3-suites-centro-itapema-IM6378",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "Petit Chateau - fitness",
+          "category": "Fitness",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n_-B2UaE8NhdmndN2FvO7QHObmfq9_bnDQ2Zz_cmeY/Academia-+Petit+Chateau.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/imoveis/petit-chateau-3-suites-centro-itapema-IM6378",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "Petit Chateau - brinquedoteca",
+          "category": "Brinquedoteca",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n_-e23i387tjpKhASBpzgoFNo1p5NzbirYwDSFdOUc/Brinquedoteca+-+Petit+Chateau.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/imoveis/petit-chateau-3-suites-centro-itapema-IM6378",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "Petit Chateau - jardim externo",
+          "category": "Paisagismo",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n9OeWEporgdiGOjSpuiMAR1x8Oso9fbnjI2ySfTyZw/Petit+Chateau.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/imoveis/petit-chateau-3-suites-centro-itapema-IM6378",
+          "source_label": "Potencial Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente mar",
+          "description": "Fontes comerciais posicionam o Petit Chateau como empreendimento pe na areia em Itapema."
+        },
+        {
+          "icon": "Building2",
+          "title": "Baixa densidade",
+          "description": "A comunicacao destaca o perfil boutique, com poucos pavimentos e poucas residencias."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer essencial",
+          "description": "Piscina aquecida, fitness e brinquedoteca entram na galeria revisada."
+        },
+        {
+          "icon": "Trees",
+          "title": "Jardim externo",
+          "description": "A curadoria inclui paisagismo e areas externas do empreendimento."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Midia real do edificio",
+          "description": "Fachada, piscina e ambientes comuns substituem imagens internas da oferta."
+        },
+        {
+          "title": "Recorte frente mar",
+          "description": "A copy passa a reforcar o posicionamento pe na areia do Petit Chateau."
+        },
+        {
+          "title": "Curadoria enxuta",
+          "description": "Foram mantidas apenas imagens verificaveis do empreendimento e do lazer."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Petit Chateau?",
+          "answer": "Em Itapema, na regiao Centro/Canto da Praia, com referencias de frente mar."
+        },
+        {
+          "question": "Quais imagens entraram?",
+          "answer": "Fachada, torre, piscina aquecida, fitness, brinquedoteca e jardim externo."
+        },
+        {
+          "question": "A galeria usa fotos internas?",
+          "answer": "Nao. As imagens escolhidas representam o empreendimento e areas comuns."
+        },
+        {
+          "question": "Qual foi a principal melhoria?",
+          "answer": "A pagina passou a mostrar o condominio antes de qualquer detalhe da oferta ativa."
+        }
+      ],
+      "sources": [
+        "https://www.potencialimoveis.com.br/imoveis/petit-chateau-3-suites-centro-itapema-IM6378",
+        "https://www.voweimobiliaria.com.br/imovel/apartamento-no-edificio-petit-chateau-itapema-centro-3-quartos-3-garagens-venda-ref-145/",
+        "https://rotadosolitapema.com.br/apartamento-frente-mar-3-suites-canto-da-praia-itapema-sc"
+      ]
+    },
+    {
+      "slug": "petropolis",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2022/01/edificio-petropolis-balneario-camboriu-1.jpg",
+      "description": "O Edificio Petropolis foi revisado como condominio quadra mar no Centro de Balneario Camboriu, proximo ao eixo do Passeio San Miguel. A pagina abandona as fotos internas da oferta e passa a exibir fachada, piscina, gourmet, eventos e fitness, tornando mais clara a leitura do empreendimento para quem compara opcoes na regiao central.",
+      "seo_description": "Edificio Petropolis em Balneario Camboriu, com fachada, piscina, gourmet, eventos e fitness.",
+      "gallery": [
+        {
+          "title": "Petropolis - fachada principal",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2022/01/edificio-petropolis-balneario-camboriu-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-petropolis/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Petropolis - fachada vertical",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/sem-titulo-1-1666878139.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-petropolis-EM34597",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Petropolis - fachada em perspectiva",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20000-1666877983.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-petropolis-EM34597",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Petropolis - piscina do lazer",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20002-1666877984.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-petropolis-EM34597",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Petropolis - piscina coberta",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20003-1666877984.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-petropolis-EM34597",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Petropolis - gourmet social",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20004-1666877985.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-petropolis-EM34597",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Petropolis - eventos",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20005-1666877985.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-petropolis-EM34597",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Petropolis - fitness",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20007-1666877986.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-petropolis-EM34597",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Quadra mar no Centro",
+          "description": "Fontes imobiliarias posicionam o Petropolis em area central e proxima da orla."
+        },
+        {
+          "icon": "Building2",
+          "title": "Fachada identificada",
+          "description": "A nova hero vem da Litoral Vertical e apresenta o predio, nao a residencia anunciada."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina do lazer",
+          "description": "Imobille trouxe imagens de piscina e areas sociais do condominio."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Ambientes de apoio",
+          "description": "Gourmet, eventos e fitness agora aparecem na experiencia da pagina."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Visual corrigido",
+          "description": "Hero e galeria foram substituidos por imagens do edificio e lazer."
+        },
+        {
+          "title": "Mais contexto urbano",
+          "description": "A descricao reforca Centro, quadra mar e proximidade de servicos."
+        },
+        {
+          "title": "Galeria equilibrada",
+          "description": "Foram combinadas fontes de fachada e lazer, sem depender de fotos privativas."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Edificio Petropolis?",
+          "answer": "No Centro de Balneario Camboriu, com referencias de quadra mar."
+        },
+        {
+          "question": "Quais areas aparecem na nova galeria?",
+          "answer": "Fachada, piscina, gourmet, eventos e fitness."
+        },
+        {
+          "question": "Por que a pagina era P0?",
+          "answer": "Porque hero e galeria estavam vinculadas as imagens da oferta."
+        },
+        {
+          "question": "Qual fonte sustentou a fachada?",
+          "answer": "A Litoral Vertical, complementada por imagens de lazer da Imobille."
+        }
+      ],
+      "sources": [
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-petropolis/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-petropolis-EM34597",
+        "https://www.minhabcimoveis.com.br/imovel/apartamento-no-edificio-petropolis-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-2119/"
+      ]
+    },
+    {
+      "slug": "place-vendome",
+      "hero_image": "https://s01.jetimgs.com/tnkmBfMrb8l6o4Sh9nQL2ApW4aAIJL4cEq9b7tIv3WQyEUpOT_RIZSW-SFRg_b7bzS7HWJlr6OOm8eygkk3ATYc6G3u6lWe9r4_-PWQx7Hv5iH-oZ08TpCvnCl4Olorg3OtC6dSjV8Nvf2HeaZJKyho6pZqZZU6vxSAYoAM/1-fachadajpg.webp",
+      "description": "O Place Vendome foi revisado como edificio de alto padrao na Rua 234, em Meia Praia, Itapema. A galeria agora mostra fachada, hall, piscina, playground, academia, bicicletario e jogos, deixando de usar fotos internas da oferta e criando uma leitura mais fiel do empreendimento e do lazer disponivel no condominio.",
+      "seo_description": "Place Vendome em Meia Praia, Itapema, com fachada, hall, piscina, playground, academia e jogos.",
+      "gallery": [
+        {
+          "title": "Place Vendome - fachada principal",
+          "category": "Fachada",
+          "image": "https://s01.jetimgs.com/tnkmBfMrb8l6o4Sh9nQL2ApW4aAIJL4cEq9b7tIv3WQyEUpOT_RIZSW-SFRg_b7bzS7HWJlr6OOm8eygkk3ATYc6G3u6lWe9r4_-PWQx7Hv5iH-oZ08TpCvnCl4Olorg3OtC6dSjV8Nvf2HeaZJKyho6pZqZZU6vxSAYoAM/1-fachadajpg.webp",
+          "source_url": "https://www.jetlar.com/imovel/apartamento-com-4-quartos-a-venda-e-4-vagas-bairro-meia-praia-em-itapema/9280733",
+          "source_label": "Jetlar"
+        },
+        {
+          "title": "Place Vendome - fachada frontal",
+          "category": "Fachada",
+          "image": "https://s01.jetimgs.com/tnkmBfMrb8l6o4Sh9nSb0PgvpF2gg2OdGotPhiUiYegrOWy7J8cK03tqk0L4_CaXHQ0K_j5ORUsn9hok1qkW6UmxtjLz0o-mL45-hZ2XD1XghmIBJCHforB9RFAC-GzV7bhv4XJ6c1ySEDuCEOfwV9j8pZqZhwKvCafTzAs/1-fachadajpg.webp",
+          "source_url": "https://www.jetlar.com/imovel/apartamento-com-4-quartos-a-venda-e-4-vagas-bairro-meia-praia-em-itapema/9280733",
+          "source_label": "Jetlar"
+        },
+        {
+          "title": "Place Vendome - hall social",
+          "category": "Hall",
+          "image": "https://s01.jetimgs.com/tnkmBfMrb8l6o4Sh9nSnrHa09FWXUWwefh3fRKgjPZZhwwV9uQj-Kl3LaTBPM8P2bUfOm7iRNRWq0-eAVk3QwYbfBOjnxqHeMuDTKpxa-81ey0jNq6RcNYoyB-Ur_TDn78a_Q4qSaP9aqruMBr4wAmTtSJuZhaavzhL8HdE/1-halljpg.webp",
+          "source_url": "https://www.jetlar.com/imovel/apartamento-com-4-quartos-a-venda-e-4-vagas-bairro-meia-praia-em-itapema/9280733",
+          "source_label": "Jetlar"
+        },
+        {
+          "title": "Place Vendome - piscina",
+          "category": "Piscina",
+          "image": "https://s01.jetimgs.com/tnkmBfMrb8l6o4Sh9nSb0dgtpJ0TzTkCErPE7MpPfvqFqqKXFX7eG330ThBPE8PyaUfOVU9ENhXm0gzD4-Xn-Enwdi65_mF-LY7mUsk84ko5GPwNJDnfsiR-XVRi8OzV5Hjh_vofdzIjL7IZF17AnmzJn5OfhVKvuAXYe-4/2-piscinajpg.webp",
+          "source_url": "https://www.jetlar.com/imovel/apartamento-com-4-quartos-a-venda-e-4-vagas-bairro-meia-praia-em-itapema/9280733",
+          "source_label": "Jetlar"
+        },
+        {
+          "title": "Place Vendome - playground",
+          "category": "Playground",
+          "image": "https://s01.jetimgs.com/tnkmBfMrb8l6o4Sh9nRb1N0tlHagg2O9FWLJ58pPfvqFqqKXFd7R2mXVyi6LMyeO7Ty-praw85ml2mzL-X0Nig_IJRsclnhrAj3BVMn4cHY69nbToyTEtuoig_UpdKkytdxO4XJ6bVySdCACbC_3qYDetISfhfOvxl7jsCY/3-playgroundjpg.webp",
+          "source_url": "https://www.jetlar.com/imovel/apartamento-com-4-quartos-a-venda-e-4-vagas-bairro-meia-praia-em-itapema/9280733",
+          "source_label": "Jetlar"
+        },
+        {
+          "title": "Place Vendome - academia",
+          "category": "Fitness",
+          "image": "https://s01.jetimgs.com/tnkmBfMrb8l6o4Sh9nRb1DFFpJ0TzTnNlopPhstPfvqFqqKXFd7RWmXVyi6LAye27Ty-praw85mlmsh-zOXl6MvwujLL7yLitOAXOq-y2ktWqHjD79xtrqZxRNB6-GutwHhO4XJ6bVySdD8CbC_3qVABH5SHhaWvlFnirDs/4-academiajpg.webp",
+          "source_url": "https://www.jetlar.com/imovel/apartamento-com-4-quartos-a-venda-e-4-vagas-bairro-meia-praia-em-itapema/9280733",
+          "source_label": "Jetlar"
+        },
+        {
+          "title": "Place Vendome - bicicletario",
+          "category": "Bicicletario",
+          "image": "https://s01.jetimgs.com/tnkmBfMrb8l6o4Sh9nSn4OYJEgwIJL6cErPE7MpPfvqFqqKXFX7eG330zhFPM8PyaUfOU09Eibkj0-eAVk3QCY8-KstGRs6oLI4ehYVjHxbktnVGp52hj5ZQu8RadKfBtXjh_vrT8_vA2mLeadIwGYhe4oOfhK6vo2T08FE/6-bicicletariojpg.webp",
+          "source_url": "https://www.jetlar.com/imovel/apartamento-com-4-quartos-a-venda-e-4-vagas-bairro-meia-praia-em-itapema/9280733",
+          "source_label": "Jetlar"
+        },
+        {
+          "title": "Place Vendome - jogos",
+          "category": "Jogos",
+          "image": "https://s01.jetimgs.com/tnkmBf8rb8l2o6Sh9nSbNrkLEgyWUWweImFJ7BaUQNbZjT_OcazWUprUymL3WQgialfOn7aw85VVw-mgkk3AOZbTZAjeBr1ctfA3Mhx8UxXAynHL7ZxtrrZYucybVKkyzfrJvsr-n3tZqq9mzoUwAmSGq56ZhU6vkxC3Xr4/5-saladejogosjpg.webp",
+          "source_url": "https://www.jetlar.com/imovel/apartamento-com-4-quartos-a-venda-e-4-vagas-bairro-meia-praia-em-itapema/9280733",
+          "source_label": "Jetlar"
+        },
+        {
+          "title": "Place Vendome - piscina externa",
+          "category": "Piscina",
+          "image": "https://s01.jetimgs.com/tnkmBfMrb8l6o4Sh9nQL2sotmHagg2MjHBHfitpMxgYRXnEbKEE3dN5Hkrlg_b_7b3Mk8yUHH1Sely83JE3QDof8G7u6la8m4rkxV_elaJbQWFcf8vuM4tPfa6vOVqYsE0u_6mVmY2c478XwCXb1VwS66JmYWy-udf3hveM/2-piscinajpg.webp",
+          "source_url": "https://www.jetlar.com/imovel/apartamento-com-4-quartos-a-venda-e-4-vagas-bairro-meia-praia-em-itapema/9280733",
+          "source_label": "Jetlar"
+        },
+        {
+          "title": "Place Vendome - torre em Meia Praia",
+          "category": "Fachada",
+          "image": "https://static.arboimoveis.com.br/AP10786_INTERP/01766058615861.webp",
+          "source_url": "https://www.arboimoveis.com.br/imovel/apartamento/venda/itapema/sc/meia-praia/AP10786_INTERP",
+          "source_label": "Arbo Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 234",
+          "description": "Fontes comerciais situam o Place Vendome na Rua 234, em Meia Praia."
+        },
+        {
+          "icon": "DoorOpen",
+          "title": "Hall social",
+          "description": "A nova galeria inclui o hall para apresentar a chegada do edificio."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina",
+          "description": "Imagens de piscina e area externa substituem ambientes privativos."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer variado",
+          "description": "Playground, academia, bicicletario e jogos entram na narrativa do empreendimento."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fonte visual forte",
+          "description": "Jetlar trouxe uma sequencia coerente de fachada e lazer do Place Vendome."
+        },
+        {
+          "title": "Meia Praia destacada",
+          "description": "A copy reforca a localizacao em uma das regioes mais procuradas de Itapema."
+        },
+        {
+          "title": "Galeria completa",
+          "description": "A pagina passa a apresentar chegada, lazer e apoio do condominio."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Place Vendome?",
+          "answer": "Na Rua 234, em Meia Praia, Itapema."
+        },
+        {
+          "question": "Quais imagens foram selecionadas?",
+          "answer": "Fachada, hall, piscina, playground, academia, bicicletario e jogos."
+        },
+        {
+          "question": "A galeria usa fotos da oferta?",
+          "answer": "Nao. A selecao privilegia imagens do empreendimento e areas comuns."
+        },
+        {
+          "question": "Qual foi a melhoria da descricao?",
+          "answer": "A pagina agora explica localizacao, lazer e experiencia do condominio."
+        }
+      ],
+      "sources": [
+        "https://www.jetlar.com/imovel/apartamento-com-4-quartos-a-venda-e-4-vagas-bairro-meia-praia-em-itapema/9280733",
+        "https://www.arboimoveis.com.br/imovel/apartamento/venda/itapema/sc/meia-praia/AP10786_INTERP",
+        "https://www.interpraiasimoveis.com.br/imovel/apartamento/venda/itapema/sc/meia-praia/AP9534_INTERP"
+      ]
+    },
+    {
+      "slug": "plaza",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/2908202310414877-1693316508.jpg",
+      "description": "O Plaza foi revisado como condominio horizontal Iate Club Plaza/Plaza Itapema Iate e Golfe, na Ilhota, em Itapema. A pagina deixa de mostrar a residencia anunciada e passa a apresentar implantacao costeira, marina, praia, pier, areas verdes e vistas aereas do conjunto, comunicando melhor a escala e a exclusividade do condominio.",
+      "seo_description": "Plaza Itapema Iate e Golfe na Ilhota, com vista aerea, marina, praia, pier e paisagismo.",
+      "gallery": [
+        {
+          "title": "Plaza Itapema - vista aerea",
+          "category": "Aereo",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/2908202310414877-1693316508.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-plaza-EM97028",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Plaza Itapema - implantacao costeira",
+          "category": "Aereo",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2022/dji-0526-1671456996.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-plaza-EM97028",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Plaza Itapema - setor residencial",
+          "category": "Aereo",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2022/dji-0527-1671456991.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-plaza-EM97028",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Plaza Itapema - paisagem do morro",
+          "category": "Paisagismo",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2022/dji-0514-1671456992.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-plaza-EM97028",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Plaza Itapema - marina e praia",
+          "category": "Marina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2022/dji-0518-1671456997.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-plaza-EM97028",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Plaza Itapema - pier e acesso nautico",
+          "category": "Marina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2022/dji-0523-1671456994.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-plaza-EM97028",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Plaza Itapema - praia privativa",
+          "category": "Praia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2022/dji-0529-1671456993.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-plaza-EM97028",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Plaza Itapema - vista panoramica",
+          "category": "Aereo",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2022/dji-0516-1671456995.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-plaza-EM97028",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Iate Club Plaza - orla regional",
+          "category": "Entorno",
+          "image": "https://imobiliariaandorinha.com.br/upload/obra19/0009-6219956913-9-1-608.png",
+          "source_url": "https://imobiliariaandorinha.com.br/empreendimento.php?codigo=19",
+          "source_label": "Imobiliaria Andorinha"
+        },
+        {
+          "title": "Iate Club Plaza - panorama costeiro",
+          "category": "Entorno",
+          "image": "https://imobiliariaandorinha.com.br/upload/obra19/0008-6219956913-8-1-129.png",
+          "source_url": "https://imobiliariaandorinha.com.br/empreendimento.php?codigo=19",
+          "source_label": "Imobiliaria Andorinha"
+        },
+        {
+          "title": "Iate Club Plaza - enseada",
+          "category": "Entorno",
+          "image": "https://imobiliariaandorinha.com.br/upload/obra19/0007-6219956913-7-1-663.png",
+          "source_url": "https://imobiliariaandorinha.com.br/empreendimento.php?codigo=19",
+          "source_label": "Imobiliaria Andorinha"
+        },
+        {
+          "title": "Iate Club Plaza - vista do conjunto",
+          "category": "Aereo",
+          "image": "https://imobiliariaandorinha.com.br/upload/obra19/0006-6219956913-6-1-67.png",
+          "source_url": "https://imobiliariaandorinha.com.br/empreendimento.php?codigo=19",
+          "source_label": "Imobiliaria Andorinha"
+        },
+        {
+          "title": "Iate Club Plaza - implantacao verde",
+          "category": "Aereo",
+          "image": "https://imobiliariaandorinha.com.br/upload/obra19/0005-6219956913-5-1-178.png",
+          "source_url": "https://imobiliariaandorinha.com.br/empreendimento.php?codigo=19",
+          "source_label": "Imobiliaria Andorinha"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Praia e marina",
+          "description": "A nova galeria destaca praia, pier e acesso nautico do Iate Club Plaza."
+        },
+        {
+          "icon": "Shield",
+          "title": "Condominio horizontal",
+          "description": "A pagina passa a tratar o Plaza como condominio fechado de alto padrao."
+        },
+        {
+          "icon": "Trees",
+          "title": "Paisagismo amplo",
+          "description": "Vistas aereas mostram a implantacao verde e a relacao com a costa."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Ilhota, Itapema",
+          "description": "O recorte de localizacao reforca a area costeira e reservada da Ilhota."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Sem residencia especifica",
+          "description": "A galeria evita fachada e interiores da casa vinculada a oferta."
+        },
+        {
+          "title": "Infraestrutura do condominio",
+          "description": "Marina, pier, praia e panoramas passam a sustentar a comunicacao."
+        },
+        {
+          "title": "Fontes complementares",
+          "description": "Imobille e Andorinha trouxeram material visual mais adequado ao condominio."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Qual Plaza foi auditado?",
+          "answer": "O Iate Club Plaza/Plaza Itapema Iate e Golfe, na Ilhota, em Itapema."
+        },
+        {
+          "question": "Que imagens entraram?",
+          "answer": "Vistas aereas, marina, pier, praia, paisagismo e entorno costeiro."
+        },
+        {
+          "question": "As imagens da residencia foram usadas?",
+          "answer": "Nao. A curadoria focou a infraestrutura e a implantacao do condominio."
+        },
+        {
+          "question": "Qual foi a principal correcao?",
+          "answer": "Trocar a leitura da oferta por uma leitura real do condominio horizontal."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/condominio-plaza-EM97028",
+        "https://imobiliariaandorinha.com.br/empreendimento.php?codigo=19",
+        "https://www.corretorrodrigomedeiros.com.br/imovel/casa-em-condominio-no-iate-clube-plaza-itapema-ilhota-5-quartos-2-garagens-venda-ref-1307/"
+      ]
+    },
+    {
+      "slug": "pontal-di-vitta-residence",
+      "hero_image": "https://img.apre.me/DctJCsAgDADA3_ToVo32kLeUrpIiNliK36-XgdkaSQfj6emQqyiL50bcwdELWW7l3JwShstbi7iUVXiv3ETjYBd1rnwU-kaBKZpA_w8.jpg",
+      "description": "O Pontal di Vitta Residence foi revisado como empreendimento na Avenida Osmar de Souza Nunes, 188, no bairro Pioneiros, em Balneario Camboriu. Como as fontes publicas misturavam muitas imagens de oferta, a curadoria manteve fachada, base da torre e hall, criando uma pagina mais limpa para apresentar o empreendimento proximo da Barra Norte.",
+      "seo_description": "Pontal di Vitta Residence em Pioneiros, Balneario Camboriu, com fachada, torre e hall social.",
+      "gallery": [
+        {
+          "title": "Pontal di Vitta - fachada principal",
+          "category": "Fachada",
+          "image": "https://img.apre.me/DctJCsAgDADA3_ToVo32kLeUrpIiNliK36-XgdkaSQfj6emQqyiL50bcwdELWW7l3JwShstbi7iUVXiv3ETjYBd1rnwU-kaBKZpA_w8.jpg",
+          "source_url": "https://plazaimoveis.com.br/pontal-di-vitta-residence-balneario-camboriu-pioneiros-apartamento-a-venda-em-bc-oportunidade-investimento",
+          "source_label": "Plaza Imoveis"
+        },
+        {
+          "title": "Pontal di Vitta - torre noturna",
+          "category": "Fachada",
+          "image": "https://b.casteldigital.com.br/barranobreimoveis/ig/if/imoveis/617/img_1152-1697552701090.jpeg",
+          "source_url": "https://www.barranobreimoveis.com.br/imovel/apartamento-no-edificio-pontal-di-vitta-residence-balneario-camboriu-pioneiros-3-quartos-2-garagens-venda-ref-617/",
+          "source_label": "Barra Nobre Imoveis"
+        },
+        {
+          "title": "Pontal di Vitta - base da torre",
+          "category": "Fachada",
+          "image": "https://b.casteldigital.com.br/barranobreimoveis/ig/il/imoveis/617/img_1152-1697552701090.jpeg",
+          "source_url": "https://www.barranobreimoveis.com.br/imovel/apartamento-no-edificio-pontal-di-vitta-residence-balneario-camboriu-pioneiros-3-quartos-2-garagens-venda-ref-617/",
+          "source_label": "Barra Nobre Imoveis"
+        },
+        {
+          "title": "Pontal di Vitta - fachada vertical",
+          "category": "Fachada",
+          "image": "https://img.apre.me/BcHbCoAgDADQv9mj9yk_7FuiZshCbBTh73cOky7ARPeCPtUEjo5kQaAXul6mnoHdXmLEVvM2dhWe8qjFkpKr3vYpbch3kIDHmIl-.jpg",
+          "source_url": "https://megasulimoveis.com.br/conhea-este-empreendimento-e-celebre-a-vida",
+          "source_label": "Mega Sul Imoveis"
+        },
+        {
+          "title": "Pontal di Vitta - fachada em obra",
+          "category": "Fachada",
+          "image": "https://img.apre.me/M7YtVksvyNKzTDVKNkg0NzY2TbE0i89JLMhMzsssKtA3NTcxMbA01E-Py0zJySxNss1UMzQ1NrNNBgA.jpg",
+          "source_url": "https://megasulimoveis.com.br/conhea-este-empreendimento-e-celebre-a-vida",
+          "source_label": "Mega Sul Imoveis"
+        },
+        {
+          "title": "Pontal di Vitta - hall social",
+          "category": "Hall",
+          "image": "https://b.casteldigital.com.br/barranobreimoveis/ig/im/imoveis/617/img_1170-1697552701089.jpeg",
+          "source_url": "https://www.barranobreimoveis.com.br/imovel/apartamento-no-edificio-pontal-di-vitta-residence-balneario-camboriu-pioneiros-3-quartos-2-garagens-venda-ref-617/",
+          "source_label": "Barra Nobre Imoveis"
+        },
+        {
+          "title": "Pontal di Vitta - recepcao",
+          "category": "Hall",
+          "image": "https://b.casteldigital.com.br/barranobreimoveis/ig/il/imoveis/617/img_1170-1697552701089.jpeg",
+          "source_url": "https://www.barranobreimoveis.com.br/imovel/apartamento-no-edificio-pontal-di-vitta-residence-balneario-camboriu-pioneiros-3-quartos-2-garagens-venda-ref-617/",
+          "source_label": "Barra Nobre Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Pioneiros",
+          "description": "Loft posiciona o edificio na Avenida Osmar de Souza Nunes, 188, em Pioneiros."
+        },
+        {
+          "icon": "Building2",
+          "title": "Torre identificada",
+          "description": "A nova galeria usa fachadas e base da torre, sem depender de fotos internas."
+        },
+        {
+          "icon": "DoorOpen",
+          "title": "Hall social",
+          "description": "Imagens de recepcao ajudam a apresentar a chegada do empreendimento."
+        },
+        {
+          "icon": "Compass",
+          "title": "Barra Norte",
+          "description": "O bairro Pioneiros reforca conexao com orla, servicos e acessos da Barra Norte."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Selecao conservadora",
+          "description": "Foram descartadas imagens de ambientes privativos e anuncios relacionados."
+        },
+        {
+          "title": "Endereco claro",
+          "description": "A copy passa a usar a referencia de endereco e bairro encontrada na Loft."
+        },
+        {
+          "title": "Foco no condominio",
+          "description": "Fachada, base e hall substituem a narrativa generica anterior."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Pontal di Vitta Residence?",
+          "answer": "Na Avenida Osmar de Souza Nunes, 188, em Pioneiros, Balneario Camboriu."
+        },
+        {
+          "question": "Quais imagens foram usadas?",
+          "answer": "Fachada, base da torre, hall social e recepcao."
+        },
+        {
+          "question": "Por que a galeria e menor?",
+          "answer": "Porque a curadoria manteve apenas imagens claramente ligadas ao empreendimento."
+        },
+        {
+          "question": "O que mudou na pagina?",
+          "answer": "A pagina deixou de usar fotos da oferta e ganhou descricao focada no condominio."
+        }
+      ],
+      "sources": [
+        "https://loft.com.br/condominio/edificio-pontal-di-vitta-residence-pioneiros-balneario-camboriu-sc/7D1TUL1B",
+        "https://plazaimoveis.com.br/pontal-di-vitta-residence-balneario-camboriu-pioneiros-apartamento-a-venda-em-bc-oportunidade-investimento",
+        "https://www.barranobreimoveis.com.br/imovel/apartamento-no-edificio-pontal-di-vitta-residence-balneario-camboriu-pioneiros-3-quartos-2-garagens-venda-ref-617/",
+        "https://megasulimoveis.com.br/conhea-este-empreendimento-e-celebre-a-vida"
+      ]
+    },
+    {
+      "slug": "porta-do-sol",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-1755191761.jpg",
+      "description": "O Edificio Porta do Sol foi revisado como condominio frente mar na Avenida Atlantica, 2920, Centro de Balneario Camboriu. A pagina passa a mostrar fachada, acesso, jardim frontal, lounge, convivencia, jogos e eventos, substituindo imagens internas da oferta e comunicando melhor a estrutura do edificio na orla.",
+      "seo_description": "Edificio Porta do Sol na Avenida Atlantica, com fachada frente mar, jardim, lounge, jogos e eventos.",
+      "gallery": [
+        {
+          "title": "Porta do Sol - fachada frente mar",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-1755191761.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-porta-do-sol-EM17598",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porta do Sol - acesso pela orla",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2023/porta-do-sol-51-1697031250.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-porta-do-sol-EM17598",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porta do Sol - jardim frontal",
+          "category": "Paisagismo",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2023/porta-do-sol-50-1697031249.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-porta-do-sol-EM17598",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porta do Sol - passeio interno",
+          "category": "Paisagismo",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2023/porta-do-sol-49-1697031248.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-porta-do-sol-EM17598",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porta do Sol - lounge social",
+          "category": "Lounge",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2023/porta-do-sol-44-1697031247.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-porta-do-sol-EM17598",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porta do Sol - convivencia social",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2023/porta-do-sol-42-1697031247.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-porta-do-sol-EM17598",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porta do Sol - jogos",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2023/porta-do-sol-40-1697031246.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-porta-do-sol-EM17598",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porta do Sol - eventos",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2023/porta-do-sol-41-1697031246.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-porta-do-sol-EM17598",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porta do Sol - fachada vertical",
+          "category": "Fachada",
+          "image": "https://b4.casteldigital.com.br/brunocassola/ig/il/imoveis/812/porta-do-sol-fachada-balneario-camboriu-17682627726469.jpeg",
+          "source_url": "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-porta-do-sol-balneario-camboriu-centro-3-quartos-1-garagem-venda-ref-812/",
+          "source_label": "Bruno Cassola"
+        },
+        {
+          "title": "Porta do Sol - frente urbana",
+          "category": "Fachada",
+          "image": "https://b4.casteldigital.com.br/brunocassola/ig/im/imoveis/812/porta-do-sol-fachada-balneario-camboriu-17682627726469.jpeg",
+          "source_url": "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-porta-do-sol-balneario-camboriu-centro-3-quartos-1-garagem-venda-ref-812/",
+          "source_label": "Bruno Cassola"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Avenida Atlantica",
+          "description": "Imobille posiciona o Porta do Sol no numero 2920, Centro de Balneario Camboriu."
+        },
+        {
+          "icon": "Waves",
+          "title": "Frente mar",
+          "description": "A fachada e o acesso reforcam a relacao direta com a orla."
+        },
+        {
+          "icon": "Trees",
+          "title": "Jardim frontal",
+          "description": "A nova galeria mostra paisagismo e acesso, dando contexto ao edificio."
+        },
+        {
+          "icon": "Gamepad2",
+          "title": "Ambientes sociais",
+          "description": "Jogos, eventos, lounge e convivencia entram na leitura do condominio."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Endereco confirmado",
+          "description": "A copy usa Avenida Atlantica, 2920, informada nas fontes do empreendimento."
+        },
+        {
+          "title": "Galeria de condominio",
+          "description": "Fachada, acesso e areas sociais substituem fotos privativas."
+        },
+        {
+          "title": "Frente mar valorizada",
+          "description": "A descricao destaca a orla e a conveniencia do Centro."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Porta do Sol?",
+          "answer": "Na Avenida Atlantica, 2920, Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Quais imagens entraram?",
+          "answer": "Fachada, acesso, jardim, lounge, convivencia, jogos e eventos."
+        },
+        {
+          "question": "A pagina continua usando fotos da oferta?",
+          "answer": "Nao. A midia foi trocada por imagens do edificio e areas comuns."
+        },
+        {
+          "question": "Qual fonte principal foi usada?",
+          "answer": "Imobille, complementada por Invicta, Loft e Bruno Cassola."
+        }
+      ],
+      "sources": [
+        "https://www.invictaimoveisbc.com.br/detalhes-imovel/1246-predio-venda-centro-balneario-camboriu-sc.html",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-porta-do-sol-EM17598",
+        "https://loft.com.br/condominio/condominio-edificio-residencial-porta-do-sol-centro-balneario-camboriu-sc/T8T43S5M",
+        "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-porta-do-sol-balneario-camboriu-centro-3-quartos-1-garagem-venda-ref-812/"
+      ]
+    },
+    {
+      "slug": "porto-di-napoli",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2015/07/edificio-porto-di-napoli-balneario-camboriu-1.2.jpg",
+      "description": "O Edificio Porto di Napoli foi revisado como empreendimento na Rua 3144, no Centro de Balneario Camboriu. Como as fontes confiaveis traziam essencialmente fachadas, a curadoria manteve uma galeria conservadora com imagens externas do predio, evitando interiores da cobertura e anuncios relacionados que nao representavam o condominio.",
+      "seo_description": "Porto di Napoli em Balneario Camboriu, com fachada real e contexto da Rua 3144 no Centro.",
+      "gallery": [
+        {
+          "title": "Porto di Napoli - fachada principal",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2015/07/edificio-porto-di-napoli-balneario-camboriu-1.2.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-porto-di-napoli/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Porto di Napoli - torre vertical",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2015/07/edificio-porto-di-napoli-balneario-camboriu-1.1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-porto-di-napoli/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Porto di Napoli - fachada clara",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2015/07/edificio-porto-di-napoli-balneario-camboriu-1.1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-porto-di-napoli/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Porto di Napoli - perspectiva da torre",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2015/07/edificio-porto-di-napoli-balneario-camboriu-1.2.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-porto-di-napoli/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Porto di Napoli - base urbana",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2015/07/edificio-porto-di-napoli-balneario-camboriu-1.3.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-porto-di-napoli/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Porto di Napoli - frente do edificio",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2015/07/edificio-porto-di-napoli-balneario-camboriu-1.3.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-porto-di-napoli/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 3144",
+          "description": "Litoral Vertical e Loft apontam o endereco no Centro de Balneario Camboriu."
+        },
+        {
+          "icon": "Building2",
+          "title": "Fachada real",
+          "description": "A pagina passa a abrir com imagem externa do edificio."
+        },
+        {
+          "icon": "Eye",
+          "title": "Curadoria limpa",
+          "description": "Foram evitadas fotos internas e imagens de outros anuncios."
+        },
+        {
+          "icon": "Compass",
+          "title": "Centro urbano",
+          "description": "A copy reforca a localizacao central para consulta e comparacao."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Galeria conservadora",
+          "description": "Somente fachadas verificaveis foram mantidas na selecao."
+        },
+        {
+          "title": "Sem cobertura anunciada",
+          "description": "As imagens da cobertura vinculada a oferta foram removidas."
+        },
+        {
+          "title": "Fonte especializada",
+          "description": "A Litoral Vertical sustentou as imagens principais do edificio."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Porto di Napoli?",
+          "answer": "Na Rua 3144, no Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Por que a galeria tem apenas fachadas?",
+          "answer": "Porque eram as imagens confiaveis disponiveis do edificio, sem risco de confundir com a oferta."
+        },
+        {
+          "question": "Qual foi a correcao?",
+          "answer": "Remover fotos internas da cobertura e apresentar o predio real."
+        },
+        {
+          "question": "Quais fontes foram usadas?",
+          "answer": "Litoral Vertical e Loft para referencia do condominio."
+        }
+      ],
+      "sources": [
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-porto-di-napoli/",
+        "https://loft.com.br/condominio/condominio-edificio-residencial-porto-di-napoli-centro-balneario-camboriu-sc/5zmn69"
+      ]
+    },
+    {
+      "slug": "porto-riviera",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/1702202615195145-1771352392.jpg",
+      "description": "O Porto Riviera Exclusive foi revisado como condominio fechado na Praia Brava, em Itajai, com mais de 100 mil m2 de area total segundo o Grupo Riviera. A pagina deixa de depender de imagens de uma residencia e passa a mostrar portaria, clube, piscinas, quadras, campo, playground, gourmet e convivencia, alinhando a midia ao condominio.",
+      "seo_description": "Porto Riviera Exclusive na Praia Brava, com portaria, clube, piscinas, quadras, campo e playground.",
+      "gallery": [
+        {
+          "title": "Porto Riviera - portaria principal",
+          "category": "Portaria",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/1702202615195145-1771352392.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Riviera - clube com piscina",
+          "category": "Clube",
+          "image": "https://www.gruporiviera.com.br/arquivos/appGaleria/porto_riviera_exclusive_1/thumb/banner_porto_riviera_exclusive_-_ba8ac3fc.jpg",
+          "source_url": "https://www.gruporiviera.com.br/pt/empreendimento/porto-riviera-exclusive",
+          "source_label": "Grupo Riviera"
+        },
+        {
+          "title": "Porto Riviera - quadra coberta",
+          "category": "Esporte",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/hGJNDPtWpn378jvsD3CA.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Riviera - campo gramado",
+          "category": "Esporte",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/jRdHFy6AvgeSh38RKOFT.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Riviera - area esportiva",
+          "category": "Esporte",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/nKlESNtkwS2nsXUPQSqg.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Riviera - muro verde",
+          "category": "Paisagismo",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/pOMqbpreOaExkRjNnI96.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Riviera - quadra de areia",
+          "category": "Esporte",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/wF5B3ZBS9T95YSJSYnG2.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Riviera - playground externo",
+          "category": "Playground",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/t50YzxnI82RzLPpJml7T.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Riviera - brinquedos externos",
+          "category": "Playground",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/S8yMJ4CAx6qirHZvQ92s.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Riviera - convivencia coberta",
+          "category": "Convivencia",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/NGBxrUADrkJNFcfIAV4Y.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Riviera - playground arborizado",
+          "category": "Playground",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/75Tnc0f6czHXREHXGcIx.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Riviera - piscina do clube",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/5uglaZxXR6XUc1T0QWic.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Riviera - piscina externa",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/wujNWiDqNUbNni2Dt8Gk.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Riviera - campo de futebol",
+          "category": "Esporte",
+          "image": "https://www.gruporiviera.com.br/arquivos/appGaleria/campo_de_futebol_1/porto_riviera_exclusive_-_deehouse___riviera-359.jpg",
+          "source_url": "https://www.gruporiviera.com.br/pt/empreendimento/porto-riviera-exclusive",
+          "source_label": "Grupo Riviera"
+        },
+        {
+          "title": "Porto Riviera - gourmet social",
+          "category": "Gourmet",
+          "image": "https://www.gruporiviera.com.br/arquivos/appGaleria/espaco_gourmet_1/porto_riviera_exclusive_-_deehouse___riviera-339.jpg",
+          "source_url": "https://www.gruporiviera.com.br/pt/empreendimento/porto-riviera-exclusive",
+          "source_label": "Grupo Riviera"
+        },
+        {
+          "title": "Porto Riviera - eventos gourmet",
+          "category": "Gourmet",
+          "image": "https://www.gruporiviera.com.br/arquivos/appGaleria/espaco_gourmet_1/porto_riviera_exclusive_-_deehouse___riviera-340.jpg",
+          "source_url": "https://www.gruporiviera.com.br/pt/empreendimento/porto-riviera-exclusive",
+          "source_label": "Grupo Riviera"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Shield",
+          "title": "Condominio fechado",
+          "description": "Grupo Riviera apresenta o Porto Riviera Exclusive como condominio fechado na Praia Brava."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Praia Brava",
+          "description": "Localizacao em Itajai, proxima da entrada de Balneario Camboriu e do eixo da Avenida Osvaldo Reis."
+        },
+        {
+          "icon": "Waves",
+          "title": "Clube e piscina",
+          "description": "A nova galeria mostra clube, piscinas e ambientes externos de uso comum."
+        },
+        {
+          "icon": "Volleyball",
+          "title": "Esporte e lazer",
+          "description": "Quadras, campo, playground, gourmet e convivencia compoem a leitura do condominio."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Galeria de infraestrutura",
+          "description": "Foram usadas imagens de portaria, clube, quadras, piscina, playground e gourmet."
+        },
+        {
+          "title": "Fonte oficial dominante",
+          "description": "Grupo Riviera e Imobille sustentam as principais imagens e informacoes."
+        },
+        {
+          "title": "Sem dependencia residencial",
+          "description": "A curadoria evita fotos de uma residencia especifica e foca o condominio."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Porto Riviera Exclusive?",
+          "answer": "Na Praia Brava, em Itajai, em area de acesso facil pela Avenida Osvaldo Reis."
+        },
+        {
+          "question": "Que imagens entraram?",
+          "answer": "Portaria, clube, quadras, campo, playground, piscina, gourmet e convivencia."
+        },
+        {
+          "question": "As fotos sao de uma residencia?",
+          "answer": "Nao. A selecao privilegia infraestrutura e areas comuns do condominio."
+        },
+        {
+          "question": "Qual fonte principal foi usada?",
+          "answer": "Grupo Riviera, complementado por Imobille e Felicita."
+        }
+      ],
+      "sources": [
+        "https://www.gruporiviera.com.br/pt/empreendimento/porto-riviera-exclusive",
+        "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+        "https://felicitanegocios.com.br/empreendimento/607/porto-riviera-exclusive/"
+      ]
+    },
+    {
+      "slug": "porto-riviera-condominio",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/1702202615195145-1771352392.jpg",
+      "description": "O Porto Riviera Condominio foi revisado com a mesma base visual do Porto Riviera Exclusive, priorizando imagens institucionais e de areas comuns na Praia Brava, em Itajai. A curadoria mostra portaria, clube, piscinas, quadras, campo, playground, gourmet e convivencia, retirando o peso de imagens de uma residencia especifica.",
+      "seo_description": "Porto Riviera Condominio na Praia Brava, com portaria, clube, piscinas, quadras e areas comuns.",
+      "gallery": [
+        {
+          "title": "Porto Riviera - portaria principal",
+          "category": "Portaria",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/1702202615195145-1771352392.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Riviera - clube com piscina",
+          "category": "Clube",
+          "image": "https://www.gruporiviera.com.br/arquivos/appGaleria/porto_riviera_exclusive_1/thumb/banner_porto_riviera_exclusive_-_ba8ac3fc.jpg",
+          "source_url": "https://www.gruporiviera.com.br/pt/empreendimento/porto-riviera-exclusive",
+          "source_label": "Grupo Riviera"
+        },
+        {
+          "title": "Porto Riviera - quadra coberta",
+          "category": "Esporte",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/hGJNDPtWpn378jvsD3CA.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Riviera - campo gramado",
+          "category": "Esporte",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/jRdHFy6AvgeSh38RKOFT.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Riviera - area esportiva",
+          "category": "Esporte",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/nKlESNtkwS2nsXUPQSqg.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Riviera - muro verde",
+          "category": "Paisagismo",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/pOMqbpreOaExkRjNnI96.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Riviera - quadra de areia",
+          "category": "Esporte",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/wF5B3ZBS9T95YSJSYnG2.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Riviera - playground externo",
+          "category": "Playground",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/t50YzxnI82RzLPpJml7T.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Riviera - brinquedos externos",
+          "category": "Playground",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/S8yMJ4CAx6qirHZvQ92s.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Riviera - convivencia coberta",
+          "category": "Convivencia",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/NGBxrUADrkJNFcfIAV4Y.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Riviera - playground arborizado",
+          "category": "Playground",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/75Tnc0f6czHXREHXGcIx.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Riviera - piscina do clube",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/5uglaZxXR6XUc1T0QWic.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Riviera - piscina externa",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/wujNWiDqNUbNni2Dt8Gk.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Riviera - campo de futebol",
+          "category": "Esporte",
+          "image": "https://www.gruporiviera.com.br/arquivos/appGaleria/churrasqueira_1/porto_riviera_exclusive_-_deehouse___riviera-339.jpg",
+          "source_url": "https://www.gruporiviera.com.br/pt/empreendimento/porto-riviera-exclusive",
+          "source_label": "Grupo Riviera"
+        },
+        {
+          "title": "Porto Riviera - gourmet social",
+          "category": "Gourmet",
+          "image": "https://www.gruporiviera.com.br/arquivos/appGaleria/espaco_gourmet_1/porto_riviera_exclusive_-_deehouse___riviera-339.jpg",
+          "source_url": "https://www.gruporiviera.com.br/pt/empreendimento/porto-riviera-exclusive",
+          "source_label": "Grupo Riviera"
+        },
+        {
+          "title": "Porto Riviera - eventos gourmet",
+          "category": "Gourmet",
+          "image": "https://www.gruporiviera.com.br/arquivos/appGaleria/espaco_gourmet_1/porto_riviera_exclusive_-_deehouse___riviera-340.jpg",
+          "source_url": "https://www.gruporiviera.com.br/pt/empreendimento/porto-riviera-exclusive",
+          "source_label": "Grupo Riviera"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Shield",
+          "title": "Condominio fechado",
+          "description": "Grupo Riviera apresenta o Porto Riviera Exclusive como condominio fechado na Praia Brava."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Praia Brava",
+          "description": "Localizacao em Itajai, proxima da entrada de Balneario Camboriu e do eixo da Avenida Osvaldo Reis."
+        },
+        {
+          "icon": "Waves",
+          "title": "Clube e piscina",
+          "description": "A nova galeria mostra clube, piscinas e ambientes externos de uso comum."
+        },
+        {
+          "icon": "Volleyball",
+          "title": "Esporte e lazer",
+          "description": "Quadras, campo, playground, gourmet e convivencia compoem a leitura do condominio."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Galeria de infraestrutura",
+          "description": "Foram usadas imagens de portaria, clube, quadras, piscina, playground e gourmet."
+        },
+        {
+          "title": "Fonte oficial dominante",
+          "description": "Grupo Riviera e Imobille sustentam as principais imagens e informacoes."
+        },
+        {
+          "title": "Sem dependencia residencial",
+          "description": "A curadoria evita fotos de uma residencia especifica e foca o condominio."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Porto Riviera Exclusive?",
+          "answer": "Na Praia Brava, em Itajai, em area de acesso facil pela Avenida Osvaldo Reis."
+        },
+        {
+          "question": "Que imagens entraram?",
+          "answer": "Portaria, clube, quadras, campo, playground, piscina, gourmet e convivencia."
+        },
+        {
+          "question": "As fotos sao de uma residencia?",
+          "answer": "Nao. A selecao privilegia infraestrutura e areas comuns do condominio."
+        },
+        {
+          "question": "Qual fonte principal foi usada?",
+          "answer": "Grupo Riviera, complementado por Imobille e Felicita."
+        }
+      ],
+      "sources": [
+        "https://www.gruporiviera.com.br/pt/empreendimento/porto-riviera-exclusive",
+        "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+        "https://felicitanegocios.com.br/empreendimento/607/porto-riviera-exclusive/"
+      ]
+    },
+    {
+      "slug": "principado-de-monaco",
+      "hero_image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_472_11118_1126_041023.jpg",
+      "description": "O Principado de Monaco foi revisado como pre-lancamento no Centro de Itapema, com fonte principal da Versatil e apoio da MySide. A pagina passa a usar renders de fachada do empreendimento e copy com dados de localizacao, entrega prevista para dezembro de 2029, proximidade do mar e lazer amplo, sem depender das imagens internas da oferta.",
+      "seo_description": "Principado de Monaco no Centro de Itapema, com fachada do projeto, localizacao e entrega prevista para 2029.",
+      "gallery": [
+        {
+          "title": "Principado de Monaco - fachada do projeto",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_472_11118_1126_041023.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/principado-de-monaco/itapema/centro/472",
+          "source_label": "Versatil Imoveis"
+        },
+        {
+          "title": "Principado de Monaco - torre na orla",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_472_11117_1126_041023.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/principado-de-monaco/itapema/centro/472",
+          "source_label": "Versatil Imoveis"
+        },
+        {
+          "title": "Principado de Monaco - fachada vertical",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_472_11116_1126_041023.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/principado-de-monaco/itapema/centro/472",
+          "source_label": "Versatil Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro de Itapema",
+          "description": "Versatil e MySide posicionam o empreendimento na Rua 115, proximo do mar."
+        },
+        {
+          "icon": "CalendarClock",
+          "title": "Entrega prevista",
+          "description": "As fontes indicam previsao de entrega para dezembro de 2029."
+        },
+        {
+          "icon": "Building2",
+          "title": "Fachada do projeto",
+          "description": "A galeria usa renders externos do empreendimento, nao ambientes privativos."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer amplo",
+          "description": "Versatil cita 15 ambientes de lazer em aproximadamente 1.703 m2."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Pre-lancamento contextualizado",
+          "description": "A copy esclarece prazo, localizacao e proposta do projeto."
+        },
+        {
+          "title": "Renders externos",
+          "description": "A selecao visual fica restrita a fachadas e torre do empreendimento."
+        },
+        {
+          "title": "Sem imagem interna",
+          "description": "As imagens decorativas da oferta foram descartadas."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Principado de Monaco?",
+          "answer": "Na Rua 115, no Centro de Itapema, proximo ao mar."
+        },
+        {
+          "question": "Quando esta prevista a entrega?",
+          "answer": "As fontes consultadas indicam dezembro de 2029."
+        },
+        {
+          "question": "Quais imagens entraram?",
+          "answer": "Renders de fachada e torre do empreendimento."
+        },
+        {
+          "question": "Por que a galeria e curta?",
+          "answer": "Porque foram mantidas apenas imagens externas confiaveis do projeto."
+        }
+      ],
+      "sources": [
+        "https://imobiliariaversatil.com.br/edificios/principado-de-monaco/itapema/centro/472",
+        "https://myside.com.br/apartamento-venda-principado-de-monaco-itapema-sc"
+      ]
+    }
+  ],
+  "skipped": []
+}

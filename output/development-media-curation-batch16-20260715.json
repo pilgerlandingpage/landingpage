@@ -1,0 +1,1298 @@
+{
+  "batch_id": "development-media-curation-batch16-20260715",
+  "generated_at": "2026-07-15T15:30:00.000Z",
+  "items": [
+    {
+      "slug": "gales-village",
+      "hero_image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2023/09/fachada-noturna3-gales-embraed.jpg",
+      "description": "O Gales Village e um empreendimento Embraed em construcao no Centro de Balneario Camboriu, proximo a Barra Sul, com 43 pavimentos e 1.600 m2 de area de lazer. A curadoria substitui imagens internas por midia do proprio projeto: fachada, piscina, academia, spa, sport grill, playground, brinquedoteca, eventos e coworking. A pagina passa a valorizar a inspiracao no Pais de Gales, a assinatura Embraed e a escala de lazer do condominio.",
+      "seo_description": "Conheca o Gales Village, Embraed em Balneario Camboriu com 43 pavimentos, fachada neoclassica e 1.600 m2 de lazer.",
+      "gallery": [
+        {
+          "title": "Gales Village - fachada noturna",
+          "category": "Fachada",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2023/09/fachada-noturna3-gales-embraed.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/gales-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Gales Village - fachada diurna",
+          "category": "Fachada",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2023/09/gales-embraed-fachada.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/gales-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Gales Village - piscina externa",
+          "category": "Piscina",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2025/06/piscina2-gales-embraed.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/gales-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Gales Village - piscina panoramica",
+          "category": "Piscina",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2023/09/piscina1-gales-embraed.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/gales-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Gales Village - fitness",
+          "category": "Fitness",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2023/09/academia-gales-embraed.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/gales-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Gales Village - spa",
+          "category": "Wellness",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2023/09/spa-gales-embraed.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/gales-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Gales Village - sport grill",
+          "category": "Gourmet",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2023/09/sport-grill-gales-embraed.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/gales-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Gales Village - playground",
+          "category": "Kids",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2023/09/playground-gales-embraed.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/gales-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Gales Village - brinquedoteca",
+          "category": "Kids",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2023/09/brinquedoteca-gales-embraed.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/gales-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Gales Village - eventos",
+          "category": "Eventos",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2023/09/salao-de-festas1-gales-embraed.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/gales-village",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Gales Village - coworking",
+          "category": "Convivencia",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2023/09/coworking-gales-embraed.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/gales-village",
+          "source_label": "Embraed"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Assinatura Embraed",
+          "description": "Projeto de alto padrao com fachada neoclassica, 43 pavimentos e curadoria visual oficial do empreendimento."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "1.600 m2 de lazer",
+          "description": "Piscinas, spa, academia, ambientes kids, gourmet, eventos e coworking reforcam a estrutura de uso comum."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Centro e Barra Sul",
+          "description": "Endereco no Centro de Balneario Camboriu, com leitura pratica para praia, servicos e eixo da Barra Sul."
+        }
+      ],
+      "differentials": [
+        "Galeria revisada com imagens oficiais de fachada e lazer do Gales Village.",
+        "Copy reposicionada para Embraed, escala vertical e 1.600 m2 de lazer.",
+        "Fotos de interiores de oferta deixam de representar a pagina do condominio."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Gales Village?",
+          "answer": "Fica no Centro de Balneario Camboriu, em area proxima a Barra Sul."
+        },
+        {
+          "question": "Quem assina o empreendimento?",
+          "answer": "O empreendimento e da Embraed, com proposta inspirada no Pais de Gales."
+        },
+        {
+          "question": "O que aparece na galeria revisada?",
+          "answer": "Fachada, piscina, academia, spa, gourmet, kids, eventos e coworking do empreendimento."
+        },
+        {
+          "question": "Por que a pagina foi ajustada?",
+          "answer": "Porque a auditoria priorizou imagens reais do empreendimento em vez de fotos internas de ofertas."
+        }
+      ],
+      "sources": [
+        "https://www.embraed.com.br/pt-BR/empreendimento/gales-village"
+      ]
+    },
+    {
+      "slug": "george-vi-residencial",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/07082025153621-1754591781.jpg",
+      "description": "O George VI Residencial fica no Canto da Praia, em Itapema, na Rua 115A, em posicao frente mar e quadra mar. A pagina foi revisada para mostrar o edificio e suas areas comuns: fachada, piscina, wellness, gourmet, spa, jogos, fitness, kids, piscina interna e lounge. A nova copy reforca o perfil de condominio completo na orla de Itapema, com estrutura de lazer, hall, box de praia e entrada para banhistas apontados nas fontes.",
+      "seo_description": "Conheca o George VI Residencial em Itapema, frente mar no Canto da Praia, com piscina, spa, fitness, gourmet e kids.",
+      "gallery": [
+        {
+          "title": "George VI - fachada frente mar",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/07082025153621-1754591781.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-george-vi-EM18356",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "George VI - fachada vertical",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/foto-destaque-535x596px-1754591781.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-george-vi-EM18356",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "George VI - piscina externa",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2022/modelo-foto-site0000-1670518497.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/apartamento-frente-mar-no-edificio-george-vi-em-itapema-IM74685",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "George VI - deck da piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2022/modelo-foto-site0003-1670518499.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/apartamento-frente-mar-no-edificio-george-vi-em-itapema-IM74685",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "George VI - wellness externo",
+          "category": "Wellness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2022/modelo-foto-site0007-1670518501.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/apartamento-frente-mar-no-edificio-george-vi-em-itapema-IM74685",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "George VI - gourmet e eventos",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2022/modelo-foto-site0009-1670518502.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/apartamento-frente-mar-no-edificio-george-vi-em-itapema-IM74685",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "George VI - spa",
+          "category": "Wellness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2022/modelo-foto-site0004-1670518499.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/apartamento-frente-mar-no-edificio-george-vi-em-itapema-IM74685",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "George VI - jogos",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2022/modelo-foto-site0005-1670518500.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/apartamento-frente-mar-no-edificio-george-vi-em-itapema-IM74685",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "George VI - fitness",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2022/modelo-foto-site0012-1670518503.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/apartamento-frente-mar-no-edificio-george-vi-em-itapema-IM74685",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "George VI - kids",
+          "category": "Kids",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/December2022/modelo-foto-site0013-1670518503.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/apartamento-frente-mar-no-edificio-george-vi-em-itapema-IM74685",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "George VI - piscina interna",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/December2021/5VLsQKn7n3KTqvpz9T9W.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/apartamento-frente-mar-no-edificio-george-vi-em-itapema-IM74685",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "George VI - lounge",
+          "category": "Convivencia",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/December2021/fzrr8spKuSMg5FSbGVRi.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/apartamento-frente-mar-no-edificio-george-vi-em-itapema-IM74685",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Canto da Praia frente mar",
+          "description": "Localizacao em Itapema com frente mar, quadra mar e endereco na Rua 115A."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer completo",
+          "description": "A curadoria destaca piscina, spa, wellness, gourmet, jogos, fitness, kids e ambientes internos de lazer."
+        },
+        {
+          "icon": "Building2",
+          "title": "Uso pratico de praia",
+          "description": "Fontes apontam hall, box de praia e entrada para banhistas, recursos importantes para a rotina beira-mar."
+        }
+      ],
+      "differentials": [
+        "Imagens de lazer e fachada substituem a galeria centrada em interiores.",
+        "Descricao reforca Canto da Praia, frente mar e infraestrutura comum.",
+        "Fontes locais cruzadas confirmam endereco e amenidades do George VI."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o George VI Residencial?",
+          "answer": "Fica no Canto da Praia, em Itapema, na Rua 115A."
+        },
+        {
+          "question": "Quais areas comuns aparecem na nova galeria?",
+          "answer": "Piscina, wellness, gourmet, spa, jogos, fitness, kids, lounge e fachada."
+        },
+        {
+          "question": "A pagina usa fotos de oferta?",
+          "answer": "A curadoria priorizou imagens do empreendimento e de areas comuns para reduzir fotos internas de oferta."
+        },
+        {
+          "question": "Qual e o perfil do condominio?",
+          "answer": "E um residencial frente mar com estrutura de lazer e apoio para uso de praia."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-george-vi-EM18356",
+        "https://www.imobillenegocios.com.br/imoveis/apartamento-frente-mar-no-edificio-george-vi-em-itapema-IM74685"
+      ]
+    },
+    {
+      "slug": "green-coast",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/green-coast-1666206173.jpg",
+      "description": "O Green Coast foi confirmado nas fontes como empreendimento no Centro de Itapema, na Rua 129 D esquina com a Rua 129 E, em posicao frente mar. A curadoria corrige a leitura do cadastro e troca a galeria por imagens do condominio: fachada, piscina, fitness, playground, deck, gourmet e hall. A copy passa a destacar o perfil de lazer compacto e bem localizado, com areas privativas entre 127 e 173 m2 apontadas pela fonte Imobille.",
+      "seo_description": "Conheca o Green Coast em Itapema, no Centro, empreendimento frente mar com piscina, fitness, kids, deck e lounge.",
+      "gallery": [
+        {
+          "title": "Green Coast - piscina e fachada",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/green-coast-1666206173.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-green-coast--EM87477",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Green Coast - fachada vertical",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/img-81-1680282759-1746817187.WEBP",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-green-coast--EM87477",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Green Coast - fitness",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2023/img-41-24-1680282753.WEBP",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-green-coast--EM87477",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Green Coast - playground",
+          "category": "Kids",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2023/img-65-3-1680282757.WEBP",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-green-coast--EM87477",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Green Coast - acesso ao lazer",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2023/img-48-16-1680282754.WEBP",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-green-coast--EM87477",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Green Coast - piscina externa",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2023/img-53-13-1680282755.WEBP",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-green-coast--EM87477",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Green Coast - gourmet externo",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2023/img-69-5-1680282758.WEBP",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-green-coast--EM87477",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Green Coast - hall social",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2023/img-73-1-1680282758.WEBP",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-green-coast--EM87477",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Green Coast - torre",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2023/img-81-1680282759.WEBP",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-green-coast--EM87477",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro de Itapema",
+          "description": "As fontes confirmam endereco na Rua 129 D com Rua 129 E, em uma faixa central e frente mar."
+        },
+        {
+          "icon": "Waves",
+          "title": "Rotina de praia",
+          "description": "Piscina, deck e posicao proxima ao mar reforcam a leitura de condominio voltado ao litoral."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer objetivo",
+          "description": "Fitness, kids, spa, deck e lounge com lareira aparecem como amenidades do empreendimento."
+        }
+      ],
+      "differentials": [
+        "Curadoria visual usa imagens do Green Coast e remove fotos internas de oferta.",
+        "Copy corrige o posicionamento para Itapema/Centro conforme fontes consultadas.",
+        "Galeria organizada por fachada, piscina, fitness, kids, hall e gourmet."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Green Coast?",
+          "answer": "As fontes consultadas indicam Centro de Itapema, na Rua 129 D esquina com a Rua 129 E."
+        },
+        {
+          "question": "Quais amenidades aparecem nas fontes?",
+          "answer": "Piscina, fitness, piscina infantil, spa, kids, deck e lounge com lareira."
+        },
+        {
+          "question": "O que foi corrigido na auditoria?",
+          "answer": "A galeria foi trocada para imagens do empreendimento e a copy passou a refletir a localizacao real em Itapema."
+        },
+        {
+          "question": "A nova galeria mostra areas comuns?",
+          "answer": "Sim. Ela mostra fachada, piscina, fitness, playground, hall, acesso e gourmet externo."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-green-coast--EM87477"
+      ]
+    },
+    {
+      "slug": "imperatriz",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/30062025094937185-1751287777.jpg",
+      "description": "O Imperatriz e um edificio tradicional frente mar na Avenida Atlantica, no Centro de Balneario Camboriu. A auditoria substitui a galeria centrada em interiores por imagens do proprio empreendimento: fachada, torre, piscina frente mar, hall, eventos e jogos. A copy passa a comunicar a forca da localizacao na Praia Central e o valor de um predio consolidado na orla, com areas comuns documentadas nas fontes.",
+      "seo_description": "Conheca o Imperatriz em Balneario Camboriu, edificio frente mar na Avenida Atlantica com piscina, hall, eventos e jogos.",
+      "gallery": [
+        {
+          "title": "Imperatriz - piscina frente mar",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/30062025094937185-1751287777.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-imperatriz-EM99008",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Imperatriz - fachada da orla",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-1751287429.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-imperatriz-EM99008",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Imperatriz - torre",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2025/edificio-imperatriz0005-1751287411.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-imperatriz-EM99008",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Imperatriz - eventos",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2025/edificio-imperatriz0001-1751287413.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-imperatriz-EM99008",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Imperatriz - jogos",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2025/edificio-imperatriz0000-1751287412.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-imperatriz-EM99008",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Imperatriz - deck da piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2025/edificio-imperatriz0003-1751287415.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-imperatriz-EM99008",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Imperatriz - piscina com vista mar",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2025/edificio-imperatriz0004-1751287416.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-imperatriz-EM99008",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Imperatriz - hall social",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2025/aa0001-1751287714.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-imperatriz-EM99008",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Imperatriz - estar do hall",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2025/aa0003-1751287713.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-imperatriz-EM99008",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Imperatriz - convivencia",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2025/aa0000-1751287714.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-imperatriz-EM99008",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Imperatriz - piscina lateral",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2025/aa0002-1751287715.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-imperatriz-EM99008",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente Praia Central",
+          "description": "Posicao na Avenida Atlantica, com piscina e fachada voltadas ao contexto da orla de Balneario Camboriu."
+        },
+        {
+          "icon": "Building2",
+          "title": "Predio consolidado",
+          "description": "O Imperatriz tem perfil tradicional e ganha uma pagina com leitura visual do edificio, nao de interiores isolados."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Areas comuns documentadas",
+          "description": "Hall, eventos, jogos e piscina passam a compor a narrativa principal do empreendimento."
+        }
+      ],
+      "differentials": [
+        "Galeria revisada com fachada, piscina, hall, eventos e jogos.",
+        "Copy focada em orla, Praia Central e perfil tradicional do edificio.",
+        "Imagens internas de oferta deixam de ser a base visual da pagina."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Imperatriz?",
+          "answer": "Fica na Avenida Atlantica, no Centro de Balneario Camboriu, frente a Praia Central."
+        },
+        {
+          "question": "Quais areas aparecem na nova galeria?",
+          "answer": "Fachada, piscina, hall, eventos, jogos e ambientes de convivencia."
+        },
+        {
+          "question": "Por que a pagina foi atualizada?",
+          "answer": "Para trocar imagens internas de oferta por registros do empreendimento e de areas comuns."
+        },
+        {
+          "question": "Qual e o principal diferencial de localizacao?",
+          "answer": "A posicao frente mar na orla central de Balneario Camboriu."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-imperatriz-EM99008"
+      ]
+    },
+    {
+      "slug": "imperio-das-ondas",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-imperio-das-ondas-balneario-camboriu-1.jpg",
+      "description": "O Imperio das Ondas fica no bairro Pioneiros, em Balneario Camboriu, na Rua Egidio Alfredo Crispim, 50. Segundo fontes consultadas, o edificio tem 49 pavimentos, 2 residencias por andar, 3 elevadores, portaria 24h, obra da Formula F10 e entrega em 2016. A nova curadoria usa fachada e areas comuns do home club de aproximadamente 2.000 m2: piscina, hall, cinema, kids, jogos, fitness, sauna e lounge.",
+      "seo_description": "Conheca o Imperio das Ondas em Balneario Camboriu, no Pioneiros, com 49 pavimentos e home club de 2.000 m2.",
+      "gallery": [
+        {
+          "title": "Imperio das Ondas - fachada",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-imperio-das-ondas-balneario-camboriu-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-imperio-das-ondas/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Imperio das Ondas - piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/imperio-ondas-25-1673534450.JPG",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-imperio-das-ondas-EM66674",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Imperio das Ondas - acesso",
+          "category": "Acesso",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/l01DGUHS5yH1SW9H8Cuk.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-imperio-das-ondas-EM66674",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Imperio das Ondas - hall social",
+          "category": "Hall",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/9JWjy3ofzwrkQcRKtpzz.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-imperio-das-ondas-EM66674",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Imperio das Ondas - piscina externa",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/tI4no2zYG6HipQGwNb9f.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-imperio-das-ondas-EM66674",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Imperio das Ondas - deck da piscina",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/asf9vXjX2ploPlaJJ6B8.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-imperio-das-ondas-EM66674",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Imperio das Ondas - cinema",
+          "category": "Cinema",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/KsCi77qVqtcQVDGggRHY.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-imperio-das-ondas-EM66674",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Imperio das Ondas - kids",
+          "category": "Kids",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/fNOAbngxk07QJuqu1QEF.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-imperio-das-ondas-EM66674",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Imperio das Ondas - jogos",
+          "category": "Jogos",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/DtrhvL9hJfRdLhysAE6p.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-imperio-das-ondas-EM66674",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Imperio das Ondas - fitness",
+          "category": "Fitness",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/FB1XK98qsQuqOT0z3Bif.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-imperio-das-ondas-EM66674",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Imperio das Ondas - sauna",
+          "category": "Wellness",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/XqtbGKSWpfEl8SvwhrGq.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-imperio-das-ondas-EM66674",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Imperio das Ondas - lounge externo",
+          "category": "Convivencia",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/OxekNrGvW3Cah2BtwpR8.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-imperio-das-ondas-EM66674",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "49 pavimentos",
+          "description": "Edificio vertical no Pioneiros, com 2 residencias por andar e 3 elevadores, segundo a fonte Litoral Vertical."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Home club de escala",
+          "description": "A area de lazer indicada tem aproximadamente 2.000 m2, com piscina, cinema, kids, jogos, fitness e sauna."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Pioneiros e Barra Norte",
+          "description": "Endereco na Rua Egidio Alfredo Crispim, em uma regiao valorizada entre praia e acesso urbano."
+        }
+      ],
+      "differentials": [
+        "Galeria limpa com fachada e amenidades do Imperio das Ondas.",
+        "Copy atualizada com construtora, entrega, pavimentos e endereco.",
+        "Fotos internas de oferta foram substituidas por imagens de condominio."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Imperio das Ondas?",
+          "answer": "Fica na Rua Egidio Alfredo Crispim, 50, no bairro Pioneiros, em Balneario Camboriu."
+        },
+        {
+          "question": "Qual e o perfil do lazer?",
+          "answer": "As fontes apontam home club com piscina, eventos, gourmet, cinema, sauna, fitness, jogos, playground e quadra."
+        },
+        {
+          "question": "Quando foi entregue?",
+          "answer": "A fonte Litoral Vertical informa entrega em 2016 pela Construtora Formula F10."
+        },
+        {
+          "question": "O que mudou na galeria?",
+          "answer": "A selecao passou a usar fachada, hall e areas comuns, removendo o foco em interiores de oferta."
+        }
+      ],
+      "sources": [
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-imperio-das-ondas/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-imperio-das-ondas-EM66674"
+      ]
+    },
+    {
+      "slug": "infinita-treehouse",
+      "hero_image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1708185827/high-photos_129/high-photos_129.jpg",
+      "description": "O Infinita Treehouse, da Blue Heaven, fica no bairro Fazenda, em Itajai, na Rua Antonio Rocha de Andrade, 65. O projeto e assinado por Triptyque e Architects Office, com paisagismo e proposta de sustentabilidade que inclui fachada verde, reaproveitamento de agua, irrigacao automatizada, paineis solares e carregamento para carro eletrico. A curadoria reforcada usa fachada, praca, piscina, terraco, work, jogos, kids, fitness, wellness e hall.",
+      "seo_description": "Conheca o Infinita Treehouse em Itajai, projeto Blue Heaven com arquitetura Triptyque, fachada verde, piscina e lazer.",
+      "gallery": [
+        {
+          "title": "Infinita Treehouse - fachada panoramica",
+          "category": "Fachada",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1708185827/high-photos_129/high-photos_129.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/infinita-treehouse",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Infinita Treehouse - fachada vertical",
+          "category": "Fachada",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1707765768/enterprises/129/empreendimento_infinita_treehouse_1.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/infinita-treehouse",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Infinita Treehouse - terraco verde",
+          "category": "Paisagismo",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1707765773/enterprises/129/area_de_lazer_infinita_treehouse_2.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/infinita-treehouse",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Infinita Treehouse - piscina com vista",
+          "category": "Piscina",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1707765779/enterprises/129/piscina_com_vista_infinita_treehouse_3.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/infinita-treehouse",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Infinita Treehouse - piscina no terraco",
+          "category": "Piscina",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1707765793/enterprises/129/piscina_terraco_infinita_treehouse_7.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/infinita-treehouse",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Infinita Treehouse - work",
+          "category": "Convivencia",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1707765782/enterprises/129/business_infinita_treehouse_4.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/infinita-treehouse",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Infinita Treehouse - jogos",
+          "category": "Jogos",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1707765786/enterprises/129/sala_da_jogos_infinita_treehouse_5.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/infinita-treehouse",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Infinita Treehouse - kids",
+          "category": "Kids",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1707765790/enterprises/129/brinquedoteca_infinita_treehouse_6.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/infinita-treehouse",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Infinita Treehouse - fitness",
+          "category": "Fitness",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1707765797/enterprises/129/academia_infinita_treehouse_8.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/infinita-treehouse",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Infinita Treehouse - wellness",
+          "category": "Wellness",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1707765800/enterprises/129/piscina_infinita_treehouse_9.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/infinita-treehouse",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Infinita Treehouse - hall",
+          "category": "Hall",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1707765804/enterprises/129/hall_infinita_treehouse_10.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/infinita-treehouse",
+          "source_label": "Sort Investimentos"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Trees",
+          "title": "Arquitetura biofilica",
+          "description": "Fachada verde, jardins suspensos e paisagismo reforcam a proposta inspirada na natureza."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Projeto autoral",
+          "description": "Triptyque e Architects Office assinam uma leitura arquitetonica distinta para o bairro Fazenda, em Itajai."
+        },
+        {
+          "icon": "Shield",
+          "title": "Sustentabilidade aplicada",
+          "description": "A fonte oficial aponta reaproveitamento de agua, paineis solares, LED, irrigacao automatizada e carregamento eletrico."
+        }
+      ],
+      "differentials": [
+        "Foi feita prancha extra para evitar usar plantas e interiores sem relacao com o condominio.",
+        "Galeria final combina fonte oficial Blue Heaven e imagens de fachada/lazer da Sort Investimentos.",
+        "Copy reposicionada para arquitetura, sustentabilidade, paisagismo e areas comuns."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Infinita Treehouse?",
+          "answer": "Fica no bairro Fazenda, em Itajai, na Rua Antonio Rocha de Andrade, 65."
+        },
+        {
+          "question": "Quem assina o projeto?",
+          "answer": "A fonte oficial aponta projeto Triptyque e Architects Office."
+        },
+        {
+          "question": "Quais pontos sustentaveis foram destacados?",
+          "answer": "Fachada verde, reaproveitamento de agua, irrigacao automatizada, LED, paineis solares e carregamento eletrico."
+        },
+        {
+          "question": "O que mudou na curadoria?",
+          "answer": "Foram descartadas plantas e interiores, priorizando fachada, piscina, paisagismo, work, jogos, kids, fitness e hall."
+        }
+      ],
+      "sources": [
+        "https://blueheaven.com.br/infinita-treehouse/",
+        "https://sortinvestimentos.com.br/empreendimentos/infinita-treehouse"
+      ]
+    },
+    {
+      "slug": "infinity-club-residence",
+      "hero_image": "https://cibea.com.br/wp-content/uploads/2023/07/Novos-Molhes-Final-v3-Baixa.jpg",
+      "description": "O Infinity Club Residence, da CIBEA, fica frente mar no Centro de Itapema, na Rua 129 E1 com Avenida Beira Mar. A fonte oficial destaca 12 m de frente vista mar, 14 andares, 2 residencias por andar, elevadores, gerador, portaria 24h e marina privativa. A nova galeria apresenta fachada, contexto beira-mar, pub, jogos, eventos, wine bar, piscina e marina, substituindo fotos internas por imagens do empreendimento.",
+      "seo_description": "Conheca o Infinity Club Residence em Itapema, CIBEA frente mar com marina privativa, piscina, jogos, eventos e pub.",
+      "gallery": [
+        {
+          "title": "Infinity Club - contexto beira-mar",
+          "category": "Localizacao",
+          "image": "https://cibea.com.br/wp-content/uploads/2023/07/Novos-Molhes-Final-v3-Baixa.jpg",
+          "source_url": "https://cibea.com.br/infinity-club/",
+          "source_label": "CIBEA"
+        },
+        {
+          "title": "Infinity Club - fachada",
+          "category": "Fachada",
+          "image": "https://cibea.com.br/wp-content/uploads/2022/07/CIBEA-Construtora-InfinityClub-Fachada-Banner.jpg",
+          "source_url": "https://cibea.com.br/infinity-club/",
+          "source_label": "CIBEA"
+        },
+        {
+          "title": "Infinity Club - vista da orla",
+          "category": "Localizacao",
+          "image": "https://cibea.com.br/wp-content/uploads/2022/08/CIBEA-CONSTRUTORA-Imagem-para-secao-Poitas2-1.jpg",
+          "source_url": "https://cibea.com.br/infinity-club/",
+          "source_label": "CIBEA"
+        },
+        {
+          "title": "Infinity Club - pub",
+          "category": "Jogos",
+          "image": "https://cibea.com.br/wp-content/uploads/2022/07/22.-CIBEA-Infinity-Club-Sala-de-Jogos-05-Copa.jpg",
+          "source_url": "https://cibea.com.br/infinity-club/",
+          "source_label": "CIBEA"
+        },
+        {
+          "title": "Infinity Club - jogos lounge",
+          "category": "Jogos",
+          "image": "https://cibea.com.br/wp-content/uploads/2022/07/21.-CIBEA-Infinity-Club-Sala-de-Jogos-04.jpg",
+          "source_url": "https://cibea.com.br/infinity-club/",
+          "source_label": "CIBEA"
+        },
+        {
+          "title": "Infinity Club - mesa de cartas",
+          "category": "Jogos",
+          "image": "https://cibea.com.br/wp-content/uploads/2022/07/20.-CIBEA-Infinity-Club-Sala-de-Jogos-03.jpg",
+          "source_url": "https://cibea.com.br/infinity-club/",
+          "source_label": "CIBEA"
+        },
+        {
+          "title": "Infinity Club - bilhar",
+          "category": "Jogos",
+          "image": "https://cibea.com.br/wp-content/uploads/2022/07/18.-CIBEA-Infinity-Club-Sala-de-Jogos-01.jpg",
+          "source_url": "https://cibea.com.br/infinity-club/",
+          "source_label": "CIBEA"
+        },
+        {
+          "title": "Infinity Club - eventos",
+          "category": "Eventos",
+          "image": "https://cibea.com.br/wp-content/uploads/2022/07/17.-CIBEA-Infinity-Club-Sala-de-Festas.jpg",
+          "source_url": "https://cibea.com.br/infinity-club/",
+          "source_label": "CIBEA"
+        },
+        {
+          "title": "Infinity Club - wine bar",
+          "category": "Convivencia",
+          "image": "https://cibea.com.br/wp-content/uploads/2022/07/15.-CIBEA-Infinity-Club-Sala-de-Festas-02.jpg",
+          "source_url": "https://cibea.com.br/infinity-club/",
+          "source_label": "CIBEA"
+        },
+        {
+          "title": "Infinity Club - piscina interna",
+          "category": "Piscina",
+          "image": "https://cibea.com.br/wp-content/uploads/2022/07/14.-CIBEA-Infinity-Club-Piscina-01.jpg",
+          "source_url": "https://cibea.com.br/infinity-club/",
+          "source_label": "CIBEA"
+        },
+        {
+          "title": "Infinity Club - marina privativa",
+          "category": "Lazer",
+          "image": "https://cibea.com.br/wp-content/uploads/2022/07/13.-CIBEA-Infinity-Club-Marina-Privativa.jpg",
+          "source_url": "https://cibea.com.br/infinity-club/",
+          "source_label": "CIBEA"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente mar em Itapema",
+          "description": "Localizacao na Rua 129 E1 com Avenida Beira Mar, em posicao frente mar no Centro."
+        },
+        {
+          "icon": "Building2",
+          "title": "CIBEA e marina",
+          "description": "A fonte oficial destaca 14 andares, 2 residencias por andar e marina privativa."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Clube compacto",
+          "description": "Pub, jogos, eventos, wine bar, piscina e marina formam uma rotina de lazer voltada ao mar."
+        }
+      ],
+      "differentials": [
+        "Galeria substituida por imagens oficiais CIBEA do empreendimento.",
+        "Copy reforca frente mar, 12 m de vista mar e marina privativa.",
+        "Fotos internas de oferta deixam de ser usadas como referencia principal."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Infinity Club Residence?",
+          "answer": "Fica na Rua 129 E1, Centro de Itapema, esquina com a Avenida Beira Mar."
+        },
+        {
+          "question": "Quem e a construtora?",
+          "answer": "A fonte oficial consultada e da CIBEA Construtora."
+        },
+        {
+          "question": "O empreendimento tem marina?",
+          "answer": "Sim. A fonte oficial informa marina privativa."
+        },
+        {
+          "question": "Quais ambientes aparecem na galeria?",
+          "answer": "Fachada, localizacao beira-mar, pub, jogos, eventos, wine bar, piscina e marina."
+        }
+      ],
+      "sources": [
+        "https://cibea.com.br/infinity-club/"
+      ]
+    },
+    {
+      "slug": "la-belle-tour",
+      "hero_image": "https://static.wixstatic.com/media/592722_16cc3b4a3f044223a0c47c0447fffd4e~mv2.jpg",
+      "description": "O La Belle Tour Residence, da Rosecon, fica no Centro de Balneario Camboriu, na Rua 2000, com proposta inspirada na Belle Epoque. A curadoria usa imagens do proprio empreendimento: fachada, coroamento, vista aerea, hall, piscina, jogos e gourmet. A pagina passa a comunicar o estilo classico, a proximidade da Praia Central e a infraestrutura de lazer, deixando de depender de imagens internas de oferta.",
+      "seo_description": "Conheca o La Belle Tour Residence em Balneario Camboriu, Rosecon no Centro com fachada classica, piscina, hall e gourmet.",
+      "gallery": [
+        {
+          "title": "La Belle Tour - fachada",
+          "category": "Fachada",
+          "image": "https://static.wixstatic.com/media/592722_16cc3b4a3f044223a0c47c0447fffd4e~mv2.jpg",
+          "source_url": "https://www.rosecon.com.br/la-belle",
+          "source_label": "Rosecon"
+        },
+        {
+          "title": "La Belle Tour - vista aerea",
+          "category": "Localizacao",
+          "image": "https://static.wixstatic.com/media/592722_5f7ace48c7da4c129235f1eefca87c8b~mv2.png",
+          "source_url": "https://www.rosecon.com.br/la-belle",
+          "source_label": "Rosecon"
+        },
+        {
+          "title": "La Belle Tour - coroamento",
+          "category": "Fachada",
+          "image": "https://static.wixstatic.com/media/592722_9b77fe2342254541914be6088136b964~mv2.png",
+          "source_url": "https://www.rosecon.com.br/la-belle",
+          "source_label": "Rosecon"
+        },
+        {
+          "title": "La Belle Tour - hall social",
+          "category": "Hall",
+          "image": "https://static.wixstatic.com/media/592722_f790f332d9fc483ba5007e943d87ab15~mv2.jpg",
+          "source_url": "https://www.rosecon.com.br/la-belle",
+          "source_label": "Rosecon"
+        },
+        {
+          "title": "La Belle Tour - piscina externa",
+          "category": "Piscina",
+          "image": "https://static.wixstatic.com/media/592722_f74287532a214dc0ae130de4198767bf~mv2.jpg",
+          "source_url": "https://www.rosecon.com.br/la-belle",
+          "source_label": "Rosecon"
+        },
+        {
+          "title": "La Belle Tour - deck da piscina",
+          "category": "Piscina",
+          "image": "https://static.wixstatic.com/media/592722_e637546012f2461d87581202c0afacb7~mv2.jpg",
+          "source_url": "https://www.rosecon.com.br/la-belle",
+          "source_label": "Rosecon"
+        },
+        {
+          "title": "La Belle Tour - piscina panoramica",
+          "category": "Piscina",
+          "image": "https://static.wixstatic.com/media/592722_6b52ba5a0d024b03bc2d88a7ab30fc58~mv2.jpg",
+          "source_url": "https://www.rosecon.com.br/la-belle",
+          "source_label": "Rosecon"
+        },
+        {
+          "title": "La Belle Tour - jogos",
+          "category": "Jogos",
+          "image": "https://static.wixstatic.com/media/592722_0a980ed058db41f7a6ef6699e458298e~mv2.jpg",
+          "source_url": "https://www.rosecon.com.br/la-belle",
+          "source_label": "Rosecon"
+        },
+        {
+          "title": "La Belle Tour - jogos lounge",
+          "category": "Jogos",
+          "image": "https://static.wixstatic.com/media/592722_117f86e144694bd19b22d86bf3ad7ed6~mv2.jpg",
+          "source_url": "https://www.rosecon.com.br/la-belle",
+          "source_label": "Rosecon"
+        },
+        {
+          "title": "La Belle Tour - gourmet",
+          "category": "Gourmet",
+          "image": "https://static.wixstatic.com/media/592722_b3be1f9c6a3b41a1994e72e515a17054~mv2.jpg",
+          "source_url": "https://www.rosecon.com.br/la-belle",
+          "source_label": "Rosecon"
+        },
+        {
+          "title": "La Belle Tour - eventos gourmet",
+          "category": "Eventos",
+          "image": "https://static.wixstatic.com/media/592722_4cf035abcff3484a9b02691ef4443bba~mv2.jpg",
+          "source_url": "https://www.rosecon.com.br/la-belle",
+          "source_label": "Rosecon"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Estilo Belle Epoque",
+          "description": "A Rosecon apresenta o empreendimento com leitura classica, nobre e sofisticada."
+        },
+        {
+          "icon": "Waves",
+          "title": "Centro perto da praia",
+          "description": "Endereco na Rua 2000, no Centro de Balneario Camboriu, favorece a rotina junto a Praia Central."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer elegante",
+          "description": "Piscina, hall, jogos, gourmet e eventos foram priorizados na nova galeria."
+        }
+      ],
+      "differentials": [
+        "Galeria oficial Rosecon com fachada, hall, piscina, jogos e gourmet.",
+        "Copy reforca inspiracao Belle Epoque e localizacao central.",
+        "Selecao visual curta, mas limpa e sem fotos internas de oferta."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o La Belle Tour?",
+          "answer": "Fica no Centro de Balneario Camboriu, na regiao da Rua 2000."
+        },
+        {
+          "question": "Quem assina o empreendimento?",
+          "answer": "A fonte oficial consultada e da Rosecon."
+        },
+        {
+          "question": "Qual e a proposta visual do projeto?",
+          "answer": "A Rosecon apresenta inspiracao na Belle Epoque, com estilo classico e refinado."
+        },
+        {
+          "question": "O que aparece na galeria revisada?",
+          "answer": "Fachada, vista aerea, hall, piscina, jogos, gourmet e eventos."
+        }
+      ],
+      "sources": [
+        "https://www.rosecon.com.br/la-belle",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-la-belle-tour-residence--EM35121"
+      ]
+    },
+    {
+      "slug": "la-dolce-vita",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2025/12/edificio-la-dolce-vita-itapema-1-1.avif",
+      "description": "O La Dolce Vita fica frente mar no Centro de Itapema, na Avenida Beira Mar, esquina com a Rua 163. A fonte Litoral Vertical aponta obra da Dallo Construtora, estilo neoclassico, 14 pavimentos, 2 elevadores e entrega em novembro de 2025. A curadoria usa imagens do empreendimento e de areas comuns, com fachada, hall, convivencia, gourmet, eventos, fitness, sauna, personal care e work space.",
+      "seo_description": "Conheca o La Dolce Vita em Itapema, Dallo frente mar no Centro com estilo neoclassico, lazer, fitness e sauna.",
+      "gallery": [
+        {
+          "title": "La Dolce Vita - fachada frente mar",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/12/edificio-la-dolce-vita-itapema-1-1.avif",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/edificio-la-dolce-vita/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "La Dolce Vita - fachada superior",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/12/edificio-la-dolce-vita-itapema-2-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/edificio-la-dolce-vita/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "La Dolce Vita - torre",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/12/edificio-la-dolce-vita-itapema-2-1.avif",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/edificio-la-dolce-vita/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "La Dolce Vita - acesso urbano",
+          "category": "Acesso",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/12/edificio-la-dolce-vita-itapema-4-1.avif",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/edificio-la-dolce-vita/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "La Dolce Vita - hall",
+          "category": "Hall",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/12/edificio-la-dolce-vita-itapema-5-8.avif",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/edificio-la-dolce-vita/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "La Dolce Vita - convivencia",
+          "category": "Convivencia",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/12/edificio-la-dolce-vita-itapema-6-1.avif",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/edificio-la-dolce-vita/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "La Dolce Vita - gourmet",
+          "category": "Gourmet",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/12/edificio-la-dolce-vita-itapema-8-1.avif",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/edificio-la-dolce-vita/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "La Dolce Vita - eventos",
+          "category": "Eventos",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/12/edificio-la-dolce-vita-itapema-7-1.avif",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/edificio-la-dolce-vita/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "La Dolce Vita - eventos neoclassico",
+          "category": "Eventos",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/12/edificio-la-dolce-vita-itapema-9-1.avif",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/edificio-la-dolce-vita/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "La Dolce Vita - wellness",
+          "category": "Wellness",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/12/edificio-la-dolce-vita-itapema-12-1.avif",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/edificio-la-dolce-vita/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "La Dolce Vita - fitness",
+          "category": "Fitness",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/12/edificio-la-dolce-vita-itapema-13-1.avif",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/edificio-la-dolce-vita/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "La Dolce Vita - sauna",
+          "category": "Wellness",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/12/edificio-la-dolce-vita-itapema-14-1.avif",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/edificio-la-dolce-vita/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "La Dolce Vita - personal care",
+          "category": "Wellness",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/12/edificio-la-dolce-vita-itapema-16-1.avif",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/edificio-la-dolce-vita/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "La Dolce Vita - work space",
+          "category": "Convivencia",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/12/edificio-la-dolce-vita-itapema-17-1.avif",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/edificio-la-dolce-vita/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente mar no Centro",
+          "description": "Endereco na Avenida Beira Mar, esquina com a Rua 163, em Itapema."
+        },
+        {
+          "icon": "Building2",
+          "title": "Dallo Construtora",
+          "description": "A fonte aponta obra da Dallo, estilo neoclassico, 14 pavimentos e entrega em novembro de 2025."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer variado",
+          "description": "Piscinas, terraco externo, academia, sauna, personal care, eventos, jogos gourmet, confraria, teen, pet park e work space."
+        }
+      ],
+      "differentials": [
+        "Galeria revisada com fachada e ambientes do empreendimento.",
+        "Copy reforca frente mar, Dallo, estilo neoclassico e entrega.",
+        "Selecao visual deixa de depender de interiores residenciais."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o La Dolce Vita?",
+          "answer": "Fica no Centro de Itapema, na Avenida Beira Mar, esquina com a Rua 163."
+        },
+        {
+          "question": "Quem construiu o empreendimento?",
+          "answer": "A fonte Litoral Vertical aponta obra da Dallo Construtora."
+        },
+        {
+          "question": "Quando foi entregue?",
+          "answer": "A fonte consultada informa entrega em novembro de 2025."
+        },
+        {
+          "question": "Quais areas comuns aparecem na galeria?",
+          "answer": "Fachada, hall, convivencia, gourmet, eventos, fitness, sauna, personal care e work space."
+        }
+      ],
+      "sources": [
+        "https://litoralvertical.com/venda/itapema/apartamentos/edificio-la-dolce-vita/"
+      ]
+    },
+    {
+      "slug": "las-brisas-residencial",
+      "hero_image": "https://cdn.imoview.com.br/bryann/Condominios/539/1-las-brisas5.jpg?1710174250",
+      "description": "O Las Brisas Residencial fica no bairro Pioneiros, em Balneario Camboriu, na Rua Protasio Boaventura Caetano. As fontes indicam projeto da Orla Construtora inspirado na praia de Las Brisas, no Mexico, com proposta de conforto, seguranca, privacidade e areas comuns completas. A nova curadoria usa fachada, acesso, piscina, lounge, quadra, pub, fitness e hall, descartando fotos internas de oferta.",
+      "seo_description": "Conheca o Las Brisas Residencial em Balneario Camboriu, no Pioneiros, com fachada, piscina, quadra, pub e fitness.",
+      "gallery": [
+        {
+          "title": "Las Brisas - fachada vertical",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/539/1-las-brisas5.jpg?1710174250",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/539/las-brisas-residencial/",
+          "source_label": "Felicita"
+        },
+        {
+          "title": "Las Brisas - fachada noturna",
+          "category": "Acesso",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/539/las-brisas-2-1.jpg?1710174250",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/539/las-brisas-residencial/",
+          "source_label": "Felicita"
+        },
+        {
+          "title": "Las Brisas - torre e varandas",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/539/las-brisas-12-1.jpg?1710174250",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/539/las-brisas-residencial/",
+          "source_label": "Felicita"
+        },
+        {
+          "title": "Las Brisas - piscina externa",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/539/las-brisas-8-1.jpg?1710174250",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/539/las-brisas-residencial/",
+          "source_label": "Felicita"
+        },
+        {
+          "title": "Las Brisas - lounge externo",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/539/las-brisas-10-1.jpg?1710174250",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/539/las-brisas-residencial/",
+          "source_label": "Felicita"
+        },
+        {
+          "title": "Las Brisas - quadra esportiva",
+          "category": "Lazer",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/539/las-brisas-13-1.jpg?1710174250",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/539/las-brisas-residencial/",
+          "source_label": "Felicita"
+        },
+        {
+          "title": "Las Brisas - pub",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/539/las-brisas-3-1.jpg?1710174250",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/539/las-brisas-residencial/",
+          "source_label": "Felicita"
+        },
+        {
+          "title": "Las Brisas - fitness",
+          "category": "Fitness",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/539/las-brisas-1-1.jpg?1710174250",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/539/las-brisas-residencial/",
+          "source_label": "Felicita"
+        },
+        {
+          "title": "Las Brisas - fachada alternativa",
+          "category": "Fachada",
+          "image": "https://cdn.imoveisgodoy.com.br/wp-content/uploads/2024/08/06171310/1-Las-Brisas5.jpg",
+          "source_url": "https://imoveisgodoy.com.br/empreendimento/las-brisas-residencial/",
+          "source_label": "Godoy dos Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Pioneiros em Balneario Camboriu",
+          "description": "Endereco na Rua Protasio Boaventura Caetano, com acesso a orla da Praia Central e servicos do bairro."
+        },
+        {
+          "icon": "Building2",
+          "title": "Orla Construtora",
+          "description": "Fonte Godoy aponta inspiracao em Las Brisas, no Mexico, e projeto pensado para conforto, seguranca e privacidade."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Areas comuns completas",
+          "description": "Piscina, gourmet, eventos, academia, convivencia, kids e quadra compoem a leitura de lazer do residencial."
+        }
+      ],
+      "differentials": [
+        "Galeria substituida por fachada e renders de areas comuns do Las Brisas.",
+        "Copy atualizada com bairro, endereco, construtora e proposta do empreendimento.",
+        "Fotos internas de oferta foram descartadas na selecao final."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Las Brisas Residencial?",
+          "answer": "Fica na Rua Protasio Boaventura Caetano, no bairro Pioneiros, em Balneario Camboriu."
+        },
+        {
+          "question": "Quem e a construtora do Las Brisas?",
+          "answer": "A fonte Godoy dos Imoveis cita a Orla Construtora e Incorporadora."
+        },
+        {
+          "question": "Quais areas comuns aparecem na nova galeria?",
+          "answer": "Fachada, acesso, piscina, lounge externo, quadra, pub e fitness."
+        },
+        {
+          "question": "O que mudou na auditoria?",
+          "answer": "A pagina deixou de usar fotos internas de oferta e passou a mostrar imagens do condominio e das areas comuns."
+        }
+      ],
+      "sources": [
+        "https://felicitanegocios.com.br/empreendimento/539/las-brisas-residencial/",
+        "https://imoveisgodoy.com.br/empreendimento/las-brisas-residencial/"
+      ]
+    }
+  ]
+}

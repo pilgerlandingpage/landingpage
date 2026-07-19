@@ -1,0 +1,1896 @@
+{
+  "batch_id": "development-media-curation-batch48-20260718",
+  "generated_at": "2026-07-18T20:10:00.000Z",
+  "items": [
+    {
+      "slug": "via-marina",
+      "hero_image": "https://cdn.imoview.com.br/bryann/Condominios/161/via-marina-barra-sul-balneario-camboriu-felicita-2.jpg?1681613814",
+      "description": "O Via Marina fica na Barra Sul de Balneario Camboriu, com acesso pela regiao da Rua 4600 e perfil quadra mar. A pesquisa cruzou Imobille, Litoral Vertical, Felicita, Bruno Cassola, Fly e Pilger para substituir fotos internas por fachada, acesso, piscina, deck, sauna, spa, academia e ambientes de convivencia do condominio. As fontes reforcam lazer com mais de 10 itens, piscina adulto com deck molhado e raia, piscina infantil, quiosques, festas e churrasqueira.",
+      "seo_description": "Via Marina na Barra Sul de Balneario Camboriu, com fachada, acesso, piscina, deck, sauna, spa, academia e lazer quadra mar.",
+      "gallery": [
+        {
+          "title": "Via Marina - fachada principal",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/161/via-marina-barra-sul-balneario-camboriu-felicita-2.jpg?1681613814",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/161/via-marina/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Via Marina - torre na Barra Sul",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-via-marina-balneario-camboriu-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-via-marina/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Via Marina - vista vertical",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/if/imoveis/175/fachada-16479748438644.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-via-marina-balneario-camboriu-centro-3-quartos-3-garagens-venda-ref-175/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Via Marina - base envidracada",
+          "category": "Fachada",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/onwyHdyqjfb2vzbqZWhX.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-via-marina-EM15409",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Via Marina - acesso social",
+          "category": "Acesso",
+          "image": "https://litoralvertical.com/wp-content/uploads/2019/02/edificio-via-marina-balneario-camboriu-qma3120-principal-2.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-via-marina/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Via Marina - fachada lateral",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-via-marina-balneario-camboriu-2.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-via-marina/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Via Marina - piscina panoramica",
+          "category": "Piscina",
+          "image": "https://b4.casteldigital.com.br/brunocassola/ig/il/imoveis/358/via-marina-barra-sul-balneario-camboriu-piscina-17096679893678.jpg",
+          "source_url": "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-via-marina-balneario-camboriu-centro-4-quartos-3-garagens-venda-ref-358/",
+          "source_label": "Bruno Cassola"
+        },
+        {
+          "title": "Via Marina - piscina externa",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/19082025164340445-1755632620.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-via-marina-EM15409",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Via Marina - deck externo",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/161/img-32.jpg?1681613814",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/161/via-marina/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Via Marina - borda da piscina",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/161/img-31.jpg?1681613814",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/161/via-marina/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Via Marina - piscina do lazer",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/161/img-30.jpg?1681613814",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/161/via-marina/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Via Marina - estar do lazer",
+          "category": "Convivencia",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/j5woBBIW17GF1Qgt97HZ.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-via-marina-EM15409",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Via Marina - sauna seca",
+          "category": "Wellness",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/LRu4ybXNVvEJcfKopQa6.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-via-marina-EM15409",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Via Marina - spa interno",
+          "category": "Wellness",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/CbJfNroJdMAcJWZvKa0x.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-via-marina-EM15409",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Via Marina - academia equipada",
+          "category": "Fitness",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/Wn2hJdQ1NUbEbuQKCozL.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-via-marina-EM15409",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Via Marina - fitness panoramico",
+          "category": "Fitness",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/ba5XpwcoNXkJ2tF56tzi.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-via-marina-EM15409",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Via Marina - pergolado externo",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/161/img-20.jpg?1681613814",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/161/via-marina/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Via Marina - lounge comum",
+          "category": "Convivencia",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/175/01-vm_hall-entrada-16479748438619.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-via-marina-balneario-camboriu-centro-3-quartos-3-garagens-venda-ref-175/",
+          "source_label": "Guilherme Pilger"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Barra Sul quadra mar",
+          "description": "A localizacao coloca o empreendimento perto da orla e dos servicos da Barra Sul."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscinas e deck",
+          "description": "As fontes citam piscina adulto com deck molhado, raia, piscina infantil e area externa."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer completo",
+          "description": "Academia, spa, sauna, estar comum e pergolado deixam a rotina mais completa."
+        },
+        {
+          "icon": "Utensils",
+          "title": "Convivencia social",
+          "description": "Quiosques, churrasqueira e eventos ampliam o uso do condominio alem da praia."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Imagem externa priorizada",
+          "description": "A galeria agora abre com fachada, acesso e piscina, evitando interiores privados."
+        },
+        {
+          "title": "Fontes cruzadas",
+          "description": "Imobille, Litoral Vertical e Felicita ajudaram a confirmar nome, localizacao e lazer."
+        },
+        {
+          "title": "Rotina de Barra Sul",
+          "description": "A copy conecta praia, lazer de torre e conveniencia urbana em um unico contexto."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Via Marina?",
+          "answer": "Na Barra Sul de Balneario Camboriu, com fontes citando a regiao da Rua 4600 e perfil quadra mar."
+        },
+        {
+          "question": "Quais imagens foram mantidas?",
+          "answer": "Fachada, acesso, piscina, deck, sauna, spa, academia e convivencia do condominio."
+        },
+        {
+          "question": "O que foi retirado da pagina?",
+          "answer": "Fotos internas de oferta que deixavam a pagina parecida com anuncio privado."
+        },
+        {
+          "question": "Quais pontos de lazer aparecem nas fontes?",
+          "answer": "Piscina adulto, deck molhado, raia, piscina infantil, quiosques, festas e churrasqueira."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-via-marina-EM15409",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-via-marina/",
+        "https://felicitanegocios.com.br/empreendimento/161/via-marina/",
+        "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-via-marina-balneario-camboriu-centro-4-quartos-3-garagens-venda-ref-358/",
+        "https://www.flyimoveis.com.br/imovel/apartamento-no-edificio-via-marina-balneario-camboriu-centro-4-quartos-4-garagens-venda-ref-1380/",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-via-marina-balneario-camboriu-centro-3-quartos-3-garagens-venda-ref-175/"
+      ]
+    },
+    {
+      "slug": "via-veneto",
+      "hero_image": "https://d78txhfo8gp8r.cloudfront.net/ds/img_vendas/g1_1_8_1129_110725.jpeg",
+      "description": "O Via Veneto e um empreendimento da Dallo em Meia Praia, Itapema. A pagina oficial da construtora informa entrega em 2015, habite-se 195/2015, 17 andares, 4 suites e 171 m2 privativos. A Danieli Santos complementa o endereco na Rua 226, 43, a cerca de 90 metros do mar, com 28 residencias, dois elevadores, hall decorado, box de praia, piscinas adulto e infantil, eventos, jogos, academia e sauna. A galeria foi corrigida para mostrar fachada, acesso e areas comuns.",
+      "seo_description": "Via Veneto em Meia Praia, Itapema, empreendimento Dallo entregue em 2015, com fachada, hall, piscinas, academia, jogos e sauna.",
+      "gallery": [
+        {
+          "title": "Via Veneto - fachada frontal",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/ds/img_vendas/g1_1_8_1129_110725.jpeg",
+          "source_url": "https://www.danielisantosimoveis.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/via-veneto/2875",
+          "source_label": "Danieli Santos Imoveis"
+        },
+        {
+          "title": "Via Veneto - torre em Meia Praia",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/vitapema/img_edificios/g1_327_12793_1436_020525.jpg",
+          "source_url": "https://www.vitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/edificio-via-veneto/4513",
+          "source_label": "Vitapema Imoveis"
+        },
+        {
+          "title": "Via Veneto - fachada ampla",
+          "category": "Fachada",
+          "image": "https://objectstorage.sa-saopaulo-1.oraclecloud.com/n/grq6lwb4htd1/b/a2f052e7-11b1-4d10-8071-5c4f674fa0e3/o/condos/1f9af24a-10f1-4cc0-a5c6-565e9ecb39ca/images/6e4b0b32-fb66-4762-ac00-f70ca8c3a87e1740175247haFI.jpg",
+          "source_url": "https://elloimob.com.br/imovel/apartamento-padrao-dallo-via-veneto-meia-praia-em-itapema-sc/473",
+          "source_label": "Ello Imob"
+        },
+        {
+          "title": "Via Veneto - entrada social",
+          "category": "Acesso",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/vitapema/img_edificios/g1_327_12805_1437_020525.jpg",
+          "source_url": "https://www.vitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/edificio-via-veneto/4513",
+          "source_label": "Vitapema Imoveis"
+        },
+        {
+          "title": "Via Veneto - acesso identificado",
+          "category": "Acesso",
+          "image": "https://objectstorage.sa-saopaulo-1.oraclecloud.com/n/grq6lwb4htd1/b/a2f052e7-11b1-4d10-8071-5c4f674fa0e3/o/condos/1f9af24a-10f1-4cc0-a5c6-565e9ecb39ca/images/a3cb1463-0280-4c37-8d3f-e77a84de213b17401753982tIS.jpg",
+          "source_url": "https://elloimob.com.br/imovel/apartamento-padrao-dallo-via-veneto-meia-praia-em-itapema-sc/473",
+          "source_label": "Ello Imob"
+        },
+        {
+          "title": "Via Veneto - hall classico",
+          "category": "Hall",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/vitapema/img_edificios/g1_327_12804_1437_020525.jpg",
+          "source_url": "https://www.vitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/edificio-via-veneto/4513",
+          "source_label": "Vitapema Imoveis"
+        },
+        {
+          "title": "Via Veneto - estar do hall",
+          "category": "Hall",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/vitapema/img_edificios/i1_327_12804_1437_020525.jpg",
+          "source_url": "https://www.vitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/edificio-via-veneto/4513",
+          "source_label": "Vitapema Imoveis"
+        },
+        {
+          "title": "Via Veneto - hidromassagem",
+          "category": "Wellness",
+          "image": "https://objectstorage.sa-saopaulo-1.oraclecloud.com/n/grq6lwb4htd1/b/a2f052e7-11b1-4d10-8071-5c4f674fa0e3/o/condos/1f9af24a-10f1-4cc0-a5c6-565e9ecb39ca/images/67336ba1-1a82-44e3-a4b5-e81e7191e22e1740175229D0RB.jpg",
+          "source_url": "https://elloimob.com.br/imovel/apartamento-padrao-dallo-via-veneto-meia-praia-em-itapema-sc/473",
+          "source_label": "Ello Imob"
+        },
+        {
+          "title": "Via Veneto - lobby decorado",
+          "category": "Hall",
+          "image": "https://objectstorage.sa-saopaulo-1.oraclecloud.com/n/grq6lwb4htd1/b/a2f052e7-11b1-4d10-8071-5c4f674fa0e3/o/condos/1f9af24a-10f1-4cc0-a5c6-565e9ecb39ca/images/e30613d1-de69-46be-a2d3-b109dc899b311740175551EGK3.jpg",
+          "source_url": "https://elloimob.com.br/imovel/apartamento-padrao-dallo-via-veneto-meia-praia-em-itapema-sc/473",
+          "source_label": "Ello Imob"
+        },
+        {
+          "title": "Via Veneto - academia",
+          "category": "Fitness",
+          "image": "https://objectstorage.sa-saopaulo-1.oraclecloud.com/n/grq6lwb4htd1/b/a2f052e7-11b1-4d10-8071-5c4f674fa0e3/o/condos/1f9af24a-10f1-4cc0-a5c6-565e9ecb39ca/images/9c445330-6f39-4b72-97fb-03505911a14f1740175381L0o2.jpg",
+          "source_url": "https://elloimob.com.br/imovel/apartamento-padrao-dallo-via-veneto-meia-praia-em-itapema-sc/473",
+          "source_label": "Ello Imob"
+        },
+        {
+          "title": "Via Veneto - eventos decorado",
+          "category": "Eventos",
+          "image": "https://objectstorage.sa-saopaulo-1.oraclecloud.com/n/grq6lwb4htd1/b/a2f052e7-11b1-4d10-8071-5c4f674fa0e3/o/condos/1f9af24a-10f1-4cc0-a5c6-565e9ecb39ca/images/a6a271bc-171a-40cc-859b-1e3877cbe94d1740175421rHSm.jpg",
+          "source_url": "https://elloimob.com.br/imovel/apartamento-padrao-dallo-via-veneto-meia-praia-em-itapema-sc/473",
+          "source_label": "Ello Imob"
+        },
+        {
+          "title": "Via Veneto - jogos",
+          "category": "Jogos",
+          "image": "https://objectstorage.sa-saopaulo-1.oraclecloud.com/n/grq6lwb4htd1/b/a2f052e7-11b1-4d10-8071-5c4f674fa0e3/o/condos/1f9af24a-10f1-4cc0-a5c6-565e9ecb39ca/images/25eb88d7-0075-468a-848f-7550dc9606701740175029XTZN.jpg",
+          "source_url": "https://elloimob.com.br/imovel/apartamento-padrao-dallo-via-veneto-meia-praia-em-itapema-sc/473",
+          "source_label": "Ello Imob"
+        },
+        {
+          "title": "Via Veneto - terraco comum",
+          "category": "Convivencia",
+          "image": "https://objectstorage.sa-saopaulo-1.oraclecloud.com/n/grq6lwb4htd1/b/a2f052e7-11b1-4d10-8071-5c4f674fa0e3/o/condos/1f9af24a-10f1-4cc0-a5c6-565e9ecb39ca/images/f3c65b9f-4f47-423e-ac38-4db7b1a675ce1740175611SA7K.jpg",
+          "source_url": "https://elloimob.com.br/imovel/apartamento-padrao-dallo-via-veneto-meia-praia-em-itapema-sc/473",
+          "source_label": "Ello Imob"
+        },
+        {
+          "title": "Via Veneto - playground",
+          "category": "Infantil",
+          "image": "https://objectstorage.sa-saopaulo-1.oraclecloud.com/n/grq6lwb4htd1/b/a2f052e7-11b1-4d10-8071-5c4f674fa0e3/o/condos/1f9af24a-10f1-4cc0-a5c6-565e9ecb39ca/images/c2593ea2-480b-44e4-9f16-a7061b2a7a1f1740175478PLPa.jpg",
+          "source_url": "https://elloimob.com.br/imovel/apartamento-padrao-dallo-via-veneto-meia-praia-em-itapema-sc/473",
+          "source_label": "Ello Imob"
+        },
+        {
+          "title": "Via Veneto - apoio wellness",
+          "category": "Wellness",
+          "image": "https://objectstorage.sa-saopaulo-1.oraclecloud.com/n/grq6lwb4htd1/b/a2f052e7-11b1-4d10-8071-5c4f674fa0e3/o/condos/1f9af24a-10f1-4cc0-a5c6-565e9ecb39ca/images/4ee57c33-a38b-49a4-ae85-16824153c2c31740175164aZPr.jpg",
+          "source_url": "https://elloimob.com.br/imovel/apartamento-padrao-dallo-via-veneto-meia-praia-em-itapema-sc/473",
+          "source_label": "Ello Imob"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Assinatura Dallo",
+          "description": "A fonte oficial posiciona o Via Veneto como empreendimento entregue pela construtora em 2015."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Rua 226 em Meia Praia",
+          "description": "A Danieli Santos cita endereco na Rua 226, 43, a aproximadamente 90 metros do mar."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscinas e wellness",
+          "description": "Piscinas adulto e infantil, sauna e hidromassagem fortalecem a estrutura de lazer."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Uso cotidiano completo",
+          "description": "Academia, jogos, eventos, playground e hall decorado atendem diferentes momentos da rotina."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Dados oficiais de entrega",
+          "description": "A copy inclui entrega, habite-se e pavimentos informados pela Dallo."
+        },
+        {
+          "title": "Galeria mais institucional",
+          "description": "Fachada, acesso e areas comuns substituem imagens internas repetidas."
+        },
+        {
+          "title": "Proximidade do mar",
+          "description": "O texto destaca a leitura de Meia Praia sem depender de uma oferta especifica."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Quem construiu o Via Veneto?",
+          "answer": "A pagina oficial identifica o empreendimento como da Construtora Dallo."
+        },
+        {
+          "question": "Quando o Via Veneto foi entregue?",
+          "answer": "A Dallo informa entrega em 2015 e habite-se 195/2015."
+        },
+        {
+          "question": "Onde fica o Via Veneto?",
+          "answer": "Em Meia Praia, Itapema, com a Danieli Santos citando Rua 226, 43."
+        },
+        {
+          "question": "Quais imagens entraram na curadoria?",
+          "answer": "Fachada, entrada, hall, hidromassagem, academia, eventos, jogos, terraco e playground."
+        }
+      ],
+      "sources": [
+        "https://www.dallo.com.br/empreendimento/via-veneto/",
+        "https://www.vitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/edificio-via-veneto/4513",
+        "https://www.danielisantosimoveis.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/via-veneto/2875",
+        "https://elloimob.com.br/imovel/apartamento-padrao-dallo-via-veneto-meia-praia-em-itapema-sc/473",
+        "https://www.ebcimobiliaria.com.br/imovel/apartamento-com-4-quartos-a-venda-e-3-vagas-bairro-meia-praia-em-itapema/801169",
+        "https://www.vivareal.com.br/condominio/residencial-via-veneto-meia-praia-id-cdc58814-e2e8/"
+      ]
+    },
+    {
+      "slug": "victor-emmanuel",
+      "hero_image": "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu0E5wuhy2TlvrfRGUbCBpgCs6ZzRxOm2o0WEpL2Hmbnq2enWRuj8+d0f6ofMNXim7vVHe4cYPmtiOdh-QUTuYqG9MmB7oiSdnRTccpFNHUxf8zs2qDtC52SfY8Xx+AAK+DOMB+zIuHC9aJnhO3p5HrMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9PnKYGiF3DSbVGux6yxdaW16SraEqCMAI7-Oycq-uzbf-zH6GlOW6jlJYK+IndPcRaa5qoCiQJEGZ4M3BJqR7j+LeLr1KrOGvKpE8=.jpg",
+      "description": "O Victor Emmanuel Residence fica em Meia Praia, Itapema, na Rua 269 segundo Lopes e Urbay, com desenvolvimento ligado a Pessoa Empreendimentos. As fontes descrevem fachada neoclassica com pele de vidro, hall decorado, climatizado e sonorizado, portaria eletronica e remota, circuito fechado de TV e dois elevadores. A area de lazer inclui piscinas adulto e infantil, academia, jogos, playground, sauna, eventos, bicicletario, pub, brinquedoteca, boliche, fireplace, deck molhado, deck seco e quadra mar.",
+      "seo_description": "Victor Emmanuel Residence em Meia Praia, Itapema, com fachada neoclassica, hall, portaria remota, piscinas, pub, boliche e lazer completo.",
+      "gallery": [
+        {
+          "title": "Victor Emmanuel - fachada diurna",
+          "category": "Fachada",
+          "image": "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu0E5wuhy2TlvrfRGUbCBpgCs6ZzRxOm2o0WEpL2Hmbnq2enWRuj8+d0f6ofMNXim7vVHe4cYPmtiOdh-QUTuYqG9MmB7oiSdnRTccpFNHUxf8zs2qDtC52SfY8Xx+AAK+DOMB+zIuHC9aJnhO3p5HrMNAdsz6EIJ9xa9SUxy8h8d55m-oS7TO7S-K5+hxzlXFx5k9oa+Squ619jCLJU4Vr0lNm4L5VMZWe0S2-TJT-8+5wEDqv3JFhXchgzWgPAoc9j0Qd9PnKYGiF3DSbVGux6yxdaW16SraEqCMAI7-Oycq-uzbf-zH6GlOW6jlJYK+IndPcRaa5qoCiQJEGZ4M3BJqR7j+LeLr1KrOGvKpE8=.jpg",
+          "source_url": "https://www.lavitaimoveis.com.br/imovel/apartamento-itapema-3-quartos-128-m/AP1321-LAVI",
+          "source_label": "La Vita Imoveis"
+        },
+        {
+          "title": "Victor Emmanuel - fachada noturna",
+          "category": "Fachada",
+          "image": "https://img.kenlo.io/VWRCUkQ2Tnp3d1BJRDBJVe1szkhnWr9UfpZS9ftWwjXgr7v5Znen3XVcMHllDVRJJeIbi3YwVYEtu3pm+-FFyTgBkI9CW6+hnA2-3qe3uM20kGGy1LHGvIT1zun5YvvO+rct36nZOVi1gbJ4eNIeN0V-bcAiSRK2eLmuMF1eqiGOr2Pca4VoaS9q8gtojEZPyF+EB7jx2wcA63+HUfmDkX7JUoHrDmB1QPlLANk18QdW9hinR0InpwcS45urs3PTcKG1MI36iGwAF0wy6oK5APevm5PPedV-GacxP3wP61NeW6wcmvuVAupw6QEZovrFTQeShQjQiOM3eYWuWd5NmbxRl13EE+NO4x3pl9fGg6Kra07XNVpp9uuW+qOwPfn6TLSne3yjiZcX84-WLoRLK43kQSRVXWU1enAd-FK4+PTZ4hi4MmqH.jpg",
+          "source_url": "https://www.lavitaimoveis.com.br/imovel/apartamento-itapema-3-quartos-128-m/AP1321-LAVI",
+          "source_label": "La Vita Imoveis"
+        },
+        {
+          "title": "Victor Emmanuel - vista costeira",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/il/imoveis/1842/1607716370910_30e3a888-8d77-4112-b58a-bcbbb838e63a-17516382812817.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-victor-emmanuel-itapema-meia-praia-3-quartos-3-garagens-venda-ref-1842/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Victor Emmanuel - torre com mar",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/1842/1607716370910_30e3a888-8d77-4112-b58a-bcbbb838e63a-17516382812817.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-victor-emmanuel-itapema-meia-praia-3-quartos-3-garagens-venda-ref-1842/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Victor Emmanuel - implantacao vertical",
+          "category": "Fachada",
+          "image": "https://betaimages.lopes.com.br/realestate/sml/REB307513/fachada.png",
+          "source_url": "https://www.lopes.com.br/lancamento/REM18532/victor-emmanuel-residence-itapema-meia-praia",
+          "source_label": "Lopes"
+        },
+        {
+          "title": "Victor Emmanuel - lounge gourmet",
+          "category": "Gourmet",
+          "image": "https://www.eubuscoimoveis.com.br/uploads/smaniottoimoveis/159406/1714071653428454.jpg",
+          "source_url": "https://www.eubuscoimoveis.com.br/empreendimento/victor-emmanuel-residence-em-itapema",
+          "source_label": "eubuscoimoveis.com.br"
+        },
+        {
+          "title": "Victor Emmanuel - fitness renderizado",
+          "category": "Fitness",
+          "image": "https://www.eubuscoimoveis.com.br/uploads/smaniottoimoveis/159406/1714071637297820.jpg",
+          "source_url": "https://www.eubuscoimoveis.com.br/empreendimento/victor-emmanuel-residence-em-itapema",
+          "source_label": "eubuscoimoveis.com.br"
+        },
+        {
+          "title": "Victor Emmanuel - piscina com borda",
+          "category": "Piscina",
+          "image": "https://betaimages.lopes.com.br/realestate/med/REB313179/piscina.jpg",
+          "source_url": "https://www.lopes.com.br/lancamento/REM18532/victor-emmanuel-residence-itapema-meia-praia",
+          "source_label": "Lopes"
+        },
+        {
+          "title": "Victor Emmanuel - playground externo",
+          "category": "Infantil",
+          "image": "https://betaimages.lopes.com.br/realestate/med/REB313179/playground.jpg",
+          "source_url": "https://www.lopes.com.br/lancamento/REM18532/victor-emmanuel-residence-itapema-meia-praia",
+          "source_label": "Lopes"
+        },
+        {
+          "title": "Victor Emmanuel - boliche e pub",
+          "category": "Jogos",
+          "image": "https://betaimages.lopes.com.br/realestate/med/REB313179/boliche.jpg",
+          "source_url": "https://www.lopes.com.br/lancamento/REM18532/victor-emmanuel-residence-itapema-meia-praia",
+          "source_label": "Lopes"
+        },
+        {
+          "title": "Victor Emmanuel - brinquedoteca",
+          "category": "Infantil",
+          "image": "https://betaimages.lopes.com.br/realestate/med/REB313179/brinquedoteca.jpg",
+          "source_url": "https://www.lopes.com.br/lancamento/REM18532/victor-emmanuel-residence-itapema-meia-praia",
+          "source_label": "Lopes"
+        },
+        {
+          "title": "Victor Emmanuel - eventos",
+          "category": "Eventos",
+          "image": "https://betaimages.lopes.com.br/realestate/med/REB313179/salao-de-festas.jpg",
+          "source_url": "https://www.lopes.com.br/lancamento/REM18532/victor-emmanuel-residence-itapema-meia-praia",
+          "source_label": "Lopes"
+        },
+        {
+          "title": "Victor Emmanuel - academia aberta",
+          "category": "Fitness",
+          "image": "https://betaimages.lopes.com.br/realestate/med/REB313179/academia.jpg",
+          "source_url": "https://www.lopes.com.br/lancamento/REM18532/victor-emmanuel-residence-itapema-meia-praia",
+          "source_label": "Lopes"
+        },
+        {
+          "title": "Victor Emmanuel - piscina noturna",
+          "category": "Piscina",
+          "image": "https://urbay.com.br/i/960/600/imagens/anexos/victor-emmanuel-residence-itapema-sc-nxc8.jpeg",
+          "source_url": "https://urbay.com.br/imovel/3066-victor-emmanuel-residence",
+          "source_label": "Urbay"
+        },
+        {
+          "title": "Victor Emmanuel - piscina lateral",
+          "category": "Piscina",
+          "image": "https://urbay.com.br/i/960/600/imagens/anexos/victor-emmanuel-residence-itapema-sc-tz5f.jpeg",
+          "source_url": "https://urbay.com.br/imovel/3066-victor-emmanuel-residence",
+          "source_label": "Urbay"
+        },
+        {
+          "title": "Victor Emmanuel - gourmet externo",
+          "category": "Gourmet",
+          "image": "https://urbay.com.br/i/960/600/imagens/anexos/victor-emmanuel-residence-itapema-sc-zgfv.jpeg",
+          "source_url": "https://urbay.com.br/imovel/3066-victor-emmanuel-residence",
+          "source_label": "Urbay"
+        },
+        {
+          "title": "Victor Emmanuel - rooftop lounge",
+          "category": "Convivencia",
+          "image": "https://urbay.com.br/i/960/600/imagens/anexos/victor-emmanuel-residence-itapema-sc-8v7u.jpeg",
+          "source_url": "https://urbay.com.br/imovel/3066-victor-emmanuel-residence",
+          "source_label": "Urbay"
+        },
+        {
+          "title": "Victor Emmanuel - area infantil",
+          "category": "Infantil",
+          "image": "https://urbay.com.br/i/960/600/imagens/anexos/victor-emmanuel-residence-itapema-sc-4q00.jpeg",
+          "source_url": "https://urbay.com.br/imovel/3066-victor-emmanuel-residence",
+          "source_label": "Urbay"
+        },
+        {
+          "title": "Victor Emmanuel - boliche",
+          "category": "Jogos",
+          "image": "https://urbay.com.br/i/960/600/imagens/anexos/victor-emmanuel-residence-itapema-sc-wmad.jpeg",
+          "source_url": "https://urbay.com.br/imovel/3066-victor-emmanuel-residence",
+          "source_label": "Urbay"
+        },
+        {
+          "title": "Victor Emmanuel - eventos amplo",
+          "category": "Eventos",
+          "image": "https://urbay.com.br/i/960/600/imagens/anexos/victor-emmanuel-residence-itapema-sc-hs0r.jpeg",
+          "source_url": "https://urbay.com.br/imovel/3066-victor-emmanuel-residence",
+          "source_label": "Urbay"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 269 em Meia Praia",
+          "description": "Lopes e Urbay posicionam o empreendimento no eixo da Rua 269, em Meia Praia."
+        },
+        {
+          "icon": "Landmark",
+          "title": "Fachada neoclassica",
+          "description": "A Lopes descreve fachada com pele de vidro frontal e lateral."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Acesso controlado",
+          "description": "Portaria eletronica e remota, hall climatizado e CFTV reforcam o uso cotidiano."
+        },
+        {
+          "icon": "Gamepad2",
+          "title": "Lazer diversificado",
+          "description": "Pub, boliche, jogos, brinquedoteca, piscina, fitness e eventos ampliam o perfil home club."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Imagem do empreendimento",
+          "description": "A galeria prioriza renders oficiais, fachada, piscina e lazer, sem interiores vazios."
+        },
+        {
+          "title": "Contexto de construtora",
+          "description": "Urbay identifica Pessoa Empreendimentos como desenvolvedora responsavel."
+        },
+        {
+          "title": "Quadra mar",
+          "description": "As fontes de venda destacam a proximidade com o mar em Meia Praia."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Victor Emmanuel Residence?",
+          "answer": "Em Meia Praia, Itapema, no eixo da Rua 269 segundo Lopes e Urbay."
+        },
+        {
+          "question": "Quem desenvolve o Victor Emmanuel?",
+          "answer": "A Urbay informa Pessoa Empreendimentos como responsavel."
+        },
+        {
+          "question": "Quais areas de lazer aparecem?",
+          "answer": "Piscinas, academia, pub, boliche, brinquedoteca, eventos, playground e lounges."
+        },
+        {
+          "question": "O que mudou na pagina?",
+          "answer": "Foram usadas imagens de fachada e areas comuns em vez de fotos de interiores de oferta."
+        }
+      ],
+      "sources": [
+        "https://www.lopes.com.br/lancamento/REM18532/victor-emmanuel-residence-itapema-meia-praia",
+        "https://zaaditapema.com.br/imovel/venda-apartamentos-03-dormitorio-em-itapema/victor-emmanuel-residence/1039",
+        "https://urbay.com.br/imovel/3066-victor-emmanuel-residence",
+        "https://www.lavitaimoveis.com.br/imovel/apartamento-itapema-3-quartos-128-m/AP1321-LAVI",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-victor-emmanuel-itapema-meia-praia-3-quartos-3-garagens-venda-ref-1842/",
+        "https://www.eubuscoimoveis.com.br/empreendimento/victor-emmanuel-residence-em-itapema"
+      ]
+    },
+    {
+      "slug": "villa-alba-residence",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/vila-alba-2-1712079142.webp",
+      "description": "O Villa Alba Residence fica na Rua 1111, no Centro de Balneario Camboriu, a cerca de 230 metros da orla segundo a Imobille. O Litoral Vertical informa 2 pavimentos de area de lazer, enquanto Loft e Viva Real reforcam academia, churrasqueira, piscina, espaco gourmet, elevador, bicicletario, piscina infantil, piscina aquecida e brinquedoteca. A curadoria substitui ambientes internos por fachada, acesso, hall, piscinas, jogos, sauna, academia e convivencia comum.",
+      "seo_description": "Villa Alba Residence no Centro de Balneario Camboriu, com fachada, hall, piscinas, jogos, sauna, academia e lazer em dois pavimentos.",
+      "gallery": [
+        {
+          "title": "Villa Alba - fachada vertical",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/vila-alba-2-1712079142.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-alba-EM66778",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Alba - torre no Centro",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-villa-alba-balneario-camboriu-1-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-villa-alba/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Villa Alba - fachada frontal",
+          "category": "Fachada",
+          "image": "https://b4.casteldigital.com.br/brunocassola/ig/il/imoveis/565/edificio-villa-alba-04-suites-03-vagas-segunda-quadra-regiao-central-de-balneario-camboriu-empreendimento-17434477566493.jpg",
+          "source_url": "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-villa-alba-balneario-camboriu-centro-4-quartos-3-garagens-venda-ref-565/",
+          "source_label": "Bruno Cassola"
+        },
+        {
+          "title": "Villa Alba - entrada identificada",
+          "category": "Acesso",
+          "image": "https://b4.casteldigital.com.br/brunocassola/ig/im/imoveis/565/edificio-villa-alba-04-suites-03-vagas-segunda-quadra-regiao-central-de-balneario-camboriu-empreendimento-17434477566493.jpg",
+          "source_url": "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-villa-alba-balneario-camboriu-centro-4-quartos-3-garagens-venda-ref-565/",
+          "source_label": "Bruno Cassola"
+        },
+        {
+          "title": "Villa Alba - piscina externa",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/02042024145900195-1712080740.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-alba-EM66778",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Alba - piscina com deck",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/vila-alba-18-1712079150.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-alba-EM66778",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Alba - borda de piscina",
+          "category": "Piscina",
+          "image": "https://b4.casteldigital.com.br/brunocassola/ig/il/imoveis/565/edificio-villa-alba-04-suites-03-vagas-segunda-quadra-regiao-central-de-balneario-camboriu-area-de-lazer-piscina-externa-17434477566475.jpg",
+          "source_url": "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-villa-alba-balneario-camboriu-centro-4-quartos-3-garagens-venda-ref-565/",
+          "source_label": "Bruno Cassola"
+        },
+        {
+          "title": "Villa Alba - piscina coberta",
+          "category": "Piscina",
+          "image": "https://b4.casteldigital.com.br/brunocassola/ig/il/imoveis/565/edificio-villa-alba-04-suites-03-vagas-segunda-quadra-regiao-central-de-balneario-camboriu-17434477566423.jpg",
+          "source_url": "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-villa-alba-balneario-camboriu-centro-4-quartos-3-garagens-venda-ref-565/",
+          "source_label": "Bruno Cassola"
+        },
+        {
+          "title": "Villa Alba - lobby lateral",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/vila-alba-31-1712079157.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-alba-EM66778",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Alba - hall decorado",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/vila-alba-29-1712079156.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-alba-EM66778",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Alba - convivencia externa",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/vila-alba-16-1712079149.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-alba-EM66778",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Alba - piscina interna",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/vila-alba-8-1712079144.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-alba-EM66778",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Alba - sauna",
+          "category": "Wellness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/vila-alba-9-1712079145.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-alba-EM66778",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Alba - jogos",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/vila-alba-3-1712079143.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-alba-EM66778",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Alba - academia",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/vila-alba-11-1712079146.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-alba-EM66778",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 1111 no Centro",
+          "description": "A localizacao aproxima o empreendimento da praia central, comercio e servicos."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscinas variadas",
+          "description": "A galeria mostra piscina externa, coberta e areas de deck do lazer."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Fitness e wellness",
+          "description": "Academia, sauna e apoio de lazer reforcam o uso diario do condominio."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Hall decorado",
+          "description": "A entrada e os halls criam leitura de alto padrao desde a chegada."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Lazer em dois pavimentos",
+          "description": "O Litoral Vertical cita dois pavimentos de area de lazer no empreendimento."
+        },
+        {
+          "title": "Proximo da orla",
+          "description": "A Imobille indica distancia de cerca de 230 metros da Praia Central."
+        },
+        {
+          "title": "Sem interiores privados",
+          "description": "A nova galeria evita fotos de living e cozinha de oferta."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Villa Alba Residence?",
+          "answer": "Na Rua 1111, no Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Qual e a distancia ate a praia?",
+          "answer": "A Imobille informa aproximadamente 230 metros da orla."
+        },
+        {
+          "question": "Quais areas foram destacadas?",
+          "answer": "Fachada, acesso, hall, piscinas, jogos, sauna, academia e convivencia."
+        },
+        {
+          "question": "Quais fontes validaram o lazer?",
+          "answer": "Imobille, Litoral Vertical, Loft, Viva Real, Bruno Cassola e Grand Exclusive."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-alba-EM66778",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-villa-alba/",
+        "https://loft.com.br/condominio/edificio-villa-alba-residence-centro-balneario-camboriu-sc/z6t4kd",
+        "https://www.grandexclusive.com.br/imovel/apartamento-no-edificio-villa-alba-residence-balneario-camboriu-centro-4-quartos-3-garagens-venda-ref-357/",
+        "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-villa-alba-balneario-camboriu-centro-4-quartos-3-garagens-venda-ref-565/",
+        "https://www.vivareal.com.br/condominio/edificio-villa-alba-residence-centro-id-249886e4-9acf/"
+      ]
+    },
+    {
+      "slug": "villa-del-fiume",
+      "hero_image": "https://sistema.safirainvestimentositapema.com.br/content/rAMCarjUR9DtQHbg/img/products_imgs/650/16797lg.jpg",
+      "description": "O Villa del Fiume fica em Meia Praia, Itapema, com a MySide citando endereco na Rua 321 e entrega em setembro de 2025. A Safira detalha Rua 321, numero 359, 27 pavimentos, 108 residencias, 4 por andar, 3 elevadores, hall decorado, sensores nas areas comuns, box de praia, monitoramento interno, vaga para jet ski e construtora Fasolo & Simon. O lazer inclui piscinas adulto e infantil, piscina aquecida, eventos, academia, sauna, spa, brinquedoteca, playground, jogos, quadra esportiva e lounge.",
+      "seo_description": "Villa del Fiume em Meia Praia, Itapema, com fachada, piscina, marina para jet ski, hall, academia e lazer completo.",
+      "gallery": [
+        {
+          "title": "Villa del Fiume - fachada frontal",
+          "category": "Fachada",
+          "image": "https://sistema.safirainvestimentositapema.com.br/content/rAMCarjUR9DtQHbg/img/products_imgs/650/16797lg.jpg",
+          "source_url": "https://www.safirainvestimentositapema.com.br/imovel/VILLA-DEL-FIUME-AP650",
+          "source_label": "Safira Investimentos"
+        },
+        {
+          "title": "Villa del Fiume - torre completa",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/vitapema/img_edificios/g1_836_15765_1102_201125.jpeg",
+          "source_url": "https://www.vitapema.com.br/imovel/venda-apartamentos-03-dormitorio-em-itapema/villa-del-fiume/1176",
+          "source_label": "Vitapema Imoveis"
+        },
+        {
+          "title": "Villa del Fiume - fachada vertical",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_1281_20442_1536_041225.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/imovel/venda-apartamentos-03-dorm-em-itapema/villa-del-fiume-03-suites-proximo-ao-pier/3459",
+          "source_label": "HJ Junior Imoveis"
+        },
+        {
+          "title": "Villa del Fiume - fachada noturna",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/foto-destaque-535x596px-1756231313.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/villa-del-fiume-EM88348",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa del Fiume - base e torre",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/vitapema/img_edificios/g1_836_15766_1102_201125.jpeg",
+          "source_url": "https://www.vitapema.com.br/imovel/venda-apartamentos-03-dormitorio-em-itapema/villa-del-fiume/1176",
+          "source_label": "Vitapema Imoveis"
+        },
+        {
+          "title": "Villa del Fiume - relacao com o rio",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/il/imoveis/1852/1dd3b7f18dc2b780b83b11dd6f3695f5358c793fa3242258d9be593c4998fc1d-1751912988298.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-villa-del-fiume-itapema-meia-praia-3-quartos-3-garagens-venda-ref-1852/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Villa del Fiume - implantacao waterfront",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/1852/1dd3b7f18dc2b780b83b11dd6f3695f5358c793fa3242258d9be593c4998fc1d-1751912988298.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-villa-del-fiume-itapema-meia-praia-3-quartos-3-garagens-venda-ref-1852/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Villa del Fiume - acesso identificado",
+          "category": "Acesso",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/vitapema/img_edificios/g1_836_15770_1103_201125.jpeg",
+          "source_url": "https://www.vitapema.com.br/imovel/venda-apartamentos-03-dormitorio-em-itapema/villa-del-fiume/1176",
+          "source_label": "Vitapema Imoveis"
+        },
+        {
+          "title": "Villa del Fiume - jardim de entrada",
+          "category": "Acesso",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/vitapema/img_edificios/i1_836_15770_1103_201125.jpeg",
+          "source_url": "https://www.vitapema.com.br/imovel/venda-apartamentos-03-dormitorio-em-itapema/villa-del-fiume/1176",
+          "source_label": "Vitapema Imoveis"
+        },
+        {
+          "title": "Villa del Fiume - base do empreendimento",
+          "category": "Acesso",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/vitapema/img_edificios/g1_836_15782_1103_201125.jpeg",
+          "source_url": "https://www.vitapema.com.br/imovel/venda-apartamentos-03-dormitorio-em-itapema/villa-del-fiume/1176",
+          "source_label": "Vitapema Imoveis"
+        },
+        {
+          "title": "Villa del Fiume - piscina panoramica",
+          "category": "Piscina",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_1281_20429_1535_041225.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/imovel/venda-apartamentos-03-dorm-em-itapema/villa-del-fiume-03-suites-proximo-ao-pier/3459",
+          "source_label": "HJ Junior Imoveis"
+        },
+        {
+          "title": "Villa del Fiume - borda da piscina",
+          "category": "Piscina",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_1281_20430_1535_041225.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/imovel/venda-apartamentos-03-dorm-em-itapema/villa-del-fiume-03-suites-proximo-ao-pier/3459",
+          "source_label": "HJ Junior Imoveis"
+        },
+        {
+          "title": "Villa del Fiume - lobby comum",
+          "category": "Hall",
+          "image": "https://sistema.safirainvestimentositapema.com.br/content/rAMCarjUR9DtQHbg/img/products_imgs/650/16798lg.jpg",
+          "source_url": "https://www.safirainvestimentositapema.com.br/imovel/VILLA-DEL-FIUME-AP650",
+          "source_label": "Safira Investimentos"
+        },
+        {
+          "title": "Villa del Fiume - academia",
+          "category": "Fitness",
+          "image": "https://sistema.safirainvestimentositapema.com.br/content/rAMCarjUR9DtQHbg/img/products_imgs/650/16805lg.jpg",
+          "source_url": "https://www.safirainvestimentositapema.com.br/imovel/VILLA-DEL-FIUME-AP650",
+          "source_label": "Safira Investimentos"
+        },
+        {
+          "title": "Villa del Fiume - estar do hall",
+          "category": "Hall",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_1281_20443_1536_041225.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/imovel/venda-apartamentos-03-dorm-em-itapema/villa-del-fiume-03-suites-proximo-ao-pier/3459",
+          "source_label": "HJ Junior Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 321 em Meia Praia",
+          "description": "As fontes posicionam o empreendimento junto ao eixo da Rua 321, proximo ao Pier Oporto."
+        },
+        {
+          "icon": "ShipWheel",
+          "title": "Apoio nautico",
+          "description": "As fontes comerciais destacam vaga para jet ski e relacao com a marina."
+        },
+        {
+          "icon": "Building2",
+          "title": "Estrutura vertical",
+          "description": "A Safira informa 27 pavimentos, 108 residencias, 4 por andar e 3 elevadores."
+        },
+        {
+          "icon": "Waves",
+          "title": "Lazer de agua",
+          "description": "Piscinas adulto e infantil, piscina aquecida, spa e lounge reforcam o perfil home club."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Curadoria junto ao rio",
+          "description": "A galeria valoriza fachada, base, jardim, piscina e relacao waterfront."
+        },
+        {
+          "title": "Entrega recente",
+          "description": "A MySide cita entrega em setembro de 2025, contextualizando o ciclo do empreendimento."
+        },
+        {
+          "title": "Dados de seguranca",
+          "description": "A copy inclui sensores, monitoramento interno, hall e controle de uso comum."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Villa del Fiume?",
+          "answer": "Em Meia Praia, Itapema, com fontes citando a Rua 321."
+        },
+        {
+          "question": "Quando foi entregue?",
+          "answer": "A MySide informa entrega em setembro de 2025."
+        },
+        {
+          "question": "Quem construiu o empreendimento?",
+          "answer": "A Safira informa Fasolo & Simon como construtora."
+        },
+        {
+          "question": "Quais imagens foram escolhidas?",
+          "answer": "Fachada, acesso, base, jardim, piscina, hall e academia do condominio."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/villa-del-fiume-EM88348",
+        "https://www.vitapema.com.br/imovel/venda-apartamentos-03-dormitorio-em-itapema/villa-del-fiume/1176",
+        "https://myside.com.br/apartamento-venda-villa-del-fiume-itapema-sc",
+        "https://www.safirainvestimentositapema.com.br/imovel/VILLA-DEL-FIUME-AP650",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-villa-del-fiume-itapema-meia-praia-3-quartos-3-garagens-venda-ref-1852/",
+        "https://hjjuniorimoveis.com.br/imovel/venda-apartamentos-03-dorm-em-itapema/villa-del-fiume-03-suites-proximo-ao-pier/3459"
+      ]
+    },
+    {
+      "slug": "villa-di-mare-residence",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-villa-di-mare-balneario-camboriu-1.jpg",
+      "description": "O Villa Di Mare Residence fica na Rua 3300, no Centro de Balneario Camboriu, segundo Litoral Vertical e Lucia Imoveis. A Imobille informa area de lazer com cerca de 1600 m2 e opcoes para todas as idades. A nova pagina mostra fachada, piscina, deck, playground, spa, pergolado, eventos, academia, gourmet, jogos e ambientes de apoio comum, retirando interiores de oferta e reforcando o perfil de torre residencial de alto padrao.",
+      "seo_description": "Villa Di Mare Residence no Centro de Balneario Camboriu, com fachada, 1600 m2 de lazer, piscina, spa, academia, eventos e jogos.",
+      "gallery": [
+        {
+          "title": "Villa Di Mare - fachada azul",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-villa-di-mare-balneario-camboriu-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-villa-di-mare-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Villa Di Mare - fachada urbana",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/automacao-nova-marco-liane0006-1677876900-1723906771.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-di-mare-EM59165",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Di Mare - torre vertical",
+          "category": "Fachada",
+          "image": "http://share-fotos.imoveloffice.com.br/foto/3451/3451/v-1/empreendimentos/18407/137901/3.jpg",
+          "source_url": "https://luciaimoveis.com/empreendimento/18407-villa-di-mare-residence",
+          "source_label": "Lucia Imoveis"
+        },
+        {
+          "title": "Villa Di Mare - acesso frontal",
+          "category": "Fachada",
+          "image": "https://dbvebtn3wsif3.cloudfront.net/foto/3451/3451/v-1/empreendimentos/18407/137901/4.jpg",
+          "source_url": "https://luciaimoveis.com/empreendimento/18407-villa-di-mare-residence",
+          "source_label": "Lucia Imoveis"
+        },
+        {
+          "title": "Villa Di Mare - base urbana",
+          "category": "Fachada",
+          "image": "https://dbvebtn3wsif3.cloudfront.net/foto/3451/3451/v-1/empreendimentos/18407/137895/4.jpg",
+          "source_url": "https://luciaimoveis.com/empreendimento/18407-villa-di-mare-residence",
+          "source_label": "Lucia Imoveis"
+        },
+        {
+          "title": "Villa Di Mare - fachada noturna",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-villa-di-mare-balneario-camboriu-1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-villa-di-mare-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Villa Di Mare - piscina e fachada",
+          "category": "Piscina",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-villa-di-mare-balneario-camboriu-principal.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-villa-di-mare-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Villa Di Mare - area externa",
+          "category": "Piscina",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-villa-di-mare-balneario-camboriu-principal.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-villa-di-mare-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Villa Di Mare - piscina descoberta",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/real-estates-photo/September2025/vila-di-mare-4-1758807258.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-di-mare-EM59165",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Di Mare - deck da piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/17082024115931272-1723906771.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-di-mare-EM59165",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Di Mare - vista superior da piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20000-1664821165.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-di-mare-EM59165",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Di Mare - piscina com deck",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20001-1664821165.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-di-mare-EM59165",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Di Mare - playground",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20003-1664821166.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-di-mare-EM59165",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Di Mare - spa externo",
+          "category": "Wellness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20004-1664821166.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-di-mare-EM59165",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Di Mare - pergolado comum",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20005-1664821166.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-di-mare-EM59165",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Di Mare - eventos",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20009-1664821167.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-di-mare-EM59165",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Di Mare - academia",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20010-1664821167.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-di-mare-EM59165",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Di Mare - apoio comum",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20013-1664821167.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-di-mare-EM59165",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Di Mare - gourmet externo",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20014-1664821168.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-di-mare-EM59165",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Di Mare - piscina panoramica",
+          "category": "Piscina",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/if/imoveis/1377/img-20241118-wa0022-17399741835471.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/cobertura-no-edificio-villa-di-mare-residence-balneario-camboriu-centro-4-quartos-4-garagens-venda-ref-1377/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Villa Di Mare - jogos",
+          "category": "Jogos",
+          "image": "https://dbvebtn3wsif3.cloudfront.net/foto/3451/3451/v-1/empreendimentos/18407/137894/4.jpg",
+          "source_url": "https://luciaimoveis.com/empreendimento/18407-villa-di-mare-residence",
+          "source_label": "Lucia Imoveis"
+        },
+        {
+          "title": "Villa Di Mare - apoio de trabalho",
+          "category": "Convivencia",
+          "image": "https://dbvebtn3wsif3.cloudfront.net/foto/3451/3451/v-1/empreendimentos/18407/137896/4.jpg",
+          "source_url": "https://luciaimoveis.com/empreendimento/18407-villa-di-mare-residence",
+          "source_label": "Lucia Imoveis"
+        },
+        {
+          "title": "Villa Di Mare - fitness lateral",
+          "category": "Fitness",
+          "image": "https://dbvebtn3wsif3.cloudfront.net/foto/3451/3451/v-1/empreendimentos/18407/137897/4.jpg",
+          "source_url": "https://luciaimoveis.com/empreendimento/18407-villa-di-mare-residence",
+          "source_label": "Lucia Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 3300 no Centro",
+          "description": "A localizacao conecta praia, servicos e acesso facil na regiao central de Balneario Camboriu."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e deck",
+          "description": "A galeria valoriza piscina, borda, spa e areas externas do lazer."
+        },
+        {
+          "icon": "Baby",
+          "title": "Lazer para familias",
+          "description": "Playground, eventos, gourmet e jogos atendem diferentes idades e rotinas."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Fitness e apoio comum",
+          "description": "Academia, apoio de trabalho e convivencia ampliam o uso cotidiano."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Lazer amplo",
+          "description": "A Imobille cita cerca de 1600 m2 de area de lazer no empreendimento."
+        },
+        {
+          "title": "Galeria institucional",
+          "description": "Fotos de fachada e areas comuns substituem imagens de ambientes privados."
+        },
+        {
+          "title": "Fontes de BC",
+          "description": "Imobille, Litoral Vertical, Lucia, Bruno Cassola, Grand Exclusive e Pilger validaram contexto e imagens."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Villa Di Mare Residence?",
+          "answer": "Na Rua 3300, no Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Qual e o tamanho da area de lazer?",
+          "answer": "A Imobille informa aproximadamente 1600 m2 de area de lazer."
+        },
+        {
+          "question": "Quais fotos entraram?",
+          "answer": "Fachada, piscina, deck, playground, spa, pergolado, eventos, academia, gourmet e jogos."
+        },
+        {
+          "question": "O que foi removido?",
+          "answer": "Interiores de oferta que nao explicavam o condominio."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-di-mare-EM59165",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-villa-di-mare-residence/",
+        "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-villa-di-mare-residence-balneario-camboriu-centro-3-quartos-3-garagens-venda-ref-334/",
+        "https://www.guilhermepilger.com/imovel/cobertura-no-edificio-villa-di-mare-residence-balneario-camboriu-centro-4-quartos-4-garagens-venda-ref-1377/",
+        "https://luciaimoveis.com/empreendimento/18407-villa-di-mare-residence",
+        "https://www.grandexclusive.com.br/imovel/apartamento-no-edificio-villa-di-mare-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-751/"
+      ]
+    },
+    {
+      "slug": "villa-florence",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2022/03/edificio-villa-florence-balneario-camboriu-1.1.jpg",
+      "description": "O Villa Florence fica na Rua 1111, numero 42, no Centro de Balneario Camboriu, segundo a Imobille. O Litoral Vertical informa que o empreendimento e uma obra da FG Empreendimentos, entregue em 2008, com 17 pavimentos, 2 residencias por andar, 2 elevadores, box de praia e localizacao na esquina da Rua 1111 com a Avenida Brasil. A area de lazer inclui piscina, ofuro, academia, playground, eventos, jogos e TV. A curadoria agora mostra fachada e lazer real do condominio.",
+      "seo_description": "Villa Florence no Centro de Balneario Camboriu, obra FG entregue em 2008, com fachada, piscina, ofuro, academia, playground e eventos.",
+      "gallery": [
+        {
+          "title": "Villa Florence - fachada FG",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2022/03/edificio-villa-florence-balneario-camboriu-1.1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-villa-florence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Villa Florence - torre no Centro",
+          "category": "Fachada",
+          "image": "https://b4.casteldigital.com.br/minhabc/ig/if/imoveis/3585/ef62b4d3-9134-4f09-8bc6-569089705669-1711567563148.jpeg",
+          "source_url": "https://www.minhabcimoveis.com.br/imovel/apartamento-no-edificio-villa-florence-balneario-camboriu-centro-3-quartos-3-garagens-venda-ref-3585/",
+          "source_label": "minhabcimoveis.com.br"
+        },
+        {
+          "title": "Villa Florence - fachada completa",
+          "category": "Fachada",
+          "image": "https://img.apre.me/BcFRCoAgDADQ2_zT1HTSx84SukwWYqMIr997TDoBHd0T2lCTKweSCZ5eaHoZPkuOKfjV1Q33nlV4yKOLcykGXNqQo8tXSACtjcQ-.jpg",
+          "source_url": "https://desc.com.br/apartamento-novo-a-venda-no-ed-villa-florence",
+          "source_label": "DESC Imoveis"
+        },
+        {
+          "title": "Villa Florence - base vertical",
+          "category": "Fachada",
+          "image": "https://b4.casteldigital.com.br/minhabc/ig/il/imoveis/3585/ef62b4d3-9134-4f09-8bc6-569089705669-1711567563148.jpeg",
+          "source_url": "https://www.minhabcimoveis.com.br/imovel/apartamento-no-edificio-villa-florence-balneario-camboriu-centro-3-quartos-3-garagens-venda-ref-3585/",
+          "source_label": "minhabcimoveis.com.br"
+        },
+        {
+          "title": "Villa Florence - detalhe da torre",
+          "category": "Fachada",
+          "image": "https://img.apre.me/M7EtVksvyNJLTktKNDU3MTI2TLU0i89JLMhMzsssKtA3NDQ3NTHTT8-LTMnJLE2yzVQzMzAwtU0GAA.jpg",
+          "source_url": "https://desc.com.br/apartamento-novo-a-venda-no-ed-villa-florence",
+          "source_label": "DESC Imoveis"
+        },
+        {
+          "title": "Villa Florence - fachada clara",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2022/03/edificio-villa-florence-balneario-camboriu-1.2.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-villa-florence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Villa Florence - torre lateral",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2022/03/edificio-villa-florence-balneario-camboriu-1.2.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-villa-florence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Villa Florence - piscina coberta",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/sem-titulo-1-1666289602.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-florence-EM7901",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Florence - piscina lateral",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2023/villa-florence-39-1675084139.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-florence-EM7901",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Florence - spa externo",
+          "category": "Wellness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2023/villa-florence-40-1675084139.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-florence-EM7901",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Florence - playground",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2023/villa-florence-41-1675084139.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-florence-EM7901",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Florence - academia compacta",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2023/villa-florence-42-1675084139.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-florence-EM7901",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Florence - fitness comum",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2023/villa-florence-43-1675084140.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-florence-EM7901",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Florence - gourmet",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2023/villa-florence-44-1675084140.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-florence-EM7901",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Florence - eventos",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2023/villa-florence-45-1675084141.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-florence-EM7901",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 1111 com Avenida Brasil",
+          "description": "O endereco central aproxima praia, restaurantes, comercio e servicos."
+        },
+        {
+          "icon": "Building2",
+          "title": "Obra FG",
+          "description": "O Litoral Vertical identifica a FG Empreendimentos como responsavel pela obra."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e ofuro",
+          "description": "Piscina, spa externo e apoio wellness ampliam a experiencia de lazer."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Uso familiar",
+          "description": "Academia, playground, gourmet e eventos atendem diferentes perfis de rotina."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Edificio entregue",
+          "description": "A fonte Litoral Vertical cita entrega em 2008 e 17 pavimentos."
+        },
+        {
+          "title": "Centro pratico",
+          "description": "A posicao na Rua 1111 com Avenida Brasil fortalece mobilidade a pe."
+        },
+        {
+          "title": "Fachada corrigida",
+          "description": "A galeria agora abre com fachada e areas comuns, nao com interiores de oferta."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Villa Florence?",
+          "answer": "Na Rua 1111, numero 42, Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Quem assina a obra?",
+          "answer": "O Litoral Vertical informa FG Empreendimentos."
+        },
+        {
+          "question": "Quando foi entregue?",
+          "answer": "A fonte Litoral Vertical cita entrega em 2008."
+        },
+        {
+          "question": "Quais areas de lazer aparecem?",
+          "answer": "Piscina, ofuro, academia, playground, gourmet e eventos."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-florence-EM7901",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-villa-florence/",
+        "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-villa-florence-balneario-camboriu-centro-3-quartos-3-garagens-venda-ref-261/",
+        "https://www.flyimoveis.com.br/imovel/apartamento-no-edificio-villa-florence-balneario-camboriu-centro-3-quartos-3-garagens-venda-ref-1484/",
+        "https://www.minhabcimoveis.com.br/imovel/apartamento-no-edificio-villa-florence-balneario-camboriu-centro-3-quartos-3-garagens-venda-ref-3585/",
+        "https://desc.com.br/apartamento-novo-a-venda-no-ed-villa-florence"
+      ]
+    },
+    {
+      "slug": "village-dos-ipes",
+      "hero_image": "https://wix.residencialvillagedosipes.com.br/wp-content/uploads/2019/09/village_dos_ipe%CC%82s.jpg",
+      "description": "O Residencial Village dos Ipes e um condominio horizontal em Balneario Camboriu, com site proprio destacando ambiente fechado, infraestrutura, alto padrao de acabamento e contato com a natureza. A Felicita posiciona o empreendimento na Avenida Hermogenes de Assis Feijo, 1100, na Barra. A curadoria foi feita com imagens institucionais do condominio e fonte nominal da Felicita, priorizando portaria, vias internas, piscina, playground, quadra, brinquedoteca, jogos, academia, gourmet, sauna, spa e eventos.",
+      "seo_description": "Residencial Village dos Ipes em Balneario Camboriu, condominio horizontal com portaria, vias internas, piscina, quadra, playground, academia e eventos.",
+      "gallery": [
+        {
+          "title": "Village dos Ipes - portaria iluminada",
+          "category": "Portaria",
+          "image": "https://wix.residencialvillagedosipes.com.br/wp-content/uploads/2019/09/village_dos_ipe%CC%82s.jpg",
+          "source_url": "https://wix.residencialvillagedosipes.com.br/",
+          "source_label": "Residencial Village dos Ipes"
+        },
+        {
+          "title": "Village dos Ipes - via interna",
+          "category": "Acesso",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/127/img-49.jpg?1742391855",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/127/village-dos-ipes/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Village dos Ipes - piscina circular",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/127/img-1-13.jpg?1742391855",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/127/village-dos-ipes/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Village dos Ipes - deck da piscina",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/127/img-2-9.jpg?1742391855",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/127/village-dos-ipes/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Village dos Ipes - playground externo",
+          "category": "Infantil",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/127/img-3-8.jpg?1742391855",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/127/village-dos-ipes/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Village dos Ipes - quadra recreativa",
+          "category": "Esporte",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/127/img-12-8.jpg?1742391855",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/127/village-dos-ipes/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Village dos Ipes - brinquedoteca",
+          "category": "Infantil",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/127/img-4-6.jpg?1742391855",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/127/village-dos-ipes/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Village dos Ipes - jogos",
+          "category": "Jogos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/127/img-5-7.jpg?1742391855",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/127/village-dos-ipes/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Village dos Ipes - academia",
+          "category": "Fitness",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/127/img-6-10.jpg?1742391855",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/127/village-dos-ipes/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Village dos Ipes - gourmet comum",
+          "category": "Gourmet",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/127/img-7-8.jpg?1742391855",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/127/village-dos-ipes/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Village dos Ipes - sauna seca",
+          "category": "Wellness",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/127/img-8-6.jpg?1742391855",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/127/village-dos-ipes/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Village dos Ipes - spa interno",
+          "category": "Wellness",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/127/img-9-9.jpg?1742391855",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/127/village-dos-ipes/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Village dos Ipes - eventos",
+          "category": "Eventos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/127/img-13-9.jpg?1742391855",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/127/village-dos-ipes/",
+          "source_label": "Felicita Negocios"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Barra de Balneario Camboriu",
+          "description": "A Felicita cita endereco na Avenida Hermogenes de Assis Feijo, 1100."
+        },
+        {
+          "icon": "Trees",
+          "title": "Condominio horizontal",
+          "description": "O site proprio destaca projeto fechado, contato com a natureza e padrao de acabamento."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Portaria e acesso interno",
+          "description": "A nova galeria mostra a chegada e as vias internas, explicando a logica do empreendimento."
+        },
+        {
+          "icon": "Baby",
+          "title": "Lazer familiar",
+          "description": "Piscina, playground, quadra, brinquedoteca, jogos, academia, gourmet, sauna e eventos completam a rotina."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Imagens institucionais",
+          "description": "A selecao evita interiores e fachadas de ofertas isoladas, usando portaria e lazer do conjunto."
+        },
+        {
+          "title": "Perfil horizontal",
+          "description": "A descricao comunica que nao se trata de torre vertical, e sim de condominio fechado."
+        },
+        {
+          "title": "Infraestrutura completa",
+          "description": "As areas comuns foram organizadas por uso para explicar a experiencia do morador."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Village dos Ipes?",
+          "answer": "Na Barra, em Balneario Camboriu, com a Felicita citando Avenida Hermogenes de Assis Feijo, 1100."
+        },
+        {
+          "question": "Que tipo de empreendimento e?",
+          "answer": "E um condominio horizontal fechado, segundo o site proprio do Residencial Village dos Ipes."
+        },
+        {
+          "question": "Quais imagens foram usadas?",
+          "answer": "Portaria, via interna, piscina, playground, quadra, brinquedoteca, jogos, academia, gourmet, sauna e eventos."
+        },
+        {
+          "question": "Por que nao foram usadas fachadas de oferta?",
+          "answer": "Para evitar confundir a pagina do condominio com uma residencia especifica."
+        }
+      ],
+      "sources": [
+        "https://wix.residencialvillagedosipes.com.br/",
+        "https://felicitanegocios.com.br/empreendimento/127/village-dos-ipes/",
+        "https://www.flyimoveis.com.br/imovel/casa-no-village-dos-ipes-balneario-camboriu-barra-3-quartos-2-garagens-venda-ref-1347/",
+        "https://www.blendbcimoveis.com.br/imoveis/balneario-camboriu/condominio-village-dos-ipes",
+        "https://www.vpclassimoveis.com.br/imovel/casa-em-condominio-balneario-camboriu-sao-judas-tadeu-3-quartos-2-garagens-venda-ref-135/",
+        "https://www.arboimoveis.com.br/imovel/casa/venda/balneario-camboriu/sc/barra/CA0040_GII"
+      ]
+    },
+    {
+      "slug": "villagio-rocca",
+      "hero_image": "https://b3.casteldigital.com.br/guilhermepilger/ig/il/imoveis/1827/fachada-17513904725126.jpeg",
+      "description": "O Villagio Rocca, tambem divulgado como Villagio Rocca Maggiore, fica em Meia Praia, Itapema. Mazzotti e HJ Junior apontam Selent Construtora e Incorporadora e descrevem lazer com piscina adulto e infantil, churrasqueira, espaco gourmet, academia, jogos, brinquedoteca, spa, hall decorado, gas central, elevador, portao eletronico, jardim, eventos e playground. Como as fontes tinham fachadas de angulos diferentes, a curadoria cruzou Imobille, Mazzotti, HJ Junior, Safira, Julio Lobo e Pilger para manter fachada, acesso, piscina, spa, academia e hall.",
+      "seo_description": "Villagio Rocca em Meia Praia, Itapema, com fachada, hall, academia, spa, piscina, gourmet, jogos e playground.",
+      "gallery": [
+        {
+          "title": "Villagio Rocca - fachada principal",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/il/imoveis/1827/fachada-17513904725126.jpeg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-villagio-rocca-itapema-meia-praia-3-quartos-3-garagens-venda-ref-1827/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Villagio Rocca - fachada noturna",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/1827/fachada-17513904725126.jpeg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-villagio-rocca-itapema-meia-praia-3-quartos-3-garagens-venda-ref-1827/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Villagio Rocca - base da torre",
+          "category": "Fachada",
+          "image": "https://sistema.safirainvestimentositapema.com.br/content/rAMCarjUR9DtQHbg/img/products_imgs/708/18411lg.jpg",
+          "source_url": "https://www.safirainvestimentositapema.com.br/imovel/Villagio-Rocca-Maggiori-AP708",
+          "source_label": "Safira Investimentos"
+        },
+        {
+          "title": "Villagio Rocca - fachada lateral",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/1827/fachada_1-17513904725124.jpeg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-villagio-rocca-itapema-meia-praia-3-quartos-3-garagens-venda-ref-1827/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Villagio Rocca - acesso lateral",
+          "category": "Acesso",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/il/imoveis/1827/fachada_1-17513904725124.jpeg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-villagio-rocca-itapema-meia-praia-3-quartos-3-garagens-venda-ref-1827/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Villagio Rocca - vista superior",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_203_2196_1435_090620.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/villagio-rocca-maggiore/itapema/meia-praia/203",
+          "source_label": "HJ Junior Imoveis"
+        },
+        {
+          "title": "Villagio Rocca - render noturno",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/mazzotti/img_edificios/g1_1736_20463_1050_290125.jpg",
+          "source_url": "https://mazzottiimoveis.com/edificios/villagio-rocca-maggiore/itapema/meia-praia/1264",
+          "source_label": "Mazzotti Imoveis"
+        },
+        {
+          "title": "Villagio Rocca - academia",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/imagens-site-20005-1710963124.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villagio-rocca-maggiore-EM12367",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villagio Rocca - spa e piscina",
+          "category": "Wellness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/imagens-site-20004-1710963123.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villagio-rocca-maggiore-EM12367",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villagio Rocca - piscina interna",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/imagens-site-20002-1710963122.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villagio-rocca-maggiore-EM12367",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villagio Rocca - hall decorado",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/imagens-site-20000-1710963121.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villagio-rocca-maggiore-EM12367",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villagio Rocca - torre vertical",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/imagens-site-20003-1710963123.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villagio-rocca-maggiore-EM12367",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villagio Rocca - piscina coberta",
+          "category": "Piscina",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_203_2200_1435_090620.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/villagio-rocca-maggiore/itapema/meia-praia/203",
+          "source_label": "HJ Junior Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Meia Praia",
+          "description": "As fontes posicionam o empreendimento em Meia Praia, no eixo da Avenida Nereu Ramos e ruas proximas."
+        },
+        {
+          "icon": "Building2",
+          "title": "Selent em destaque",
+          "description": "Mazzotti e HJ Junior relacionam o empreendimento a Selent Construtora e Incorporadora."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e spa",
+          "description": "Piscina, spa e ambientes wellness aparecem nas fontes nominais do empreendimento."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Rotina completa",
+          "description": "Academia, gourmet, jogos, brinquedoteca, eventos e playground ampliam o uso das areas comuns."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Nomes consolidados",
+          "description": "A copy considera a variacao Villagio Rocca Maggiore usada por algumas fontes."
+        },
+        {
+          "title": "Curadoria visual cruzada",
+          "description": "Fachadas de fontes diferentes foram comparadas antes da escolha final."
+        },
+        {
+          "title": "Sem interiores de oferta",
+          "description": "Imagens de quartos, corredores e banheiros privados ficaram fora da selecao."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Villagio Rocca e Villagio Rocca Maggiore sao o mesmo contexto?",
+          "answer": "As fontes pesquisadas usam a variacao Villagio Rocca Maggiore para o empreendimento em Meia Praia."
+        },
+        {
+          "question": "Onde fica o empreendimento?",
+          "answer": "Em Meia Praia, Itapema, com fontes citando o eixo da Avenida Nereu Ramos e ruas proximas."
+        },
+        {
+          "question": "Quais areas foram selecionadas?",
+          "answer": "Fachada, acesso, piscina, spa, academia e hall."
+        },
+        {
+          "question": "Quais imagens foram evitadas?",
+          "answer": "Interiores privados e fotos que nao ajudavam a explicar o condominio."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-villagio-rocca-maggiore-EM12367",
+        "https://mazzottiimoveis.com/edificios/villagio-rocca-maggiore/itapema/meia-praia/1264",
+        "https://hjjuniorimoveis.com.br/edificios/villagio-rocca-maggiore/itapema/meia-praia/203",
+        "https://www.julioloboimoveis.com/imovel/venda-coberturas-em-itapema/villagio-rocca-maggiore/267",
+        "https://www.safirainvestimentositapema.com.br/imovel/Villagio-Rocca-Maggiori-AP708",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-villagio-rocca-itapema-meia-praia-3-quartos-3-garagens-venda-ref-1827/"
+      ]
+    },
+    {
+      "slug": "ville-del-acqua",
+      "hero_image": "https://cdn.imoview.com.br/bryann/Condominios/255/ville-del-acqua-felicita-balneario-camboriu-39.jpg?1743790212",
+      "description": "O Ville Del Acqua Residence fica na Rua 3250, 100, em Balneario Camboriu, segundo a Felicita, com perfil Centro/Barra Sul e opcoes comerciais entre 122 m2 e 330 m2. A Imobille apresenta o empreendimento como Ville Del Acqua Residence, enquanto Sort, Bruno Cassola e Fly reforcam a localizacao privilegiada. A pagina agora mostra fachada, base, piscina, hall, lobby, estar comum, academia, pub, jogos, gourmet, spa, cinema e kids, retirando interiores de oferta.",
+      "seo_description": "Ville Del Acqua Residence em Balneario Camboriu, com fachada, piscina, hall, academia, pub, jogos, gourmet, spa, cinema e kids.",
+      "gallery": [
+        {
+          "title": "Ville Del Acqua - fachada principal",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/255/ville-del-acqua-felicita-balneario-camboriu-39.jpg?1743790212",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/255/ville-del-acqua/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Ville Del Acqua - torre envidracada",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/255/ville-del-acqua-felicita-balneario-camboriu-37.jpg?1743790212",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/255/ville-del-acqua/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Ville Del Acqua - base frontal",
+          "category": "Fachada",
+          "image": "https://b4.casteldigital.com.br/brunocassola/ig/il/imoveis/386/ville-del-acqua-balneario-camboriu-17612467897707.jpg",
+          "source_url": "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-ville-del-acqua-residence-balneario-camboriu-centro-4-quartos-3-garagens-venda-ref-386/",
+          "source_label": "Bruno Cassola"
+        },
+        {
+          "title": "Ville Del Acqua - fachada Bruno",
+          "category": "Fachada",
+          "image": "https://b4.casteldigital.com.br/brunocassola/ig/im/imoveis/386/ville-del-acqua-balneario-camboriu-17612467897707.jpg",
+          "source_url": "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-ville-del-acqua-residence-balneario-camboriu-centro-4-quartos-3-garagens-venda-ref-386/",
+          "source_label": "Bruno Cassola"
+        },
+        {
+          "title": "Ville Del Acqua - fachada Sort",
+          "category": "Fachada",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1702045023/properties/167/diamond_hill___embraed_empreendimentos_0_medium.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/ville-del-acqua",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Ville Del Acqua - torre com palmeiras",
+          "category": "Fachada",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1702045025/properties/167/diamond_hill___embraed_empreendimentos_0_large.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/ville-del-acqua",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Ville Del Acqua - piscina aberta",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/ville-del-acqua-1666103536.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ville-del-acqua-residence-EM16048",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ville Del Acqua - piscina externa",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/m6lTN4yYdosMqz701HE6.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ville-del-acqua-residence-EM16048",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ville Del Acqua - deck da piscina",
+          "category": "Piscina",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1708187127/high-photos_101/high-photos_101.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/ville-del-acqua",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Ville Del Acqua - escadaria do hall",
+          "category": "Hall",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/real-estates-photo/December2021/Yq1zfTC6z4QkqMFrPQVJ.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ville-del-acqua-residence-EM16048",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ville Del Acqua - lobby social",
+          "category": "Hall",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/tdqnb3QKvxvC4sWU7Cod.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ville-del-acqua-residence-EM16048",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ville Del Acqua - estar comum",
+          "category": "Convivencia",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/vIFrDUSanY5QttQP8Rfl.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ville-del-acqua-residence-EM16048",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ville Del Acqua - academia",
+          "category": "Fitness",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/tAzQIGJNdePgiYId4LZ3.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ville-del-acqua-residence-EM16048",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ville Del Acqua - pub gourmet",
+          "category": "Gourmet",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/OlcIcyisCqtGmqdIHJN4.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ville-del-acqua-residence-EM16048",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ville Del Acqua - jogos premium",
+          "category": "Jogos",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/UzCg81VdyRkT6aKiN4Ts.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ville-del-acqua-residence-EM16048",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ville Del Acqua - gourmet com bilhar",
+          "category": "Gourmet",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/jnWtjLyDBxB4Zmynfq1w.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ville-del-acqua-residence-EM16048",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ville Del Acqua - spa interno",
+          "category": "Wellness",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/UrtWOp7jLWsw6NdewNVQ.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ville-del-acqua-residence-EM16048",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ville Del Acqua - piscina coberta",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/lzSu67RB9tkvkRnBIuJO.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ville-del-acqua-residence-EM16048",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ville Del Acqua - eventos externos",
+          "category": "Eventos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/255/ville-del-acqua-felicita-balneario-camboriu-36.jpg?1743790212",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/255/ville-del-acqua/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Ville Del Acqua - cinema",
+          "category": "Cinema",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/255/ville-del-acqua-felicita-balneario-camboriu-19.jpg?1743790212",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/255/ville-del-acqua/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Ville Del Acqua - jogos decorado",
+          "category": "Jogos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/255/ville-del-acqua-felicita-balneario-camboriu-17.jpg?1743790212",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/255/ville-del-acqua/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Ville Del Acqua - bar comum",
+          "category": "Gourmet",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/255/ville-del-acqua-felicita-balneario-camboriu-15.jpg?1743790212",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/255/ville-del-acqua/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Ville Del Acqua - kids",
+          "category": "Infantil",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/255/ville-del-acqua-felicita-balneario-camboriu-14.jpg?1743790212",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/255/ville-del-acqua/",
+          "source_label": "Felicita Negocios"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 3250 no Centro",
+          "description": "A Felicita cita endereco na Rua 3250, 100, em Balneario Camboriu."
+        },
+        {
+          "icon": "Building2",
+          "title": "Fachada marcante",
+          "description": "A torre tem pele de vidro e base urbana com presenca forte na regiao central."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscinas e spa",
+          "description": "Piscina externa, piscina coberta e spa aparecem como pontos centrais da galeria."
+        },
+        {
+          "icon": "Gamepad2",
+          "title": "Lazer social completo",
+          "description": "Pub, jogos, gourmet, cinema, kids, academia e eventos deixam o condominio mais completo."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Imagem externa recuperada",
+          "description": "A nova curadoria troca interiores por fachada, base e piscinas do empreendimento."
+        },
+        {
+          "title": "Centro e Barra Sul",
+          "description": "A copy posiciona o empreendimento em uma regiao valorizada de Balneario Camboriu."
+        },
+        {
+          "title": "Fontes multiplas",
+          "description": "Imobille, Felicita, Bruno, Fly, Godoy e Sort foram usados para validar imagens e contexto."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Ville Del Acqua?",
+          "answer": "Na Rua 3250, 100, em Balneario Camboriu, segundo a Felicita."
+        },
+        {
+          "question": "Quais imagens entraram na galeria?",
+          "answer": "Fachada, base, piscina, hall, lobby, academia, pub, jogos, gourmet, spa, cinema e kids."
+        },
+        {
+          "question": "Qual era o problema anterior?",
+          "answer": "A pagina usava imagens internas que pareciam de uma oferta privada."
+        },
+        {
+          "question": "Quais fontes foram usadas?",
+          "answer": "Imobille, Felicita, Bruno Cassola, Fly, Marcos Godoy e Sort Investimentos."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-ville-del-acqua-residence-EM16048",
+        "https://felicitanegocios.com.br/empreendimento/255/ville-del-acqua/",
+        "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-ville-del-acqua-residence-balneario-camboriu-centro-4-quartos-3-garagens-venda-ref-386/",
+        "https://www.flyimoveis.com.br/imovel/apartamento-no-edificio-ville-del-acqua-balneario-camboriu-centro-4-quartos-3-garagens-venda-ref-1487/",
+        "https://imoveisgodoy.com.br/imoveis/edificio-ville-del-acqua-sem-mobilia-em-balneario-camboriu/",
+        "https://sortinvestimentos.com.br/empreendimentos/ville-del-acqua"
+      ]
+    }
+  ]
+}

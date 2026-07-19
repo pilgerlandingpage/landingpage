@@ -1,0 +1,1061 @@
+{
+  "batch_id": "development-media-curation-batch13-20260715",
+  "generated_at": "2026-07-15T11:45:00.000Z",
+  "items": [
+    {
+      "slug": "brava-aikon",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/brava-aikon-21-1772630412.webp",
+      "description": "O Brava Aikon e um empreendimento da Aikon na Praia Brava, em Itajai, com arquitetura contemporanea, fachada marcada e lazer associado a uma rotina de praia. A pesquisa cruzou o site da incorporadora, Imobille e Litoral Vertical para substituir imagens de ofertas por registros do edificio, fachada, piscina, hall, jogos, fitness e areas de convivencia. A pagina passa a apresentar o empreendimento em si, com foco no endereco da Brava e na estrutura compartilhada.",
+      "seo_description": "Conheca o Brava Aikon, empreendimento na Praia Brava em Itajai, com fachada contemporanea, piscina, fitness e areas de convivencia.",
+      "gallery": [
+        {
+          "title": "Brava Aikon - fachada principal",
+          "category": "Empreendimento",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/brava-aikon-21-1772630412.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-aikon-EM15927",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Brava Aikon - torre arquitetonica",
+          "category": "Fachada",
+          "image": "https://admin.aikonempreendimentos.com.br/uploads/enterprise/2/62c5ebedd9f453.87494498.jpg",
+          "source_url": "https://www.aikonempreendimentos.com.br/empreendimento/brava-aikon-residence/",
+          "source_label": "Aikon Empreendimentos"
+        },
+        {
+          "title": "Brava Aikon - piscina",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/06062026085517650-1780746917.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-aikon-EM15927",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Brava Aikon - acesso social",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2026/brava-aikon-18-1772630236.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-aikon-EM15927",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Brava Aikon - ambiente de jogos",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2026/brava-aikon-16-1772630235.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-aikon-EM15927",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Brava Aikon - fitness",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2026/brava-aikon-15-1772630234.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-aikon-EM15927",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Brava Aikon - solarium",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2026/brava-aikon-2-1772630237.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-aikon-EM15927",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Praia Brava",
+          "description": "Endereco em uma das regioes mais desejadas de Itajai, com praia, gastronomia e servicos no entorno."
+        },
+        {
+          "icon": "Waves",
+          "title": "Lazer com piscina",
+          "description": "A curadoria identificou piscina, solarium, jogos, fitness e areas de convivencia do empreendimento."
+        },
+        {
+          "icon": "Building2",
+          "title": "Arquitetura Aikon",
+          "description": "Fachada vertical com linguagem contemporanea, coerente com o padrao residencial da Brava."
+        }
+      ],
+      "differentials": [
+        "Galeria revisada com fachada, piscina e lazer do empreendimento.",
+        "Imagens de ofertas especificas foram removidas da pagina.",
+        "Fontes cruzadas entre Aikon, Imobille e Litoral Vertical para confirmar midia e contexto."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Brava Aikon?",
+          "answer": "O Brava Aikon fica na Praia Brava, em Itajai."
+        },
+        {
+          "question": "O que mudou na curadoria visual?",
+          "answer": "A galeria foi trocada por imagens de fachada, piscina, acesso, fitness e areas compartilhadas."
+        },
+        {
+          "question": "Quais areas aparecem na nova galeria?",
+          "answer": "A nova galeria mostra fachada, piscina, acesso social, ambiente de jogos, fitness e solarium."
+        },
+        {
+          "question": "Quais fontes foram usadas?",
+          "answer": "Foram consultados o site da Aikon, Imobille e Litoral Vertical."
+        }
+      ],
+      "sources": [
+        "https://www.aikonempreendimentos.com.br/empreendimento/brava-aikon-residence/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-aikon-EM15927",
+        "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/edificio-brava-aikon/"
+      ]
+    },
+    {
+      "slug": "brava-coast-residence",
+      "hero_image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/12/Fachada-5.jpg",
+      "description": "O Brava Coast Residence e um empreendimento da Absoluta na regiao da Praia dos Amores/Praia Brava, com implantacao de baixa altura, fachada horizontal e lazer no topo. A fonte oficial da incorporadora trouxe os melhores registros de fachada, acesso, embasamento e area de lazer. A curadoria descarta plantas e imagens de ofertas, usando apenas registros que representam o empreendimento e sua arquitetura.",
+      "seo_description": "Conheca o Brava Coast Residence, empreendimento da Absoluta na regiao da Brava, com fachada horizontal e lazer no topo.",
+      "gallery": [
+        {
+          "title": "Brava Coast Residence - fachada principal",
+          "category": "Empreendimento",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/12/Fachada-5.jpg",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-coast-residence/",
+          "source_label": "Absoluta Incorporadora"
+        },
+        {
+          "title": "Brava Coast Residence - fachada horizontal",
+          "category": "Fachada",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/12/Coast-1-900x450.jpg",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-coast-residence/",
+          "source_label": "Absoluta Incorporadora"
+        },
+        {
+          "title": "Brava Coast Residence - fachada lateral",
+          "category": "Fachada",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/12/Coast-2.jpg",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-coast-residence/",
+          "source_label": "Absoluta Incorporadora"
+        },
+        {
+          "title": "Brava Coast Residence - acesso",
+          "category": "Acesso",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/12/Salas-Comerciais-1.jpeg",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-coast-residence/",
+          "source_label": "Absoluta Incorporadora"
+        },
+        {
+          "title": "Brava Coast Residence - fachada noturna",
+          "category": "Fachada",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/12/Fachada-2.jpg",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-coast-residence/",
+          "source_label": "Absoluta Incorporadora"
+        },
+        {
+          "title": "Brava Coast Residence - esquina arquitetonica",
+          "category": "Fachada",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/12/Fachada-4.jpg",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-coast-residence/",
+          "source_label": "Absoluta Incorporadora"
+        },
+        {
+          "title": "Brava Coast Residence - lazer superior",
+          "category": "Lazer",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/12/Area-de-lazer-4.jpg",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-coast-residence/",
+          "source_label": "Absoluta Incorporadora"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Baixa altura",
+          "description": "Implantacao horizontalizada, com escala diferente das torres mais altas da regiao."
+        },
+        {
+          "icon": "Waves",
+          "title": "Proximo a Brava",
+          "description": "Endereco associado ao eixo Praia dos Amores/Praia Brava, com facil acesso ao mar e a servicos."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer no topo",
+          "description": "A curadoria visual confirma area de lazer elevada com piscina e solarium."
+        }
+      ],
+      "differentials": [
+        "Fachada horizontal e esquina arquitetonica como imagens principais.",
+        "Plantas foram descartadas para preservar a leitura de empreendimento.",
+        "Fonte oficial da Absoluta usada como base principal da curadoria."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Brava Coast Residence?",
+          "answer": "O Brava Coast Residence fica na regiao da Praia dos Amores/Praia Brava."
+        },
+        {
+          "question": "Qual e o perfil do empreendimento?",
+          "answer": "E um empreendimento de baixa altura, com fachada horizontal e lazer superior."
+        },
+        {
+          "question": "A nova galeria usa plantas?",
+          "answer": "Nao. As plantas foram descartadas e a galeria prioriza fachada, acesso e lazer."
+        },
+        {
+          "question": "Qual fonte foi usada para as imagens?",
+          "answer": "A fonte principal foi a pagina oficial da Absoluta Incorporadora."
+        }
+      ],
+      "sources": [
+        "https://www.absolutaincorporadora.com.br/empreendimento/brava-coast-residence/",
+        "https://godoydosimoveis.com.br/empreendimento/brava-coast-residence/page/2/",
+        "https://bravanorteimoveis.com.br/cobertura"
+      ]
+    },
+    {
+      "slug": "brava-garden",
+      "hero_image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/11/Garden-1-700x450.jpg",
+      "description": "O Brava Garden e um empreendimento da Absoluta na Praia Brava, em Itajai, com fachada de baixa altura, proposta residencial compacta e areas de lazer integradas ao projeto. A curadoria usa imagens oficiais de fachada, acesso, piscina, lounge e gourmet, descartando plantas e fotos internas. A pagina agora representa o empreendimento como produto arquitetonico da Brava, nao como uma oferta especifica.",
+      "seo_description": "Conheca o Brava Garden na Praia Brava, empreendimento da Absoluta com fachada de baixa altura, piscina, lounge e gourmet.",
+      "gallery": [
+        {
+          "title": "Brava BG - fachada principal",
+          "category": "Empreendimento",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/11/Garden-1-700x450.jpg",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-garden/",
+          "source_label": "Absoluta Incorporadora"
+        },
+        {
+          "title": "Brava BG - acesso",
+          "category": "Acesso",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/11/Garden-2.jpg",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-garden/",
+          "source_label": "Absoluta Incorporadora"
+        },
+        {
+          "title": "Brava BG - volumetria",
+          "category": "Fachada",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/11/Garden-1-1.jpg",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-garden/",
+          "source_label": "Absoluta Incorporadora"
+        },
+        {
+          "title": "Brava BG - perspectiva externa",
+          "category": "Fachada",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/11/Garden-1-2.jpg",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-garden/",
+          "source_label": "Absoluta Incorporadora"
+        },
+        {
+          "title": "Brava BG - acesso noturno",
+          "category": "Acesso",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/11/Garden-2-1.jpg",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-garden/",
+          "source_label": "Absoluta Incorporadora"
+        },
+        {
+          "title": "Brava BG - piscina",
+          "category": "Lazer",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/11/Garden-6-1.jpg",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-garden/",
+          "source_label": "Absoluta Incorporadora"
+        },
+        {
+          "title": "Brava BG - lounge externo",
+          "category": "Lazer",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/11/Garden-7.jpg",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-garden/",
+          "source_label": "Absoluta Incorporadora"
+        },
+        {
+          "title": "Brava BG - gourmet",
+          "category": "Gourmet",
+          "image": "https://www.absolutaincorporadora.com.br/wp-content/uploads/2022/11/Garden-9.jpg",
+          "source_url": "https://www.absolutaincorporadora.com.br/empreendimento/brava-garden/",
+          "source_label": "Absoluta Incorporadora"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Praia Brava",
+          "description": "Endereco em Itajai, conectado ao estilo de vida da Praia Brava."
+        },
+        {
+          "icon": "Building2",
+          "title": "Escala baixa",
+          "description": "Fachada de menor altura e linguagem residencial mais reservada."
+        },
+        {
+          "icon": "Waves",
+          "title": "Lazer essencial",
+          "description": "Piscina, lounge externo e gourmet aparecem nos registros oficiais selecionados."
+        }
+      ],
+      "differentials": [
+        "Curadoria visual baseada na fonte oficial da Absoluta.",
+        "Plantas e imagens internas foram retiradas da galeria ativa.",
+        "Fachada, acesso e lazer passam a guiar a leitura da pagina."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Brava Garden?",
+          "answer": "O Brava Garden fica na Praia Brava, em Itajai."
+        },
+        {
+          "question": "Qual e a proposta do empreendimento?",
+          "answer": "A proposta combina fachada de baixa altura, endereco na Praia Brava e areas de lazer integradas ao projeto."
+        },
+        {
+          "question": "Quais imagens foram mantidas?",
+          "answer": "Foram mantidas imagens de fachada, acesso, piscina, lounge externo e gourmet."
+        },
+        {
+          "question": "Qual fonte visual foi usada?",
+          "answer": "A fonte principal foi a pagina oficial da Absoluta Incorporadora."
+        }
+      ],
+      "sources": [
+        "https://www.absolutaincorporadora.com.br/empreendimento/brava-garden/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-garden-residence-EM67777",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-garden-residence-absoluta-EM56084"
+      ]
+    },
+    {
+      "slug": "bravissima-private-residence",
+      "hero_image": "https://bravissimaprivateresidence.com.br/wp-content/uploads/2025/04/DJI_20240826015051_0050_D-2.jpg",
+      "description": "O Bravissima Private Residence e um condominio residencial na Praia Brava, em Itajai, com implantacao de baixa altura, piscina central, paisagismo e relacao direta com a faixa de praia. A fonte oficial trouxe registros aereos e externos do conjunto, permitindo substituir imagens de unidades por fotos reais do empreendimento. A nova copy destaca o perfil privativo, a escala horizontalizada e a experiencia de morar em um conjunto planejado junto ao mar.",
+      "seo_description": "Conheca o Bravissima Private Residence na Praia Brava, com implantacao privativa, piscina central, paisagismo e vista para o mar.",
+      "gallery": [
+        {
+          "title": "Bravissima Private Residence - implantacao aerea",
+          "category": "Condominio",
+          "image": "https://bravissimaprivateresidence.com.br/wp-content/uploads/2025/04/DJI_20240826015051_0050_D-2.jpg",
+          "source_url": "https://bravissimaprivateresidence.com.br/",
+          "source_label": "Bravissima Private Residence"
+        },
+        {
+          "title": "Bravissima Private Residence - fachada e piscina",
+          "category": "Lazer",
+          "image": "https://bravissimaprivateresidence.com.br/wp-content/uploads/2025/04/DJI_20240826015000_0044_D-1.jpg",
+          "source_url": "https://bravissimaprivateresidence.com.br/",
+          "source_label": "Bravissima Private Residence"
+        },
+        {
+          "title": "Bravissima Private Residence - piscina central",
+          "category": "Lazer",
+          "image": "https://bravissimaprivateresidence.com.br/wp-content/uploads/2025/04/DJI_20240826014943_0043_D-2.jpg",
+          "source_url": "https://bravissimaprivateresidence.com.br/",
+          "source_label": "Bravissima Private Residence"
+        },
+        {
+          "title": "Bravissima Private Residence - contexto da praia",
+          "category": "Implantacao",
+          "image": "https://bravissimaprivateresidence.com.br/wp-content/uploads/2025/04/DJI_20240826020252_0064_D-2.jpg",
+          "source_url": "https://bravissimaprivateresidence.com.br/",
+          "source_label": "Bravissima Private Residence"
+        },
+        {
+          "title": "Bravissima Private Residence - vista aerea do conjunto",
+          "category": "Implantacao",
+          "image": "https://bravissimaprivateresidence.com.br/wp-content/uploads/2025/04/DJI_20240826014538_0027_D.jpg",
+          "source_url": "https://bravissimaprivateresidence.com.br/",
+          "source_label": "Bravissima Private Residence"
+        },
+        {
+          "title": "Bravissima Private Residence - lazer e paisagismo",
+          "category": "Lazer",
+          "image": "https://bravissimaprivateresidence.com.br/wp-content/uploads/2025/04/DJI_20240826014748_0036_D-2.jpg",
+          "source_url": "https://bravissimaprivateresidence.com.br/",
+          "source_label": "Bravissima Private Residence"
+        },
+        {
+          "title": "Bravissima Private Residence - relacao com o mar",
+          "category": "Implantacao",
+          "image": "https://bravissimaprivateresidence.com.br/wp-content/uploads/2025/04/DJI_20240826014721_0034_D.jpg",
+          "source_url": "https://bravissimaprivateresidence.com.br/",
+          "source_label": "Bravissima Private Residence"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente praia",
+          "description": "Conjunto em contexto de Praia Brava, com imagens aereas que mostram a proximidade com o mar."
+        },
+        {
+          "icon": "Trees",
+          "title": "Implantacao privativa",
+          "description": "Escala horizontalizada, paisagismo e piscina central reforcam a sensacao de condominio reservado."
+        },
+        {
+          "icon": "Shield",
+          "title": "Perfil exclusivo",
+          "description": "A proposta visual e residencial e mais reservada do que a de torres tradicionais da regiao."
+        }
+      ],
+      "differentials": [
+        "Registros aereos oficiais substituem imagens internas e de ofertas.",
+        "Piscina central e paisagismo aparecem como elementos estruturantes do conjunto.",
+        "Relacao direta com a Praia Brava fica clara na nova galeria."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Bravissima Private Residence?",
+          "answer": "O Bravissima Private Residence fica na Praia Brava, em Itajai."
+        },
+        {
+          "question": "Qual e o perfil do empreendimento?",
+          "answer": "E um condominio residencial de baixa altura, com perfil privativo, piscina central e paisagismo."
+        },
+        {
+          "question": "As imagens sao do conjunto?",
+          "answer": "Sim. A galeria foi substituida por registros aereos e externos do conjunto."
+        },
+        {
+          "question": "Qual fonte foi usada?",
+          "answer": "A fonte principal foi o site oficial do Bravissima Private Residence."
+        }
+      ],
+      "sources": [
+        "https://bravissimaprivateresidence.com.br/",
+        "https://bravissimapraiabrava.com.br/",
+        "https://www.imobillenegocios.com.br/empreendimento/bravissima-private-residence-EM65358",
+        "https://manicamarin.com.br/imovel/empreendimento-praia-brava-itajai-sc-2459"
+      ]
+    },
+    {
+      "slug": "caledonia-private-village",
+      "hero_image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0916__Easy-Resize.com_.jpg",
+      "description": "O Caledonia Private Village e um condominio horizontal em Camboriu, na regiao de Santa Regina, com ampla implantacao, clube, piscina, quadras, playground, areas verdes e ruas internas. O site oficial do condominio forneceu registros aereos e de lazer que substituem as imagens de ofertas especificas. A nova pagina comunica o perfil de condominio planejado, familiar e com estrutura de lazer robusta.",
+      "seo_description": "Conheca o Caledonia Private Village em Camboriu, condominio horizontal com clube, piscina, quadras, playground e areas verdes.",
+      "gallery": [
+        {
+          "title": "Caledonia Private Village - vista aerea",
+          "category": "Condominio",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0916__Easy-Resize.com_.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia Private Village - quadra de areia",
+          "category": "Esporte",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0985__Easy-Resize.com_.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia Private Village - clube",
+          "category": "Lazer",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0943__Easy-Resize.com_-787x383-c-default.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia Private Village - playground",
+          "category": "Kids",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0934__Easy-Resize.com_-787x383-c-default.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia Private Village - quadras",
+          "category": "Esporte",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0927__Easy-Resize.com_.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia Private Village - piscina do clube",
+          "category": "Lazer",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0995__Easy-Resize.com_.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        },
+        {
+          "title": "Caledonia Private Village - ruas internas",
+          "category": "Implantacao",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0906__Easy-Resize.com_-787x383-c-default.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Condominio Caledonia"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Trees",
+          "title": "Condominio horizontal",
+          "description": "Implantacao ampla, ruas internas e areas verdes reforcam o perfil residencial planejado."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Clube completo",
+          "description": "Piscina, quadras, playground e espacos de lazer aparecem nos registros oficiais."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Santa Regina",
+          "description": "Localizacao em Camboriu, com acesso a um ambiente mais reservado e ao eixo urbano regional."
+        }
+      ],
+      "differentials": [
+        "Galeria baseada em imagens oficiais do condominio.",
+        "Foco em implantacao, clube, esporte, kids e paisagismo.",
+        "Copy reescrita para apresentar o condominio, nao ofertas individuais."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Caledonia Private Village?",
+          "answer": "O Caledonia Private Village fica em Camboriu, na regiao de Santa Regina."
+        },
+        {
+          "question": "Qual e o perfil do condominio?",
+          "answer": "E um condominio horizontal planejado, com ruas internas, clube e areas de lazer."
+        },
+        {
+          "question": "Quais estruturas aparecem na galeria?",
+          "answer": "A galeria mostra vista aerea, clube, piscina, quadras, playground e ruas internas."
+        },
+        {
+          "question": "Qual fonte foi usada?",
+          "answer": "A fonte principal foi o site oficial do Condominio Caledonia."
+        }
+      ],
+      "sources": [
+        "https://condominiocaledonia.com.br/",
+        "https://residencialcaledonia.com.br/",
+        "https://www.imobillenegocios.com.br/empreendimento/condominio-caledonia-EM26933",
+        "https://maximoveis.com.br/empreendimento/389/condominio-caledonia-private-village/"
+      ]
+    },
+    {
+      "slug": "cartier-cna-residence",
+      "hero_image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/311946/images/_96a4d89b458324168721289010196363.webp",
+      "description": "O Cartier CNA Residence e um empreendimento em Meia Praia, Itapema, com fachada vertical, acesso imponente e lazer de padrao alto. A fonte MySide trouxe imagens funcionais de fachada, acesso, piscina, spa, gourmet, lobby, fitness e kids. A nova curadoria remove fotos de ofertas e organiza a pagina em torno da identidade do edificio e das areas compartilhadas.",
+      "seo_description": "Conheca o Cartier CNA Residence em Meia Praia, Itapema, com fachada vertical, acesso imponente, piscina, spa e lazer completo.",
+      "gallery": [
+        {
+          "title": "Cartier CNA Residence - fachada",
+          "category": "Empreendimento",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/311946/images/_96a4d89b458324168721289010196363.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-cartier-cna-residence-itapema-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Cartier CNA Residence - acesso",
+          "category": "Acesso",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/311946/images/_d7532079980015168721277010103122.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-cartier-cna-residence-itapema-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Cartier CNA Residence - piscina",
+          "category": "Lazer",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/311946/images/_126c2da1245828168721269810385198.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-cartier-cna-residence-itapema-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Cartier CNA Residence - spa",
+          "category": "Lazer",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/311946/images/_3fe2303450247416872130051067877.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-cartier-cna-residence-itapema-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Cartier CNA Residence - gourmet",
+          "category": "Gourmet",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/311946/images/_58785316957537168721344610055451.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-cartier-cna-residence-itapema-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Cartier CNA Residence - lobby",
+          "category": "Acesso",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/311946/images/_d6dabcc4105823168721346010033294.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-cartier-cna-residence-itapema-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Cartier CNA Residence - fitness",
+          "category": "Fitness",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/311946/images/_a8f8f602090033168721274811077740.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-cartier-cna-residence-itapema-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Cartier CNA Residence - kids",
+          "category": "Kids",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/311946/images/_20cf775f737869168721278510603150.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-cartier-cna-residence-itapema-sc",
+          "source_label": "MySide"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Meia Praia",
+          "description": "Endereco em uma das regioes mais valorizadas de Itapema."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer de padrao alto",
+          "description": "Piscina, spa, gourmet, fitness e kids compoem a estrutura visualmente confirmada."
+        },
+        {
+          "icon": "Building2",
+          "title": "Acesso imponente",
+          "description": "Fachada e hall reforcam a proposta classica e vertical do empreendimento."
+        }
+      ],
+      "differentials": [
+        "Imagens diretas do empreendimento substituem fotos de ofertas.",
+        "Galeria cobre fachada, acesso, piscina, spa, gourmet, lobby, fitness e kids.",
+        "Pagina reposicionada para o edificio em Meia Praia."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Cartier CNA Residence?",
+          "answer": "O Cartier CNA Residence fica em Meia Praia, Itapema."
+        },
+        {
+          "question": "Quais imagens foram usadas?",
+          "answer": "Foram usadas imagens de fachada, acesso, piscina, spa, gourmet, lobby, fitness e kids."
+        },
+        {
+          "question": "A galeria ainda usa fotos de ofertas?",
+          "answer": "Nao. A curadoria substituiu as imagens por registros do empreendimento e de suas areas compartilhadas."
+        },
+        {
+          "question": "Quais fontes foram consultadas?",
+          "answer": "Foram consultadas MySide, Viva Real, Litoral Vertical e Edu Villares."
+        }
+      ],
+      "sources": [
+        "https://myside.com.br/apartamento-venda-cartier-cna-residence-itapema-sc",
+        "https://www.vivareal.com.br/condominio/cartier-cna-residence-meia-praia-id-1826ef52-83e7/",
+        "https://litoralvertical.com/venda/itapema/apartamentos/meia-praia/cartier-cna-residence/",
+        "https://eduvillares.com/property/cartier-cna-residence-lujo-departamentos-exclusividad-financiado-frente-al-mar-apartamentos/"
+      ]
+    },
+    {
+      "slug": "celina-garden",
+      "hero_image": "https://static.wixstatic.com/media/01ead4_ed9de7db521b42cf8473273051017263~mv2.jpg",
+      "description": "O Celina Garden Residence e um empreendimento da Pioneira no bairro Pioneiros, em Balneario Camboriu, com fachada vertical, base verde e linguagem arquitetonica voltada a presenca urbana. A fonte oficial da Pioneira trouxe uma sequencia consistente de renders externos, permitindo trocar imagens de ofertas por fachada, volumetria e embasamento. A copy foi ajustada para destacar arquitetura, bairro e identidade visual sem prometer areas que nao aparecem na midia selecionada.",
+      "seo_description": "Conheca o Celina Garden Residence, empreendimento da Pioneira no bairro Pioneiros, com fachada vertical e base verde marcante.",
+      "gallery": [
+        {
+          "title": "Celina Residence - fachada principal",
+          "category": "Empreendimento",
+          "image": "https://static.wixstatic.com/media/01ead4_ed9de7db521b42cf8473273051017263~mv2.jpg",
+          "source_url": "https://www.pioneiraempreendimentos.com.br/empreendimentos/celina",
+          "source_label": "Pioneira Empreendimentos"
+        },
+        {
+          "title": "Celina Residence - torre",
+          "category": "Fachada",
+          "image": "https://static.wixstatic.com/media/01ead4_ade8c03302cc4f1ea1ec0067c23c76e5~mv2.jpg",
+          "source_url": "https://www.pioneiraempreendimentos.com.br/empreendimentos/celina",
+          "source_label": "Pioneira Empreendimentos"
+        },
+        {
+          "title": "Celina Residence - base arquitetonica",
+          "category": "Fachada",
+          "image": "https://static.wixstatic.com/media/01ead4_d7018e8493564b1881af9f569e40ada5~mv2.jpg",
+          "source_url": "https://www.pioneiraempreendimentos.com.br/empreendimentos/celina",
+          "source_label": "Pioneira Empreendimentos"
+        },
+        {
+          "title": "Celina Residence - embasamento verde",
+          "category": "Fachada",
+          "image": "https://static.wixstatic.com/media/01ead4_9077c58f7e5d4f59bcc4cfdf58164abe~mv2.jpg",
+          "source_url": "https://www.pioneiraempreendimentos.com.br/empreendimentos/celina",
+          "source_label": "Pioneira Empreendimentos"
+        },
+        {
+          "title": "Celina Residence - fachada lateral",
+          "category": "Fachada",
+          "image": "https://static.wixstatic.com/media/01ead4_b4ec1f594ab54c54ae2bc3cefc5f668c~mv2.jpg",
+          "source_url": "https://www.pioneiraempreendimentos.com.br/empreendimentos/celina",
+          "source_label": "Pioneira Empreendimentos"
+        },
+        {
+          "title": "Celina Residence - acesso urbano",
+          "category": "Acesso",
+          "image": "https://static.wixstatic.com/media/01ead4_e2ab55f2c3cd4c7fb2beab45987f9b0b~mv2.jpg",
+          "source_url": "https://www.pioneiraempreendimentos.com.br/empreendimentos/celina",
+          "source_label": "Pioneira Empreendimentos"
+        },
+        {
+          "title": "Celina Residence - fachada noturna",
+          "category": "Fachada",
+          "image": "https://static.wixstatic.com/media/01ead4_f56a84d39018449e8b201e85b08a16b3~mv2.jpg",
+          "source_url": "https://www.pioneiraempreendimentos.com.br/empreendimentos/celina",
+          "source_label": "Pioneira Empreendimentos"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Arquitetura Pioneira",
+          "description": "Fachada vertical e base verde reforcam a identidade visual do empreendimento."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Bairro Pioneiros",
+          "description": "Localizacao no eixo norte de Balneario Camboriu, com acesso a orla, servicos e deslocamentos urbanos."
+        },
+        {
+          "icon": "Trees",
+          "title": "Embasamento verde",
+          "description": "Os renders oficiais destacam paisagismo e uma base arquitetonica com vegetacao."
+        }
+      ],
+      "differentials": [
+        "Curadoria usa imagens oficiais externas da Pioneira.",
+        "Fachada, torre e embasamento verde ganham prioridade na leitura visual.",
+        "Pagina passa a comunicar arquitetura e bairro, sem depender de fotos internas."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Celina Garden Residence?",
+          "answer": "O Celina Garden Residence fica no bairro Pioneiros, em Balneario Camboriu."
+        },
+        {
+          "question": "Qual fonte foi usada para as imagens?",
+          "answer": "A fonte principal foi a pagina oficial da Pioneira Empreendimentos."
+        },
+        {
+          "question": "Qual e o destaque visual do empreendimento?",
+          "answer": "O destaque visual esta na fachada vertical, no embasamento verde e na presenca urbana do projeto."
+        },
+        {
+          "question": "A galeria mostra ambientes internos?",
+          "answer": "Nao. A galeria prioriza fachada, torre, acesso e embasamento do empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.pioneiraempreendimentos.com.br/empreendimentos/celina",
+        "https://myside.com.br/apartamento-venda-celina-garden-residence-balneario-camboriu-sc",
+        "https://felicitanegocios.com.br/empreendimento/537/celina-garden-residence/",
+        "https://sortinvestimentos.com.br/empreendimentos/celina-garden-residence"
+      ]
+    },
+    {
+      "slug": "chacara-flora",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/img-135-1710942426.webp",
+      "description": "O Chacara Flora e um condominio em Casa Branca, Itapema, com portaria, lago, paisagismo, playground, quadras, campo, ponte e areas de convivencia. A pesquisa encontrou registros consistentes na Imobille e referencias complementares em Versatil e Guilherme Pilger. A nova galeria retira imagens de ofertas e apresenta o condominio como conjunto de lazer e natureza, com foco nos espacos compartilhados.",
+      "seo_description": "Conheca o Chacara Flora em Casa Branca, Itapema, com portaria, lago, quadras, playground, paisagismo e lazer compartilhado.",
+      "gallery": [
+        {
+          "title": "Chacara Flora - portaria",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/img-135-1710942426.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-chacara-flora-EM12453",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Chacara Flora - lago e paisagismo",
+          "category": "Paisagismo",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/101020241038441254-1728567524.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-chacara-flora-EM12453",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Chacara Flora - playground",
+          "category": "Kids",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/img-111-1710942414.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-chacara-flora-EM12453",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Chacara Flora - quadra de tenis",
+          "category": "Esporte",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/img-108-1-1710942413.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-chacara-flora-EM12453",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Chacara Flora - campo",
+          "category": "Esporte",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/img-102-1-1710942428.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-chacara-flora-EM12453",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Chacara Flora - quadra poliesportiva",
+          "category": "Esporte",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/img-109-1-1710942430.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-chacara-flora-EM12453",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Chacara Flora - ponte do lago",
+          "category": "Paisagismo",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/img-126-1710942423.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-chacara-flora-EM12453",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Chacara Flora - ambiente de jogos",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/img-132-1710942426.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-chacara-flora-EM12453",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Trees",
+          "title": "Natureza e lago",
+          "description": "Paisagismo, lago e areas verdes aparecem como elementos centrais do condominio."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Esporte e lazer",
+          "description": "Quadras, campo, playground e jogos ampliam a estrutura de uso compartilhado."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Casa Branca",
+          "description": "Localizacao em Itapema, em regiao mais residencial e conectada ao verde."
+        }
+      ],
+      "differentials": [
+        "Portaria, lago e quadras substituem imagens de ofertas especificas.",
+        "Galeria mostra estrutura condominial variada e facil de reconhecer.",
+        "Copy reposicionada para lazer, paisagismo e perfil familiar."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Chacara Flora?",
+          "answer": "O Chacara Flora fica em Casa Branca, Itapema."
+        },
+        {
+          "question": "Quais estruturas aparecem na galeria?",
+          "answer": "A galeria mostra portaria, lago, playground, quadras, campo, ponte e ambiente de jogos."
+        },
+        {
+          "question": "As imagens internas foram removidas?",
+          "answer": "Sim. A curadoria substituiu imagens de ofertas por registros do condominio."
+        },
+        {
+          "question": "Quais fontes foram consultadas?",
+          "answer": "Foram consultadas Imobille, Versatil e Guilherme Pilger."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/condominio-chacara-flora-EM12453",
+        "https://imobiliariaversatil.com.br/edificios/condominio-chacara-flora/itapema/casa-branca/1590",
+        "https://www.guilhermepilger.com/imovel/casa-no-condominio-chacara-flora-itapema-casa-branca-5-quartos-6-garagens-venda-ref-1859/"
+      ]
+    },
+    {
+      "slug": "charmant-residence",
+      "hero_image": "https://www.trianonempreendimentos.com.br/wp-content/uploads/2018/08/115A5611-5-scaled.jpg",
+      "description": "O Charmant Residence e um empreendimento da Trianon no Centro de Balneario Camboriu, com fachada vertical, acesso elegante e lazer distribuido em piscina, playground, kids, gourmet, terraco e fitness. A curadoria usa registros da fonte oficial da incorporadora e remove imagens de unidades. A pagina passa a mostrar o edificio, a recepcao e os ambientes compartilhados, reforcando o contexto central e a estrutura de lazer.",
+      "seo_description": "Conheca o Charmant Residence, empreendimento da Trianon no Centro de Balneario Camboriu, com fachada, piscina, kids e fitness.",
+      "gallery": [
+        {
+          "title": "Charmant Residence - fachada",
+          "category": "Empreendimento",
+          "image": "https://www.trianonempreendimentos.com.br/wp-content/uploads/2018/08/115A5611-5-scaled.jpg",
+          "source_url": "https://www.trianonempreendimentos.com.br/empreendimentos/charmant-residence/",
+          "source_label": "Trianon"
+        },
+        {
+          "title": "Charmant Residence - acesso",
+          "category": "Acesso",
+          "image": "https://www.trianonempreendimentos.com.br/wp-content/uploads/2018/08/115A5715-25-scaled.jpg",
+          "source_url": "https://www.trianonempreendimentos.com.br/empreendimentos/charmant-residence/",
+          "source_label": "Trianon"
+        },
+        {
+          "title": "Charmant Residence - lobby",
+          "category": "Acesso",
+          "image": "https://www.trianonempreendimentos.com.br/wp-content/uploads/2018/08/115A5633-8-scaled.jpg",
+          "source_url": "https://www.trianonempreendimentos.com.br/empreendimentos/charmant-residence/",
+          "source_label": "Trianon"
+        },
+        {
+          "title": "Charmant Residence - terraco",
+          "category": "Lazer",
+          "image": "https://www.trianonempreendimentos.com.br/wp-content/uploads/2018/08/N4A9831.jpg",
+          "source_url": "https://www.trianonempreendimentos.com.br/empreendimentos/charmant-residence/",
+          "source_label": "Trianon"
+        },
+        {
+          "title": "Charmant Residence - playground",
+          "category": "Kids",
+          "image": "https://www.trianonempreendimentos.com.br/wp-content/uploads/2018/08/N4A9870.jpg",
+          "source_url": "https://www.trianonempreendimentos.com.br/empreendimentos/charmant-residence/",
+          "source_label": "Trianon"
+        },
+        {
+          "title": "Charmant Residence - piscina",
+          "category": "Lazer",
+          "image": "https://www.trianonempreendimentos.com.br/wp-content/uploads/2018/08/N4A9811.jpg",
+          "source_url": "https://www.trianonempreendimentos.com.br/empreendimentos/charmant-residence/",
+          "source_label": "Trianon"
+        },
+        {
+          "title": "Charmant Residence - gourmet",
+          "category": "Gourmet",
+          "image": "https://www.trianonempreendimentos.com.br/wp-content/uploads/2018/08/N4A9851.jpg",
+          "source_url": "https://www.trianonempreendimentos.com.br/empreendimentos/charmant-residence/",
+          "source_label": "Trianon"
+        },
+        {
+          "title": "Charmant Residence - fitness",
+          "category": "Fitness",
+          "image": "https://www.trianonempreendimentos.com.br/wp-content/uploads/2018/08/N4A9857.jpg",
+          "source_url": "https://www.trianonempreendimentos.com.br/empreendimentos/charmant-residence/",
+          "source_label": "Trianon"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro de Balneario Camboriu",
+          "description": "Endereco central, com acesso a servicos, praia e mobilidade urbana."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer completo",
+          "description": "Piscina, terraco, playground, kids, gourmet e fitness aparecem nos registros oficiais."
+        },
+        {
+          "icon": "Building2",
+          "title": "Assinatura Trianon",
+          "description": "Fachada, acesso e lobby reforcam o padrao da incorporadora no Centro."
+        }
+      ],
+      "differentials": [
+        "Galeria oficial da Trianon substitui imagens internas.",
+        "Fachada, acesso e lazer mostram o empreendimento com clareza.",
+        "Copy reescrita para destacar Centro, lazer e padrao construtivo."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Charmant Residence?",
+          "answer": "O Charmant Residence fica no Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Quais areas foram destacadas?",
+          "answer": "Foram destacadas fachada, acesso, lobby, terraco, playground, piscina, gourmet e fitness."
+        },
+        {
+          "question": "A curadoria usa imagens da incorporadora?",
+          "answer": "Sim. As imagens principais vieram da pagina oficial da Trianon."
+        },
+        {
+          "question": "A galeria ainda usa imagens de unidades?",
+          "answer": "Nao. A galeria foi revisada para priorizar o edificio e suas areas compartilhadas."
+        }
+      ],
+      "sources": [
+        "https://www.trianonempreendimentos.com.br/empreendimentos/charmant-residence/",
+        "https://myside.com.br/apartamento-venda-charmant-residence-balneario-camboriu-sc",
+        "https://felicitanegocios.com.br/empreendimento/110/charmant/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-charmant-residence-EM7375"
+      ]
+    },
+    {
+      "slug": "cond-empresarial-cunha",
+      "hero_image": "https://cdn.imoview.com.br/maximoveis/Condominios/1913/3d-cec-rev05a-1.jpg?1736442794",
+      "description": "O Cond. Empresarial Cunha, tambem identificado como CEC, e um empreendimento empresarial em Itaipava, Itajai, com portaria, acesso planejado, vias internas e implantacao voltada a operacoes logisticas e industriais. A pesquisa localizou imagens no site oficial e na Max Imoveis, mas os links oficiais diretos de imagem estavam indisponiveis; por isso a curadoria usa os registros hospedados na Max Imoveis que renderizaram corretamente. A pagina deixa de usar imagens de ofertas e passa a mostrar portaria, acesso e implantacao do empreendimento.",
+      "seo_description": "Conheca o Cond. Empresarial Cunha em Itaipava, Itajai, empreendimento empresarial com portaria, acesso planejado e implantacao logistica.",
+      "gallery": [
+        {
+          "title": "CEC - portaria principal",
+          "category": "Empreendimento",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1913/3d-cec-rev05a-1.jpg?1736442794",
+          "source_url": "https://maximoveis.com.br/empreendimento/1913/cec-condominio-empresarial-cunha/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "CEC - acesso planejado",
+          "category": "Acesso",
+          "image": "https://cdn.imoview.com.br//maximoveis//Condominios//1913//3d-cec-rev05a-3.jpg?1736442794",
+          "source_url": "https://maximoveis.com.br/empreendimento/1913/cec-condominio-empresarial-cunha/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "CEC - acesso frontal",
+          "category": "Acesso",
+          "image": "https://cdn.imoview.com.br//maximoveis//Condominios//1913//3d-cec-rev05a-2.jpg?1736442794",
+          "source_url": "https://maximoveis.com.br/empreendimento/1913/cec-condominio-empresarial-cunha/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "CEC - implantacao de entrada",
+          "category": "Implantacao",
+          "image": "https://cdn.imoview.com.br//maximoveis//Condominios//1913//3d-cec-rev05a-4.jpg?1736442794",
+          "source_url": "https://maximoveis.com.br/empreendimento/1913/cec-condominio-empresarial-cunha/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "CEC - eixo viario",
+          "category": "Infraestrutura",
+          "image": "https://cdn.imoview.com.br//maximoveis//Condominios//1913//3d-cec-rev05a-5.jpg?1736442794",
+          "source_url": "https://maximoveis.com.br/empreendimento/1913/cec-condominio-empresarial-cunha/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "CEC - implantacao geral",
+          "category": "Implantacao",
+          "image": "https://cdn.imoview.com.br//maximoveis//Condominios//1913//3d-cec-rev05a-10a.jpg?1736442794",
+          "source_url": "https://maximoveis.com.br/empreendimento/1913/cec-condominio-empresarial-cunha/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "CEC - quadras empresariais",
+          "category": "Implantacao",
+          "image": "https://cdn.imoview.com.br//maximoveis//Condominios//1913//3d-cec-rev05a-10.jpg?1736442794",
+          "source_url": "https://maximoveis.com.br/empreendimento/1913/cec-condominio-empresarial-cunha/",
+          "source_label": "Max Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Truck",
+          "title": "Vocacao logistica",
+          "description": "Implantacao e acessos foram pensados para operacoes empresariais e fluxo de veiculos."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Itaipava",
+          "description": "Localizacao em Itajai, regiao estrategica para operacoes ligadas a infraestrutura e porto."
+        },
+        {
+          "icon": "Shield",
+          "title": "Acesso controlado",
+          "description": "Portaria e vias internas reforcam controle operacional e organizacao do conjunto."
+        }
+      ],
+      "differentials": [
+        "Curadoria usa imagens de portaria, acesso e implantacao em vez de fotos de oferta.",
+        "Galeria apresenta a vocacao operacional do conjunto com portaria e eixos viarios.",
+        "Copy ajustada para o perfil empresarial e logistico do empreendimento."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Cond. Empresarial Cunha?",
+          "answer": "O Cond. Empresarial Cunha fica em Itaipava, Itajai."
+        },
+        {
+          "question": "Qual e o perfil do empreendimento?",
+          "answer": "E um empreendimento empresarial/logistico, com portaria, acessos planejados e vias internas."
+        },
+        {
+          "question": "O que aparece na nova galeria?",
+          "answer": "A nova galeria mostra portaria, acessos, vias internas e implantacao do conjunto."
+        },
+        {
+          "question": "Quais fontes foram consultadas?",
+          "answer": "Foram consultados o site oficial do CEC, Max Imoveis e referencias locais."
+        }
+      ],
+      "sources": [
+        "https://cecitajai.com.br/",
+        "https://maximoveis.com.br/empreendimento/1913/cec-condominio-empresarial-cunha/",
+        "https://maximoveis.com.br/imovel/15465/terreno-em-condominio-cec-%E2%80%93-condominio-empresarial-cunha-itaipava-itajai/",
+        "https://www.guilhermepilger.com/imovel/galpao-deposito-itajai-itaipava-venda-ref-2037/",
+        "https://njf-logispark.com/"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1527 @@
+{
+  "batch_id": "development-media-curation-batch37-20260716",
+  "generated_at": "2026-07-16T18:55:00.000Z",
+  "notes": [
+    "Lote 37 P0 auditado com foco em midia real de empreendimento/condominio.",
+    "Todos os 10 slugs receberam curadoria aplicavel; nenhuma pendencia visual bloqueante foi mantida neste lote.",
+    "As galerias evitam rotulos de unidade e descartam interiores de oferta quando misturados nas fontes."
+  ],
+  "skipped": [],
+  "items": [
+    {
+      "slug": "maestria",
+      "hero_image": "https://csegerconstrutora.com.br/wp-content/uploads/2023/08/SEGMA_01_Fachada_Diurna_Cam01_P3.jpg",
+      "description": "O Maestria by CSeger foi revisado como empreendimento de alto padrao no Pereque, em Porto Belo, na Avenida Senador Atilio Fontana, 745. A CSeger informa area privativa de 205,34 m2 a 207,01 m2, quatro suites, tres vagas e 1.400 m2 de lazer. A MySide complementa que o projeto tem 32 pavimentos, 46 residencias, duas por andar, entrega prevista para outubro de 2027 e localizacao a cerca de 150 metros da Praia do Pereque. A galeria agora prioriza fachada, acesso e hall do empreendimento, substituindo imagens de oferta.",
+      "seo_description": "Conheca o Maestria by CSeger no Pereque, Porto Belo, com fachada, hall e lazer validados por fontes externas.",
+      "gallery": [
+        {
+          "title": "Maestria by CSeger - fachada diurna",
+          "category": "Fachada",
+          "image": "https://csegerconstrutora.com.br/wp-content/uploads/2023/08/SEGMA_01_Fachada_Diurna_Cam01_P3.jpg",
+          "source_url": "https://csegerconstrutora.com.br/empreendimentos/maestria-by-seger/",
+          "source_label": "CSeger Construtora"
+        },
+        {
+          "title": "Maestria by CSeger - acesso principal",
+          "category": "Fachada",
+          "image": "https://csegerconstrutora.com.br/wp-content/uploads/2023/08/SEGMA_01_Fachada_Diurna_Cam02_P3.jpg",
+          "source_url": "https://csegerconstrutora.com.br/empreendimentos/maestria-by-seger/",
+          "source_label": "CSeger Construtora"
+        },
+        {
+          "title": "Maestria by CSeger - fachada noturna",
+          "category": "Fachada",
+          "image": "https://csegerconstrutora.com.br/wp-content/uploads/2023/08/SEGMA_02_Fachada_Noturna_Cam01_P4.jpg",
+          "source_url": "https://csegerconstrutora.com.br/empreendimentos/maestria-by-seger/",
+          "source_label": "CSeger Construtora"
+        },
+        {
+          "title": "Maestria by CSeger - torre iluminada",
+          "category": "Fachada",
+          "image": "https://csegerconstrutora.com.br/wp-content/uploads/2023/08/SEGMA_02_Fachada_Noturna_Cam02_P3.jpg",
+          "source_url": "https://csegerconstrutora.com.br/empreendimentos/maestria-by-seger/",
+          "source_label": "CSeger Construtora"
+        },
+        {
+          "title": "Maestria by CSeger - chegada",
+          "category": "Acesso",
+          "image": "https://csegerconstrutora.com.br/wp-content/uploads/2023/08/SEGMA_04_Acesso_Cam01_P2.jpg",
+          "source_url": "https://csegerconstrutora.com.br/empreendimentos/maestria-by-seger/",
+          "source_label": "CSeger Construtora"
+        },
+        {
+          "title": "Maestria by CSeger - porte cochere",
+          "category": "Acesso",
+          "image": "https://csegerconstrutora.com.br/wp-content/uploads/2023/08/SEGMA_04_Acesso_Cam02_P1-1.jpg",
+          "source_url": "https://csegerconstrutora.com.br/empreendimentos/maestria-by-seger/",
+          "source_label": "CSeger Construtora"
+        },
+        {
+          "title": "Maestria by CSeger - vista litoranea",
+          "category": "Implantacao",
+          "image": "https://csegerconstrutora.com.br/wp-content/uploads/2023/08/SEGMA_03_Fotomontagem_Cam02_P3.jpg",
+          "source_url": "https://csegerconstrutora.com.br/empreendimentos/maestria-by-seger/",
+          "source_label": "CSeger Construtora"
+        },
+        {
+          "title": "Maestria by CSeger - horizonte",
+          "category": "Implantacao",
+          "image": "https://csegerconstrutora.com.br/wp-content/uploads/2023/08/SEGMA_03_Fotomontagem_Cam01_P2_B.jpg",
+          "source_url": "https://csegerconstrutora.com.br/empreendimentos/maestria-by-seger/",
+          "source_label": "CSeger Construtora"
+        },
+        {
+          "title": "Maestria by CSeger - entorno",
+          "category": "Implantacao",
+          "image": "https://csegerconstrutora.com.br/wp-content/uploads/2023/08/SEGMA_03_Fotomontagem_Cam01_P2_A.jpg",
+          "source_url": "https://csegerconstrutora.com.br/empreendimentos/maestria-by-seger/",
+          "source_label": "CSeger Construtora"
+        },
+        {
+          "title": "Maestria by CSeger - hall",
+          "category": "Hall",
+          "image": "https://csegerconstrutora.com.br/wp-content/uploads/2023/08/SEGMA_05_Hall_Cam03_P1.jpg",
+          "source_url": "https://csegerconstrutora.com.br/empreendimentos/maestria-by-seger/",
+          "source_label": "CSeger Construtora"
+        },
+        {
+          "title": "Maestria by CSeger - recepcao",
+          "category": "Hall",
+          "image": "https://csegerconstrutora.com.br/wp-content/uploads/2023/08/SEGMA_05_Hall_Cam01_P1.jpg",
+          "source_url": "https://csegerconstrutora.com.br/empreendimentos/maestria-by-seger/",
+          "source_label": "CSeger Construtora"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Pereque perto do mar",
+          "description": "A MySide posiciona o Maestria a cerca de 150 metros da Praia do Pereque."
+        },
+        {
+          "icon": "Building2",
+          "title": "Projeto CSeger",
+          "description": "A pagina oficial informa quatro suites, tres vagas e area privativa entre 205,34 m2 e 207,01 m2."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer em tres pavimentos",
+          "description": "As fontes citam piscina adulto e infantil, roof bar, fitness, festas, gourmet, brinquedoteca, playground, boliche e coworking."
+        },
+        {
+          "icon": "Car",
+          "title": "Infraestrutura atual",
+          "description": "A comunicacao inclui vaga com ponto para carro eletrico, gerador e ambientes preparados para automacao."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fachada oficial validada",
+          "description": "As imagens escolhidas vieram da pagina oficial da CSeger e de fontes de mercado com o mesmo empreendimento."
+        },
+        {
+          "title": "Vista e escala",
+          "description": "O projeto combina 32 pavimentos, vista para o mar e duas residencias por andar."
+        },
+        {
+          "title": "Copy completa",
+          "description": "A pagina deixa de usar texto generico e passa a explicar endereco, construtora, metragem, lazer e prazo."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Maestria by CSeger?",
+          "answer": "Na Avenida Senador Atilio Fontana, 745, Pereque, Porto Belo - SC."
+        },
+        {
+          "question": "Qual e a previsao de entrega?",
+          "answer": "A MySide informa entrega prevista para outubro de 2027; a CSeger informa previsao em 2027."
+        },
+        {
+          "question": "Quais areas de lazer foram conferidas?",
+          "answer": "Piscinas, roof bar, fitness, festas, gourmet, brinquedoteca, playground, boliche, coworking e hall decorado."
+        },
+        {
+          "question": "O que mudou na auditoria?",
+          "answer": "Hero e galeria foram trocados por fachada, acesso e hall do empreendimento."
+        }
+      ],
+      "sources": [
+        "https://csegerconstrutora.com.br/empreendimentos/maestria-by-seger/",
+        "https://myside.com.br/apartamento-venda-maestria-by-cseger-porto-belo-sc",
+        "https://costamareitapema.com.br/edificios/maestria-by-seger/porto-belo/pereque/111"
+      ]
+    },
+    {
+      "slug": "magic-sun",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2023/layout-fotos-site-10001-1695927719.jpg",
+      "description": "O Magic Sun Home Resort foi revisado como empreendimento da Baggio Empreendimentos na Rua 3750, Barra Sul, em Balneario Camboriu. A Litoral Vertical informa 33 pavimentos, uma residencia por andar, 24 residencias no total, dois elevadores e entrega prevista para outubro de 2028. O lazer ocupa dois pavimentos e inclui piscina externa, quiosque, terraco, playground, espaco pet, saloes de festas, pub, jogos, lounge, spa, sauna, massagem, multimidia, academia e brinquedoteca. A galeria foi realinhada com fachada e ambientes comuns.",
+      "seo_description": "Conheca o Magic Sun Home Resort na Barra Sul, com fachada, piscina, fitness, playground e lazer revisados.",
+      "gallery": [
+        {
+          "title": "Magic Sun Home Resort - fachada iluminada",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2023/layout-fotos-site-10001-1695927719.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/magic-sun-home-resort--EM73323",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Magic Sun Home Resort - torre",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2024/06/edificio-magic-sun-balneario-camboriu-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-magic-sun/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Magic Sun Home Resort - base",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2023/layout-fotos-site-10007-1695927721.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/magic-sun-home-resort--EM73323",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Magic Sun Home Resort - piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2023/layout-fotos-site-10006-1695927720.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/magic-sun-home-resort--EM73323",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Magic Sun Home Resort - convivencia",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2023/layout-fotos-site-10002-1695927719.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/magic-sun-home-resort--EM73323",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Magic Sun Home Resort - piscina coberta",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2023/layout-fotos-site-10004-1695927719.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/magic-sun-home-resort--EM73323",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Magic Sun Home Resort - jogos",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2023/layout-fotos-site-10005-1695927720.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/magic-sun-home-resort--EM73323",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Magic Sun Home Resort - fitness",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2023/layout-fotos-site-10009-1695927721.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/magic-sun-home-resort--EM73323",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Magic Sun Home Resort - playground",
+          "category": "Playground",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2023/layout-fotos-site-10010-1695927722.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/magic-sun-home-resort--EM73323",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Magic Sun Home Resort - deck externo",
+          "category": "Piscina",
+          "image": "https://dbatkwuiwvpoxjjqfdfz.storage.supabase.co/storage/v1/object/public/hunter-storage/account/86/property/8525aeaf-8f9c-41e9-9bbe-86400d916b9e/media/PROPERTY_PICTURE/131_ea762218-d3c5-4dda-8146-6135fd0e6f31.webp",
+          "source_url": "https://www.oceanprime.com.br/imovel/apartamento-a-venda-4-quartos-4-suites-5-banheiros-4-vagas-barra-sul-balneario-camboriu-sc-cod-131",
+          "source_label": "Ocean Prime"
+        },
+        {
+          "title": "Magic Sun Home Resort - estar externo",
+          "category": "Lazer",
+          "image": "https://dbatkwuiwvpoxjjqfdfz.storage.supabase.co/storage/v1/object/public/hunter-storage/account/86/property/8525aeaf-8f9c-41e9-9bbe-86400d916b9e/media/PROPERTY_PICTURE/131_6b1cf67a-6512-4ae8-9720-a923b7d83478.webp",
+          "source_url": "https://www.oceanprime.com.br/imovel/apartamento-a-venda-4-quartos-4-suites-5-banheiros-4-vagas-barra-sul-balneario-camboriu-sc-cod-131",
+          "source_label": "Ocean Prime"
+        },
+        {
+          "title": "Magic Sun Home Resort - piscina externa",
+          "category": "Piscina",
+          "image": "https://dbatkwuiwvpoxjjqfdfz.storage.supabase.co/storage/v1/object/public/hunter-storage/account/86/property/8525aeaf-8f9c-41e9-9bbe-86400d916b9e/media/PROPERTY_PICTURE/131_95f504c3-6588-4f5c-90ad-e7f588815638.webp",
+          "source_url": "https://www.oceanprime.com.br/imovel/apartamento-a-venda-4-quartos-4-suites-5-banheiros-4-vagas-barra-sul-balneario-camboriu-sc-cod-131",
+          "source_label": "Ocean Prime"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Barra Sul",
+          "description": "A Litoral Vertical localiza o empreendimento na Rua 3750, Barra Sul."
+        },
+        {
+          "icon": "Building2",
+          "title": "Exclusividade vertical",
+          "description": "A ficha cita 33 pavimentos, uma residencia por andar e 24 residencias no total."
+        },
+        {
+          "icon": "Waves",
+          "title": "Lazer em dois pavimentos",
+          "description": "Piscina, quiosque, terraco, playground, pet, festas, pub, jogos, spa, sauna, academia e brinquedoteca."
+        },
+        {
+          "icon": "Calendar",
+          "title": "Entrega prevista",
+          "description": "A fonte de mercado consultada informa previsao para outubro de 2028."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Baggio Empreendimentos",
+          "description": "A fonte de lancamento associa o Magic Sun a Baggio Empreendimentos."
+        },
+        {
+          "title": "Lazer de resort urbano",
+          "description": "A curadoria destaca piscinas, academia, playground, jogos e areas sociais."
+        },
+        {
+          "title": "Galeria sem interiores da oferta",
+          "description": "Foram descartadas fotos internas da residencia ativa e mantidas imagens de fachada e areas comuns."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Magic Sun Home Resort?",
+          "answer": "Na Rua 3750, Barra Sul, Balneario Camboriu - SC."
+        },
+        {
+          "question": "Quantos pavimentos o empreendimento tem?",
+          "answer": "A Litoral Vertical informa 33 pavimentos e uma residencia por andar."
+        },
+        {
+          "question": "Quais ambientes de lazer aparecem nas fontes?",
+          "answer": "Piscina, quiosque, terraco, playground, pet, festas, pub, jogos, spa, sauna, massagem, multimidia, academia e brinquedoteca."
+        },
+        {
+          "question": "O que foi corrigido?",
+          "answer": "Hero e galeria passaram a mostrar fachada e lazer do condominio, nao fotos da residencia ativa."
+        }
+      ],
+      "sources": [
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-magic-sun/",
+        "https://www.imobillenegocios.com.br/empreendimento/magic-sun-home-resort--EM73323",
+        "https://www.oceanprime.com.br/imovel/apartamento-a-venda-4-quartos-4-suites-5-banheiros-4-vagas-barra-sul-balneario-camboriu-sc-cod-131"
+      ]
+    },
+    {
+      "slug": "magna-tower",
+      "hero_image": "https://framerusercontent.com/images/rJbopOrgc4oI8viNgrUvgX1HynA.jpg?scale-down-to=1024",
+      "description": "O Magna Tower foi revisado como empreendimento da Heil Construtora no Centro de Itapema. A MySide informa endereco na Avenida Nereu Ramos, 850, entrega prevista para dezembro de 2027, plantas de 238 m2, quatro suites e tres vagas. A Imobille registra endereco na Avenida Nereu Ramos, 900, lazer com piscinas, playground, salao de festas, jogos, sauna, brinquedoteca, gourmet, piscina aquecida, academia, lounge, spa, hidromassagem, bar molhado, jacuzzi, hall, wine bar e rooftop. A galeria agora privilegia fachada, piscina e implantacao da torre.",
+      "seo_description": "Conheca o Magna Tower no Centro de Itapema, com fachada, piscina, rooftop e dados revisados do empreendimento.",
+      "gallery": [
+        {
+          "title": "Magna Tower - fachada principal",
+          "category": "Fachada",
+          "image": "https://framerusercontent.com/images/rJbopOrgc4oI8viNgrUvgX1HynA.jpg?scale-down-to=1024",
+          "source_url": "https://heilconstrutora.com.br/",
+          "source_label": "Heil Construtora"
+        },
+        {
+          "title": "Magna Tower - piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/2801202512010617653-1738076467.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/magna-tower-EM61413",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Magna Tower - implantacao na orla",
+          "category": "Implantacao",
+          "image": "https://framerusercontent.com/images/7tgvLs89SQB3t7KOpa5niwldaFk.jpg",
+          "source_url": "https://heilconstrutora.com.br/",
+          "source_label": "Heil Construtora"
+        },
+        {
+          "title": "Magna Tower - rooftop",
+          "category": "Lazer",
+          "image": "https://framerusercontent.com/images/HbYxXCpIgWRcsj3cuSh6UvBQVZk.jpg",
+          "source_url": "https://heilconstrutora.com.br/",
+          "source_label": "Heil Construtora"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro de Itapema",
+          "description": "As fontes posicionam o projeto na Avenida Nereu Ramos, proximo da Praia do Centro."
+        },
+        {
+          "icon": "Ruler",
+          "title": "238 m2",
+          "description": "A MySide informa plantas de 238 m2, quatro suites e tres vagas."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer completo",
+          "description": "Piscinas, sauna, spa, academia, wine bar, brinquedoteca, playground, festas, jogos, hall e rooftop."
+        },
+        {
+          "icon": "Building2",
+          "title": "Heil Construtora",
+          "description": "A MySide associa o empreendimento a Heil, com foco em alto padrao no mercado de Itapema."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fachada atualizada",
+          "description": "O hero agora vem de fonte externa do empreendimento, nao da galeria da oferta ativa."
+        },
+        {
+          "title": "Rooftop e vista",
+          "description": "As imagens conferidas mostram a torre no skyline e o lazer elevado."
+        },
+        {
+          "title": "Dados cruzados",
+          "description": "A descricao usa MySide, Imobille e Heil para endereco, tipologia e lazer."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Magna Tower?",
+          "answer": "No Centro de Itapema, no eixo da Avenida Nereu Ramos."
+        },
+        {
+          "question": "Qual e a previsao de entrega?",
+          "answer": "A MySide informa entrega prevista para dezembro de 2027."
+        },
+        {
+          "question": "Quais areas de lazer foram conferidas?",
+          "answer": "Piscinas, sauna, spa, academia, wine bar, brinquedoteca, playground, festas, jogos, hall e rooftop."
+        },
+        {
+          "question": "O que foi alterado?",
+          "answer": "Hero e galeria foram substituidos por imagens externas de fachada, piscina e implantacao."
+        }
+      ],
+      "sources": [
+        "https://myside.com.br/apartamento-venda-magna-tower-itapema-sc",
+        "https://www.imobillenegocios.com.br/empreendimento/magna-tower-EM61413",
+        "https://heilconstrutora.com.br/"
+      ]
+    },
+    {
+      "slug": "magnifique",
+      "hero_image": "https://magnifiquetower.com.br/wp-content/uploads/2024/04/magnifique-tower-fachada-700x1000px.jpg",
+      "description": "O Magnifique Tower foi revisado como empreendimento da FG Empreendimentos na Avenida Brasil, em Balneario Camboriu. O site oficial informa localizacao na Avenida Brasil, 3655, Centro, bem perto do mar. A Imobille registra o Magnifique Tower na Avenida Brasil, 3605, com areas privativas entre 91 m2 e 340 m2, duas a quatro vagas e lazer com piscina, playground, salao de festas, jogos, brinquedoteca, fitness, gourmet, cinema, massagem, spa, descanso e sauna umida. A pagina tambem cita 48 andares e fachada imponente. A nova galeria usa fachada e lazer do condominio.",
+      "seo_description": "Conheca o Magnifique Tower em Balneario Camboriu, com fachada, piscina, fitness, jogos e lazer completo.",
+      "gallery": [
+        {
+          "title": "Magnifique Tower - fachada principal",
+          "category": "Fachada",
+          "image": "https://magnifiquetower.com.br/wp-content/uploads/2024/04/magnifique-tower-fachada-700x1000px.jpg",
+          "source_url": "https://magnifiquetower.com.br/",
+          "source_label": "Magnifique Tower"
+        },
+        {
+          "title": "Magnifique Tower - acesso frontal",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/15/magnifique-tower-fg-felicita-balneario-camboriu-44.jpg?1668804246",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/15/magnifique-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Magnifique Tower - base da torre",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/15/magnifique-tower-fg-felicita-balneario-camboriu-46.jpg?1668804246",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/15/magnifique-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Magnifique Tower - fachada inferior",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/15/magnifique-tower-fg-felicita-balneario-camboriu-45.jpg?1668804246",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/15/magnifique-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Magnifique Tower - piscina elevada",
+          "category": "Piscina",
+          "image": "https://magnifiquetower.com.br/wp-content/uploads/2024/04/Magnefique-Tower-57-1024x576.webp",
+          "source_url": "https://magnifiquetower.com.br/",
+          "source_label": "Magnifique Tower"
+        },
+        {
+          "title": "Magnifique Tower - piscina externa",
+          "category": "Piscina",
+          "image": "https://magnifiquetower.com.br/wp-content/uploads/2024/04/Magnefique-Tower-63-1024x576.webp",
+          "source_url": "https://magnifiquetower.com.br/",
+          "source_label": "Magnifique Tower"
+        },
+        {
+          "title": "Magnifique Tower - solarium",
+          "category": "Piscina",
+          "image": "https://magnifiquetower.com.br/wp-content/uploads/2024/04/Magnefique-Tower-65-1024x576.webp",
+          "source_url": "https://magnifiquetower.com.br/",
+          "source_label": "Magnifique Tower"
+        },
+        {
+          "title": "Magnifique Tower - deck de lazer",
+          "category": "Piscina",
+          "image": "https://magnifiquetower.com.br/wp-content/uploads/2024/04/Magnefique-Tower-69-1024x576.webp",
+          "source_url": "https://magnifiquetower.com.br/",
+          "source_label": "Magnifique Tower"
+        },
+        {
+          "title": "Magnifique Tower - torre vista baixa",
+          "category": "Fachada",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/January2022/yWS5g2k8n1bjnEQZ0Cj7.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-magnifique-tower-EM88853",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Magnifique Tower - hall social",
+          "category": "Hall",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/January2022/JwAe3EzqaTsWsR6xornn.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-magnifique-tower-EM88853",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Magnifique Tower - entrada",
+          "category": "Hall",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/January2022/NSNHYcW0sakUtPO32xzx.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-magnifique-tower-EM88853",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Magnifique Tower - jogos",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/January2022/sgnZO2Qrd37QgUon75m1.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-magnifique-tower-EM88853",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Magnifique Tower - piscina lateral",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/January2022/VFk9Ao8ELOz5cS10K07t.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-magnifique-tower-EM88853",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Magnifique Tower - area externa",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/January2022/dH0wRieoigmyLKw7pCs3.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-magnifique-tower-EM88853",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Magnifique Tower - descanso",
+          "category": "Spa",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/January2022/xGL9XCOmCVW60XUElbZb.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-magnifique-tower-EM88853",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Magnifique Tower - cinema",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/January2022/7p4iErN8Vr46q3XZ0KuM.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-magnifique-tower-EM88853",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Magnifique Tower - deck molhado",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/January2022/Cs3xYoF5LuGPWQStQMQ4.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-magnifique-tower-EM88853",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Avenida Brasil",
+          "description": "O site oficial posiciona o Magnifique Tower na Avenida Brasil, 3655, Centro."
+        },
+        {
+          "icon": "Building2",
+          "title": "FG Empreendimentos",
+          "description": "A Imobille associa o projeto a FG Empreendimentos e informa 48 andares."
+        },
+        {
+          "icon": "Waves",
+          "title": "Perto do mar",
+          "description": "A comunicacao oficial destaca a quadra exclusiva na Avenida Brasil, bem perto do mar."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer completo",
+          "description": "Piscina, playground, festas, jogos, brinquedoteca, fitness, gourmet, cinema, massagem, spa e sauna."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fachada de referencia",
+          "description": "O hero foi trocado por imagem externa do Magnifique Tower."
+        },
+        {
+          "title": "Areas comuns reais",
+          "description": "A galeria substitui interiores da oferta por piscina, hall, cinema, jogos e deck."
+        },
+        {
+          "title": "Ficha mais informativa",
+          "description": "A copy agora traz endereco, construtora, andares, metragens e estrutura de lazer."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Magnifique Tower?",
+          "answer": "Na Avenida Brasil, em Balneario Camboriu; o site oficial informa o numero 3655."
+        },
+        {
+          "question": "Quem e a construtora?",
+          "answer": "A Imobille associa o empreendimento a FG Empreendimentos."
+        },
+        {
+          "question": "Quais ambientes de lazer foram revisados?",
+          "answer": "Piscinas, playground, festas, jogos, brinquedoteca, fitness, gourmet, cinema, massagem, spa e sauna."
+        },
+        {
+          "question": "O que mudou na auditoria?",
+          "answer": "A galeria agora mostra fachada e areas comuns do empreendimento."
+        }
+      ],
+      "sources": [
+        "https://magnifiquetower.com.br/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-magnifique-tower-EM88853",
+        "https://felicitanegocios.com.br/empreendimento/15/magnifique-tower/"
+      ]
+    },
+    {
+      "slug": "magnifique-imperiale",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/1636491668851-3a532486-8e3c-44b6-97d8-a400b0f91042-1666633183.jpeg",
+      "description": "O Magnifique Imperiale foi revisado como empreendimento de estilo neoclassico em Meia Praia, Itapema. A Imobille informa endereco na Rua 211, 45, quatro dormitorios, quatro suites, areas privativas entre 190 m2 e 269 m2 e duas a quatro vagas. A mesma fonte posiciona o projeto a menos de 200 metros do mar e descreve duas torres com 16 pavimentos, aproximadamente 1.500 m2 de lazer, seguranca, guarita, automacao residencial, fitness, sauna, spa, piscina aquecida, bar molhado, espaco kids, jogos, game station, festas e gourmet. A galeria agora mostra fachada e areas comuns.",
+      "seo_description": "Conheca o Magnifique Imperiale em Meia Praia, com fachada neoclassica, piscina, kids, festas e lazer validado.",
+      "gallery": [
+        {
+          "title": "Magnifique Imperiale - fachada com piscina",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/1636491668851-3a532486-8e3c-44b6-97d8-a400b0f91042-1666633183.jpeg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-magnifique-imperiale-EM18310",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Magnifique Imperiale - fachada frontal",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/layout-fotos-site-10000-1691181652-1722861307.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-magnifique-imperiale-EM18310",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Magnifique Imperiale - torre",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/vitapema/img_vendas/m1_659_74111_1009_060224.jpg",
+          "source_url": "https://www.vitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/magnifique-imperiale/659",
+          "source_label": "Vitapema Imoveis"
+        },
+        {
+          "title": "Magnifique Imperiale - fachada externa",
+          "category": "Fachada",
+          "image": "https://www.norbertocorretor.com.br/miniatura/norberto/1/158443/1000/1000/90/1719414390579854493.jpg",
+          "source_url": "https://www.norbertocorretor.com.br/imovel/165854/",
+          "source_label": "Norberto Corretor"
+        },
+        {
+          "title": "Magnifique Imperiale - perspectiva externa",
+          "category": "Fachada",
+          "image": "https://b.casteldigital.com.br/imobiliariaforcast/ig/il/imoveis/1653/gallery_0b5f2f4b107c0a96f2d9976350f4bbaf-17113772233119.jpg",
+          "source_url": "https://www.imobiliariaforcast.com.br/imovel/apartamento-no-edificio-magnifique-imperiale-itapema-meia-praia-4-quartos-3-garagens-venda-ref-1653/",
+          "source_label": "Forcast"
+        },
+        {
+          "title": "Magnifique Imperiale - kids",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2023/layout-fotos-site-10013-1691181657.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-magnifique-imperiale-EM18310",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Magnifique Imperiale - brinquedoteca",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2023/layout-fotos-site-10015-1691181658.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-magnifique-imperiale-EM18310",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Magnifique Imperiale - playground",
+          "category": "Playground",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2023/layout-fotos-site-10020-1691181660.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-magnifique-imperiale-EM18310",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Magnifique Imperiale - salao de festas",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2023/layout-fotos-site-10016-1691181658.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-magnifique-imperiale-EM18310",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Magnifique Imperiale - piscina coberta",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2023/layout-fotos-site-10011-1691181656.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-magnifique-imperiale-EM18310",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Magnifique Imperiale - piscina aquecida",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2023/layout-fotos-site-10010-1691181656.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-magnifique-imperiale-EM18310",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Magnifique Imperiale - gourmet",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2023/layout-fotos-site-10023-1691181661.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-magnifique-imperiale-EM18310",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Magnifique Imperiale - terraco",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2023/layout-fotos-site-10017-1691181659.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-magnifique-imperiale-EM18310",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Magnifique Imperiale - fachada vertical",
+          "category": "Fachada",
+          "image": "https://b.casteldigital.com.br/imobiliariaforcast/ig/im/imoveis/1653/gallery_5a0a89f7048e2421240f64c8312c1866-1711377223313.jpg",
+          "source_url": "https://www.imobiliariaforcast.com.br/imovel/apartamento-no-edificio-magnifique-imperiale-itapema-meia-praia-4-quartos-3-garagens-venda-ref-1653/",
+          "source_label": "Forcast"
+        },
+        {
+          "title": "Magnifique Imperiale - base neoclassica",
+          "category": "Fachada",
+          "image": "https://b.casteldigital.com.br/imobiliariaforcast/ig/il/imoveis/1653/gallery_5a0a89f7048e2421240f64c8312c1866-1711377223313.jpg",
+          "source_url": "https://www.imobiliariaforcast.com.br/imovel/apartamento-no-edificio-magnifique-imperiale-itapema-meia-praia-4-quartos-3-garagens-venda-ref-1653/",
+          "source_label": "Forcast"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Meia Praia",
+          "description": "A Imobille localiza o empreendimento na Rua 211, 45, Meia Praia, Itapema."
+        },
+        {
+          "icon": "Waves",
+          "title": "Menos de 200 metros do mar",
+          "description": "A fonte informa localizacao a menos de 200 metros do mar."
+        },
+        {
+          "icon": "Building2",
+          "title": "Duas torres",
+          "description": "A Imobille descreve duas torres com 16 pavimentos e estilo neoclassico."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Cerca de 1.500 m2 de lazer",
+          "description": "Fitness, sauna, spa, piscina aquecida, bar molhado, kids, jogos, festas e gourmet."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Identidade neoclassica",
+          "description": "As imagens de fachada mostram o perfil visual informado nas fontes."
+        },
+        {
+          "title": "Lazer familiar",
+          "description": "A galeria inclui kids, playground, festas, gourmet, piscina e terraco."
+        },
+        {
+          "title": "Copy corrigida",
+          "description": "A descricao deixa de ser generica e passa a informar endereco, metragem, vagas e lazer."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Magnifique Imperiale?",
+          "answer": "Na Rua 211, 45, Meia Praia, Itapema - SC."
+        },
+        {
+          "question": "Qual e o tamanho das plantas?",
+          "answer": "A Imobille informa metragens de 190 m2 a 269 m2."
+        },
+        {
+          "question": "Quais areas comuns foram conferidas?",
+          "answer": "Piscina aquecida, fitness, sauna, spa, kids, jogos, festas, gourmet, playground e terraco."
+        },
+        {
+          "question": "O que mudou na pagina?",
+          "answer": "Fotos da oferta foram substituidas por fachada e areas comuns do empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-magnifique-imperiale-EM18310",
+        "https://www.vitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/magnifique-imperiale/659",
+        "https://www.norbertocorretor.com.br/imovel/165854/",
+        "https://www.imobiliariaforcast.com.br/imovel/apartamento-no-edificio-magnifique-imperiale-itapema-meia-praia-4-quartos-3-garagens-venda-ref-1653/"
+      ]
+    },
+    {
+      "slug": "magnum-cna-home",
+      "hero_image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_891_11944_1906_140924.jpg",
+      "description": "O Magnum CNA Home foi revisado como empreendimento da CNA Construtora em Meia Praia, Itapema, na Avenida Nereu Ramos, 4581, esquina com a Rua 259. A Versatil informa status novo, CNA Construtora, dois elevadores, elevador para automoveis, um por andar, revestimento externo em pastilhas, hall decorado, gerador, sensores de presenca e areas comuns com salao de festas, hall, spa, academia, jogos, brinquedoteca, hidromassagem e piscinas adulto e infantil. A CNA complementa 156 m2 privativos, 258 m2 totais, tres vagas, dois elevadores e piscinas aquecidas.",
+      "seo_description": "Conheca o Magnum CNA Home em Meia Praia, com fachada, hall, piscinas, fitness e lazer da CNA Construtora.",
+      "gallery": [
+        {
+          "title": "Magnum CNA Home - fachada principal",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_891_11944_1906_140924.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/magnum-cna-home/itapema/meia-praia/891",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Magnum CNA Home - fachada lateral",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/vitapema/img_vendas/m1_13_43633_1453_250322.jpg",
+          "source_url": "https://www.vitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/magnum-home/13",
+          "source_label": "Vitapema Imoveis"
+        },
+        {
+          "title": "Magnum CNA Home - torre",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/sprot/ig/il/imoveis/676/imagem-jpeg-b8b302731823-1-1728327194672.jpeg",
+          "source_url": "https://www.sprot.com.br/imovel/apartamento-no-edificio-magnum-cna-home-itapema-meia-praia-4-quartos-3-garagens-venda-ref-676/",
+          "source_label": "sprot.com.br"
+        },
+        {
+          "title": "Magnum CNA Home - base externa",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/sprot/ig/im/imoveis/676/imagem-jpeg-b8b302731823-1-1728327194672.jpeg",
+          "source_url": "https://www.sprot.com.br/imovel/apartamento-no-edificio-magnum-cna-home-itapema-meia-praia-4-quartos-3-garagens-venda-ref-676/",
+          "source_label": "sprot.com.br"
+        },
+        {
+          "title": "Magnum CNA Home - hall decorado",
+          "category": "Hall",
+          "image": "https://b3.casteldigital.com.br/sprot/ig/im/imoveis/676/imagem-jpeg-b8b302731823-3-1728327194672.jpeg",
+          "source_url": "https://www.sprot.com.br/imovel/apartamento-no-edificio-magnum-cna-home-itapema-meia-praia-4-quartos-3-garagens-venda-ref-676/",
+          "source_label": "sprot.com.br"
+        },
+        {
+          "title": "Magnum CNA Home - hall social",
+          "category": "Hall",
+          "image": "https://b3.casteldigital.com.br/sprot/ig/il/imoveis/676/imagem-jpeg-b8b302731823-3-1728327194672.jpeg",
+          "source_url": "https://www.sprot.com.br/imovel/apartamento-no-edificio-magnum-cna-home-itapema-meia-praia-4-quartos-3-garagens-venda-ref-676/",
+          "source_label": "sprot.com.br"
+        },
+        {
+          "title": "Magnum CNA Home - piscina aquecida",
+          "category": "Piscina",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_891_11952_1906_140924.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/magnum-cna-home/itapema/meia-praia/891",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Magnum CNA Home - piscina interna",
+          "category": "Piscina",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_891_11948_1906_140924.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/magnum-cna-home/itapema/meia-praia/891",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Magnum CNA Home - spa",
+          "category": "Spa",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_891_11946_1906_140924.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/magnum-cna-home/itapema/meia-praia/891",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Magnum CNA Home - kids",
+          "category": "Lazer",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_891_11947_1906_140924.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/magnum-cna-home/itapema/meia-praia/891",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Magnum CNA Home - brinquedoteca",
+          "category": "Lazer",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_891_11950_1906_140924.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/magnum-cna-home/itapema/meia-praia/891",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Magnum CNA Home - jogos",
+          "category": "Lazer",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_891_11957_1906_140924.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/magnum-cna-home/itapema/meia-praia/891",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Magnum CNA Home - portaria",
+          "category": "Acesso",
+          "image": "https://b3.casteldigital.com.br/sprot/ig/im/imoveis/676/imagem-jpeg-b8b302731823-4-1728327194672.jpeg",
+          "source_url": "https://www.sprot.com.br/imovel/apartamento-no-edificio-magnum-cna-home-itapema-meia-praia-4-quartos-3-garagens-venda-ref-676/",
+          "source_label": "sprot.com.br"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Meia Praia",
+          "description": "A Versatil informa endereco na Avenida Nereu Ramos, 4581, esquina com a Rua 259."
+        },
+        {
+          "icon": "Building2",
+          "title": "CNA Construtora",
+          "description": "As fontes associam o empreendimento a CNA Construtora."
+        },
+        {
+          "icon": "Shield",
+          "title": "Infraestrutura premium",
+          "description": "Dois elevadores, gerador, elevador para automoveis, sensores de presenca e hall decorado."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer completo",
+          "description": "Piscinas adulto e infantil, spa, academia, jogos, brinquedoteca, festas e hidromassagem."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Uma residencia por andar",
+          "description": "A Versatil registra exclusividade de um por andar."
+        },
+        {
+          "title": "Fino acabamento CNA",
+          "description": "As fontes destacam hall decorado, marmore e areas comuns equipadas."
+        },
+        {
+          "title": "Galeria corrigida",
+          "description": "A pagina passa a mostrar fachada, hall, portaria e lazer do condominio."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Magnum CNA Home?",
+          "answer": "Na Avenida Nereu Ramos, 4581, esquina com a Rua 259, Meia Praia, Itapema - SC."
+        },
+        {
+          "question": "Quem e a construtora?",
+          "answer": "As fontes consultadas indicam a CNA Construtora."
+        },
+        {
+          "question": "Quais areas comuns foram revisadas?",
+          "answer": "Piscinas, spa, academia, jogos, brinquedoteca, hall, festas e portaria."
+        },
+        {
+          "question": "O que mudou na auditoria?",
+          "answer": "Hero e galeria foram substituidos por midia real do empreendimento e areas comuns."
+        }
+      ],
+      "sources": [
+        "https://imobiliariaversatil.com.br/edificios/magnum-cna-home/itapema/meia-praia/891",
+        "https://cnaconstrutora.com.br/selecionados/124",
+        "https://www.vitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/magnum-home/13",
+        "https://www.sprot.com.br/imovel/apartamento-no-edificio-magnum-cna-home-itapema-meia-praia-4-quartos-3-garagens-venda-ref-676/"
+      ]
+    },
+    {
+      "slug": "maison-lafayette",
+      "hero_image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_874_23609_1703_060726.jpg",
+      "description": "O Maison Lafayette foi revisado como empreendimento da Dallo Construtora em Meia Praia, Itapema. A Versatil informa endereco na Rua 254, numero 215, incorporacao R-4-69089, status em construcao e previsao de entrega para dezembro de 2025. A ficha lista hall decorado, dois elevadores, box de praia, entrada para banhistas, espaco pet, fireplace, gerador, guarita, gas central, lounge, medidores individuais, piscina infantil, playground, jogos, massagem, festas, sauna e spa. A galeria agora usa fachada neoclassica, rooftop, piscina, fitness e areas sociais.",
+      "seo_description": "Conheca o Maison Lafayette em Meia Praia, com fachada neoclassica, piscina, rooftop, fitness e lazer completo.",
+      "gallery": [
+        {
+          "title": "Maison Lafayette - fachada principal",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_874_23609_1703_060726.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/maison-lafayette/itapema/meia-praia/874",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Maison Lafayette - coroamento",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-moi-1747759054.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-maison-lafayette-EM73855",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Maison Lafayette - torre neoclassica",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/vitapema/img_edificios/m1_1405_16090_1004_290126.jpg",
+          "source_url": "https://www.vitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/maison-lafayette/4503",
+          "source_label": "Vitapema Imoveis"
+        },
+        {
+          "title": "Maison Lafayette - rooftop",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2024/photoshop-novo-1-copia0008-1726768317.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-maison-lafayette-EM73855",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Maison Lafayette - piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2024/photoshop-novo-1-copia0011-1726768318.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-maison-lafayette-EM73855",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Maison Lafayette - vista do lazer",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2024/photoshop-novo-1-copia0014-1726768319.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-maison-lafayette-EM73855",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Maison Lafayette - lounge externo",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2024/photoshop-novo-1-copia0013-1726768319.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-maison-lafayette-EM73855",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Maison Lafayette - fitness",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2024/photoshop-novo-1-copia0009-1726768317.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-maison-lafayette-EM73855",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Maison Lafayette - massagem",
+          "category": "Spa",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2024/photoshop-novo-1-copia0012-1726768318.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-maison-lafayette-EM73855",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Maison Lafayette - estar social",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2024/photoshop-novo-1-copia0007-1726768316.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-maison-lafayette-EM73855",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Maison Lafayette - lounge interno",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2024/photoshop-novo-1-copia0004-1726768315.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-maison-lafayette-EM73855",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Maison Lafayette - jogos",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2024/photoshop-novo-1-copia0010-1726768318.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-maison-lafayette-EM73855",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Maison Lafayette - fireplace",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2024/photoshop-novo-1-copia0015-1726768320.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-maison-lafayette-EM73855",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Maison Lafayette - salao de festas",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2024/photoshop-novo-1-copia0016-1726768321.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-maison-lafayette-EM73855",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Maison Lafayette - acesso",
+          "category": "Acesso",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_874_23615_1703_060726.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/maison-lafayette/itapema/meia-praia/874",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Maison Lafayette - hall",
+          "category": "Hall",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_874_23595_1702_060726.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/maison-lafayette/itapema/meia-praia/874",
+          "source_label": "Versatil"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 254 em Meia Praia",
+          "description": "A Versatil informa endereco na Rua 254, numero 215, Meia Praia."
+        },
+        {
+          "icon": "Calendar",
+          "title": "Entrega dezembro de 2025",
+          "description": "A ficha da Versatil registra previsao de entrega para dezembro de 2025."
+        },
+        {
+          "icon": "Building2",
+          "title": "Dallo Construtora",
+          "description": "A fonte externa associa o projeto a Dallo Construtora."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer completo",
+          "description": "Piscinas, jogos, playground, brinquedoteca, sauna, spa, massagem, pet, fireplace, fitness e festas."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fachada neoclassica",
+          "description": "As imagens selecionadas reforcam a identidade visual do empreendimento."
+        },
+        {
+          "title": "Infraestrutura de praia",
+          "description": "A ficha lista box de praia e entrada para banhistas."
+        },
+        {
+          "title": "Galeria com areas sociais",
+          "description": "Foram usados piscina, rooftop, fitness, jogos, lounge, hall e festas."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Maison Lafayette?",
+          "answer": "Na Rua 254, numero 215, Meia Praia, Itapema - SC."
+        },
+        {
+          "question": "Qual e a previsao de entrega?",
+          "answer": "A Versatil informa dezembro de 2025."
+        },
+        {
+          "question": "Quais areas comuns foram revisadas?",
+          "answer": "Piscinas, rooftop, fitness, jogos, sauna, spa, massagem, pet, fireplace, hall e festas."
+        },
+        {
+          "question": "O que mudou na pagina?",
+          "answer": "A curadoria substituiu fotos da oferta por fachada e areas comuns do empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.dallo.com.br/empreendimento/maison-lafayette/",
+        "https://imobiliariaversatil.com.br/edificios/maison-lafayette/itapema/meia-praia/874",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-maison-lafayette-EM73855",
+        "https://www.vitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/maison-lafayette/4503"
+      ]
+    },
+    {
+      "slug": "maison-paris",
+      "hero_image": "https://b.casteldigital.com.br/imobiliariaforcast/ig/il/imoveis/386/11c5c1fa-d6af-41c4-aa29-25a004608ff9-1686169658577.jpeg",
+      "description": "O Maison Paris foi revisado como empreendimento em Meia Praia, Itapema, com endereco conferido pela Imobille na Rua 254, 117. A Imobille informa quatro dormitorios, quatro suites, 186 m2, tres vagas e lazer com piscina, salao de festas, jogos, brinquedoteca, piscina infantil, academia, ofuro, hall de entrada e piscina interna. O texto da fonte destaca o charme inspirado em Paris, ambientes amplos, alto padrao e poucos metros da orla de Meia Praia. A galeria foi corrigida com fachada, piscina interna, fitness, jogos, kids, hall e deck externo.",
+      "seo_description": "Conheca o Maison Paris em Meia Praia, com fachada, piscina interna, fitness, jogos, kids e hall revisados.",
+      "gallery": [
+        {
+          "title": "Maison Paris - fachada vertical",
+          "category": "Fachada",
+          "image": "https://b.casteldigital.com.br/imobiliariaforcast/ig/il/imoveis/386/11c5c1fa-d6af-41c4-aa29-25a004608ff9-1686169658577.jpeg",
+          "source_url": "https://www.imobiliariaforcast.com.br/imovel/apartamento-no-edificio-maison-paris-254-itapema-meia-praia-4-quartos-3-garagens-venda-ref-386/",
+          "source_label": "Forcast"
+        },
+        {
+          "title": "Maison Paris - fachada frontal",
+          "category": "Fachada",
+          "image": "https://b.casteldigital.com.br/imobiliariaforcast/ig/im/imoveis/386/fa3c92b7-5616-4a69-b522-f3d89c7c4535-1686169658577.jpeg",
+          "source_url": "https://www.imobiliariaforcast.com.br/imovel/apartamento-no-edificio-maison-paris-254-itapema-meia-praia-4-quartos-3-garagens-venda-ref-386/",
+          "source_label": "Forcast"
+        },
+        {
+          "title": "Maison Paris - fachada noturna",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2024/imagens-site-20016-1715283593.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-maison-paris--EM96264",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Maison Paris - jogos",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2024/imagens-site-20021-1715283570.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-maison-paris--EM96264",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Maison Paris - brinquedoteca",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2024/imagens-site-20022-1715283571.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-maison-paris--EM96264",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Maison Paris - fitness",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2024/imagens-site-20025-1715283573.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-maison-paris--EM96264",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Maison Paris - piscina interna",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2024/imagens-site-20018-1715283595.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-maison-paris--EM96264",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Maison Paris - deck externo",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2024/imagens-site-20000-1715283593.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-maison-paris--EM96264",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Maison Paris - hall social",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2024/imagens-site-20017-1715283594.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-maison-paris--EM96264",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Maison Paris - piscina externa",
+          "category": "Piscina",
+          "image": "https://b.casteldigital.com.br/imobiliariaforcast/ig/im/imoveis/386/20d6d266-b7a2-49ab-ae88-4841738a9476-1686169658577.jpeg",
+          "source_url": "https://www.imobiliariaforcast.com.br/imovel/apartamento-no-edificio-maison-paris-254-itapema-meia-praia-4-quartos-3-garagens-venda-ref-386/",
+          "source_label": "Forcast"
+        },
+        {
+          "title": "Maison Paris - lazer externo",
+          "category": "Piscina",
+          "image": "https://b.casteldigital.com.br/imobiliariaforcast/ig/il/imoveis/386/20d6d266-b7a2-49ab-ae88-4841738a9476-1686169658577.jpeg",
+          "source_url": "https://www.imobiliariaforcast.com.br/imovel/apartamento-no-edificio-maison-paris-254-itapema-meia-praia-4-quartos-3-garagens-venda-ref-386/",
+          "source_label": "Forcast"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Meia Praia",
+          "description": "A Imobille informa endereco na Rua 254, 117, Meia Praia, Itapema."
+        },
+        {
+          "icon": "Ruler",
+          "title": "186 m2",
+          "description": "A ficha registra 186 m2, quatro suites e tres vagas."
+        },
+        {
+          "icon": "Waves",
+          "title": "Perto da orla",
+          "description": "A fonte descreve localizacao a poucos metros da orla de Meia Praia."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer pratico",
+          "description": "Piscinas, ofuro, festas, jogos, brinquedoteca, academia e hall de entrada."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fachada confirmada",
+          "description": "A galeria usa imagens externas de Forcast e Imobille para evitar confusao com outras torres."
+        },
+        {
+          "title": "Estrutura familiar",
+          "description": "Piscina interna, kids, jogos, fitness e festas reforcam o perfil de condominio completo."
+        },
+        {
+          "title": "Copy enriquecida",
+          "description": "A pagina agora mostra endereco, metragem, vagas e lazer conferidos."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Maison Paris?",
+          "answer": "Na Rua 254, 117, Meia Praia, Itapema - SC."
+        },
+        {
+          "question": "Qual e a metragem informada?",
+          "answer": "A Imobille informa 186 m2, quatro suites e tres vagas."
+        },
+        {
+          "question": "Quais areas comuns foram revisadas?",
+          "answer": "Piscina, piscina interna, ofuro, festas, jogos, brinquedoteca, academia e hall."
+        },
+        {
+          "question": "O que foi corrigido?",
+          "answer": "A galeria deixou de usar imagens da oferta e passou a mostrar fachada e lazer do condominio."
+        }
+      ],
+      "sources": [
+        "https://www.dallo.com.br/empreendimento/maison-paris/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-maison-paris--EM96264",
+        "https://www.imobiliariaforcast.com.br/imovel/apartamento-no-edificio-maison-paris-254-itapema-meia-praia-4-quartos-3-garagens-venda-ref-386/"
+      ]
+    },
+    {
+      "slug": "malbec-malbec-praia-brava",
+      "hero_image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/09/malbec-malbec-praia-brava-itajai-sc-1.jpg",
+      "description": "O Malbec Malbec Praia Brava foi revisado como empreendimento da ABF Vaccaro na Praia Brava, em Itajai. A pagina oficial informa tipologias de 166,38 m2 a 253,79 m2, arquitetura FGMF, paisagismo Inflorescencia e localizacao na Praia Brava/Itajai. A Invexo confirma endereco na Rua Pratico Adolfinho Lindalvo Costa, 84, construtora ABF Vaccaro, 19 residencias, tres suites, duas a quatro vagas, plantas entre 166 m2 e 253,79 m2 e entrega prevista para dezembro de 2028. A galeria passa a mostrar fachada, rooftop, academia, wine bar, gourmet e ambiencia do projeto.",
+      "seo_description": "Conheca o Malbec Malbec Praia Brava, com fachada, rooftop, wine bar, gourmet e projeto da ABF Vaccaro.",
+      "gallery": [
+        {
+          "title": "Malbec Malbec - fachada principal",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/09/malbec-malbec-praia-brava-itajai-sc-1.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/malbec-malbec-praia-brava/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Malbec Malbec - fachada lateral",
+          "category": "Fachada",
+          "image": "https://www.adamantenegocios.com.br/fotos/g/malbec2.jpg?token=UDVaQW5qVzFMeVROUnpOKzZmbGpoSkRHYlRQTWo2V3VvMWFTNHdvY1VGekV1QldwY1ZFYWMrcUlDN3RTNnJudFFKRHB2L0RTSVViNGxQMGJwUTFuZjBPcmlrY0FaUlFONlYrM1Z2dXI0ZFIwejV1Z1NlTlVHeEIwSXJGYlBXZVg=",
+          "source_url": "https://www.adamantenegocios.com.br/empreendimento/16/malbec-malbec/",
+          "source_label": "Adamante Negocios"
+        },
+        {
+          "title": "Malbec Malbec - torre em detalhe",
+          "category": "Fachada",
+          "image": "https://www.adamantenegocios.com.br/fotos/800x600/malbec2.jpg?token=UDVaQW5qVzFMeVROUnpOKzZmbGpoSkRHYlRQTWo2V3VvMWFTNHdvY1VGekV1QldwY1ZFYWMrcUlDN3RTNnJudFFKRHB2L0RTSVViNGxQMGJwUTFuZjBPcmlrY0FaUlFONlYrM1Z2dXI0ZFIwejV1Z1NlTlVHeEIwSXJGYlBXZVg=",
+          "source_url": "https://www.adamantenegocios.com.br/empreendimento/16/malbec-malbec/",
+          "source_label": "Adamante Negocios"
+        },
+        {
+          "title": "Malbec Malbec - rooftop",
+          "category": "Lazer",
+          "image": "https://abfvaccaro.com.br/wp-content/uploads/2025/06/banner-ABF-Vaccaro-Malbec-Malbec-Lancamento.jpg",
+          "source_url": "https://abfvaccaro.com.br/malbec-malbec/",
+          "source_label": "ABF Vaccaro"
+        },
+        {
+          "title": "Malbec Malbec - terraco panoramico",
+          "category": "Lazer",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/09/malbec-malbec-praia-brava-itajai-sc-4.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/malbec-malbec-praia-brava/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Malbec Malbec - fitness",
+          "category": "Fitness",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/09/malbec-malbec-praia-brava-itajai-sc-6.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/malbec-malbec-praia-brava/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Malbec Malbec - lounge",
+          "category": "Lazer",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/09/malbec-malbec-praia-brava-itajai-sc-2.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/malbec-malbec-praia-brava/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Malbec Malbec - wine bar",
+          "category": "Lazer",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/09/malbec-malbec-praia-brava-itajai-sc-12.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/malbec-malbec-praia-brava/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Malbec Malbec - gourmet",
+          "category": "Gourmet",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/09/malbec-malbec-praia-brava-itajai-sc-3.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/malbec-malbec-praia-brava/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Malbec Malbec - bar",
+          "category": "Lazer",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/09/malbec-malbec-praia-brava-itajai-sc-5.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/malbec-malbec-praia-brava/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Malbec Malbec - fachada aproximada",
+          "category": "Fachada",
+          "image": "https://abfvaccaro.com.br/wp-content/uploads/2025/06/slider01.jpg",
+          "source_url": "https://abfvaccaro.com.br/malbec-malbec/",
+          "source_label": "ABF Vaccaro"
+        },
+        {
+          "title": "Malbec Malbec - cava",
+          "category": "Lazer",
+          "image": "https://abfvaccaro.com.br/wp-content/uploads/2025/06/img01-02.jpg",
+          "source_url": "https://abfvaccaro.com.br/malbec-malbec/",
+          "source_label": "ABF Vaccaro"
+        },
+        {
+          "title": "Malbec Malbec - implantacao praia",
+          "category": "Implantacao",
+          "image": "https://cdn.vistahost.com.br/cli36621/vista.imobi/fotos/9118/i1Oh7842_911868db236143cf9.jpg",
+          "source_url": "https://manicamarin.com.br/imovel/empreendimento-praia-brava-itajai-sc-398997",
+          "source_label": "Manica Marin"
+        },
+        {
+          "title": "Malbec Malbec - estudo de fachada",
+          "category": "Fachada",
+          "image": "https://cdn.vistahost.com.br/cli36621/vista.imobi/fotos/9118/i1Oh7842_911868db2363cfcc0.jpg",
+          "source_url": "https://manicamarin.com.br/imovel/empreendimento-praia-brava-itajai-sc-398997",
+          "source_label": "Manica Marin"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Praia Brava",
+          "description": "A Invexo informa endereco na Rua Pratico Adolfinho Lindalvo Costa, 84."
+        },
+        {
+          "icon": "Building2",
+          "title": "ABF Vaccaro",
+          "description": "As fontes associam o projeto a ABF Vaccaro, com arquitetura FGMF e paisagismo Inflorescencia."
+        },
+        {
+          "icon": "Ruler",
+          "title": "166 m2 a 253,79 m2",
+          "description": "A ficha registra tres suites, duas a quatro vagas e 19 residencias."
+        },
+        {
+          "icon": "Wine",
+          "title": "Conceito inspirado no vinho",
+          "description": "O projeto trabalha cava, wine bar, gourmet, rooftop e atmosfera inspirada em Mendoza."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Projeto assinado",
+          "description": "FGMF Arquitetura e Inflorescencia Paisagismo aparecem nas fontes oficiais."
+        },
+        {
+          "title": "Exclusividade",
+          "description": "A Invexo informa apenas 19 residencias em torre unica."
+        },
+        {
+          "title": "Galeria de empreendimento",
+          "description": "A curadoria prioriza fachada, rooftop, fitness, wine bar, gourmet e cava."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Malbec Malbec?",
+          "answer": "Na Rua Pratico Adolfinho Lindalvo Costa, 84, Praia Brava, Itajai - SC."
+        },
+        {
+          "question": "Quem e a construtora?",
+          "answer": "As fontes consultadas indicam ABF Vaccaro."
+        },
+        {
+          "question": "Qual e a previsao de entrega?",
+          "answer": "A Invexo informa dezembro de 2028."
+        },
+        {
+          "question": "Quais areas comuns foram revisadas?",
+          "answer": "Rooftop, fitness, wine bar, gourmet, cava, lounge e terraco panoramico."
+        }
+      ],
+      "sources": [
+        "https://abfvaccaro.com.br/malbec-malbec/",
+        "https://lancamento.invexo.com.br/sc/malbec-malbec-praia-brava/",
+        "https://myside.com.br/apartamento-venda-malbec-malbec-itajai-sc",
+        "https://www.adamantenegocios.com.br/empreendimento/16/malbec-malbec/",
+        "https://manicamarin.com.br/imovel/empreendimento-praia-brava-itajai-sc-398997"
+      ]
+    },
+    {
+      "slug": "marabella",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2024/07/edificio-marabella-tower-balneario-camboriu-1.0.jpg",
+      "description": "O Marabella Tower foi revisado como empreendimento no Centro de Balneario Camboriu, na Rua 910. A Viva Real informa endereco na Rua 910, 159, Centro, e condominio com piscina, churrasqueira, academia, elevador, espaco gourmet, piscina infantil e acessibilidade. A Litoral Vertical complementa que o edificio tem 17 pavimentos, duas residencias por andar, dois elevadores, obra da Bella Cyntra Construtora e Incorporadora, entrega em fevereiro de 2025 e lazer com piscina, salao de festas, pub, jogos, kids, academia e sauna seca. A galeria foi corrigida com fachada e lazer.",
+      "seo_description": "Conheca o Marabella Tower no Centro de Balneario Camboriu, com fachada, piscina, gourmet, fitness e lazer.",
+      "gallery": [
+        {
+          "title": "Marabella Tower - fachada principal",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2024/07/edificio-marabella-tower-balneario-camboriu-1.0.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-marabella-tower/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Marabella Tower - fachada frontal",
+          "category": "Fachada",
+          "image": "https://b.casteldigital.com.br/flyimoveis/ig/il/imoveis/780/menu2-16831552743729.jpg",
+          "source_url": "https://www.flyimoveis.com.br/imovel/apartamento-no-edificio-marabella-tower-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-780/",
+          "source_label": "Fly Imoveis"
+        },
+        {
+          "title": "Marabella Tower - torre",
+          "category": "Fachada",
+          "image": "https://b.casteldigital.com.br/flyimoveis/ig/im/imoveis/780/menu2-16831552743729.jpg",
+          "source_url": "https://www.flyimoveis.com.br/imovel/apartamento-no-edificio-marabella-tower-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-780/",
+          "source_label": "Fly Imoveis"
+        },
+        {
+          "title": "Marabella Tower - gourmet",
+          "category": "Gourmet",
+          "image": "https://litoralvertical.com/wp-content/uploads/2024/07/edificio-marabella-tower-balneario-camboriu-1.2.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-marabella-tower/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Marabella Tower - fitness e sauna",
+          "category": "Fitness",
+          "image": "https://litoralvertical.com/wp-content/uploads/2024/07/edificio-marabella-tower-balneario-camboriu-1.3.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-marabella-tower/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Marabella Tower - piscina",
+          "category": "Piscina",
+          "image": "https://b.casteldigital.com.br/flyimoveis/ig/im/imoveis/780/piscina2-1683155274373.jpg",
+          "source_url": "https://www.flyimoveis.com.br/imovel/apartamento-no-edificio-marabella-tower-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-780/",
+          "source_label": "Fly Imoveis"
+        },
+        {
+          "title": "Marabella Tower - deck da piscina",
+          "category": "Piscina",
+          "image": "https://b.casteldigital.com.br/flyimoveis/ig/il/imoveis/780/piscina2-1683155274373.jpg",
+          "source_url": "https://www.flyimoveis.com.br/imovel/apartamento-no-edificio-marabella-tower-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-780/",
+          "source_label": "Fly Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro de Balneario Camboriu",
+          "description": "A Viva Real informa endereco na Rua 910, 159, Centro."
+        },
+        {
+          "icon": "Building2",
+          "title": "17 pavimentos",
+          "description": "A Litoral Vertical informa 17 pavimentos, dois elevadores e duas residencias por andar."
+        },
+        {
+          "icon": "Calendar",
+          "title": "Entregue em 2025",
+          "description": "A Litoral Vertical registra entrega em fevereiro de 2025."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer essencial",
+          "description": "Piscina, festas, pub, jogos, kids, academia, sauna seca, gourmet e churrasqueira."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Bella Cyntra Construtora",
+          "description": "A Litoral Vertical associa a obra a Bella Cyntra Construtora e Incorporadora."
+        },
+        {
+          "title": "Localizacao central",
+          "description": "A pagina cita Rua 910, proximo do Camelodromo e da Paroquia Santa Ines."
+        },
+        {
+          "title": "Curadoria conservadora",
+          "description": "Foram usadas poucas imagens, mas todas focadas em fachada e lazer para evitar interiores da oferta."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Marabella Tower?",
+          "answer": "Na Rua 910, 159, Centro, Balneario Camboriu - SC."
+        },
+        {
+          "question": "O empreendimento ja foi entregue?",
+          "answer": "A Litoral Vertical informa entrega em fevereiro de 2025."
+        },
+        {
+          "question": "Quais areas comuns foram revisadas?",
+          "answer": "Piscina, gourmet, fitness, sauna, festas, pub, jogos e kids."
+        },
+        {
+          "question": "O que mudou na auditoria?",
+          "answer": "A pagina deixou de usar fotos internas da oferta e passou a mostrar fachada e lazer."
+        }
+      ],
+      "sources": [
+        "https://www.vivareal.com.br/condominio/edificio-marabella-tower-centro-id-025fff66-52d1/",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-marabella-tower/",
+        "https://www.flyimoveis.com.br/imovel/apartamento-no-edificio-marabella-tower-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-780/"
+      ]
+    }
+  ]
+}

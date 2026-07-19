@@ -1,0 +1,1162 @@
+{
+  "batch_id": "development-media-curation-batch11-20260714",
+  "generated_at": "2026-07-14T21:45:00.000Z",
+  "items": [
+    {
+      "slug": "marina-camboriu",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/150520251031071437-1747315867.jpg",
+      "description": "O Marina Camboriu e um condominio nautico horizontal na Barra, em Balneario Camboriu, com acesso ao canal, atracadouros e perfil residencial voltado a quem busca privacidade, seguranca e relacao direta com a agua. A pesquisa cruzou Imobille, Viva Real e Meufrentemar para confirmar o contexto do condominio, sua localizacao e os elementos de uso comum ligados a navegacao. A nova curadoria remove fotos internas e prioriza imagens aereas, canal, pier, embarcacoes e implantacao do conjunto.",
+      "seo_description": "Conheca o Marina Camboriu, condominio nautico na Barra de Balneario Camboriu, com canal, atracadouros, privacidade e acesso nautico.",
+      "gallery": [
+        {
+          "title": "Marina Camboriu - vista aerea do condominio",
+          "category": "Condominio",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/150520251031071437-1747315867.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-marina-camboriu-EM92726",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Marina Camboriu - implantacao nautica",
+          "category": "Condominio",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/real-estates-photo/TE0007/-pbetMVNJv6KHYdfWnBeUcvQXhyMbGKVc96aYGg9zp7v3W2ZZZ9MTyKRoiw7KMbUEBp_ISOWDpFUsfM7A08DyAWk4ZA4MKLcg37-vS6IwXZ9ikQ=w1024-h768.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-marina-camboriu-EM92726",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Marina Camboriu - canal interno",
+          "category": "Nautico",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/real-estates-photo/TE0007/JDxMiXnT0PLb2VfP59LjGgsg3BZujGdOdnFb9Wy-rYEZphrqKLP0tPInZzuQeOWSpTxAR497A9JAfie3XKI35fgqvw5I5aTM5wz7AemPw1Kk0fI=w1024-h768.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-marina-camboriu-EM92726",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Marina Camboriu - atracadouros",
+          "category": "Nautico",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/real-estates-photo/TE0007/LFt_FfSfdILEJslOUw3H3-wSZDsS4BThmoTrCfTMMuKq-mhwcVekj6-0jFW6X4SMqjuQEH8EQLF74IfMip1Td_AeZ4nNjiwMlvUN67K8bG9R6AM=w1024-h768.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-marina-camboriu-EM92726",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Marina Camboriu - pier e embarcacoes",
+          "category": "Nautico",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/real-estates-photo/TE0007/MAIN-vy82Niuc2ZgyU5Iuan5xxJ3sm-j3fHaC7Wcxpar_uuMb2wdB0eOijnhw_Jx5UW3rU7zysgnYmyU_YTb9vfyGV8EhabC1nrpqPlJ7yiFL62j0dg=w1024-h768.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-marina-camboriu-EM92726",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Marina Camboriu - margem do canal",
+          "category": "Nautico",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/real-estates-photo/TE0007/PUFnfzJibY3fw2QQD7aq6jXonRFiLbQItkmpMsCJzBmFTpExzUO7rgz1MYmzGw3BgmlFOU_wwCnE4kihSqe6BftbGToaGhqaEJ0GYNPHsmoXYA=w1024-h768.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-marina-camboriu-EM92726",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Marina Camboriu - circulacao nautica",
+          "category": "Nautico",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/real-estates-photo/TE0007/Wmxm0a_T37qV9LwtqKWLFMk7FTq3CyZuCrivnb3axEAOilajz2YjdH7z3wuMIKDbi-uATsAMUcHYDK_jXbQLnJaP5-i92kT8v4uNHuWy1C-5r74=w1024-h768.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-marina-camboriu-EM92726",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Perfil nautico",
+          "description": "O condominio esta ligado ao canal e a atracadouros, favorecendo uma rotina conectada a navegacao."
+        },
+        {
+          "icon": "Shield",
+          "title": "Privacidade na Barra",
+          "description": "Conjunto horizontal em regiao residencial de Balneario Camboriu, com acesso controlado e baixa exposicao urbana."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Conexao com a cidade",
+          "description": "Localizacao na Barra, com acesso ao eixo sul da cidade e as areas de lazer, marina e servicos da regiao."
+        }
+      ],
+      "differentials": [
+        "Canal interno e atracadouros reforcam o diferencial nautico do condominio.",
+        "Implantacao horizontal com baixa densidade visual em comparacao aos eixos verticais da orla.",
+        "Curadoria visual revisada com foco em imagens do conjunto e da estrutura nautica."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Marina Camboriu?",
+          "answer": "O Marina Camboriu fica na Barra, em Balneario Camboriu, com relacao direta com o canal nautico da regiao."
+        },
+        {
+          "question": "Qual e o diferencial do Marina Camboriu?",
+          "answer": "O principal diferencial e o perfil nautico, com canal, atracadouros e implantacao horizontal voltada a privacidade."
+        },
+        {
+          "question": "As imagens desta pagina sao do condominio?",
+          "answer": "Sim. A galeria foi substituida por imagens do canal, pier, implantacao e areas externas do Marina Camboriu."
+        },
+        {
+          "question": "O Marina Camboriu combina com qual perfil?",
+          "answer": "Combina com quem busca endereco reservado, acesso nautico e vida residencial proxima a Balneario Camboriu."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/condominio-marina-camboriu-EM92726",
+        "https://www.vivareal.com.br/condominio/marina-camboriu-barra-id-4636ad71-7b30/",
+        "https://meufrentemar.com.br/empreendimentos"
+      ]
+    },
+    {
+      "slug": "marine-palace-residence",
+      "hero_image": "https://static.wixstatic.com/media/01ead4_ae97faaf03d24889b529f0c7c97e7afb~mv2.jpeg/v1/fit/w_1280,h_580,q_90,enc_avif,quality_auto/01ead4_ae97faaf03d24889b529f0c7c97e7afb~mv2.jpeg",
+      "description": "O Marine Palace Residence e um pre-lancamento da Pioneira Empreendimentos no Centro de Balneario Camboriu. A fonte oficial apresenta uma torre residencial de alto padrao inspirada em elementos naturais do oceano e das pedras, com fachada curva, base arquitetonica marcante e lazer integrado. A curadoria substitui fotos internas por renders externos oficiais do empreendimento, reforcando identidade, volumetria e acesso.",
+      "seo_description": "Conheca o Marine Palace Residence, pre-lancamento da Pioneira no Centro de Balneario Camboriu, com torre de alto padrao e fachada autoral.",
+      "gallery": [
+        {
+          "title": "Marine Palace Residence - fachada principal",
+          "category": "Empreendimento",
+          "image": "https://static.wixstatic.com/media/01ead4_ae97faaf03d24889b529f0c7c97e7afb~mv2.jpeg/v1/fit/w_1280,h_580,q_90,enc_avif,quality_auto/01ead4_ae97faaf03d24889b529f0c7c97e7afb~mv2.jpeg",
+          "source_url": "https://www.pioneiraempreendimentos.com.br/marine-palace-residence-item",
+          "source_label": "Pioneira Empreendimentos"
+        },
+        {
+          "title": "Marine Palace Residence - base arquitetonica",
+          "category": "Empreendimento",
+          "image": "https://static.wixstatic.com/media/01ead4_f63d438652764c0593e1b55171ea5867~mv2.jpeg/v1/fit/w_1280,h_580,q_90,enc_avif,quality_auto/01ead4_f63d438652764c0593e1b55171ea5867~mv2.jpeg",
+          "source_url": "https://www.pioneiraempreendimentos.com.br/marine-palace-residence-item",
+          "source_label": "Pioneira Empreendimentos"
+        },
+        {
+          "title": "Marine Palace Residence - embasamento",
+          "category": "Empreendimento",
+          "image": "https://static.wixstatic.com/media/01ead4_8b871af4bfa9461981e67fa67a23e04b~mv2.jpeg/v1/fit/w_1280,h_580,q_90,enc_avif,quality_auto/01ead4_8b871af4bfa9461981e67fa67a23e04b~mv2.jpeg",
+          "source_url": "https://www.pioneiraempreendimentos.com.br/marine-palace-residence-item",
+          "source_label": "Pioneira Empreendimentos"
+        },
+        {
+          "title": "Marine Palace Residence - detalhes da fachada",
+          "category": "Empreendimento",
+          "image": "https://static.wixstatic.com/media/01ead4_b367e4522f8947528e735702e6ef79ec~mv2.jpeg/v1/fit/w_1280,h_580,q_90,enc_avif,quality_auto/01ead4_b367e4522f8947528e735702e6ef79ec~mv2.jpeg",
+          "source_url": "https://www.pioneiraempreendimentos.com.br/marine-palace-residence-item",
+          "source_label": "Pioneira Empreendimentos"
+        },
+        {
+          "title": "Marine Palace Residence - torre residencial",
+          "category": "Empreendimento",
+          "image": "https://static.wixstatic.com/media/01ead4_927112db9c6b49efa37a8eafaed8bf01~mv2.jpeg/v1/fit/w_555,h_580,q_90,enc_avif,quality_auto/01ead4_927112db9c6b49efa37a8eafaed8bf01~mv2.jpeg",
+          "source_url": "https://www.pioneiraempreendimentos.com.br/marine-palace-residence-item",
+          "source_label": "Pioneira Empreendimentos"
+        },
+        {
+          "title": "Marine Palace Residence - acesso em curva",
+          "category": "Acesso",
+          "image": "https://static.wixstatic.com/media/01ead4_1598ff33130a42ee96955a507b7c94e4~mv2.jpeg/v1/fit/w_1280,h_580,q_90,enc_avif,quality_auto/01ead4_1598ff33130a42ee96955a507b7c94e4~mv2.jpeg",
+          "source_url": "https://www.pioneiraempreendimentos.com.br/marine-palace-residence-item",
+          "source_label": "Pioneira Empreendimentos"
+        },
+        {
+          "title": "Marine Palace Residence - fachada vertical",
+          "category": "Empreendimento",
+          "image": "https://static.wixstatic.com/media/01ead4_ea5e2d154bff417ebbb441b40071cfcf~mv2.jpeg/v1/fit/w_1280,h_580,q_90,enc_avif,quality_auto/01ead4_ea5e2d154bff417ebbb441b40071cfcf~mv2.jpeg",
+          "source_url": "https://www.pioneiraempreendimentos.com.br/marine-palace-residence-item",
+          "source_label": "Pioneira Empreendimentos"
+        },
+        {
+          "title": "Marine Palace Residence - volumetria da torre",
+          "category": "Empreendimento",
+          "image": "https://static.wixstatic.com/media/01ead4_d7d2deceb86d4e688bf09a87bed6ed72~mv2.jpeg/v1/fit/w_1280,h_580,q_90,enc_avif,quality_auto/01ead4_d7d2deceb86d4e688bf09a87bed6ed72~mv2.jpeg",
+          "source_url": "https://www.pioneiraempreendimentos.com.br/marine-palace-residence-item",
+          "source_label": "Pioneira Empreendimentos"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Projeto Pioneira",
+          "description": "Empreendimento assinado pela Pioneira, com proposta de alto padrao e linguagem arquitetonica propria."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Fachada autoral",
+          "description": "Base, curvas e elementos visuais remetem ao oceano e a materiais naturais, criando identidade forte na paisagem urbana."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Centro de Balneario Camboriu",
+          "description": "Endereco urbano com acesso aos servicos, restaurantes e conveniencias centrais da cidade."
+        }
+      ],
+      "differentials": [
+        "Pre-lancamento com imagens oficiais da incorporadora.",
+        "Fachada curva e embasamento com presenca visual marcada.",
+        "Curadoria com renders externos do empreendimento, sem fotos de interiores privativos."
+      ],
+      "faq": [
+        {
+          "question": "Quem realiza o Marine Palace Residence?",
+          "answer": "A fonte oficial vincula o Marine Palace Residence a Pioneira Empreendimentos."
+        },
+        {
+          "question": "Onde fica o Marine Palace Residence?",
+          "answer": "O empreendimento fica no Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Que tipo de imagem foi usada na curadoria?",
+          "answer": "Foram usados renders externos oficiais de fachada, base, acesso e volumetria do empreendimento."
+        },
+        {
+          "question": "Por que a galeria foi alterada?",
+          "answer": "Porque a pagina estava usando imagens de imoveis; a nova galeria prioriza a identidade do empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.pioneiraempreendimentos.com.br/marine-palace-residence-item",
+        "https://myside.com.br/apartamento-venda-marine-palace-residence-balneario-camboriu-sc",
+        "https://imoveisgodoy.com.br/empreendimento/marine-palace-residence/"
+      ]
+    },
+    {
+      "slug": "neos",
+      "hero_image": "https://neos.maxrealiza.com/_next/image/?url=%2Fassets%2Fimages%2Fhero.png&w=3840&q=75",
+      "description": "O NEOS Praia Brava e um empreendimento da Max Realiza em Itajai, em frente ao Brava Mall e proximo ao mar. As fontes oficiais destacam duas torres de 25 pavimentos, arquitetura, interiores e paisagismo assinados por Marcos Bertoldi, localizacao na Rua Luci Canziani e mais de 3.000 m2 de lazer. A nova galeria usa imagens oficiais de fachada, acesso, paisagismo, hall, mini quadra, piscina, academia e brinquedoteca.",
+      "seo_description": "Conheca o NEOS Praia Brava, da Max Realiza, com arquitetura Marcos Bertoldi, duas torres, lazer completo e endereco em frente ao Brava Mall.",
+      "gallery": [
+        {
+          "title": "NEOS Praia Brava - acesso principal",
+          "category": "Acesso",
+          "image": "https://neos.maxrealiza.com/_next/image/?url=%2Fassets%2Fimages%2Fhero.png&w=3840&q=75",
+          "source_url": "https://neos.maxrealiza.com/",
+          "source_label": "NEOS Max Realiza"
+        },
+        {
+          "title": "NEOS Praia Brava - torres",
+          "category": "Empreendimento",
+          "image": "https://neos.maxrealiza.com/assets/images/home-about-facade/facade-1-zoom.png",
+          "source_url": "https://neos.maxrealiza.com/",
+          "source_label": "NEOS Max Realiza"
+        },
+        {
+          "title": "NEOS Praia Brava - paisagismo",
+          "category": "Paisagismo",
+          "image": "https://neos.maxrealiza.com/_next/image/?url=%2Fassets%2Fimages%2Fabout-features-2.jpg&w=1920&q=75",
+          "source_url": "https://neos.maxrealiza.com/",
+          "source_label": "NEOS Max Realiza"
+        },
+        {
+          "title": "NEOS Praia Brava - hall norte",
+          "category": "Acesso",
+          "image": "https://neos.maxrealiza.com/assets/images/common-areas/hall-norte.png",
+          "source_url": "https://neos.maxrealiza.com/",
+          "source_label": "NEOS Max Realiza"
+        },
+        {
+          "title": "NEOS Praia Brava - playground",
+          "category": "Lazer",
+          "image": "https://neos.maxrealiza.com/assets/images/common-areas/playground.png",
+          "source_url": "https://neos.maxrealiza.com/",
+          "source_label": "NEOS Max Realiza"
+        },
+        {
+          "title": "NEOS Praia Brava - mini quadra",
+          "category": "Lazer",
+          "image": "https://neos.maxrealiza.com/assets/images/common-areas/mini-quadra.png",
+          "source_url": "https://neos.maxrealiza.com/",
+          "source_label": "NEOS Max Realiza"
+        },
+        {
+          "title": "NEOS Praia Brava - piscina infantil",
+          "category": "Lazer",
+          "image": "https://neos.maxrealiza.com/assets/images/common-areas/piscina-infantil.png",
+          "source_url": "https://neos.maxrealiza.com/",
+          "source_label": "NEOS Max Realiza"
+        },
+        {
+          "title": "NEOS Praia Brava - academia",
+          "category": "Lazer",
+          "image": "https://neos.maxrealiza.com/assets/images/common-areas/academia.png",
+          "source_url": "https://neos.maxrealiza.com/",
+          "source_label": "NEOS Max Realiza"
+        },
+        {
+          "title": "NEOS Praia Brava - brinquedoteca",
+          "category": "Lazer",
+          "image": "https://neos.maxrealiza.com/assets/images/common-areas/brinquedoteca.png",
+          "source_url": "https://neos.maxrealiza.com/",
+          "source_label": "NEOS Max Realiza"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Arquitetura Marcos Bertoldi",
+          "description": "Projeto com arquitetura, interiores e paisagismo assinados por Marcos Bertoldi, segundo as fontes oficiais."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Em frente ao Brava Mall",
+          "description": "Localizacao na Rua Luci Canziani, em frente ao Brava Mall e proxima ao Colegio Bom Jesus."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Mais de 3.000 m2 de lazer",
+          "description": "Piscinas, wellness, academia, pilates, mini quadra, playground, brinquedoteca e espacos gourmet integrados."
+        }
+      ],
+      "differentials": [
+        "Duas torres de 25 pavimentos na Praia Brava.",
+        "Projeto autoral com conexao entre cidade, paisagismo e areas comuns.",
+        "Galeria revisada com imagens oficiais do empreendimento e do lazer."
+      ],
+      "faq": [
+        {
+          "question": "Quem e a construtora do NEOS Praia Brava?",
+          "answer": "O NEOS Praia Brava e um empreendimento da Max Realiza."
+        },
+        {
+          "question": "Onde fica o NEOS Praia Brava?",
+          "answer": "Fica na Praia Brava, em Itajai, na Rua Luci Canziani, em frente ao Brava Mall."
+        },
+        {
+          "question": "Quem assina a arquitetura do NEOS?",
+          "answer": "As fontes oficiais citam arquitetura, interiores e paisagismo assinados por Marcos Bertoldi."
+        },
+        {
+          "question": "As imagens sao do empreendimento?",
+          "answer": "Sim. Foram selecionadas imagens oficiais de fachada, acesso, paisagismo e areas comuns do NEOS."
+        }
+      ],
+      "sources": [
+        "https://neos.maxrealiza.com/",
+        "https://myside.com.br/apartamento-venda-neos-praia-brava-itajai-sc",
+        "https://www.maxrealiza.com/blog/lancamento-neos-praia-brava-itajai/"
+      ]
+    },
+    {
+      "slug": "olimpia-residence",
+      "hero_image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/353580/images/xxl/_0cc6928e577061168719832910025143.jpg",
+      "description": "O Olimpia Residence fica no Centro de Balneario Camboriu, na regiao da Avenida Brasil com a Rua 1451, e aparece nas fontes como um empreendimento de alto padrao com fachada em linguagem classica, mais de 1.000 m2 de lazer e estrutura com piscina, fitness e brinquedoteca. A curadoria substitui interiores por imagens de fachada, lazer e areas comuns, confirmadas em MySide, Litoral Vertical e Imobille.",
+      "seo_description": "Conheca o Olimpia Residence no Centro de Balneario Camboriu, com fachada classica, piscina, fitness, brinquedoteca e lazer completo.",
+      "gallery": [
+        {
+          "title": "Olimpia Residence - fachada principal",
+          "category": "Empreendimento",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/353580/images/xxl/_0cc6928e577061168719832910025143.jpg",
+          "source_url": "https://myside.com.br/apartamento-venda-olimpia-residence-balneario-camboriu-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Olimpia Residence - fachada em destaque",
+          "category": "Empreendimento",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/353580/images/xxl/_efdde87c192049168719836210728271.jpg",
+          "source_url": "https://myside.com.br/apartamento-venda-olimpia-residence-balneario-camboriu-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Olimpia Residence - fitness",
+          "category": "Lazer",
+          "image": "https://myside.com.br/_next/image?url=https%3A%2F%2Frocket.myside.com.br%2Fapplication%2Fplugins%2Fmodule_imobles%2Fuploads%2Fenterprise%2F353580%2Fimages%2F_285ab944558360168719854711017564.webp&w=3840&q=75",
+          "source_url": "https://myside.com.br/apartamento-venda-olimpia-residence-balneario-camboriu-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Olimpia Residence - piscina",
+          "category": "Lazer",
+          "image": "https://myside.com.br/_next/image?url=https%3A%2F%2Frocket.myside.com.br%2Fapplication%2Fplugins%2Fmodule_imobles%2Fuploads%2Fenterprise%2F353580%2Fimages%2F_8ce5d989935779168719854811086666.webp&w=3840&q=75",
+          "source_url": "https://myside.com.br/apartamento-venda-olimpia-residence-balneario-camboriu-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Olimpia Residence - brinquedoteca",
+          "category": "Lazer",
+          "image": "https://myside.com.br/_next/image?url=https%3A%2F%2Frocket.myside.com.br%2Fapplication%2Fplugins%2Fmodule_imobles%2Fuploads%2Fenterprise%2F353580%2Fimages%2F_cf98f161714128168719854910262716.webp&w=3840&q=75",
+          "source_url": "https://myside.com.br/apartamento-venda-olimpia-residence-balneario-camboriu-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Olimpia Residence - topo da torre",
+          "category": "Empreendimento",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/companyconstruction/558/images/_d3a03b46324171168727377810918865.jpg",
+          "source_url": "https://myside.com.br/apartamento-venda-olimpia-residence-balneario-camboriu-sc",
+          "source_label": "MySide"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro de Balneario Camboriu",
+          "description": "Endereco no eixo da Avenida Brasil e Rua 1451, proximo a comercio, servicos e praia central."
+        },
+        {
+          "icon": "Building2",
+          "title": "Fachada classica",
+          "description": "A volumetria e a base do edificio reforcam uma presenca elegante no Centro da cidade."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer para rotina",
+          "description": "As fontes indicam mais de 1.000 m2 de lazer, com piscina, fitness, brinquedoteca e ambientes de convivencia."
+        }
+      ],
+      "differentials": [
+        "Localizacao central em Balneario Camboriu, com acesso rapido a praia e servicos.",
+        "Fachada em estilo classico, com base marcada e torre vertical.",
+        "Galeria revisada para destacar empreendimento e lazer, nao interiores privativos."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Olimpia Residence?",
+          "answer": "O Olimpia Residence fica no Centro de Balneario Camboriu, na regiao da Avenida Brasil com a Rua 1451."
+        },
+        {
+          "question": "O Olimpia Residence tem area de lazer?",
+          "answer": "Sim. As fontes citam lazer amplo, com piscina, fitness, brinquedoteca e outros ambientes de uso comum."
+        },
+        {
+          "question": "As imagens desta pagina sao do empreendimento?",
+          "answer": "Sim. A galeria foi revisada com fachada e areas comuns do Olimpia Residence."
+        },
+        {
+          "question": "Por que a copy foi alterada?",
+          "answer": "A descricao anterior era generica; agora o texto destaca localizacao, fachada e lazer confirmados em fontes externas."
+        }
+      ],
+      "sources": [
+        "https://myside.com.br/apartamento-venda-olimpia-residence-balneario-camboriu-sc",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-olimpia/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-olimpia-residence-EM28261"
+      ]
+    },
+    {
+      "slug": "pharos",
+      "hero_image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/April2022/cjLdUOPouqEIrOSCyO2g.jpg",
+      "description": "O Pharos e um empreendimento de alto padrao em Balneario Camboriu, citado por fontes como Imobille, Ocean Prime e Felicita. As informacoes pesquisadas destacam fachada revestida em aluminio, vidros e pastilhas, localizacao privilegiada e lazer completo com piscina, spa, sauna, fitness, brinquedoteca, cinema, jogos, gourmet e ambientes sociais. A curadoria usa imagens do edificio, rooftop, hall e lazer, removendo fotos de interiores de imoveis.",
+      "seo_description": "Conheca o Pharos em Balneario Camboriu, com fachada em aluminio, vidros e pastilhas, rooftop, piscina, spa, fitness e lazer completo.",
+      "gallery": [
+        {
+          "title": "Pharos - fachada e entorno",
+          "category": "Empreendimento",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/April2022/cjLdUOPouqEIrOSCyO2g.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-pharos-EM60964",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Pharos - piscina com vista",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/photoshop-novo0027-1723148899.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-pharos-EM60964",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Pharos - spa aquecido",
+          "category": "Wellness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/photoshop-novo0005-1723148914.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-pharos-EM60964",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Pharos - hall social",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/photoshop-novo0023-1723148906.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-pharos-EM60964",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Pharos - escadaria do hall",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/photoshop-novo0016-1723148908.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-pharos-EM60964",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Pharos - gourmet",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/photoshop-novo0026-1723148899.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-pharos-EM60964",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Pharos - brinquedoteca",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/photoshop-novo0011-1723148911.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-pharos-EM60964",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Pharos - fitness",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/photoshop-novo0013-1723148906.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-pharos-EM60964",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Pharos - ambiente de jogos",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/photoshop-novo0002-1723148918.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-pharos-EM60964",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Fachada de alto padrao",
+          "description": "As fontes destacam fachada com aluminio, vidros e pastilhas, reforcando a presenca do edificio."
+        },
+        {
+          "icon": "Waves",
+          "title": "Lazer com vista",
+          "description": "Piscina, rooftop e ambientes de descanso aproveitam o contexto visual de Balneario Camboriu."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Bem-estar completo",
+          "description": "Spa, sauna, fitness, brinquedoteca, cinema, jogos e gourmet atendem diferentes rotinas de uso."
+        }
+      ],
+      "differentials": [
+        "Fachada revestida em materiais nobres, segundo as fontes pesquisadas.",
+        "Lazer com ambientes secos e molhados, incluindo piscina, spa e fitness.",
+        "Curadoria visual revisada para priorizar fachada, hall e areas comuns."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Pharos?",
+          "answer": "O Pharos fica em Balneario Camboriu, com fontes citando localizacao privilegiada e acesso a servicos e praias."
+        },
+        {
+          "question": "Que lazer o Pharos oferece?",
+          "answer": "As fontes citam piscina, spa, sauna, fitness, brinquedoteca, cinema, gourmet e ambiente de jogos."
+        },
+        {
+          "question": "As imagens desta pagina sao do empreendimento?",
+          "answer": "Sim. Foram selecionadas imagens de fachada, hall, rooftop e areas comuns do Pharos."
+        },
+        {
+          "question": "Por que a galeria foi revisada?",
+          "answer": "Para remover imagens internas de imoveis e apresentar o condominio de forma correta."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-pharos-EM60964",
+        "https://www.oceanprime.com.br/empreendimentos/pharos",
+        "https://felicitanegocios.com.br/empreendimento/162/pharos/"
+      ]
+    },
+    {
+      "slug": "phoenix-tower",
+      "hero_image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/January2022/S7XYukDDYsucLjIiQZq0.jpg",
+      "description": "O Phoenix Tower e um empreendimento da FG Empreendimentos em Balneario Camboriu, descrito nas fontes como um edificio com design moderno, localizacao central/Barra Sul e amplo lazer. A pesquisa em Imobille, Felicita e Solk confirmou estrutura com piscina, spa, sauna, cinema, brinquedoteca, playground, quadra, fitness, gourmet, festas e massagem. A curadoria remove imagens de interiores privativos e usa acesso, fachada e areas comuns.",
+      "seo_description": "Conheca o Phoenix Tower da FG em Balneario Camboriu, com fachada, piscina, spa, cinema, brinquedoteca, quadra, fitness e lazer completo.",
+      "gallery": [
+        {
+          "title": "Phoenix Tower - acesso e fachada",
+          "category": "Empreendimento",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/January2022/S7XYukDDYsucLjIiQZq0.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-phoenix-tower-EM40286",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Phoenix Tower - fitness",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/Sm66EvfGfyvdAxFJlfuZ.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-phoenix-tower-EM40286",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Phoenix Tower - ambiente de jogos",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/m6fcrtMrWGkUzAoDjfaF.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-phoenix-tower-EM40286",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Phoenix Tower - brinquedoteca",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/Y87JRFZPXht3LnID3JGP.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-phoenix-tower-EM40286",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Phoenix Tower - cinema",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/Hjh5AKeCkP20onYN9PhX.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-phoenix-tower-EM40286",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Phoenix Tower - sauna",
+          "category": "Wellness",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/hmkARzyX3MdXfx9znnMw.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-phoenix-tower-EM40286",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Phoenix Tower - festas",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/xPRSVycajIzJ8tsq4Y9f.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-phoenix-tower-EM40286",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Phoenix Tower - playground",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/M5Rv3XzudshRJ5t4ySJ7.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-phoenix-tower-EM40286",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Phoenix Tower - quadra",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/RvKajMWenrLXq7LJord7.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-phoenix-tower-EM40286",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Phoenix Tower - piscina elevada",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/rWRNflcLVTBNtr43aiaQ.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-phoenix-tower-EM40286",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Assinatura FG",
+          "description": "Fontes pesquisadas vinculam o Phoenix Tower a FG Empreendimentos."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer amplo",
+          "description": "Piscina, spa, sauna, cinema, brinquedoteca, playground, quadra, festas, gourmet e fitness compoem o conjunto de uso comum."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Regiao central",
+          "description": "Localizacao em Balneario Camboriu, com facil acesso a praia, servicos e eixos de circulacao."
+        }
+      ],
+      "differentials": [
+        "Edificio FG com lazer variado para diferentes perfis de moradores.",
+        "Piscina elevada, quadra, cinema e ambientes infantis reforcam a estrutura comum.",
+        "Galeria revisada com fotos de acesso e areas comuns, sem interiores privativos."
+      ],
+      "faq": [
+        {
+          "question": "Quem e a construtora do Phoenix Tower?",
+          "answer": "As fontes pesquisadas vinculam o Phoenix Tower a FG Empreendimentos."
+        },
+        {
+          "question": "Que lazer o Phoenix Tower oferece?",
+          "answer": "Piscina, spa, sauna, cinema, brinquedoteca, playground, quadra, fitness, gourmet e festas estao entre os itens citados."
+        },
+        {
+          "question": "As imagens desta pagina sao do empreendimento?",
+          "answer": "Sim. A galeria foi substituida por acesso, fachada e areas comuns do Phoenix Tower."
+        },
+        {
+          "question": "Por que a descricao foi atualizada?",
+          "answer": "Para trocar o texto generico por informacoes reais de construtora, localizacao e lazer."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-phoenix-tower-EM40286",
+        "https://felicitanegocios.com.br/empreendimento/74/phoenix-tower/",
+        "https://solkimoveis.com.br/empreendimento/959365/phoenix/"
+      ]
+    },
+    {
+      "slug": "porto-ribeiro-village",
+      "hero_image": "https://www.gkempreendimentos.com.br/wp-content/uploads/2025/05/porto-ribeiro-thumb.jpg",
+      "description": "O Porto Ribeiro Village e um empreendimento frente-mar da GK Empreendimentos na Praia do Ribeiro, em Bombinhas, entre Bombas e o Centro. As fontes pesquisadas descrevem um home club de alto padrao integrado a praia e a natureza, com torres baixas, piscinas, spa, saunas, restaurante privativo, gourmet, pub, fitness, festas, jogos, kids e parque ambiental. A nova curadoria usa imagens oficiais de implantacao, praia, fachada e lazer, removendo plantas e fotos de unidades.",
+      "seo_description": "Conheca o Porto Ribeiro Village, home club frente-mar da GK na Praia do Ribeiro, com piscinas, spa, parque ambiental e lazer completo.",
+      "gallery": [
+        {
+          "title": "Porto Ribeiro Village - frente-mar",
+          "category": "Empreendimento",
+          "image": "https://www.gkempreendimentos.com.br/wp-content/uploads/2025/05/porto-ribeiro-thumb.jpg",
+          "source_url": "https://www.gkempreendimentos.com.br/imoveis-em-bombinhas-empreendimentos/porto-ribeiro-village-bombinhas/",
+          "source_label": "GK Empreendimentos"
+        },
+        {
+          "title": "Porto Ribeiro Village - fachada integrada",
+          "category": "Empreendimento",
+          "image": "https://www.gkempreendimentos.com.br/wp-content/uploads/2025/05/porto-ribeiro-7.jpg",
+          "source_url": "https://www.gkempreendimentos.com.br/imoveis-em-bombinhas-empreendimentos/porto-ribeiro-village-bombinhas/",
+          "source_label": "GK Empreendimentos"
+        },
+        {
+          "title": "Porto Ribeiro Village - implantacao na praia",
+          "category": "Empreendimento",
+          "image": "https://www.gkempreendimentos.com.br/wp-content/uploads/2025/05/porto-ribeiro-1.jpg",
+          "source_url": "https://www.gkempreendimentos.com.br/imoveis-em-bombinhas-empreendimentos/porto-ribeiro-village-bombinhas/",
+          "source_label": "GK Empreendimentos"
+        },
+        {
+          "title": "Porto Ribeiro Village - piscina organica",
+          "category": "Lazer",
+          "image": "https://www.gkempreendimentos.com.br/wp-content/uploads/2025/05/porto-ribeiro-4.jpg",
+          "source_url": "https://www.gkempreendimentos.com.br/imoveis-em-bombinhas-empreendimentos/porto-ribeiro-village-bombinhas/",
+          "source_label": "GK Empreendimentos"
+        },
+        {
+          "title": "Porto Ribeiro Village - piscina frente-mar",
+          "category": "Lazer",
+          "image": "https://www.gkempreendimentos.com.br/wp-content/uploads/2025/05/porto-ribeiro-5.jpg",
+          "source_url": "https://www.gkempreendimentos.com.br/imoveis-em-bombinhas-empreendimentos/porto-ribeiro-village-bombinhas/",
+          "source_label": "GK Empreendimentos"
+        },
+        {
+          "title": "Porto Ribeiro Village - espelho d'agua",
+          "category": "Lazer",
+          "image": "https://www.gkempreendimentos.com.br/wp-content/uploads/2025/05/porto-ribeiro-6.jpg",
+          "source_url": "https://www.gkempreendimentos.com.br/imoveis-em-bombinhas-empreendimentos/porto-ribeiro-village-bombinhas/",
+          "source_label": "GK Empreendimentos"
+        },
+        {
+          "title": "Porto Ribeiro Village - sauna",
+          "category": "Wellness",
+          "image": "https://www.gkempreendimentos.com.br/wp-content/uploads/2025/05/decorado-porto-ribeiro-7.jpg",
+          "source_url": "https://www.gkempreendimentos.com.br/imoveis-em-bombinhas-empreendimentos/porto-ribeiro-village-bombinhas/",
+          "source_label": "GK Empreendimentos"
+        },
+        {
+          "title": "Porto Ribeiro Village - lounge wellness",
+          "category": "Wellness",
+          "image": "https://www.gkempreendimentos.com.br/wp-content/uploads/2025/05/decorado-porto-ribeiro-6.jpg",
+          "source_url": "https://www.gkempreendimentos.com.br/imoveis-em-bombinhas-empreendimentos/porto-ribeiro-village-bombinhas/",
+          "source_label": "GK Empreendimentos"
+        },
+        {
+          "title": "Porto Ribeiro Village - piscina coberta",
+          "category": "Lazer",
+          "image": "https://www.gkempreendimentos.com.br/wp-content/uploads/2025/05/decorado-porto-ribeiro-3.jpg",
+          "source_url": "https://www.gkempreendimentos.com.br/imoveis-em-bombinhas-empreendimentos/porto-ribeiro-village-bombinhas/",
+          "source_label": "GK Empreendimentos"
+        },
+        {
+          "title": "Porto Ribeiro Village - descanso aquecido",
+          "category": "Wellness",
+          "image": "https://www.gkempreendimentos.com.br/wp-content/uploads/2025/05/decorado-porto-ribeiro-1.jpg",
+          "source_url": "https://www.gkempreendimentos.com.br/imoveis-em-bombinhas-empreendimentos/porto-ribeiro-village-bombinhas/",
+          "source_label": "GK Empreendimentos"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Praia do Ribeiro",
+          "description": "Implantacao frente-mar em uma praia reservada de Bombinhas, entre Bombas e o Centro."
+        },
+        {
+          "icon": "Trees",
+          "title": "Integração com a natureza",
+          "description": "Projeto se relaciona com costao, vegetacao, praia e parque ambiental descrito pelas fontes."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Home club completo",
+          "description": "Piscinas, spa, saunas, restaurante privativo, gourmet, pub, fitness, festas, jogos e kids compoem a estrutura."
+        }
+      ],
+      "differentials": [
+        "Empreendimento da GK Empreendimentos na Praia do Ribeiro.",
+        "Implantacao frente-mar com piscinas e areas de wellness integradas a paisagem.",
+        "Curadoria visual oficial, sem plantas e sem fotos de unidades."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Porto Ribeiro Village?",
+          "answer": "Fica na Praia do Ribeiro, em Bombinhas, entre Bombas e o Centro."
+        },
+        {
+          "question": "Quem realiza o Porto Ribeiro Village?",
+          "answer": "As fontes oficiais vinculam o empreendimento a GK Empreendimentos."
+        },
+        {
+          "question": "Que estrutura de lazer foi considerada?",
+          "answer": "Piscinas, spa, saunas, restaurante privativo, gourmet, pub, fitness, festas, jogos, kids e parque ambiental."
+        },
+        {
+          "question": "As imagens desta pagina sao do empreendimento?",
+          "answer": "Sim. A galeria foi revisada com imagens oficiais de implantacao, praia, fachada e lazer."
+        }
+      ],
+      "sources": [
+        "https://www.gkempreendimentos.com.br/imoveis-em-bombinhas-empreendimentos/porto-ribeiro-village-bombinhas/",
+        "https://imobiliariarotadosol.com.br/porto-ribeiro-village-lancamento-frente-mar-bombinhas-sc",
+        "https://roccoimob.com/empreendimento-porto-ribeiro-village/",
+        "https://boavistabombinhas.com.br/portoribeirovillage"
+      ]
+    },
+    {
+      "slug": "residencial-brescia",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-brescia-balneario-camboriu-1.jpg",
+      "description": "O Residencial Brescia fica no Centro de Balneario Camboriu, na Rua 3600, em posicao quadra-mar. As fontes pesquisadas destacam empreendimento de alto padrao, entregue, com um pavimento tipo mais exclusivo, fachada vertical, hall, elevadores e lazer com piscina, spa, brinquedoteca, fitness, jogos, festas e garagem. A curadoria usa imagens do edificio e das areas comuns, removendo fotos internas de imoveis.",
+      "seo_description": "Conheca o Residencial Brescia no Centro de Balneario Camboriu, quadra-mar, com fachada, hall, piscina, spa, brinquedoteca e fitness.",
+      "gallery": [
+        {
+          "title": "Residencial Brescia - fachada",
+          "category": "Empreendimento",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-brescia-balneario-camboriu-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-residencial-brescia/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Residencial Brescia - hall social",
+          "category": "Acesso",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-brescia-balneario-camboriu-2.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-residencial-brescia/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Residencial Brescia - elevadores",
+          "category": "Acesso",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-brescia-balneario-camboriu-4.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-residencial-brescia/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Residencial Brescia - gourmet",
+          "category": "Lazer",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-brescia-balneario-camboriu-5.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-residencial-brescia/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Residencial Brescia - piscina",
+          "category": "Lazer",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-brescia-balneario-camboriu-8.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-residencial-brescia/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Residencial Brescia - spa",
+          "category": "Wellness",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-brescia-balneario-camboriu-10.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-residencial-brescia/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Residencial Brescia - brinquedoteca",
+          "category": "Lazer",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-brescia-balneario-camboriu-11.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-residencial-brescia/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Residencial Brescia - fitness",
+          "category": "Lazer",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-brescia-balneario-camboriu-14.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-residencial-brescia/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Residencial Brescia - ambiente de jogos",
+          "category": "Lazer",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-brescia-balneario-camboriu-17.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-residencial-brescia/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Residencial Brescia - garagem",
+          "category": "Acesso",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-brescia-balneario-camboriu-21.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-residencial-brescia/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Quadra-mar no Centro",
+          "description": "Localizacao na Rua 3600, em area central de Balneario Camboriu e proxima a praia."
+        },
+        {
+          "icon": "Building2",
+          "title": "Fachada pronta",
+          "description": "Edificio entregue, com torre vertical e acesso social registrados nas fontes."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer completo",
+          "description": "Piscina, spa, brinquedoteca, fitness, jogos, gourmet e festas atendem a rotina dos moradores."
+        }
+      ],
+      "differentials": [
+        "Empreendimento quadra-mar no Centro de Balneario Camboriu.",
+        "Hall, elevadores e lazer documentados em galeria externa.",
+        "Curadoria substitui fotos internas por midia do edificio e das areas comuns."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Residencial Brescia?",
+          "answer": "Fica na Rua 3600, no Centro de Balneario Camboriu, em posicao quadra-mar."
+        },
+        {
+          "question": "O Residencial Brescia esta pronto?",
+          "answer": "As fontes pesquisadas indicam o empreendimento como entregue/pronto."
+        },
+        {
+          "question": "Que areas comuns aparecem na galeria?",
+          "answer": "Hall, elevadores, gourmet, piscina, spa, brinquedoteca, fitness, jogos e garagem."
+        },
+        {
+          "question": "As imagens sao do empreendimento?",
+          "answer": "Sim. A curadoria usa fotos do edificio e das areas comuns do Residencial Brescia."
+        }
+      ],
+      "sources": [
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-residencial-brescia/",
+        "https://myside.com.br/apartamento-venda-residencial-brescia-balneario-camboriu-sc",
+        "https://imobiliariainesdias.com.br/empreendimento/2453/residencial-brescia/"
+      ]
+    },
+    {
+      "slug": "ristretto",
+      "hero_image": "https://b5.casteldigital.com.br/jkleinimoveis/ig/il/imoveis/5/fachada-ristretto-17695282843999.jpg",
+      "description": "O Ristretto e um empreendimento da Construtora Dallo no Canto da Praia, em Itapema. As fontes pesquisadas destacam uma torre de 37 pavimentos, padrao Dallo, localizacao a poucos passos da praia e lazer completo com ambientes de convivencia, piscina, fitness, yoga, hall, jogos, cinema e espacos sociais. A curadoria usa fachada e areas comuns do empreendimento, deixando fora plantas e ambientes privativos.",
+      "seo_description": "Conheca o Ristretto, empreendimento Dallo no Canto da Praia em Itapema, com fachada marcante, hall, piscina, fitness, jogos e lazer completo.",
+      "gallery": [
+        {
+          "title": "Ristretto - fachada Dallo",
+          "category": "Empreendimento",
+          "image": "https://b5.casteldigital.com.br/jkleinimoveis/ig/il/imoveis/5/fachada-ristretto-17695282843999.jpg",
+          "source_url": "https://www.jkleinimoveis.com.br/imovel/apartamento-no-edificio-ristretto-itapema-centro-4-quartos-3-garagens-venda-ref-5/",
+          "source_label": "J Klein Imoveis"
+        },
+        {
+          "title": "Ristretto - estar social",
+          "category": "Lazer",
+          "image": "https://b5.casteldigital.com.br/jkleinimoveis/ig/il/imoveis/5/ristretto-itapema-centro-salao-festa-10-17695530166005.jpeg",
+          "source_url": "https://www.jkleinimoveis.com.br/imovel/apartamento-no-edificio-ristretto-itapema-centro-4-quartos-3-garagens-venda-ref-5/",
+          "source_label": "J Klein Imoveis"
+        },
+        {
+          "title": "Ristretto - piscina",
+          "category": "Lazer",
+          "image": "https://b5.casteldigital.com.br/jkleinimoveis/ig/il/imoveis/5/ristretto-itapema-centro-salao-festa-18-17695530166008.jpeg",
+          "source_url": "https://www.jkleinimoveis.com.br/imovel/apartamento-no-edificio-ristretto-itapema-centro-4-quartos-3-garagens-venda-ref-5/",
+          "source_label": "J Klein Imoveis"
+        },
+        {
+          "title": "Ristretto - fitness",
+          "category": "Lazer",
+          "image": "https://b5.casteldigital.com.br/jkleinimoveis/ig/il/imoveis/5/ristretto-itapema-centro-academia-17695530166012.jpeg",
+          "source_url": "https://www.jkleinimoveis.com.br/imovel/apartamento-no-edificio-ristretto-itapema-centro-4-quartos-3-garagens-venda-ref-5/",
+          "source_label": "J Klein Imoveis"
+        },
+        {
+          "title": "Ristretto - espaco yoga",
+          "category": "Wellness",
+          "image": "https://b5.casteldigital.com.br/jkleinimoveis/ig/il/imoveis/5/ristretto-itapema-centro-espaco-yoga-17695530166013.jpeg",
+          "source_url": "https://www.jkleinimoveis.com.br/imovel/apartamento-no-edificio-ristretto-itapema-centro-4-quartos-3-garagens-venda-ref-5/",
+          "source_label": "J Klein Imoveis"
+        },
+        {
+          "title": "Ristretto - hall de entrada",
+          "category": "Acesso",
+          "image": "https://b5.casteldigital.com.br/jkleinimoveis/ig/il/imoveis/5/ristretto-itapema-centro-hall-de-entrada-2-17695530166013.jpeg",
+          "source_url": "https://www.jkleinimoveis.com.br/imovel/apartamento-no-edificio-ristretto-itapema-centro-4-quartos-3-garagens-venda-ref-5/",
+          "source_label": "J Klein Imoveis"
+        },
+        {
+          "title": "Ristretto - lounge de lazer",
+          "category": "Lazer",
+          "image": "https://b5.casteldigital.com.br/jkleinimoveis/ig/il/imoveis/5/ristretto-itapema-centro-lazer-17695530166014.jpeg",
+          "source_url": "https://www.jkleinimoveis.com.br/imovel/apartamento-no-edificio-ristretto-itapema-centro-4-quartos-3-garagens-venda-ref-5/",
+          "source_label": "J Klein Imoveis"
+        },
+        {
+          "title": "Ristretto - ambiente de jogos",
+          "category": "Lazer",
+          "image": "https://b5.casteldigital.com.br/jkleinimoveis/ig/il/imoveis/5/ristretto-itapema-centro-sala-de-jogos-17695530166014.jpeg",
+          "source_url": "https://www.jkleinimoveis.com.br/imovel/apartamento-no-edificio-ristretto-itapema-centro-4-quartos-3-garagens-venda-ref-5/",
+          "source_label": "J Klein Imoveis"
+        },
+        {
+          "title": "Ristretto - cinema",
+          "category": "Lazer",
+          "image": "https://b5.casteldigital.com.br/jkleinimoveis/ig/il/imoveis/5/ristretto-itapema-centro-salao-festa-5-17695530166018.jpeg",
+          "source_url": "https://www.jkleinimoveis.com.br/imovel/apartamento-no-edificio-ristretto-itapema-centro-4-quartos-3-garagens-venda-ref-5/",
+          "source_label": "J Klein Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Padrao Dallo",
+          "description": "Empreendimento da Construtora Dallo, associado ao alto padrao de acabamento em Itapema."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Canto da Praia",
+          "description": "Localizacao no Canto da Praia, com proximidade ao mar e a pontos de conveniencia de Itapema."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer completo",
+          "description": "Fachada, hall, piscina, fitness, yoga, jogos, cinema e ambientes sociais foram confirmados na curadoria."
+        }
+      ],
+      "differentials": [
+        "Torre de 37 pavimentos com presenca vertical marcante no Canto da Praia.",
+        "Lazer com wellness, fitness, jogos, cinema e ambientes de recepcao.",
+        "Galeria revisada com imagens do empreendimento, sem plantas e sem interiores privativos."
+      ],
+      "faq": [
+        {
+          "question": "Quem e a construtora do Ristretto?",
+          "answer": "O Ristretto e um empreendimento da Construtora Dallo."
+        },
+        {
+          "question": "Onde fica o Ristretto?",
+          "answer": "Fica no Canto da Praia, em Itapema, proximo ao mar."
+        },
+        {
+          "question": "Que areas comuns aparecem na galeria?",
+          "answer": "Fachada, hall, piscina, fitness, yoga, lounge, ambiente de jogos e cinema."
+        },
+        {
+          "question": "Por que a galeria foi trocada?",
+          "answer": "Para apresentar o empreendimento corretamente e remover imagens de interiores privativos."
+        }
+      ],
+      "sources": [
+        "https://www.dallo.com.br/empreendimento/ristretto/",
+        "https://litoralvertical.com/venda/itapema/apartamentos/edificio-ristretto/",
+        "https://www.jkleinimoveis.com.br/imovel/apartamento-no-edificio-ristretto-itapema-centro-4-quartos-3-garagens-venda-ref-5/",
+        "https://www.mercattoimoveis.com.br/condominio/ristretto/75"
+      ]
+    },
+    {
+      "slug": "riva-praia-brava",
+      "hero_image": "https://cdn.imoview.com.br/maximoveis/Condominios/1193/riva-fachada-4.jpg?1754508755",
+      "description": "O Riva Praia Brava e um empreendimento da Max Realiza em Itajai, localizado na Rua Delfim Mario de Padua Peixoto, proximo ao mar. As fontes pesquisadas destacam duas torres, projeto de alto padrao, mais de 3.000 m2 de lazer e entrega recente. A estrutura inclui piscinas, sauna, fitness, brinquedoteca, playground, gourmet, pub, pet place, beauty, delivery e areas sociais. A curadoria usa imagens de fachada, acesso e lazer, sem fotos de interiores privativos.",
+      "seo_description": "Conheca o Riva Praia Brava, empreendimento Max Realiza em Itajai, com duas torres, fachada pronta, piscinas, sauna, fitness e lazer completo.",
+      "gallery": [
+        {
+          "title": "Riva Praia Brava - fachada",
+          "category": "Empreendimento",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1193/riva-fachada-4.jpg?1754508755",
+          "source_url": "https://maximoveis.com.br/empreendimento/1193/riva/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Riva Praia Brava - acesso",
+          "category": "Acesso",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1193/riva-area-de-lazer-48.jpg?1754508755",
+          "source_url": "https://maximoveis.com.br/empreendimento/1193/riva/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Riva Praia Brava - piscina externa",
+          "category": "Lazer",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1193/riva-area-de-lazer-18.jpg?1754508755",
+          "source_url": "https://maximoveis.com.br/empreendimento/1193/riva/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Riva Praia Brava - piscina aquecida",
+          "category": "Lazer",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1193/riva-area-de-lazer-52.jpg?1754508755",
+          "source_url": "https://maximoveis.com.br/empreendimento/1193/riva/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Riva Praia Brava - fitness",
+          "category": "Lazer",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1193/riva-area-de-lazer-57.jpg?1754508755",
+          "source_url": "https://maximoveis.com.br/empreendimento/1193/riva/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Riva Praia Brava - sauna",
+          "category": "Wellness",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1193/riva-area-de-lazer-70.jpg?1754508755",
+          "source_url": "https://maximoveis.com.br/empreendimento/1193/riva/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Riva Praia Brava - brinquedoteca",
+          "category": "Lazer",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1193/riva-area-de-lazer-38.jpg?1754508755",
+          "source_url": "https://maximoveis.com.br/empreendimento/1193/riva/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Riva Praia Brava - playground",
+          "category": "Lazer",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1193/riva-area-de-lazer-34.jpg?1754508755",
+          "source_url": "https://maximoveis.com.br/empreendimento/1193/riva/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Riva Praia Brava - gourmet",
+          "category": "Lazer",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1193/riva-area-de-lazer-28.jpg?1754508755",
+          "source_url": "https://maximoveis.com.br/empreendimento/1193/riva/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Riva Praia Brava - estar social",
+          "category": "Lazer",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1193/riva-area-de-lazer-41.jpg?1754508755",
+          "source_url": "https://maximoveis.com.br/empreendimento/1193/riva/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Riva Praia Brava - espaco beleza",
+          "category": "Wellness",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1193/riva-area-de-lazer-62.jpg?1754508755",
+          "source_url": "https://maximoveis.com.br/empreendimento/1193/riva/",
+          "source_label": "Max Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Max Realiza na Praia Brava",
+          "description": "Empreendimento da Max Realiza com duas torres e arquitetura de alto padrao."
+        },
+        {
+          "icon": "Waves",
+          "title": "A uma quadra do mar",
+          "description": "Fontes pesquisadas posicionam o Riva Praia Brava proximo a praia, na Rua Delfim Mario de Padua Peixoto."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Mais de 3.000 m2 de lazer",
+          "description": "Piscinas, sauna, fitness, brinquedoteca, playground, gourmet, pub, pet place, beauty e delivery compoem a estrutura."
+        }
+      ],
+      "differentials": [
+        "Projeto da Max Realiza na Praia Brava, com entrega recente citada nas fontes.",
+        "Duas torres e lazer amplo com areas molhadas, wellness e ambientes sociais.",
+        "Galeria revisada com fachada e areas comuns, sem imagens de interiores privativos."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Riva Praia Brava?",
+          "answer": "Fica na Praia Brava, em Itajai, na Rua Delfim Mario de Padua Peixoto."
+        },
+        {
+          "question": "Quem e a construtora do Riva Praia Brava?",
+          "answer": "As fontes pesquisadas vinculam o Riva Praia Brava a Max Realiza."
+        },
+        {
+          "question": "Que lazer o Riva oferece?",
+          "answer": "Piscinas, sauna, fitness, brinquedoteca, playground, gourmet, pub, pet place, beauty, delivery e areas sociais."
+        },
+        {
+          "question": "As imagens desta pagina sao do empreendimento?",
+          "answer": "Sim. Foram selecionadas imagens de fachada, acesso e lazer do Riva Praia Brava."
+        }
+      ],
+      "sources": [
+        "https://maximoveis.com.br/empreendimento/1193/riva/",
+        "https://myside.com.br/apartamento-venda-riva-praia-brava-itajai-sc",
+        "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/edificio-riva/",
+        "https://www.maxrealiza.com/blog/viver-no-riva-praia-brava-uma-experiencia-unica-de-moradia/"
+      ]
+    }
+  ]
+}

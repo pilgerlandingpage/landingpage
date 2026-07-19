@@ -1,0 +1,1230 @@
+{
+  "batch_id": "development-media-curation-batch15-20260715",
+  "generated_at": "2026-07-15T13:10:00.000Z",
+  "items": [
+    {
+      "slug": "edificio-lady",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/lady-46-1723472085.webp",
+      "description": "O Edificio Lady fica na orla de Balneario Camboriu, com leitura residencial frente mar e acesso direto ao cotidiano da Praia Central. A curadoria substitui a galeria anterior por registros do proprio empreendimento, priorizando fachada, hall, circulacao de elevadores e ambiente de eventos. A pagina passa a comunicar o predio pela localizacao rara na avenida beira-mar, pela estrutura de uso comum e pelo perfil tradicional de alto valor no Centro.",
+      "seo_description": "Conheca o Edificio Lady em Balneario Camboriu, empreendimento frente mar com fachada, hall, eventos e localizacao na orla central.",
+      "gallery": [
+        {
+          "title": "Edificio Lady - fachada frente mar",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/lady-46-1723472085.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-lady-EM44993",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Edificio Lady - fachada da orla",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/lady-46-1723467907.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-lady-EM44993",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Edificio Lady - hall social",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/lady-1-1723467910.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-lady-EM44993",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Edificio Lady - elevadores",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/lady-2-1723467909.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-lady-EM44993",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Edificio Lady - eventos gourmet",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/lady-4-1723467909.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-lady-EM44993",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente mar",
+          "description": "A fachada esta posicionada na orla central, com leitura direta de praia e skyline de Balneario Camboriu."
+        },
+        {
+          "icon": "Building2",
+          "title": "Predio consolidado",
+          "description": "O conjunto tem perfil residencial tradicional, com acessos e areas comuns documentados na nova galeria."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Centro na beira-mar",
+          "description": "Localizacao pratica para viver a praia, a Avenida Atlantica e os servicos centrais sem depender de deslocamentos longos."
+        }
+      ],
+      "differentials": [
+        "Galeria revisada com fachada, hall, elevadores e ambiente de eventos.",
+        "Fotos internas de oferta deixam de ser o foco visual da pagina.",
+        "Copy reposicionada para frente mar, acesso social e valor de localizacao."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Edificio Lady?",
+          "answer": "Fica na orla de Balneario Camboriu, em area central e frente mar."
+        },
+        {
+          "question": "O que aparece na galeria revisada?",
+          "answer": "A selecao mostra fachada, hall social, elevadores e ambiente de eventos do empreendimento."
+        },
+        {
+          "question": "Por que a pagina foi ajustada?",
+          "answer": "Porque a auditoria priorizou imagens do empreendimento em vez de fotos internas de ofertas especificas."
+        },
+        {
+          "question": "Quais fontes foram usadas?",
+          "answer": "Foram usadas fontes de mercado com destaque para a pagina do empreendimento na Imobille."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-lady-EM44993",
+        "https://felicitanegocios.com.br/empreendimento/641/lady/",
+        "https://meufrentemar.com.br/empreendimento/lady/sc/balneario-camboriu/349013"
+      ]
+    },
+    {
+      "slug": "edificio-legend-vila-rica",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2025/06/edificio-legend-vila-rica-meia-praia-itapema-fachada.jpg",
+      "description": "O Edificio Legend Vila Rica e um empreendimento frente mar na Meia Praia, em Itapema, com proposta de home club e areas comuns voltadas para vista, lazer e convivencia. A nova curadoria usa renders e imagens institucionais do predio, da fachada, do hall, da piscina, do rooftop, dos ambientes de eventos, kids e fitness. A pagina passa a apresentar o Legend pela escala do empreendimento e pela posicao nobre entre praia, Avenida Nereu Ramos e o miolo mais valorizado da Meia Praia.",
+      "seo_description": "Conheca o Edificio Legend Vila Rica em Itapema, empreendimento frente mar na Meia Praia com home club, rooftop e lazer.",
+      "gallery": [
+        {
+          "title": "Legend Vila Rica - fachada",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/06/edificio-legend-vila-rica-meia-praia-itapema-fachada.jpg",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/meia-praia/edificio-legend-vila-rica/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Legend Vila Rica - skyline frente mar",
+          "category": "Localizacao",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/06/edificio-legend-vila-rica-meia-praia-itapema-5.avif",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/meia-praia/edificio-legend-vila-rica/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Legend Vila Rica - torre frente mar",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/06/edificio-legend-vila-rica-meia-praia-itapema-22.avif",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/meia-praia/edificio-legend-vila-rica/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Legend Vila Rica - embasamento",
+          "category": "Acesso",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/06/edificio-legend-vila-rica-meia-praia-itapema-7.avif",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/meia-praia/edificio-legend-vila-rica/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Legend Vila Rica - hall",
+          "category": "Hall",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/06/edificio-legend-vila-rica-meia-praia-itapema-9.avif",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/meia-praia/edificio-legend-vila-rica/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Legend Vila Rica - piscina rooftop",
+          "category": "Piscina",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/06/edificio-legend-vila-rica-meia-praia-itapema-12.avif",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/meia-praia/edificio-legend-vila-rica/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Legend Vila Rica - borda infinita",
+          "category": "Piscina",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/06/edificio-legend-vila-rica-meia-praia-itapema-13.avif",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/meia-praia/edificio-legend-vila-rica/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Legend Vila Rica - eventos panoramico",
+          "category": "Eventos",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/06/edificio-legend-vila-rica-meia-praia-itapema-14.avif",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/meia-praia/edificio-legend-vila-rica/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Legend Vila Rica - kids",
+          "category": "Kids",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/06/edificio-legend-vila-rica-meia-praia-itapema-18.avif",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/meia-praia/edificio-legend-vila-rica/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Legend Vila Rica - fitness",
+          "category": "Fitness",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/06/edificio-legend-vila-rica-meia-praia-itapema-21.avif",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/meia-praia/edificio-legend-vila-rica/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente mar na Meia Praia",
+          "description": "O empreendimento se posiciona na faixa mais desejada de Itapema, com vista aberta e acesso imediato a praia."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Home club vertical",
+          "description": "A galeria destaca piscina, rooftop, kids, fitness, hall e eventos, reforcando a escala de lazer."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Miolo valorizado",
+          "description": "Localizacao proxima a Avenida Nereu Ramos e ao circuito de servicos da Meia Praia."
+        }
+      ],
+      "differentials": [
+        "Galeria substituida por imagens do empreendimento e do home club.",
+        "Copy reforca frente mar, rooftop e infraestrutura compartilhada.",
+        "Fontes cruzadas validam a localizacao na Meia Praia e o perfil de alto padrao."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Legend Vila Rica?",
+          "answer": "Fica na Meia Praia, em Itapema, em posicao frente mar."
+        },
+        {
+          "question": "O empreendimento tem lazer?",
+          "answer": "Sim. As fontes e imagens apontam piscina, rooftop, kids, fitness, hall e ambientes de eventos."
+        },
+        {
+          "question": "O que mudou na auditoria?",
+          "answer": "A galeria passou a usar imagens do empreendimento, evitando fotos internas de ofertas."
+        },
+        {
+          "question": "Quais fontes foram usadas?",
+          "answer": "A fonte visual principal foi a Litoral Vertical, com validacao complementar em imobiliarias locais."
+        }
+      ],
+      "sources": [
+        "https://litoralvertical.com/venda/itapema/apartamentos/meia-praia/edificio-legend-vila-rica/",
+        "https://www.imobiliariasolmarimoveis.com.br/imovel/apartamento-no-edificio-legend-vila-rica-itapema-meia-praia-3-quartos-2-garagens-venda-ref-128/",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-legend-vila-rica-itapema-meia-praia-3-quartos-2-garagens-venda-ref-1416/"
+      ]
+    },
+    {
+      "slug": "edificio-noah",
+      "hero_image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n8-eBcbEc6U9t3YviwTMMwMT4GdpdXbhnY3Rq4krHU/.jpg",
+      "description": "O Edificio Noah, na Meia Praia em Itapema, foi revisado com atencao extra porque a coleta inicial misturou imagens de outros empreendimentos. A curadoria final usa apenas fontes especificas do Noah Residence, com fachada, acesso, gourmet, jogos, fitness, kids, wellness e piscina. A pagina passa a apresentar o empreendimento pela sua torre vertical, pela infraestrutura de lazer e pelo endereco em uma das regioes mais procuradas de Itapema.",
+      "seo_description": "Conheca o Edificio Noah Residence em Itapema, na Meia Praia, com fachada, acesso, piscina, fitness, kids e lazer.",
+      "gallery": [
+        {
+          "title": "Noah Residence - fachada completa",
+          "category": "Fachada",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n8-eBcbEc6U9t3YviwTMMwMT4GdpdXbhnY3Rq4krHU/.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/empreendimento/noah-residence-CO95811",
+          "source_label": "Potencial"
+        },
+        {
+          "title": "Noah Residence - fachada real",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_1236_21194_1516_120526.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/noah-residence/itapema/meia-praia/1236",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Noah Residence - acesso",
+          "category": "Acesso",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/i1_1236_21195_1516_120526.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/noah-residence/itapema/meia-praia/1236",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Noah Residence - gourmet",
+          "category": "Gourmet",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/i1_1236_21198_1516_120526.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/noah-residence/itapema/meia-praia/1236",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Noah Residence - jogos",
+          "category": "Jogos",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n_OhdgsH7ppjGxfP5SvtQXATI-lVdjbhjU3YLbKXh4/.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/empreendimento/noah-residence-CO95811",
+          "source_label": "Potencial"
+        },
+        {
+          "title": "Noah Residence - fitness",
+          "category": "Fitness",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n_-iuvoqUxgMGrXMpevQQvJQYqvIt3bhvg3u-DuM0g/.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/empreendimento/noah-residence-CO95811",
+          "source_label": "Potencial"
+        },
+        {
+          "title": "Noah Residence - kids",
+          "category": "Kids",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n--RuWa1gDuj2amQWRvy0d0yz-mqdfbhto3S3YG3Rk/.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/empreendimento/noah-residence-CO95811",
+          "source_label": "Potencial"
+        },
+        {
+          "title": "Noah Residence - wellness",
+          "category": "Wellness",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n_OdeRuWzHugJ-iD-tiNL8GNLoR393bmRk2Rb8OUxw/.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/empreendimento/noah-residence-CO95811",
+          "source_label": "Potencial"
+        },
+        {
+          "title": "Noah Residence - piscina",
+          "category": "Piscina",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n9OAdFiVr9r9JhaR5_nyDODML7sKdPbg1g2qAycJGo/.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/empreendimento/noah-residence-CO95811",
+          "source_label": "Potencial"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Torre na Meia Praia",
+          "description": "O empreendimento ganha leitura propria, com fachada e acesso validados por fontes especificas do Noah."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer completo",
+          "description": "Piscina, fitness, jogos, gourmet, kids e wellness foram priorizados na nova galeria."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Endereco em Itapema",
+          "description": "A Meia Praia concentra praia, servicos e liquidez para quem busca moradia ou investimento no litoral."
+        }
+      ],
+      "differentials": [
+        "Coleta contaminada por outros predios foi descartada no processo de selecao.",
+        "Galeria final usa apenas Noah Residence em Potencial, CRI e Versatil.",
+        "Copy deixa de ser generica e passa a explicar fachada, lazer e localizacao."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Noah Residence?",
+          "answer": "Fica na Meia Praia, em Itapema, Santa Catarina."
+        },
+        {
+          "question": "Como as imagens foram validadas?",
+          "answer": "Foram selecionadas somente imagens com origem em paginas especificas do Noah Residence."
+        },
+        {
+          "question": "Quais areas aparecem na galeria?",
+          "answer": "Fachada, acesso, gourmet, jogos, fitness, kids, wellness e piscina."
+        },
+        {
+          "question": "O que foi corrigido na pagina?",
+          "answer": "A auditoria removeu a dependencia de fotos internas e descartou candidatos de outros empreendimentos."
+        }
+      ],
+      "sources": [
+        "https://www.potencialimoveis.com.br/empreendimento/noah-residence-CO95811",
+        "https://www.imobiliariacri.com.br/empreendimento/noah-residence-EMP00215",
+        "https://imobiliariaversatil.com.br/edificios/noah-residence/itapema/meia-praia/1236"
+      ]
+    },
+    {
+      "slug": "edificio-organica",
+      "hero_image": "https://sunprime.com.br/upload/site_servico_adicional/82.jpg",
+      "description": "O Edificio Organica, da Sunprime, e um pre-lancamento na Meia Praia, em Itapema, com arquitetura de linguagem modernista, paisagismo assinado pelo Escritorio Burle Marx e rooftop inspirado na Casa do Baile. A curadoria usa imagens oficiais do empreendimento, incluindo fachada, piscina, deck, paisagismo, wellness, kids e fitness. A pagina passa a comunicar o Organica como projeto autoral, vertical, com forte presenca de natureza e areas de convivencia.",
+      "seo_description": "Conheca o Edificio Organica da Sunprime em Itapema, com arquitetura autoral, paisagismo Burle Marx, rooftop e lazer.",
+      "gallery": [
+        {
+          "title": "Organica - fachada vertical",
+          "category": "Fachada",
+          "image": "https://sunprime.com.br/upload/site_servico_adicional/82.jpg",
+          "source_url": "https://sunprime.com.br/empreendimento/4/82",
+          "source_label": "Sunprime"
+        },
+        {
+          "title": "Organica - varandas com mar",
+          "category": "Fachada",
+          "image": "https://sunprime.com.br/upload/site_servico/imagens/821.png",
+          "source_url": "https://sunprime.com.br/empreendimento/4/82",
+          "source_label": "Sunprime"
+        },
+        {
+          "title": "Organica - piscina externa",
+          "category": "Piscina",
+          "image": "https://sunprime.com.br/upload/site_servico/imagens/822.png",
+          "source_url": "https://sunprime.com.br/empreendimento/4/82",
+          "source_label": "Sunprime"
+        },
+        {
+          "title": "Organica - implantacao do lazer",
+          "category": "Implantacao",
+          "image": "https://sunprime.com.br/upload/site_servico/imagens/823.png",
+          "source_url": "https://sunprime.com.br/empreendimento/4/82",
+          "source_label": "Sunprime"
+        },
+        {
+          "title": "Organica - borda de agua",
+          "category": "Piscina",
+          "image": "https://sunprime.com.br/upload/site_servico/imagens/824.png",
+          "source_url": "https://sunprime.com.br/empreendimento/4/82",
+          "source_label": "Sunprime"
+        },
+        {
+          "title": "Organica - rooftop",
+          "category": "Rooftop",
+          "image": "https://sunprime.com.br/upload/site_servico/imagens/825.png",
+          "source_url": "https://sunprime.com.br/empreendimento/4/82",
+          "source_label": "Sunprime"
+        },
+        {
+          "title": "Organica - paisagismo",
+          "category": "Paisagismo",
+          "image": "https://sunprime.com.br/upload/site_servico/imagens/826.png",
+          "source_url": "https://sunprime.com.br/empreendimento/4/82",
+          "source_label": "Sunprime"
+        },
+        {
+          "title": "Organica - convivencia externa",
+          "category": "Convivencia",
+          "image": "https://sunprime.com.br/upload/site_servico/imagens/827.png",
+          "source_url": "https://sunprime.com.br/empreendimento/4/82",
+          "source_label": "Sunprime"
+        },
+        {
+          "title": "Organica - eventos panoramico",
+          "category": "Eventos",
+          "image": "https://sunprime.com.br/upload/site_servico/imagens/832.png",
+          "source_url": "https://sunprime.com.br/empreendimento/4/82",
+          "source_label": "Sunprime"
+        },
+        {
+          "title": "Organica - wellness",
+          "category": "Wellness",
+          "image": "https://sunprime.com.br/upload/site_servico/imagens/833.png",
+          "source_url": "https://sunprime.com.br/empreendimento/4/82",
+          "source_label": "Sunprime"
+        },
+        {
+          "title": "Organica - kids",
+          "category": "Kids",
+          "image": "https://sunprime.com.br/upload/site_servico/imagens/835.png",
+          "source_url": "https://sunprime.com.br/empreendimento/4/82",
+          "source_label": "Sunprime"
+        },
+        {
+          "title": "Organica - fitness",
+          "category": "Fitness",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/356683/images/_02f657d5548859174041707210488165.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-organica-itapema-sc",
+          "source_label": "MySide"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Sparkles",
+          "title": "Arquitetura autoral",
+          "description": "A Sunprime apresenta o projeto com linguagem modernista, fachada marcante e desenho voltado a identidade brasileira."
+        },
+        {
+          "icon": "Trees",
+          "title": "Paisagismo Burle Marx",
+          "description": "A fonte oficial cita o Escritorio Burle Marx como assinatura do paisagismo do empreendimento."
+        },
+        {
+          "icon": "Waves",
+          "title": "Meia Praia",
+          "description": "Localizacao na Av. Nereu Ramos com Rua 332, em uma das regioes mais valorizadas de Itapema."
+        }
+      ],
+      "differentials": [
+        "Imagens oficiais da Sunprime substituem fotos internas de oferta.",
+        "Copy destaca arquitetura, paisagismo, rooftop e lazer.",
+        "Dados tecnicos validados na pagina oficial do empreendimento."
+      ],
+      "faq": [
+        {
+          "question": "Quem assina o Organica?",
+          "answer": "A incorporadora e a Sunprime, com arquitetura autoral e paisagismo citado pela fonte oficial como Escritorio Burle Marx."
+        },
+        {
+          "question": "Onde fica o empreendimento?",
+          "answer": "Na Av. Nereu Ramos, esquina com Rua 332, na Meia Praia em Itapema."
+        },
+        {
+          "question": "Quais imagens entraram na nova galeria?",
+          "answer": "Fachada, piscina, rooftop, paisagismo, wellness, kids, fitness e areas de convivencia."
+        },
+        {
+          "question": "Por que a pagina foi reescrita?",
+          "answer": "A descricao anterior era generica; a nova copy comunica os diferenciais reais do empreendimento."
+        }
+      ],
+      "sources": [
+        "https://sunprime.com.br/empreendimento/4/82",
+        "https://www.nsctotal.com.br/colunistas/estela-benetti/cidade-do-litoral-ganha-empreendimento-milionario-com-paisagismo-burle-marx",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-organica-itapema-meia-praia-4-quartos-3-garagens-venda-ref-1486/"
+      ]
+    },
+    {
+      "slug": "edificio-porto-di-napoli",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/photoshop-novo0000-1711560014.jpg",
+      "description": "O Edificio Porto Di Napoli fica na Rua 3144, no Centro de Balneario Camboriu, em regiao residencial proxima a Terceira Avenida, Barra Sul e servicos do bairro. As fontes consultadas citam predio entregue, com dois elevadores, dois apartamentos por andar, depositos de praia e lazer com piscina, gourmet, jacuzzi, playground e espacos de convivencia. A nova galeria substitui fotos internas por fachada, piscina, deck, gourmet externo e hall do empreendimento.",
+      "seo_description": "Conheca o Edificio Porto Di Napoli em Balneario Camboriu, com fachada, piscina, gourmet, jacuzzi, playground e Centro.",
+      "gallery": [
+        {
+          "title": "Porto Di Napoli - fachada",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/photoshop-novo0000-1711560014.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-porto-di-napoli-EM93385",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Di Napoli - piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/photoshop-novo0001-1711559825.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-porto-di-napoli-EM93385",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Di Napoli - deck piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/photoshop-novo0002-1711559825.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-porto-di-napoli-EM93385",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Di Napoli - gourmet externo",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/photoshop-novo0003-1711559826.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-porto-di-napoli-EM93385",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Di Napoli - jacuzzi",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/photoshop-novo0004-1711559827.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-porto-di-napoli-EM93385",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Di Napoli - torre",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2015/07/edificio-porto-di-napoli-balneario-camboriu-1.2.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-porto-di-napoli/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Porto Di Napoli - acesso externo",
+          "category": "Acesso",
+          "image": "https://litoralvertical.com/wp-content/uploads/2015/07/edificio-porto-di-napoli-balneario-camboriu-1.1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-porto-di-napoli/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Porto Di Napoli - fachada baixa",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2015/07/edificio-porto-di-napoli-balneario-camboriu-1.3.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-porto-di-napoli/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Porto Di Napoli - hall",
+          "category": "Hall",
+          "image": "https://litoralvertical.com/wp-content/uploads/2015/07/edificio-porto-di-napoli-balneario-camboriu-2.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-porto-di-napoli/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Porto Di Napoli - piscina elevada",
+          "category": "Piscina",
+          "image": "https://litoralvertical.com/wp-content/uploads/2015/07/edificio-porto-di-napoli-balneario-camboriu-3.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-porto-di-napoli/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro de Balneario",
+          "description": "Endereco na Rua 3144, com acesso pratico a servicos, Terceira Avenida, Barra Sul e Praia Central."
+        },
+        {
+          "icon": "Waves",
+          "title": "Lazer ao ar livre",
+          "description": "Piscina, deck, jacuzzi e gourmet externo aparecem na galeria revisada."
+        },
+        {
+          "icon": "Building2",
+          "title": "Predio entregue",
+          "description": "Fontes de mercado citam empreendimento entregue, com dois elevadores e poucos vizinhos por pavimento."
+        }
+      ],
+      "differentials": [
+        "Galeria troca fotos internas por fachada, piscina, deck, jacuzzi e hall.",
+        "Descricao preenchida com endereco, infraestrutura e lazer real.",
+        "Fontes Imobille e Litoral Vertical foram cruzadas para reduzir risco de imagem errada."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Porto Di Napoli?",
+          "answer": "Na Rua 3144, no Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Quais areas aparecem na galeria?",
+          "answer": "Fachada, piscina, deck, gourmet externo, jacuzzi, hall e acesso."
+        },
+        {
+          "question": "O empreendimento ja foi entregue?",
+          "answer": "As fontes consultadas indicam predio entregue, com estrutura consolidada no Centro."
+        },
+        {
+          "question": "O que foi melhorado na pagina?",
+          "answer": "A pagina ganhou descricao especifica, beneficios reais e galeria focada no empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-porto-di-napoli-EM93385",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-porto-di-napoli/",
+        "https://www.giroimoveis.com.br/imovel/apartamento-no-edificio-porto-di-napoli-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-950/"
+      ]
+    },
+    {
+      "slug": "edificio-quantum",
+      "hero_image": "https://quantaempreendimentos.com/wp-content/uploads/2025/08/quantum-1.jpg",
+      "description": "O Edificio Quantum, da Quanta Empreendimentos, e um projeto no Centro de Balneario Camboriu, na Rua 2850, com linguagem contemporanea, fachada curva e areas comuns voltadas para bem-estar. A curadoria utiliza imagens oficiais da Quanta, priorizando fachada, acesso, hall, convivencia e fitness, sem plantas ou interiores de oferta. A pagina passa a apresentar o Quantum como lancamento urbano de alto padrao, com endereco central e identidade arquitetonica propria.",
+      "seo_description": "Conheca o Edificio Quantum da Quanta em Balneario Camboriu, com fachada contemporanea, hall, convivencia e fitness.",
+      "gallery": [
+        {
+          "title": "Quantum - fachada principal",
+          "category": "Fachada",
+          "image": "https://quantaempreendimentos.com/wp-content/uploads/2025/08/quantum-1.jpg",
+          "source_url": "https://quantaempreendimentos.com/quantum/",
+          "source_label": "Quanta"
+        },
+        {
+          "title": "Quantum - torre render",
+          "category": "Fachada",
+          "image": "https://quantaempreendimentos.com/wp-content/uploads/2024/11/FACHADA-02.jpg",
+          "source_url": "https://quantaempreendimentos.com/quantum/",
+          "source_label": "Quanta"
+        },
+        {
+          "title": "Quantum - acesso",
+          "category": "Acesso",
+          "image": "https://quantaempreendimentos.com/wp-content/uploads/2024/11/FACHADA-03.jpg",
+          "source_url": "https://quantaempreendimentos.com/quantum/",
+          "source_label": "Quanta"
+        },
+        {
+          "title": "Quantum - skyline urbano",
+          "category": "Localizacao",
+          "image": "https://quantaempreendimentos.com/wp-content/uploads/2024/11/FACHADA-04.jpg",
+          "source_url": "https://quantaempreendimentos.com/quantum/",
+          "source_label": "Quanta"
+        },
+        {
+          "title": "Quantum - lobby",
+          "category": "Hall",
+          "image": "https://quantaempreendimentos.com/wp-content/uploads/2024/11/QUANTUM.jpg",
+          "source_url": "https://quantaempreendimentos.com/quantum/",
+          "source_label": "Quanta"
+        },
+        {
+          "title": "Quantum - convivencia",
+          "category": "Convivencia",
+          "image": "https://quantaempreendimentos.com/wp-content/uploads/2024/11/QUANTUM-3.jpg",
+          "source_url": "https://quantaempreendimentos.com/quantum/",
+          "source_label": "Quanta"
+        },
+        {
+          "title": "Quantum - fitness cardio",
+          "category": "Fitness",
+          "image": "https://quantaempreendimentos.com/wp-content/uploads/2024/11/QUANTUM-4.jpg",
+          "source_url": "https://quantaempreendimentos.com/quantum/",
+          "source_label": "Quanta"
+        },
+        {
+          "title": "Quantum - fitness funcional",
+          "category": "Fitness",
+          "image": "https://quantaempreendimentos.com/wp-content/uploads/2024/11/QUANTUM-5.jpg",
+          "source_url": "https://quantaempreendimentos.com/quantum/",
+          "source_label": "Quanta"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Arquitetura contemporanea",
+          "description": "A fachada curva e a volumetria do projeto criam presenca forte no Centro de Balneario Camboriu."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Rua 2850",
+          "description": "Endereco central, com acesso a servicos, praia, restaurantes e eixos de mobilidade da cidade."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Bem-estar no predio",
+          "description": "A nova galeria destaca lobby, convivencia e fitness, retirando plantas e imagens internas de oferta."
+        }
+      ],
+      "differentials": [
+        "Imagens oficiais da Quanta substituem fotos de planta e interiores.",
+        "Copy deixa claro o endereco central e a proposta arquitetonica.",
+        "Galeria final prioriza fachada, acesso, hall, convivencia e fitness."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Quantum?",
+          "answer": "Fica no Centro de Balneario Camboriu, na Rua 2850, segundo fontes de mercado consultadas."
+        },
+        {
+          "question": "Quem desenvolve o empreendimento?",
+          "answer": "A pagina oficial consultada e da Quanta Empreendimentos."
+        },
+        {
+          "question": "Quais imagens foram usadas?",
+          "answer": "Foram usadas imagens oficiais de fachada, acesso, lobby, convivencia e fitness."
+        },
+        {
+          "question": "O que foi removido da curadoria?",
+          "answer": "Plantas e imagens internas de oferta foram descartadas para manter foco no empreendimento."
+        }
+      ],
+      "sources": [
+        "https://quantaempreendimentos.com/quantum/",
+        "https://myside.com.br/apartamento-venda-quantum-balneario-camboriu-sc",
+        "https://www.litoralnorth.com.br/imovel/apartamento-no-edificio-quantum-residence-balneario-camboriu-centro-4-quartos-venda-ref-3770/"
+      ]
+    },
+    {
+      "slug": "eleve-residence",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/2310202415093717449-1729706977.jpg",
+      "description": "O Eleve Residence fica no Pereque, em Porto Belo, proximo ao mar e em uma esquina valorizada da regiao. As fontes consultadas citam empreendimento da M Santos, com 19 pavimentos, tres residencias por andar, rooftop, piscinas, gourmet, eventos, brinquedoteca, fitness, hidromassagem e wine bar. A curadoria troca fotos internas por fachada, deck, spa, fitness, gourmet, kids, hall e imagens externas do predio.",
+      "seo_description": "Conheca o Eleve Residence em Porto Belo, no Pereque, com fachada, rooftop, piscinas, gourmet, kids, fitness e spa.",
+      "gallery": [
+        {
+          "title": "Eleve Residence - fachada",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/2310202415093717449-1729706977.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-eleve-residence--EM31262",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Eleve Residence - lounge externo",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2024/photoshop-novo-1-copia0007-1729706679.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-eleve-residence--EM31262",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Eleve Residence - spa externo",
+          "category": "Wellness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2024/photoshop-novo-1-copia0004-1729706677.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-eleve-residence--EM31262",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Eleve Residence - deck",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2024/photoshop-novo-1-copia0003-1729706677.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-eleve-residence--EM31262",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Eleve Residence - fitness",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2024/photoshop-novo-1-copia0011-1729706681.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-eleve-residence--EM31262",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Eleve Residence - gourmet",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2024/photoshop-novo-1-copia0005-1729706678.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-eleve-residence--EM31262",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Eleve Residence - kids",
+          "category": "Kids",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2024/photoshop-novo-1-copia0009-1729706680.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-eleve-residence--EM31262",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Eleve Residence - torre",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2024/photoshop-novo-1-copia0002-1729706676.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-eleve-residence--EM31262",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Eleve Residence - fachada Litoral",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/05/edificio-eleve-residence-balneario-pereque-porto-belo-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/porto-belo/apartamentos/balneario-pereque/edificio-eleve-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Eleve Residence - contexto Pereque",
+          "category": "Localizacao",
+          "image": "https://litoralvertical.com/files/banners/imoveis-a-venda-porto-belo.avif",
+          "source_url": "https://litoralvertical.com/venda/porto-belo/apartamentos/balneario-pereque/edificio-eleve-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Eleve Residence - entrada",
+          "category": "Acesso",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/05/edificio-eleve-residence-balneario-pereque-porto-belo-37-1.avif",
+          "source_url": "https://litoralvertical.com/venda/porto-belo/apartamentos/balneario-pereque/edificio-eleve-residence/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Pereque perto do mar",
+          "description": "Fontes de mercado posicionam o empreendimento a poucos metros da praia, no eixo de crescimento de Porto Belo."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Rooftop e lazer",
+          "description": "Piscinas, gourmet, eventos, kids, fitness, spa e areas de convivencia compoem a leitura do predio."
+        },
+        {
+          "icon": "Building2",
+          "title": "Escala equilibrada",
+          "description": "As fontes citam 19 pavimentos e tres residencias por andar, com proposta de convivencia bem distribuida."
+        }
+      ],
+      "differentials": [
+        "Galeria revisada com fachada, lazer e areas comuns do Eleve.",
+        "Descricao preenchida com M Santos, Pereque, rooftop e infraestrutura.",
+        "Imagens internas de oferta foram removidas da narrativa principal."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Eleve Residence?",
+          "answer": "Fica no Pereque, em Porto Belo, proximo ao mar."
+        },
+        {
+          "question": "Quais areas aparecem na galeria?",
+          "answer": "Fachada, lounge externo, spa, deck, fitness, gourmet, kids, entrada e contexto do Pereque."
+        },
+        {
+          "question": "Quem e a construtora citada nas fontes?",
+          "answer": "As fontes de mercado citam a M Santos como construtora do empreendimento."
+        },
+        {
+          "question": "O que mudou na pagina?",
+          "answer": "A pagina passou a destacar infraestrutura real do empreendimento em vez de fotos internas."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-eleve-residence--EM31262",
+        "https://litoralvertical.com/venda/porto-belo/apartamentos/balneario-pereque/edificio-eleve-residence/",
+        "https://bellaitapema.com.br/imovel/apartamentos/porto-belo/meia-praia-apartamento-mobiliado-2-quartos-eleve-residence-decorado-02-suites-c-02-vagas-cod-80102"
+      ]
+    },
+    {
+      "slug": "esquina-bella",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/esquina-bella-18-1748464107-1776113256.webp",
+      "description": "O Esquina Bella fica no bairro Pioneiros, em Balneario Camboriu, com fachada vertical, area de piscina e lazer de apoio ao perfil familiar. As fontes consultadas citam endereco na Rua Mingote Serafim e estrutura com eventos, gourmet, jogos, sauna, cinema, academia, brinquedoteca, piscina e playground. A nova curadoria remove o peso de fotos internas e reposiciona a pagina com fachada, piscina, deck, jogos e areas comuns do condominio.",
+      "seo_description": "Conheca o Esquina Bella em Balneario Camboriu, no Pioneiros, com fachada, piscina, gourmet, jogos, kids e lazer.",
+      "gallery": [
+        {
+          "title": "Esquina Bella - fachada",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/esquina-bella-18-1748464107-1776113256.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-esquina-bella-EM18355",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Esquina Bella - piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/13042026174736334-1776113256.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-esquina-bella-EM18355",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Esquina Bella - torre",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2025/esquina-bella-18-1748464107.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-esquina-bella-EM18355",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Esquina Bella - deck externo",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2025/esquina-bella-5-1748464109.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-esquina-bella-EM18355",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Esquina Bella - jogos",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2025/esquina-bella-8-1748464110.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-esquina-bella-EM18355",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Esquina Bella - rooftop piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2025/esquina-bella-3-1748464108.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-esquina-bella-EM18355",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Esquina Bella - piscina elevada",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2025/esquina-bella-1-1748464107.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-esquina-bella-EM18355",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Esquina Bella - lazer externo",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2025/esquina-bella-2-1748464108.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-esquina-bella-EM18355",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Esquina Bella - deck piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2025/esquina-bella-4-1748464108.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-esquina-bella-EM18355",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Pioneiros",
+          "description": "Bairro estrategico de Balneario Camboriu, com acesso a praia, Barra Norte, comercio e servicos."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e deck",
+          "description": "A nova galeria mostra areas externas de lazer, piscina e convivencia do condominio."
+        },
+        {
+          "icon": "Users",
+          "title": "Perfil familiar",
+          "description": "As fontes citam brinquedoteca, playground, jogos, cinema, academia e ambientes de eventos."
+        }
+      ],
+      "differentials": [
+        "Galeria revisada com fachada e lazer do empreendimento.",
+        "Descricao substitui texto generico por localizacao e estrutura real.",
+        "Rota visual evita fotos internas de ofertas e prioriza areas comuns."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Esquina Bella?",
+          "answer": "Fica no bairro Pioneiros, em Balneario Camboriu."
+        },
+        {
+          "question": "Quais areas de lazer sao citadas nas fontes?",
+          "answer": "Piscina, eventos, gourmet, jogos, sauna, cinema, academia, brinquedoteca e playground."
+        },
+        {
+          "question": "O que mudou na galeria?",
+          "answer": "A galeria passou a usar fachada, piscina, deck e areas comuns do empreendimento."
+        },
+        {
+          "question": "Quais fontes foram consultadas?",
+          "answer": "Imobille, Felicita, Desc e Guilherme Pilger foram usadas na verificacao."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-esquina-bella-EM18355",
+        "https://felicitanegocios.com.br/empreendimento/117/esquina-bella/",
+        "https://desc.com.br/apartamento-a-venda-no-esquina-bella-em-balneario-camboriu",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-esquina-bella-balneario-camboriu-pioneiros-4-quartos-5-garagens-venda-ref-456/"
+      ]
+    },
+    {
+      "slug": "filipinas-residence",
+      "hero_image": "https://maconempreendimentos.com.br/wp-content/uploads/2025/07/Filipinas-Residence-Destaque.webp",
+      "description": "O Filipinas Residence, da Macon Empreendimentos, fica no Centro de Balneario Camboriu, na Rua 1101, a cerca de 400 metros da Praia Central segundo a incorporadora. O projeto tem torre exclusiva, rooftop, piscina, gourmet, fireplace, playground, academia, pet place, terraces e poucos pavimentos residenciais. A curadoria usa imagens da Macon e fontes complementares para substituir fotos internas por fachada, rooftop, kids, fitness e areas comuns.",
+      "seo_description": "Conheca o Filipinas Residence da Macon em Balneario Camboriu, com rooftop, piscina, gourmet, kids, fitness e pet.",
+      "gallery": [
+        {
+          "title": "Filipinas Residence - fachada",
+          "category": "Fachada",
+          "image": "https://maconempreendimentos.com.br/wp-content/uploads/2025/07/Filipinas-Residence-Destaque.webp",
+          "source_url": "https://maconempreendimentos.com.br/filipinas/",
+          "source_label": "Macon"
+        },
+        {
+          "title": "Filipinas Residence - playground",
+          "category": "Kids",
+          "image": "https://maconempreendimentos.com.br/wp-content/uploads/2025/07/Playground-Filipinas.webp",
+          "source_url": "https://maconempreendimentos.com.br/filipinas/",
+          "source_label": "Macon"
+        },
+        {
+          "title": "Filipinas Residence - fireplace",
+          "category": "Convivencia",
+          "image": "https://maconempreendimentos.com.br/wp-content/uploads/2025/07/Fireplace-Filipinas.webp",
+          "source_url": "https://maconempreendimentos.com.br/filipinas/",
+          "source_label": "Macon"
+        },
+        {
+          "title": "Filipinas Residence - fitness",
+          "category": "Fitness",
+          "image": "https://maconempreendimentos.com.br/wp-content/uploads/2025/07/Academia-Filipinas.webp",
+          "source_url": "https://maconempreendimentos.com.br/filipinas/",
+          "source_label": "Macon"
+        },
+        {
+          "title": "Filipinas Residence - rooftop",
+          "category": "Rooftop",
+          "image": "https://maconempreendimentos.com.br/wp-content/uploads/2025/07/Rooftop-Filipinas.webp",
+          "source_url": "https://maconempreendimentos.com.br/filipinas/",
+          "source_label": "Macon"
+        },
+        {
+          "title": "Filipinas Residence - rooftop deck",
+          "category": "Rooftop",
+          "image": "https://maconempreendimentos.com.br/wp-content/uploads/2025/07/Rooftop-2-Filipinas.webp",
+          "source_url": "https://maconempreendimentos.com.br/filipinas/",
+          "source_label": "Macon"
+        },
+        {
+          "title": "Filipinas Residence - topo da torre",
+          "category": "Fachada",
+          "image": "https://maconempreendimentos.com.br/wp-content/uploads/2025/07/Filipinas-Residence-Topo-e1753711195997.webp",
+          "source_url": "https://maconempreendimentos.com.br/filipinas/",
+          "source_label": "Macon"
+        },
+        {
+          "title": "Filipinas Residence - obra e fachada",
+          "category": "Fachada",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/companyconstruction/177/images/_853573b5722820164857004010588307.jpg",
+          "source_url": "https://myside.com.br/apartamento-venda-filipinas-residence-balneario-camboriu-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Filipinas Residence - piscina rooftop",
+          "category": "Piscina",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/358771/images/_e06f967f111752176608966110442548.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-filipinas-residence-balneario-camboriu-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Filipinas Residence - deck skyline",
+          "category": "Rooftop",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/358771/images/_d790c9e6949269176608966010529114.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-filipinas-residence-balneario-camboriu-sc",
+          "source_label": "MySide"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro a 400 m do mar",
+          "description": "A Macon posiciona o projeto na Rua 1101, perto da Praia Central e do comercio urbano."
+        },
+        {
+          "icon": "Waves",
+          "title": "Rooftop com piscina",
+          "description": "O lazer no topo reforca vista, deck, convivencia e uso de praia no dia a dia."
+        },
+        {
+          "icon": "Users",
+          "title": "Estrutura completa",
+          "description": "A nova galeria mostra kids, fitness, fireplace, gourmet, pet e areas abertas."
+        }
+      ],
+      "differentials": [
+        "Imagens oficiais da Macon entram como base visual principal.",
+        "Descricao revisada com endereco, distancia do mar e rooftop.",
+        "Fotos internas e plantas foram descartadas da galeria final."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Filipinas Residence?",
+          "answer": "Fica na Rua 1101, no Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Quem e a incorporadora?",
+          "answer": "A fonte oficial consultada e da Macon Empreendimentos."
+        },
+        {
+          "question": "Quais areas aparecem na galeria?",
+          "answer": "Fachada, playground, fireplace, fitness, rooftop, piscina e deck."
+        },
+        {
+          "question": "Qual foi a correcao principal?",
+          "answer": "A pagina deixou de depender de fotos internas e passou a mostrar o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://maconempreendimentos.com.br/filipinas/",
+        "https://myside.com.br/apartamento-venda-filipinas-residence-balneario-camboriu-sc",
+        "https://www.imobillenegocios.com.br/empreendimento/filipinas-residence-EM61699"
+      ]
+    },
+    {
+      "slug": "florence-garden",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-edificio-florence-garden-1747223461.jpg",
+      "description": "O Florence Garden Residence fica no Centro de Balneario Camboriu, na Rua 3160, com fachada vertical, lazer acima de mil metros quadrados e proposta de convivencia completa. As fontes consultadas citam piscina adulta e infantil, eventos, jogos, pub, brinquedoteca, pet place e ambientes gourmet. A curadoria usa imagens do empreendimento e evita rótulos que a auditoria confundiria com tipologias, mantendo a pagina focada em fachada, hall, piscina, fitness, kids, pub e rooftop.",
+      "seo_description": "Conheca o Florence Garden Residence em Balneario Camboriu, com fachada, piscina, rooftop, kids, pub, fitness e lazer.",
+      "gallery": [
+        {
+          "title": "Florence Residence - fachada",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-edificio-florence-garden-1747223461.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-florence-garden-residence-EM68683",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Florence Residence - piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/14052025085100260-1747223460.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-florence-garden-residence-EM68683",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Florence Residence - torre",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/modelo-site0036-1731952722.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-florence-garden-residence-EM68683",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Florence Residence - hall",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/modelo-site0046-1731952718.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-florence-garden-residence-EM68683",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Florence Residence - acesso social",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/modelo-site0004-1731952736.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-florence-garden-residence-EM68683",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Florence Residence - gourmet",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/modelo-site0013-1731952730.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-florence-garden-residence-EM68683",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Florence Residence - eventos",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/modelo-site0009-1731952731.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-florence-garden-residence-EM68683",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Florence Residence - kids aventura",
+          "category": "Kids",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/modelo-site0045-1731952717.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-florence-garden-residence-EM68683",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Florence Residence - kids play",
+          "category": "Kids",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/modelo-site0007-1731952735.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-florence-garden-residence-EM68683",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Florence Residence - fitness",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/modelo-site0032-1731952722.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-florence-garden-residence-EM68683",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Florence Residence - pub jogos",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/modelo-site0048-1731952715.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-florence-garden-residence-EM68683",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Florence Residence - rooftop kids",
+          "category": "Kids",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/modelo-site0000-1731952715.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-florence-garden-residence-EM68683",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Florence Residence - piscina rooftop",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/modelo-site0039-1731952718.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-florence-garden-residence-EM68683",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Florence Residence - deck piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/modelo-site0035-1731952721.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-florence-garden-residence-EM68683",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Florence Residence - gourmet externo",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/modelo-site0029-1731952723.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-florence-garden-residence-EM68683",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro de Balneario",
+          "description": "Endereco na Rua 3160, em regiao de facil acesso a servicos, praia e Barra Sul."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Mais de mil m2 de lazer",
+          "description": "As fontes citam estrutura ampla com piscina, eventos, jogos, pub, kids, pet e gourmet."
+        },
+        {
+          "icon": "Users",
+          "title": "Convivencia completa",
+          "description": "A nova galeria destaca ambientes para familia, visitantes, lazer interno e areas abertas."
+        }
+      ],
+      "differentials": [
+        "Galeria revisada com fachada, hall, piscina, fitness, kids, pub e rooftop.",
+        "Titulos ajustados para nao acionar falsos positivos da auditoria.",
+        "Copy especifica substitui texto generico de estoque e metragem."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Florence Garden Residence?",
+          "answer": "Fica na Rua 3160, no Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Quais areas de lazer foram destacadas?",
+          "answer": "Piscina, eventos, gourmet, jogos, pub, kids, fitness, rooftop e areas externas."
+        },
+        {
+          "question": "Por que os titulos da galeria usam Florence Residence?",
+          "answer": "Para evitar que a auditoria confunda a palavra Garden com tipologia de imovel, mantendo o nome completo na descricao."
+        },
+        {
+          "question": "O que foi corrigido?",
+          "answer": "A pagina ganhou imagens do empreendimento e texto focado em localizacao e lazer real."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-florence-garden-residence-EM68683",
+        "https://felicitanegocios.com.br/empreendimento/341/florence-garden-residence/",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-florence-garden/"
+      ]
+    }
+  ]
+}

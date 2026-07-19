@@ -1,0 +1,1850 @@
+{
+  "batch_id": "development-media-curation-batch50-20260718",
+  "generated_at": "2026-07-18T22:45:00.000Z",
+  "items": [
+    {
+      "slug": "falcon-tower",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-towe-1749242299.jpg",
+      "description": "O Falcon Tower fica no Centro de Balneario Camboriu, com acesso pela Rua 1111 e conexao rapida com a Avenida do Estado. Imobille, Litoral Vertical, Felicita, Sort e Apto.vc associam o empreendimento a FG Empreendimentos, torre pronta e plantas em torno de 129 a 130 m2. A galeria foi refeita para mostrar fachada, base, piscina, deck, hall, jogos, fitness, brinquedoteca e playground, trocando imagens internas por registros do edificio e das areas comuns.",
+      "seo_description": "Falcon Tower no Centro de Balneario Camboriu, empreendimento FG com fachada, piscina, hall, jogos, fitness e lazer familiar.",
+      "gallery": [
+        {
+          "title": "Falcon Tower - fachada principal",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-towe-1749242299.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-falcon-tower-EM11739",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Falcon Tower - torre no skyline",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-falcon-tower-balneario-camboriu-1.1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-falcon-tower/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Falcon Tower - acesso urbano",
+          "category": "Acesso",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/86/lazer-49.jpg?1739382143",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/86/falcon-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Falcon Tower - base envidracada",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2024/falcon-27-1730147518.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-falcon-tower-EM11739",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Falcon Tower - piscina e deck",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/dji-0217-web-1664480776.jpeg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-falcon-tower-EM11739",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Falcon Tower - piscina externa",
+          "category": "Piscina",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1702480337/enterprises/86/falcon_tower_0_medium.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/falcon-tower",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Falcon Tower - piscina no lazer",
+          "category": "Piscina",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1702480341/enterprises/86/falcon_tower_1_medium.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/falcon-tower",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Falcon Tower - desenho da piscina",
+          "category": "Piscina",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1702480369/enterprises/86/falcon_tower_8_medium.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/falcon-tower",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Falcon Tower - hall social",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/86/lazer-48.jpg?1739382143",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/86/falcon-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Falcon Tower - jogos",
+          "category": "Jogos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/86/lazer-36.jpg?1739382143",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/86/falcon-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Falcon Tower - fitness",
+          "category": "Fitness",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1702480357/enterprises/86/falcon_tower_5_medium.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/falcon-tower",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Falcon Tower - brinquedoteca",
+          "category": "Infantil",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1702480349/enterprises/86/falcon_tower_3_medium.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/falcon-tower",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Falcon Tower - playground",
+          "category": "Infantil",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/86/lazer-9.jpg?1739382143",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/86/falcon-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Falcon Tower - mesa de jogos",
+          "category": "Jogos",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1702480377/enterprises/86/falcon_tower_10_medium.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/falcon-tower",
+          "source_label": "Sort Investimentos"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro com acesso rapido",
+          "description": "Rua 1111 e Avenida do Estado colocam o edificio perto de servicos, comercio e da rotina central de Balneario Camboriu."
+        },
+        {
+          "icon": "Building2",
+          "title": "Assinatura FG",
+          "description": "As fontes consultadas associam o Falcon Tower a FG Empreendimentos e a uma torre ja entregue."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e deck",
+          "description": "A area externa ganha destaque com piscina, solario e ambientes para permanencia."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer de uso diario",
+          "description": "Hall, jogos, fitness, brinquedoteca e playground tornam a estrutura mais completa para diferentes perfis."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Galeria do edificio",
+          "description": "A pagina passa a abrir com fachada e lazer, sem depender de interiores privados."
+        },
+        {
+          "title": "Base de fontes cruzadas",
+          "description": "Imobille, Litoral Vertical, Felicita, Sort e Apto.vc foram usados para conferir endereco, autoria e lazer."
+        },
+        {
+          "title": "Rotina central",
+          "description": "A posicao no Centro favorece deslocamentos curtos e acesso aos principais eixos da cidade."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Falcon Tower?",
+          "answer": "No Centro de Balneario Camboriu, com referencias na Rua 1111 e no eixo da Avenida do Estado."
+        },
+        {
+          "question": "Quem assina o Falcon Tower?",
+          "answer": "As fontes consultadas associam o empreendimento a FG Empreendimentos."
+        },
+        {
+          "question": "Quais areas aparecem na nova galeria?",
+          "answer": "Fachada, piscina, deck, hall, jogos, fitness, brinquedoteca e playground."
+        },
+        {
+          "question": "Qual foi a correcao visual?",
+          "answer": "A curadoria retirou a dependencia de imagens internas e passou a priorizar fotos reais do edificio e do condominio."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-falcon-tower-EM11739",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-falcon-tower/",
+        "https://felicitanegocios.com.br/empreendimento/86/falcon-tower/",
+        "https://sortinvestimentos.com.br/empreendimentos/falcon-tower",
+        "https://apto.vc/br/sc/balneario-camboriu/centro/falcon-tower"
+      ]
+    },
+    {
+      "slug": "mueller-ocean-club",
+      "hero_image": "http://muelleroceanclub.com.br/wp-content/uploads/2019/04/FAV_MR_FACHADA_R01.jpg?id=48",
+      "description": "O Mueller Ocean Club fica no Centro de Balneario Camboriu, a poucos metros do mar. O site oficial apresenta arquitetura autoral, infraestrutura de clube e conceito de spa urbano, enquanto Imobille, Litoral Vertical, Apto.vc e Solk reforcam lazer com piscina, bar molhado, spa, sauna, academia, eventos, lounge, quadra e playground. A curadoria visual prioriza fachada, base, piscina, convivencia externa e areas comuns.",
+      "seo_description": "Mueller Ocean Club no Centro de Balneario Camboriu, com arquitetura autoral, infraestrutura de clube, piscina, spa, fitness e quadra.",
+      "gallery": [
+        {
+          "title": "Mueller Ocean Club - fachada autoral",
+          "category": "Fachada",
+          "image": "http://muelleroceanclub.com.br/wp-content/uploads/2019/04/FAV_MR_FACHADA_R01.jpg?id=48",
+          "source_url": "https://muelleroceanclub.com.br/",
+          "source_label": "Mueller Ocean Club"
+        },
+        {
+          "title": "Mueller Ocean Club - torre completa",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-mueller-ocean-club-balneario-camboriu-2.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-mueller-ocean-club/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Mueller Ocean Club - base urbana",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/mueller-ocean-club-26-1723828733.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-mueller-ocean-club-EM20981",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Mueller Ocean Club - acesso frontal",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/mueller-ocean-club-28-1723828636.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-mueller-ocean-club-EM20981",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Mueller Ocean Club - torre e base",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/mueller-ocean-club-22-1723828635.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-mueller-ocean-club-EM20981",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Mueller Ocean Club - piscina com deck",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/16082024141853600-1723828733.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-mueller-ocean-club-EM20981",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Mueller Ocean Club - piscina e estar",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/mueller-ocean-club-24-1723828634.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-mueller-ocean-club-EM20981",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Mueller Ocean Club - solario da piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/mueller-ocean-club-23-1723828633.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-mueller-ocean-club-EM20981",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Mueller Ocean Club - pergolado externo",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/mueller-ocean-club-20-1723828633.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-mueller-ocean-club-EM20981",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Mueller Ocean Club - estar externo",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/mueller-ocean-club-19-1723828632.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-mueller-ocean-club-EM20981",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Mueller Ocean Club - playground",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/mueller-ocean-club-12-1723828628.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-mueller-ocean-club-EM20981",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Mueller Ocean Club - quadra",
+          "category": "Esporte",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/mueller-ocean-club-11-1723828627.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-mueller-ocean-club-EM20981",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Mueller Ocean Club - eventos e gourmet",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2024/mueller-ocean-club-18-1723828631.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-mueller-ocean-club-EM20981",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Mueller Ocean Club - fitness",
+          "category": "Fitness",
+          "image": "https://muelleroceanclub.com.br/wp-content/uploads/2019/04/FAV_MR_FITNESS_R01-1.jpg",
+          "source_url": "https://muelleroceanclub.com.br/",
+          "source_label": "Mueller Ocean Club"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Perto do mar",
+          "description": "A comunicacao oficial posiciona o empreendimento a poucos metros da praia central."
+        },
+        {
+          "icon": "Building2",
+          "title": "Arquitetura autoral",
+          "description": "O projeto se apresenta como uma proposta contemporanea e original para o Centro."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Spa urbano",
+          "description": "Spa, sauna, areas de descanso e piscina reforcam o uso voltado a bem-estar."
+        },
+        {
+          "icon": "Users",
+          "title": "Infraestrutura de clube",
+          "description": "Piscina, lounge, quadra, playground, eventos e fitness ampliam a experiencia condominial."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Galeria institucional",
+          "description": "Fachada, lazer e areas comuns substituem fotos internas de oferta."
+        },
+        {
+          "title": "Lazer amplo",
+          "description": "As fontes destacam piscina, spa, sauna, academia, quadra e ambientes sociais."
+        },
+        {
+          "title": "Endereco central",
+          "description": "A localizacao combina proximidade da praia com servicos e mobilidade urbana."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Mueller Ocean Club?",
+          "answer": "No Centro de Balneario Camboriu, em localizacao divulgada como proxima ao mar."
+        },
+        {
+          "question": "Qual e o conceito do empreendimento?",
+          "answer": "A fonte oficial fala em arquitetura autoral, infraestrutura de clube e spa urbano."
+        },
+        {
+          "question": "Quais areas foram priorizadas nas imagens?",
+          "answer": "Fachada, piscina, deck, pergolado, playground, quadra, eventos e fitness."
+        },
+        {
+          "question": "O que mudou na pagina?",
+          "answer": "A galeria passou a representar o condominio e nao interiores privados."
+        }
+      ],
+      "sources": [
+        "https://muelleroceanclub.com.br/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-mueller-ocean-club-EM20981",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-mueller-ocean-club/",
+        "https://apto.vc/br/sc/balneario-camboriu/centro/mueller-ocean-club",
+        "https://solkimoveis.com.br/imovel/AP33351355/apartamento-4-quartos-mueller-ocean-club-centro-balneario-camboriu/"
+      ]
+    },
+    {
+      "slug": "belvedere-residence",
+      "hero_image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_vendas/g1_8467_171954_1422_180423.jpg",
+      "description": "O Belvedere Residence fica no Canto da Praia, em Itapema, com posicionamento frente mar. Dallo informa entrega com habite-se em dezembro de 2019, e fontes como Imobille, Golden, Versatil e Vaz Premium descrevem estrutura com torres, hall, piscina adulto e infantil, bar molhado, cinema, gourmet, ofuro, sauna, spa, academia, brinquedoteca e jogos. A nova galeria remove candidatos duvidosos e usa fachada, acesso, piscinas, hall e areas de convivencia do empreendimento.",
+      "seo_description": "Belvedere Residence no Canto da Praia, Itapema, frente mar, com fachada, piscinas, hall, gourmet, spa, academia e lazer completo.",
+      "gallery": [
+        {
+          "title": "Belvedere Residence - fachada frente mar",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_vendas/g1_8467_171954_1422_180423.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/belvedere-residence/8467",
+          "source_label": "Imobiliaria Versatil"
+        },
+        {
+          "title": "Belvedere Residence - acesso principal",
+          "category": "Acesso",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/golden/img_vendas/m1_5788_129349_1018_210622.webp",
+          "source_url": "https://www.goldenitapema.com.br/edificios/belvedere-residence/12",
+          "source_label": "Golden Itapema"
+        },
+        {
+          "title": "Belvedere Residence - portoes e fachada",
+          "category": "Fachada",
+          "image": "https://static.arboimoveis.com.br/AP1382_CRB/640x480/71733506563903.jpeg",
+          "source_url": "https://www.vazpremiumimoveis.com.br/imovel/apartamento/venda/itapema/sc/canto-da-praia/AP1382_CRB",
+          "source_label": "Vaz Premium Imoveis"
+        },
+        {
+          "title": "Belvedere Residence - fachada classica",
+          "category": "Fachada",
+          "image": "https://static.arboimoveis.com.br/AP1382_CRB/71733506563903.jpeg",
+          "source_url": "https://www.vazpremiumimoveis.com.br/imovel/apartamento/venda/itapema/sc/canto-da-praia/AP1382_CRB",
+          "source_label": "Vaz Premium Imoveis"
+        },
+        {
+          "title": "Belvedere Residence - piscina coberta",
+          "category": "Piscina",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/icp/imoveis/833/02-1-16787352699983.jpeg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-belvedere-residence-itapema-canto-da-praia-4-quartos-4-garagens-venda-ref-2622/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Belvedere Residence - piscina externa",
+          "category": "Piscina",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/icp/imoveis/266/1aaab-17486239462894.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-belvedere-residence-itapema-canto-da-praia-4-quartos-4-garagens-venda-ref-2622/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Belvedere Residence - jardim frontal",
+          "category": "Paisagismo",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_vendas/g1_8467_171936_1412_180423.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/belvedere-residence/8467",
+          "source_label": "Imobiliaria Versatil"
+        },
+        {
+          "title": "Belvedere Residence - lounge externo",
+          "category": "Convivencia",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_vendas/g1_8467_171953_1421_180423.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/belvedere-residence/8467",
+          "source_label": "Imobiliaria Versatil"
+        },
+        {
+          "title": "Belvedere Residence - pergolado externo",
+          "category": "Convivencia",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_vendas/g1_8467_171952_1421_180423.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/belvedere-residence/8467",
+          "source_label": "Imobiliaria Versatil"
+        },
+        {
+          "title": "Belvedere Residence - hall elegante",
+          "category": "Hall",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_vendas/g1_8467_171880_1359_180423.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/belvedere-residence/8467",
+          "source_label": "Imobiliaria Versatil"
+        },
+        {
+          "title": "Belvedere Residence - hall social",
+          "category": "Hall",
+          "image": "https://static.arboimoveis.com.br/AP1382_CRB/21733506563113.jpeg",
+          "source_url": "https://www.vazpremiumimoveis.com.br/imovel/apartamento/venda/itapema/sc/canto-da-praia/AP1382_CRB",
+          "source_label": "Vaz Premium Imoveis"
+        },
+        {
+          "title": "Belvedere Residence - eventos decorado",
+          "category": "Eventos",
+          "image": "https://static.arboimoveis.com.br/AP1382_CRB/31733506563880.jpeg",
+          "source_url": "https://www.vazpremiumimoveis.com.br/imovel/apartamento/venda/itapema/sc/canto-da-praia/AP1382_CRB",
+          "source_label": "Vaz Premium Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Frente mar no Canto da Praia",
+          "description": "A localizacao valoriza a relacao direta com a orla de Itapema."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Empreendimento entregue",
+          "description": "A publicacao da Dallo registra entrega e habite-se em dezembro de 2019."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscinas e wellness",
+          "description": "Fontes do mercado citam piscina adulto e infantil, bar molhado, ofuro, sauna e spa."
+        },
+        {
+          "icon": "Users",
+          "title": "Ambientes sociais completos",
+          "description": "Hall, gourmet, cinema, academia, brinquedoteca e jogos ampliam o uso do condominio."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Curadoria depurada",
+          "description": "Foram descartadas imagens com indicio de outro empreendimento e mantidas apenas fontes coerentes com Belvedere."
+        },
+        {
+          "title": "Arquitetura marcante",
+          "description": "A fachada classica e o acesso frontal passam a conduzir a apresentacao."
+        },
+        {
+          "title": "Lazer frente mar",
+          "description": "Piscinas, lounges e areas internas comuns conectam conforto e vista para a orla."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Belvedere Residence?",
+          "answer": "No Canto da Praia, em Itapema, com posicionamento frente mar."
+        },
+        {
+          "question": "O empreendimento esta entregue?",
+          "answer": "A Dallo publicou entrega com habite-se em dezembro de 2019."
+        },
+        {
+          "question": "Quais areas aparecem na galeria?",
+          "answer": "Fachada, acesso, piscinas, jardim, lounge, hall e eventos."
+        },
+        {
+          "question": "Como a curadoria foi corrigida?",
+          "answer": "Imagens com sinal de outro empreendimento foram removidas antes da aplicacao final."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-belvedere-residence--EM09234",
+        "https://www.dallo.com.br/post/uma-declaracao-ao-bem-viver-com-sofisticacao?_wpnonce=7638457aa0&id=17",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-belvedere-residence-itapema-canto-da-praia-4-quartos-4-garagens-venda-ref-2622/",
+        "https://www.goldenitapema.com.br/edificios/belvedere-residence/12",
+        "https://imobiliariaversatil.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/belvedere-residence/8467",
+        "https://www.vazpremiumimoveis.com.br/imovel/apartamento/venda/itapema/sc/canto-da-praia/AP1382_CRB"
+      ]
+    },
+    {
+      "slug": "condominio-logistico-e-industrial-nextto",
+      "hero_image": "https://cdnuso.com/16773/2024/07/08d22810e45e0d5aa09e1c5751c98bd8.jpg",
+      "description": "O Condominio Logistico e Industrial Nextto esta em Volta Grande, Navegantes, em eixo voltado a operacoes industriais e distribuicao. As fontes Pilger e Area Dez apontam modulos a partir de 1.100 m2, pe-direito livre de 12,50 m e padrao Triple A; o EIV da Prefeitura de Navegantes identifica o projeto na Rua Prefeito Manoel Evaldo Muller, bairro Volta Grande. A galeria foi refeita com fonte externa e mostra implantacao, portaria, acesso viario, docas, patio, estrutura interna e apoio operacional.",
+      "seo_description": "Nextto em Volta Grande, Navegantes, condominio logistico com modulos de 1.100 m2, pe-direito de 12,50 m, docas e acesso viario.",
+      "gallery": [
+        {
+          "title": "Nextto - implantacao aerea",
+          "category": "Implantacao",
+          "image": "https://cdnuso.com/16773/2024/07/08d22810e45e0d5aa09e1c5751c98bd8.jpg",
+          "source_url": "https://areadez.com.br/comprar/sc/navegantes/volta-grande/condominio-logistico/75243567",
+          "source_label": "Area Dez"
+        },
+        {
+          "title": "Nextto - portaria principal",
+          "category": "Portaria",
+          "image": "https://cdnuso.com/16773/2024/07/4cb56404c1e76fc9597c26a164f59c60.jpg",
+          "source_url": "https://areadez.com.br/comprar/sc/navegantes/volta-grande/condominio-logistico/75243567",
+          "source_label": "Area Dez"
+        },
+        {
+          "title": "Nextto - acesso viario",
+          "category": "Acesso",
+          "image": "https://cdnuso.com/16773/2024/07/5118416be25d7fedceae963afe238c14.jpg",
+          "source_url": "https://areadez.com.br/comprar/sc/navegantes/volta-grande/condominio-logistico/75243567",
+          "source_label": "Area Dez"
+        },
+        {
+          "title": "Nextto - corredor operacional",
+          "category": "Circulacao",
+          "image": "https://cdnuso.com/16773/2024/07/5ec07e61023de406c8b62a09e4d1769c.jpg",
+          "source_url": "https://areadez.com.br/comprar/sc/navegantes/volta-grande/condominio-logistico/75243567",
+          "source_label": "Area Dez"
+        },
+        {
+          "title": "Nextto - conjunto logistico",
+          "category": "Implantacao",
+          "image": "https://cdnuso.com/16773/2024/08/eca324e5fdbf193a437b9404b21e877f.jpg",
+          "source_url": "https://areadez.com.br/comprar/sc/navegantes/volta-grande/condominio-logistico/75243567",
+          "source_label": "Area Dez"
+        },
+        {
+          "title": "Nextto - vista superior",
+          "category": "Implantacao",
+          "image": "https://cdnuso.com/16773/2024/08/3fe01fe0839b9d1530ffc648487eb031.jpg",
+          "source_url": "https://areadez.com.br/comprar/sc/navegantes/volta-grande/condominio-logistico/75243567",
+          "source_label": "Area Dez"
+        },
+        {
+          "title": "Nextto - docas cobertas",
+          "category": "Docas",
+          "image": "https://cdnuso.com/16773/2024/07/3d4523d499ab6fc643bcb27947a30970.jpg",
+          "source_url": "https://areadez.com.br/comprar/sc/navegantes/volta-grande/condominio-logistico/75243567",
+          "source_label": "Area Dez"
+        },
+        {
+          "title": "Nextto - patio de manobra",
+          "category": "Patio",
+          "image": "https://cdnuso.com/16773/2024/08/37e9e6183d04685822af4a9ae0718354.jpg",
+          "source_url": "https://areadez.com.br/comprar/sc/navegantes/volta-grande/condominio-logistico/75243567",
+          "source_label": "Area Dez"
+        },
+        {
+          "title": "Nextto - estrutura interna",
+          "category": "Estrutura",
+          "image": "https://cdnuso.com/16773/2024/07/51c05f658faae08cdb7b5d69b1366b46.jpg",
+          "source_url": "https://areadez.com.br/comprar/sc/navegantes/volta-grande/condominio-logistico/75243567",
+          "source_label": "Area Dez"
+        },
+        {
+          "title": "Nextto - vao operacional",
+          "category": "Estrutura",
+          "image": "https://cdnuso.com/16773/2024/08/8146a3ca28eb692e1df4153aed97e948.jpg",
+          "source_url": "https://areadez.com.br/comprar/sc/navegantes/volta-grande/condominio-logistico/75243567",
+          "source_label": "Area Dez"
+        },
+        {
+          "title": "Nextto - iluminacao interna",
+          "category": "Estrutura",
+          "image": "https://cdnuso.com/16773/2024/08/1a431dfbea0fa4fbb4d57e0f9ed48e3c.jpg",
+          "source_url": "https://areadez.com.br/comprar/sc/navegantes/volta-grande/condominio-logistico/75243567",
+          "source_label": "Area Dez"
+        },
+        {
+          "title": "Nextto - area modulavel",
+          "category": "Estrutura",
+          "image": "https://cdnuso.com/16773/2024/08/91ea60c3ac596472542fba4875b9d195.jpg",
+          "source_url": "https://areadez.com.br/comprar/sc/navegantes/volta-grande/condominio-logistico/75243567",
+          "source_label": "Area Dez"
+        },
+        {
+          "title": "Nextto - operacao interna",
+          "category": "Estrutura",
+          "image": "https://cdnuso.com/16773/2024/08/fa619c503b82992deb6d025dec181135.jpg",
+          "source_url": "https://areadez.com.br/comprar/sc/navegantes/volta-grande/condominio-logistico/75243567",
+          "source_label": "Area Dez"
+        },
+        {
+          "title": "Nextto - apoio administrativo",
+          "category": "Apoio",
+          "image": "https://cdnuso.com/16773/2024/08/cd6dd9d647f1947955f7feacc734577b.jpg",
+          "source_url": "https://areadez.com.br/comprar/sc/navegantes/volta-grande/condominio-logistico/75243567",
+          "source_label": "Area Dez"
+        },
+        {
+          "title": "Nextto - estacionamento veiculos leves",
+          "category": "Patio",
+          "image": "https://cdnuso.com/16773/2024/08/ff9160171b20442305a8e2f9d0e31983.jpg",
+          "source_url": "https://areadez.com.br/comprar/sc/navegantes/volta-grande/condominio-logistico/75243567",
+          "source_label": "Area Dez"
+        },
+        {
+          "title": "Nextto - portas automatizadas",
+          "category": "Acesso",
+          "image": "https://cdnuso.com/16773/2024/08/a2dc78e844b07baae380f4f2d690cf29.jpg",
+          "source_url": "https://areadez.com.br/comprar/sc/navegantes/volta-grande/condominio-logistico/75243567",
+          "source_label": "Area Dez"
+        },
+        {
+          "title": "Nextto - pe direito elevado",
+          "category": "Infraestrutura",
+          "image": "https://cdnuso.com/16773/2024/08/00cb2957c5ee31ac0652073392a73e62.jpg",
+          "source_url": "https://areadez.com.br/comprar/sc/navegantes/volta-grande/condominio-logistico/75243567",
+          "source_label": "Area Dez"
+        },
+        {
+          "title": "Nextto - capacidade modular",
+          "category": "Infraestrutura",
+          "image": "https://cdnuso.com/16773/2024/08/5e7599d6e9ca1b0d4471a9c044f3bc16.jpg",
+          "source_url": "https://areadez.com.br/comprar/sc/navegantes/volta-grande/condominio-logistico/75243567",
+          "source_label": "Area Dez"
+        },
+        {
+          "title": "Nextto - iluminacao natural",
+          "category": "Infraestrutura",
+          "image": "https://cdnuso.com/16773/2024/08/ab850bffbe3642bba1a18a439494d9d2.jpg",
+          "source_url": "https://areadez.com.br/comprar/sc/navegantes/volta-grande/condominio-logistico/75243567",
+          "source_label": "Area Dez"
+        },
+        {
+          "title": "Nextto - layout flexivel",
+          "category": "Estrutura",
+          "image": "https://cdnuso.com/16773/2024/08/75893c3ad6484231c2cfc413f23b5777.jpg",
+          "source_url": "https://areadez.com.br/comprar/sc/navegantes/volta-grande/condominio-logistico/75243567",
+          "source_label": "Area Dez"
+        },
+        {
+          "title": "Nextto - acesso principal",
+          "category": "Acesso",
+          "image": "https://cdnuso.com/16773/2024/08/93208d588c24415638939f81b405ebf5.jpg",
+          "source_url": "https://areadez.com.br/comprar/sc/navegantes/volta-grande/condominio-logistico/75243567",
+          "source_label": "Area Dez"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Eixo logistico de Navegantes",
+          "description": "Volta Grande conecta o projeto ao corredor industrial e ao acesso regional do municipio."
+        },
+        {
+          "icon": "Warehouse",
+          "title": "Padrao Triple A",
+          "description": "As fontes comerciais destacam alto padrao construtivo e estrutura pensada para operacoes robustas."
+        },
+        {
+          "icon": "Maximize2",
+          "title": "Pe-direito de 12,50 m",
+          "description": "A altura livre favorece armazenagem vertical, circulacao de equipamentos e organizacao operacional."
+        },
+        {
+          "icon": "Truck",
+          "title": "Docas e patio",
+          "description": "A curadoria mostra docas cobertas, patio de manobra, acessos e circulacao para veiculos de carga."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Galeria externa confiavel",
+          "description": "Imagens geradas por IA e fotos de ficha interna foram descartadas em favor da fonte Area Dez."
+        },
+        {
+          "title": "Informacao municipal",
+          "description": "O EIV da Prefeitura de Navegantes confirma endereco e enquadramento do empreendimento."
+        },
+        {
+          "title": "Uso industrial claro",
+          "description": "A pagina agora comunica implantacao, docas, pe-direito, patio e infraestrutura, nao imagens residenciais."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Nextto?",
+          "answer": "Em Volta Grande, Navegantes, com referencia municipal na Rua Prefeito Manoel Evaldo Muller."
+        },
+        {
+          "question": "Qual e a escala dos modulos?",
+          "answer": "As fontes comerciais apontam modulos a partir de 1.100 m2."
+        },
+        {
+          "question": "Qual pe-direito foi identificado?",
+          "answer": "As fontes consultadas informam pe-direito livre de 12,50 m."
+        },
+        {
+          "question": "Quais imagens foram usadas?",
+          "answer": "Implantacao, portaria, acesso viario, docas, patio, estrutura interna e apoio operacional da fonte externa Area Dez."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/imovel/galpao-deposito-navegantes-volta-grande-venda-ref-2638/",
+        "https://guilhermepilger.ai/condominio-logistico-e-industrial-nextto",
+        "https://areadez.com.br/comprar/sc/navegantes/volta-grande/condominio-logistico/75243567",
+        "https://navegantes.sc.gov.br/wp-content/uploads/2024/03/EIV_CENA_CONDOMINIO_NEXTTO.pdf"
+      ]
+    },
+    {
+      "slug": "illuminati-residence",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-1756900156.jpg",
+      "description": "O Illuminati Residence fica na Rua 1520, 251, Centro de Balneario Camboriu. Litoral Vertical, Imobille, Sort e Lopes descrevem fachada em pele de vidro, torre 100% pastilhada, dois por andar, tres elevadores e portaria 24h. O lazer citado inclui piscinas adulto, infantil e aquecida, bar molhado, eventos, gourmet, pub, jogos, cinema, fitness, sauna, beauty space, mini golf, playground, brinquedoteca e pet place. A galeria passa a mostrar fachada e estrutura condominial.",
+      "seo_description": "Illuminati Residence no Centro de Balneario Camboriu, com fachada em pele de vidro, piscinas, fitness, jogos, pet place e portaria 24h.",
+      "gallery": [
+        {
+          "title": "Illuminati Residence - fachada principal",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-1756900156.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-illuminati-EM6919",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Illuminati Residence - render noturno",
+          "category": "Fachada",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1748459665/enterprise_332/enterprise_edificio-illuminati-residence-1_1748459592.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/edificio-illuminati-residence",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Illuminati Residence - base iluminada",
+          "category": "Fachada",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1748459661/enterprises_edificio-illuminati-residence_1748459588/enterprise_edificio-illuminati-residence_1748459588.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/edificio-illuminati-residence",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Illuminati Residence - torre vertical",
+          "category": "Fachada",
+          "image": "https://betaimages.lopes.com.br/realestate/med/REB112143/fachada.jpg",
+          "source_url": "https://www.lopes.com.br/lancamento/REM15208/illuminati-residence-balneario-camboriu-centro",
+          "source_label": "Lopes"
+        },
+        {
+          "title": "Illuminati Residence - torre completa",
+          "category": "Fachada",
+          "image": "https://betaimages.lopes.com.br/realestate/sml/REB102632/Fachada.jpg",
+          "source_url": "https://www.lopes.com.br/lancamento/REM15208/illuminati-residence-balneario-camboriu-centro",
+          "source_label": "Lopes"
+        },
+        {
+          "title": "Illuminati Residence - piscina lateral",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20021-1664819249.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-illuminati-EM6919",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Illuminati Residence - deck da piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20001-1664819246.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-illuminati-EM6919",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Illuminati Residence - piscina externa",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20002-1664819246.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-illuminati-EM6919",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Illuminati Residence - piscina coberta",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20003-1664819246.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-illuminati-EM6919",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Illuminati Residence - jogos e convivencia",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20004-1664819247.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-illuminati-EM6919",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Illuminati Residence - fitness amplo",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20005-1664819247.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-illuminati-EM6919",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Illuminati Residence - pet place",
+          "category": "Pet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20009-1664819248.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-illuminati-EM6919",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Illuminati Residence - espaco esportivo",
+          "category": "Esporte",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20012-1664819248.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-illuminati-EM6919",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Illuminati Residence - hall social",
+          "category": "Hall",
+          "image": "https://litoralvertical.com/wp-content/uploads/2014/11/edificio-illuminati-balneario-camboriu-sqcd404-12-1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-illuminati-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Illuminati Residence - beauty space",
+          "category": "Wellness",
+          "image": "https://betaimages.lopes.com.br/realestate/med/REB112143/_beauty_space_.jpg",
+          "source_url": "https://www.lopes.com.br/lancamento/REM15208/illuminati-residence-balneario-camboriu-centro",
+          "source_label": "Lopes"
+        },
+        {
+          "title": "Illuminati Residence - fitness funcional",
+          "category": "Fitness",
+          "image": "https://betaimages.lopes.com.br/realestate/med/REB112143/_fitness_.jpg",
+          "source_url": "https://www.lopes.com.br/lancamento/REM15208/illuminati-residence-balneario-camboriu-centro",
+          "source_label": "Lopes"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 1520 no Centro",
+          "description": "Endereco central com acesso facil a praia, comercio e servicos de Balneario Camboriu."
+        },
+        {
+          "icon": "Building2",
+          "title": "Fachada em pele de vidro",
+          "description": "As fontes destacam a torre pastilhada, base imponente e linguagem vertical marcante."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscinas variadas",
+          "description": "Piscinas externas e coberta aquecida atendem lazer, descanso e uso em diferentes climas."
+        },
+        {
+          "icon": "Dog",
+          "title": "Lazer plural",
+          "description": "Fitness, jogos, pet place, espaco esportivo, beauty space e ambientes sociais ampliam a experiencia."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Imagem principal correta",
+          "description": "A fachada real substitui imagens internas e apresenta o condominio ja no primeiro impacto."
+        },
+        {
+          "title": "Portaria 24h",
+          "description": "As fontes de mercado citam portaria 24h como parte da estrutura."
+        },
+        {
+          "title": "Mix de lazer completo",
+          "description": "A pagina agora comunica piscina, wellness, esporte, pet e convivencia com clareza."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Illuminati Residence?",
+          "answer": "Na Rua 1520, 251, Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Como e a fachada?",
+          "answer": "As fontes consultadas destacam pele de vidro e torre 100% pastilhada."
+        },
+        {
+          "question": "Quais areas de lazer foram confirmadas?",
+          "answer": "Piscinas, jogos, fitness, sauna, beauty space, playground, brinquedoteca, pet place e eventos."
+        },
+        {
+          "question": "O que foi corrigido nas imagens?",
+          "answer": "A nova galeria prioriza fachada e areas comuns do edificio, retirando o foco de interiores privados."
+        }
+      ],
+      "sources": [
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-illuminati-residence/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-illuminati-EM6919",
+        "https://sortinvestimentos.com.br/empreendimentos/edificio-illuminati-residence",
+        "https://www.lopes.com.br/lancamento/REM15208/illuminati-residence-balneario-camboriu-centro"
+      ]
+    },
+    {
+      "slug": "lykke",
+      "hero_image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/12/lykke-balneario-camboriu-sc-3.jpg",
+      "description": "O Lykke e um lancamento no Centro de Balneario Camboriu, na Rua 1926, 59. Invexo, Litoral Vertical, MySide, Apto.vc, Manica Marin e Pilger relacionam o projeto ao Grupo Formiga, com arquitetura BOLD e FFV, interiores por Karla Spezia, 19 pavimentos, um ou dois por andar, dois elevadores e rooftop. A curadoria removeu candidatos de outros predios e manteve renders de fachada, acesso, hall, gourmet e convivencia do empreendimento.",
+      "seo_description": "Lykke no Centro de Balneario Camboriu, lancamento do Grupo Formiga com fachada autoral, rooftop, hall, gourmet e lazer compacto.",
+      "gallery": [
+        {
+          "title": "Lykke - fachada principal",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/12/lykke-balneario-camboriu-sc-3.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/lykke-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Lykke - torre noturna",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/12/lykke-balneario-camboriu-sc-1.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/lykke-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Lykke - acesso urbano",
+          "category": "Acesso",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/12/lykke-balneario-camboriu-sc-2.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/lykke-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Lykke - perspectiva superior",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/03/edificio-lykke-balneario-camboriu-2.jpg",
+          "source_url": "https://litoralvertical.com/pre-lancamento/balneario-camboriu/apartamentos/edificio-lykke/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Lykke - conjunto de fachada",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/03/edificio-lykke-balneario-camboriu-principal.avif",
+          "source_url": "https://litoralvertical.com/pre-lancamento/balneario-camboriu/apartamentos/edificio-lykke/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Lykke - fachada e skyline",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/03/edificio-lykke-balneario-camboriu-principal.jpg",
+          "source_url": "https://litoralvertical.com/pre-lancamento/balneario-camboriu/apartamentos/edificio-lykke/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Lykke - torre com assinatura",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/1578/w1-17455141461131.webp",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-lykke-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-1578/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Lykke - implantacao vertical",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/1578/w2-17455141461132.webp",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-lykke-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-1578/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Lykke - hall e elevadores",
+          "category": "Hall",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/12/lykke-balneario-camboriu-sc-4.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/lykke-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Lykke - gourmet social",
+          "category": "Gourmet",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/12/lykke-balneario-camboriu-sc-5.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/lykke-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Lykke - gourmet amplo",
+          "category": "Gourmet",
+          "image": "https://cdn.vistahost.com.br/cli36621/vista.imobi/fotos/5534/if4e3g_553466cfbd9c34223.jpg",
+          "source_url": "https://manicamarin.com.br/imovel/empreendimento-centro-balneario-camboriu-sc-3826",
+          "source_label": "Manica Marin Imoveis"
+        },
+        {
+          "title": "Lykke - hall de entrada",
+          "category": "Hall",
+          "image": "https://cdn.vistahost.com.br/cli36621/vista.imobi/fotos/5534/ij5p7y_553466cfbd99e0505_p.jpg",
+          "source_url": "https://manicamarin.com.br/imovel/empreendimento-centro-balneario-camboriu-sc-3826",
+          "source_label": "Manica Marin Imoveis"
+        },
+        {
+          "title": "Lykke - convivencia gourmet",
+          "category": "Gourmet",
+          "image": "https://cdn.vistahost.com.br/cli36621/vista.imobi/fotos/5534/if4e3g_553466cfbd9c34223_p.jpg",
+          "source_url": "https://manicamarin.com.br/imovel/empreendimento-centro-balneario-camboriu-sc-3826",
+          "source_label": "Manica Marin Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 1926 no Centro",
+          "description": "Endereco central em Balneario Camboriu, com acesso a servicos e deslocamentos urbanos."
+        },
+        {
+          "icon": "Building2",
+          "title": "Projeto autoral",
+          "description": "As fontes associam arquitetura BOLD e FFV a interiores assinados por Karla Spezia."
+        },
+        {
+          "icon": "Layers",
+          "title": "Torre de 19 pavimentos",
+          "description": "O empreendimento foi divulgado com implantacao vertical e perfil boutique."
+        },
+        {
+          "icon": "Utensils",
+          "title": "Rooftop e gourmet",
+          "description": "A galeria reforca hall, gourmet social e areas de convivencia previstas no projeto."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Renders coerentes",
+          "description": "Foram removidas imagens de outros edificios encontradas em uma das fontes."
+        },
+        {
+          "title": "Identidade visual forte",
+          "description": "Fachada, base e hall comunicam a proposta contemporanea do empreendimento."
+        },
+        {
+          "title": "Copy de lancamento",
+          "description": "A descricao passa a explicar autoria, endereco e estrutura sem usar texto generico."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Lykke?",
+          "answer": "Na Rua 1926, 59, Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Quem desenvolve o Lykke?",
+          "answer": "As fontes consultadas relacionam o empreendimento ao Grupo Formiga."
+        },
+        {
+          "question": "Quais imagens foram mantidas?",
+          "answer": "Fachada, acesso, hall, gourmet e convivencia, todas ligadas ao Lykke."
+        },
+        {
+          "question": "O que foi removido da selecao?",
+          "answer": "Candidatos de outros predios e imagens sem relacao direta com o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://lancamento.invexo.com.br/sc/lykke-balneario-camboriu/",
+        "https://litoralvertical.com/pre-lancamento/balneario-camboriu/apartamentos/edificio-lykke/",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-lykke/",
+        "https://myside.com.br/apartamento-venda-lykke-balneario-camboriu-sc",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-lykke-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-1578/",
+        "https://apto.vc/br/sc/balneario-camboriu/centro/lykke",
+        "https://manicamarin.com.br/imovel/empreendimento-centro-balneario-camboriu-sc-3826"
+      ]
+    },
+    {
+      "slug": "mirante-camboriu",
+      "hero_image": "https://d78txhfo8gp8r.cloudfront.net/getulio/img_vendas/m1_2329_45557_1534_181021.jpg",
+      "description": "O Mirante Camboriu e um condominio fechado em Camboriu, com referencias no Rio do Meio e acesso rapido a Balneario Camboriu e a BR-101. Imobille, Mazzotti, Imoveis Terra, Fly, Bedin, Lemur e Getulio destacam portaria, controle de entrada e lazer com piscina adulto e infantil, campo, academia, eventos, jogos, gourmet, quadra e playground. A galeria foi reconstruida com portaria, piscina, campos, playground, vias internas e paisagismo.",
+      "seo_description": "Mirante Camboriu, condominio fechado em Camboriu com portaria, piscina, campo, playground, areas verdes e acesso rapido a BR-101.",
+      "gallery": [
+        {
+          "title": "Mirante Camboriu - portaria frontal",
+          "category": "Portaria",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/getulio/img_vendas/m1_2329_45557_1534_181021.jpg",
+          "source_url": "https://www.getulioimoveis.com.br/imovel/venda-terrenos-residenciais-em-camboriu/terreno-residencial-mirante-em-camboriu/2329",
+          "source_label": "Getulio Imoveis"
+        },
+        {
+          "title": "Mirante Camboriu - portaria ampla",
+          "category": "Portaria",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/getulio/img_vendas/g1_2329_45557_1534_181021.jpg",
+          "source_url": "https://www.getulioimoveis.com.br/imovel/venda-terrenos-residenciais-em-camboriu/terreno-residencial-mirante-em-camboriu/2329",
+          "source_label": "Getulio Imoveis"
+        },
+        {
+          "title": "Mirante Camboriu - acesso principal",
+          "category": "Acesso",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/getulio/img_vendas/i1_2329_45557_1534_181021.jpg",
+          "source_url": "https://www.getulioimoveis.com.br/imovel/venda-terrenos-residenciais-em-camboriu/terreno-residencial-mirante-em-camboriu/2329",
+          "source_label": "Getulio Imoveis"
+        },
+        {
+          "title": "Mirante Camboriu - entrada do condominio",
+          "category": "Acesso",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/mazzotti/img_vendas/g1_1563_29886_1219_150721.jpg",
+          "source_url": "https://mazzottiimoveis.com/imovel/venda-terrenos-residenciais-em-camboriu/condominio-mirante-camboriu-/1563",
+          "source_label": "Mazzotti Imoveis"
+        },
+        {
+          "title": "Mirante Camboriu - controle de entrada",
+          "category": "Portaria",
+          "image": "https://img.apre.me/M7YtVksvyNJLtTSzNDE0SzE2SzYzi89JLMhMzsssKtA3NzE2trTQT8-LTMnJLE2yzVQzNzI3tU0GAA.jpg",
+          "source_url": "https://lemur.net.br/terreno-no-condominio-mirante-camboriu-em-camboriu",
+          "source_label": "Lemur Imoveis"
+        },
+        {
+          "title": "Mirante Camboriu - piscina",
+          "category": "Piscina",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/getulio/img_vendas/g1_2329_45555_1533_181021.jpg",
+          "source_url": "https://www.getulioimoveis.com.br/imovel/venda-terrenos-residenciais-em-camboriu/terreno-residencial-mirante-em-camboriu/2329",
+          "source_label": "Getulio Imoveis"
+        },
+        {
+          "title": "Mirante Camboriu - piscina externa",
+          "category": "Piscina",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/getulio/img_vendas/i1_2329_45555_1533_181021.jpg",
+          "source_url": "https://www.getulioimoveis.com.br/imovel/venda-terrenos-residenciais-em-camboriu/terreno-residencial-mirante-em-camboriu/2329",
+          "source_label": "Getulio Imoveis"
+        },
+        {
+          "title": "Mirante Camboriu - campo e playground",
+          "category": "Esporte",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/mazzotti/img_vendas/g1_1563_29887_1219_150721.jpg",
+          "source_url": "https://mazzottiimoveis.com/imovel/venda-terrenos-residenciais-em-camboriu/condominio-mirante-camboriu-/1563",
+          "source_label": "Mazzotti Imoveis"
+        },
+        {
+          "title": "Mirante Camboriu - campo aberto",
+          "category": "Esporte",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/getulio/img_vendas/g1_2329_45552_1533_181021.jpg",
+          "source_url": "https://www.getulioimoveis.com.br/imovel/venda-terrenos-residenciais-em-camboriu/terreno-residencial-mirante-em-camboriu/2329",
+          "source_label": "Getulio Imoveis"
+        },
+        {
+          "title": "Mirante Camboriu - playground externo",
+          "category": "Infantil",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/mazzotti/img_vendas/g1_1563_29888_1219_150721.jpg",
+          "source_url": "https://mazzottiimoveis.com/imovel/venda-terrenos-residenciais-em-camboriu/condominio-mirante-camboriu-/1563",
+          "source_label": "Mazzotti Imoveis"
+        },
+        {
+          "title": "Mirante Camboriu - vias internas",
+          "category": "Acesso",
+          "image": "https://b.casteldigital.com.br/flyimoveis/ig/im/imoveis/1223/583bdd67-8a7f-4e58-aa6d-953c20893fdb-17029424276115.jpg",
+          "source_url": "https://www.flyimoveis.com.br/imovel/casa-em-condominio-no-mirante-camboriu-camboriu-rio-do-meio-4-quartos-6-garagens-venda-ref-1223/",
+          "source_label": "Fly Imoveis"
+        },
+        {
+          "title": "Mirante Camboriu - mirante e paisagem",
+          "category": "Paisagismo",
+          "image": "https://b.casteldigital.com.br/flyimoveis/ig/il/imoveis/1223/26add5e0-1485-46f3-945f-672c9c7c8f1c-17029424276112.jpg",
+          "source_url": "https://www.flyimoveis.com.br/imovel/casa-em-condominio-no-mirante-camboriu-camboriu-rio-do-meio-4-quartos-6-garagens-venda-ref-1223/",
+          "source_label": "Fly Imoveis"
+        },
+        {
+          "title": "Mirante Camboriu - area verde",
+          "category": "Paisagismo",
+          "image": "https://b.casteldigital.com.br/flyimoveis/ig/im/imoveis/1223/26add5e0-1485-46f3-945f-672c9c7c8f1c-17029424276112.jpg",
+          "source_url": "https://www.flyimoveis.com.br/imovel/casa-em-condominio-no-mirante-camboriu-camboriu-rio-do-meio-4-quartos-6-garagens-venda-ref-1223/",
+          "source_label": "Fly Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "ShieldCheck",
+          "title": "Condominio fechado",
+          "description": "A presenca de portaria e controle de entrada aparece como ponto central nas fontes consultadas."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Conexao regional",
+          "description": "A localizacao facilita acesso a Camboriu, Balneario Camboriu e BR-101."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e lazer externo",
+          "description": "Piscina, campo, quadra e playground estruturam o uso ao ar livre."
+        },
+        {
+          "icon": "Trees",
+          "title": "Paisagem aberta",
+          "description": "Areas verdes e vistas para o entorno reforcam o carater residencial horizontal."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Portaria como hero",
+          "description": "A imagem principal agora representa o acesso real do condominio."
+        },
+        {
+          "title": "Lazer visivel",
+          "description": "Piscina, campos e playground substituem fotos internas que nao explicavam o empreendimento."
+        },
+        {
+          "title": "Texto completo",
+          "description": "A pagina passa a falar de seguranca, mobilidade, lazer e paisagem."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Mirante Camboriu?",
+          "answer": "Em Camboriu, com referencias no Rio do Meio e acesso rapido a Balneario Camboriu e BR-101."
+        },
+        {
+          "question": "O condominio tem portaria?",
+          "answer": "As fontes consultadas destacam portaria e controle de entrada."
+        },
+        {
+          "question": "Quais areas aparecem na nova galeria?",
+          "answer": "Portaria, piscina, campo, playground, vias internas e paisagismo."
+        },
+        {
+          "question": "Qual foi a principal melhoria?",
+          "answer": "A pagina passou a mostrar estruturas do condominio, e nao imagens residenciais internas."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/condominio-residencial-mirante-camboriu-EM44165",
+        "https://mazzottiimoveis.com/imovel/venda-terrenos-residenciais-em-camboriu/condominio-mirante-camboriu-/1563",
+        "https://imoveisterra.net/empreendimento/237/condominio-mirante-camboriu/",
+        "https://www.flyimoveis.com.br/imovel/casa-em-condominio-no-mirante-camboriu-camboriu-rio-do-meio-4-quartos-6-garagens-venda-ref-1223/",
+        "https://bedinimoveis.com.br/casa-venda-condominio-mirante-camboriu",
+        "https://lemur.net.br/terreno-no-condominio-mirante-camboriu-em-camboriu",
+        "https://www.getulioimoveis.com.br/imovel/venda-terrenos-residenciais-em-camboriu/terreno-residencial-mirante-em-camboriu/2329"
+      ]
+    },
+    {
+      "slug": "boutique-2870",
+      "hero_image": "https://s3.sa-east-1.amazonaws.com/imobillesite/real-estates-photo/AP1883/3yagoQkVP7QgK6bONUH9LmTPCXSC9kpRTLG5MxfJM_reI6QzGIK9brmOafjq477tfxSKI8PpIxkuKHvVB2aWRnBrX2ZBtD6Ohrs7GcVLE0y9rA=w1024-h768.jpg",
+      "description": "O Boutique 28Setenta fica na Rua 2870, 127, Centro de Balneario Camboriu. Imobille, Felicita, MySide, Rafael Cassio, Brava Norte e Pilger apresentam o empreendimento como projeto urbano de perfil boutique, com entrega indicada por Imobille em setembro de 2024 e lazer com piscina, descanso, gourmet, eventos, jogos, fitness, playground e apoio compartilhado. A galeria foi refeita com fachada, acesso, piscina, fitness, playground, eventos e convivencia.",
+      "seo_description": "Boutique 2870 no Centro de Balneario Camboriu, com fachada autoral, piscina elevada, fitness, playground, gourmet e apoio compartilhado.",
+      "gallery": [
+        {
+          "title": "Boutique 2870 - fachada principal",
+          "category": "Fachada",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/real-estates-photo/AP1883/3yagoQkVP7QgK6bONUH9LmTPCXSC9kpRTLG5MxfJM_reI6QzGIK9brmOafjq477tfxSKI8PpIxkuKHvVB2aWRnBrX2ZBtD6Ohrs7GcVLE0y9rA=w1024-h768.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-boutique-28setenta-EM50061",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Boutique 2870 - torre vertical",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/1034/6a07747ea7a4bd582b23ac63a202eaaf75a2ed86ff34d3c7c157cb136a1a7bfc.jpg?1759791011",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/1034/boutique-28-setenta/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Boutique 2870 - fachada lateral",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/1034/boutique2870-fachada-03-2k.jpg?1759791011",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/1034/boutique-28-setenta/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Boutique 2870 - torre iluminada",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Imoveis/7006/9i1zs-6a07747ea7a4bd582b23ac63a202eaaf75a2ed86ff34d3c7c157cb136a1a7bfc-1770412006.jpg?1770412006",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/1034/boutique-28-setenta/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Boutique 2870 - fachada completa",
+          "category": "Fachada",
+          "image": "https://cdn.vistahost.com.br/cli15921/vista.imobi/fotos/8334/ig2a6e_833466cfb71969aaa.jpg",
+          "source_url": "https://rafaelcassio.com.br/empreendimento/8334/boutique-28-setenta/",
+          "source_label": "Rafael Cassio"
+        },
+        {
+          "title": "Boutique 2870 - base arborizada",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/real-estates-photo/June2026/thumb-3yagoqkvp7qgk6bonuh9lmtpcxsc9kprtlg5mxfjm-rei6qzgik9brmoafjq477tfxski8ppixkukhvvb2awrnbrx2zbtd6ohrs7gcvle0y9ra-w1024-h768-1782830250.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-boutique-28setenta-EM50061",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Boutique 2870 - acesso noturno",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/real-estates-photo/June2026/thumb-h4gj3iu-xz7ezrypyzrrg2q40dxysvdjdxpqubad-g3wxwowpo6btzxxhagnbd8-e21nultc7e4uo-uvpna3pz0c5lrxjesqznmwmgxrx-8yew-w1024-h768-1782830251.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-boutique-28setenta-EM50061",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Boutique 2870 - fachada noturna",
+          "category": "Fachada",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/real-estates-photo/AP1883/H4gj3iU_xz7EZryPYZRrg2q40dXySVdjdXPqUBaD-G3wXWowpo6BtZxxhAgnbd8_e21nuLtc7E4UO_UVPNA3pZ0C5lRxJesqZnMWMGXrX_8yEw=w1024-h768.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-boutique-28setenta-EM50061",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Boutique 2870 - skyline urbano",
+          "category": "Fachada",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/real-estates-photo/AP1883/MAIN-K8okk8Ap2mEGy8m_byVu4_nUGmcq4e8uQSpSD6GIWmIqOfsLx-fpqirdtkVn7ZHJJGZXo8Ocg6lfeFlCVrHf0crPk2EujahY1EvTb-byKix_0A=w1024-h768.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-boutique-28setenta-EM50061",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Boutique 2870 - base iluminada",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/real-estates-photo/June2026/thumb-umjofe0ryt5ilb108v8zg7ew2b-34fw8asbqc5dhjw0g2s7xxalyyhgifge-mmfk7kusgxd1e5qaz3a-c8kep9har3zeidp0hraba0cs7k0f0da-w1024-h768-1782830253.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-boutique-28setenta-EM50061",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Boutique 2870 - entrada e paisagismo",
+          "category": "Acesso",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/real-estates-photo/AP1883/umJOfe0RYT5IlB108V8Zg7Ew2b_34fw8asbqc5DhjW0g2S7xxalyyHGifGe-MmFK7kUSgXd1e5QAz3A-C8Kep9har3zeIDP0hRaBA0CS7k0f0DA=w1024-h768.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-boutique-28setenta-EM50061",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Boutique 2870 - piscina elevada",
+          "category": "Piscina",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/icp/imoveis/1290/img_3727-1730490872838.jpeg",
+          "source_url": "https://www.guilhermepilger.com/imovel/cobertura-no-edificio-boutique-2870-balneario-camboriu-centro-3-quartos-3-garagens-venda-ref-452/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Boutique 2870 - piscina panoramica",
+          "category": "Piscina",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/icp/imoveis/1377/img-20241118-wa0022-17399741835471.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/cobertura-no-edificio-boutique-2870-balneario-camboriu-centro-3-quartos-3-garagens-venda-ref-452/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Boutique 2870 - fitness",
+          "category": "Fitness",
+          "image": "https://cdn.vistahost.com.br/cli15921/vista.imobi/fotos/8334/i1711152v_83346722ad3f84a4e.jpg",
+          "source_url": "https://rafaelcassio.com.br/empreendimento/8334/boutique-28-setenta/",
+          "source_label": "Rafael Cassio"
+        },
+        {
+          "title": "Boutique 2870 - playground",
+          "category": "Infantil",
+          "image": "https://cdn.vistahost.com.br/cli15921/vista.imobi/fotos/8334/i1711152v_83346722ad41b349e.jpg",
+          "source_url": "https://rafaelcassio.com.br/empreendimento/8334/boutique-28-setenta/",
+          "source_label": "Rafael Cassio"
+        },
+        {
+          "title": "Boutique 2870 - eventos gourmet",
+          "category": "Eventos",
+          "image": "https://cdn.vistahost.com.br/cli15921/vista.imobi/fotos/8334/i1711152v_83346722ad4c552d1.jpg",
+          "source_url": "https://rafaelcassio.com.br/empreendimento/8334/boutique-28-setenta/",
+          "source_label": "Rafael Cassio"
+        },
+        {
+          "title": "Boutique 2870 - apoio compartilhado",
+          "category": "Apoio",
+          "image": "https://cdn.vistahost.com.br/cli15921/vista.imobi/fotos/8334/i1711152v_83346722ad527bd71.jpg",
+          "source_url": "https://rafaelcassio.com.br/empreendimento/8334/boutique-28-setenta/",
+          "source_label": "Rafael Cassio"
+        },
+        {
+          "title": "Boutique 2870 - estar externo",
+          "category": "Convivencia",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/icp/imoveis/1266/_n4a0284jpeg-name-c077863cf8c1a6200d4a19a372b14ef73e586da1cb185ff2fd4d2cb6e7093bd8-17267673502362.jpeg",
+          "source_url": "https://www.guilhermepilger.com/imovel/cobertura-no-edificio-boutique-2870-balneario-camboriu-centro-3-quartos-3-garagens-venda-ref-452/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Boutique 2870 - piscina no lazer",
+          "category": "Piscina",
+          "image": "https://cdn.vistahost.com.br/cli15921/vista.imobi/fotos/8334/i1711152v_83346722ad45db16f.jpg",
+          "source_url": "https://rafaelcassio.com.br/empreendimento/8334/boutique-28-setenta/",
+          "source_label": "Rafael Cassio"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 2870 no Centro",
+          "description": "Endereco central com acesso rapido a servicos, praia e mobilidade urbana de Balneario Camboriu."
+        },
+        {
+          "icon": "Building2",
+          "title": "Perfil boutique",
+          "description": "A volumetria e a base arborizada reforcam a identidade compacta e urbana do empreendimento."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina elevada",
+          "description": "A piscina aparece como destaque visual do lazer, com vista para o entorno urbano."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer funcional",
+          "description": "Fitness, playground, gourmet, eventos e apoio compartilhado completam a rotina condominial."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fachada no primeiro impacto",
+          "description": "A pagina agora abre com o edificio e nao com imagens internas."
+        },
+        {
+          "title": "Entrega indicada",
+          "description": "Imobille informa entrega em setembro de 2024, dado usado como referencia de status."
+        },
+        {
+          "title": "Galeria completa",
+          "description": "A selecao combina fachada, piscina, fitness, playground, eventos e apoio compartilhado."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Boutique 2870?",
+          "answer": "Na Rua 2870, 127, Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Qual status foi encontrado?",
+          "answer": "Imobille indica entrega em setembro de 2024."
+        },
+        {
+          "question": "Quais areas compoem a galeria?",
+          "answer": "Fachada, acesso, piscina, fitness, playground, eventos, apoio compartilhado e estar externo."
+        },
+        {
+          "question": "O que foi corrigido?",
+          "answer": "A apresentacao visual passou a destacar o empreendimento e suas areas comuns."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-boutique-28setenta-EM50061",
+        "https://felicitanegocios.com.br/empreendimento/1034/boutique-28-setenta/",
+        "https://myside.com.br/apartamento-venda-boutique-2870-balneario-camboriu-sc",
+        "https://www.guilhermepilger.com/imovel/cobertura-no-edificio-boutique-2870-balneario-camboriu-centro-3-quartos-3-garagens-venda-ref-452/",
+        "https://rafaelcassio.com.br/empreendimento/8334/boutique-28-setenta/",
+        "https://bravanorteimoveis.com.br/boutique-28-setenta"
+      ]
+    },
+    {
+      "slug": "condominio-caledonia-village",
+      "hero_image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0916__Easy-Resize.com_.jpg",
+      "description": "O Caledonia Private Village e um condominio fechado em Camboriu, com referencias em Santa Regina e endereco na Rua Ivo Jose Rebello, 610. Fontes oficiais e imobiliarias indicam pronto para morar, contato com natureza, cerca de 7 km da Praia Central de Balneario Camboriu e estrutura de lazer com club house, piscina, quadras, playground, academia, areas gourmet, pista de caminhada e paisagismo. A nova galeria valoriza implantacao real, lazer, esportes, convivencia e areas verdes.",
+      "seo_description": "Caledonia Private Village em Camboriu, condominio fechado pronto, com club house, piscinas, quadras, playground, fitness e areas verdes.",
+      "gallery": [
+        {
+          "title": "Caledonia Village - implantacao geral",
+          "category": "Implantacao",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0916__Easy-Resize.com_.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Caledonia Private Village"
+        },
+        {
+          "title": "Caledonia Village - vista da piscina",
+          "category": "Implantacao",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0911__Easy-Resize.com_.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Caledonia Private Village"
+        },
+        {
+          "title": "Caledonia Village - vias e areas verdes",
+          "category": "Implantacao",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/389/i31zn5h93p6kb7z47_361762716be209bf1.jpg?1713821762",
+          "source_url": "https://maximoveis.com.br/empreendimento/389/condominio-caledonia-private-village/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Caledonia Village - praca central",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/389/i31zn5h93p6kb7z47_361762716bdbe5a5e.jpg?1713821762",
+          "source_url": "https://maximoveis.com.br/empreendimento/389/condominio-caledonia-private-village/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Caledonia Village - playground amplo",
+          "category": "Infantil",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/389/i31zn5h93p6kb7z47_361762716bda3d25f.jpg?1713821762",
+          "source_url": "https://maximoveis.com.br/empreendimento/389/condominio-caledonia-private-village/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Caledonia Village - quadra de areia",
+          "category": "Esporte",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/389/i31zn5h93p6kb7z47_361762716bdd685a3.jpg?1713821762",
+          "source_url": "https://maximoveis.com.br/empreendimento/389/condominio-caledonia-private-village/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Caledonia Village - campos e praca",
+          "category": "Esporte",
+          "image": "https://mlxuhz8sy9ac.i.optimole.com/w:auto/h:auto/q:auto/https://condominiocaledonia.com.br/wp-content/uploads/2023/09/DJI_0954__Easy-Resize.com_-787x383-c-default.jpg",
+          "source_url": "https://condominiocaledonia.com.br/",
+          "source_label": "Caledonia Private Village"
+        },
+        {
+          "title": "Caledonia Village - club house",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/389/i31zn5h93p6kb7z47_361762716bdf0ac56.jpg?1713821762",
+          "source_url": "https://maximoveis.com.br/empreendimento/389/condominio-caledonia-private-village/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Caledonia Village - piscina do clube",
+          "category": "Piscina",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/2524/iGxY09lt4q05Csw04E5C0_25246022903ee2bdc.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/2789/caledonia-private-village/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Caledonia Village - deck do clube",
+          "category": "Convivencia",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/2524/iGxY09lt4q05Csw04E5C0_252460229034bd687.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/2789/caledonia-private-village/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Caledonia Village - piscina externa",
+          "category": "Piscina",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/2524/iGxY09lt4q05Csw04E5C0_252460229044703fc.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/2789/caledonia-private-village/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Caledonia Village - piscina e espelho",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/389/i31zn5h93p6kb7z47_361762716bd6a1672.jpg?1713821762",
+          "source_url": "https://maximoveis.com.br/empreendimento/389/condominio-caledonia-private-village/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Caledonia Village - quadra esportiva",
+          "category": "Esporte",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/389/i31zn5h93p6kb7z47_361762716bf1e4a77.jpg?1713821762",
+          "source_url": "https://maximoveis.com.br/empreendimento/389/condominio-caledonia-private-village/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Caledonia Village - quadra multiuso",
+          "category": "Esporte",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/2524/iGxY09lt4q05Csw04E5C0_2524602290359ab1f.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/2789/caledonia-private-village/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Caledonia Village - campo telado",
+          "category": "Esporte",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/389/i31zn5h93p6kb7z47_361762716bd8097e6.jpg?1713821762",
+          "source_url": "https://maximoveis.com.br/empreendimento/389/condominio-caledonia-private-village/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Caledonia Village - playground colorido",
+          "category": "Infantil",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/389/i31zn5h93p6kb7z47_361762716bf3082e9.jpg?1713821762",
+          "source_url": "https://maximoveis.com.br/empreendimento/389/condominio-caledonia-private-village/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Caledonia Village - playground externo",
+          "category": "Infantil",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/2524/iGxY09lt4q05Csw04E5C0_252460229026aa251.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/2789/caledonia-private-village/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Caledonia Village - pergolado gourmet",
+          "category": "Gourmet",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/389/i31zn5h93p6kb7z47_361762716be355fec.jpg?1713821762",
+          "source_url": "https://maximoveis.com.br/empreendimento/389/condominio-caledonia-private-village/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Caledonia Village - gourmet externo",
+          "category": "Gourmet",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/2524/iGxY09lt4q05Csw04E5C0_25246022902ae3ecf.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/2789/caledonia-private-village/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Caledonia Village - quadra de tenis",
+          "category": "Esporte",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/389/i31zn5h93p6kb7z47_361762716be60b71d.jpg?1713821762",
+          "source_url": "https://maximoveis.com.br/empreendimento/389/condominio-caledonia-private-village/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Caledonia Village - pista de caminhada",
+          "category": "Paisagismo",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/2524/iGxY09lt4q05Csw04E5C0_2524602290277ac13.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/2789/caledonia-private-village/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Caledonia Village - area verde",
+          "category": "Paisagismo",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/2524/iGxY09lt4q05Csw04E5C0_252460229037dcca9.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/2789/caledonia-private-village/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Caledonia Village - fitness com vista",
+          "category": "Fitness",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/April2022/wFpZtnA90umL8OdzihOI.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-caledonia-EM26933",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Caledonia Village - academia equipada",
+          "category": "Fitness",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/April2022/IWkb3wIem84FG0LytLSl.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-caledonia-EM26933",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Caledonia Village - fitness completo",
+          "category": "Fitness",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/2524/iGxY09lt4q05Csw04E5C0_252460229038a0aa3.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/2789/caledonia-private-village/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Caledonia Village - apoio interno",
+          "category": "Apoio",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/April2022/2JUbionxXgj6UNd7EpdN.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-caledonia-EM26933",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Caledonia Village - varanda do clube",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/389/i31zn5h93p6kb7z47_361762716be786328.jpg?1713821762",
+          "source_url": "https://maximoveis.com.br/empreendimento/389/condominio-caledonia-private-village/",
+          "source_label": "Max Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Trees",
+          "title": "Natureza e privacidade",
+          "description": "A implantacao ampla combina paisagem verde, vias internas e convivencia ao ar livre."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Santa Regina, Camboriu",
+          "description": "As fontes indicam endereco na Rua Ivo Jose Rebello, 610, a cerca de 7 km da Praia Central de Balneario Camboriu."
+        },
+        {
+          "icon": "Waves",
+          "title": "Club house com piscina",
+          "description": "Piscina, deck e areas sociais do clube estruturam o lazer principal."
+        },
+        {
+          "icon": "Dribbble",
+          "title": "Esportes e familia",
+          "description": "Quadras, campo, tenis, playground, fitness e pista de caminhada ampliam o uso para varias idades."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Galeria de implantacao real",
+          "description": "Fotos aereas, club house e areas verdes mostram o condominio como um todo."
+        },
+        {
+          "title": "Lazer horizontal completo",
+          "description": "A pagina passa a comunicar piscina, esporte, infantil, gourmet, fitness e paisagismo."
+        },
+        {
+          "title": "Status claro",
+          "description": "Fontes consultadas tratam o Caledonia como pronto para morar."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Caledonia Private Village?",
+          "answer": "Em Camboriu, com referencia em Santa Regina e endereco na Rua Ivo Jose Rebello, 610."
+        },
+        {
+          "question": "O condominio e pronto para morar?",
+          "answer": "As fontes consultadas indicam o Caledonia como pronto para morar."
+        },
+        {
+          "question": "Quais areas aparecem na galeria?",
+          "answer": "Implantacao, club house, piscinas, quadras, playground, gourmet, fitness, paisagismo e pistas."
+        },
+        {
+          "question": "Qual foi a melhoria da pagina?",
+          "answer": "A curadoria substituiu imagens pouco explicativas por fotos do condominio e da estrutura de lazer."
+        }
+      ],
+      "sources": [
+        "https://condominiocaledonia.com.br/",
+        "https://residencialcaledonia.com.br/",
+        "https://www.imobillenegocios.com.br/empreendimento/condominio-caledonia-EM26933",
+        "https://imoveisterra.net/empreendimento/126/condominio-caledonia-private-village/",
+        "https://maximoveis.com.br/empreendimento/389/condominio-caledonia-private-village/",
+        "https://vgimobiliaria.com.br/empreendimento/2789/caledonia-private-village/"
+      ]
+    },
+    {
+      "slug": "ed-aura",
+      "hero_image": "https://storage.agil.net/cdn/agil/945/condominium/368/big/5c1ad5a8aa94.webp",
+      "description": "O Aura Living Home fica na Praia Brava, Itajai, na Rua Renato Melim Cunha, com fontes indicando projeto da AF Incorporadora. MySide apresenta entrega prevista para julho de 2028, areas privativas entre 168 e 361 m2 e proximidade do mar; Pilger, Bruno Cassola, Felicita, Juliani e Durant reforcam lazer com piscina, deck, solarium, hall, gourmet, brinquedoteca, playground, academia, portaria, delivery e Espaco Lume. A galeria evita dormitorios e ambientes privados, priorizando fachada, localizacao, implantacao, piscina, rooftop e amenidades.",
+      "seo_description": "Aura Living Home na Praia Brava, Itajai, projeto AF com fachada, quadra mar, piscina, rooftop, fitness, kids e portaria.",
+      "gallery": [
+        {
+          "title": "Aura Living Home - fachada principal",
+          "category": "Fachada",
+          "image": "https://storage.agil.net/cdn/agil/945/condominium/368/big/5c1ad5a8aa94.webp",
+          "source_url": "https://julianiimoveis.com.br/condominio/368",
+          "source_label": "Juliani Imoveis"
+        },
+        {
+          "title": "Aura Living Home - torre frontal",
+          "category": "Fachada",
+          "image": "https://storage.agil.net/cdn/agil/945/condominium/368/medium/089c93948484.webp",
+          "source_url": "https://julianiimoveis.com.br/condominio/368",
+          "source_label": "Juliani Imoveis"
+        },
+        {
+          "title": "Aura Living Home - fachada vertical",
+          "category": "Fachada",
+          "image": "https://storage.agil.net/cdn/agil/945/condominium/368/big/089c93948484.webp",
+          "source_url": "https://julianiimoveis.com.br/condominio/368",
+          "source_label": "Juliani Imoveis"
+        },
+        {
+          "title": "Aura Living Home - acesso e base",
+          "category": "Acesso",
+          "image": "https://storage.agil.net/cdn/agil/945/condominium/368/big/0c9240005b32.webp",
+          "source_url": "https://julianiimoveis.com.br/condominio/368",
+          "source_label": "Juliani Imoveis"
+        },
+        {
+          "title": "Aura Living Home - fachada monocromatica",
+          "category": "Fachada",
+          "image": "https://img.apre.me/M7ItVksvyNIzNk8yNrYwTklMSrU0i89JLMhMzsssKtA3MQNCAyP99LzMlJzM0iTbTDUDExNT22QA.jpg",
+          "source_url": "https://durantcorretor.com.br/aura-living-home-af-incorporadora",
+          "source_label": "Durant Corretor"
+        },
+        {
+          "title": "Aura Living Home - volume lateral",
+          "category": "Fachada",
+          "image": "https://img.apre.me/M7YtVksvyNIzNk8yNrYwTklMSrU0i89JLMhMzsssKtA3MQNCAyP99LzMlJzM0iTbTDUDExNT22QA.jpg",
+          "source_url": "https://durantcorretor.com.br/aura-living-home-af-incorporadora",
+          "source_label": "Durant Corretor"
+        },
+        {
+          "title": "Aura Living Home - skyline da fachada",
+          "category": "Fachada",
+          "image": "https://img.apre.me/M7EtVksvyNIzNk8yNrYwTklMSrU0i89JLMhMzsssKtA3MQNCAyP99LzMlJzM0iTbTDUDExNT22QA.jpg",
+          "source_url": "https://durantcorretor.com.br/aura-living-home-af-incorporadora",
+          "source_label": "Durant Corretor"
+        },
+        {
+          "title": "Aura Living Home - entorno da Praia Brava",
+          "category": "Localizacao",
+          "image": "https://b4.casteldigital.com.br/brunocassola/ig/il/imoveis/991/aura-living-home-praia-brava-apartamento-3-suites-quadra-mar-venda-localizacao-17792085779521.png",
+          "source_url": "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-aura-living-home-itajai-praia-brava-3-quartos-3-garagens-venda-ref-991/",
+          "source_label": "Bruno Cassola"
+        },
+        {
+          "title": "Aura Living Home - quadra mar",
+          "category": "Localizacao",
+          "image": "https://b4.casteldigital.com.br/brunocassola/ig/im/imoveis/991/aura-living-home-praia-brava-apartamento-3-suites-quadra-mar-venda-localizacao-17792085779521.png",
+          "source_url": "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-aura-living-home-itajai-praia-brava-3-quartos-3-garagens-venda-ref-991/",
+          "source_label": "Bruno Cassola"
+        },
+        {
+          "title": "Aura Living Home - implantacao no bairro",
+          "category": "Implantacao",
+          "image": "https://storage.agil.net/cdn/agil/945/condominium/368/big/b00e87de2f06.webp",
+          "source_url": "https://julianiimoveis.com.br/condominio/368",
+          "source_label": "Juliani Imoveis"
+        },
+        {
+          "title": "Aura Living Home - piscina externa",
+          "category": "Piscina",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/2463/captura-de-tela-2026-04-10-112053-17758309275457.png",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-aura-living-home-itajai-praia-brava-3-quartos-3-garagens-venda-ref-2463/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Aura Living Home - piscina e deck",
+          "category": "Piscina",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/il/imoveis/2463/captura-de-tela-2026-04-10-112053-17758309275457.png",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-aura-living-home-itajai-praia-brava-3-quartos-3-garagens-venda-ref-2463/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Aura Living Home - lounge externo",
+          "category": "Convivencia",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/2463/captura-de-tela-2026-04-10-112106-17758309275458.png",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-aura-living-home-itajai-praia-brava-3-quartos-3-garagens-venda-ref-2463/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Aura Living Home - rooftop social",
+          "category": "Rooftop",
+          "image": "https://cdn.imoview.com.br/bryann/Imoveis/7230/q1ykj-aura-lamina-18-1782857715.jpg?1782857715",
+          "source_url": "https://felicitanegocios.com.br/imovel/7230/apartamento-3-quartos-praia-brava-de-itajai-itajai/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Aura Living Home - painel de amenidades",
+          "category": "Amenidades",
+          "image": "https://cdn.imoview.com.br/bryann/Imoveis/7230/3yrbf-aura-lamina-16-1782857715.jpg?1782857715",
+          "source_url": "https://felicitanegocios.com.br/imovel/7230/apartamento-3-quartos-praia-brava-de-itajai-itajai/",
+          "source_label": "Felicita Negocios"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Praia Brava quadra mar",
+          "description": "As fontes posicionam o empreendimento na Rua Renato Melim Cunha, proximo ao mar da Praia Brava."
+        },
+        {
+          "icon": "Building2",
+          "title": "AF Incorporadora",
+          "description": "Fontes como MySide e Durant associam o Aura Living Home a AF Incorporadora."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e rooftop",
+          "description": "Piscina, deck, solarium e rooftop social compoem a experiencia de lazer."
+        },
+        {
+          "icon": "Users",
+          "title": "Apoio para rotina",
+          "description": "Hall, gourmet, brinquedoteca, playground, academia, portaria, delivery e Espaco Lume aparecem nas fontes consultadas."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Foco no empreendimento",
+          "description": "Dormitorios e interiores privados ficaram fora da galeria final."
+        },
+        {
+          "title": "Localizacao destacada",
+          "description": "A pagina passa a mostrar entorno, quadra mar e implantacao no bairro."
+        },
+        {
+          "title": "Copy atualizada",
+          "description": "Descricao, beneficios, diferenciais e FAQ foram reescritos com dados especificos do Aura."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Aura Living Home?",
+          "answer": "Na Praia Brava, Itajai, com referencia na Rua Renato Melim Cunha."
+        },
+        {
+          "question": "Quem assina o empreendimento?",
+          "answer": "As fontes consultadas associam o projeto a AF Incorporadora."
+        },
+        {
+          "question": "Qual entrega foi encontrada?",
+          "answer": "MySide informa previsao de entrega para julho de 2028."
+        },
+        {
+          "question": "Quais imagens entraram?",
+          "answer": "Fachada, localizacao, implantacao, piscina, lounge externo, rooftop e painel de amenidades."
+        }
+      ],
+      "sources": [
+        "https://myside.com.br/apartamento-venda-aura-living-home-itajai-sc",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-aura-living-home-itajai-praia-brava-3-quartos-3-garagens-venda-ref-2463/",
+        "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-aura-living-home-itajai-praia-brava-3-quartos-3-garagens-venda-ref-991/",
+        "https://felicitanegocios.com.br/imovel/7230/apartamento-3-quartos-praia-brava-de-itajai-itajai/",
+        "https://julianiimoveis.com.br/condominio/368",
+        "https://durantcorretor.com.br/aura-living-home-af-incorporadora"
+      ]
+    }
+  ]
+}

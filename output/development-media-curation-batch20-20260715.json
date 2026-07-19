@@ -1,0 +1,1405 @@
+{
+  "batch_id": "development-media-curation-batch20-20260715",
+  "generated_at": "2026-07-15T20:00:00.000Z",
+  "notes": [
+    "Lote 20 P0 auditado com foco em imagens reais de empreendimento/condominio.",
+    "Unique teve fontes homonimas descartadas e foi corrigido para Brava Unique Residence, Praia Brava de Itajai.",
+    "Sunrise recebeu galeria mais enxuta porque as fontes abertas misturam muitas imagens privativas."
+  ],
+  "items": [
+    {
+      "slug": "summer-beach",
+      "hero_image": "https://cdn.imoview.com.br/bryann/Condominios/112/captura-de-tela-2024-05-16-123645.png?1715874668",
+      "description": "O Summer Beach Residence foi reposicionado como um condominio frente mar da Barra Sul de Balneario Camboriu, com foco em fachada, piscina e lazer do edificio. As fontes consultadas indicam localizacao na Avenida Atlantica/Barra Sul, plantas amplas entre aproximadamente 200 m2 e 600 m2, 4 a 6 suites e estrutura de lazer com piscinas adulto e infantil de frente para o mar, quadra poliesportiva, academia, sauna, salao de festas, sala de jogos, boate e espaco gourmet. A nova galeria remove o peso de fotos internas e passa a representar o empreendimento.",
+      "seo_description": "Conheca o Summer Beach Residence, frente mar na Barra Sul de Balneario Camboriu, com lazer completo e piscina na orla.",
+      "gallery": [
+        {
+          "title": "Summer Beach - torre frente mar",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/112/captura-de-tela-2024-05-16-123645.png?1715874668",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/112/summer-beach/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Summer Beach - fachada da orla",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/112/captura-de-tela-2024-05-16-123610.png?1715874668",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/112/summer-beach/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Summer Beach - embasamento frontal",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-1763383737.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-summer-beach-EM15749",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Summer Beach - piscina frente mar",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/1711202509485770-1763383737.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-summer-beach-EM15749",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Summer Beach - acesso externo",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2025/summer-beach-12-1763383424.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-summer-beach-EM15749",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Summer Beach - lounge gourmet",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2025/summer-beach-8-1763383420.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-summer-beach-EM15749",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Summer Beach - ambiente de jogos",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2025/summer-beach-9-1763383421.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-summer-beach-EM15749",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Summer Beach - fitness",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2025/summer-beach-10-1763383422.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-summer-beach-EM15749",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Summer Beach - piscina panoramica",
+          "category": "Piscina",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/il/imoveis/13/summer-beach-57-845x684-1621633312616205.jpeg",
+          "source_url": "https://www.guilhermepilger.com/imovel/cobertura-no-edificio-summer-beach-balneario-camboriu-barra-sul-7-quartos-6-garagens-venda-ref-13/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Summer Beach - torre iluminada",
+          "category": "Fachada",
+          "image": "https://www.guilhermepilger.com/img/width/0/0/larg/256//sharpen/24/jpg-quality/85/file/noticias/12/b376dec6-e1b7-4088-aad1-ef178d883457-1738008578065.jpeg",
+          "source_url": "https://www.guilhermepilger.com/imovel/cobertura-no-edificio-summer-beach-balneario-camboriu-barra-sul-7-quartos-6-garagens-venda-ref-13/",
+          "source_label": "Guilherme Pilger"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente mar na Barra Sul",
+          "description": "Endereco na orla de Balneario Camboriu, com leitura direta da praia e da vida urbana da Barra Sul."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer completo",
+          "description": "Piscinas, quadra, academia, sauna, saloes, jogos, boate e gourmet sustentam a experiencia do condominio."
+        },
+        {
+          "icon": "Building2",
+          "title": "Residencias amplas",
+          "description": "As fontes apontam plantas grandes, com padrao frente mar e poucas residencias por pavimento."
+        }
+      ],
+      "differentials": [
+        "Hero trocado para imagem de fachada do edificio.",
+        "Galeria prioriza piscina, acesso, fachada e lazer comum.",
+        "Descricao atualizada com dados de Barra Sul, areas amplas e estrutura do condominio."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Summer Beach Residence?",
+          "answer": "Fica na Barra Sul de Balneario Camboriu, em posicao frente mar."
+        },
+        {
+          "question": "Quais areas de lazer o Summer Beach oferece?",
+          "answer": "As fontes citam piscinas adulto e infantil, quadra, academia, sauna, salao de festas, jogos, boate e espaco gourmet."
+        },
+        {
+          "question": "O que mudou na pagina?",
+          "answer": "A pagina passou a usar imagens do edificio e das areas comuns, evitando a galeria centrada em fotos internas de oferta."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, piscina, acesso, gourmet, jogos, fitness e outras areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-summer-beach-EM15749",
+        "https://felicitanegocios.com.br/empreendimento/112/summer-beach/",
+        "https://sortinvestimentos.com.br/empreendimentos/summer-beach",
+        "https://www.brianreis.com.br/emprendimento/summer-beach-residence/",
+        "https://www.guilhermepilger.com/imovel/cobertura-no-edificio-summer-beach-balneario-camboriu-barra-sul-7-quartos-6-garagens-venda-ref-13/"
+      ]
+    },
+    {
+      "slug": "sunny-coast",
+      "hero_image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_1298_21066_1046_120526.jpg",
+      "description": "O Sunny Coast foi tratado como um empreendimento frente mar no Centro de Itapema, com torre unica, acesso direto a praia pela area de lazer e infraestrutura social de grande porte. As fontes indicam endereco na Rua 149, 1802, areas privativas entre 229 m2 e 508 m2, plantas com 4 quartos, 31 pavimentos, 2 residencias por andar e cerca de 55 residencias. A Imobille informa mais de 2400 m2 de lazer, incluindo fitness, sauna, sala de jogos, piscina e espacos de convivencia.",
+      "seo_description": "Conheca o Sunny Coast, frente mar no Centro de Itapema, com acesso direto a praia e mais de 2400 m2 de lazer.",
+      "gallery": [
+        {
+          "title": "Sunny Coast - fachada frontal",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_1298_21066_1046_120526.jpg",
+          "source_url": "https://www.imobiliariaversatil.com.br/edificios/sunny-coast/1298",
+          "source_label": "Versatil Imoveis"
+        },
+        {
+          "title": "Sunny Coast - torre frente mar",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/vitapema/img_vendas/m1_1448_43822_1556_070422.jpeg",
+          "source_url": "https://www.vitapema.com.br/imovel/venda-coberturas-em-itapema/sunny-coast/1448",
+          "source_label": "Vitapema Imoveis"
+        },
+        {
+          "title": "Sunny Coast - fachada vertical",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/vitapema/img_vendas/g1_1448_43822_1556_070422.jpeg",
+          "source_url": "https://www.vitapema.com.br/imovel/venda-coberturas-em-itapema/sunny-coast/1448",
+          "source_label": "Vitapema Imoveis"
+        },
+        {
+          "title": "Sunny Coast - fachada noturna",
+          "category": "Fachada",
+          "image": "https://centralcorretor.s3.sa-east-1.amazonaws.com/protected/us-east-1:c19b00f3-4d13-c113-dcdd-8a86f2516d1f/28f11e94-9c9d-4de9-88b0-69e51e363013_xl.webp",
+          "source_url": "https://jarussi.com.br/empreendimentos/Sunny-Coast_64AC404FE0EC9",
+          "source_label": "J.A. Russi"
+        },
+        {
+          "title": "Sunny Coast - piscina frente mar",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/17022026160528845-1771355128.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sunny-coast-EM91196",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sunny Coast - torre lateral",
+          "category": "Fachada",
+          "image": "https://centralcorretor.s3.sa-east-1.amazonaws.com/protected/us-east-1:0a29d542-aa00-4b2d-b26f-e76af4199d66/34b9b489-4b25-42a1-aada-90a77f8c1917_xl.webp",
+          "source_url": "https://sunnycoast.com.br/",
+          "source_label": "Sunny Coast"
+        },
+        {
+          "title": "Sunny Coast - skyline da torre",
+          "category": "Fachada",
+          "image": "https://centralcorretor.s3.sa-east-1.amazonaws.com/protected/us-east-1:c19b00f3-4d48-c991-6807-6f2d38e510f4/3ed87192-13da-4fc1-902e-9b57ec58367c_xl.webp",
+          "source_url": "https://jarussi.com.br/empreendimentos/Sunny-Coast_64AC404FE0EC9",
+          "source_label": "J.A. Russi"
+        },
+        {
+          "title": "Sunny Coast - vista urbana",
+          "category": "Fachada",
+          "image": "https://centralcorretor.s3.sa-east-1.amazonaws.com/protected/us-east-1:0a29d542-aa00-4b2d-b26f-e76af4199d66/8f2c4c18-ba97-4d90-8dce-83aff4dbdf2f_xl.webp",
+          "source_url": "https://jarussi.com.br/empreendimentos/Sunny-Coast_64AC404FE0EC9",
+          "source_label": "J.A. Russi"
+        },
+        {
+          "title": "Sunny Coast - acesso da torre",
+          "category": "Acesso",
+          "image": "https://centralcorretor.s3.sa-east-1.amazonaws.com/protected/us-east-1:5d89ea9c-4a19-4644-802e-f9cba9062df3/8c092f48-e787-4774-b44d-20c4cd244095_xl.webp",
+          "source_url": "https://jarussi.com.br/empreendimentos/Sunny-Coast_64AC404FE0EC9",
+          "source_label": "J.A. Russi"
+        },
+        {
+          "title": "Sunny Coast - deck de piscina",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/December2021/eNdH2xuoqEswKrxitX9N.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sunny-coast-EM91196",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sunny Coast - lazer na orla",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/December2021/2xgD2wcvCZj2v87Lk1Zf.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sunny-coast-EM91196",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sunny Coast - contexto frente mar",
+          "category": "Paisagem",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/December2021/BYa9YG4wJdHN6fwzKbaB.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sunny-coast-EM91196",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Pe na areia em Itapema",
+          "description": "Projeto frente mar no Centro, com acesso a praia pela area de lazer."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Mais de 2400 m2 de lazer",
+          "description": "Estrutura de lazer ampla para rotina de praia, bem-estar e convivencia."
+        },
+        {
+          "icon": "Building2",
+          "title": "Torre unica",
+          "description": "Empreendimento com 31 pavimentos, duas residencias por andar e plantas amplas."
+        }
+      ],
+      "differentials": [
+        "Fachada e piscina substituem as fotos internas de oferta.",
+        "Copy reforca o endereco frente mar no Centro de Itapema.",
+        "Galeria com imagens de torre, acesso, piscina e contexto da orla."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Sunny Coast?",
+          "answer": "Fica no Centro de Itapema, na Rua 149, 1802, em localizacao frente mar."
+        },
+        {
+          "question": "O Sunny Coast tem acesso a praia?",
+          "answer": "A Imobille informa acesso direto a praia pela area de lazer do empreendimento."
+        },
+        {
+          "question": "Quais tamanhos aparecem nas fontes?",
+          "answer": "As fontes consultadas indicam areas entre 229 m2 e 508 m2, com plantas de alto padrao."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, piscina, acesso, paisagem e outras areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://sunnycoast.com.br/",
+        "https://myside.com.br/apartamento-venda-sunny-coast-itapema-sc",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-sunny-coast-EM91196",
+        "https://rotadosolitapema.com.br/sunny-coast-apartamentos-frente-mar-4-suites-e-3-vagas-no-centro-de-itapema-sc",
+        "https://www.imobiliariaversatil.com.br/edificios/sunny-coast/1298",
+        "https://www.vitapema.com.br/imovel/venda-coberturas-em-itapema/sunny-coast/1448",
+        "https://jarussi.com.br/empreendimentos/Sunny-Coast_64AC404FE0EC9"
+      ]
+    },
+    {
+      "slug": "sunrise-praia-brava",
+      "hero_image": "https://s01.jetimgs.com/tnkmRI8vL9l6oztxvRIDQtPp-FNlvwmctWgFev8_5jOl5wN7vkeAW5V8ct8rgUwpjsypCcr0fyTTI3TNqUKUnA6VXi1WcRWsk-PsSrl8gsQCReAearTjpEFmRzUtz7eGTcrtsp0Q1HwDvV1jOLVYLtuFWTwXfkgjBgO_qbPNoyXEjwnvl0EXi0Y/abfsunrisefachadadiajpg.webp",
+      "description": "O Sunrise Praia Brava foi revisado como empreendimento frente mar na Avenida Jose Medeiros Vieira, na Praia Brava de Itajai, ligado a ABF & Vaccaro. As fontes indicam 3 a 4 suites, areas entre 141 m2 e 407 m2, poucas residencias, conclusao em 2024 e lazer no rooftop com piscina, salao de festas, pub gourmet e academia. Como as fontes abertas misturam muitas fotos de apartamentos e varandas privativas, a nova galeria ficou enxuta e usa fachada, acesso e contexto frente mar.",
+      "seo_description": "Conheca o Sunrise Praia Brava, frente mar em Itajai, com rooftop, piscina, salao de festas e academia.",
+      "gallery": [
+        {
+          "title": "Sunrise - fachada diurna",
+          "category": "Fachada",
+          "image": "https://s01.jetimgs.com/tnkmRI8vL9l6oztxvRIDQtPp-FNlvwmctWgFev8_5jOl5wN7vkeAW5V8ct8rgUwpjsypCcr0fyTTI3TNqUKUnA6VXi1WcRWsk-PsSrl8gsQCReAearTjpEFmRzUtz7eGTcrtsp0Q1HwDvV1jOLVYLtuFWTwXfkgjBgO_qbPNoyXEjwnvl0EXi0Y/abfsunrisefachadadiajpg.webp",
+          "source_url": "https://www.ebcimobiliaria.com.br/imovel/apartamento-com-4-quartos-a-venda-e-3-vagas-bairro-praia-brava-de-itajai-em-itajai/802113",
+          "source_label": "EBC Imobiliaria"
+        },
+        {
+          "title": "Sunrise - fachada da praia",
+          "category": "Fachada",
+          "image": "https://s01.jetimgs.com/tnnAwYXphKBPiW3sr35S56TSBu41PCPMXJgG4UpLuMhmB5uKGXsEydyXaxruLCKtnCrSatjy6lvqAePA6t-VAqFWAhoV88JKqYJobgI-sVTbTnxFUnlAaeqdoQi8_RjwmimWRdPcSj0MBls6tC6u7a1PAFvGon3_TDzX3HjHeXglNLNse_onkzjO/abfsunrisefachadadiajpg.webp",
+          "source_url": "https://www.ebcimobiliaria.com.br/imovel/apartamento-com-4-quartos-a-venda-e-3-vagas-bairro-praia-brava-de-itajai-em-itajai/802113",
+          "source_label": "EBC Imobiliaria"
+        },
+        {
+          "title": "Sunrise - fachada com palmeiras",
+          "category": "Fachada",
+          "image": "https://s01.jetimgs.com/tnkmRI8vL9l6oztxvRIDeA4nFA9ps4zdxo-pFD8arYy7nzxN8otpa4IuxzUnn31DL_WwdfpBzzsWVw18JIqP4uoYxzn-HZBBz7ICLeVwrOvN8RNXexRuI5NEteODLAVNdHeqP0_oappLbN54X7L8-bsdKVQ67vJyHK4lXWQDlAeQjg_v6rHGH3E/abfsunrisefachadadiajpg.webp",
+          "source_url": "https://www.ebcimobiliaria.com.br/imovel/apartamento-com-4-quartos-a-venda-e-3-vagas-bairro-praia-brava-de-itajai-em-itajai/802113",
+          "source_label": "EBC Imobiliaria"
+        },
+        {
+          "title": "Sunrise - acesso de pedestres",
+          "category": "Acesso",
+          "image": "https://s01.jetimgs.com/tnnAwYXphKBPiW3sr35S56TSBu41PCPMXJgG4UpLuMhmB5uKGXsEydyXaxruLCKtnCpQbjqWdD6JZIcnbb5zHkdUABkTEDsV8GbUkMeGSPZelf47VcDF7lHgA5K7fv6S_oZFMvPgtv2QZrHfUP6miuKjoHR9WgE4V-zXHBCY9l-bpjLvICjohJk/abfsunriseacessopedestresjpg.webp",
+          "source_url": "https://www.ebcimobiliaria.com.br/imovel/apartamento-com-4-quartos-a-venda-e-3-vagas-bairro-praia-brava-de-itajai-em-itajai/802113",
+          "source_label": "EBC Imobiliaria"
+        },
+        {
+          "title": "Sunrise - embasamento de acesso",
+          "category": "Acesso",
+          "image": "https://s01.jetimgs.com/tnnAwYXphKBPiW3sr35S56TSBu41PCPMXJgG4UpLuMhmB5uKGXsEydyXaxruLCKtnKpWbjqWdD6JZIcnbb5zHkdUABkTEDsV8GbUkMeGSPZelf47VcDF7lHgA5K7fv6S_oZFMvPgtv2QZrHfUP6miuKjoHR9WgE4V-zXHBCY9l-bp__vK6edx70/abfsunriseacessopedestresjpg.webp",
+          "source_url": "https://www.ebcimobiliaria.com.br/imovel/apartamento-com-4-quartos-a-venda-e-3-vagas-bairro-praia-brava-de-itajai-em-itajai/802113",
+          "source_label": "EBC Imobiliaria"
+        },
+        {
+          "title": "Sunrise - entrada do empreendimento",
+          "category": "Acesso",
+          "image": "https://s01.jetimgs.com/tnnAwYXphKBPiW3sr35S56TSBu41PCPMXJgG4UpLuMhmB5uKGXsEydyXaxruLCKtnCpSaNnx6lvqAePA6t-VAqFWAhoV88JKqYJobgI-sVTbTnxFUnlAaeqdoQi8_RjwmimWRdPcSj0MBls6tIYJjaXs5-uJYcafF9SffABnfng1NLPPe_JMUPyR/abfsunriseacessopedestresjpg.webp",
+          "source_url": "https://www.ebcimobiliaria.com.br/imovel/apartamento-com-4-quartos-a-venda-e-3-vagas-bairro-praia-brava-de-itajai-em-itajai/802113",
+          "source_label": "EBC Imobiliaria"
+        },
+        {
+          "title": "Sunrise - obra na orla",
+          "category": "Fachada",
+          "image": "https://objectstorage.sa-saopaulo-1.oraclecloud.com/n/grq6lwb4htd1/b/tecimob-production/o/media/8b083b7d-9ae7-468d-91e0-ddf239924e16/properties/e5b190b5-eaaa-4229-b212-6b4f5418fa8b/images/331ee1ed-5bf7-4669-be02-98b5d08916b21737326349AXJf.jpg",
+          "source_url": "https://lucastonin.com.br/imovel/apartamento-frente-mar-na-praia-brava-sunrise-com-3-suites-2-vagas-piscina-itajai/P019-ITJ",
+          "source_label": "Lucas Tonin"
+        },
+        {
+          "title": "Sunrise - contexto da Praia Brava",
+          "category": "Paisagem",
+          "image": "https://s01.jetimgs.com/tnkmRA8uL9l2ozsZ19NrbwNQkpkc1xYZnjvvHV50cE2Y4wMfJt9TOrs4CEkqo67cCrf58SKOfd9JMRbMNiPicIWA7STOqBdU0GvwKwm12C8VSdPX8C0BKoHOargGOqCi6c9ZxWGT_-hrZDJr05V39IsdVypi1H0pgOD03MSpiuYO2CZLlYfoXA/abfsunrisefachadadiajpg.webp",
+          "source_url": "https://www.ebcimobiliaria.com.br/imovel/apartamento-com-4-quartos-a-venda-e-3-vagas-bairro-praia-brava-de-itajai-em-itajai/802113",
+          "source_label": "EBC Imobiliaria"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente mar na Praia Brava",
+          "description": "Endereco na Avenida Jose Medeiros Vieira, em uma das faixas mais valorizadas de Itajai."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Rooftop de lazer",
+          "description": "Fontes citam piscina, salao de festas, pub gourmet e academia no topo do empreendimento."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Curadoria conservadora",
+          "description": "Galeria enxuta para evitar o uso de piscinas e varandas privativas como se fossem areas comuns."
+        }
+      ],
+      "differentials": [
+        "Imagens internas de apartamento foram removidas da representacao do condominio.",
+        "Foram usadas fachadas, acesso e contexto frente mar confirmados nas fontes.",
+        "Descricao passou a citar ABF & Vaccaro, Praia Brava e lazer de rooftop."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Sunrise Praia Brava?",
+          "answer": "Fica na Avenida Jose Medeiros Vieira, na Praia Brava de Itajai, em localizacao frente mar."
+        },
+        {
+          "question": "Quais areas de lazer aparecem nas fontes?",
+          "answer": "As fontes citam rooftop com piscina, salao de festas, pub gourmet e academia."
+        },
+        {
+          "question": "Por que a galeria ficou mais curta?",
+          "answer": "Porque muitas imagens abertas eram de ambientes privativos; a curadoria manteve somente fachada, acesso e contexto do empreendimento."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, acesso, paisagem e outras areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-sunrise-EM32847",
+        "https://www.adamantenegocios.com.br/empreendimento/1/sunrise-praia-brava/",
+        "https://felicitanegocios.com.br/empreendimento/212/sunrise/",
+        "https://www.ebcimobiliaria.com.br/imovel/apartamento-com-4-quartos-a-venda-e-3-vagas-bairro-praia-brava-de-itajai-em-itajai/802113",
+        "https://lucastonin.com.br/imovel/apartamento-frente-mar-na-praia-brava-sunrise-com-3-suites-2-vagas-piscina-itajai/P019-ITJ"
+      ]
+    },
+    {
+      "slug": "tierra-del-sol",
+      "hero_image": "https://cdn.imoview.com.br/bryann/Condominios/1115/fachada-1-1.jpg?1776194202",
+      "description": "O Tierra Del Sol passou a ter bloco completo de empreendimento, com foco no Centro de Balneario Camboriu e na obra da Terra Empreendimentos. As fontes indicam Rua 1141, 298/303, 15 pavimentos, 2 residencias por andar, 1 elevador, entrega em 2024 e plantas em torno de 115 m2, com 3 dormitorios/suites e 2 vagas. A area de lazer fica no rooftop/cobertura e inclui piscina, academia, salao de festas e espaco gourmet, com apoio de sauna e hall decorado em algumas fontes.",
+      "seo_description": "Conheca o Tierra Del Sol, Terra Empreendimentos no Centro de Balneario Camboriu, com lazer rooftop e piscina.",
+      "gallery": [
+        {
+          "title": "Tierra Del Sol - fachada principal",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/1115/fachada-1-1.jpg?1776194202",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/1115/tierra-del-sol/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Tierra Del Sol - torre urbana",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2024/06/edificio-tierra-del-sol-balneario-camboriu-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-tierra-del-sol/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Tierra Del Sol - embasamento frontal",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-1756140288.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/tierra-del-sol-EM88486",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tierra Del Sol - entrada do hall",
+          "category": "Acesso",
+          "image": "https://s01.jetimgs.com/tnkmRP8rb8lyowt55fbS_7EHyapzsSiK5mj5no-ngVjywCBLhINSWoKbUWXhnHlTngKEW3PXmtQoFMKPJd9b-p-R2Pp526V_40sXd09oNwEqaVB-ZY8ml9xrtDgOxYpdqlXTfjfhEQXZ3BQrb-ldfRVSNvJS_k6zDKMH2ZCYBCC1PPhunr4/33jpg-name-92280d0a375f19cc4d0a4c5c6ed085b15d46ba2603b12a2bd76a50815ae7ec54jpg.webp",
+          "source_url": "https://www.viveroimoveis.com.br/lancamento/tierra-del-sol/375244",
+          "source_label": "Vivero Imoveis"
+        },
+        {
+          "title": "Tierra Del Sol - rooftop social",
+          "category": "Rooftop",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/1115/fachada-42.jpg?1776194202",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/1115/tierra-del-sol/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Tierra Del Sol - piscina rooftop",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/1115/fachada-43.jpg?1776194202",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/1115/tierra-del-sol/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Tierra Del Sol - piscina elevada",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/1115/fachada-44.jpg?1776194202",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/1115/tierra-del-sol/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Tierra Del Sol - deck de piscina",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/1115/fachada-45.jpg?1776194202",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/1115/tierra-del-sol/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Tierra Del Sol - sauna",
+          "category": "Spa",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/1115/fachada-38.jpg?1776194202",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/1115/tierra-del-sol/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Tierra Del Sol - fitness",
+          "category": "Fitness",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/1115/fachada-36.jpg?1776194202",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/1115/tierra-del-sol/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Tierra Del Sol - academia",
+          "category": "Fitness",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/1115/fachada-37.jpg?1776194202",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/1115/tierra-del-sol/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Tierra Del Sol - piscina noturna",
+          "category": "Piscina",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/353517/images/_5c376f6d969703168960456110806779.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-tierra-del-sol-balneario-camboriu-sc",
+          "source_label": "MySide"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro de Balneario Camboriu",
+          "description": "Endereco na Rua 1141, com acesso rapido ao comercio central e a Praia Central."
+        },
+        {
+          "icon": "Building2",
+          "title": "Obra Terra Empreendimentos",
+          "description": "Projeto entregue em 2024, com 15 pavimentos e duas residencias por andar."
+        },
+        {
+          "icon": "Sun",
+          "title": "Lazer no rooftop",
+          "description": "Piscina, academia, salao de festas e gourmet foram destacados na nova galeria."
+        }
+      ],
+      "differentials": [
+        "Slug sem bloco completo recebeu descricao, beneficios, diferenciais e FAQ.",
+        "Galeria troca interiores por fachada, acesso e lazer rooftop.",
+        "Copy inclui endereco, pavimentos, entrega e estrutura de lazer consultada."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Tierra Del Sol?",
+          "answer": "Fica na Rua 1141, no Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Quem realizou o Tierra Del Sol?",
+          "answer": "As fontes associam o projeto a Terra Empreendimentos."
+        },
+        {
+          "question": "Como e a area de lazer?",
+          "answer": "O lazer fica na cobertura/rooftop, com piscina, academia, salao de festas e espaco gourmet."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, acesso, rooftop, piscina, spa, fitness e outras areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-tierra-del-sol/",
+        "https://www.imobillenegocios.com.br/empreendimento/tierra-del-sol-EM88486",
+        "https://felicitanegocios.com.br/empreendimento/1115/tierra-del-sol/",
+        "https://myside.com.br/apartamento-venda-tierra-del-sol-balneario-camboriu-sc",
+        "https://www.viveroimoveis.com.br/lancamento/tierra-del-sol/375244"
+      ]
+    },
+    {
+      "slug": "torre-de-booz",
+      "hero_image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/05/torre-de-booz-bal-camboriu-sc-025.jpg",
+      "description": "A Torre de Booz passou a ser descrita como empreendimento Concicat no bairro Pioneiros, em Balneario Camboriu, com endereco de referencia na Rua Bruno Silva, 222. As fontes indicam entrega em julho de 2025, areas entre 99 m2 e 291 m2, plantas residenciais de 3 a 5 suites, salas comerciais e cerca de 20 pavimentos. A area comum foi destacada com piscina, salao de festas, gourmet, academia, jogos, lounge, playground, pet place e espaco zen/yoga, removendo a dependencia de fotos internas de apartamento.",
+      "seo_description": "Conheca a Torre de Booz, Concicat no bairro Pioneiros em Balneario Camboriu, com lazer completo e vista mar.",
+      "gallery": [
+        {
+          "title": "Torre de Booz - fachada noturna",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/05/torre-de-booz-bal-camboriu-sc-025.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/torre-de-booz-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Torre de Booz - fachada clara",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/761/1642428215740-2f7a4a2b-12ca-4046-b46f-decb760d0f2e.jpg?1743089086",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/761/torre-de-booz/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Torre de Booz - torre vertical",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2022/03/edificio-torre-de-booz-balneario-camboriu-1.12.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-torre-de-booz/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Torre de Booz - fachada frontal",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Imoveis/2731/upbw5-1642428229583-d42697f8-b791-42af-88f9-ec5aa72d400a-1701710697.jpg?1761766657",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/761/torre-de-booz/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Torre de Booz - embasamento urbano",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Imoveis/4721/m7zev-1642428199905-e9405599-bd17-4b8f-8c24-7f1f33322987-1739992997.jpg?1761773355",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/761/torre-de-booz/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Torre de Booz - piscina rooftop",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/761/1642428189372-e2f76a4f-80fb-496d-8643-b09f3669b30e.jpg?1743089086",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/761/torre-de-booz/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Torre de Booz - deck com vista",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/761/1642428187012-a0e70582-5d35-4c4a-89c8-12775b690ad8.jpg?1743089086",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/761/torre-de-booz/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Torre de Booz - terraco social",
+          "category": "Rooftop",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/05/torre-de-booz-bal-camboriu-sc-002.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/torre-de-booz-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Torre de Booz - piscina panoramica",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/240220261655531012-1771962953.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-de-booz-EM70650",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Torre de Booz - deck de lazer",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/March2022/LMBOy0VKlPlGqNKL9KXS.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-de-booz-EM70650",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Torre de Booz - piscina elevada",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/March2022/bSvyzieju5lV7amefi6w.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-de-booz-EM70650",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Torre de Booz - ambiente de jogos",
+          "category": "Jogos",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/March2022/wQ0VRSQZ7bnkazGnj8Y2.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-de-booz-EM70650",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Torre de Booz - fachada em composicao",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2022/03/edificio-torre-de-booz-balneario-camboriu-1.11.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-torre-de-booz/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Torre de Booz - vista da torre",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2022/03/edificio-torre-de-booz-balneario-camboriu-1.12.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-torre-de-booz/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Pioneiros valorizado",
+          "description": "Localizacao em uma regiao de Balneario Camboriu com acesso rapido a orla, servicos e mobilidade."
+        },
+        {
+          "icon": "Building2",
+          "title": "Concicat com uso misto",
+          "description": "Projeto combina residencias de alto padrao e salas comerciais, com plantas amplas."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "13 ambientes de lazer",
+          "description": "Fontes destacam piscina, academia, gourmet, jogos, lounge, playground, pet place e espaco zen."
+        }
+      ],
+      "differentials": [
+        "Slug sem bloco completo recebeu narrativa propria de empreendimento.",
+        "Imagens escolhidas mostram fachada, piscina, rooftop e jogos.",
+        "Descricao corrige localizacao e dados de entrega com fontes especificas."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica a Torre de Booz?",
+          "answer": "As fontes indicam Rua Bruno Silva, 222, no bairro Pioneiros, em Balneario Camboriu."
+        },
+        {
+          "question": "Quem construiu a Torre de Booz?",
+          "answer": "A Torre de Booz e associada a Concicat."
+        },
+        {
+          "question": "Quando foi entregue?",
+          "answer": "A MySide informa entrega em julho de 2025."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, piscina, rooftop, jogos e outras areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.concicat.com.br/torre-de-booz",
+        "https://lancamento.invexo.com.br/sc/torre-de-booz-balneario-camboriu/",
+        "https://myside.com.br/apartamento-venda-torre-de-booz-balneario-camboriu-sc",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-de-booz-EM70650",
+        "https://felicitanegocios.com.br/empreendimento/761/torre-de-booz/",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-torre-de-booz/"
+      ]
+    },
+    {
+      "slug": "unique",
+      "hero_image": "https://www.chavesnamao.com.br/imn/1200x0800/N/70/imoveis/1200798/39894346/sc-itajai-praia-brava-rua-conselheiro-julio-kumm-apartamento-a-venda-3-quartos-69a029c0-1.jpg",
+      "description": "O slug Unique foi corrigido para o Brava Unique Residence da Praia Brava de Itajai, descartando fontes homonimas de Balneario Camboriu e imagens de outros empreendimentos da Brava. As fontes confirmam Rua Conselheiro Julio Kumm, 528, menos de 400 m da praia, entrega em junho de 2023, areas em torno de 98 m2 a 100 m2, 3 dormitorios, 1 suite e 2 vagas. A area comum inclui academia, piscina, playground, salao de festas e portaria 24 horas.",
+      "seo_description": "Conheca o Brava Unique Residence, na Praia Brava de Itajai, a menos de 400 m da praia, com piscina e academia.",
+      "gallery": [
+        {
+          "title": "Brava Unique - fachada real",
+          "category": "Fachada",
+          "image": "https://www.chavesnamao.com.br/imn/1200x0800/N/70/imoveis/1200798/39894346/sc-itajai-praia-brava-rua-conselheiro-julio-kumm-apartamento-a-venda-3-quartos-69a029c0-1.jpg",
+          "source_url": "https://www.chavesnamao.com.br/imovel/apartamento-a-venda-3-quartos-com-garagem-sc-itajai-praia-brava-RS1795000/id-39894346/",
+          "source_label": "Chaves na Mao"
+        },
+        {
+          "title": "Brava Unique - fachada frontal",
+          "category": "Fachada",
+          "image": "https://www.chavesnamao.com.br/imn/0640x0400/N/imoveis/1200798/39894346/sc-itajai-praia-brava-rua-conselheiro-julio-kumm-apartamento-a-venda-3-quartos-69a029c0-1.jpg",
+          "source_url": "https://www.chavesnamao.com.br/imovel/apartamento-a-venda-3-quartos-com-garagem-sc-itajai-praia-brava-RS1795000/id-39894346/",
+          "source_label": "Chaves na Mao"
+        },
+        {
+          "title": "Brava Unique - fachada lateral",
+          "category": "Fachada",
+          "image": "https://imgs1.cdn-imobibrasil.com.br/imagens/imoveis/202603181133223719.jpg",
+          "source_url": "https://www.penthouseimoveis.com.br/imovel/4178462/apartamento-zona-central-venda-itajai-sc-praia-brava-de-itajai-brava-unique-residence",
+          "source_label": "Penthouse Imoveis"
+        },
+        {
+          "title": "Brava Unique - escadaria externa",
+          "category": "Acesso",
+          "image": "https://imgs1.cdn-imobibrasil.com.br/imagens/imoveis/20260318113321957.jpg",
+          "source_url": "https://www.penthouseimoveis.com.br/imovel/4178462/apartamento-zona-central-venda-itajai-sc-praia-brava-de-itajai-brava-unique-residence",
+          "source_label": "Penthouse Imoveis"
+        },
+        {
+          "title": "Brava Unique - piscina externa",
+          "category": "Piscina",
+          "image": "https://imgs1.cdn-imobibrasil.com.br/imagens/imoveis/202603181133191889.jpg",
+          "source_url": "https://www.penthouseimoveis.com.br/imovel/4178462/apartamento-zona-central-venda-itajai-sc-praia-brava-de-itajai-brava-unique-residence",
+          "source_label": "Penthouse Imoveis"
+        },
+        {
+          "title": "Brava Unique - piscina social",
+          "category": "Piscina",
+          "image": "https://imgs1.cdn-imobibrasil.com.br/imagens/imoveis/202603181133202484.jpg",
+          "source_url": "https://www.penthouseimoveis.com.br/imovel/4178462/apartamento-zona-central-venda-itajai-sc-praia-brava-de-itajai-brava-unique-residence",
+          "source_label": "Penthouse Imoveis"
+        },
+        {
+          "title": "Brava Unique - piscina identificada",
+          "category": "Piscina",
+          "image": "https://www.chavesnamao.com.br/imn/1200x0800/N/70/imoveis/1200798/39894346/sc-itajai-praia-brava-rua-conselheiro-julio-kumm-apartamento-a-venda-3-quartos-69a029c0-26.jpg",
+          "source_url": "https://www.chavesnamao.com.br/imovel/apartamento-a-venda-3-quartos-com-garagem-sc-itajai-praia-brava-RS1795000/id-39894346/",
+          "source_label": "Chaves na Mao"
+        },
+        {
+          "title": "Brava Unique - entrada interna",
+          "category": "Acesso",
+          "image": "https://www.chavesnamao.com.br/imn/1200x0800/N/70/imoveis/1200798/39894346/sc-itajai-praia-brava-rua-conselheiro-julio-kumm-apartamento-a-venda-3-quartos-69a029c0-3.jpg",
+          "source_url": "https://www.chavesnamao.com.br/imovel/apartamento-a-venda-3-quartos-com-garagem-sc-itajai-praia-brava-RS1795000/id-39894346/",
+          "source_label": "Chaves na Mao"
+        },
+        {
+          "title": "Brava Unique - fitness",
+          "category": "Fitness",
+          "image": "https://www.chavesnamao.com.br/imn/1200x0800/N/70/imoveis/1200798/39894346/sc-itajai-praia-brava-rua-conselheiro-julio-kumm-apartamento-a-venda-3-quartos-69a029c0-29.jpg",
+          "source_url": "https://www.chavesnamao.com.br/imovel/apartamento-a-venda-3-quartos-com-garagem-sc-itajai-praia-brava-RS1795000/id-39894346/",
+          "source_label": "Chaves na Mao"
+        },
+        {
+          "title": "Brava Unique - bike fitness",
+          "category": "Fitness",
+          "image": "https://www.chavesnamao.com.br/imn/1200x0800/N/70/imoveis/1200798/39894346/sc-itajai-praia-brava-rua-conselheiro-julio-kumm-apartamento-a-venda-3-quartos-69a029c0-30.jpg",
+          "source_url": "https://www.chavesnamao.com.br/imovel/apartamento-a-venda-3-quartos-com-garagem-sc-itajai-praia-brava-RS1795000/id-39894346/",
+          "source_label": "Chaves na Mao"
+        },
+        {
+          "title": "Brava Unique - garagem demarcada",
+          "category": "Garagem",
+          "image": "https://www.chavesnamao.com.br/imn/1200x0800/N/70/imoveis/1200798/39894346/sc-itajai-praia-brava-rua-conselheiro-julio-kumm-apartamento-a-venda-3-quartos-69a029c0-23.jpg",
+          "source_url": "https://www.chavesnamao.com.br/imovel/apartamento-a-venda-3-quartos-com-garagem-sc-itajai-praia-brava-RS1795000/id-39894346/",
+          "source_label": "Chaves na Mao"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Praia Brava correta",
+          "description": "Endereco confirmado na Rua Conselheiro Julio Kumm, 528, em Itajai, a menos de 400 m da praia."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Homonimos descartados",
+          "description": "A curadoria removeu imagens de outro Unique Residence e de empreendimentos Brava Ocean/Brava Green."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer funcional",
+          "description": "Piscina, academia, playground, salao de festas e portaria 24 horas sustentam a nova narrativa."
+        }
+      ],
+      "differentials": [
+        "Identidade corrigida para Brava Unique Residence, Praia Brava de Itajai.",
+        "Galeria usa fachada real, piscina, acesso, garagem e fitness do condominio correto.",
+        "Descricao substitui bloco ausente por dados de endereco, entrega e lazer."
+      ],
+      "faq": [
+        {
+          "question": "Qual Unique foi considerado nesta pagina?",
+          "answer": "Foi considerado o Brava Unique Residence, na Rua Conselheiro Julio Kumm, 528, Praia Brava de Itajai."
+        },
+        {
+          "question": "O que foi descartado?",
+          "answer": "Foram descartadas imagens de outro Unique Residence em Balneario Camboriu e de empreendimentos Brava Ocean/Brava Green."
+        },
+        {
+          "question": "Quais areas comuns foram identificadas?",
+          "answer": "Piscina, academia, salao de festas, playground, garagem e portaria 24 horas aparecem nas fontes consultadas."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, acesso, piscina, fitness, garagem e outras areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://felicitanegocios.com.br/empreendimento/328/brava-unique/",
+        "https://www.imobillenegocios.com.br/empreendimento/brava-unique-EM00429",
+        "https://www.chavesnamao.com.br/imovel/apartamento-a-venda-3-quartos-com-garagem-sc-itajai-praia-brava-RS1795000/id-39894346/",
+        "https://www.penthouseimoveis.com.br/imovel/4178462/apartamento-zona-central-venda-itajai-sc-praia-brava-de-itajai-brava-unique-residence"
+      ]
+    },
+    {
+      "slug": "venetian",
+      "hero_image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/venetian-residenziale-balneario-camboriu-sc-25.jpg",
+      "description": "O Venetian foi atualizado como Venetian Residenziale, empreendimento Galli/Moonville no Centro de Balneario Camboriu, na Rua 3144, 193. As fontes indicam plantas entre aproximadamente 118 m2 e 252 m2, 3 a 4 suites, 2 a 4 vagas e previsao de entrega em dezembro de 2025. A nova galeria destaca fachada inspirada em Veneza, acesso, piscina, playground, eventos, gourmet, fitness e lounges, substituindo imagens internas de ofertas.",
+      "seo_description": "Conheca o Venetian Residenziale, no Centro de Balneario Camboriu, com fachada marcante e lazer completo.",
+      "gallery": [
+        {
+          "title": "Venetian - fachada principal",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/venetian-residenziale-balneario-camboriu-sc-25.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/venetian-residenziale/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Venetian - torre vertical",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2024/07/edificio-venetian-balneario-camboriu-1.3.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-venetian/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Venetian - acesso iluminado",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/real-estates-photo/June2023/layout-fotos-site-1-1685965344.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/venetian-EM60323",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Venetian - fachada urbana",
+          "category": "Fachada",
+          "image": "https://cdn.vistahost.com.br/cli36621/vista.imobi/fotos/5553/im5b8d_555366df8fe11fe00.jpg",
+          "source_url": "https://manicamarin.com.br/imovel/empreendimento-centro-balneario-camboriu-sc-3843",
+          "source_label": "Manica Marin"
+        },
+        {
+          "title": "Venetian - entrada principal",
+          "category": "Acesso",
+          "image": "https://cdn.vistahost.com.br/cli36621/vista.imobi/fotos/5553/ig4s2x_555366df8fe36cbd4.jpg",
+          "source_url": "https://manicamarin.com.br/imovel/empreendimento-centro-balneario-camboriu-sc-3843",
+          "source_label": "Manica Marin"
+        },
+        {
+          "title": "Venetian - fachada com paisagismo",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2023/layout-fotos-site-10008-1685965117.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/venetian-EM60323",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Venetian - piscina social",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2023/layout-fotos-site-10001-1685965115.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/venetian-EM60323",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Venetian - playground",
+          "category": "Kids",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2023/layout-fotos-site-10002-1685965115.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/venetian-EM60323",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Venetian - salao social",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2023/layout-fotos-site-10003-1685965115.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/venetian-EM60323",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Venetian - lounge decorado",
+          "category": "Lounge",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2023/layout-fotos-site-10004-1685965116.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/venetian-EM60323",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Venetian - fitness",
+          "category": "Fitness",
+          "image": "https://cdn.vistahost.com.br/cli36621/vista.imobi/fotos/5553/iy0b2v_555366df8fef22427.jpg",
+          "source_url": "https://manicamarin.com.br/imovel/empreendimento-centro-balneario-camboriu-sc-3843",
+          "source_label": "Manica Marin"
+        },
+        {
+          "title": "Venetian - gourmet social",
+          "category": "Gourmet",
+          "image": "https://cdn.vistahost.com.br/cli36621/vista.imobi/fotos/5553/is8e2k_555366df8ff0ba0d2.jpg",
+          "source_url": "https://manicamarin.com.br/imovel/empreendimento-centro-balneario-camboriu-sc-3843",
+          "source_label": "Manica Marin"
+        },
+        {
+          "title": "Venetian - detalhe da fachada",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2024/07/edificio-venetian-balneario-camboriu-1.2.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-venetian/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Venetian - vista da torre",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2024/07/edificio-venetian-balneario-camboriu-1.2.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-venetian/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro de Balneario Camboriu",
+          "description": "Endereco na Rua 3144, 193, proximo a servicos e ao eixo central da cidade."
+        },
+        {
+          "icon": "Building2",
+          "title": "Projeto Galli/Moonville",
+          "description": "Arquitetura de alto padrao com fachada marcada por linhas verticais e inspiracao veneziana."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer completo",
+          "description": "Piscina, playground, saloes, gourmet, fitness e lounges aparecem na curadoria revisada."
+        }
+      ],
+      "differentials": [
+        "Galeria substitui interiores por fachada, acesso e lazer do empreendimento.",
+        "Copy atualizada com endereco, areas, suites e entrega prevista.",
+        "Imagens de piscina, kids, fitness e gourmet reforcam o condominio."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Venetian Residenziale?",
+          "answer": "Fica na Rua 3144, 193, no Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Qual a previsao de entrega do Venetian?",
+          "answer": "A Manica Marin informa previsao de entrega para dezembro de 2025."
+        },
+        {
+          "question": "Quais areas aparecem na galeria?",
+          "answer": "A galeria mostra fachada, acesso, piscina, playground, saloes, gourmet, fitness e lounge."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, acesso, piscina, kids, eventos, lounge e outras areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://lancamento.invexo.com.br/sc/venetian-residenziale/",
+        "https://felicitanegocios.com.br/empreendimento/1006/venetian-residenziale/",
+        "https://manicamarin.com.br/imovel/empreendimento-centro-balneario-camboriu-sc-3843",
+        "https://myside.com.br/apartamento-venda-venetian-residenziale-balneario-camboriu-sc",
+        "https://www.imobillenegocios.com.br/empreendimento/venetian-EM60323",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-venetian/"
+      ]
+    },
+    {
+      "slug": "vermont",
+      "hero_image": "https://cdn.imoview.com.br/bryann/Condominios/579/captura-de-tela-2024-05-15-085057.png?1715773884",
+      "description": "O Vermont foi revisado como empreendimento Embraed no Centro de Balneario Camboriu, na Rua 1001, 226, a poucos metros da Praia Central e da Avenida Brasil. As fontes indicam 27 pavimentos, 2 elevadores, entrega em 2008, areas privativas em torno de 252 m2, 3 suites e 3 vagas. A copy passa a destacar o padrao Embraed, pe-direito duplo, lazer com piscina, academia, playground, salao de jogos, gourmet e portaria 24 horas, com imagens principalmente de fachada e acesso.",
+      "seo_description": "Conheca o Vermont Embraed, no Centro de Balneario Camboriu, perto da Praia Central e da Avenida Brasil.",
+      "gallery": [
+        {
+          "title": "Vermont - fachada principal",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/579/captura-de-tela-2024-05-15-085057.png?1715773884",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/579/vermont-embraed/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Vermont - torre vertical",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-vermont-balneario-camboriu-1.2.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-vermont/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Vermont - fachada urbana",
+          "category": "Fachada",
+          "image": "https://www.pauloaragaoimoveis.com.br/thumb.php?w=600&img=https://imgs.voacorretorsrc.com.br/2198/imoveis/apartamento-de-alto-padrao-a-venda-em-balneario-camboriu-centro-com-3-quartos-921982248245fb45da648ab4d3a1183ea228.jpeg",
+          "source_url": "https://www.pauloaragaoimoveis.com.br/imovel/apartamento-de-alto-padrao-a-venda-em-balneario-camboriu-centro-com-3-quartos-43/AP0032",
+          "source_label": "Paulo Aragao Imoveis"
+        },
+        {
+          "title": "Vermont - detalhe da torre",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Imoveis/4631/6r1fr-screenshot-1-1739466163.png?1761773040",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/579/vermont-embraed/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Vermont - volume da fachada",
+          "category": "Fachada",
+          "image": "https://betaimages.lopes.com.br/realestate/sml/v1/REO712913/6BEF40AB23EDA857CAB5A1489C5C3E67.JPG",
+          "source_url": "https://www.lopes.com.br/condominios/sc/balneario-camboriu/centro/REC22982/condominio-vermont-rua-1001-226",
+          "source_label": "Lopes"
+        },
+        {
+          "title": "Vermont - fachada lateral",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-vermont-balneario-camboriu-1.1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-vermont/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Vermont - torre em perspectiva",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-vermont-balneario-camboriu-1.1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-vermont/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Vermont - base da fachada",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-vermont-balneario-camboriu-1.2.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-vermont/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Vermont - fachada superior",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-vermont-balneario-camboriu-1.3.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-vermont/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Vermont - hall classico",
+          "category": "Hall",
+          "image": "https://imgs.voacorretorsrc.com.br/2198/imoveis/apartamento-de-alto-padrao-a-venda-em-balneario-camboriu-centro-com-3-quartos-1219822481548c94236e3f42027ebe730bdd.jpeg",
+          "source_url": "https://www.pauloaragaoimoveis.com.br/imovel/apartamento-de-alto-padrao-a-venda-em-balneario-camboriu-centro-com-3-quartos-43/AP0032",
+          "source_label": "Paulo Aragao Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro perto do mar",
+          "description": "Localizacao na Rua 1001, com acesso rapido a Praia Central e Avenida Brasil."
+        },
+        {
+          "icon": "Award",
+          "title": "Padrao Embraed",
+          "description": "Empreendimento entregue, com arquitetura classica e acabamento de alto padrao."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer e portaria",
+          "description": "Fontes citam piscina, academia, playground, salao de jogos, gourmet e portaria 24 horas."
+        }
+      ],
+      "differentials": [
+        "Hero agora usa fachada real do edificio.",
+        "Galeria conservadora evita interiores de apartamento e reforca a arquitetura do condominio.",
+        "Copy atualizada com endereco, ano de entrega, pavimentos e lazer."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Vermont?",
+          "answer": "Fica na Rua 1001, 226, no Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Quem construiu o Vermont?",
+          "answer": "As fontes associam o empreendimento a Embraed Empreendimentos."
+        },
+        {
+          "question": "Quando o Vermont foi entregue?",
+          "answer": "A EBC informa entrega em 2008."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, hall e outras areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.brianreis.com.br/emprendimento/vermont/",
+        "https://felicitanegocios.com.br/empreendimento/579/vermont-embraed/",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-vermont/",
+        "https://www.ebcimobiliaria.com.br/lancamento/vermont/685234",
+        "https://www.pauloaragaoimoveis.com.br/imovel/apartamento-de-alto-padrao-a-venda-em-balneario-camboriu-centro-com-3-quartos-43/AP0032",
+        "https://www.lopes.com.br/condominios/sc/balneario-camboriu/centro/REC22982/condominio-vermont-rua-1001-226"
+      ]
+    },
+    {
+      "slug": "vero-praia-brava",
+      "hero_image": "https://b3.casteldigital.com.br/guilhermepilger/ig/il/imoveis/1352/copia_de_maxrealiza-vero-04-fachadavoopassaro-final-17534573328653.jpg",
+      "description": "O Vero Praia Brava foi atualizado com foco no projeto da Max Realiza na Praia Brava de Itajai, regiao Balneario Santa Clara. As fontes mostram um empreendimento de arquitetura contemporanea, com areas verdes integradas, fachada organica, piscina, deck, acesso paisagistico, salas de convivencia e leitura de praia. A MySide e as fontes comerciais apontam plantas de alto padrao na Praia Brava, enquanto a nova galeria usa imagens oficiais e de pagina de empreendimento, evitando cenas internas de apartamento.",
+      "seo_description": "Conheca o Vero Praia Brava, Max Realiza em Itajai, com fachada organica, piscina e paisagismo integrado.",
+      "gallery": [
+        {
+          "title": "Vero - fachada voo de passaro",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/il/imoveis/1352/copia_de_maxrealiza-vero-04-fachadavoopassaro-final-17534573328653.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-vero-praia-brava-itajai-balneario-santa-clara-4-quartos-3-garagens-venda-ref-1352/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Vero - piscina e fachada",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/0905202515431217765-1746816192.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-vero-EM36377",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Vero - fachada frontal",
+          "category": "Fachada",
+          "image": "https://objectstorage.sa-saopaulo-1.oraclecloud.com/n/grq6lwb4htd1/b/tecimob-production/o/media/8b083b7d-9ae7-468d-91e0-ddf239924e16/sites/posts/600x450/outside/11fd60f0-ead3-426b-acf9-8cb97f33d6d81739055289YYKn.jpg",
+          "source_url": "https://lucastonin.com.br/postagem/vero-praia-brava-lancamento",
+          "source_label": "Lucas Tonin"
+        },
+        {
+          "title": "Vero - torre verde",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-vero-1746816192.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-vero-EM36377",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Vero - acesso paisagistico",
+          "category": "Acesso",
+          "image": "https://vero.maxrealiza.com/assets/images/section-6.jpg",
+          "source_url": "https://vero.maxrealiza.com/",
+          "source_label": "Max Realiza"
+        },
+        {
+          "title": "Vero - embasamento social",
+          "category": "Fachada",
+          "image": "https://objectstorage.sa-saopaulo-1.oraclecloud.com/n/grq6lwb4htd1/b/tecimob-production/o/media/8b083b7d-9ae7-468d-91e0-ddf239924e16/sites/posts/1200x900/outside/11fd60f0-ead3-426b-acf9-8cb97f33d6d81739055289Vtsq.jpg",
+          "source_url": "https://lucastonin.com.br/postagem/vero-praia-brava-lancamento",
+          "source_label": "Lucas Tonin"
+        },
+        {
+          "title": "Vero - piscina social",
+          "category": "Piscina",
+          "image": "https://vero.maxrealiza.com/assets/images/section-8.jpg",
+          "source_url": "https://vero.maxrealiza.com/",
+          "source_label": "Max Realiza"
+        },
+        {
+          "title": "Vero - fachada ao entardecer",
+          "category": "Fachada",
+          "image": "https://vero.maxrealiza.com/assets/images/gallery-1/thumb/01.jpg",
+          "source_url": "https://vero.maxrealiza.com/",
+          "source_label": "Max Realiza"
+        },
+        {
+          "title": "Vero - fachada ampla",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/1352/copia_de_maxrealiza-vero-04-fachadavoopassaro-final-17534573328653.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-vero-praia-brava-itajai-balneario-santa-clara-4-quartos-3-garagens-venda-ref-1352/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Vero - volume da torre",
+          "category": "Fachada",
+          "image": "https://vero.maxrealiza.com/assets/images/gallery-1/zoom/01.jpg",
+          "source_url": "https://vero.maxrealiza.com/",
+          "source_label": "Max Realiza"
+        },
+        {
+          "title": "Vero - vista da fachada",
+          "category": "Fachada",
+          "image": "https://vero.maxrealiza.com/assets/images/gallery-1/thumb/02.jpg",
+          "source_url": "https://vero.maxrealiza.com/",
+          "source_label": "Max Realiza"
+        },
+        {
+          "title": "Vero - torre com paisagem",
+          "category": "Fachada",
+          "image": "https://vero.maxrealiza.com/assets/images/gallery-1/zoom/02.jpg",
+          "source_url": "https://vero.maxrealiza.com/",
+          "source_label": "Max Realiza"
+        },
+        {
+          "title": "Vero - fachada jardim",
+          "category": "Fachada",
+          "image": "https://vero.maxrealiza.com/assets/images/gallery-1/thumb/03.jpg",
+          "source_url": "https://vero.maxrealiza.com/",
+          "source_label": "Max Realiza"
+        },
+        {
+          "title": "Vero - piscina linear",
+          "category": "Piscina",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/companyconstruction/474/images/_6531b32f699475165885793410347048.jpg",
+          "source_url": "https://myside.com.br/apartamento-venda-vero-praia-brava-itajai-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Vero - embasamento de acesso",
+          "category": "Acesso",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/1352/copia_de_maxrealiza-vero-02-fachadaembasamentoacesso-final-17534573328652.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-vero-praia-brava-itajai-balneario-santa-clara-4-quartos-3-garagens-venda-ref-1352/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Vero - acesso frontal",
+          "category": "Acesso",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/il/imoveis/1352/copia_de_maxrealiza-vero-02-fachadaembasamentoacesso-final-17534573328652.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-vero-praia-brava-itajai-balneario-santa-clara-4-quartos-3-garagens-venda-ref-1352/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Vero - fachada lateral",
+          "category": "Fachada",
+          "image": "https://vero.maxrealiza.com/assets/images/gallery-1/thumb/04.jpg",
+          "source_url": "https://vero.maxrealiza.com/",
+          "source_label": "Max Realiza"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Leaf",
+          "title": "Arquitetura com paisagismo",
+          "description": "Fachada e acesso valorizam vegetacao, volumes organicos e atmosfera de praia."
+        },
+        {
+          "icon": "Waves",
+          "title": "Praia Brava de Itajai",
+          "description": "Localizacao na regiao Balneario Santa Clara, com leitura de praia e mobilidade para BC."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Piscina e convivencia",
+          "description": "Galeria destaca piscina, deck, embasamento social e areas comuns externas."
+        }
+      ],
+      "differentials": [
+        "Imagens oficiais do Vero substituem fotos internas de oferta.",
+        "Hero usa fachada ampla do empreendimento.",
+        "Copy reforca Max Realiza, Praia Brava e paisagismo integrado."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Vero Praia Brava?",
+          "answer": "Fica na Praia Brava de Itajai, regiao Balneario Santa Clara."
+        },
+        {
+          "question": "Quem assina o Vero?",
+          "answer": "As fontes oficiais associam o projeto a Max Realiza."
+        },
+        {
+          "question": "O que a nova galeria mostra?",
+          "answer": "Mostra fachada, acesso, paisagismo, piscina e embasamento social do empreendimento."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, piscina, acesso e outras areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://vero.maxrealiza.com/",
+        "https://myside.com.br/apartamento-venda-vero-praia-brava-itajai-sc",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-vero-EM36377",
+        "https://lucastonin.com.br/postagem/vero-praia-brava-lancamento",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-vero-praia-brava-itajai-balneario-santa-clara-4-quartos-3-garagens-venda-ref-1352/"
+      ]
+    },
+    {
+      "slug": "victor-hugo-residence",
+      "hero_image": "https://imobiliariaandorinha.com.br/upload/obra15/A-fachada-303-759.jpg",
+      "description": "O Victor Hugo Residence foi revisado como empreendimento frente mar no Centro de Itapema, na Rua 155, 2020. As fontes indicam padrao Embraed, torre baixa com 1 bloco, 2 residencias por andar, construcao em 2018, plantas muito amplas em torno de 411 m2 a 440 m2, 5 suites e 4 a 6 vagas. O lazer do condominio inclui piscina termica, deck, espelho de agua, academia, brinquedoteca, salao de festas, sala de jogos, sauna, spa, sala de massagem, ofuro e entrada para banhistas.",
+      "seo_description": "Conheca o Victor Hugo Residence, frente mar no Centro de Itapema, com lazer completo e plantas amplas.",
+      "gallery": [
+        {
+          "title": "Victor Hugo - fachada noturna",
+          "category": "Fachada",
+          "image": "https://imobiliariaandorinha.com.br/upload/obra15/A-fachada-303-759.jpg",
+          "source_url": "https://imobiliariaandorinha.com.br/empreendimento.php?codigo=15",
+          "source_label": "Imobiliaria Andorinha"
+        },
+        {
+          "title": "Victor Hugo - fachada lateral",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/vitapema/img_edificios/m1_1111_5985_0924_250822.jpg",
+          "source_url": "https://www.vitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/victor-hugo-residence/3648",
+          "source_label": "Vitapema Imoveis"
+        },
+        {
+          "title": "Victor Hugo - fachada na praia",
+          "category": "Fachada",
+          "image": "https://www.topliving.com.br/wp-content/uploads/victor-hugo-001.jpg",
+          "source_url": "https://www.topliving.com.br/imovel/victor-hugo-residence-centro-itapema/",
+          "source_label": "Top Living"
+        },
+        {
+          "title": "Victor Hugo - piscina interna",
+          "category": "Piscina",
+          "image": "https://www.topliving.com.br/wp-content/uploads/victor-hugo-002.jpg",
+          "source_url": "https://www.topliving.com.br/imovel/victor-hugo-residence-centro-itapema/",
+          "source_label": "Top Living"
+        },
+        {
+          "title": "Victor Hugo - salao de festas",
+          "category": "Eventos",
+          "image": "https://www.topliving.com.br/wp-content/uploads/victor-hugo-salao-de-festas.jpg",
+          "source_url": "https://www.topliving.com.br/imovel/victor-hugo-residence-centro-itapema/",
+          "source_label": "Top Living"
+        },
+        {
+          "title": "Victor Hugo - ambiente de jogos",
+          "category": "Jogos",
+          "image": "https://www.topliving.com.br/wp-content/uploads/victor-hugo-salao-de-jogos.jpg",
+          "source_url": "https://www.topliving.com.br/imovel/victor-hugo-residence-centro-itapema/",
+          "source_label": "Top Living"
+        },
+        {
+          "title": "Victor Hugo - academia",
+          "category": "Fitness",
+          "image": "https://www.topliving.com.br/wp-content/uploads/victor-hugo-005.jpg",
+          "source_url": "https://www.topliving.com.br/imovel/victor-hugo-residence-centro-itapema/",
+          "source_label": "Top Living"
+        },
+        {
+          "title": "Victor Hugo - paisagismo externo",
+          "category": "Acesso",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/vitapema/img_edificios/g1_1111_5987_0924_250822.jpg",
+          "source_url": "https://www.vitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/victor-hugo-residence/3648",
+          "source_label": "Vitapema Imoveis"
+        },
+        {
+          "title": "Victor Hugo - jardim lateral",
+          "category": "Acesso",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/vitapema/img_edificios/p1_1111_5987_0924_250822.jpg",
+          "source_url": "https://www.vitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/victor-hugo-residence/3648",
+          "source_label": "Vitapema Imoveis"
+        },
+        {
+          "title": "Victor Hugo - fachada ajardinada",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/vitapema/img_edificios/i1_1111_5987_0924_250822.jpg",
+          "source_url": "https://www.vitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/victor-hugo-residence/3648",
+          "source_label": "Vitapema Imoveis"
+        },
+        {
+          "title": "Victor Hugo - fachada principal",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/vitapema/img_edificios/g1_1111_5988_0924_250822.jpg",
+          "source_url": "https://www.vitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/victor-hugo-residence/3648",
+          "source_label": "Vitapema Imoveis"
+        },
+        {
+          "title": "Victor Hugo - frente urbana",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/vitapema/img_edificios/p1_1111_5988_0924_250822.jpg",
+          "source_url": "https://www.vitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/victor-hugo-residence/3648",
+          "source_label": "Vitapema Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente mar em Itapema",
+          "description": "Endereco na Rua 155, 2020, Centro, com vista direta para a orla."
+        },
+        {
+          "icon": "Award",
+          "title": "Padrao Embraed",
+          "description": "Fontes apontam projeto de alto padrao, plantas muito amplas e torre de baixa densidade."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer de resort urbano",
+          "description": "Piscina, academia, saloes, jogos, sauna, spa, ofuro e entrada para banhistas compoem a experiencia."
+        }
+      ],
+      "differentials": [
+        "Hero e galeria agora mostram fachada e areas comuns do condominio.",
+        "Descricao atualizada com endereco, frente mar, areas amplas e lazer.",
+        "Interiores de apartamento foram evitados na selecao principal."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Victor Hugo Residence?",
+          "answer": "Fica na Rua 155, 2020, Centro de Itapema, em localizacao frente mar."
+        },
+        {
+          "question": "Qual o padrao do empreendimento?",
+          "answer": "As fontes consultadas associam o Victor Hugo Residence ao padrao Embraed e a plantas amplas frente mar."
+        },
+        {
+          "question": "Quais areas comuns aparecem nas fontes?",
+          "answer": "Piscina, academia, brinquedoteca, salao de festas, jogos, sauna, spa, massagem, ofuro e entrada para banhistas."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, piscina, eventos, jogos, fitness, acesso e outras areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://imobiliariaandorinha.com.br/empreendimento.php?codigo=15",
+        "https://www.vitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/victor-hugo-residence/3648",
+        "https://www.imoveispraitapema.com.br/imovel/venda-apartamento-04-dormitorio-em-itapema/victor-hugo-residence-frente-mar-em-itapema/551",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-victor-hugo-residence-itapema-centro-5-quartos-4-garagens-venda-ref-320/",
+        "https://www.topliving.com.br/imovel/victor-hugo-residence-centro-itapema/"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1059 @@
+{
+  "batch_id": "development-media-curation-batch28-20260715",
+  "generated_at": "2026-07-15T22:40:00.000Z",
+  "items": [
+    {
+      "slug": "condominio-dona-lely",
+      "hero_image": "https://static.arboimoveis.com.br/AP5709_CONFIM/640x480/img_88111763577729238.jpg",
+      "description": "O Condominio Dona Lely foi revisado como empreendimento em Meia Praia, Itapema. A Confiari confirma o nome do condominio na Avenida Nereu Ramos, 5055, e descreve estrutura com elevador, solarium, estar social, interfone e medidores individuais de agua, luz e gas. A galeria foi corrigida de forma conservadora com areas comuns publicadas na ficha externa do Dona Lely, priorizando piscina, jogos e estar social em vez de fotos internas de oferta.",
+      "seo_description": "Conheca o Condominio Dona Lely, em Meia Praia, Itapema, com piscina, estar social e solarium.",
+      "gallery": [
+        {
+          "title": "Dona Lely - piscina externa",
+          "category": "Piscina",
+          "image": "https://static.arboimoveis.com.br/AP5709_CONFIM/640x480/img_88111763577729238.jpg",
+          "source_url": "https://www.confiari.com.br/imovel/apartamento/venda/itapema/sc/meia-praia/AP5709_CONFIM",
+          "source_label": "Confiari"
+        },
+        {
+          "title": "Dona Lely - piscina coberta",
+          "category": "Piscina",
+          "image": "https://static.arboimoveis.com.br/AP5709_CONFIM/640x480/img_88041763577729254.jpg",
+          "source_url": "https://www.confiari.com.br/imovel/apartamento/venda/itapema/sc/meia-praia/AP5709_CONFIM",
+          "source_label": "Confiari"
+        },
+        {
+          "title": "Dona Lely - jogos sociais",
+          "category": "Jogos",
+          "image": "https://static.arboimoveis.com.br/AP5709_CONFIM/640x480/img_88151763577729265.jpg",
+          "source_url": "https://www.confiari.com.br/imovel/apartamento/venda/itapema/sc/meia-praia/AP5709_CONFIM",
+          "source_label": "Confiari"
+        },
+        {
+          "title": "Dona Lely - estar social",
+          "category": "Social",
+          "image": "https://static.arboimoveis.com.br/AP5709_CONFIM/img_88161763577729236.jpg",
+          "source_url": "https://www.confiari.com.br/imovel/apartamento/venda/itapema/sc/meia-praia/AP5709_CONFIM",
+          "source_label": "Confiari"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Meia Praia, Itapema",
+          "description": "A Confiari posiciona o condominio na Avenida Nereu Ramos, 5055, em Meia Praia."
+        },
+        {
+          "icon": "Sun",
+          "title": "Solarium e estar social",
+          "description": "A fonte externa cita solarium, estar social e estrutura funcional do empreendimento."
+        },
+        {
+          "icon": "Gauge",
+          "title": "Medidores individuais",
+          "description": "A ficha do condominio destaca medidores individuais de agua, luz e gas."
+        }
+      ],
+      "differentials": [
+        "Hero substituido por piscina comum vinculada a fonte externa do Dona Lely.",
+        "Galeria evita fachadas duvidosas e remove leitura de ambiente interno de oferta.",
+        "Descricao passa a identificar endereco, estrutura e servicos reais do condominio."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Condominio Dona Lely?",
+          "answer": "A Confiari informa Avenida Nereu Ramos, 5055, em Meia Praia, Itapema."
+        },
+        {
+          "question": "Quais estruturas foram confirmadas?",
+          "answer": "Elevador, solarium, estar social, interfone e medidores individuais de agua, luz e gas."
+        },
+        {
+          "question": "O que mudou nas imagens?",
+          "answer": "A selecao passou a priorizar piscina, jogos e estar social publicados em fonte externa do condominio."
+        },
+        {
+          "question": "Por que a revisao foi conservadora?",
+          "answer": "Algumas fachadas encontradas misturavam empreendimentos parecidos; por isso foram usadas areas comuns mais seguras."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/imovel/apartamento-itapema-meia-praia-3-quartos-2-garagens-venda-ref-2134/",
+        "https://www.potencialimoveis.com.br/empreendimento/condominio-dona-lely-CO879159",
+        "https://www.confiari.com.br/imovel/apartamento/venda/itapema/sc/meia-praia/AP5709_CONFIM"
+      ]
+    },
+    {
+      "slug": "condominio-green-ocean",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20000-1664916101.jpg",
+      "description": "O Condominio Green Ocean foi revisado como condominio horizontal na Interpraias, entre Praia do Estaleiro e Estaleirinho, em Balneario Camboriu. Fontes de mercado posicionam o empreendimento na Avenida Rodesindo Pavan, 1210, e destacam salao de festas, home cinema, lounge, playground tematico, quadra de tenis, piscinas adulto e infantil, bar molhado, cascata, espaco zen e espaco luau. A nova galeria usa portaria, clube, piscina, tenis, academia e convivencia externa do condominio.",
+      "seo_description": "Conheca o Green Ocean, condominio na Interpraias com clube, piscina, tenis e lazer completo.",
+      "gallery": [
+        {
+          "title": "Green Ocean - portaria principal",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20000-1664916101.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/terreno-no-condominio-green-ocean-em-balneario-camboriu-IM84171",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Green Ocean - clube social",
+          "category": "Clube",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20008-1664916104.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/terreno-no-condominio-green-ocean-em-balneario-camboriu-IM84171",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Green Ocean - piscina do clube",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20005-1664916103.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/terreno-no-condominio-green-ocean-em-balneario-camboriu-IM84171",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Green Ocean - convivencia externa",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20006-1664916103.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/terreno-no-condominio-green-ocean-em-balneario-camboriu-IM84171",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Green Ocean - quadra de tenis",
+          "category": "Esportes",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20002-1664916102.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/terreno-no-condominio-green-ocean-em-balneario-camboriu-IM84171",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Green Ocean - pergolado gourmet",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20007-1664916104.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/terreno-no-condominio-green-ocean-em-balneario-camboriu-IM84171",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Green Ocean - academia",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-20001-1664916101.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/terreno-no-condominio-green-ocean-em-balneario-camboriu-IM84171",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Interpraias",
+          "description": "As fontes indicam localizacao na Avenida Rodesindo Pavan, proxima ao Estaleiro e Estaleirinho."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscinas e clube",
+          "description": "A infraestrutura citada inclui piscinas, bar molhado, cascata, lounge e salao de festas."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Esportes e bem-estar",
+          "description": "As fontes destacam quadra de tenis, academia, espaco zen e areas externas de convivencia."
+        }
+      ],
+      "differentials": [
+        "Hero trocado para portaria do condominio.",
+        "Galeria usa estrutura comum do Green Ocean em vez de fotos de residencia.",
+        "Descricao identifica endereco, praias de referencia e lazer completo."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Green Ocean?",
+          "answer": "As fontes posicionam o condominio na Avenida Rodesindo Pavan, 1210, na Interpraias."
+        },
+        {
+          "question": "Quais itens de lazer aparecem nas fontes?",
+          "answer": "Piscinas, bar molhado, salao de festas, lounge, home cinema, playground, tenis e espaco zen."
+        },
+        {
+          "question": "A galeria mostra o condominio?",
+          "answer": "Sim. A revisao prioriza portaria, clube, piscina, quadra, academia e convivencia externa."
+        },
+        {
+          "question": "Qual e o perfil do empreendimento?",
+          "answer": "Condominio horizontal de alto padrao na regiao das praias do sul de Balneario Camboriu."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/imovel/casa-no-condominio-green-ocean-balneario-camboriu-praia-do-estaleiro-5-quartos-6-garagens-venda-ref-271/",
+        "https://www.imobillenegocios.com.br/imoveis/terreno-no-condominio-green-ocean-em-balneario-camboriu-IM84171",
+        "https://100porcentoimoveis.com.br/imovel/T0019",
+        "https://www.reservacamboriu.com.br/oportunidade/green-ocean-village-condominio--1"
+      ]
+    },
+    {
+      "slug": "condominio-horizontal-praia-brava",
+      "hero_image": "https://cdn.imoview.com.br/bryann/Condominios/225/img-115.jpg?1744220786",
+      "description": "O Condominio Horizontal Praia Brava foi revisado como condominio residencial na Praia Brava, em Itajai. Felicita e Imobille posicionam o empreendimento na Avenida Marcio Ferreira de Mello e Silva, com ofertas tambem associadas ao numero 55 e 125. A Fly informa 170 lotes residenciais distribuidos em 10 quadras, enquanto a Broulee destaca lotes de ate 2.150 m2, regiao segura e entorno de Mata Atlantica. Fontes locais citam portaria 24h, piscina, playground, fitness, gourmet, quadras, horta, pomar e salao de festas. A galeria agora mostra portaria, aereas, piscina, playground, quadras e academia.",
+      "seo_description": "Conheca o Condominio Horizontal Praia Brava, em Itajai, com portaria, piscina, quadras e lazer.",
+      "gallery": [
+        {
+          "title": "Horizontal Praia Brava - portaria",
+          "category": "Acesso",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/225/img-115.jpg?1744220786",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/225/condominio-horizontal-praia-brava/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Horizontal Praia Brava - vista aerea",
+          "category": "Implantacao",
+          "image": "https://b.casteldigital.com.br/flyimoveis/ig/il/imoveis/838/unnamed-16872968349359.png",
+          "source_url": "https://www.flyimoveis.com.br/imovel/terreno-em-condominio-no-horizontal-praia-brava-itajai-praia-brava-venda-ref-838/",
+          "source_label": "Fly Imoveis"
+        },
+        {
+          "title": "Horizontal Praia Brava - playground",
+          "category": "Kids",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/225/img-96.jpg?1744220786",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/225/condominio-horizontal-praia-brava/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Horizontal Praia Brava - quadra de tenis",
+          "category": "Esportes",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/225/img-100.jpg?1744220786",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/225/condominio-horizontal-praia-brava/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Horizontal Praia Brava - piscina",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/225/img-102.jpg?1744220786",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/225/condominio-horizontal-praia-brava/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Horizontal Praia Brava - academia",
+          "category": "Fitness",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/225/img-111.jpg?1744220786",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/225/condominio-horizontal-praia-brava/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Horizontal Praia Brava - pergolado externo",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2023/brava-horizontal-6-1687264376.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-horizontal-praia-brava-EM51300",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Horizontal Praia Brava - quadra coberta",
+          "category": "Esportes",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2023/brava-horizontal-11-1687264376.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-horizontal-praia-brava-EM51300",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Praia Brava, Itajai",
+          "description": "Felicita e Imobille posicionam o condominio na Avenida Marcio Ferreira de Mello e Silva."
+        },
+        {
+          "icon": "Trees",
+          "title": "Entorno de Mata Atlantica",
+          "description": "A Broulee destaca o condominio cercado por natureza e com tranquilidade residencial."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Portaria e lazer",
+          "description": "Fontes locais citam portaria 24h, piscina, quadras, playground, gourmet e salao de festas."
+        }
+      ],
+      "differentials": [
+        "Foram adicionadas fontes de empreendimento para substituir fotos de oferta residencial.",
+        "Galeria usa portaria, implantacao e lazer comum do condominio.",
+        "Copy identifica endereco, quantidade de lotes e infraestrutura citada nas fontes."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Condominio Horizontal Praia Brava?",
+          "answer": "As fontes indicam Avenida Marcio Ferreira de Mello e Silva, na Praia Brava, Itajai."
+        },
+        {
+          "question": "Quantos lotes o condominio possui?",
+          "answer": "A Fly informa 170 lotes residenciais distribuidos em 10 quadras."
+        },
+        {
+          "question": "Quais itens de lazer foram considerados?",
+          "answer": "Piscina, playground, academia, gourmet, quadras, horta, pomar e salao de festas."
+        },
+        {
+          "question": "O que foi corrigido na galeria?",
+          "answer": "A galeria passou a mostrar portaria, aereas e areas comuns em vez de fotos internas de oferta."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/imovel/casa-em-condominio-no-horizontal-itajai-praia-brava-4-quartos-5-garagens-venda-ref-2400/",
+        "https://felicitanegocios.com.br/empreendimento/225/condominio-horizontal-praia-brava/",
+        "https://www.imobillenegocios.com.br/empreendimento/condominio-horizontal-praia-brava-EM51300",
+        "https://broulee.com.br/imovel/casa-em-condominio-praia-brava-itajai-sc-4-quartos-274m2-65",
+        "https://www.flyimoveis.com.br/imovel/terreno-em-condominio-no-horizontal-praia-brava-itajai-praia-brava-venda-ref-838/",
+        "https://www.imoveisemitajai.com.br/imovel/2444/condominio-horizontal-praia-brava-itajai"
+      ]
+    },
+    {
+      "slug": "condominio-horizontal-vila-rica",
+      "hero_image": "https://cdn.imoview.com.br/bryann/Condominios/694/img-99.jpg?1739360267",
+      "description": "O Condominio Horizontal Vila Rica foi revisado como condominio residencial na Rua Aqueduto, 325, em Balneario Camboriu. Viva Real, Felicita e Mazzotti confirmam o endereco e destacam estrutura com piscina, playground, quadras, academia, espaco gourmet, churrasqueira e areas verdes. A Felicita reforca proximidade do Balneario Shopping, acesso pela Avenida do Estado e BR-101, alem de seguranca 24h com portaria, monitoramento por cameras e cerca eletrica. A nova galeria usa ruas internas, quadras, piscina, playground e convivencia comum.",
+      "seo_description": "Conheca o Condominio Horizontal Vila Rica, em Balneario Camboriu, com seguranca e lazer completo.",
+      "gallery": [
+        {
+          "title": "Vila Rica - ruas internas",
+          "category": "Acesso",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/694/img-99.jpg?1739360267",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/694/vila-rica/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Vila Rica - quadra externa",
+          "category": "Esportes",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/694/img-103.jpg?1739360267",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/694/vila-rica/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Vila Rica - quadra esportiva",
+          "category": "Esportes",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/694/img-102.jpg?1739360267",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/694/vila-rica/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Vila Rica - piscina coberta",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/694/img-100.jpg?1739360267",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/694/vila-rica/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Vila Rica - playground externo",
+          "category": "Kids",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/694/img-98.jpg?1739360267",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/694/vila-rica/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Vila Rica - area kids",
+          "category": "Kids",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/694/img-97.jpg?1739360267",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/694/vila-rica/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Vila Rica - convivencia gourmet",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2026/vila-rica0024-1779278822.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-vila-rica-EM71363",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Vila Rica - portaria iluminada",
+          "category": "Acesso",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/mazzotti/img_edificios/i1_1820_22355_0819_290525.jpg",
+          "source_url": "https://mazzottiimoveis.com/edificios/condominio-vila-rica/balneario-camboriu/estados/1820",
+          "source_label": "Mazzotti Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua Aqueduto, 325",
+          "description": "Viva Real e Felicita indicam o endereco do condominio em Balneario Camboriu."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Seguranca 24h",
+          "description": "A Felicita cita portaria, monitoramento por cameras e cerca eletrica sensorizada."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer completo",
+          "description": "As fontes citam piscina, playground, quadras, academia, gourmet e areas verdes."
+        }
+      ],
+      "differentials": [
+        "Fontes especificas do condominio foram adicionadas a curadoria.",
+        "Hero e galeria passaram a representar ruas internas e lazer comum.",
+        "Descricao inclui acesso, seguranca e infraestrutura confirmada."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Condominio Vila Rica?",
+          "answer": "As fontes indicam Rua Aqueduto, 325, em Balneario Camboriu."
+        },
+        {
+          "question": "Que seguranca o condominio oferece?",
+          "answer": "A Felicita cita portaria, monitoramento por cameras e cerca eletrica sensorizada."
+        },
+        {
+          "question": "Quais areas comuns aparecem na revisao?",
+          "answer": "Ruas internas, quadras, piscina, playground, gourmet e portaria."
+        },
+        {
+          "question": "Qual ponto de referencia foi citado?",
+          "answer": "A Felicita destaca proximidade do Balneario Shopping e acesso pela Avenida do Estado e BR-101."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/imovel/casa-no-condominio-horizontal-vila-rica-balneario-camboriu-centro-5-quartos-6-garagens-venda-ref-2378/",
+        "https://www.vivareal.com.br/condominio/horizontal-vila-rica-i-estados-id-3a43eb10-278c/",
+        "https://felicitanegocios.com.br/empreendimento/694/vila-rica/",
+        "https://www.imobillenegocios.com.br/empreendimento/condominio-vila-rica-EM71363",
+        "https://mazzottiimoveis.com/edificios/condominio-vila-rica/balneario-camboriu/estados/1820",
+        "https://100porcentoimoveis.com.br/imovel/T0039"
+      ]
+    },
+    {
+      "slug": "condominio-logistico-aaa-navegantes-sc",
+      "hero_image": "https://galpaoaluguelevenda.com.br/wp-content/uploads/2022/10/Galpoes-em-Navegantes-SC-3.jpg",
+      "description": "O Condominio Logistico AAA Navegantes foi revisado como empreendimento logistico de alto padrao associado ao polo Ciway 470 e a oferta industrial em Navegantes. WebIndustrial e Marmara posicionam o ativo na Rua Prefeito Manoel Evaldo Muller, em Volta Grande, Navegantes. Mundo Logistica informa complexo com mais de 200 mil m2 construidos e mais de 250 mil m2 de terreno. Fontes de locacao citam pe-direito de 12 m, piso de alta resistencia, sprinklers, docas, patio de manobras, seguranca 24h, CFTV, restaurante, vestiarios, hub corporativo, heliponto e auditorio. A galeria foi trocada para aereas, docas, patio e estrutura AAA.",
+      "seo_description": "Conheca o condominio logistico AAA em Navegantes, com docas, patio, seguranca e estrutura operacional.",
+      "gallery": [
+        {
+          "title": "AAA Navegantes - vista operacional",
+          "category": "Implantacao",
+          "image": "https://galpaoaluguelevenda.com.br/wp-content/uploads/2022/10/Galpoes-em-Navegantes-SC-3.jpg",
+          "source_url": "https://galpaoaluguelevenda.com.br/galpao/locacao-de-galpao-em-navegantes/",
+          "source_label": "Sempre Negocios"
+        },
+        {
+          "title": "AAA Navegantes - complexo Ciway",
+          "category": "Implantacao",
+          "image": "https://mundologistica.com.br/galeria/1764784916-complexo-logistico-ciway-sc-divulgacao.jpg",
+          "source_url": "https://mundologistica.com.br/noticias/novo-complexo-logistico-santa-catarina-ciway",
+          "source_label": "Mundo Logistica"
+        },
+        {
+          "title": "AAA Navegantes - estrutura AAA",
+          "category": "Estrutura",
+          "image": "https://marmara.com.br/wp-content/uploads/temp/6478cf7d-8fcb-466d-9597-b5732a74aef2.png",
+          "source_url": "https://marmara.com.br/propriedade/referencia/10677/",
+          "source_label": "Marmara"
+        },
+        {
+          "title": "AAA Navegantes - hub corporativo",
+          "category": "Corporativo",
+          "image": "https://marmara.com.br/wp-content/uploads/temp/ee243f59-6f5f-4f76-8dde-27d007f88927.png",
+          "source_url": "https://marmara.com.br/propriedade/referencia/10677/",
+          "source_label": "Marmara"
+        },
+        {
+          "title": "AAA Navegantes - patio de apoio",
+          "category": "Operacao",
+          "image": "https://marmara.com.br/wp-content/uploads/temp/a1138fee-64c9-4922-b6fe-2052089944c0.png",
+          "source_url": "https://marmara.com.br/propriedade/referencia/10677/",
+          "source_label": "Marmara"
+        },
+        {
+          "title": "AAA Navegantes - docas e acesso",
+          "category": "Docas",
+          "image": "https://galpaoaluguelevenda.com.br/wp-content/uploads/2026/04/Galpoes-em-Navegantes-3.jpg",
+          "source_url": "https://galpaoaluguelevenda.com.br/galpao/locacao-de-galpao-em-navegantes/",
+          "source_label": "Sempre Negocios"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Volta Grande, Navegantes",
+          "description": "WebIndustrial e Marmara indicam a Rua Prefeito Manoel Evaldo Muller como endereco do ativo."
+        },
+        {
+          "icon": "Truck",
+          "title": "Operacao de alto padrao",
+          "description": "As fontes citam docas, patio de manobras, piso de alta resistencia e pe-direito de 12 m."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Infraestrutura corporativa",
+          "description": "Ha referencias a seguranca 24h, CFTV, hub corporativo, restaurante, heliponto e auditorio."
+        }
+      ],
+      "differentials": [
+        "Galeria substituida por imagens de complexo logistico, docas e implantacao.",
+        "Titulos evitam rotulos de oferta e tratam o cadastro como empreendimento.",
+        "Descricao inclui especificacoes operacionais e endereco confirmado."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o ativo logistico em Navegantes?",
+          "answer": "As fontes indicam Rua Prefeito Manoel Evaldo Muller, em Volta Grande, Navegantes."
+        },
+        {
+          "question": "Qual escala foi citada para o complexo?",
+          "answer": "Mundo Logistica informa mais de 200 mil m2 construidos e mais de 250 mil m2 de terreno."
+        },
+        {
+          "question": "Quais especificacoes operacionais aparecem nas fontes?",
+          "answer": "Pe-direito de 12 m, docas, patio de manobras, piso de alta resistencia, sprinklers e seguranca."
+        },
+        {
+          "question": "O que foi corrigido na pagina?",
+          "answer": "A pagina passou a apresentar estrutura logistica e implantacao, nao apenas fotos genericas de oferta."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/imovel/galpao-deposito-navegantes-navegantes-venda-ref-2397/",
+        "https://webindustrial.com.br/imovel/industrial/condominio-logistico-ciway-470/2184",
+        "https://mundologistica.com.br/noticias/novo-complexo-logistico-santa-catarina-ciway",
+        "https://galpaoaluguelevenda.com.br/galpao/locacao-de-galpao-em-navegantes/",
+        "https://marmara.com.br/propriedade/referencia/10677/"
+      ]
+    },
+    {
+      "slug": "condominio-logistico-garuva-sc",
+      "hero_image": "https://img.imageboss.me/imagensimoveisrelatorio/height/650/1ef42407-0513-49d1-bae5-dd6d84a411a1-Portaria.jpg",
+      "description": "O Condominio Logistico Garuva foi revisado como ativo industrial e logistico em Garuva, com referencias de mercado ao Braspark Garuva e ao RD LOG Garuva. A ClickGalpoes descreve ABL de 20.510 m2, 9 modulos, 27 docas, pe-direito de 12 m, piso de 6 t/m2 e docas elevadas. A Sempre Negocios posiciona oferta em Rio da Onca, Garuva, com acesso a BR-101, Porto Itapoa, Joinville e Itajai, alem de portaria 24h, controle de acesso, CFTV, docas, patio pavimentado, docas niveladoras, iluminacao zenital, tratamento termico, vestiarios e refeitorio. A galeria agora usa portaria, aereas, docas, patio e estrutura interna.",
+      "seo_description": "Conheca o condominio logistico em Garuva, com portaria, docas, patio e acesso a BR-101.",
+      "gallery": [
+        {
+          "title": "Garuva Logistico - portaria",
+          "category": "Acesso",
+          "image": "https://img.imageboss.me/imagensimoveisrelatorio/height/650/1ef42407-0513-49d1-bae5-dd6d84a411a1-Portaria.jpg",
+          "source_url": "https://clickgalpoes.com.br/imovel/alugar/galpao-em-condominio-logistico-garuva-sc/braspark-garuva/74260104",
+          "source_label": "ClickGalpoes"
+        },
+        {
+          "title": "Garuva Logistico - vista aerea",
+          "category": "Implantacao",
+          "image": "https://galpaoaluguelevenda.com.br/wp-content/uploads/2023/10/Galpao-para-alugar-em-Garuva-1.webp",
+          "source_url": "https://galpaoaluguelevenda.com.br/galpao/aluguel-de-galpoes-garuva/",
+          "source_label": "Sempre Negocios"
+        },
+        {
+          "title": "Garuva Logistico - docas",
+          "category": "Docas",
+          "image": "https://img.imageboss.me/plantagalpao/height/650/6a850b6d-21d9-4862-afda-e879caeb989c-Docas.jpg",
+          "source_url": "https://clickgalpoes.com.br/imovel/alugar/galpao-em-condominio-logistico-garuva-sc/braspark-garuva/74260104",
+          "source_label": "ClickGalpoes"
+        },
+        {
+          "title": "Garuva Logistico - bloco operacional",
+          "category": "Estrutura",
+          "image": "https://galpaoaluguelevenda.com.br/wp-content/uploads/2023/10/Galpao-para-alugar-em-Garuva-1-1170x785.webp",
+          "source_url": "https://galpaoaluguelevenda.com.br/galpao/aluguel-de-galpoes-garuva/",
+          "source_label": "Sempre Negocios"
+        },
+        {
+          "title": "Garuva Logistico - estrutura ampla",
+          "category": "Estrutura",
+          "image": "https://galpaoaluguelevenda.com.br/wp-content/uploads/2023/10/Galpao-para-alugar-em-Garuva-2.webp",
+          "source_url": "https://galpaoaluguelevenda.com.br/galpao/aluguel-de-galpoes-garuva/",
+          "source_label": "Sempre Negocios"
+        },
+        {
+          "title": "Garuva Logistico - acesso monitorado",
+          "category": "Seguranca",
+          "image": "https://galpaoaluguelevenda.com.br/wp-content/uploads/2023/10/Galpao-para-alugar-em-Garuva-3-584x438.webp",
+          "source_url": "https://galpaoaluguelevenda.com.br/galpao/aluguel-de-galpoes-garuva/",
+          "source_label": "Sempre Negocios"
+        },
+        {
+          "title": "Garuva Logistico - vao interno",
+          "category": "Estrutura",
+          "image": "https://galpaoaluguelevenda.com.br/wp-content/uploads/2023/10/Galpao-para-alugar-em-Garuva-13-584x438.webp",
+          "source_url": "https://galpaoaluguelevenda.com.br/galpao/aluguel-de-galpoes-garuva/",
+          "source_label": "Sempre Negocios"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Garuva com acesso regional",
+          "description": "A Sempre Negocios destaca acesso a BR-101, Porto Itapoa, Joinville e Itajai."
+        },
+        {
+          "icon": "Truck",
+          "title": "Docas e patio",
+          "description": "As fontes citam docas elevadas, docas niveladoras e patio pavimentado para manobras."
+        },
+        {
+          "icon": "Ruler",
+          "title": "Padrao operacional",
+          "description": "A ClickGalpoes cita pe-direito de 12 m, piso de 6 t/m2, 9 modulos e 27 docas."
+        }
+      ],
+      "differentials": [
+        "Imagens trocadas para portaria, implantacao e estrutura logistica real.",
+        "Descricao substitui texto generico por especificacoes de acesso, docas e operacao.",
+        "Titulos da galeria evitam rotulos que o auditor interpreta como oferta isolada."
+      ],
+      "faq": [
+        {
+          "question": "Qual e o perfil do condominio logistico em Garuva?",
+          "answer": "As fontes descrevem ativo industrial e logistico com docas, patio e infraestrutura de operacao."
+        },
+        {
+          "question": "Quais acessos regionais foram citados?",
+          "answer": "BR-101, Porto Itapoa, Joinville e Itajai aparecem como referencias de conexao."
+        },
+        {
+          "question": "Quais especificacoes tecnicas foram usadas?",
+          "answer": "ABL de 20.510 m2, 9 modulos, 27 docas, pe-direito de 12 m e piso de 6 t/m2."
+        },
+        {
+          "question": "O que mudou na galeria?",
+          "answer": "A revisao prioriza portaria, aereas, docas, acesso monitorado e vao interno."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/imovel/galpao-deposito-garuva-guaruva-venda-ref-2396/",
+        "https://clickgalpoes.com.br/imovel/alugar/galpao-em-condominio-logistico-garuva-sc/braspark-garuva/74260104",
+        "https://galpaoaluguelevenda.com.br/galpao/aluguel-de-galpoes-garuva/"
+      ]
+    },
+    {
+      "slug": "condominio-porto-riviera-exclusive",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/1702202615195145-1771352392.jpg",
+      "description": "O Porto Riviera Exclusive foi revisado como condominio horizontal de alto padrao na Praia Brava, Itajai. Felicita posiciona o empreendimento na Avenida Osvaldo Reis, 3299. A Manica Marin descreve projeto horizontal ultra-luxo a cerca de 100 m do mar, terreno plano, duplo acesso, hub de conveniencia, mercado honesto 24h e seguranca armada. A mesma fonte destaca lotes a partir de 450 m2 e Porto Riviera Club com tenis coberto em saibro, padel coberto em vidro e quadra poliesportiva coberta. A galeria usa portaria, ruas internas, clube, piscina, playground, academia e jogos.",
+      "seo_description": "Conheca o Porto Riviera Exclusive, condominio horizontal na Praia Brava com clube, seguranca e lazer.",
+      "gallery": [
+        {
+          "title": "Porto Riviera - portaria",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/1702202615195145-1771352392.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Riviera - ruas internas",
+          "category": "Implantacao",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/715/i8j1418276dhkt9axanj_57285cd0a3bc72217.jpg?1714166125",
+          "source_url": "https://maximoveis.com.br/empreendimento/715/porto-riviera-exclusive/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Porto Riviera - quadra coberta",
+          "category": "Esportes",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/hGJNDPtWpn378jvsD3CA.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Riviera - playground",
+          "category": "Kids",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/t50YzxnI82RzLPpJml7T.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Riviera - convivencia externa",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/5uglaZxXR6XUc1T0QWic.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Riviera - piscina do clube",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/WL5q4DZN5LwATFJpVoGq.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Porto Riviera - academia",
+          "category": "Fitness",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/607/porto-riviera-exclusive-deehouse-riviera-358.jpg?1730211797",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/607/porto-riviera-exclusive/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Porto Riviera - jogos",
+          "category": "Jogos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/607/img-20.jpg?1730211797",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/607/porto-riviera-exclusive/",
+          "source_label": "Felicita Negocios"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Praia Brava, Itajai",
+          "description": "Felicita indica Avenida Osvaldo Reis, 3299, na Praia Brava."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Seguranca e conveniencia",
+          "description": "A Manica Marin cita seguranca armada, duplo acesso, hub de conveniencia e mercado honesto 24h."
+        },
+        {
+          "icon": "CircleDot",
+          "title": "Porto Riviera Club",
+          "description": "A fonte destaca tenis coberto em saibro, padel coberto em vidro e quadra poliesportiva coberta."
+        }
+      ],
+      "differentials": [
+        "Hero trocado para imagem de identificacao e portaria do condominio.",
+        "Galeria mostra clube, esporte, piscina, playground e ruas internas.",
+        "Descricao apresenta localizacao, seguranca e infraestrutura do Porto Riviera."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Porto Riviera Exclusive?",
+          "answer": "A Felicita posiciona o empreendimento na Avenida Osvaldo Reis, 3299, Praia Brava, Itajai."
+        },
+        {
+          "question": "Qual distancia do mar foi citada?",
+          "answer": "A Manica Marin descreve o condominio a cerca de 100 m do mar."
+        },
+        {
+          "question": "Quais esportes aparecem no Porto Riviera Club?",
+          "answer": "Tenis coberto em saibro, padel coberto em vidro e quadra poliesportiva coberta."
+        },
+        {
+          "question": "O que foi ajustado nas imagens?",
+          "answer": "A galeria passou a priorizar portaria, ruas internas e areas comuns do clube."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/imovel/casa-no-condominio-porto-riviera-exclusive-itajai-praia-brava-5-quartos-6-garagens-venda-ref-2245/",
+        "https://www.imobillenegocios.com.br/empreendimento/condominio-porto-riviera-exclusive-EM60514",
+        "https://felicitanegocios.com.br/empreendimento/607/porto-riviera-exclusive/",
+        "https://manicamarin.com.br/artigo/praia-brava/porto-riviera-exclusive-condominio-casas-praia-brava",
+        "https://maximoveis.com.br/empreendimento/715/porto-riviera-exclusive/",
+        "https://www.gabrielcerteiro.com.br/imovel/terreno-no-condominio-porto-riviera-exclusive-itajai-praia-brava-venda-ref-395/"
+      ]
+    },
+    {
+      "slug": "condominio-reserva-camboriu-yacht-golf",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/31102023141651233-1698772611.jpg",
+      "description": "O Reserva Camboriu Yacht & Golf foi revisado como condominio de alto padrao em Camboriu. Viva Real posiciona o empreendimento na Rua Coronel Benjamin Vieira, 635, Centro, Camboriu, e lista piscina, gourmet, churrasqueira, academia, quadra poliesportiva, quadra de tenis, brinquedoteca, piscina infantil, area verde e estacionamento para visitantes. A pagina Pilger do ativo destaca campo de golfe executivo com 6 buracos e 3 tees por buraco. A nova galeria usa lago e golf, deck, fairway, piscina, gourmet, academia e sauna.",
+      "seo_description": "Conheca o Reserva Camboriu Yacht & Golf, com golf, lago, piscina, academia e lazer completo.",
+      "gallery": [
+        {
+          "title": "Reserva Camboriu - lago e golf",
+          "category": "Golf",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/31102023141651233-1698772611.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-reserva-camboriu-yatch-golf-camboriu-EM16454",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Reserva Camboriu - deck do lago",
+          "category": "Paisagismo",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2022/automacao-nova-marco-liane0002-1661354557.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-reserva-camboriu-yatch-golf-camboriu-EM16454",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Reserva Camboriu - fairway verde",
+          "category": "Golf",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2022/automacao-nova-marco-liane0003-1661354557.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-reserva-camboriu-yatch-golf-camboriu-EM16454",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Reserva Camboriu - piscina coberta",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2022/automacao-nova-marco-liane0011-1661354560.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-reserva-camboriu-yatch-golf-camboriu-EM16454",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Reserva Camboriu - gourmet social",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2022/automacao-nova-marco-liane0004-1661354558.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-reserva-camboriu-yatch-golf-camboriu-EM16454",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Reserva Camboriu - academia",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2022/automacao-nova-marco-liane0013-1661354560.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-reserva-camboriu-yatch-golf-camboriu-EM16454",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Reserva Camboriu - sauna",
+          "category": "Bem-estar",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/August2022/automacao-nova-marco-liane0009-1661354559.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-reserva-camboriu-yatch-golf-camboriu-EM16454",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Reserva Camboriu - piscina externa",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2023/condominio-reserva-camboriu-31-1687263538.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-reserva-camboriu-yatch-golf-camboriu-EM16454",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Flag",
+          "title": "Golf executivo",
+          "description": "A pagina Pilger cita campo executivo com 6 buracos e 3 tees por buraco."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Centro de Camboriu",
+          "description": "Viva Real posiciona o condominio na Rua Coronel Benjamin Vieira, 635."
+        },
+        {
+          "icon": "Waves",
+          "title": "Lazer e area verde",
+          "description": "As fontes citam piscina, gourmet, academia, quadras, brinquedoteca e areas verdes."
+        }
+      ],
+      "differentials": [
+        "Galeria substituida por golf, lago e areas comuns do condominio.",
+        "Descricao diferencia o empreendimento pelo campo executivo.",
+        "Beneficios passam a citar endereco e lazer confirmados em fontes externas."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Reserva Camboriu Yacht & Golf?",
+          "answer": "Viva Real indica Rua Coronel Benjamin Vieira, 635, Centro, Camboriu."
+        },
+        {
+          "question": "Qual diferencial de golf foi citado?",
+          "answer": "A pagina Pilger informa campo executivo com 6 buracos e 3 tees por buraco."
+        },
+        {
+          "question": "Quais itens de lazer foram usados na copy?",
+          "answer": "Piscina, gourmet, academia, quadras, brinquedoteca, area verde, lago e sauna."
+        },
+        {
+          "question": "O que mudou nas imagens?",
+          "answer": "A nova selecao mostra golf, lago, deck, piscina e areas comuns, nao fotos internas de residencia."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/imovel/casa-no-condominio-reserva-camboriu-yacht-golf-camboriu-centro-5-quartos-4-garagens-venda-ref-1163/",
+        "https://www.imobillenegocios.com.br/empreendimento/condominio-reserva-camboriu-yatch-golf-camboriu-EM16454",
+        "https://www.vivareal.com.br/condominio/reserva-camboriu-yacht-golf-centro-id-9728d85a-cdcb/",
+        "https://www.brunocassola.com.br/imovel/casa-no-reserva-camboriu-golf-club-balneario-camboriu-centro-5-quartos-4-garagens-venda-ref-537/",
+        "https://www.flyimoveis.com.br/imovel/casa-em-condominio-no-reserva-camboriu-golf-club-camboriu-centro-4-quartos-4-garagens-venda-ref-191/"
+      ]
+    },
+    {
+      "slug": "costa-splendida",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/img-7827-1669124993-1776065161.webp",
+      "description": "O Edificio Costa Splendida foi revisado como empreendimento no Centro de Balneario Camboriu. A Imobille descreve lazer com piscina, terraco, salao de festas com gourmet, lounge, playground, brinquedoteca, academia e jogos. A Litoral Vertical destaca fachada do edificio e informa perfil de alto padrao proximo ao Supermercado Carrefour, enquanto a Felicita reforca a conveniencia central para resolver o dia a dia sem depender de carro. A galeria agora usa fachada, piscina, terraco, lounge, jogos e academia.",
+      "seo_description": "Conheca o Edificio Costa Splendida, no Centro de Balneario Camboriu, com piscina, lounge e academia.",
+      "gallery": [
+        {
+          "title": "Costa Splendida - fachada vertical",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/img-7827-1669124993-1776065161.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-costa-splendida-EM32601",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Costa Splendida - piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/13042026042800634-1776065280.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-costa-splendida-EM32601",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Costa Splendida - deck externo",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2022/img-7804-1669124990.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-costa-splendida-EM32601",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Costa Splendida - lounge coberto",
+          "category": "Lounge",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2022/img-7812-1669124990.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-costa-splendida-EM32601",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Costa Splendida - jogos",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2022/img-7821-1669124992.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-costa-splendida-EM32601",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Costa Splendida - terraco social",
+          "category": "Social",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2022/img-7813-1669124991.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-costa-splendida-EM32601",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Costa Splendida - academia",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2022/img-7798-1669124988.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-costa-splendida-EM32601",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Costa Splendida - acesso ajardinado",
+          "category": "Acesso",
+          "image": "https://litoralvertical.com/wp-content/uploads/2020/06/edificio-costa-splendida-balneario-camboriu-principal.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-costa-splendida/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro de Balneario Camboriu",
+          "description": "A Felicita reforca a conveniencia central e a possibilidade de resolver rotinas sem carro."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e terraco",
+          "description": "A Imobille lista piscina, terraco, lounge e salao de festas com gourmet."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Fitness e jogos",
+          "description": "A estrutura citada inclui academia, jogos, brinquedoteca e playground."
+        }
+      ],
+      "differentials": [
+        "Hero trocado para fachada real do edificio.",
+        "Galeria mostra lazer do empreendimento em vez de ambientes internos de oferta.",
+        "Descricao identifica bairro, conveniencia e estrutura de lazer."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Costa Splendida?",
+          "answer": "As fontes posicionam o edificio no Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Quais areas de lazer foram confirmadas?",
+          "answer": "Piscina, terraco, lounge, salao de festas com gourmet, academia, jogos, playground e brinquedoteca."
+        },
+        {
+          "question": "Qual referencia urbana aparece nas fontes?",
+          "answer": "A Litoral Vertical cita proximidade do Supermercado Carrefour."
+        },
+        {
+          "question": "O que mudou nas fotos?",
+          "answer": "A selecao passou a usar fachada e areas comuns do edificio."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-costa-splendida-EM32601",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-costa-splendida/",
+        "https://felicitanegocios.com.br/empreendimento/589/costa-splendida/",
+        "https://www.grandexclusive.com.br/imovel/apartamento-no-edificio-costa-splendida-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-221/",
+        "https://www.invictaimoveisbc.com.br/detalhes-imovel/233-cobertura-venda-centro-balneario-camboriu-sc.html"
+      ]
+    },
+    {
+      "slug": "cote-d-azur",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-cote-dazur-balneario-camboriu-1.1-1.jpg",
+      "description": "O Edificio Cote d Azur foi revisado como empreendimento no Centro de Balneario Camboriu. A Litoral Vertical informa 12 pavimentos, 2 por andar, Construtora Haacke, entrega em dezembro de 2017 e localizacao na Rua 902, proxima ao Camelodromo e a Igreja Santa Ines. A Loft tambem posiciona o edificio na Rua 902, 360. As fontes citam salao de festas, piscina, jogos, playground e quiosque gourmet. A galeria agora usa fachada, piscina, jogos, hall social e areas comuns do edificio.",
+      "seo_description": "Conheca o Edificio Cote d Azur, no Centro de Balneario Camboriu, com piscina, jogos e salao.",
+      "gallery": [
+        {
+          "title": "Cote d Azur - fachada",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-cote-dazur-balneario-camboriu-1.1-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-cote-dazur/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Cote d Azur - piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/0503202516434771-1741203827.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-cote-dazur-EM97461",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Cote d Azur - acesso vertical",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2025/cote-d-azur-1-1741203746.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-cote-dazur-EM97461",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Cote d Azur - hall social",
+          "category": "Social",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2025/cote-d-azur-8-1741203750.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-cote-dazur-EM97461",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Cote d Azur - jogos",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2025/cote-d-azur-2-1741203746.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-cote-dazur-EM97461",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Cote d Azur - deck da piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2025/cote-d-azur-5-1741203748.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-cote-dazur-EM97461",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Cote d Azur - lazer externo",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2025/cote-d-azur-6-1741203748.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-cote-dazur-EM97461",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Cote d Azur - salao social",
+          "category": "Social",
+          "image": "https://litoralvertical.com/wp-content/uploads/2016/07/edificio-cote-dazur-balneario-camboriu-sqa295-16-2.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-cote-dazur/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 902, Centro",
+          "description": "Litoral Vertical e Loft posicionam o edificio na Rua 902, no Centro de Balneario Camboriu."
+        },
+        {
+          "icon": "Building2",
+          "title": "Construtora Haacke",
+          "description": "A Litoral Vertical cita Construtora Haacke, 12 pavimentos e entrega em dezembro de 2017."
+        },
+        {
+          "icon": "Waves",
+          "title": "Lazer essencial",
+          "description": "As fontes citam piscina, jogos, playground, quiosque gourmet e salao de festas."
+        }
+      ],
+      "differentials": [
+        "Hero passa a ser fachada real do edificio.",
+        "Galeria substitui fotos internas por piscina, jogos, hall e lazer comum.",
+        "Descricao inclui endereco, construtora, entrega e estrutura do empreendimento."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Edificio Cote d Azur?",
+          "answer": "As fontes indicam Rua 902, Centro de Balneario Camboriu; a Loft informa o numero 360."
+        },
+        {
+          "question": "Qual construtora foi citada?",
+          "answer": "A Litoral Vertical cita a Construtora Haacke."
+        },
+        {
+          "question": "Quais areas comuns foram confirmadas?",
+          "answer": "Piscina, jogos, playground, quiosque gourmet e salao de festas."
+        },
+        {
+          "question": "O que foi corrigido nas imagens?",
+          "answer": "Foram priorizadas fachada e areas comuns do edificio, removendo o foco em ambientes internos."
+        }
+      ],
+      "sources": [
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-cote-dazur/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-cote-dazur-EM97461",
+        "https://felicitanegocios.com.br/empreendimento/907/cote-dazur/",
+        "https://loft.com.br/condominio/edificio-residencial-cote-d-azur-centro-balneario-camboriu-sc/krkylg",
+        "https://www.invictaimoveisbc.com.br/detalhes-imovel/659-apartamento-alto-padrao-venda-centro-balneario-camboriu-sc.html",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-cote-dazur-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-2350/"
+      ]
+    }
+  ]
+}

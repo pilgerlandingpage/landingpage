@@ -1,0 +1,1816 @@
+{
+  "batch_id": "development-media-curation-batch47-20260718",
+  "generated_at": "2026-07-18T04:30:00.000Z",
+  "items": [
+    {
+      "slug": "theiss-heim",
+      "hero_image": "https://cdn.imoview.com.br/bryann/Condominios/517/img-17-29.jpg?1750097358",
+      "description": "O Theiss Heim Residence fica na Avenida Atlantica, 4000, em Balneario Camboriu, com perfil frente mar e plantas amplas em uma torre de alto padrao. A pagina foi corrigida para mostrar fachada, hall, acesso, piscina, deck, gourmet e eventos do condominio. As fontes indicam lazer com piscina, academia, salao de festas, espaco gourmet, playground e portaria, reforcando uma rotina residencial exclusiva junto a Barra Sul.",
+      "seo_description": "Theiss Heim Residence frente mar em Balneario Camboriu, com fachada, hall, piscina, deck, gourmet e lazer de alto padrao.",
+      "gallery": [
+        {
+          "title": "Theiss Heim - fachada frente mar",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/517/img-17-29.jpg?1750097358",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/517/theiss-heim/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Theiss Heim - torre na Atlantica",
+          "category": "Fachada",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/o4HhfmdvI1ebrqPnCJl4.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-theiss-heim-EM63154",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Theiss Heim - hall de chegada",
+          "category": "Hall",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/6Ucafh96cYJXB6T8UOsF.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-theiss-heim-EM63154",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Theiss Heim - acesso social",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2026/thumb-6ucafh96cyjxb6t8uosf-1782830339.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-theiss-heim-EM63154",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Theiss Heim - lobby coberto",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/517/img-1-41.jpg?1750097358",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/517/theiss-heim/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Theiss Heim - acesso interno",
+          "category": "Acesso",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/517/img-3-32.jpg?1750097358",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/517/theiss-heim/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Theiss Heim - gourmet externo",
+          "category": "Gourmet",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/517/img-5-27.jpg?1750097358",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/517/theiss-heim/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Theiss Heim - deck frente mar",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/517/img-6-30.jpg?1750097358",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/517/theiss-heim/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Theiss Heim - piscina ao sol",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/517/img-7-38.jpg?1750097358",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/517/theiss-heim/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Theiss Heim - piscina panoramica",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/517/img-12-31.jpg?1750097358",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/517/theiss-heim/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Theiss Heim - deck de descanso",
+          "category": "Lazer",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/517/img-8-35.jpg?1750097358",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/517/theiss-heim/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Theiss Heim - estar externo",
+          "category": "Lazer",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/517/img-11-29.jpg?1750097358",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/517/theiss-heim/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Theiss Heim - eventos",
+          "category": "Eventos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/517/img-13-32.jpg?1750097358",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/517/theiss-heim/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Theiss Heim - gourmet social",
+          "category": "Gourmet",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/517/img-16-33.jpg?1750097358",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/517/theiss-heim/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Theiss Heim - piscina com vista",
+          "category": "Piscina",
+          "image": "https://betaimages.lopes.com.br/realestate/sml/v1/REO836928/20706B6892C90C45981F4553A43EBCB5.JPG",
+          "source_url": "https://www.lopes.com.br/condominios/sc/balneario-camboriu/centro/REC24601/edificio-theiss-heim-residence-bloco-dom-augustus-avenida-atlantica-4000",
+          "source_label": "Lopes"
+        },
+        {
+          "title": "Theiss Heim - lounge da piscina",
+          "category": "Lazer",
+          "image": "https://betaimages.lopes.com.br/realestate/sml/v1/REO835906/4A7BA86DDB82CCB68E2ACAE815640D7A.JPEG",
+          "source_url": "https://www.lopes.com.br/condominios/sc/balneario-camboriu/centro/REC24601/edificio-theiss-heim-residence-bloco-dom-augustus-avenida-atlantica-4000",
+          "source_label": "Lopes"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente mar na Atlantica",
+          "description": "O endereco na Avenida Atlantica coloca o predio em uma das frentes mais valorizadas de Balneario Camboriu."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Perfil exclusivo",
+          "description": "As fontes destacam plantas amplas, alto padrao e atmosfera residencial reservada."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer frente mar",
+          "description": "Piscina, deck, gourmet e eventos aproveitam a relacao direta com a orla."
+        },
+        {
+          "icon": "Building2",
+          "title": "Estrutura completa",
+          "description": "Hall, portaria, academia, playground e espacos sociais completam o uso do condominio."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fachada correta",
+          "description": "A hero agora mostra o Theiss Heim, e imagens reaproveitadas de outros predios ficaram fora."
+        },
+        {
+          "title": "Galeria de condominio",
+          "description": "A selecao prioriza acesso, hall, piscina, deck e areas sociais."
+        },
+        {
+          "title": "Copy de alto padrao",
+          "description": "O texto comunica frente mar, exclusividade e lazer real do empreendimento."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Theiss Heim?",
+          "answer": "Na Avenida Atlantica, 4000, em Balneario Camboriu, com leitura de frente mar na Barra Sul."
+        },
+        {
+          "question": "Quais imagens foram escolhidas?",
+          "answer": "Fachada, hall, acesso, piscina, deck, gourmet e eventos do condominio."
+        },
+        {
+          "question": "Que lazer aparece nas fontes?",
+          "answer": "Piscina, academia, salao de festas, espaco gourmet, playground e portaria."
+        },
+        {
+          "question": "O que foi evitado na curadoria?",
+          "answer": "Fotos internas de oferta e imagens reaproveitadas de outros empreendimentos."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-theiss-heim-EM63154",
+        "https://imoveisterra.net/empreendimento/367/edificio-theiss-heim-residence/",
+        "https://felicitanegocios.com.br/empreendimento/517/theiss-heim/",
+        "https://www.lopes.com.br/condominios/sc/balneario-camboriu/centro/REC24601/edificio-theiss-heim-residence-bloco-dom-augustus-avenida-atlantica-4000",
+        "https://www.guilhermepilger.com/imovel/cobertura-no-edificio-theiss-heim-balneario-camboriu-centro-5-quartos-4-garagens-venda-ref-1116/"
+      ]
+    },
+    {
+      "slug": "tivoli-plaza",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2023/layout-fotos-site0001-1674580590.jpg",
+      "description": "O Tivoli Plaza, da Macodesc, fica no bairro Fazenda, em Itajai, na Rua Onze de Junho. O projeto foi inspirado no conceito dinamarques Hygge e trabalha exclusividade, inspiracao e sustentabilidade. A pagina agora mostra fachada, rooftop, gourmet, piscina aquecida, jacuzzi, espaco kids, jardim, eventos e halls, destacando tambem horta comunitaria e vista para a Beira Rio como diferenciais reais do condominio.",
+      "seo_description": "Tivoli Plaza no bairro Fazenda, Itajai, com fachada, rooftop Hygge, piscina aquecida, jacuzzi, kids, jardim e eventos.",
+      "gallery": [
+        {
+          "title": "Tivoli Plaza - fachada atual",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2023/layout-fotos-site0001-1674580590.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-tivoli-plaza-EM63370",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tivoli Plaza - conceito Macodesc",
+          "category": "Fachada",
+          "image": "https://www.macodesc.com.br/image/?src=/uploads/blogtivoli06ago2018macodesc-01-5b6895d30c6c3.png",
+          "source_url": "https://www.macodesc.com.br/blog/06-08-2018-vem-ai-o-tivoli-plaza/",
+          "source_label": "Macodesc"
+        },
+        {
+          "title": "Tivoli Plaza - rooftop Hygge",
+          "category": "Rooftop",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2023/layout-fotos-site0009-1674580592.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-tivoli-plaza-EM63370",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tivoli Plaza - gourmet externo",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2023/layout-fotos-site0008-1674580592.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-tivoli-plaza-EM63370",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tivoli Plaza - jardim social",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2023/layout-fotos-site0011-1674580593.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-tivoli-plaza-EM63370",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tivoli Plaza - churrasqueira coletiva",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2023/layout-fotos-site0007-1674580592.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-tivoli-plaza-EM63370",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tivoli Plaza - piscina aquecida",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2023/layout-fotos-site0014-1674580593.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-tivoli-plaza-EM63370",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tivoli Plaza - piscina e deck",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2023/layout-fotos-site0023-1674580595.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-tivoli-plaza-EM63370",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tivoli Plaza - jacuzzi",
+          "category": "Spa",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2023/layout-fotos-site0019-1674580594.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-tivoli-plaza-EM63370",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tivoli Plaza - salao Danmark",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2023/layout-fotos-site0000-1674580590.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-tivoli-plaza-EM63370",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tivoli Plaza - hall social",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2023/layout-fotos-site0002-1674580590.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-tivoli-plaza-EM63370",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tivoli Plaza - apoio gourmet",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2023/layout-fotos-site0004-1674580591.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-tivoli-plaza-EM63370",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tivoli Plaza - eventos Star Flyer",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2023/layout-fotos-site0005-1674580591.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-tivoli-plaza-EM63370",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Tivoli Plaza - sinalizacao interna",
+          "category": "Acesso",
+          "image": "https://urbay.com.br/i/960/600/imagens/anexos/tivoli-plaza-itajai-sc-e00f.jpg",
+          "source_url": "https://urbay.com.br/imovel/2572-tivoli-plaza",
+          "source_label": "Urbay"
+        },
+        {
+          "title": "Tivoli Plaza - spa coberto",
+          "category": "Spa",
+          "image": "https://urbay.com.br/i/960/600/imagens/anexos/tivoli-plaza-itajai-sc-rxcx.jpg",
+          "source_url": "https://urbay.com.br/imovel/2572-tivoli-plaza",
+          "source_label": "Urbay"
+        },
+        {
+          "title": "Tivoli Plaza - espaco kids",
+          "category": "Infantil",
+          "image": "https://urbay.com.br/i/960/600/imagens/anexos/tivoli-plaza-itajai-sc-etyx.jpg",
+          "source_url": "https://urbay.com.br/imovel/2572-tivoli-plaza",
+          "source_label": "Urbay"
+        },
+        {
+          "title": "Tivoli Plaza - convivencia noturna",
+          "category": "Convivencia",
+          "image": "https://urbay.com.br/i/960/600/imagens/anexos/tivoli-plaza-itajai-sc-wner.jpg",
+          "source_url": "https://urbay.com.br/imovel/2572-tivoli-plaza",
+          "source_label": "Urbay"
+        },
+        {
+          "title": "Tivoli Plaza - jardim contemplativo",
+          "category": "Lazer",
+          "image": "https://urbay.com.br/i/960/600/imagens/anexos/tivoli-plaza-itajai-sc-vwtz.jpg",
+          "source_url": "https://urbay.com.br/imovel/2572-tivoli-plaza",
+          "source_label": "Urbay"
+        },
+        {
+          "title": "Tivoli Plaza - estar verde",
+          "category": "Lazer",
+          "image": "https://urbay.com.br/i/960/600/imagens/anexos/tivoli-plaza-itajai-sc-a42k.jpg",
+          "source_url": "https://urbay.com.br/imovel/2572-tivoli-plaza",
+          "source_label": "Urbay"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Fazenda em Itajai",
+          "description": "A Rua Onze de Junho aproxima o predio da Beira Rio, restaurantes, pracas e servicos do bairro."
+        },
+        {
+          "icon": "Leaf",
+          "title": "Conceito Hygge",
+          "description": "A Macodesc apresenta o projeto com foco em bem-estar, aconchego, simplicidade e convivencia."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e jacuzzi",
+          "description": "Piscina aquecida, jacuzzi e deck criam uma area de descanso para uso diario."
+        },
+        {
+          "icon": "Baby",
+          "title": "Kids e jardim",
+          "description": "Espaco kids, playground, jardim contemplativo e horta comunitaria reforcam a vida em comunidade."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fonte da incorporadora",
+          "description": "O conceito do Tivoli foi validado na Macodesc e cruzado com fontes comerciais."
+        },
+        {
+          "title": "Rooftop e horta",
+          "description": "A copy passa a destacar elementos especificos do predio, nao frases genericas."
+        },
+        {
+          "title": "Galeria de lazer real",
+          "description": "Fachada, piscina, jacuzzi, kids, gourmet e jardim substituem imagens de oferta."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Quem desenvolveu o Tivoli Plaza?",
+          "answer": "A Macodesc Construtora e Incorporadora e citada como responsavel pelo empreendimento."
+        },
+        {
+          "question": "Onde fica o Tivoli Plaza?",
+          "answer": "Na Rua Onze de Junho, bairro Fazenda, Itajai."
+        },
+        {
+          "question": "Quais itens de lazer foram verificados?",
+          "answer": "Rooftop Hygge, piscina aquecida, jacuzzi, espaco kids, playground, jardim, fitness e eventos."
+        },
+        {
+          "question": "Qual diferencial foi incluido na copy?",
+          "answer": "O conceito Hygge e a horta comunitaria, ambos citados nas fontes pesquisadas."
+        }
+      ],
+      "sources": [
+        "https://www.macodesc.com.br/blog/06-08-2018-vem-ai-o-tivoli-plaza/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-tivoli-plaza-EM63370",
+        "https://loft.com.br/condominio/condominio-edificio-tivoli-plaza-fazenda-itajai-sc/5Z6Z92KH",
+        "https://www.giraldiimoveis.com.br/empreendimento/tivoli-plaza-apartamentos-itajai-3-quartos-104-a-108-m/9186539-GIE",
+        "https://urbay.com.br/imovel/2572-tivoli-plaza"
+      ]
+    },
+    {
+      "slug": "torre-atlantica",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-torre-atla-1769438243.jpg",
+      "description": "A Torre Atlantica fica de frente para o mar na Barra Norte de Balneario Camboriu, proxima ao Hotel Marambaia e ao acesso para Itajai. A pagina agora usa fachada, piscina, hall, entrada, deck, jardim e terraco do condominio. O texto reforca a localizacao frente mar, a rotina da Barra Norte e uma estrutura de lazer com piscina e areas sociais, sem depender de fotos internas de oferta.",
+      "seo_description": "Torre Atlantica frente mar na Barra Norte de Balneario Camboriu, com fachada, piscina, hall, deck e areas sociais.",
+      "gallery": [
+        {
+          "title": "Torre Atlantica - fachada frontal",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-torre-atla-1769438243.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-atlantica-EM63440",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Torre Atlantica - fachada Litoral",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2023/03/edificio-torre-atlantica-balneario-camboriu-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-torre-atlantica/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Torre Atlantica - torre entre palmeiras",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2023/03/edificio-torre-atlantica-balneario-camboriu-2-770x386.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-torre-atlantica/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Torre Atlantica - acesso Barra Norte",
+          "category": "Acesso",
+          "image": "https://litoralvertical.com/wp-content/uploads/2023/03/edificio-torre-atlantica-balneario-camboriu-3-770x386.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-torre-atlantica/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Torre Atlantica - piscina frente mar",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/18032024160014337-1710788414.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-atlantica-EM63440",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Torre Atlantica - lobby amplo",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/torre-atlantica-1-1710788181.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-atlantica-EM63440",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Torre Atlantica - entrada social",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/torre-atlantica-3-1710788182.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-atlantica-EM63440",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Torre Atlantica - hall de eventos",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/torre-atlantica-4-1710788183.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-atlantica-EM63440",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Torre Atlantica - piscina externa",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/torre-atlantica-7-1710788183.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-atlantica-EM63440",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Torre Atlantica - deck da piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/torre-atlantica-8-1710788184.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-atlantica-EM63440",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Torre Atlantica - jardim lateral",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/torre-atlantica-12-1710788185.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-atlantica-EM63440",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Torre Atlantica - piscina coberta",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/torre-atlantica-13-1710788185.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-atlantica-EM63440",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Torre Atlantica - base ajardinada",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/torre-atlantica-14-1710788186.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-atlantica-EM63440",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Torre Atlantica - salao social",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/torre-atlantica-17-1710788187.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-atlantica-EM63440",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Torre Atlantica - base urbana",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/torre-atlantica-25-1710788188.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-atlantica-EM63440",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Torre Atlantica - terraco aberto",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/torre-atlantica-26-1710788189.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-atlantica-EM63440",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente mar Barra Norte",
+          "description": "As fontes posicionam a Torre Atlantica junto a orla, ao lado do Hotel Marambaia."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Acesso pratico",
+          "description": "A Barra Norte facilita deslocamento para o Centro, Pontal Norte e Itajai."
+        },
+        {
+          "icon": "Building2",
+          "title": "Fachada reconhecivel",
+          "description": "A torre tem presenca forte na Avenida Atlantica e aparece em varias fontes nominais."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer com piscina",
+          "description": "Piscina, deck, hall, jardim e ambientes sociais comunicam o uso real do condominio."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Hero da torre",
+          "description": "A imagem principal passou a mostrar a fachada da Torre Atlantica."
+        },
+        {
+          "title": "Lazer frente mar",
+          "description": "A galeria destaca piscina e areas comuns voltadas para a orla."
+        },
+        {
+          "title": "Copy localizada",
+          "description": "O texto menciona Barra Norte, Hotel Marambaia e acesso a Itajai."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica a Torre Atlantica?",
+          "answer": "Na Barra Norte de Balneario Camboriu, em local frente mar proximo ao Hotel Marambaia."
+        },
+        {
+          "question": "Quais imagens entraram?",
+          "answer": "Fachada, piscina, hall, entrada, jardim, deck e terraco."
+        },
+        {
+          "question": "A pagina tinha fotos internas?",
+          "answer": "A auditoria substituiu o contexto por imagens de predio e areas comuns."
+        },
+        {
+          "question": "Qual e o apelo principal?",
+          "answer": "Frente mar com lazer e acesso rapido aos servicos da Barra Norte."
+        }
+      ],
+      "sources": [
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-torre-atlantica/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-atlantica-EM63440",
+        "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-torre-atlantica-balneario-camboriu-barra-norte-3-quartos-2-garagens-venda-ref-441/",
+        "https://www.flyimoveis.com.br/imovel/apartamento-no-edificio-torre-atlantica-balneario-camboriu-barra-norte-3-quartos-3-garagens-venda-ref-1395/",
+        "https://www.alexpiresimoveis.com.br/imovel/apartamento-no-edificio-torre-atlantica-balneario-camboriu-barra-norte-3-quartos-2-garagens-venda-ref-24/"
+      ]
+    },
+    {
+      "slug": "torre-de-malaga",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2019/08/edificio-torre-de-malaga-balneario-camboriu-sqcd412-1-1.jpg",
+      "description": "A Torre de Malaga fica na Barra Norte de Balneario Camboriu, na regiao da Avenida Brasil com as ruas Jacob Schmidt e Julieta Lins, a menos de 100 metros do mar. Segundo o Litoral Vertical, o edificio tem 30 pavimentos, um por andar, dois elevadores e foi entregue pela Formula F10. A pagina agora destaca fachada, piscina, gourmet, academia, playground e convivencia externa, com imagem de homonimo removida.",
+      "seo_description": "Torre de Malaga na Barra Norte de Balneario Camboriu, com 30 pavimentos, fachada curva, piscina, gourmet e academia.",
+      "gallery": [
+        {
+          "title": "Torre de Malaga - fachada principal",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2019/08/edificio-torre-de-malaga-balneario-camboriu-sqcd412-1-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-torre-de-malaga/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Torre de Malaga - fachada alternativa",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2019/08/edificio-torre-de-malaga-balneario-camboriu-sqcd412-1-1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-torre-de-malaga/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Torre de Malaga - acesso vertical",
+          "category": "Fachada",
+          "image": "https://b4.casteldigital.com.br/brunocassola/ig/il/imoveis/123/apartamento-torre-de-malaga-venda-balneario-camboriu-fachada-16721818832694.jpg",
+          "source_url": "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-torre-de-malaga-balneario-camboriu-barra-norte-3-quartos-2-garagens-venda-ref-123/",
+          "source_label": "Bruno Cassola"
+        },
+        {
+          "title": "Torre de Malaga - torre curva",
+          "category": "Fachada",
+          "image": "https://b4.casteldigital.com.br/brunocassola/ig/im/imoveis/123/apartamento-torre-de-malaga-venda-balneario-camboriu-fachada-16721818832694.jpg",
+          "source_url": "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-torre-de-malaga-balneario-camboriu-barra-norte-3-quartos-2-garagens-venda-ref-123/",
+          "source_label": "Bruno Cassola"
+        },
+        {
+          "title": "Torre de Malaga - playground",
+          "category": "Infantil",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/kW9NOgRVEEvFZIWUT52j.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-de-malaga-EM89093",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Torre de Malaga - piscina lateral",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/KHPNzHd7ehha5JuWSuPF.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-de-malaga-EM89093",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Torre de Malaga - gourmet coberto",
+          "category": "Gourmet",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/O51gZE5guGmcppDUC2Iu.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-de-malaga-EM89093",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Torre de Malaga - churrasqueira coletiva",
+          "category": "Gourmet",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/6XbMukubKV0uEMRZHuCq.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-de-malaga-EM89093",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Torre de Malaga - academia",
+          "category": "Fitness",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/lv1dMW9jFgjuzlgKwpTV.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-de-malaga-EM89093",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Torre de Malaga - deck da piscina",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/XZp6Ke9RfEjaeCDCtIQk.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-de-malaga-EM89093",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Torre de Malaga - gourmet integrado",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2026/thumb-o51gze5gugmcppduc2iu-1782832713.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-de-malaga-EM89093",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Torre de Malaga - eventos abertos",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2026/thumb-6xbmukubkv0uemrzhucq-1782832713.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-de-malaga-EM89093",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Torre de Malaga - piscina Litoral",
+          "category": "Piscina",
+          "image": "https://litoralvertical.com/wp-content/uploads/2019/08/edificio-torre-de-malaga-balneario-camboriu-sqcd412-9-1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-torre-de-malaga/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Torre de Malaga - base da torre",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2019/08/edificio-torre-de-malaga-balneario-camboriu-sqcd412-10-1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-torre-de-malaga/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Torre de Malaga - convivencia externa",
+          "category": "Gourmet",
+          "image": "https://litoralvertical.com/wp-content/uploads/2019/08/edificio-torre-de-malaga-balneario-camboriu-sqcd412-10-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-torre-de-malaga/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Barra Norte perto do mar",
+          "description": "A localizacao combina Avenida Brasil, Rua Jacob Schmidt, Rua Julieta Lins e acesso rapido a praia."
+        },
+        {
+          "icon": "Building2",
+          "title": "Um por andar",
+          "description": "O Litoral Vertical informa exclusividade de um pavimento residencial por andar."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e deck",
+          "description": "A area de lazer mostra piscina, deck e apoio gourmet junto ao predio."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer completo",
+          "description": "Academia, playground, gourmet, eventos, jogos, sauna e cinema aparecem nas fontes pesquisadas."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Homonimo removido",
+          "description": "A foto de Torre de Monaco foi descartada antes da curadoria final."
+        },
+        {
+          "title": "Fachada nominal",
+          "description": "Foram usadas imagens do Litoral Vertical, Imobille e Bruno Cassola ligadas ao Torre de Malaga."
+        },
+        {
+          "title": "Copy tecnica",
+          "description": "A descricao agora inclui pavimentos, localizacao e lazer."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica a Torre de Malaga?",
+          "answer": "Na Barra Norte de Balneario Camboriu, perto da Avenida Brasil, Rua Jacob Schmidt e Rua Julieta Lins."
+        },
+        {
+          "question": "Quais informacoes estruturais foram encontradas?",
+          "answer": "O Litoral Vertical cita 30 pavimentos, um por andar, dois elevadores e entrega pela Formula F10."
+        },
+        {
+          "question": "Quais areas aparecem na galeria?",
+          "answer": "Fachada, piscina, gourmet, academia, playground e convivencia externa."
+        },
+        {
+          "question": "Havia risco de imagem errada?",
+          "answer": "Sim. Uma fachada de Torre de Monaco apareceu nas fontes e foi removida."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-torre-de-malaga-EM89093",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-torre-de-malaga/",
+        "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-torre-de-malaga-balneario-camboriu-barra-norte-3-quartos-2-garagens-venda-ref-123/",
+        "https://www.flyimoveis.com.br/imovel/apartamento-no-edificio-torre-de-malaga-balneario-camboriu-pioneiros-3-quartos-3-garagens-venda-ref-541/",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-torre-de-malaga-balneario-camboriu-pioneiros-3-quartos-2-garagens-venda-ref-1607/"
+      ]
+    },
+    {
+      "slug": "toulon-palace-residence",
+      "hero_image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n_OAxUf2kKch5VhCx8RTAN9hzMbJtHbg203E6Nhoxs/Fachada+%7C+Empreendimento+Toulon+Palace+Residence.jpg",
+      "description": "O Toulon Palace Residence fica em Meia Praia, Itapema, na Rua 284, com projeto inspirado na cidade francesa de Toulon e fachada de linhas neoclassicas. As fontes citam 809 m2 de lazer, solarium, piscina, pub, gourmet, jogos, sauna, fitness, playground, brinquedoteca e quadra recreativa. A pagina agora mostra fachada e areas comuns, corrigindo a comunicacao para um empreendimento completo proximo ao mar.",
+      "seo_description": "Toulon Palace Residence em Meia Praia, Itapema, com fachada neoclassica, 809 m2 de lazer, piscina, pub e fitness.",
+      "gallery": [
+        {
+          "title": "Toulon Palace - fachada Potencial",
+          "category": "Fachada",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n_OAxUf2kKch5VhCx8RTAN9hzMbJtHbg203E6Nhoxs/Fachada+%7C+Empreendimento+Toulon+Palace+Residence.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/empreendimento/toulon-palace-residence-CO110531",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "Toulon Palace - torre urbana",
+          "category": "Fachada",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQrh93oEZSAxK0Jz8r2ALJvbNUp8p9AvZcfQNcfKzjMAauhE95T1fNrK6C-K1hj8bga5lEPD2xoGBRVSi2C6Eaq8e_oZVGgeetvaHJ-U-JtbdV0NHv9rs8B91GKGmTAwZL4T5vn_-FRgF0bv-azMK1HAyKmmzGohZSXkbQnTiRT3vQhA/Fachada+%7C+Empreendimento+Doha+Tower.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/empreendimento/toulon-palace-residence-CO110531",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "Toulon Palace - fachada vertical",
+          "category": "Fachada",
+          "image": "https://s01.jetimgs.com/trsmAoUvbsl256ThRfL_AV1E6nZiXGFHUt9fpjxCKdwWxKn_oCakvLODxR6iaT8q4A-9TosoxCU5_oWHKSG39yF2NqG14reizsYG1x9hPX6__EbZrT1ig7BPC5ZQ1ZhxiY5FrskjNz6Brh6KxsvrS4xiiUkjywv8nW3y_DZcFChG-1K8V1kyhctFgmxu/Fachada+%7C+Empreendimento+Doha+Tower.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/empreendimento/toulon-palace-residence-CO110531",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "Toulon Palace - base com lazer",
+          "category": "Fachada",
+          "image": "https://s01.jetimgs.com/trsmAp8vb8l6JoThBfK_K7ToXrCV1UlA5guzeR-jEiroJ0m0lNJwR4kRx1S8cS9fFYecUy0aTbCc0EjhGF9ID3EFX9cuohybnDDoCESe809Xux-_BEsYBKDfh0ggKViDeQVIjQmZgJFdwt3qE3zolXUkdxT9Os-Bor0PVgDvOaFplTTbZ3SGeTzxgw/Fachada+%7C+Empreendimento+Doha+Tower.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/empreendimento/toulon-palace-residence-CO110531",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "Toulon Palace - embasamento",
+          "category": "Fachada",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQrh93oEZSAxK0Jz8r2ALJvbNUp8p9AvZcfQNcfKzjMAauhE95T1fNrK6C-K1hj8bga5lEPD2xoGBRVSi2C6Eaq8e_oZVGgeetvaHJ-U-JtbdV0NHv9rs8B91GKGmTAwZL4T5vn4-IvTuB7YgQO0-wlv6H7qKDIuqVXUbbKTgauu2GUw/Fachada+%7C+Empreendimento+Doha+Tower.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/empreendimento/toulon-palace-residence-CO110531",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "Toulon Palace - fachada neoclassica",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/mastermar/img_vendas/m2_424_9395_1224_020318.jpg",
+          "source_url": "https://www.mastermar.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/h-santos-empreendimentos-/424",
+          "source_label": "Mastermar"
+        },
+        {
+          "title": "Toulon Palace - brinquedoteca",
+          "category": "Infantil",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/mastermar/img_vendas/g2_424_9388_1223_020318.JPG",
+          "source_url": "https://www.mastermar.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/h-santos-empreendimentos-/424",
+          "source_label": "Mastermar"
+        },
+        {
+          "title": "Toulon Palace - academia",
+          "category": "Fitness",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/mastermar/img_vendas/g2_424_9389_1223_020318.JPG",
+          "source_url": "https://www.mastermar.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/h-santos-empreendimentos-/424",
+          "source_label": "Mastermar"
+        },
+        {
+          "title": "Toulon Palace - fitness amplo",
+          "category": "Fitness",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/mastermar/img_vendas/g2_424_9390_1223_020318.JPG",
+          "source_url": "https://www.mastermar.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/h-santos-empreendimentos-/424",
+          "source_label": "Mastermar"
+        },
+        {
+          "title": "Toulon Palace - pub social",
+          "category": "Convivencia",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/mastermar/img_vendas/g2_424_9391_1223_020318.JPG",
+          "source_url": "https://www.mastermar.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/h-santos-empreendimentos-/424",
+          "source_label": "Mastermar"
+        },
+        {
+          "title": "Toulon Palace - bar de apoio",
+          "category": "Convivencia",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/mastermar/img_vendas/i2_424_9391_1223_020318.JPG",
+          "source_url": "https://www.mastermar.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/h-santos-empreendimentos-/424",
+          "source_label": "Mastermar"
+        },
+        {
+          "title": "Toulon Palace - playground",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/imagens-site-20007-1713991001.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-toulon-palace-EM23686",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Toulon Palace - apoio infantil",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/imagens-site-20009-1713991002.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-toulon-palace-EM23686",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Toulon Palace - quadra recreativa",
+          "category": "Esporte",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/imagens-site-20010-1713991003.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-toulon-palace-EM23686",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Toulon Palace - jogos",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/imagens-site-20019-1713991010.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-toulon-palace-EM23686",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Toulon Palace - pub Imobille",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/imagens-site-20008-1713991001.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-toulon-palace-EM23686",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Toulon Palace - lounge externo",
+          "category": "Lounge",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/imagens-site-20018-1713991009.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-toulon-palace-EM23686",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Toulon Palace - piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/imagens-site-20021-1713991012.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-toulon-palace-EM23686",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Toulon Palace - hall elegante",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/imagens-site-20012-1713991005.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-toulon-palace-EM23686",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Toulon Palace - fachada Imobille",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/imagens-site-20013-1713991006.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-toulon-palace-EM23686",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Toulon Palace - lounge gourmet",
+          "category": "Gourmet",
+          "image": "https://www.eubuscoimoveis.com.br/uploads/smaniottoimoveis/159406/1714071653428454.jpg",
+          "source_url": "https://www.eubuscoimoveis.com.br/empreendimento/toulon-palace-residence-em-itapema",
+          "source_label": "Eu Busco Imoveis"
+        },
+        {
+          "title": "Toulon Palace - fitness EBI",
+          "category": "Fitness",
+          "image": "https://www.eubuscoimoveis.com.br/uploads/smaniottoimoveis/159406/1714071637297820.jpg",
+          "source_url": "https://www.eubuscoimoveis.com.br/empreendimento/toulon-palace-residence-em-itapema",
+          "source_label": "Eu Busco Imoveis"
+        },
+        {
+          "title": "Toulon Palace - relaxamento",
+          "category": "Spa",
+          "image": "https://www.eubuscoimoveis.com.br/uploads/smaniottoimoveis/159406/1714071653383648.jpg",
+          "source_url": "https://www.eubuscoimoveis.com.br/empreendimento/toulon-palace-residence-em-itapema",
+          "source_label": "Eu Busco Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 284 em Meia Praia",
+          "description": "A localizacao aproxima o predio da praia, comercio e servicos centrais de Itapema."
+        },
+        {
+          "icon": "Building2",
+          "title": "Estilo neoclassico",
+          "description": "O projeto referencia a cidade francesa de Toulon e valoriza uma fachada imponente."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "809 m2 de lazer",
+          "description": "Potencial e Mastermar citam uma area de lazer ampla, com ambientes internos e externos."
+        },
+        {
+          "icon": "Users",
+          "title": "Convivencia completa",
+          "description": "Pub, gourmet, jogos, fitness, spa, piscina, quadra e infantil sustentam o uso coletivo."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fachada como hero",
+          "description": "A imagem principal agora mostra o Toulon Palace e sua arquitetura."
+        },
+        {
+          "title": "Lazer documentado",
+          "description": "A galeria inclui piscina, fitness, pub, jogos, quadra, brinquedoteca e spa."
+        },
+        {
+          "title": "Copy especifica",
+          "description": "O texto traz Rua 284, conceito frances, Meia Praia e dimensao do lazer."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Toulon Palace Residence?",
+          "answer": "Em Meia Praia, Itapema, na Rua 284."
+        },
+        {
+          "question": "Qual e o conceito arquitetonico?",
+          "answer": "As fontes descrevem inspiracao na cidade francesa de Toulon e linhas neoclassicas."
+        },
+        {
+          "question": "Quais itens de lazer foram encontrados?",
+          "answer": "Piscina, pub, gourmet, jogos, sauna, fitness, playground, brinquedoteca e quadra recreativa."
+        },
+        {
+          "question": "O que mudou na pagina?",
+          "answer": "A pagina passou a mostrar fachada e areas comuns do condominio, nao ambientes privados."
+        }
+      ],
+      "sources": [
+        "https://www.potencialimoveis.com.br/empreendimento/toulon-palace-residence-CO110531",
+        "https://www.mastermar.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/h-santos-empreendimentos-/424",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-toulon-palace-EM23686",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-toulon-palace-residence-itapema-meia-praia-4-quartos-3-garagens-venda-ref-2172/",
+        "https://www.eubuscoimoveis.com.br/empreendimento/toulon-palace-residence-em-itapema"
+      ]
+    },
+    {
+      "slug": "unic-residence",
+      "hero_image": "https://construtorazimmermann.com.br/wp-content/uploads/2025/04/ZIM_UNIC_Fachada_Recorte_Fim-de-Tarde_EF-Grande.jpeg",
+      "description": "O Unic Residence, da Construtora Zimmermann, esta em Balneario Pereque, Porto Belo, a cerca de 15 metros da praia segundo a fonte oficial. O projeto tem arquitetura contemporanea, acabamentos de alto padrao, rooftop com lazer completo e vista para o mar. A pagina agora usa fachada, rooftop, fitness e imagens do entorno de praia, deixando fora interiores de oferta e renders de outros empreendimentos.",
+      "seo_description": "Unic Residence em Balneario Pereque, Porto Belo, a 15 m da praia, com fachada, rooftop, fitness e vista para o mar.",
+      "gallery": [
+        {
+          "title": "Unic Residence - fachada Zimmermann",
+          "category": "Fachada",
+          "image": "https://construtorazimmermann.com.br/wp-content/uploads/2025/04/ZIM_UNIC_Fachada_Recorte_Fim-de-Tarde_EF-Grande.jpeg",
+          "source_url": "https://construtorazimmermann.com.br/unic-residence/",
+          "source_label": "Construtora Zimmermann"
+        },
+        {
+          "title": "Unic Residence - fachada frontal",
+          "category": "Fachada",
+          "image": "https://construtorazimmermann.com.br/wp-content/uploads/2025/04/ZIM_UNIC_Fachada_Frontal_EF-Grande.jpeg",
+          "source_url": "https://construtorazimmermann.com.br/unic-residence/",
+          "source_label": "Construtora Zimmermann"
+        },
+        {
+          "title": "Unic Residence - rooftop vista mar",
+          "category": "Rooftop",
+          "image": "https://construtorazimmermann.com.br/wp-content/uploads/2025/04/ZIM_UNIC_Rooftop_Vista_EF-Grande.jpeg",
+          "source_url": "https://construtorazimmermann.com.br/unic-residence/",
+          "source_label": "Construtora Zimmermann"
+        },
+        {
+          "title": "Unic Residence - vista norte",
+          "category": "Fachada",
+          "image": "https://construtorazimmermann.com.br/wp-content/uploads/2025/04/ZIM_UNIC_Fachada_Vista_Norte_EF-Grande.jpeg",
+          "source_url": "https://construtorazimmermann.com.br/unic-residence/",
+          "source_label": "Construtora Zimmermann"
+        },
+        {
+          "title": "Unic Residence - vista sul",
+          "category": "Fachada",
+          "image": "https://construtorazimmermann.com.br/wp-content/uploads/2025/04/ZIM_UNIC_Fachada_Vista_Sul_EF-Grande.jpeg",
+          "source_url": "https://construtorazimmermann.com.br/unic-residence/",
+          "source_label": "Construtora Zimmermann"
+        },
+        {
+          "title": "Unic Residence - fitness rooftop",
+          "category": "Fitness",
+          "image": "https://construtorazimmermann.com.br/wp-content/uploads/2025/04/ZIM_UNI_Fitness_EF-Grande.jpeg",
+          "source_url": "https://construtorazimmermann.com.br/unic-residence/",
+          "source_label": "Construtora Zimmermann"
+        },
+        {
+          "title": "Unic Residence - praia Pereque",
+          "category": "Entorno",
+          "image": "http://share-fotos.imoveloffice.com.br/foto/3436/3436/v-1/imoveis/1501692/24112893/3.jpg",
+          "source_url": "https://fabianerigonimoveis.com/imovel/1501692-unic-residence-venda-frente-para-o-mar-pereque",
+          "source_label": "Fabiane Rigoni"
+        },
+        {
+          "title": "Unic Residence - orla do Pereque",
+          "category": "Entorno",
+          "image": "https://dbvebtn3wsif3.cloudfront.net/foto/3436/3436/v-1/imoveis/1501692/24112893/4.jpg",
+          "source_url": "https://fabianerigonimoveis.com/imovel/1501692-unic-residence-venda-frente-para-o-mar-pereque",
+          "source_label": "Fabiane Rigoni"
+        },
+        {
+          "title": "Unic Residence - torre no bairro",
+          "category": "Fachada",
+          "image": "https://dbvebtn3wsif3.cloudfront.net/foto/3436/3436/v-1/imoveis/1501692/24112913/4.jpg",
+          "source_url": "https://fabianerigonimoveis.com/imovel/1501692-unic-residence-venda-frente-para-o-mar-pereque",
+          "source_label": "Fabiane Rigoni"
+        },
+        {
+          "title": "Unic Residence - implantacao aerea",
+          "category": "Fachada",
+          "image": "https://dbvebtn3wsif3.cloudfront.net/foto/3436/3436/v-1/imoveis/1501692/24112894/4.jpg",
+          "source_url": "https://fabianerigonimoveis.com/imovel/1501692-unic-residence-venda-frente-para-o-mar-pereque",
+          "source_label": "Fabiane Rigoni"
+        },
+        {
+          "title": "Unic Residence - faixa de praia",
+          "category": "Entorno",
+          "image": "https://dbvebtn3wsif3.cloudfront.net/foto/3436/3436/v-1/imoveis/1501692/24112912/4.jpg",
+          "source_url": "https://fabianerigonimoveis.com/imovel/1501692-unic-residence-venda-frente-para-o-mar-pereque",
+          "source_label": "Fabiane Rigoni"
+        },
+        {
+          "title": "Unic Residence - vista da enseada",
+          "category": "Entorno",
+          "image": "https://dbvebtn3wsif3.cloudfront.net/foto/3436/3436/v-1/imoveis/1501692/24112891/4.jpg",
+          "source_url": "https://fabianerigonimoveis.com/imovel/1501692-unic-residence-venda-frente-para-o-mar-pereque",
+          "source_label": "Fabiane Rigoni"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "15 m da praia",
+          "description": "A Zimmermann informa implantacao a poucos metros da Praia do Pereque, em Porto Belo."
+        },
+        {
+          "icon": "Building2",
+          "title": "Arquitetura contemporanea",
+          "description": "A fachada trabalha linhas atuais, vidro e base urbana com leitura de alto padrao."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Rooftop completo",
+          "description": "O lazer elevado com vista para o mar e um dos pontos centrais do empreendimento."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Fitness com vista",
+          "description": "A academia no rooftop reforca bem-estar e aproveitamento do visual da orla."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fonte oficial usada",
+          "description": "A curadoria prioriza a pagina da Construtora Zimmermann."
+        },
+        {
+          "title": "Interiores removidos",
+          "description": "Living, varanda e ambientes privados ficaram fora da galeria final."
+        },
+        {
+          "title": "Entorno valorizado",
+          "description": "A sequencia mostra fachada e relacao direta com a praia de Pereque."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Quem assina o Unic Residence?",
+          "answer": "A Construtora Zimmermann aparece como fonte oficial do empreendimento."
+        },
+        {
+          "question": "Onde fica o Unic Residence?",
+          "answer": "Em Balneario Pereque, Porto Belo, com fonte oficial citando cerca de 15 metros da praia."
+        },
+        {
+          "question": "Quais imagens entraram?",
+          "answer": "Fachada, rooftop, fitness e entorno de praia."
+        },
+        {
+          "question": "Qual foi o cuidado na curadoria?",
+          "answer": "Remover interiores privados e imagens de empreendimentos diferentes que apareceram em fontes comerciais."
+        }
+      ],
+      "sources": [
+        "https://construtorazimmermann.com.br/unic-residence/",
+        "https://www.imobillenegocios.com.br/empreendimento/unic-residence-EM47715",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-unic-residence-porto-belo-pereque-4-quartos-3-garagens-venda-ref-2193/",
+        "https://fabianerigonimoveis.com/imovel/1501692-unic-residence-venda-frente-para-o-mar-pereque",
+        "https://litoralvertical.com/pre-lancamento/porto-belo/"
+      ]
+    },
+    {
+      "slug": "vale-dos-reis",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-1759436414.jpg",
+      "description": "O Vale dos Reis Residence e um empreendimento Embraed em Balneario Camboriu, na regiao da Rua 3420, perto da praia e do Passeio San Miguel. O Litoral Vertical cita quadra mar, 32 pavimentos, dois por andar, 54 residencias, tres elevadores, hall com pe direito duplo, portaria 24h e entrega em 2012. A pagina agora mostra fachada, piscina, cinema, fitness, spa, jogos, infantil, esporte e eventos.",
+      "seo_description": "Vale dos Reis Residence da Embraed em Balneario Camboriu, quadra mar, com fachada, piscina, cinema, fitness e infantil.",
+      "gallery": [
+        {
+          "title": "Vale dos Reis - fachada principal",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-1759436414.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-vale-dos-reis-EM49373",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Vale dos Reis - fachada Litoral",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-vale-dos-reis-balneario-camboriu-1.1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-vale-dos-reis-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Vale dos Reis - torre vertical",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-vale-dos-reis-balneario-camboriu-1.1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-vale-dos-reis-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Vale dos Reis - piscina adulto",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/0210202517201441-1759436414.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-vale-dos-reis-EM49373",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Vale dos Reis - piscina lateral",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2023/img-61-6-1681758635.WEBP",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-vale-dos-reis-EM49373",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Vale dos Reis - cinema",
+          "category": "Cinema",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2023/img-50-12-1681758633.WEBP",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-vale-dos-reis-EM49373",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Vale dos Reis - academia",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2023/img-51-14-1681758633.WEBP",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-vale-dos-reis-EM49373",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Vale dos Reis - massagem",
+          "category": "Spa",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2023/img-52-11-1681758634.WEBP",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-vale-dos-reis-EM49373",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Vale dos Reis - jogos",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2023/img-57-8-1681758635.WEBP",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-vale-dos-reis-EM49373",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Vale dos Reis - brinquedoteca",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2023/img-58-9-1681758635.WEBP",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-vale-dos-reis-EM49373",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Vale dos Reis - playground",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2023/img-71-2-1681758638.WEBP",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-vale-dos-reis-EM49373",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Vale dos Reis - quadra recreativa",
+          "category": "Esporte",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2023/img-72-5-1681758639.WEBP",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-vale-dos-reis-EM49373",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Vale dos Reis - eventos",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2023/img-55-10-1681758634.WEBP",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-vale-dos-reis-EM49373",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Vale dos Reis - convivencia externa",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2023/img-65-5-1681758637.WEBP",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-vale-dos-reis-EM49373",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Vale dos Reis - lounge aberto",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2023/img-67-5-1681758638.WEBP",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-vale-dos-reis-EM49373",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 3420 e praia",
+          "description": "A localizacao aproxima o predio do Passeio San Miguel, Avenida Brasil e praia central."
+        },
+        {
+          "icon": "Building2",
+          "title": "Padrao Embraed",
+          "description": "As fontes identificam o empreendimento como obra da Embraed, com 32 pavimentos."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina com raia",
+          "description": "A area de lazer inclui piscina adulto com raia e piscina infantil, segundo a Imobille."
+        },
+        {
+          "icon": "Baby",
+          "title": "Lazer familiar",
+          "description": "Cinema, brinquedoteca, playground, jogos, fitness, spa, eventos e quadra completam o uso comum."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Copy estrutural",
+          "description": "A descricao agora informa construtora, pavimentos, hall, portaria e localizacao."
+        },
+        {
+          "title": "Galeria completa",
+          "description": "Fachada e lazer coletivo substituem imagens internas."
+        },
+        {
+          "title": "Perto do San Miguel",
+          "description": "A copy passa a valorizar o contexto urbano da Rua 3420."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Quem construiu o Vale dos Reis?",
+          "answer": "As fontes apontam a Embraed Empreendimentos como responsavel."
+        },
+        {
+          "question": "Onde fica o Vale dos Reis?",
+          "answer": "Na regiao da Rua 3420, perto da praia central e do Passeio San Miguel."
+        },
+        {
+          "question": "Quais itens de lazer foram confirmados?",
+          "answer": "Piscina adulto com raia, piscina infantil, cinema, fitness, spa, jogos, brinquedoteca, playground, eventos e quadra."
+        },
+        {
+          "question": "Qual foi a correcao principal?",
+          "answer": "Trocar a pagina para imagens de fachada e areas comuns do condominio."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-vale-dos-reis-EM49373",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-vale-dos-reis-residence/",
+        "https://sortinvestimentos.com.br/empreendimentos/vale-dos-reis",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-vale-dos-reis-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-2275/",
+        "https://www.prconsultor.com.br/imovel/apartamento-no-edificio-vale-dos-reis-balneario-camboriu-centro-3-quartos-3-garagens-venda-ref-496/"
+      ]
+    },
+    {
+      "slug": "valley-business-park",
+      "hero_image": "https://galpaoaluguelevenda.com.br/wp-content/uploads/2026/05/1-26.avif",
+      "description": "O Valley Business Park e um condominio logistico em Itajai, associado a Itaipava e a eixos de acesso como Rodovia Antonio Heil e BR-101. As fontes comerciais descrevem padrao Triple A+, modulos flexiveis, eficiencia operacional, tecnologia, seguranca e infraestrutura para empresas. A pagina agora usa imagens externas do complexo logistico, blocos, patio e implantacao, deixando fora fotos de outros condominios logisticos encontrados na busca.",
+      "seo_description": "Valley Business Park em Itajai, condominio logistico Triple A+ com modulos flexiveis, patio, blocos e acesso estrategico.",
+      "gallery": [
+        {
+          "title": "Valley Business Park - vista aerea",
+          "category": "Fachada",
+          "image": "https://galpaoaluguelevenda.com.br/wp-content/uploads/2026/05/1-26.avif",
+          "source_url": "https://galpaoaluguelevenda.com.br/galpao/locacao-de-galpao-em-itajai-sc-valley-business-park/",
+          "source_label": "Galpao Aluguel e Venda"
+        },
+        {
+          "title": "Valley Business Park - modulo frontal",
+          "category": "Logistica",
+          "image": "https://galpaoaluguelevenda.com.br/wp-content/uploads/2026/05/4-29-584x438.avif",
+          "source_url": "https://galpaoaluguelevenda.com.br/galpao/locacao-de-galpao-em-itajai-sc-valley-business-park/",
+          "source_label": "Galpao Aluguel e Venda"
+        },
+        {
+          "title": "Valley Business Park - fachada operacional",
+          "category": "Logistica",
+          "image": "https://galpaoaluguelevenda.com.br/wp-content/uploads/2026/05/4-29.avif",
+          "source_url": "https://galpaoaluguelevenda.com.br/galpao/locacao-de-galpao-em-itajai-sc-valley-business-park/",
+          "source_label": "Galpao Aluguel e Venda"
+        },
+        {
+          "title": "Valley Business Park - corredor externo",
+          "category": "Logistica",
+          "image": "https://galpaoaluguelevenda.com.br/wp-content/uploads/2026/05/4-29-1170x785.avif",
+          "source_url": "https://galpaoaluguelevenda.com.br/galpao/locacao-de-galpao-em-itajai-sc-valley-business-park/",
+          "source_label": "Galpao Aluguel e Venda"
+        },
+        {
+          "title": "Valley Business Park - lateral do bloco",
+          "category": "Logistica",
+          "image": "https://galpaoaluguelevenda.com.br/wp-content/uploads/2026/05/3-29-584x438.avif",
+          "source_url": "https://galpaoaluguelevenda.com.br/galpao/locacao-de-galpao-em-itajai-sc-valley-business-park/",
+          "source_label": "Galpao Aluguel e Venda"
+        },
+        {
+          "title": "Valley Business Park - bloco logistico",
+          "category": "Logistica",
+          "image": "https://galpaoaluguelevenda.com.br/wp-content/uploads/2026/05/3-29.avif",
+          "source_url": "https://galpaoaluguelevenda.com.br/galpao/locacao-de-galpao-em-itajai-sc-valley-business-park/",
+          "source_label": "Galpao Aluguel e Venda"
+        },
+        {
+          "title": "Valley Business Park - modulo alto",
+          "category": "Logistica",
+          "image": "https://galpaoaluguelevenda.com.br/wp-content/uploads/2026/05/3-29-1170x785.avif",
+          "source_url": "https://galpaoaluguelevenda.com.br/galpao/locacao-de-galpao-em-itajai-sc-valley-business-park/",
+          "source_label": "Galpao Aluguel e Venda"
+        },
+        {
+          "title": "Valley Business Park - acesso de carga",
+          "category": "Acesso",
+          "image": "https://galpaoaluguelevenda.com.br/wp-content/uploads/2026/05/5-29-584x438.avif",
+          "source_url": "https://galpaoaluguelevenda.com.br/galpao/locacao-de-galpao-em-itajai-sc-valley-business-park/",
+          "source_label": "Galpao Aluguel e Venda"
+        },
+        {
+          "title": "Valley Business Park - implantacao do bloco",
+          "category": "Logistica",
+          "image": "https://galpaoaluguelevenda.com.br/wp-content/uploads/2026/05/5-29.avif",
+          "source_url": "https://galpaoaluguelevenda.com.br/galpao/locacao-de-galpao-em-itajai-sc-valley-business-park/",
+          "source_label": "Galpao Aluguel e Venda"
+        },
+        {
+          "title": "Valley Business Park - patio externo",
+          "category": "Acesso",
+          "image": "https://galpaoaluguelevenda.com.br/wp-content/uploads/2026/05/5-29-1170x785.avif",
+          "source_url": "https://galpaoaluguelevenda.com.br/galpao/locacao-de-galpao-em-itajai-sc-valley-business-park/",
+          "source_label": "Galpao Aluguel e Venda"
+        },
+        {
+          "title": "Valley Business Park - aerea complementar",
+          "category": "Fachada",
+          "image": "https://galpaoaluguelevenda.com.br/wp-content/uploads/2026/05/1-26-584x438.avif",
+          "source_url": "https://galpaoaluguelevenda.com.br/cidade/itajai/",
+          "source_label": "Galpao Aluguel e Venda"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Eixo logistico de Itajai",
+          "description": "A localizacao conecta Itaipava, Rodovia Antonio Heil, BR-101, porto e corredores regionais."
+        },
+        {
+          "icon": "Truck",
+          "title": "Operacao eficiente",
+          "description": "As fontes citam padrao Triple A+, modulos flexiveis e infraestrutura para empresas."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Condominio fechado",
+          "description": "O modelo logistico favorece controle de acesso, organizacao operacional e seguranca."
+        },
+        {
+          "icon": "Building2",
+          "title": "Blocos modernos",
+          "description": "As imagens mostram grandes areas cobertas, patio, fachada operacional e implantacao."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Curadoria comercial",
+          "description": "O lote trata Valley como empreendimento logistico, nao residencial."
+        },
+        {
+          "title": "Homonimos removidos",
+          "description": "Smart Valley, Espaco Itajai e Raizz foram descartados da galeria."
+        },
+        {
+          "title": "Copy operacional",
+          "description": "O texto agora fala de modulos, logistica, acesso e eficiencia."
+        }
+      ],
+      "faq": [
+        {
+          "question": "O Valley Business Park e residencial?",
+          "answer": "Nao. A pagina foi revisada como condominio logistico em Itajai."
+        },
+        {
+          "question": "Quais imagens foram escolhidas?",
+          "answer": "Vista aerea, blocos, fachada operacional, patio e acessos do complexo logistico."
+        },
+        {
+          "question": "O que foi removido?",
+          "answer": "Imagens de outros condominios logisticos que apareceram misturadas nas fontes."
+        },
+        {
+          "question": "Qual e o diferencial de localizacao?",
+          "answer": "Acesso a eixos logisticos de Itajai, incluindo Rodovia Antonio Heil e BR-101."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/imovel/galpao-deposito-itajai-itaipava-venda-ref-2035/",
+        "https://galpaoaluguelevenda.com.br/galpao/locacao-de-galpao-em-itajai-sc-valley-business-park/",
+        "https://galpaoaluguelevenda.com.br/cidade/itajai/",
+        "https://www.incorporaengenharia.com/",
+        "https://www.imovelweb.com.br/comerciais-galpao-deposito-barracao-venda-itaipava-itajai-ate-3-quartos-ordem-precio-menor.html"
+      ]
+    },
+    {
+      "slug": "veneza-residence",
+      "hero_image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_320_19070_1444_290426.jpg",
+      "description": "O Veneza Residence fica em Meia Praia, Itapema, na Rua 323 B segundo a MySide, com entrega indicada para junho de 2025. A Versatil informa construtora Santana, 19 pavimentos, dois por andar, 24 residencias, dois elevadores, hall mobiliado, sensores nas areas comuns e coleta seletiva. A pagina agora mostra fachada, acesso, hall, brinquedoteca, jogos, cinema e academia, com foco claro no condominio.",
+      "seo_description": "Veneza Residence em Meia Praia, Itapema, com fachada, hall, brinquedoteca, jogos, cinema, academia e lazer completo.",
+      "gallery": [
+        {
+          "title": "Veneza Residence - fachada vertical",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_320_19070_1444_290426.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/veneza-residence/itapema/meia-praia/320",
+          "source_label": "Versatil Imoveis"
+        },
+        {
+          "title": "Veneza Residence - acesso identificado",
+          "category": "Acesso",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_320_19068_1443_290426.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/veneza-residence/itapema/meia-praia/320",
+          "source_label": "Versatil Imoveis"
+        },
+        {
+          "title": "Veneza Residence - hall decorado",
+          "category": "Hall",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_320_19069_1444_290426.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/veneza-residence/itapema/meia-praia/320",
+          "source_label": "Versatil Imoveis"
+        },
+        {
+          "title": "Veneza Residence - brinquedoteca",
+          "category": "Infantil",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_320_19062_1443_290426.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/veneza-residence/itapema/meia-praia/320",
+          "source_label": "Versatil Imoveis"
+        },
+        {
+          "title": "Veneza Residence - jogos",
+          "category": "Jogos",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_320_19057_1443_290426.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/veneza-residence/itapema/meia-praia/320",
+          "source_label": "Versatil Imoveis"
+        },
+        {
+          "title": "Veneza Residence - cinema",
+          "category": "Cinema",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_320_19058_1443_290426.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/veneza-residence/itapema/meia-praia/320",
+          "source_label": "Versatil Imoveis"
+        },
+        {
+          "title": "Veneza Residence - academia",
+          "category": "Fitness",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_320_19066_1443_290426.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/veneza-residence/itapema/meia-praia/320",
+          "source_label": "Versatil Imoveis"
+        },
+        {
+          "title": "Veneza Residence - render noturno",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/il/imoveis/189/403616-d-8-95-f-3-4-d-07-b-647-50-bb-3085-f-8-c-0-16237120920538.jpeg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-veneza-residence-itapema-meia-praia-4-quartos-3-garagens-venda-ref-189/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Veneza Residence - render frontal",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/189/5209-d-5-ac-5-a-4-a-4-c-09-adc-8-6-ec-928-f-40169-16237120920531.jpeg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-veneza-residence-itapema-meia-praia-4-quartos-3-garagens-venda-ref-189/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Veneza Residence - torre completa",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/il/imoveis/189/5209-d-5-ac-5-a-4-a-4-c-09-adc-8-6-ec-928-f-40169-16237120920531.jpeg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-veneza-residence-itapema-meia-praia-4-quartos-3-garagens-venda-ref-189/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Veneza Residence - detalhe do acesso",
+          "category": "Acesso",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n9OgxUs28ZhB-2gtROrTzMPTkGUodzbgAI3FSr7BO0/Fachada+-+Empreendimento+Veneza+Residence.jpeg",
+          "source_url": "https://www.potencialimoveis.com.br/imoveis/veneza-residence-apartamento-2-suites-veneza-residence-meia-praia-itapema-IM5761",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "Veneza Residence - fachada urbana",
+          "category": "Fachada",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n_-T9fqrjQT_OwmD-VnTU-ENo6T0tTbhKk3LJ8vcxc/Vista+da+Sacada.jpeg",
+          "source_url": "https://www.potencialimoveis.com.br/imoveis/veneza-residence-apartamento-2-suites-veneza-residence-meia-praia-itapema-IM5761",
+          "source_label": "Potencial Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Meia Praia",
+          "description": "A Rua 323 B coloca o empreendimento em uma das regioes mais procuradas de Itapema."
+        },
+        {
+          "icon": "Building2",
+          "title": "Santana Empreendimentos",
+          "description": "A Versatil identifica a construtora e informa 19 pavimentos, dois por andar e 24 residencias."
+        },
+        {
+          "icon": "Baby",
+          "title": "Lazer familiar",
+          "description": "Brinquedoteca, playground, piscina adulto e infantil e cinema atendem diferentes idades."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Rotina completa",
+          "description": "Academia, jogos, gourmet, eventos, spa e hall decorado reforcam o conforto do condominio."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Entrega recente",
+          "description": "A MySide cita entrega em junho de 2025, ajudando a contextualizar o empreendimento."
+        },
+        {
+          "title": "Galeria sem obra privada",
+          "description": "Ambientes internos vazios e terracos de oferta foram deixados fora."
+        },
+        {
+          "title": "Informacoes estruturais",
+          "description": "A copy inclui pavimentos, elevadores, hall, sensores e coleta seletiva."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Veneza Residence?",
+          "answer": "Em Meia Praia, Itapema, com endereco citado na Rua 323 B pela MySide."
+        },
+        {
+          "question": "Quem construiu o Veneza Residence?",
+          "answer": "A Versatil informa Santana Empreendimentos como construtora."
+        },
+        {
+          "question": "Quais areas aparecem na galeria?",
+          "answer": "Fachada, acesso, hall, brinquedoteca, jogos, cinema e academia."
+        },
+        {
+          "question": "O que foi removido da curadoria?",
+          "answer": "Fotos de ambientes vazios ou privados que nao explicavam o condominio."
+        }
+      ],
+      "sources": [
+        "https://imobiliariaversatil.com.br/edificios/veneza-residence/itapema/meia-praia/320",
+        "https://myside.com.br/apartamento-venda-veneza-residence-itapema-sc",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-veneza-residence-itapema-meia-praia-4-quartos-3-garagens-venda-ref-189/",
+        "https://www.potencialimoveis.com.br/imoveis/veneza-residence-apartamento-2-suites-veneza-residence-meia-praia-itapema-IM5761",
+        "https://www.julioloboimoveis.com/imovel/venda-apartamentos-04-dormitorio-em-itapema/veneza-residence-/5538"
+      ]
+    },
+    {
+      "slug": "venezia-residenziale",
+      "hero_image": "https://static.arboimoveis.com.br/AP0812_CRB/681694476264553.png",
+      "description": "O Venezia Residenziale fica em Meia Praia, Itapema, com fontes comerciais indicando frente mar e Rua 297. A nova pagina mostra fachada, acesso, base, piscina, deck e relacao direta com a orla. A copy destaca portaria 24h, piscina, piscina infantil, gourmet, guarita e estrutura de alto padrao para quem busca morar junto ao mar, removendo fotos internas que confundiam a pagina com uma oferta especifica.",
+      "seo_description": "Venezia Residenziale frente mar em Meia Praia, Itapema, com fachada, acesso, piscina, deck e estrutura gourmet.",
+      "gallery": [
+        {
+          "title": "Venezia Residenziale - fachada com piscina",
+          "category": "Fachada",
+          "image": "https://static.arboimoveis.com.br/AP0812_CRB/681694476264553.png",
+          "source_url": "https://www.vazpremiumimoveis.com.br/imovel/apartamento/venda/itapema/sc/meia-praia/AP0812_CRB",
+          "source_label": "Vaz Premium"
+        },
+        {
+          "title": "Venezia Residenziale - fachada frontal",
+          "category": "Fachada",
+          "image": "https://static.arboimoveis.com.br/AP0812_CRB/531694476264426.png",
+          "source_url": "https://www.vazpremiumimoveis.com.br/imovel/apartamento/venda/itapema/sc/meia-praia/AP0812_CRB",
+          "source_label": "Vaz Premium"
+        },
+        {
+          "title": "Venezia Residenziale - base e torre",
+          "category": "Fachada",
+          "image": "https://static.arboimoveis.com.br/AP0812_CRB/640x480/681694476264553.png",
+          "source_url": "https://www.vazpremiumimoveis.com.br/imovel/apartamento/venda/itapema/sc/meia-praia/AP0812_CRB",
+          "source_label": "Vaz Premium"
+        },
+        {
+          "title": "Venezia Residenziale - acesso lateral",
+          "category": "Acesso",
+          "image": "https://static.arboimoveis.com.br/AP1479_CRB/61774374890280.jpg",
+          "source_url": "https://www.vazpremiumimoveis.com.br/imovel/apartamento/venda/itapema/sc/meia-praia/AP0812_CRB",
+          "source_label": "Vaz Premium"
+        },
+        {
+          "title": "Venezia Residenziale - detalhe da fachada",
+          "category": "Fachada",
+          "image": "https://static.arboimoveis.com.br/AP1479_CRB/640x480/31774374889945.jpg",
+          "source_url": "https://www.vazpremiumimoveis.com.br/imovel/apartamento/venda/itapema/sc/meia-praia/AP0812_CRB",
+          "source_label": "Vaz Premium"
+        },
+        {
+          "title": "Venezia Residenziale - torre na rua",
+          "category": "Fachada",
+          "image": "https://static.arboimoveis.com.br/AP1479_CRB/31774374889945.jpg",
+          "source_url": "https://www.vazpremiumimoveis.com.br/imovel/apartamento/venda/itapema/sc/meia-praia/AP0812_CRB",
+          "source_label": "Vaz Premium"
+        },
+        {
+          "title": "Venezia Residenziale - base urbana",
+          "category": "Fachada",
+          "image": "https://static.arboimoveis.com.br/AP1479_CRB/640x480/241774374889935.jpg",
+          "source_url": "https://www.vazpremiumimoveis.com.br/imovel/apartamento/venda/itapema/sc/meia-praia/AP0812_CRB",
+          "source_label": "Vaz Premium"
+        },
+        {
+          "title": "Venezia Residenziale - acesso vertical",
+          "category": "Acesso",
+          "image": "https://static.arboimoveis.com.br/AP1479_CRB/241774374889935.jpg",
+          "source_url": "https://www.vazpremiumimoveis.com.br/imovel/apartamento/venda/itapema/sc/meia-praia/AP0812_CRB",
+          "source_label": "Vaz Premium"
+        },
+        {
+          "title": "Venezia Residenziale - entrada frontal",
+          "category": "Acesso",
+          "image": "https://static.arboimoveis.com.br/AP1479_CRB/640x480/221774374890341.jpg",
+          "source_url": "https://www.vazpremiumimoveis.com.br/imovel/apartamento/venda/itapema/sc/meia-praia/AP0812_CRB",
+          "source_label": "Vaz Premium"
+        },
+        {
+          "title": "Venezia Residenziale - piscina vista mar",
+          "category": "Piscina",
+          "image": "https://static.arboimoveis.com.br/AP0812_CRB/371694476264154.png",
+          "source_url": "https://www.vazpremiumimoveis.com.br/imovel/apartamento/venda/itapema/sc/meia-praia/AP0812_CRB",
+          "source_label": "Vaz Premium"
+        },
+        {
+          "title": "Venezia Residenziale - deck da piscina",
+          "category": "Piscina",
+          "image": "https://static.arboimoveis.com.br/AP0812_CRB/501694476264125.png",
+          "source_url": "https://www.vazpremiumimoveis.com.br/imovel/apartamento/venda/itapema/sc/meia-praia/AP0812_CRB",
+          "source_label": "Vaz Premium"
+        },
+        {
+          "title": "Venezia Residenziale - borda da piscina",
+          "category": "Piscina",
+          "image": "https://static.arboimoveis.com.br/AP1479_CRB/640x480/151774374890006.jpg",
+          "source_url": "https://www.vazpremiumimoveis.com.br/imovel/apartamento/venda/itapema/sc/meia-praia/AP0812_CRB",
+          "source_label": "Vaz Premium"
+        },
+        {
+          "title": "Venezia Residenziale - piscina panoramica",
+          "category": "Piscina",
+          "image": "https://static.arboimoveis.com.br/AP1479_CRB/151774374890006.jpg",
+          "source_url": "https://www.vazpremiumimoveis.com.br/imovel/apartamento/venda/itapema/sc/meia-praia/AP0812_CRB",
+          "source_label": "Vaz Premium"
+        },
+        {
+          "title": "Venezia Residenziale - torre JSobrinho",
+          "category": "Fachada",
+          "image": "https://img.apre.me/DczbDYAgDADAbfrJGyIfncVUFFJDsNEY1tcb4ArKBBPxmtCGqI3IIE9w_ECTUxXy1aaa83KEtHYSLoNv0T7Y4KJug-fO74YMxv9L_QA.jpg",
+          "source_url": "https://jsobrinho.com.br/venezia-residenziale-itapema-lb4",
+          "source_label": "JSobrinho Imoveis"
+        },
+        {
+          "title": "Venezia Residenziale - fachada em Meia Praia",
+          "category": "Fachada",
+          "image": "https://img.apre.me/M7YtVksvyNJLTjROMzRLs7S0SDUxi89JLMhMzsssKtA3NjE0MTLVT8-LTMnJLE2yzVQzMDYwtU0GAA.jpg",
+          "source_url": "https://jsobrinho.com.br/venezia-residenziale-itapema-lb4",
+          "source_label": "JSobrinho Imoveis"
+        },
+        {
+          "title": "Venezia Residenziale - fachada horizontal",
+          "category": "Fachada",
+          "image": "https://img.apre.me/M7EtVksvyNJLTjROMzRLs7S0SDUxi89JLMhMzsssKtA3NjE0MTLVT8-LTMnJLE2yzVQzMDYwtU0GAA.jpg",
+          "source_url": "https://jsobrinho.com.br/venezia-residenziale-itapema-lb4",
+          "source_label": "JSobrinho Imoveis"
+        },
+        {
+          "title": "Venezia Residenziale - base JBelle",
+          "category": "Fachada",
+          "image": "https://b.casteldigital.com.br/jbelleimoveis/ig/icp/imoveis/55/1jpg-name-e1f13aef6040613bc8bc20091cb3aa5bb239f4197caa53d3bd48aa86bcfed619-17256453788033.jpg",
+          "source_url": "https://www.jbelleimoveis.com.br/imovel/apartamento-no-edificio-venezia-residenziale-itapema-meia-praia-4-quartos-3-garagens-venda-ref-23/",
+          "source_label": "JBelle Imoveis"
+        },
+        {
+          "title": "Venezia Residenziale - piscina frente mar",
+          "category": "Piscina",
+          "image": "https://b.casteldigital.com.br/jbelleimoveis/ig/icp/imoveis/47/img_0094-1725066931528.jpeg",
+          "source_url": "https://www.jbelleimoveis.com.br/imovel/apartamento-no-edificio-venezia-residenziale-itapema-meia-praia-4-quartos-3-garagens-venda-ref-23/",
+          "source_label": "JBelle Imoveis"
+        },
+        {
+          "title": "Venezia Residenziale - fachada noturna",
+          "category": "Fachada",
+          "image": "https://b.casteldigital.com.br/jbelleimoveis/ig/icp/imoveis/17/img_9030-1724035709882.jpeg",
+          "source_url": "https://www.jbelleimoveis.com.br/imovel/apartamento-no-edificio-venezia-residenziale-itapema-meia-praia-4-quartos-3-garagens-venda-ref-23/",
+          "source_label": "JBelle Imoveis"
+        },
+        {
+          "title": "Venezia Residenziale - piscina externa",
+          "category": "Piscina",
+          "image": "https://b.casteldigital.com.br/jbelleimoveis/ig/icp/imoveis/8/1634309495376_bf620aa7-e865-4533-a202-c3dd43fa0135-17220534106139.jpg",
+          "source_url": "https://www.jbelleimoveis.com.br/imovel/apartamento-no-edificio-venezia-residenziale-itapema-meia-praia-4-quartos-3-garagens-venda-ref-23/",
+          "source_label": "JBelle Imoveis"
+        },
+        {
+          "title": "Venezia Residenziale - torre na orla",
+          "category": "Fachada",
+          "image": "https://b.casteldigital.com.br/jbelleimoveis/ig/icp/imoveis/4/1683577328594_3c98d021-5c48-442d-a5a2-49e8f4513c88-17217025712408.jpeg",
+          "source_url": "https://www.jbelleimoveis.com.br/imovel/apartamento-no-edificio-venezia-residenziale-itapema-meia-praia-4-quartos-3-garagens-venda-ref-23/",
+          "source_label": "JBelle Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente mar em Meia Praia",
+          "description": "As fontes comerciais posicionam o empreendimento em trecho frente mar de Itapema."
+        },
+        {
+          "icon": "Building2",
+          "title": "Fachada imponente",
+          "description": "A torre tem base marcada, vidro e leitura vertical clara na orla."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Piscina com vista",
+          "description": "Piscina, deck e borda visual para o mar aparecem em varias fontes nominais."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Apoio de seguranca",
+          "description": "Portaria 24h e guarita aparecem nas fontes como parte da infraestrutura do condominio."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Galeria externa",
+          "description": "Fachada, piscina, acesso e orla substituem fotos internas de oferta."
+        },
+        {
+          "title": "Frente mar reforcada",
+          "description": "A descricao comunica a posicao de Meia Praia junto ao mar."
+        },
+        {
+          "title": "Curadoria cruzada",
+          "description": "Vaz Premium, JSobrinho, JBelle, Vitapema e Pilger foram usados para validar imagens e contexto."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Venezia Residenziale?",
+          "answer": "Em Meia Praia, Itapema, com fontes comerciais indicando Rua 297 e posicao frente mar."
+        },
+        {
+          "question": "Quais imagens foram selecionadas?",
+          "answer": "Fachada, acesso, base, piscina, deck e vistas externas da orla."
+        },
+        {
+          "question": "Quais comodidades aparecem nas fontes?",
+          "answer": "Portaria 24h, piscina, piscina infantil, gourmet, guarita e estrutura de convivencia."
+        },
+        {
+          "question": "Por que interiores ficaram fora?",
+          "answer": "Porque o objetivo da pagina e mostrar o empreendimento e o condominio, nao uma oferta privada."
+        }
+      ],
+      "sources": [
+        "https://www.vitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/venezia-residenziale/3444",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-venezia-residenziale-itapema-meia-praia-4-quartos-3-garagens-venda-ref-1294/",
+        "https://www.vazpremiumimoveis.com.br/imovel/apartamento/venda/itapema/sc/meia-praia/AP0812_CRB",
+        "https://jsobrinho.com.br/venezia-residenziale-itapema-lb4",
+        "https://www.jbelleimoveis.com.br/imovel/apartamento-no-edificio-venezia-residenziale-itapema-meia-praia-4-quartos-3-garagens-venda-ref-23/"
+      ]
+    }
+  ]
+}

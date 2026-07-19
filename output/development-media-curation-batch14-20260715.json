@@ -1,0 +1,1126 @@
+{
+  "batch_id": "development-media-curation-batch14-20260715",
+  "generated_at": "2026-07-15T12:45:00.000Z",
+  "items": [
+    {
+      "slug": "condominio-horizontal",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/layout-fotos-site0007-1687366745-1723293330.jpg",
+      "description": "O Condominio Horizontal Praia Brava e um conjunto residencial fechado em Itajai, proximo ao eixo da Praia Brava e cercado por verde. A curadoria substitui imagens internas por registros do condominio, com piscina, quadras, playground, clube, implantacao aerea e contexto de praia. A pagina passa a comunicar o perfil reservado do empreendimento, a infraestrutura compartilhada e a relacao com a natureza da Brava.",
+      "seo_description": "Conheca o Condominio Horizontal Praia Brava em Itajai, com piscina, quadras, playground, clube e implantacao cercada por verde.",
+      "gallery": [
+        {
+          "title": "Condominio Horizontal - implantacao aerea",
+          "category": "Condominio",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/layout-fotos-site0007-1687366745-1723293330.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-horizontal-praia-brava-EM51300",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Condominio Horizontal - piscina",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2023/brava-horizontal-4-1687264377.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-horizontal-praia-brava-EM51300",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Condominio Horizontal - pergolado",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2023/brava-horizontal-6-1687264376.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-horizontal-praia-brava-EM51300",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Condominio Horizontal - quadra de tenis",
+          "category": "Esporte",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2023/brava-horizontal-11-1687264376.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-horizontal-praia-brava-EM51300",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Condominio Horizontal - quadra poliesportiva",
+          "category": "Esporte",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2023/brava-horizontal-2-1687264373.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-horizontal-praia-brava-EM51300",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Condominio Horizontal - clube",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2023/brava-horizontal-13-1687264375.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-horizontal-praia-brava-EM51300",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Condominio Horizontal - playground",
+          "category": "Kids",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2023/brava-horizontal-10-1687264373.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-horizontal-praia-brava-EM51300",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Condominio Horizontal - contexto da Brava",
+          "category": "Localizacao",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/June2023/layout-fotos-site0002-1687366744.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-horizontal-praia-brava-EM51300",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Shield",
+          "title": "Perfil reservado",
+          "description": "Conjunto fechado com leitura residencial mais privativa e baixa exposicao urbana."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Esporte e lazer",
+          "description": "Piscina, quadras, playground, pergolado e clube aparecem nos registros selecionados."
+        },
+        {
+          "icon": "Trees",
+          "title": "Verde da Praia Brava",
+          "description": "A implantacao aparece cercada por morros e vegetacao, com acesso ao estilo de vida da Brava."
+        }
+      ],
+      "differentials": [
+        "Galeria revisada com piscina, quadras, clube, playground e implantacao.",
+        "Imagens internas foram substituidas por registros do condominio.",
+        "Copy reposicionada para privacidade, lazer e contexto natural da Praia Brava."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Condominio Horizontal Praia Brava?",
+          "answer": "Fica na Praia Brava, em Itajai, em uma regiao valorizada entre praia, verde e servicos."
+        },
+        {
+          "question": "Quais areas aparecem na nova galeria?",
+          "answer": "A galeria mostra piscina, quadras, pergolado, clube, playground e imagens aereas do conjunto."
+        },
+        {
+          "question": "O que mudou na pagina?",
+          "answer": "Foram removidas imagens internas de ofertas e priorizadas imagens do condominio e da infraestrutura compartilhada."
+        },
+        {
+          "question": "Quais fontes foram usadas?",
+          "answer": "A base visual principal veio da Imobille, com referencias complementares de mercado sobre o condominio."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/condominio-horizontal-praia-brava-EM51300",
+        "https://www.bravaimoveis.com.br/imovel/venda-terrenos-em-condominio-em-itajai/condominio-horizontal-praia-brava/1701",
+        "https://felicitanegocios.com.br/empreendimento/225/condominio-horizontal-praia-brava/"
+      ]
+    },
+    {
+      "slug": "condominio-iate-club-plaza",
+      "hero_image": "https://cdn.vistahost.com.br/perezemp/vista.imobi/fotos/10136/iX1lsf6C1luC7X2H2jP4_10136680bc01a9f9a8.jpg",
+      "description": "O Condominio Iate Club Plaza, em Ilhota, Itapema, tem perfil raro de condominio costeiro, com marina, heliponto, frente para o mar e praia semiprivativa citados nas fontes consultadas. A curadoria visual foi conservadora: removeu imagens internas e manteve registros aereos da peninsula, do entorno verde e da relacao direta com o mar. A pagina passa a comunicar o condominio como destino nautico e reservado, nao como uma oferta isolada.",
+      "seo_description": "Conheca o Condominio Iate Club Plaza em Ilhota, Itapema, com marina, heliponto, praia semiprivativa e entorno costeiro.",
+      "gallery": [
+        {
+          "title": "Iate Club Plaza - peninsula",
+          "category": "Localizacao",
+          "image": "https://cdn.vistahost.com.br/perezemp/vista.imobi/fotos/10136/iX1lsf6C1luC7X2H2jP4_10136680bc023c783d.jpg",
+          "source_url": "https://www.imobiliariaperez.com.br/imovel/terrenos-a-venda-ilhota-itapema-sc-cod-10136",
+          "source_label": "Perez"
+        },
+        {
+          "title": "Iate Club Plaza - praia semiprivativa",
+          "category": "Praia",
+          "image": "https://cdn.vistahost.com.br/perezemp/vista.imobi/fotos/10136/iX1lsf6C1luC7X2H2jP4_10136680bc0149ac5a.jpg",
+          "source_url": "https://www.imobiliariaperez.com.br/imovel/terrenos-a-venda-ilhota-itapema-sc-cod-10136",
+          "source_label": "Perez"
+        },
+        {
+          "title": "Iate Club Plaza - vista costeira",
+          "category": "Localizacao",
+          "image": "https://cdn.vistahost.com.br/perezemp/vista.imobi/fotos/10136/iX1lsf6C1luC7X2H2jP4_10136680bc0180255f.jpg",
+          "source_url": "https://www.imobiliariaperez.com.br/imovel/terrenos-a-venda-ilhota-itapema-sc-cod-10136",
+          "source_label": "Perez"
+        },
+        {
+          "title": "Iate Club Plaza - implantacao verde",
+          "category": "Implantacao",
+          "image": "https://cdn.vistahost.com.br/perezemp/vista.imobi/fotos/10136/iX1lsf6C1luC7X2H2jP4_10136680bc01a9f9a8.jpg",
+          "source_url": "https://www.imobiliariaperez.com.br/imovel/terrenos-a-venda-ilhota-itapema-sc-cod-10136",
+          "source_label": "Perez"
+        },
+        {
+          "title": "Iate Club Plaza - vista aerea",
+          "category": "Implantacao",
+          "image": "https://cdn.vistahost.com.br/perezemp/vista.imobi/fotos/10136/iX1lsf6C1luC7X2H2jP4_10136680bc01dc52a0.jpg",
+          "source_url": "https://www.imobiliariaperez.com.br/imovel/terrenos-a-venda-ilhota-itapema-sc-cod-10136",
+          "source_label": "Perez"
+        },
+        {
+          "title": "Iate Club Plaza - entorno da Ilhota",
+          "category": "Localizacao",
+          "image": "https://cdn.vistahost.com.br/perezemp/vista.imobi/fotos/10136/iX1lsf6C1luC7X2H2jP4_10136680bc020eb604.jpg",
+          "source_url": "https://www.imobiliariaperez.com.br/imovel/terrenos-a-venda-ilhota-itapema-sc-cod-10136",
+          "source_label": "Perez"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Anchor",
+          "title": "Vocacao nautica",
+          "description": "As fontes citam marina exclusiva e relacao direta com o mar, ponto forte para quem busca vida nautica."
+        },
+        {
+          "icon": "Shield",
+          "title": "Reserva costeira",
+          "description": "O conjunto aparece implantado em uma peninsula verde, com acesso controlado e baixa exposicao."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Ilhota em Itapema",
+          "description": "Localizacao entre mar, BR-101 e paisagem natural, com perfil mais reservado que a malha central."
+        }
+      ],
+      "differentials": [
+        "Galeria conservadora com imagens aereas e contexto costeiro.",
+        "Copy destaca marina, heliponto e praia semiprivativa com base nas fontes consultadas.",
+        "Imagens internas foram descartadas para manter a leitura do condominio."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Condominio Iate Club Plaza?",
+          "answer": "Fica na Ilhota, em Itapema, em uma area costeira com acesso pela regiao da BR-101."
+        },
+        {
+          "question": "O condominio tem marina?",
+          "answer": "As fontes consultadas citam marina exclusiva e estrutura nautica como diferenciais do condominio."
+        },
+        {
+          "question": "Por que a galeria usa imagens aereas?",
+          "answer": "Porque as imagens internas encontradas pertenciam a ofertas especificas; a selecao final prioriza o condominio e seu entorno."
+        },
+        {
+          "question": "Quais fontes foram consultadas?",
+          "answer": "Foram consultadas Perez, Meu Frente Mar, Quatro Cinco e CNA."
+        }
+      ],
+      "sources": [
+        "https://www.imobiliariaperez.com.br/imovel/terrenos-a-venda-ilhota-itapema-sc-cod-10136",
+        "https://meufrentemar.com.br/comprar/sc/itapema/ilhota/casa/77200640",
+        "https://www.quatrocinco.com.br/condominio/cond-iate-clube-itapema/142",
+        "https://cnaconstrutora.com.br/selecionados/127"
+      ]
+    },
+    {
+      "slug": "condominio-riverside",
+      "hero_image": "https://img.apre.me/BcHBDYAgDADAbfpEoBb8dBaDgE2NIgkxrO9d5j7BIr8TpHWzni6yTvA8QPplXEq2RNyoZgr7qJIeXdBbDGGRpuXW72CFSJY4-w.jpg",
+      "description": "O Condominio Riverside, em Itajai, tem proposta de moradia cercada por verde, com clube, piscinas, trilhas, horta, mirante, areas de encontro e seguranca 24 horas citados nas fontes consultadas. A curadoria trocou fotos de residencias por imagens de implantacao, lazer e acesso do condominio. A pagina agora apresenta o Riverside como conjunto planejado em meio a natureza, com estrutura de lazer ampla e perfil familiar.",
+      "seo_description": "Conheca o Condominio Riverside em Itajai, com clube, piscinas, trilhas, areas verdes, acesso controlado e lazer completo.",
+      "gallery": [
+        {
+          "title": "Riverside - implantacao aerea",
+          "category": "Implantacao",
+          "image": "https://img.apre.me/BcFJDoAgDADA3-TIVihc_hajgKRGkYQYvu9M5rHAIL8LWh-KnzayLHA8oY1LWZeKJ0yh5kDbrG1-RKMzSKRbl3LLd7BADCZw-gE.jpg",
+          "source_url": "https://tabimoveis.com.br/terreno-para-venda-no-condominio-riverside-4923",
+          "source_label": "Tab Imoveis"
+        },
+        {
+          "title": "Riverside - vias e verde",
+          "category": "Paisagismo",
+          "image": "https://img.apre.me/BcHBDYAgDADAbfoEpBb8dBaDgE2NIgkxrO9d5j7BIb8TpHWznktkneB5gPTLJJ9KCbhRzRT2USU9atE7DMFK03Lrd7BCJEecfw.jpg",
+          "source_url": "https://tabimoveis.com.br/terreno-para-venda-no-condominio-riverside-4923",
+          "source_label": "Tab Imoveis"
+        },
+        {
+          "title": "Riverside - vista superior do clube",
+          "category": "Lazer",
+          "image": "https://img.apre.me/BcHBDYAgDADAbfrECpby6SxGEZsaRRJiWN_7LG0ABnkHaG1uOWcWG_Clg7bLYeLiOSQqmeLai26PTcFjiHHSasdt3y4GTEiSfw.jpg",
+          "source_url": "https://tabimoveis.com.br/terreno-para-venda-no-condominio-riverside-4923",
+          "source_label": "Tab Imoveis"
+        },
+        {
+          "title": "Riverside - clube com piscina",
+          "category": "Lazer",
+          "image": "https://img.apre.me/BcHBDYAgDADAbfpEoBb8dBaDgE2NIgkxrO9d5j7BIr8TpHWzni6yTvA8QPplXEq2RNyoZgr7qJIeXdBbDGGRpuXW72CFSJY4-w.jpg",
+          "source_url": "https://tabimoveis.com.br/terreno-para-venda-no-condominio-riverside-4923",
+          "source_label": "Tab Imoveis"
+        },
+        {
+          "title": "Riverside - area de convivio",
+          "category": "Convivencia",
+          "image": "https://img.apre.me/BcHBDYAgDADAbfoEpBb4dBYjFUmNIgkxrO_dcJ-gkN8JtXWznktkneB5QO2XwSyZEiYqQmEbpe6PWvQOQ7C16XHrl1khkiOWHw.jpg",
+          "source_url": "https://tabimoveis.com.br/terreno-para-venda-no-condominio-riverside-4923",
+          "source_label": "Tab Imoveis"
+        },
+        {
+          "title": "Riverside - piscina do clube",
+          "category": "Lazer",
+          "image": "https://img.apre.me/BcHBDYAgDADAbfoEpBb00VkMIjQ1iiTGsL53mfsAh-wMkNbNXKfIOsDzC9JPE2uquOJCJVPY3iLpVoveYQhWmh6XfjsrRHLE_Qc.jpg",
+          "source_url": "https://tabimoveis.com.br/terreno-para-venda-no-condominio-riverside-4923",
+          "source_label": "Tab Imoveis"
+        },
+        {
+          "title": "Riverside - acesso interno",
+          "category": "Acesso",
+          "image": "https://img.apre.me/M7ItVksvyNIzS05LMk5KTDUwSDYxi89JLMhMzsssKtA3NzMzNDDVT8-LTMnJLE2yzVQzNzUwtU0GAA.jpg",
+          "source_url": "https://tabimoveis.com.br/terreno-para-venda-no-condominio-riverside-4923",
+          "source_label": "Tab Imoveis"
+        },
+        {
+          "title": "Riverside - portaria e paisagismo",
+          "category": "Acesso",
+          "image": "https://img.apre.me/M7ItVktPLcjSSzM3MUg1NrIwTkkyNYvPSSzITM7LLCrQN7EwMjI100-Py0zJySxNss1UMzc1MLVNBgA.jpeg",
+          "source_url": "https://tabimoveis.com.br/terreno-para-venda-no-condominio-riverside-4923",
+          "source_label": "Tab Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Trees",
+          "title": "Natureza preservada",
+          "description": "A proposta combina vias internas, verde abundante e areas de lazer em contato com a paisagem."
+        },
+        {
+          "icon": "Waves",
+          "title": "Clube com piscinas",
+          "description": "As imagens e fontes destacam clube, piscinas e espacos de convivencia para uso compartilhado."
+        },
+        {
+          "icon": "Shield",
+          "title": "Seguranca e acesso",
+          "description": "As fontes citam portaria 24 horas, circuito interno e infraestrutura planejada."
+        }
+      ],
+      "differentials": [
+        "Galeria troca fotos de residencias por implantacao, clube, piscina e acesso.",
+        "Copy reforca trilhas, horta, mirante, clube e lazer amplo conforme fontes consultadas.",
+        "O empreendimento passa a ser apresentado pelo seu conjunto de areas comuns."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Condominio Riverside?",
+          "answer": "Fica em Itajai, na regiao de Itaipava/Rio do Meio, em contexto residencial com bastante verde."
+        },
+        {
+          "question": "Quais estruturas de lazer foram identificadas?",
+          "answer": "As fontes citam clube, piscinas, trilhas, horta, mirante, areas de encontro, academia, sauna e ambientes de convivencia."
+        },
+        {
+          "question": "A nova galeria mostra residencias especificas?",
+          "answer": "Nao. A selecao prioriza implantacao, clube, piscina, vias internas e acesso do condominio."
+        },
+        {
+          "question": "Quais fontes foram usadas?",
+          "answer": "Foram consultadas Tab Imoveis, Guilherme Pilger, Jean Carlo Exclusive e conteudo da Imobille."
+        }
+      ],
+      "sources": [
+        "https://tabimoveis.com.br/terreno-para-venda-no-condominio-riverside-4923",
+        "https://www.guilhermepilger.com/imovel/casa-no-condominio-riverside-itajai-itaipava-3-quartos-2-garagens-venda-ref-1257/",
+        "https://www.jeancarloexclusive.com.br/imovel/casa-no-condominio-riverside-itajai-itaipava-4-quartos-2-garagens-venda-ref-723/",
+        "https://blog.imobillenegocios.com.br/conheca-os-melhores-condominios-fechados-em-itajai/"
+      ]
+    },
+    {
+      "slug": "costao-da-barra",
+      "hero_image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1701175901/enterprises/61/costao_da_barra_1.jpg",
+      "description": "O Costao da Barra e um home club frente mar na Barra Sul, em Balneario Camboriu, associado a Procave e a uma implantacao com mais de 7 mil metros quadrados de lazer segundo as fontes consultadas. A curadoria usa imagens do empreendimento, com fachada, piscinas, quadras, fitness, eventos, kids, spa e jardins. A pagina passa a destacar a escala de lazer e a posicao beira-mar, retirando a dependencia de imagens de ofertas especificas.",
+      "seo_description": "Conheca o Costao da Barra na Barra Sul, Balneario Camboriu, home club frente mar com piscinas, quadras, fitness e lazer amplo.",
+      "gallery": [
+        {
+          "title": "Costao da Barra - fachada",
+          "category": "Fachada",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1701175901/enterprises/61/costao_da_barra_1.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/costao-da-barra",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Costao da Barra - piscina coberta",
+          "category": "Lazer",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1701175897/enterprises/61/costao_da_barra_0.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/costao-da-barra",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Costao da Barra - jardim interno",
+          "category": "Paisagismo",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1701175904/enterprises/61/costao_da_barra_2.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/costao-da-barra",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Costao da Barra - spa",
+          "category": "Bem-estar",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1701175907/enterprises/61/costao_da_barra_3.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/costao-da-barra",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Costao da Barra - quadra de tenis",
+          "category": "Esporte",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1701175913/enterprises/61/costao_da_barra_5.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/costao-da-barra",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Costao da Barra - fitness",
+          "category": "Fitness",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1701175919/enterprises/61/costao_da_barra_7.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/costao-da-barra",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Costao da Barra - eventos",
+          "category": "Eventos",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1701175922/enterprises/61/costao_da_barra_8.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/costao-da-barra",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Costao da Barra - piscina externa",
+          "category": "Lazer",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1701175928/enterprises/61/costao_da_barra_10.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/costao-da-barra",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Costao da Barra - acesso noturno",
+          "category": "Acesso",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1701175943/enterprises/61/costao_da_barra_14.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/costao-da-barra",
+          "source_label": "Sort Investimentos"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente mar na Barra Sul",
+          "description": "Localizacao junto a Avenida Atlantica, com leitura direta da orla de Balneario Camboriu."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer de grande escala",
+          "description": "Piscinas, quadras, fitness, kids, spa, eventos e jardins reforcam o perfil de home club."
+        },
+        {
+          "icon": "Building2",
+          "title": "Conjunto Procave",
+          "description": "Empreendimento associado a uma das marcas mais reconhecidas da cidade, com implantacao robusta."
+        }
+      ],
+      "differentials": [
+        "Galeria focada em fachada, lazer e areas compartilhadas.",
+        "Copy reposicionada para frente mar, Barra Sul e escala de home club.",
+        "Fontes cruzadas entre Procave, Sort, Imobille e Godoy."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Costao da Barra?",
+          "answer": "Fica na Barra Sul, em Balneario Camboriu, junto ao eixo da Avenida Atlantica."
+        },
+        {
+          "question": "Qual e o perfil do empreendimento?",
+          "answer": "E um home club frente mar, com grande estrutura de lazer e areas de convivencia."
+        },
+        {
+          "question": "Quais imagens foram priorizadas?",
+          "answer": "Foram priorizadas fachada, piscina, jardim, spa, quadras, fitness, eventos e acesso."
+        },
+        {
+          "question": "Quais fontes foram usadas?",
+          "answer": "Foram consultadas Procave, Sort Investimentos, Imobille e Imoveis Godoy."
+        }
+      ],
+      "sources": [
+        "https://procave.com.br/costao-da-barra-um-home-club-repleto-de-natureza-a-beira-mar/",
+        "https://sortinvestimentos.com.br/empreendimentos/costao-da-barra",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-costao-da-barra-EM76526",
+        "https://imoveisgodoy.com.br/imoveis/edificio-costao-da-barra-balneario-camboriu/"
+      ]
+    },
+    {
+      "slug": "costao-da-barra-towers-residencial-club",
+      "hero_image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1708187844/high-photos_61/high-photos_61.jpg",
+      "description": "O Costao da Barra Towers Residencial Club corresponde ao conjunto Costao da Barra na Barra Sul, em Balneario Camboriu, com torres residenciais e estrutura de lazer de home club. A curadoria usa imagens de fachada, piscinas, jardins, quadras, fitness, eventos, kids e acesso, evitando fotos internas de ofertas. A pagina passa a explicar o empreendimento como conjunto frente-mar, com lazer amplo e forte presenca urbana na orla.",
+      "seo_description": "Conheca o Costao da Barra Towers Residencial Club na Barra Sul, com torres frente-mar, piscinas, quadras, fitness e lazer amplo.",
+      "gallery": [
+        {
+          "title": "Costao da Barra Towers - fachada vertical",
+          "category": "Fachada",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1708187844/high-photos_61/high-photos_61.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/costao-da-barra",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Costao da Barra Towers - piscina coberta",
+          "category": "Lazer",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1701175897/enterprises/61/costao_da_barra_0.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/costao-da-barra",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Costao da Barra Towers - paisagismo",
+          "category": "Paisagismo",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1701175904/enterprises/61/costao_da_barra_2.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/costao-da-barra",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Costao da Barra Towers - spa",
+          "category": "Bem-estar",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1701175907/enterprises/61/costao_da_barra_3.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/costao-da-barra",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Costao da Barra Towers - quadra de tenis",
+          "category": "Esporte",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1701175913/enterprises/61/costao_da_barra_5.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/costao-da-barra",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Costao da Barra Towers - fitness",
+          "category": "Fitness",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1701175919/enterprises/61/costao_da_barra_7.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/costao-da-barra",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Costao da Barra Towers - piscina externa",
+          "category": "Lazer",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1701175928/enterprises/61/costao_da_barra_10.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/costao-da-barra",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Costao da Barra Towers - acesso",
+          "category": "Acesso",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1701175943/enterprises/61/costao_da_barra_14.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/costao-da-barra",
+          "source_label": "Sort Investimentos"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Torres frente-mar",
+          "description": "O conjunto tem presenca vertical na Barra Sul e relacao direta com a orla de Balneario Camboriu."
+        },
+        {
+          "icon": "Waves",
+          "title": "Home club completo",
+          "description": "Piscinas, spa, quadras, fitness, kids, eventos e areas externas sustentam uma rotina de lazer ampla."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Barra Sul",
+          "description": "Regiao consolidada, com praia, gastronomia, turismo e acesso ao eixo sul da cidade."
+        }
+      ],
+      "differentials": [
+        "Curadoria diferencia o conjunto por torres, lazer e frente-mar.",
+        "Galeria revisada para usar estrutura comum e fachada, sem imagens internas de oferta.",
+        "Copy reforca Barra Sul, orla e escala residencial club."
+      ],
+      "faq": [
+        {
+          "question": "O Costao da Barra Towers fica onde?",
+          "answer": "Fica na Barra Sul, em Balneario Camboriu, no eixo da orla."
+        },
+        {
+          "question": "O empreendimento e o mesmo conjunto Costao da Barra?",
+          "answer": "A curadoria trata a pagina como o conjunto Costao da Barra/Towers Residencial Club, com torres e estrutura de home club."
+        },
+        {
+          "question": "Quais imagens foram selecionadas?",
+          "answer": "Foram selecionadas imagens de fachada, piscina, spa, quadra, fitness, paisagismo e acesso."
+        },
+        {
+          "question": "Quais fontes foram usadas?",
+          "answer": "Foram consultadas Procave, Sort Investimentos, Imobille e Imoveis Godoy."
+        }
+      ],
+      "sources": [
+        "https://procave.com.br/costao-da-barra-um-home-club-repleto-de-natureza-a-beira-mar/",
+        "https://sortinvestimentos.com.br/empreendimentos/costao-da-barra",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-costao-da-barra-EM76526",
+        "https://imoveisgodoy.com.br/imoveis/edificio-costao-da-barra-balneario-camboriu/"
+      ]
+    },
+    {
+      "slug": "diamond-crystal-tower",
+      "hero_image": "https://www.construtoradiamond.com.br/arquivo/empreendimento/05-externa-aproximada.jpg",
+      "description": "O Diamond Crystal Tower e um empreendimento da Construtora Diamond no Centro de Balneario Camboriu, com fachada vertical, acesso marcado, elevador panoramico e mais de 1,2 mil metros quadrados de lazer segundo as fontes consultadas. A curadoria usa a pagina oficial da construtora para substituir imagens internas por fachada, piscina, gourmet, cinema, fitness, spa, piscina aquecida, bar molhado, praca e kids. A pagina ganha leitura institucional do empreendimento e de suas areas compartilhadas.",
+      "seo_description": "Conheca o Diamond Crystal Tower no Centro de Balneario Camboriu, com fachada marcante, elevador panoramico e lazer acima de 1,2 mil m2.",
+      "gallery": [
+        {
+          "title": "Diamond Crystal Tower - fachada principal",
+          "category": "Fachada",
+          "image": "https://www.construtoradiamond.com.br/arquivo/empreendimento/05-externa-aproximada.jpg",
+          "source_url": "https://www.construtoradiamond.com.br/empreendimento/diamond-crystal-tower",
+          "source_label": "Construtora Diamond"
+        },
+        {
+          "title": "Diamond Crystal Tower - torre diurna",
+          "category": "Fachada",
+          "image": "https://www.construtoradiamond.com.br/arquivo/empreendimento/extra-05-externa-dia-nova.jpg",
+          "source_url": "https://www.construtoradiamond.com.br/empreendimento/diamond-crystal-tower",
+          "source_label": "Construtora Diamond"
+        },
+        {
+          "title": "Diamond Crystal Tower - fachada noturna",
+          "category": "Fachada",
+          "image": "https://www.construtoradiamond.com.br/arquivo/empreendimento/extra-04-externa-noite-nova-1.jpg",
+          "source_url": "https://www.construtoradiamond.com.br/empreendimento/diamond-crystal-tower",
+          "source_label": "Construtora Diamond"
+        },
+        {
+          "title": "Diamond Crystal Tower - acesso",
+          "category": "Acesso",
+          "image": "https://www.construtoradiamond.com.br/arquivo/empreendimento/06-aproximada-acesso-2.jpg",
+          "source_url": "https://www.construtoradiamond.com.br/empreendimento/diamond-crystal-tower",
+          "source_label": "Construtora Diamond"
+        },
+        {
+          "title": "Diamond Crystal Tower - piscina",
+          "category": "Lazer",
+          "image": "https://www.construtoradiamond.com.br/arquivo/empreendimento/ac-11-piscina.jpg",
+          "source_url": "https://www.construtoradiamond.com.br/empreendimento/diamond-crystal-tower",
+          "source_label": "Construtora Diamond"
+        },
+        {
+          "title": "Diamond Crystal Tower - gourmet",
+          "category": "Gourmet",
+          "image": "https://www.construtoradiamond.com.br/arquivo/empreendimento/ac-02-salao-gourmet.jpg",
+          "source_url": "https://www.construtoradiamond.com.br/empreendimento/diamond-crystal-tower",
+          "source_label": "Construtora Diamond"
+        },
+        {
+          "title": "Diamond Crystal Tower - fitness",
+          "category": "Fitness",
+          "image": "https://www.construtoradiamond.com.br/arquivo/empreendimento/ac-08-academia.jpg",
+          "source_url": "https://www.construtoradiamond.com.br/empreendimento/diamond-crystal-tower",
+          "source_label": "Construtora Diamond"
+        },
+        {
+          "title": "Diamond Crystal Tower - spa",
+          "category": "Bem-estar",
+          "image": "https://www.construtoradiamond.com.br/arquivo/empreendimento/ac-13-spa.jpg",
+          "source_url": "https://www.construtoradiamond.com.br/empreendimento/diamond-crystal-tower",
+          "source_label": "Construtora Diamond"
+        },
+        {
+          "title": "Diamond Crystal Tower - bar molhado",
+          "category": "Lazer",
+          "image": "https://www.construtoradiamond.com.br/arquivo/empreendimento/ac-15-bar-molhado.jpg",
+          "source_url": "https://www.construtoradiamond.com.br/empreendimento/diamond-crystal-tower",
+          "source_label": "Construtora Diamond"
+        },
+        {
+          "title": "Diamond Crystal Tower - praca cristal",
+          "category": "Convivencia",
+          "image": "https://www.construtoradiamond.com.br/arquivo/empreendimento/ac-10-praca-cristal.jpg",
+          "source_url": "https://www.construtoradiamond.com.br/empreendimento/diamond-crystal-tower",
+          "source_label": "Construtora Diamond"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Assinatura Diamond",
+          "description": "Fachada vertical e acesso marcado reforcam a identidade da construtora no Centro de Balneario Camboriu."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Mais de 1,2 mil m2 de lazer",
+          "description": "As fontes citam uma estrutura robusta com piscina, gourmet, cinema, fitness, spa, kids e bar molhado."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Centro de Balneario Camboriu",
+          "description": "Endereco urbano, proximo a servicos, orla e mobilidade central."
+        }
+      ],
+      "differentials": [
+        "Curadoria visual baseada na pagina oficial da Construtora Diamond.",
+        "Plantas e imagens internas foram descartadas da galeria ativa.",
+        "Copy reforca fachada, acesso, elevador panoramico e lazer completo."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Diamond Crystal Tower?",
+          "answer": "Fica no Centro de Balneario Camboriu, em endereco urbano proximo a servicos e a orla."
+        },
+        {
+          "question": "Qual construtora assina o empreendimento?",
+          "answer": "O empreendimento e da Construtora Diamond."
+        },
+        {
+          "question": "Quais areas aparecem na nova galeria?",
+          "answer": "A galeria mostra fachada, acesso, piscina, gourmet, fitness, spa, bar molhado e praca."
+        },
+        {
+          "question": "Quais fontes foram usadas?",
+          "answer": "Foram consultadas Construtora Diamond, MySide, Imobille e Imobiliaria Diamond."
+        }
+      ],
+      "sources": [
+        "https://www.construtoradiamond.com.br/empreendimento/diamond-crystal-tower",
+        "https://myside.com.br/apartamento-venda-diamond-crystal-tower-balneario-camboriu-sc",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-diamond-crystal-tower-EM9546",
+        "https://imobiliariadiamond.com.br/empreendimento/diamond-crystal-tower/"
+      ]
+    },
+    {
+      "slug": "diamond-tower",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2025/04/edificio-diamond-tower-meia-praia-itapema-1-1.jpg",
+      "description": "O Diamond Tower e um empreendimento da Meia Praia Empreendimentos em Itapema, localizado na Rua 248, em Meia Praia, com 33 pavimentos, duas residencias por andar, tres elevadores e entrega em 2024 segundo as fontes consultadas. A curadoria usa Litoral Vertical e Imobille para exibir fachada, piscina, spa, fitness, gourmet, kids e lazer, descartando imagens internas e blocos de outros empreendimentos que apareceram em paginas de venda. A pagina passa a apresentar o Diamond Tower pelo edificio e pelo home club de 1.200 metros quadrados.",
+      "seo_description": "Conheca o Diamond Tower em Meia Praia, Itapema, empreendimento da MPEI com 33 pavimentos, fachada marcante e home club de 1.200 m2.",
+      "gallery": [
+        {
+          "title": "Diamond Tower - fachada principal",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/04/edificio-diamond-tower-meia-praia-itapema-1-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/meia-praia/edificio-diamond-tower/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Diamond Tower - piscina",
+          "category": "Lazer",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/04/edificio-diamond-tower-meia-praia-itapema-3-1.avif",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/meia-praia/edificio-diamond-tower/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Diamond Tower - spa",
+          "category": "Bem-estar",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/04/edificio-diamond-tower-meia-praia-itapema-4-1.avif",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/meia-praia/edificio-diamond-tower/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Diamond Tower - fitness",
+          "category": "Fitness",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/04/edificio-diamond-tower-meia-praia-itapema-8-1.avif",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/meia-praia/edificio-diamond-tower/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Diamond Tower - gourmet",
+          "category": "Gourmet",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/04/edificio-diamond-tower-meia-praia-itapema-2-1.avif",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/meia-praia/edificio-diamond-tower/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Diamond Tower - kids",
+          "category": "Kids",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/04/edificio-diamond-tower-meia-praia-itapema-6-1.avif",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/meia-praia/edificio-diamond-tower/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Diamond Tower - kids externo",
+          "category": "Kids",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/04/edificio-diamond-tower-meia-praia-itapema-7-1.avif",
+          "source_url": "https://litoralvertical.com/venda/itapema/apartamentos/meia-praia/edificio-diamond-tower/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Diamond Tower - piscina Imobille",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/30042025115729958-1746025049.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-diamond-tower-EM75297",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "MPEI em Meia Praia",
+          "description": "Empreendimento da Meia Praia Empreendimentos, entregue em 2024, com presenca vertical na Rua 248."
+        },
+        {
+          "icon": "Waves",
+          "title": "A 150 metros do mar",
+          "description": "A Litoral Vertical informa localizacao proxima da praia, no eixo de Meia Praia."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Home club de 1.200 m2",
+          "description": "Piscinas, spa, sauna, fitness, gourmet, kids, pub, jogos, pet e quadra compoem a estrutura citada."
+        }
+      ],
+      "differentials": [
+        "Fontes especificas substituem a home da incorporadora que misturava outros edificios.",
+        "Galeria revisada com fachada e lazer do Diamond Tower.",
+        "Copy destaca 33 pavimentos, duas residencias por andar e home club de 1.200 m2."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Diamond Tower?",
+          "answer": "Fica na Rua 248, em Meia Praia, Itapema, proximo ao mar e ao comercio da regiao."
+        },
+        {
+          "question": "Quem assina o Diamond Tower?",
+          "answer": "O empreendimento e da Meia Praia Empreendimentos, tambem identificada como MPEI."
+        },
+        {
+          "question": "Quais areas foram selecionadas para a galeria?",
+          "answer": "Foram selecionadas fachada, piscina, spa, fitness, gourmet e kids."
+        },
+        {
+          "question": "Quais fontes foram usadas?",
+          "answer": "Foram consultadas Litoral Vertical, Imobille, MPEI, Potencial, Vitapema e Ello."
+        }
+      ],
+      "sources": [
+        "https://litoralvertical.com/venda/itapema/apartamentos/meia-praia/edificio-diamond-tower/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-diamond-tower-EM75297",
+        "https://www.mpei.com.br/",
+        "https://www.potencialimoveis.com.br/imoveis/diamond-tower-apartamento-04-suites-meia-praia-itapema-potencial-imoveis-IM5656",
+        "https://www.vitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/diamond-tower/648",
+        "https://elloimob.com.br/imovel/edificio-diamond-tower-a-venda-no-bairro-meia-praia-itapema-sc/940"
+      ]
+    },
+    {
+      "slug": "dom",
+      "hero_image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/312023/images/_b986700c866374166387717710241470.webp",
+      "description": "O DOM Residencial e um empreendimento da Essege no Centro de Balneario Camboriu, na Rua 1401, com arquitetura inspirada em linguagem nordica e entrega indicada pela MySide para marco de 2026. A curadoria usa imagens de fachada, acesso, piscina, fitness e areas de convivencia, retirando renders internos de oferta. A pagina passa a apresentar o DOM pelo desenho arquitetonico, endereco central e estrutura compartilhada.",
+      "seo_description": "Conheca o DOM Residencial da Essege no Centro de Balneario Camboriu, com arquitetura nordica, fachada marcante, piscina e fitness.",
+      "gallery": [
+        {
+          "title": "DOM Residencial - fachada vertical",
+          "category": "Fachada",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/312023/images/_b986700c866374166387717710241470.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-dom-balneario-camboriu-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "DOM Residencial - fachada lateral",
+          "category": "Fachada",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/312023/images/e9b7e36b56e17187ca8145e62295c8bb.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-dom-balneario-camboriu-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "DOM Residencial - acesso",
+          "category": "Acesso",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/312023/images/_eab0141b189921166792053810737226.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-dom-balneario-camboriu-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "DOM Residencial - piscina",
+          "category": "Lazer",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/312023/images/_a36adbc3850575166792053810935439.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-dom-balneario-camboriu-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "DOM Residencial - piscina Essege",
+          "category": "Lazer",
+          "image": "https://i0.wp.com/www.essege.com.br/wp-content/uploads/2022/09/Piscina-min.jpg?ssl=1",
+          "source_url": "https://www.essege.com.br/",
+          "source_label": "Essege"
+        },
+        {
+          "title": "DOM Residencial - fitness",
+          "category": "Fitness",
+          "image": "https://i0.wp.com/www.essege.com.br/wp-content/uploads/2022/09/Academia-min.jpg?ssl=1",
+          "source_url": "https://www.essege.com.br/",
+          "source_label": "Essege"
+        },
+        {
+          "title": "DOM Residencial - convivencia externa",
+          "category": "Convivencia",
+          "image": "https://i0.wp.com/www.essege.com.br/wp-content/uploads/2022/04/espacos-carrusel-1-3d-min.jpg?fit=1190%2C744&ssl=1",
+          "source_url": "https://www.essege.com.br/",
+          "source_label": "Essege"
+        },
+        {
+          "title": "DOM Residencial - espaco fitness",
+          "category": "Fitness",
+          "image": "https://i0.wp.com/www.essege.com.br/wp-content/uploads/2022/04/espacos-carrusel-7-3d-min.jpg?fit=1190%2C744&ssl=1",
+          "source_url": "https://www.essege.com.br/",
+          "source_label": "Essege"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Arquitetura Essege",
+          "description": "Fachada com linguagem nordica e desenho urbano diferenciado no Centro de Balneario Camboriu."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Rua 1401",
+          "description": "Endereco central, com facil acesso a servicos, praia e deslocamentos urbanos."
+        },
+        {
+          "icon": "Waves",
+          "title": "Lazer essencial",
+          "description": "Piscina, fitness e convivencia externa aparecem nas fontes selecionadas."
+        }
+      ],
+      "differentials": [
+        "Galeria revisada para priorizar fachada, acesso e lazer.",
+        "Copy destaca Essege, Rua 1401 e arquitetura inspirada em linguagem nordica.",
+        "Imagens internas de oferta foram removidas da selecao ativa."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o DOM Residencial?",
+          "answer": "Fica na Rua 1401, no Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Quem assina o DOM Residencial?",
+          "answer": "O empreendimento e da Essege Construtora e Incorporadora."
+        },
+        {
+          "question": "Quais imagens foram selecionadas?",
+          "answer": "Foram selecionadas imagens de fachada, acesso, piscina, fitness e convivencia externa."
+        },
+        {
+          "question": "Quais fontes foram usadas?",
+          "answer": "Foram consultadas a Essege e a MySide."
+        }
+      ],
+      "sources": [
+        "https://www.essege.com.br/",
+        "https://myside.com.br/apartamento-venda-dom-balneario-camboriu-sc"
+      ]
+    },
+    {
+      "slug": "edificio-brava-eco-home",
+      "hero_image": "https://optimaempreendimentos.com.br/wp-content/uploads/2024/11/1.jpg",
+      "description": "O Edificio Brava Eco Home e um empreendimento da Optima na Praia Brava, em Itajai, a cerca de 300 metros do mar segundo a incorporadora. A curadoria usa imagens oficiais de fachada, acesso, fitness, kids, rooftop, piscina e convivencia, descartando plantas e ambientes internos. A pagina passa a destacar a proximidade da praia, o perfil de alto padrao e a estrutura de lazer do empreendimento.",
+      "seo_description": "Conheca o Brava Eco Home da Optima na Praia Brava, Itajai, a cerca de 300 m do mar, com fachada, piscina, fitness e kids.",
+      "gallery": [
+        {
+          "title": "Brava Eco Home - fachada principal",
+          "category": "Fachada",
+          "image": "https://optimaempreendimentos.com.br/wp-content/uploads/2024/11/1.jpg",
+          "source_url": "https://optimaempreendimentos.com.br/brava-eco-home/",
+          "source_label": "Optima"
+        },
+        {
+          "title": "Brava Eco Home - fachada vertical",
+          "category": "Fachada",
+          "image": "https://optimaempreendimentos.com.br/wp-content/uploads/2024/11/1-Foto-ao-lado-do-texto.jpg",
+          "source_url": "https://optimaempreendimentos.com.br/brava-eco-home/",
+          "source_label": "Optima"
+        },
+        {
+          "title": "Brava Eco Home - acesso",
+          "category": "Acesso",
+          "image": "https://optimaempreendimentos.com.br/wp-content/uploads/2024/11/2.jpg",
+          "source_url": "https://optimaempreendimentos.com.br/brava-eco-home/",
+          "source_label": "Optima"
+        },
+        {
+          "title": "Brava Eco Home - fitness",
+          "category": "Fitness",
+          "image": "https://optimaempreendimentos.com.br/wp-content/uploads/2024/11/7.jpg",
+          "source_url": "https://optimaempreendimentos.com.br/brava-eco-home/",
+          "source_label": "Optima"
+        },
+        {
+          "title": "Brava Eco Home - kids",
+          "category": "Kids",
+          "image": "https://optimaempreendimentos.com.br/wp-content/uploads/2024/11/8.jpg",
+          "source_url": "https://optimaempreendimentos.com.br/brava-eco-home/",
+          "source_label": "Optima"
+        },
+        {
+          "title": "Brava Eco Home - convivencia",
+          "category": "Convivencia",
+          "image": "https://optimaempreendimentos.com.br/wp-content/uploads/2024/11/9.jpg",
+          "source_url": "https://optimaempreendimentos.com.br/brava-eco-home/",
+          "source_label": "Optima"
+        },
+        {
+          "title": "Brava Eco Home - piscina",
+          "category": "Lazer",
+          "image": "https://optimaempreendimentos.com.br/wp-content/uploads/2024/11/10.jpg",
+          "source_url": "https://optimaempreendimentos.com.br/brava-eco-home/",
+          "source_label": "Optima"
+        },
+        {
+          "title": "Brava Eco Home - gourmet",
+          "category": "Gourmet",
+          "image": "https://optimaempreendimentos.com.br/wp-content/uploads/2024/11/11.jpg",
+          "source_url": "https://optimaempreendimentos.com.br/brava-eco-home/",
+          "source_label": "Optima"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Praia Brava a poucos metros",
+          "description": "A Optima informa localizacao a cerca de 300 metros do mar, em uma das regioes mais desejadas de Itajai."
+        },
+        {
+          "icon": "Building2",
+          "title": "Assinatura Optima",
+          "description": "Fachada contemporanea, acesso marcado e padrao de acabamento alto compoem a proposta do empreendimento."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer completo",
+          "description": "Piscina, fitness, kids, gourmet e areas de convivencia aparecem na curadoria oficial."
+        }
+      ],
+      "differentials": [
+        "Galeria baseada principalmente na fonte oficial da Optima.",
+        "Plantas e ambientes internos foram descartados.",
+        "Copy reforca Praia Brava, 300 metros do mar e lazer do empreendimento."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Brava Eco Home?",
+          "answer": "Fica na Praia Brava, em Itajai, a cerca de 300 metros do mar segundo a Optima."
+        },
+        {
+          "question": "Quem assina o empreendimento?",
+          "answer": "O empreendimento e da Optima Empreendimentos."
+        },
+        {
+          "question": "Quais imagens foram selecionadas?",
+          "answer": "Foram selecionadas imagens de fachada, acesso, fitness, kids, convivencia, piscina e gourmet."
+        },
+        {
+          "question": "Quais fontes foram usadas?",
+          "answer": "Foram consultadas Optima, MySide, Felicita e Guilherme Pilger."
+        }
+      ],
+      "sources": [
+        "https://optimaempreendimentos.com.br/brava-eco-home/",
+        "https://myside.com.br/apartamento-venda-brava-eco-home-itajai-sc",
+        "https://felicitanegocios.com.br/empreendimento/854/brava-eco-home/",
+        "https://www.guilhermepilger.com/imovel/cobertura-duplex-no-edificio-brava-eco-home-itajai-praia-brava-4-quartos-3-garagens-venda-ref-1435/"
+      ]
+    },
+    {
+      "slug": "edificio-era",
+      "hero_image": "https://sucessosa.com.br/uploads/imagens/thumbnailimage00115.jpg",
+      "description": "O Edificio Era, da Sunprime Empreendimentos no Centro de Itapema, ganhou destaque por reconhecimento internacional de arquitetura em noticia da Sucesso SA, incluindo premiacoes no Canada. A curadoria combina imagens da noticia e da pagina Guilherme Pilger para apresentar fachada, volumetria, base, acesso, rooftop, piscina e detalhes de lazer. A pagina deixa de depender de fotos internas e passa a comunicar o Era como empreendimento de arquitetura premiada.",
+      "seo_description": "Conheca o Edificio Era da Sunprime no Centro de Itapema, empreendimento de arquitetura premiada com fachada marcante, rooftop e piscina.",
+      "gallery": [
+        {
+          "title": "Era - fachada premiada",
+          "category": "Fachada",
+          "image": "https://sucessosa.com.br/uploads/imagens/thumbnailimage00115.jpg",
+          "source_url": "https://www.sucessosa.com.br/noticia/edificio-em-itapema-e-reconhecido-como-a-melhor-arquitetura-das-americas-em-premiacao-no-canada",
+          "source_label": "Sucesso SA"
+        },
+        {
+          "title": "Era - volumetria",
+          "category": "Arquitetura",
+          "image": "https://sucessosa.com.br/uploads/imagens/image0057.jpg",
+          "source_url": "https://www.sucessosa.com.br/noticia/edificio-em-itapema-e-reconhecido-como-a-melhor-arquitetura-das-americas-em-premiacao-no-canada",
+          "source_label": "Sucesso SA"
+        },
+        {
+          "title": "Era - rooftop",
+          "category": "Lazer",
+          "image": "https://sucessosa.com.br/uploads/imagens/thumbnailimage00316.jpg",
+          "source_url": "https://www.sucessosa.com.br/noticia/edificio-em-itapema-e-reconhecido-como-a-melhor-arquitetura-das-americas-em-premiacao-no-canada",
+          "source_label": "Sucesso SA"
+        },
+        {
+          "title": "Era - torre",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/1485/s1-17434325062739.webp",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-era-itapema-centro-3-quartos-2-garagens-venda-ref-1485/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Era - fachada em curva",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/1485/s2-1743432506274.webp",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-era-itapema-centro-3-quartos-2-garagens-venda-ref-1485/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Era - chegada urbana",
+          "category": "Acesso",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/1485/s3-17434325062741.webp",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-era-itapema-centro-3-quartos-2-garagens-venda-ref-1485/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Era - base arquitetonica",
+          "category": "Arquitetura",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/1485/s4-17434325062741.webp",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-era-itapema-centro-3-quartos-2-garagens-venda-ref-1485/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Era - vista elevada",
+          "category": "Lazer",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/1485/s7-17434325062742.webp",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-era-itapema-centro-3-quartos-2-garagens-venda-ref-1485/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Era - piscina",
+          "category": "Lazer",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/1485/s8-17434325062743.webp",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-era-itapema-centro-3-quartos-2-garagens-venda-ref-1485/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Era - area escultural",
+          "category": "Arquitetura",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/1485/s11-17434325062743.webp",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-era-itapema-centro-3-quartos-2-garagens-venda-ref-1485/",
+          "source_label": "Guilherme Pilger"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Award",
+          "title": "Arquitetura premiada",
+          "description": "A noticia da Sucesso SA destaca reconhecimento internacional para o projeto do Era."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Centro de Itapema",
+          "description": "Endereco central, com acesso a servicos, mobilidade e praia."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Projeto autoral",
+          "description": "Fachada em curva, base marcada, rooftop e piscina compoem uma leitura visual de alto impacto."
+        }
+      ],
+      "differentials": [
+        "Curadoria combina noticia de premiacao e imagens do empreendimento.",
+        "Galeria substitui fotos internas por fachada, rooftop, piscina e base arquitetonica.",
+        "Copy posiciona o Era como arquitetura premiada da Sunprime no Centro de Itapema."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Edificio Era?",
+          "answer": "Fica no Centro de Itapema."
+        },
+        {
+          "question": "Quem assina o Era?",
+          "answer": "A noticia consultada associa o Edificio Era a Sunprime Empreendimentos."
+        },
+        {
+          "question": "Por que o Era foi destacado na copy?",
+          "answer": "Porque a noticia da Sucesso SA informa reconhecimento internacional de arquitetura para o empreendimento."
+        },
+        {
+          "question": "Quais imagens foram selecionadas?",
+          "answer": "Foram selecionadas imagens de fachada, volumetria, rooftop, base arquitetonica, piscina e detalhes externos."
+        }
+      ],
+      "sources": [
+        "https://www.sucessosa.com.br/noticia/edificio-em-itapema-e-reconhecido-como-a-melhor-arquitetura-das-americas-em-premiacao-no-canada",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-era-itapema-centro-3-quartos-2-garagens-venda-ref-1485/",
+        "https://www.efinvestimentos.com.br/imovel/apartamento-no-edificio-era-itapema-centro-3-quartos-2-garagens-venda-ref-67/",
+        "https://www.fernandocrispimimoveis.com.br/imovel/apartamento-no-edificio-era-itapema-centro-3-quartos-2-garagens-venda-ref-90/"
+      ]
+    }
+  ]
+}

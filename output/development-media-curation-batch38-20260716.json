@@ -1,0 +1,1158 @@
+{
+  "batch_id": "development-media-curation-batch38-20260716",
+  "generated_at": "2026-07-16T20:40:00.000Z",
+  "notes": [
+    "Lote 38 P0 auditado com foco em midia real de empreendimento/condominio.",
+    "Aplicados 7 slugs com fontes visuais confiaveis e checagem manual de contact sheets.",
+    "Tres slugs ficaram pendentes porque as fontes encontradas ainda nao davam seguranca visual suficiente."
+  ],
+  "skipped": [
+    {
+      "slug": "mario-quintana-residence",
+      "reason": "Fontes verificadas traziam majoritariamente fotos internas de oferta ou imagens sem confirmacao clara de fachada/areas comuns do condominio.",
+      "checked_sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-mario-quintana-EM07475",
+        "https://www.desc.com.br/",
+        "https://www.100porcentoimoveis.com.br/"
+      ]
+    },
+    {
+      "slug": "milano-exclusive-residence",
+      "reason": "As imagens encontradas eram fotos da oferta, vistas/paisagens ou materiais insuficientes para representar o empreendimento com seguranca.",
+      "checked_sources": [
+        "https://www.imobillenegocios.com.br/",
+        "https://myside.com.br/",
+        "https://atlanimoveis.com.br/"
+      ]
+    },
+    {
+      "slug": "montreal",
+      "reason": "As fontes consultadas nao apresentaram midia publica confiavel de fachada e areas comuns; havia interiores ou imagens genericas.",
+      "checked_sources": [
+        "https://loft.com.br/",
+        "https://www.invictaimoveisbc.com.br/",
+        "https://gpimoveis.com.br/"
+      ]
+    }
+  ],
+  "items": [
+    {
+      "slug": "marena-residence",
+      "hero_image": "https://dbatkwuiwvpoxjjqfdfz.storage.supabase.co/storage/v1/object/public/hunter-storage/account/86/property/412ee20b-63cf-44d5-8692-359b047edb8a/media/PROPERTY_PICTURE/561_b1401edd-7d51-4ff7-9046-f4af6f9cc108.webp",
+      "description": "O Marena Residence foi revisado como empreendimento de alto padrao no Centro de Balneario Camboriu, associado nas fontes de mercado ao padrao Embraed. A curadoria substituiu fotos internas da oferta por fachada, piscina, espacos de bem-estar, spa e areas sociais do condominio. A pagina agora explica o contexto do edificio, destaca a localizacao central e mostra uma galeria focada no empreendimento, com imagens externas de Ocean Prime e Ilha Bella conferidas manualmente.",
+      "seo_description": "Conheca o Marena Residence no Centro de Balneario Camboriu, com fachada, piscina, spa e areas comuns revisadas.",
+      "gallery": [
+        {
+          "title": "Marena Residence - fachada principal",
+          "category": "Fachada",
+          "image": "https://dbatkwuiwvpoxjjqfdfz.storage.supabase.co/storage/v1/object/public/hunter-storage/account/86/property/412ee20b-63cf-44d5-8692-359b047edb8a/media/PROPERTY_PICTURE/561_b1401edd-7d51-4ff7-9046-f4af6f9cc108.webp",
+          "source_url": "https://www.oceanprime.com.br/imovel/apartamento-a-venda-4-quartos-4-suites-5-banheiros-4-vagas-centro-balneario-camboriu-sc-cod-561",
+          "source_label": "Ocean Prime"
+        },
+        {
+          "title": "Marena Residence - piscina externa",
+          "category": "Piscina",
+          "image": "https://dbatkwuiwvpoxjjqfdfz.storage.supabase.co/storage/v1/object/public/hunter-storage/account/86/property/412ee20b-63cf-44d5-8692-359b047edb8a/media/PROPERTY_PICTURE/561_5fbcfd1f-d365-413e-a45a-7c40d77503b3.webp",
+          "source_url": "https://www.oceanprime.com.br/imovel/apartamento-a-venda-4-quartos-4-suites-5-banheiros-4-vagas-centro-balneario-camboriu-sc-cod-561",
+          "source_label": "Ocean Prime"
+        },
+        {
+          "title": "Marena Residence - piscina elevada",
+          "category": "Piscina",
+          "image": "https://dbatkwuiwvpoxjjqfdfz.storage.supabase.co/storage/v1/object/public/hunter-storage/account/86/property/412ee20b-63cf-44d5-8692-359b047edb8a/media/PROPERTY_PICTURE/561_494f1d79-ff2c-4002-aa69-ba4efd0d3f86.webp",
+          "source_url": "https://www.oceanprime.com.br/imovel/apartamento-a-venda-4-quartos-4-suites-5-banheiros-4-vagas-centro-balneario-camboriu-sc-cod-561",
+          "source_label": "Ocean Prime"
+        },
+        {
+          "title": "Marena Residence - deck da piscina",
+          "category": "Piscina",
+          "image": "https://dbatkwuiwvpoxjjqfdfz.storage.supabase.co/storage/v1/object/public/hunter-storage/account/86/property/412ee20b-63cf-44d5-8692-359b047edb8a/media/PROPERTY_PICTURE/561_89028534-624c-443a-912e-ba691518a999.webp",
+          "source_url": "https://www.oceanprime.com.br/imovel/apartamento-a-venda-4-quartos-4-suites-5-banheiros-4-vagas-centro-balneario-camboriu-sc-cod-561",
+          "source_label": "Ocean Prime"
+        },
+        {
+          "title": "Marena Residence - bem-estar",
+          "category": "Spa",
+          "image": "https://dbatkwuiwvpoxjjqfdfz.storage.supabase.co/storage/v1/object/public/hunter-storage/account/86/property/412ee20b-63cf-44d5-8692-359b047edb8a/media/PROPERTY_PICTURE/561_1c481852-9980-4dea-94a0-e7449f2bae62.webp",
+          "source_url": "https://www.oceanprime.com.br/imovel/apartamento-a-venda-4-quartos-4-suites-5-banheiros-4-vagas-centro-balneario-camboriu-sc-cod-561",
+          "source_label": "Ocean Prime"
+        },
+        {
+          "title": "Marena Residence - lazer coberto",
+          "category": "Lazer",
+          "image": "https://dbatkwuiwvpoxjjqfdfz.storage.supabase.co/storage/v1/object/public/hunter-storage/account/86/property/412ee20b-63cf-44d5-8692-359b047edb8a/media/PROPERTY_PICTURE/561_7b764713-1087-473b-800f-7be510f3f6de.webp",
+          "source_url": "https://www.oceanprime.com.br/imovel/apartamento-a-venda-4-quartos-4-suites-5-banheiros-4-vagas-centro-balneario-camboriu-sc-cod-561",
+          "source_label": "Ocean Prime"
+        },
+        {
+          "title": "Marena Residence - piscina e fachada",
+          "category": "Piscina",
+          "image": "https://imobiliariailhabella.com.br/images/imoveis/fotos/imobiliaria-ilha-bella-647dcbdb061b5.jpg",
+          "source_url": "https://imobiliariailhabella.com.br/imovel/3027/apartamento",
+          "source_label": "Ilha Bella"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro de BC",
+          "description": "Localizacao central em Balneario Camboriu, com acesso pratico a servicos, praia e vida urbana."
+        },
+        {
+          "icon": "Building2",
+          "title": "Padrao Embraed",
+          "description": "As fontes de mercado associam o Marena ao alto padrao de acabamento da Embraed."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscinas e deck",
+          "description": "As imagens revisadas mostram piscinas, deck e espacos externos do condominio."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Bem-estar",
+          "description": "A nova galeria destaca spa, ambientes sociais e areas de relaxamento do empreendimento."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Galeria de condominio",
+          "description": "Foram removidas as imagens internas da oferta ativa e priorizadas fotos de fachada e lazer."
+        },
+        {
+          "title": "Centro de Balneario Camboriu",
+          "description": "A pagina passa a comunicar melhor o contexto urbano do empreendimento."
+        },
+        {
+          "title": "Curadoria visual segura",
+          "description": "A selecao evita imagens que coincidam com a galeria da residencia ativa."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Marena Residence?",
+          "answer": "No Centro de Balneario Camboriu - SC."
+        },
+        {
+          "question": "Quais imagens foram priorizadas?",
+          "answer": "Fachada, piscina, deck, spa e areas sociais do condominio."
+        },
+        {
+          "question": "Por que a galeria foi alterada?",
+          "answer": "A pagina usava fotos da oferta ativa; a nova versao foca no empreendimento."
+        },
+        {
+          "question": "Quais fontes ajudaram na revisao?",
+          "answer": "Ocean Prime e Ilha Bella, com checagem visual manual das imagens."
+        }
+      ],
+      "sources": [
+        "https://www.oceanprime.com.br/imovel/apartamento-a-venda-4-quartos-4-suites-5-banheiros-4-vagas-centro-balneario-camboriu-sc-cod-561",
+        "https://imobiliariailhabella.com.br/imovel/3027/apartamento"
+      ]
+    },
+    {
+      "slug": "marina-beach-towers",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2015/02/edificio-marina-beach-towers-balneario-camboriu-1.jpg",
+      "description": "O Marina Beach Towers foi revisado como icone residencial da Barra Sul, em Balneario Camboriu, com comunicacao propria do empreendimento e imagens oficiais de areas comuns. A curadoria agora mostra a torre integrada ao skyline da marina, hall, lounge, deck, piscina, solarium, gourmet, sky party, fitness e spa. A pagina deixa de depender da galeria interna da oferta e passa a apresentar o condominio pela escala, localizacao e estrutura de lazer.",
+      "seo_description": "Conheca o Marina Beach Towers na Barra Sul, com fachada, deck, piscina, hall, gourmet, fitness e spa.",
+      "gallery": [
+        {
+          "title": "Marina Beach Towers - skyline da marina",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2015/02/edificio-marina-beach-towers-balneario-camboriu-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/marina-beach-towers/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Marina Beach Towers - lazer elevado",
+          "category": "Piscina",
+          "image": "https://litoralvertical.com/wp-content/uploads/2015/02/edificio-marina-beach-towers-balneario-camboriu-2.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/marina-beach-towers/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Marina Beach Towers - deck panoramico",
+          "category": "Deck",
+          "image": "https://litoralvertical.com/wp-content/uploads/2015/02/edificio-marina-beach-towers-balneario-camboriu-3.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/marina-beach-towers/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Marina Beach Towers - hall principal",
+          "category": "Hall",
+          "image": "https://www.marinabeachtowers.com.br/wp-content/uploads/2016/11/Lounge-Hall-Principal-1.jpg",
+          "source_url": "https://www.marinabeachtowers.com.br/",
+          "source_label": "Marina Beach Towers"
+        },
+        {
+          "title": "Marina Beach Towers - galeria social",
+          "category": "Hall",
+          "image": "https://www.marinabeachtowers.com.br/wp-content/uploads/2016/11/Art-Galery.jpg",
+          "source_url": "https://www.marinabeachtowers.com.br/",
+          "source_label": "Marina Beach Towers"
+        },
+        {
+          "title": "Marina Beach Towers - lounge",
+          "category": "Lazer",
+          "image": "https://www.marinabeachtowers.com.br/wp-content/uploads/2016/11/Lounge-Torre-Atlantic.jpg",
+          "source_url": "https://www.marinabeachtowers.com.br/",
+          "source_label": "Marina Beach Towers"
+        },
+        {
+          "title": "Marina Beach Towers - deck externo",
+          "category": "Deck",
+          "image": "https://www.marinabeachtowers.com.br/wp-content/uploads/2016/11/Louge-Deck.jpg",
+          "source_url": "https://www.marinabeachtowers.com.br/",
+          "source_label": "Marina Beach Towers"
+        },
+        {
+          "title": "Marina Beach Towers - piscina",
+          "category": "Piscina",
+          "image": "https://www.marinabeachtowers.com.br/wp-content/uploads/2016/11/Piscina.jpg",
+          "source_url": "https://www.marinabeachtowers.com.br/",
+          "source_label": "Marina Beach Towers"
+        },
+        {
+          "title": "Marina Beach Towers - deck molhado",
+          "category": "Piscina",
+          "image": "https://www.marinabeachtowers.com.br/wp-content/uploads/2016/11/Deck-Molhado.jpg",
+          "source_url": "https://www.marinabeachtowers.com.br/",
+          "source_label": "Marina Beach Towers"
+        },
+        {
+          "title": "Marina Beach Towers - solarium",
+          "category": "Piscina",
+          "image": "https://www.marinabeachtowers.com.br/wp-content/uploads/2016/11/Solarium-1.jpg",
+          "source_url": "https://www.marinabeachtowers.com.br/",
+          "source_label": "Marina Beach Towers"
+        },
+        {
+          "title": "Marina Beach Towers - estar whisky",
+          "category": "Lazer",
+          "image": "https://www.marinabeachtowers.com.br/wp-content/uploads/2016/11/Clube-do-Whisky-Estar.jpg",
+          "source_url": "https://www.marinabeachtowers.com.br/",
+          "source_label": "Marina Beach Towers"
+        },
+        {
+          "title": "Marina Beach Towers - gourmet",
+          "category": "Gourmet",
+          "image": "https://www.marinabeachtowers.com.br/wp-content/uploads/2016/11/Gourmet.jpg",
+          "source_url": "https://www.marinabeachtowers.com.br/",
+          "source_label": "Marina Beach Towers"
+        },
+        {
+          "title": "Marina Beach Towers - sky party",
+          "category": "Eventos",
+          "image": "https://www.marinabeachtowers.com.br/wp-content/uploads/2016/11/Skyparty2.jpg",
+          "source_url": "https://www.marinabeachtowers.com.br/",
+          "source_label": "Marina Beach Towers"
+        },
+        {
+          "title": "Marina Beach Towers - fitness",
+          "category": "Fitness",
+          "image": "https://www.marinabeachtowers.com.br/wp-content/uploads/2016/11/Academia-1.jpg",
+          "source_url": "https://www.marinabeachtowers.com.br/",
+          "source_label": "Marina Beach Towers"
+        },
+        {
+          "title": "Marina Beach Towers - spa",
+          "category": "Spa",
+          "image": "https://www.marinabeachtowers.com.br/wp-content/uploads/2016/11/SPA.jpg",
+          "source_url": "https://www.marinabeachtowers.com.br/",
+          "source_label": "Marina Beach Towers"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Barra Sul",
+          "description": "Posicionado na Barra Sul, com relacao direta com a marina e o eixo mais valorizado de Balneario Camboriu."
+        },
+        {
+          "icon": "Building2",
+          "title": "Duas torres",
+          "description": "A comunicacao oficial identifica as torres Atlantic e Pacific em um projeto de grande escala."
+        },
+        {
+          "icon": "Waves",
+          "title": "Deck e piscina",
+          "description": "A galeria oficial mostra piscina, deck molhado, solarium e areas externas de lazer."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Clube completo",
+          "description": "Fitness, spa, gourmet, sky party, lounge, whisky e hall reforcam a estrutura de alto padrao."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fonte oficial",
+          "description": "A maior parte das imagens vem da pagina oficial do Marina Beach Towers."
+        },
+        {
+          "title": "Identidade de resort urbano",
+          "description": "O empreendimento combina marina, deck, piscinas e ambientes sociais amplos."
+        },
+        {
+          "title": "Hero corrigido",
+          "description": "O hero foi trocado por imagem externa do edificio, sem coincidencia com a oferta ativa."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Marina Beach Towers?",
+          "answer": "Na Barra Sul, em Balneario Camboriu - SC."
+        },
+        {
+          "question": "Quais areas comuns aparecem na nova galeria?",
+          "answer": "Hall, lounge, deck, piscina, solarium, gourmet, sky party, fitness e spa."
+        },
+        {
+          "question": "As imagens sao oficiais?",
+          "answer": "A curadoria usa principalmente imagens da pagina oficial do empreendimento, complementadas por Litoral Vertical."
+        },
+        {
+          "question": "O que foi corrigido?",
+          "answer": "A pagina deixou de usar fotos internas da oferta e passou a mostrar a estrutura do condominio."
+        }
+      ],
+      "sources": [
+        "https://www.marinabeachtowers.com.br/",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/marina-beach-towers/",
+        "https://www.liebertnegocios.com.br/imovel/apartamento-balneario-camboriu-barra-sul-3-quartos-4-garagens-venda-ref-66/"
+      ]
+    },
+    {
+      "slug": "marina-residence",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2024/07/edificio-marina-residence-balneario-camboriu-1.jpg",
+      "description": "O Edificio Marina Residence foi revisado como empreendimento da Barra Sul, em Balneario Camboriu, com imagem externa e lazer conferidos na Litoral Vertical. A nova pagina privilegia fachada, piscina e terraco do condominio, em vez de usar a galeria da cobertura ativa. A descricao agora contextualiza o edificio na Barra Sul e explica que a midia foi selecionada para representar o empreendimento, com galeria curta e conservadora por seguranca visual.",
+      "seo_description": "Conheca o Marina Residence na Barra Sul, com fachada, piscina e areas comuns revisadas.",
+      "gallery": [
+        {
+          "title": "Marina Residence - fachada principal",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2024/07/edificio-marina-residence-balneario-camboriu-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-marina-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Marina Residence - piscina",
+          "category": "Piscina",
+          "image": "https://litoralvertical.com/wp-content/uploads/2024/07/edificio-marina-residence-balneario-camboriu-2.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-marina-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Marina Residence - terraco externo",
+          "category": "Lazer",
+          "image": "https://litoralvertical.com/wp-content/uploads/2024/07/edificio-marina-residence-balneario-camboriu-3.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-marina-residence/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Barra Sul",
+          "description": "Endereco em uma das regioes mais procuradas de Balneario Camboriu."
+        },
+        {
+          "icon": "Building2",
+          "title": "Fachada validada",
+          "description": "A Litoral Vertical apresenta imagem externa especifica do Edificio Marina Residence."
+        },
+        {
+          "icon": "Waves",
+          "title": "Lazer com piscina",
+          "description": "A nova galeria mostra piscina e terraco do condominio."
+        },
+        {
+          "icon": "Shield",
+          "title": "Curadoria conservadora",
+          "description": "Foram usadas poucas imagens, todas revisadas visualmente para evitar interiores da oferta."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Foco no edificio",
+          "description": "Hero e galeria passam a representar o condominio, nao a cobertura anunciada."
+        },
+        {
+          "title": "Barra Sul consolidada",
+          "description": "A pagina reforca o posicionamento em Balneario Camboriu."
+        },
+        {
+          "title": "Fonte unica confiavel",
+          "description": "A curadoria se apoiou na ficha da Litoral Vertical por conter imagens claras do empreendimento."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Marina Residence?",
+          "answer": "Na Barra Sul, em Balneario Camboriu - SC."
+        },
+        {
+          "question": "Quantas imagens entraram na galeria?",
+          "answer": "Tres imagens: fachada, piscina e terraco."
+        },
+        {
+          "question": "Por que a galeria ficou curta?",
+          "answer": "Porque a auditoria priorizou seguranca visual e descartou materiais internos da oferta ativa."
+        },
+        {
+          "question": "Qual fonte foi usada?",
+          "answer": "A ficha publica da Litoral Vertical para o Edificio Marina Residence."
+        }
+      ],
+      "sources": [
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-marina-residence/"
+      ]
+    },
+    {
+      "slug": "mendelssohn",
+      "hero_image": "https://www.brianreis.com.br/wp-content/uploads/2025/05/melde.webp",
+      "description": "O Mendelssohn Residence foi revisado como empreendimento da Barra Sul, em Balneario Camboriu, com material visual associado a Lombarda Construtora e imagens de lazer conferidas em Brian Reis, Sort e Mazzotti. A nova galeria mostra fachada real, acesso, gourmet, lounge, fitness, cinema, terraco, jogos e areas de convivio. A pagina deixa de usar fotos internas da oferta e passa a comunicar o condominio com localizacao, estrutura social e midia do empreendimento.",
+      "seo_description": "Conheca o Mendelssohn Residence na Barra Sul, com fachada, gourmet, lounge, fitness, cinema e lazer.",
+      "gallery": [
+        {
+          "title": "Mendelssohn Residence - fachada principal",
+          "category": "Fachada",
+          "image": "https://www.brianreis.com.br/wp-content/uploads/2025/05/melde.webp",
+          "source_url": "https://www.brianreis.com.br/emprendimento/mendelssohn-residence/",
+          "source_label": "Brian Reis"
+        },
+        {
+          "title": "Mendelssohn Residence - acesso externo",
+          "category": "Acesso",
+          "image": "https://www.brianreis.com.br/wp-content/uploads/2025/05/Mendelssohn-Residence-Lombarda-Construtora-IMG-20250326-WA0076.jpg",
+          "source_url": "https://www.brianreis.com.br/emprendimento/mendelssohn-residence/",
+          "source_label": "Brian Reis"
+        },
+        {
+          "title": "Mendelssohn Residence - gourmet",
+          "category": "Gourmet",
+          "image": "https://www.brianreis.com.br/wp-content/uploads/2025/05/Mendelssohn-Residence-Lombarda-Construtora-IMG-20250326-WA0059.jpg",
+          "source_url": "https://www.brianreis.com.br/emprendimento/mendelssohn-residence/",
+          "source_label": "Brian Reis"
+        },
+        {
+          "title": "Mendelssohn Residence - lounge social",
+          "category": "Lazer",
+          "image": "https://www.brianreis.com.br/wp-content/uploads/2025/05/Mendelssohn-Residence-Lombarda-Construtora-IMG-20250326-WA0062.jpg",
+          "source_url": "https://www.brianreis.com.br/emprendimento/mendelssohn-residence/",
+          "source_label": "Brian Reis"
+        },
+        {
+          "title": "Mendelssohn Residence - fitness",
+          "category": "Fitness",
+          "image": "https://www.brianreis.com.br/wp-content/uploads/2025/05/Mendelssohn-Residence-Lombarda-Construtora-IMG-20250326-WA0063.jpg",
+          "source_url": "https://www.brianreis.com.br/emprendimento/mendelssohn-residence/",
+          "source_label": "Brian Reis"
+        },
+        {
+          "title": "Mendelssohn Residence - eventos",
+          "category": "Eventos",
+          "image": "https://www.brianreis.com.br/wp-content/uploads/2025/05/Mendelssohn-Residence-Lombarda-Construtora-IMG-20250326-WA0071.jpg",
+          "source_url": "https://www.brianreis.com.br/emprendimento/mendelssohn-residence/",
+          "source_label": "Brian Reis"
+        },
+        {
+          "title": "Mendelssohn Residence - espaco de trabalho",
+          "category": "Lazer",
+          "image": "https://www.brianreis.com.br/wp-content/uploads/2025/05/Mendelssohn-Residence-Lombarda-Construtora-IMG-20250326-WA0070.jpg",
+          "source_url": "https://www.brianreis.com.br/emprendimento/mendelssohn-residence/",
+          "source_label": "Brian Reis"
+        },
+        {
+          "title": "Mendelssohn Residence - cinema",
+          "category": "Lazer",
+          "image": "https://www.brianreis.com.br/wp-content/uploads/2025/05/Mendelssohn-Residence-Lombarda-Construtora-IMG-20250326-WA0082.jpg",
+          "source_url": "https://www.brianreis.com.br/emprendimento/mendelssohn-residence/",
+          "source_label": "Brian Reis"
+        },
+        {
+          "title": "Mendelssohn Residence - terraco",
+          "category": "Lazer",
+          "image": "https://www.brianreis.com.br/wp-content/uploads/2025/05/Mendelssohn-Residence-Lombarda-Construtora-IMG-20250326-WA0081.jpg",
+          "source_url": "https://www.brianreis.com.br/emprendimento/mendelssohn-residence/",
+          "source_label": "Brian Reis"
+        },
+        {
+          "title": "Mendelssohn Residence - ambiente gourmet",
+          "category": "Gourmet",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1710531073/enterprises/192/mendelssohn_1_medium.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/mendelssohn",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Mendelssohn Residence - estar social",
+          "category": "Lazer",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1710531080/enterprises/192/mendelssohn_3_medium.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/mendelssohn",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Mendelssohn Residence - fitness amplo",
+          "category": "Fitness",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1710531083/enterprises/192/mendelssohn_4_medium.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/mendelssohn",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Mendelssohn Residence - sauna",
+          "category": "Spa",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1710531086/enterprises/192/mendelssohn_5_medium.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/mendelssohn",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Mendelssohn Residence - lazer interno",
+          "category": "Lazer",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1710531089/enterprises/192/mendelssohn_6_medium.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/mendelssohn",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Mendelssohn Residence - fitness decorado",
+          "category": "Fitness",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/mazzotti/img_edificios/g1_1836_22568_1054_250625.jpg",
+          "source_url": "https://mazzottiimoveis.com/edificios/mendelssohn-residence/balneario-camboriu/barra-sul/1836",
+          "source_label": "Mazzotti Imoveis"
+        },
+        {
+          "title": "Mendelssohn Residence - academia",
+          "category": "Fitness",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/mazzotti/img_edificios/g1_1836_22569_1054_250625.jpg",
+          "source_url": "https://mazzottiimoveis.com/edificios/mendelssohn-residence/balneario-camboriu/barra-sul/1836",
+          "source_label": "Mazzotti Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Barra Sul",
+          "description": "As fontes de mercado posicionam o Mendelssohn na Barra Sul de Balneario Camboriu."
+        },
+        {
+          "icon": "Building2",
+          "title": "Lombarda Construtora",
+          "description": "O material da Brian Reis identifica o empreendimento como Mendelssohn Residence Lombarda Construtora."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Fitness e wellness",
+          "description": "A galeria revisada mostra academia, sauna e espacos de cuidado."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Ambientes sociais",
+          "description": "Gourmet, lounge, cinema, eventos e terraco completam a leitura do condominio."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fachada real",
+          "description": "O hero foi substituido por foto externa do edificio."
+        },
+        {
+          "title": "Fontes cruzadas",
+          "description": "Brian Reis, Sort e Mazzotti foram usados para confirmar midia e areas comuns."
+        },
+        {
+          "title": "Lazer mais claro",
+          "description": "A nova copy descreve os ambientes que aparecem nas imagens verificadas."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Mendelssohn Residence?",
+          "answer": "Na Barra Sul, em Balneario Camboriu - SC."
+        },
+        {
+          "question": "Quem aparece associado ao empreendimento?",
+          "answer": "O material da Brian Reis identifica Lombarda Construtora."
+        },
+        {
+          "question": "Quais areas comuns foram revisadas?",
+          "answer": "Gourmet, lounge, fitness, cinema, sauna, eventos, terraco e acesso."
+        },
+        {
+          "question": "O que foi corrigido?",
+          "answer": "A pagina deixou de usar imagens internas da oferta e passou a mostrar fachada e lazer do condominio."
+        }
+      ],
+      "sources": [
+        "https://www.brianreis.com.br/emprendimento/mendelssohn-residence/",
+        "https://sortinvestimentos.com.br/empreendimentos/mendelssohn",
+        "https://mazzottiimoveis.com/edificios/mendelssohn-residence/balneario-camboriu/barra-sul/1836"
+      ]
+    },
+    {
+      "slug": "meridian-tower",
+      "hero_image": "https://cdn.imoview.com.br/maximoveis/Condominios/1556/i0s530t2b9k_1210463f7998594822.jpg?1713414811",
+      "description": "O Meridian Tower foi revisado como empreendimento da RV Empreendimentos no Centro de Balneario Camboriu, com imagens externas de fachada, acesso, skyline, marketplace e ambientes sociais. A Max Imoveis e a VG Imobiliaria oferecem material visual consistente do edificio, enquanto as fontes institucionais ajudam a contextualizar o projeto. A nova pagina substitui fotos da oferta ativa por uma galeria de condominio, destacando a torre, o acesso, o hall e a proposta urbana do empreendimento.",
+      "seo_description": "Conheca o Meridian Tower no Centro de Balneario Camboriu, com fachada, acesso, marketplace e lazer.",
+      "gallery": [
+        {
+          "title": "Meridian Tower - fachada principal",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1556/i0s530t2b9k_1210463f7998594822.jpg?1713414811",
+          "source_url": "https://maximoveis.com.br/empreendimento/1556/meridian-tower/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Meridian Tower - torre iluminada",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1556/i0s530t2b9k_1210463f79988629df.jpg?1713414811",
+          "source_url": "https://maximoveis.com.br/empreendimento/1556/meridian-tower/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Meridian Tower - acesso",
+          "category": "Acesso",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1556/i0s530t2b9k_1210463f7998adc66f.jpg?1713414811",
+          "source_url": "https://maximoveis.com.br/empreendimento/1556/meridian-tower/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Meridian Tower - skyline",
+          "category": "Implantacao",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1556/i0s530t2b9k_1210463f7998d8f466.jpg?1713414811",
+          "source_url": "https://maximoveis.com.br/empreendimento/1556/meridian-tower/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Meridian Tower - vista urbana",
+          "category": "Implantacao",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1556/i0s530t2b9k_1210463f7998f7c080.jpg?1713414811",
+          "source_url": "https://maximoveis.com.br/empreendimento/1556/meridian-tower/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Meridian Tower - marketplace",
+          "category": "Marketplace",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1556/i0s530t2b9k_1210463f79992ce6ad.jpg?1713414811",
+          "source_url": "https://maximoveis.com.br/empreendimento/1556/meridian-tower/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Meridian Tower - hall e circulacao",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1556/i0s530t2b9k_1210463f799961c9ea.jpg?1713414811",
+          "source_url": "https://maximoveis.com.br/empreendimento/1556/meridian-tower/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Meridian Tower - lounge",
+          "category": "Lazer",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1556/i0s530t2b9k_1210463f7999974dd3.jpg?1713414811",
+          "source_url": "https://maximoveis.com.br/empreendimento/1556/meridian-tower/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Meridian Tower - fachada frontal",
+          "category": "Fachada",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/3966/iPm6x89C8q3Q2Z2_39666425e86e6a90c.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/4231/meridian-tower/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Meridian Tower - fachada vertical",
+          "category": "Fachada",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/3966/iPm6x89C8q3Q2Z2_39666425e87019feb.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/4231/meridian-tower/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Meridian Tower - perspectiva urbana",
+          "category": "Implantacao",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/3966/iPm6x89C8q3Q2Z2_39666425e87399ae4.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/4231/meridian-tower/",
+          "source_label": "VG Imobiliaria"
+        },
+        {
+          "title": "Meridian Tower - estar social",
+          "category": "Lazer",
+          "image": "https://cdn.vistahost.com.br/vangogh1/vista.imobi/fotos/3966/iPm6x89C8q3Q2Z2_39666425e87a5db0d.jpg",
+          "source_url": "https://vgimobiliaria.com.br/empreendimento/4231/meridian-tower/",
+          "source_label": "VG Imobiliaria"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro de BC",
+          "description": "Localizacao central em Balneario Camboriu, com conexao direta a servicos e mobilidade urbana."
+        },
+        {
+          "icon": "Building2",
+          "title": "RV Empreendimentos",
+          "description": "As fontes institucionais associam o Meridian Tower a RV Empreendimentos."
+        },
+        {
+          "icon": "Store",
+          "title": "Marketplace",
+          "description": "As imagens de mercado destacam a area de marketplace integrada ao empreendimento."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Ambientes sociais",
+          "description": "Hall, lounge, acesso e implantacao urbana ajudam a apresentar o condominio."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fachada validada",
+          "description": "A curadoria priorizou imagens externas de Max Imoveis e VG Imobiliaria."
+        },
+        {
+          "title": "Uso misto qualificado",
+          "description": "O marketplace reforca a proposta urbana do edificio."
+        },
+        {
+          "title": "Pagina mais completa",
+          "description": "A descricao passa a explicar construtora, localizacao, acesso e areas comuns."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Meridian Tower?",
+          "answer": "No Centro de Balneario Camboriu - SC."
+        },
+        {
+          "question": "Quem e a construtora?",
+          "answer": "As fontes institucionais indicam RV Empreendimentos."
+        },
+        {
+          "question": "Quais imagens foram usadas?",
+          "answer": "Fachada, acesso, skyline, marketplace, hall e lounge."
+        },
+        {
+          "question": "O que mudou na auditoria?",
+          "answer": "Hero e galeria foram corrigidos para deixar de coincidir com a oferta ativa."
+        }
+      ],
+      "sources": [
+        "https://maximoveis.com.br/empreendimento/1556/meridian-tower/",
+        "https://vgimobiliaria.com.br/empreendimento/4231/meridian-tower/",
+        "https://www.rvempreendimentos.com.br/empreendimento/meridian-tower/",
+        "https://myside.com.br/apartamento-venda-meridian-tower-balneario-camboriu-sc"
+      ]
+    },
+    {
+      "slug": "milano-residence",
+      "hero_image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_1167_23328_1421_230626.jpg",
+      "description": "O Milano Residence foi revisado como empreendimento em Meia Praia, Itapema, com midia de fachada e areas comuns conferida em Versatil, NR Imoveis Itapema e Portal Imoveis Itapema. A nova galeria destaca fachada, acesso, hall, gourmet, kids, playground, spa, fitness, ambientes sociais e lazer. A pagina abandona a galeria da oferta ativa e passa a apresentar melhor o condominio, com beneficios focados na localizacao de Meia Praia e na estrutura comum do edificio.",
+      "seo_description": "Conheca o Milano Residence em Meia Praia, com fachada, hall, gourmet, kids, spa, fitness e lazer.",
+      "gallery": [
+        {
+          "title": "Milano Residence - fachada principal",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_1167_23328_1421_230626.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/milano-residence/itapema/meia-praia/1167",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Milano Residence - fachada lateral",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_1167_23329_1421_230626.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/milano-residence/itapema/meia-praia/1167",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Milano Residence - acesso frontal",
+          "category": "Acesso",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_1167_23337_1425_230626.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/milano-residence/itapema/meia-praia/1167",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Milano Residence - hall decorado",
+          "category": "Hall",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_1167_23330_1421_230626.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/milano-residence/itapema/meia-praia/1167",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Milano Residence - gourmet",
+          "category": "Gourmet",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_1167_23331_1421_230626.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/milano-residence/itapema/meia-praia/1167",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Milano Residence - kids",
+          "category": "Lazer",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_1167_23332_1421_230626.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/milano-residence/itapema/meia-praia/1167",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Milano Residence - spa",
+          "category": "Spa",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_1167_23333_1421_230626.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/milano-residence/itapema/meia-praia/1167",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Milano Residence - playground",
+          "category": "Playground",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_1167_23335_1421_230626.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/milano-residence/itapema/meia-praia/1167",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Milano Residence - acesso em detalhe",
+          "category": "Acesso",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/i1_1167_23337_1425_230626.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/milano-residence/itapema/meia-praia/1167",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Milano Residence - hall social",
+          "category": "Hall",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/i1_1167_23336_1425_230626.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/milano-residence/itapema/meia-praia/1167",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Milano Residence - estar gourmet",
+          "category": "Gourmet",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/i1_1167_23330_1421_230626.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/milano-residence/itapema/meia-praia/1167",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Milano Residence - brinquedoteca",
+          "category": "Lazer",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/i1_1167_23331_1421_230626.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/milano-residence/itapema/meia-praia/1167",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Milano Residence - descanso spa",
+          "category": "Spa",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/i1_1167_23332_1421_230626.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/milano-residence/itapema/meia-praia/1167",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Milano Residence - torre",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/nr/img_edificios/m1_1391_7699_1643_041024.jpeg",
+          "source_url": "https://www.nrimoveisitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/milano-residence/2316",
+          "source_label": "NR Imoveis Itapema"
+        },
+        {
+          "title": "Milano Residence - fachada externa",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/nr/img_edificios/g1_1391_7699_1643_041024.jpeg?nc=1",
+          "source_url": "https://www.nrimoveisitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/milano-residence/2316",
+          "source_label": "NR Imoveis Itapema"
+        },
+        {
+          "title": "Milano Residence - base do edificio",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/nr/img_edificios/p1_1391_7699_1643_041024.jpeg",
+          "source_url": "https://www.nrimoveisitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/milano-residence/2316",
+          "source_label": "NR Imoveis Itapema"
+        },
+        {
+          "title": "Milano Residence - fachada atual",
+          "category": "Fachada",
+          "image": "https://img.apre.me/DczJDYAgEADAbvbJfchjazEIkawhuNEY2scpYAryBOXxntAGi_yiRppg8IXGl8gpJnVW66qOYe_ZqQx6WAZjgk_yDaqdvgMJ7PYvZQE.jpg",
+          "source_url": "https://portalimoveisitapema.com.br/exclusivo-apartamento-no-milano-residence-4-suites-com-lazer-completo-e-acabamento-sofisticado",
+          "source_label": "Portal Imoveis Itapema"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Meia Praia",
+          "description": "Empreendimento em Meia Praia, Itapema, uma das regioes mais buscadas do litoral catarinense."
+        },
+        {
+          "icon": "Building2",
+          "title": "Fachada conferida",
+          "description": "As fontes externas apresentam fachadas e acesso do Milano Residence."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer familiar",
+          "description": "Kids, playground, spa, gourmet, hall e ambientes sociais compoem a leitura do condominio."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Estrutura de bem-estar",
+          "description": "A curadoria visual evidencia spa, descanso e areas comuns para rotina de praia."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Multiplas fontes",
+          "description": "Versatil, NR Imoveis Itapema e Portal Imoveis Itapema foram usados para cruzar imagens."
+        },
+        {
+          "title": "Foco em areas comuns",
+          "description": "A nova galeria evita interiores da oferta e valoriza acesso, hall e lazer."
+        },
+        {
+          "title": "Pagina mais util",
+          "description": "A copy passa a explicar localizacao, perfil do edificio e beneficios concretos."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Milano Residence?",
+          "answer": "Em Meia Praia, Itapema - SC."
+        },
+        {
+          "question": "Quais areas aparecem na nova galeria?",
+          "answer": "Fachada, acesso, hall, gourmet, kids, playground, spa e areas sociais."
+        },
+        {
+          "question": "Quais fontes foram usadas?",
+          "answer": "Versatil, NR Imoveis Itapema e Portal Imoveis Itapema."
+        },
+        {
+          "question": "O que foi corrigido?",
+          "answer": "Hero e galeria foram trocados por imagens do empreendimento e areas comuns."
+        }
+      ],
+      "sources": [
+        "https://imobiliariaversatil.com.br/edificios/milano-residence/itapema/meia-praia/1167",
+        "https://www.nrimoveisitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/milano-residence/2316",
+        "https://portalimoveisitapema.com.br/exclusivo-apartamento-no-milano-residence-4-suites-com-lazer-completo-e-acabamento-sofisticado"
+      ]
+    },
+    {
+      "slug": "monaco-residence",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/17022026163023782-1771356623.jpg",
+      "description": "O Monaco Residence foi revisado como empreendimento em Meia Praia, Itapema, com fontes de Imobille, HJ Junior e Fabiane Rigoni. A curadoria seleciona fachada, hall, gourmet, eventos, kids, fitness, jogos, playground, piscina, spa e ambientes sociais do condominio. A pagina deixa de usar fotos da cobertura ativa e passa a apresentar o edificio pela localizacao, pela estrutura de lazer e por imagens externas de mercado conferidas visualmente.",
+      "seo_description": "Conheca o Monaco Residence em Meia Praia, com fachada, hall, gourmet, piscina, spa, kids, fitness e lazer.",
+      "gallery": [
+        {
+          "title": "Monaco Residence - fachada principal",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/17022026163023782-1771356623.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-monaco-residence-EM3384",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Monaco Residence - hall de entrada",
+          "category": "Hall",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/November2021/nb1645bawIFwv7Gpwxhb.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-monaco-residence-EM3384",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Monaco Residence - hall social",
+          "category": "Hall",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/November2021/S3wdvqEuSbIfhAa4qP44.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-monaco-residence-EM3384",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Monaco Residence - gourmet",
+          "category": "Gourmet",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/November2021/IN3NNOFXIdJFtk6BqKbf.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-monaco-residence-EM3384",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Monaco Residence - gourmet decorado",
+          "category": "Gourmet",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/November2021/Q4ETpdhmt38P7CtyjPdS.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-monaco-residence-EM3384",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Monaco Residence - eventos",
+          "category": "Eventos",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/November2021/NsfIcHdEXZJUfNONEcyH.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-monaco-residence-EM3384",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Monaco Residence - convivio social",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/November2021/lbTXQeEPxkuw8IfjuPKp.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-monaco-residence-EM3384",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Monaco Residence - lounge",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/November2021/lIK4XihYAZRilGmSLLya.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-monaco-residence-EM3384",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Monaco Residence - kids",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/November2021/4kVzfXx3vlqbnwcKTQZp.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-monaco-residence-EM3384",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Monaco Residence - fitness",
+          "category": "Fitness",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/November2021/7hQHlsQVgBx7INWz50ew.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-monaco-residence-EM3384",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Monaco Residence - jogos",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/November2021/WrkUpnqHmQ9xOUsY07uO.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-monaco-residence-EM3384",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Monaco Residence - playground",
+          "category": "Playground",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/November2021/3ymvLXOnIs3zQ4ysT3na.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-monaco-residence-EM3384",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Monaco Residence - recreacao",
+          "category": "Playground",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/November2021/Z5YnGoGUydyKG5MwX2kG.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-monaco-residence-EM3384",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Monaco Residence - fachada noturna",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_448_4546_1535_260321.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/monaco-residence/itapema/448",
+          "source_label": "HJ Junior"
+        },
+        {
+          "title": "Monaco Residence - fachada frontal",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_448_4542_1535_260321.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/monaco-residence/itapema/448",
+          "source_label": "HJ Junior"
+        },
+        {
+          "title": "Monaco Residence - recepcao",
+          "category": "Hall",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_448_4541_1535_260321.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/monaco-residence/itapema/448",
+          "source_label": "HJ Junior"
+        },
+        {
+          "title": "Monaco Residence - hall decorado",
+          "category": "Hall",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_448_4549_1535_260321.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/monaco-residence/itapema/448",
+          "source_label": "HJ Junior"
+        },
+        {
+          "title": "Monaco Residence - piscina",
+          "category": "Piscina",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_448_4544_1535_260321.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/monaco-residence/itapema/448",
+          "source_label": "HJ Junior"
+        },
+        {
+          "title": "Monaco Residence - spa",
+          "category": "Spa",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_448_4548_1535_260321.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/monaco-residence/itapema/448",
+          "source_label": "HJ Junior"
+        },
+        {
+          "title": "Monaco Residence - jogos decorados",
+          "category": "Lazer",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_448_4543_1535_260321.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/monaco-residence/itapema/448",
+          "source_label": "HJ Junior"
+        },
+        {
+          "title": "Monaco Residence - gourmet social",
+          "category": "Gourmet",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/g1_448_4545_1535_260321.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/monaco-residence/itapema/448",
+          "source_label": "HJ Junior"
+        },
+        {
+          "title": "Monaco Residence - torre",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/hj/img_edificios/i1_448_4542_1535_260321.webp",
+          "source_url": "https://hjjuniorimoveis.com.br/edificios/monaco-residence/itapema/448",
+          "source_label": "HJ Junior"
+        },
+        {
+          "title": "Monaco Residence - fachada atual",
+          "category": "Fachada",
+          "image": "https://dbvebtn3wsif3.cloudfront.net/foto/3436/3436/v-1/imoveis/1367197/21075727/3.jpg",
+          "source_url": "https://fabianerigonimoveis.com/imovel/1367197-monaco-residence-rua-222-venda-meia-praia",
+          "source_label": "Fabiane Rigoni"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Meia Praia",
+          "description": "Localizado em Meia Praia, Itapema, com comunicacao de mercado ligada a Rua 222."
+        },
+        {
+          "icon": "Building2",
+          "title": "Fachada e hall",
+          "description": "As fontes apresentam fachadas, recepcao e hall decorado do empreendimento."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e spa",
+          "description": "A galeria revisada inclui piscina, spa e areas de descanso."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer completo",
+          "description": "Gourmet, eventos, kids, fitness, jogos, playground e lounge reforcam a estrutura do condominio."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fontes cruzadas",
+          "description": "Imobille, HJ Junior e Fabiane Rigoni foram usados para confirmar a midia."
+        },
+        {
+          "title": "Galeria robusta",
+          "description": "A pagina agora tem fachada, hall e muitas areas comuns do empreendimento."
+        },
+        {
+          "title": "Sem imagens da cobertura",
+          "description": "A curadoria troca a leitura de oferta por uma apresentacao do condominio."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Monaco Residence?",
+          "answer": "Em Meia Praia, Itapema - SC."
+        },
+        {
+          "question": "Quais areas comuns aparecem?",
+          "answer": "Hall, gourmet, eventos, kids, fitness, jogos, playground, piscina, spa e lounge."
+        },
+        {
+          "question": "Quais fontes foram usadas?",
+          "answer": "Imobille, HJ Junior e Fabiane Rigoni."
+        },
+        {
+          "question": "O que foi corrigido?",
+          "answer": "Fotos da cobertura ativa foram substituidas por midia do edificio e do lazer comum."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-monaco-residence-EM3384",
+        "https://hjjuniorimoveis.com.br/edificios/monaco-residence/itapema/448",
+        "https://fabianerigonimoveis.com/imovel/1367197-monaco-residence-rua-222-venda-meia-praia"
+      ]
+    }
+  ]
+}

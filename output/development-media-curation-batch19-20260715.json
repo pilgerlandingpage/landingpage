@@ -1,0 +1,1645 @@
+{
+  "batch_id": "development-media-curation-batch19-20260715",
+  "generated_at": "2026-07-15T20:00:00.000Z",
+  "items": [
+    {
+      "slug": "salzburgo",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/July2026/thumb-photoshop-novo-1-copia0041-1729800871-1783377253.jpg",
+      "description": "O Salzburgo, da Dallo, fica em Meia Praia, Itapema, proximo ao mar, com inspiracao no estilo austriaco classico. As fontes consultadas apontam torre de 45 andares, cerca de 150 m de altura, plantas de 213 m2 a 352 m2, 4 suites e 3 a 4 vagas. A pagina passa a destacar fachada, acesso e lazer do condominio, incluindo jogos, kids, fitness, gourmet, lounge e ambientes de convivencia, substituindo fotos internas de oferta.",
+      "seo_description": "Conheca o Salzburgo, Dallo em Meia Praia, Itapema, com 45 andares, lazer completo e rooftop de convivencia.",
+      "gallery": [
+        {
+          "title": "Salzburgo - acesso monumental",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/July2026/thumb-photoshop-novo-1-copia0041-1729800871-1783377253.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/apartamento-no-edificio-salzburgo-da-construtora-dallo-IM94338",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Salzburgo - fachada noturna",
+          "category": "Fachada",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/real-estates-photo/February2022/WtIe60juHR6pxl6AKAUl.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/apartamento-no-edificio-salzburgo-da-construtora-dallo-IM94338",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Salzburgo - embasamento frontal",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/real-estates-photo/September2023/thumb-ewuxcauuxxl9eaflkurd-1695746100.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/apartamento-no-edificio-salzburgo-da-construtora-dallo-IM94338",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Salzburgo - jogos gourmet",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2023/automacao-nova-2-310005-1685123418.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/apartamento-no-edificio-salzburgo-da-construtora-dallo-IM94338",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Salzburgo - playground colorido",
+          "category": "Kids",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2023/automacao-nova-2-310006-1685123418.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/apartamento-no-edificio-salzburgo-da-construtora-dallo-IM94338",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Salzburgo - hall classico",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2023/automacao-nova-2-310009-1685123419.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/apartamento-no-edificio-salzburgo-da-construtora-dallo-IM94338",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Salzburgo - fitness panoramico",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2023/automacao-nova-2-310011-1685123420.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/apartamento-no-edificio-salzburgo-da-construtora-dallo-IM94338",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Salzburgo - gourmet social",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2023/automacao-nova-2-310010-1685123420.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/apartamento-no-edificio-salzburgo-da-construtora-dallo-IM94338",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Salzburgo - lounge de eventos",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2023/automacao-nova-2-310003-1685123417.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/apartamento-no-edificio-salzburgo-da-construtora-dallo-IM94338",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Salzburgo - torre iluminada",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/real-estates-photo/July2026/thumb-img-3915-1758544108-1783384064.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/apartamento-no-edificio-salzburgo-da-construtora-dallo-IM94338",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Meia Praia perto do mar",
+          "description": "Localizacao em Itapema, proxima a orla e ao eixo de servicos de Meia Praia."
+        },
+        {
+          "icon": "Building2",
+          "title": "Torre Dallo de alto padrao",
+          "description": "Projeto com 45 andares, inspiracao austriaca, 4 suites e metragens amplas."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer completo",
+          "description": "Jogos, kids, fitness, gourmet, eventos, piscinas, spa, sauna, pet e rooftop aparecem na nova narrativa."
+        }
+      ],
+      "differentials": [
+        "Fachada e areas comuns substituem imagens internas de oferta.",
+        "Copy atualizada com Dallo, Meia Praia, 45 andares e metragens do projeto.",
+        "Galeria conservadora com acesso, lazer e convivencia do empreendimento."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Salzburgo?",
+          "answer": "Fica em Meia Praia, Itapema, proximo ao mar."
+        },
+        {
+          "question": "Quem assina o Salzburgo?",
+          "answer": "As fontes consultadas associam o empreendimento a Construtora Dallo."
+        },
+        {
+          "question": "O que mudou na pagina?",
+          "answer": "A pagina passou a mostrar fachada, acesso e areas comuns, reduzindo fotos internas de ofertas."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza acesso, fachada, jogos, kids, hall, fitness e outras areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.dallo.com.br/empreendimento/salzburgo/",
+        "https://www.imobillenegocios.com.br/imoveis/apartamento-no-edificio-salzburgo-da-construtora-dallo-IM94338",
+        "https://bravanorteimoveis.com.br/apartamento-a-venda-na-meia-praia-43e"
+      ]
+    },
+    {
+      "slug": "sante-by-embraed",
+      "hero_image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2024/12/sante-torre.jpg",
+      "description": "O Sante Boutique Residence, da Embraed, fica na regiao norte de Balneario Camboriu, a cerca de 100 m do mar, inspirado na arquitetura francesa e em hoteis boutique europeus. A Embraed informa entrega em junho de 2024, 36 residencias, uma por andar, e lazer completo com 12 ambientes. A curadoria agora usa fachada, embasamento, piscina, lounge, kids, fitness, cave gourmet e areas externas para representar o condominio.",
+      "seo_description": "Conheca o Sante Boutique Residence, Embraed em Balneario Camboriu, a 100 m do mar, com lazer completo e 1 por andar.",
+      "gallery": [
+        {
+          "title": "Sante - fachada principal",
+          "category": "Fachada",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2024/12/sante-torre.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/sante-boutique-residence",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Sante - torre vertical",
+          "category": "Fachada",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2024/12/sante-torre-portrait-600x900-2qcpo.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/sante-boutique-residence",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Sante - embasamento urbano",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-1764003588.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sante-boutique-residence-EM46506",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sante - fachada com acesso",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/sante-13-1714153248.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sante-boutique-residence-EM46506",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sante - entrada principal",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/sante-12-1714153249.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sante-boutique-residence-EM46506",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sante - piscina e roda gigante",
+          "category": "Piscina",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2024/12/sante-lazer-piscina-roda.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/sante-boutique-residence",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Sante - piscina noturna",
+          "category": "Piscina",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/sante-boutique-residence-piscina-noturna-sante-boutique-residence.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/sante-boutique-residence",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Sante - piscina com deck",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/sante-10-1714153250.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sante-boutique-residence-EM46506",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sante - raia externa",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2024/sante-9-1714153251.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sante-boutique-residence-EM46506",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sante - brinquedoteca",
+          "category": "Kids",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/sante-boutique-residence-brinquedoteca-sante-boutique-residence.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/sante-boutique-residence",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Sante - fitness",
+          "category": "Fitness",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/sante-boutique-residence-academia-sante-boutique-residence.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/sante-boutique-residence",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Sante - cave gourmet",
+          "category": "Gourmet",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/sante-boutique-residence-cave-gourmet-sante-boutique-residence.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/sante-boutique-residence",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Sante - fachada de esquina",
+          "category": "Fachada",
+          "image": "https://embraed-empreendimentos.s3-sa-east-1.amazonaws.com/uploaded_files/2020/10/sante-boutique-residence-fachada-embasamento-sante-boutique-residence.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/sante-boutique-residence",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Sante - entrega Embraed",
+          "category": "Fachada",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2024/06/24-06-sante-entrega-blog-thumb-min.png",
+          "source_url": "https://www.embraed.com.br/pt-BR/blog/embraed-entrega-sante-boutique-residences-com-100-das-unidades-vendidas",
+          "source_label": "Embraed"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "100 m do mar",
+          "description": "Endereco na regiao norte de Balneario Camboriu, perto da orla e do eixo Barra Norte."
+        },
+        {
+          "icon": "Gem",
+          "title": "Padrao Embraed",
+          "description": "Arquitetura inspirada em hoteis boutique europeus, com 36 residencias e uma por andar."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "12 ambientes de lazer",
+          "description": "Piscina, hidromassagem, spa, sauna, massagem, festas, lounge, cave gourmet, grill, kids e fitness."
+        }
+      ],
+      "differentials": [
+        "Imagens oficiais da Embraed entram como base da pagina.",
+        "Texto reforca entrega em 2024, 100 m do mar e padrao boutique.",
+        "Interiores de oferta foram substituidos por fachada e lazer."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Sante Boutique Residence?",
+          "answer": "Fica na regiao norte de Balneario Camboriu, a cerca de 100 m do mar."
+        },
+        {
+          "question": "Quando foi entregue?",
+          "answer": "A Embraed informou entrega em junho de 2024."
+        },
+        {
+          "question": "Quais areas foram destacadas?",
+          "answer": "Fachada, piscina, deck, kids, fitness, cave gourmet e areas externas."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, acesso, piscina, kids, fitness, gourmet e outras areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.embraed.com.br/pt-BR/empreendimento/sante-boutique-residence",
+        "https://www.embraed.com.br/pt-BR/blog/embraed-entrega-sante-boutique-residences-com-100-das-unidades-vendidas",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-sante-boutique-residence-EM46506"
+      ]
+    },
+    {
+      "slug": "sense-praia-brava",
+      "hero_image": "https://cdn.imoview.com.br/maximoveis/Condominios/1677/i4h48808dqpvx2hm_130776526a5e5b8a1f.jpg?1741614798",
+      "description": "O Sense Praia Brava fica na Jose Medeiros Vieira 1752, na Praia Brava, em Itajai, com proposta frente mar e apenas 6 residencias. As fontes indicam areas privativas entre aproximadamente 189 m2 e 419 m2, 3 a 4 suites, 3 a 5 vagas, acesso por reconhecimento facial, infraestrutura para automacao e previsao de entrega em fevereiro de 2027. A pagina agora usa fachada, implantacao, entorno da praia e obra real, evitando interiores de oferta.",
+      "seo_description": "Conheca o Sense Praia Brava, empreendimento frente mar em Itajai com apenas 6 residencias e entrega prevista para 2027.",
+      "gallery": [
+        {
+          "title": "Sense - fachada principal",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1677/i4h48808dqpvx2hm_130776526a5e5b8a1f.jpg?1741614798",
+          "source_url": "https://maximoveis.com.br/empreendimento/1677/sense-praia-brava/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Sense - torre frontal",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1677/i4h48808dqpvx2hm_130776526a5de50256.jpg?1741614798",
+          "source_url": "https://maximoveis.com.br/empreendimento/1677/sense-praia-brava/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Sense - vista frente mar",
+          "category": "Localizacao",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1677/i4h48808dqpvx2hm_130776526a5db07c86.jpg?1741614798",
+          "source_url": "https://maximoveis.com.br/empreendimento/1677/sense-praia-brava/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Sense - eixo da Praia Brava",
+          "category": "Localizacao",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1677/i4h48808dqpvx2hm_130776526a5e163e39.jpg?1741614798",
+          "source_url": "https://maximoveis.com.br/empreendimento/1677/sense-praia-brava/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Sense - implantacao na orla",
+          "category": "Localizacao",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1677/i4h48808dqpvx2hm_130776526a5d70c100.jpg?1741614798",
+          "source_url": "https://maximoveis.com.br/empreendimento/1677/sense-praia-brava/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Sense - detalhe de acesso",
+          "category": "Acesso",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/1677/i4h48808dqpvx2hm_130776526a5eb3165c.jpg?1741614798",
+          "source_url": "https://maximoveis.com.br/empreendimento/1677/sense-praia-brava/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Sense - praia e edificio",
+          "category": "Localizacao",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/10/sense-praia-brava-itajai-sc-3.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/sense-praia-brava/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Sense - fachada em render",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/10/sense-praia-brava-itajai-sc-2.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/sense-praia-brava/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Sense - frente mar",
+          "category": "Localizacao",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/10/sense-praia-brava-itajai-sc-1.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/sense-praia-brava/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Sense - fachada exclusiva",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/10/sense-praia-brava-itajai-sc-4.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/sense-praia-brava/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Sense - torres gemeas do projeto",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/icp/imoveis/2572/01-img_8116-1740512166104-17739452805117.jpeg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-sense-praia-brava-itajai-praia-brava-3-quartos-3-garagens-venda-ref-1070/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Sense - embasamento vertical",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/icp/imoveis/2308/img_8116-1740512166104.jpeg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-sense-praia-brava-itajai-praia-brava-3-quartos-3-garagens-venda-ref-1070/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Sense - base do empreendimento",
+          "category": "Acesso",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/icp/imoveis/2576/05_ceg_sense_embasamento_r03-17798114443707.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-sense-praia-brava-itajai-praia-brava-3-quartos-3-garagens-venda-ref-1070/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Sense - obra na Praia Brava",
+          "category": "Obra",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/icp/imoveis/2152/oip-17634999716172.webp",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-sense-praia-brava-itajai-praia-brava-3-quartos-3-garagens-venda-ref-1070/",
+          "source_label": "Guilherme Pilger"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente mar na Brava",
+          "description": "Endereco na Jose Medeiros Vieira 1752, em um dos pontos mais valorizados de Itajai."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Exclusividade real",
+          "description": "Projeto com apenas 6 residencias, plantas amplas e alto nivel de privacidade."
+        },
+        {
+          "icon": "Cpu",
+          "title": "Tecnologia e conforto",
+          "description": "Reconhecimento facial, automacao, isolamento acustico e infraestrutura de alto padrao."
+        }
+      ],
+      "differentials": [
+        "Galeria focada em fachada, praia, implantacao e obra real.",
+        "Copy corrige o foco para empreendimento frente mar e 6 residencias.",
+        "Interiores e plantas foram evitados por nao representarem o condominio."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Sense Praia Brava?",
+          "answer": "Fica na Jose Medeiros Vieira 1752, Praia Brava, Itajai."
+        },
+        {
+          "question": "Quantas residencias possui?",
+          "answer": "As fontes consultadas indicam apenas 6 residencias."
+        },
+        {
+          "question": "Qual e a previsao de entrega?",
+          "answer": "A fonte consultada informa previsao de entrega para fevereiro de 2027."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, localizacao, acesso, obra e outras areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://maximoveis.com.br/empreendimento/1677/sense-praia-brava/",
+        "https://lancamento.invexo.com.br/sc/sense-praia-brava/",
+        "https://myside.com.br/apartamento-venda-sense-praia-brava-itajai-sc",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-sense-praia-brava-itajai-praia-brava-3-quartos-3-garagens-venda-ref-1070/"
+      ]
+    },
+    {
+      "slug": "serenity",
+      "hero_image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/serenity-residencial-balneario-camboriu-sc-10.jpg",
+      "description": "O Serenity Residencial, da Silva Packer, fica no Centro de Balneario Camboriu, na Rua 3614/Rua 2550 conforme as fontes comerciais, com torre residencial de escala exclusiva. A ficha do projeto apresenta 23 residencias, 1 cobertura duplex, 2 elevadores e 1 pavimento de lazer, com plantas de 173,67 m2 a 347,34 m2. A nova curadoria remove a leitura de oferta interna e destaca fachada, base, lazer, kids, fitness e vistas do empreendimento.",
+      "seo_description": "Conheca o Serenity Residencial, Silva Packer no Centro de Balneario Camboriu, com torre exclusiva e lazer completo.",
+      "gallery": [
+        {
+          "title": "Serenity - torre vertical",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/serenity-residencial-balneario-camboriu-sc-10.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/serenity-residencial/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Serenity - fachada principal",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2024/06/edificio-serenity-balneario-camboriu-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-serenity/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Serenity - acesso urbano",
+          "category": "Acesso",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/il/imoveis/1213/2jpg-name-7d6a05fcb32f8ad9ae763560f44d728836164a6f27cce29ebc99251c6e65056f-17165701721418.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-serenity-balneario-camboriu-centro-4-quartos-2-garagens-venda-ref-1213/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Serenity - fachada noturna",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/serenity-residencial-balneario-camboriu-sc-13.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/serenity-residencial/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Serenity - terraco panoramico",
+          "category": "Convivencia",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/serenity-residencial-balneario-camboriu-sc-23.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/serenity-residencial/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Serenity - fachada com skyline",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/serenity-residencial-balneario-camboriu-sc-22.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/serenity-residencial/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Serenity - base do edificio",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2024/06/edificio-serenity-balneario-camboriu-principal.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-serenity/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Serenity - fachada e living social",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2024/06/edificio-serenity-balneario-camboriu-principal.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-serenity/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Serenity - torre em perspectiva",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2024/06/edificio-serenity-balneario-camboriu-1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-serenity/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Serenity - lazer externo",
+          "category": "Lazer",
+          "image": "https://www.silvapacker.com.br/wp-content/uploads/2024/09/area-de-lazer.jpg",
+          "source_url": "https://www.silvapacker.com.br/empreendimentos/serenity/",
+          "source_label": "Silva Packer"
+        },
+        {
+          "title": "Serenity - brinquedoteca",
+          "category": "Kids",
+          "image": "https://www.silvapacker.com.br/wp-content/uploads/2024/09/Brinquedoteca-ALTA-scaled.jpg",
+          "source_url": "https://www.silvapacker.com.br/empreendimentos/serenity/",
+          "source_label": "Silva Packer"
+        },
+        {
+          "title": "Serenity - academia wellness",
+          "category": "Fitness",
+          "image": "https://www.silvapacker.com.br/wp-content/uploads/2024/09/academia-2.jpg",
+          "source_url": "https://www.silvapacker.com.br/empreendimentos/serenity/",
+          "source_label": "Silva Packer"
+        },
+        {
+          "title": "Serenity - fitness equipado",
+          "category": "Fitness",
+          "image": "https://www.silvapacker.com.br/wp-content/uploads/2024/09/academia.jpg",
+          "source_url": "https://www.silvapacker.com.br/empreendimentos/serenity/",
+          "source_label": "Silva Packer"
+        },
+        {
+          "title": "Serenity - coroamento com mar",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/serenity-residencial-balneario-camboriu-sc-15.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/serenity-residencial/",
+          "source_label": "Invexo Lancamentos"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro de Balneario",
+          "description": "Localizacao central, com acesso pratico a orla, servicos e rotina urbana."
+        },
+        {
+          "icon": "Building2",
+          "title": "Torre exclusiva",
+          "description": "Projeto com 23 residencias, 1 cobertura duplex, 2 elevadores e 1 pavimento de lazer."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer funcional",
+          "description": "Fitness, brinquedoteca, convivencia e areas externas complementam a proposta residencial."
+        }
+      ],
+      "differentials": [
+        "Selecao visual evita ambientes de unidade e prioriza fachada e areas comuns.",
+        "Copy reposicionada com Silva Packer, Centro e baixa densidade.",
+        "Pranchas de fonte oficial e comercial foram cruzadas para melhorar a confiabilidade."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Serenity Residencial?",
+          "answer": "Fica no Centro de Balneario Camboriu, com fontes comerciais indicando a Rua 3614 e a Rua 2550."
+        },
+        {
+          "question": "Quem assina o projeto?",
+          "answer": "A fonte oficial consultada e da Silva Packer."
+        },
+        {
+          "question": "Quais imagens foram priorizadas?",
+          "answer": "Fachada, base, acesso, lazer, brinquedoteca, fitness e vistas do empreendimento."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, acesso, convivencia, lazer, kids, fitness e outras areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.silvapacker.com.br/empreendimentos/serenity/",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-serenity/",
+        "https://lancamento.invexo.com.br/sc/serenity-residencial/",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-serenity-balneario-camboriu-centro-4-quartos-2-garagens-venda-ref-1213/"
+      ]
+    },
+    {
+      "slug": "sirena",
+      "hero_image": "https://torresdabrava.com/wp-content/uploads/2024/10/Torres-da-Brava-1.jpg",
+      "description": "O Torres da Brava Sirena, da Lotisa, fica na Av. Luci Canziani 100, Praia Brava, Itajai, em obras, com arquitetura contemporanea e design voltado ao portal de entrada da Brava. O projeto trabalha plantas de 78 m2 a 110 m2, ate 2 vagas, e lazer de alto padrao com 4 ambientes de eventos, pub, quiosque gourmet, quadra, kids, playground, piscinas, jogos e academia. A pagina passa a mostrar torres, implantacao, piscinas, fitness e lazer real do condominio.",
+      "seo_description": "Conheca o Torres da Brava Sirena, Lotisa na Praia Brava, Itajai, com piscinas, kids, pub, quadra e academia.",
+      "gallery": [
+        {
+          "title": "Sirena - torres na Praia Brava",
+          "category": "Fachada",
+          "image": "https://torresdabrava.com/wp-content/uploads/2024/10/Torres-da-Brava-1.jpg",
+          "source_url": "https://torresdabrava.com/",
+          "source_label": "Torres da Brava"
+        },
+        {
+          "title": "Sirena - implantacao frontal",
+          "category": "Fachada",
+          "image": "https://www.lotisa.com.br/wp-content/uploads/2024/12/COMPARTILHAMENTO-SIRENA.png",
+          "source_url": "https://www.lotisa.com.br/empreendimento/sirena-torres-da-brava/",
+          "source_label": "Lotisa"
+        },
+        {
+          "title": "Sirena - fachada e entorno",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/real-estates-photo/August2022/sirena-1661448439.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torres-da-brava-sirena-EM13688",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sirena - vista aerea das torres",
+          "category": "Localizacao",
+          "image": "https://www.adamantenegocios.com.br/fotos/g/torres-da-brava-sirena-praia-brava-itajai-sc-af031dde.jpg?token=UDVaQW5qVzFMeVROUnpOKzZmbGpoSkRHYlRQTWo2V3VvMWFTNHdvY1VGekV1QldwY1ZFYWMrcUlDN3RTNnJudFNteHd3N0duMEpsM2xpMWZNQVlVR3NCdzZUMHNRMXAyT0c4dktQcGg3WWxyb205TmxpYWJCbFNWSEdLSk9xMmV2a051REIveVZaK2htTm1KOWhsZFZLMmNFbHprZVdiTGkxY3BSM1VOSGVjPQ==",
+          "source_url": "https://www.adamantenegocios.com.br/empreendimento/8/torres-da-brava-sirena/",
+          "source_label": "Adamante Negocios"
+        },
+        {
+          "title": "Sirena - conjunto residencial",
+          "category": "Fachada",
+          "image": "https://torresdabrava.com/wp-content/uploads/2024/10/Torres-da-Brava-2.jpg",
+          "source_url": "https://torresdabrava.com/",
+          "source_label": "Torres da Brava"
+        },
+        {
+          "title": "Sirena - piscina com vista",
+          "category": "Piscina",
+          "image": "https://www.lotisa.com.br/wp-content/uploads/2024/12/Background-Mobile-2.png",
+          "source_url": "https://www.lotisa.com.br/empreendimento/sirena-torres-da-brava/",
+          "source_label": "Lotisa"
+        },
+        {
+          "title": "Sirena - deck da piscina",
+          "category": "Piscina",
+          "image": "https://www.adamantenegocios.com.br/fotos/g/torres-da-brava-sirena-praia-brava-itajai-sc-d4c3cf56.jpg?token=UDVaQW5qVzFMeVROUnpOKzZmbGpoSkRHYlRQTWo2V3VvMWFTNHdvY1VGekV1QldwY1ZFYWMrcUlDN3RTNnJudFNteHd3N0duMEpsM2xpMWZNQVlVR3NCdzZUMHNRMXAyT0c4dktQcGg3WWxyb205TmxpYWJCbFNWSEdLSk9xMmUvNEdYZy9sdEZrampWL3hUdEtlM3dZcFQvV3M2azA4V3ZqOEJ0a2o0NjhFPQ==",
+          "source_url": "https://www.adamantenegocios.com.br/empreendimento/8/torres-da-brava-sirena/",
+          "source_label": "Adamante Negocios"
+        },
+        {
+          "title": "Sirena - piscina infantil",
+          "category": "Piscina",
+          "image": "https://torresdabrava.com/wp-content/uploads/2024/10/91-lazerpiscinainfantil.jpg",
+          "source_url": "https://torresdabrava.com/",
+          "source_label": "Torres da Brava"
+        },
+        {
+          "title": "Sirena - base ajardinada",
+          "category": "Acesso",
+          "image": "https://cdn.vistahost.com.br/cli36621/vista.imobi/fotos/3556/il1g8h_35566398f50ce0ee7.jpg",
+          "source_url": "https://manicamarin.com.br/imovel/empreendimento-praia-brava-de-itajai-itajai-sc-1895",
+          "source_label": "Manica Marin"
+        },
+        {
+          "title": "Sirena - piscina externa",
+          "category": "Piscina",
+          "image": "https://www.adamantenegocios.com.br/fotos/g/torres-da-brava-sirena-praia-brava-itajai-sc-dff55079.jpg?token=UDVaQW5qVzFMeVROUnpOKzZmbGpoSkRHYlRQTWo2V3VvMWFTNHdvY1VGekV1QldwY1ZFYWMrcUlDN3RTNnJudFNteHd3N0duMEpsM2xpMWZNQVlVR3NCdzZUMHNRMXAyT0c4dktQcGg3WWxyb205TmxpYWJCbFNWSEdLSk9xMmVJTjIxQ3BsTWZyaU1Mc0tNRU9nNkZCY2syU01Ha2dpa25CQTVpcnVNUXdzPQ==",
+          "source_url": "https://www.adamantenegocios.com.br/empreendimento/8/torres-da-brava-sirena/",
+          "source_label": "Adamante Negocios"
+        },
+        {
+          "title": "Sirena - espaco gourmet externo",
+          "category": "Gourmet",
+          "image": "https://www.adamantenegocios.com.br/fotos/g/torres-da-brava-sirena-praia-brava-itajai-sc-bf16aee1.jpg?token=UDVaQW5qVzFMeVROUnpOKzZmbGpoSkRHYlRQTWo2V3VvMWFTNHdvY1VGekV1QldwY1ZFYWMrcUlDN3RTNnJudFNteHd3N0duMEpsM2xpMWZNQVlVR3NCdzZUMHNRMXAyT0c4dktQcGg3WWxyb205TmxpYWJCbFNWSEdLSk9xMmV3ZXVTc0VTeWxRN1htR3hJY2xreUw3TjBLaG1kWnZKcEIyMXNsN2dNZU4wPQ==",
+          "source_url": "https://www.adamantenegocios.com.br/empreendimento/8/torres-da-brava-sirena/",
+          "source_label": "Adamante Negocios"
+        },
+        {
+          "title": "Sirena - jogos iluminados",
+          "category": "Jogos",
+          "image": "https://www.adamantenegocios.com.br/fotos/g/torres-da-brava-sirena-praia-brava-itajai-sc-afffebe2.jpg?token=UDVaQW5qVzFMeVROUnpOKzZmbGpoSkRHYlRQTWo2V3VvMWFTNHdvY1VGekV1QldwY1ZFYWMrcUlDN3RTNnJudFNteHd3N0duMEpsM2xpMWZNQVlVR3NCdzZUMHNRMXAyT0c4dktQcGg3WWxyb205TmxpYWJCbFNWSEdLSk9xMmVFd09jZS9RYmtDVyt2MXlIYzh4eEk2WUFwc3RNN0FtdHlyNjlaa3p3Nm93PQ==",
+          "source_url": "https://www.adamantenegocios.com.br/empreendimento/8/torres-da-brava-sirena/",
+          "source_label": "Adamante Negocios"
+        },
+        {
+          "title": "Sirena - fitness e paisagismo",
+          "category": "Fitness",
+          "image": "https://cdn.vistahost.com.br/cli36621/vista.imobi/fotos/3556/if2y9k_35566398f51e1685c.jpg",
+          "source_url": "https://manicamarin.com.br/imovel/empreendimento-praia-brava-de-itajai-itajai-sc-1895",
+          "source_label": "Manica Marin"
+        },
+        {
+          "title": "Sirena - hall de convivencia",
+          "category": "Hall",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/3wCRQBYG6YXx8Rc4DD3M.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torres-da-brava-sirena-EM13688",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sirena - piscina e lazer",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/6cyJ9gJlVXMLQpBNGwBx.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torres-da-brava-sirena-EM13688",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sirena - playground externo",
+          "category": "Kids",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/qD3YoVCQa2oG3ctehvd2.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torres-da-brava-sirena-EM13688",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Av. Luci Canziani",
+          "description": "Endereco na Praia Brava, em Itajai, com acesso facil ao eixo da orla e da Osvaldo Reis."
+        },
+        {
+          "icon": "Building2",
+          "title": "Projeto Lotisa",
+          "description": "Torres com arquitetura contemporanea e plantas de 78 m2 a 110 m2."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer de alto padrao",
+          "description": "Eventos, pub, gourmet, quadra, kids, playground, piscinas, jogos e academia."
+        }
+      ],
+      "differentials": [
+        "Fotos do empreendimento substituem imagens internas de ofertas.",
+        "Texto reforca Lotisa, Praia Brava, obras e lazer compartilhado.",
+        "Galeria inclui implantacao, piscinas, hall, fitness, jogos e kids."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Torres da Brava Sirena?",
+          "answer": "Fica na Av. Luci Canziani 100, Praia Brava, Itajai."
+        },
+        {
+          "question": "Quem assina o empreendimento?",
+          "answer": "A fonte oficial consultada associa o Sirena a Lotisa."
+        },
+        {
+          "question": "Quais areas de lazer aparecem?",
+          "answer": "Piscinas, eventos, pub, quiosque gourmet, quadra, kids, playground, jogos e academia."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, localizacao, piscina, acesso, gourmet, jogos e outras areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.lotisa.com.br/empreendimento/sirena-torres-da-brava/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-torres-da-brava-sirena-EM13688",
+        "https://torresdabrava.com/",
+        "https://www.adamantenegocios.com.br/empreendimento/8/torres-da-brava-sirena/",
+        "https://manicamarin.com.br/imovel/empreendimento-praia-brava-de-itajai-itajai-sc-1895"
+      ]
+    },
+    {
+      "slug": "sirius-residence",
+      "hero_image": "https://stayou.sfo3.digitaloceanspaces.com/properties/orulo/1423570-xlarge.webp",
+      "description": "O Sirius Residence correto deste lote e o empreendimento da Reference no Centro de Balneario Camboriu, na Rua 3250, 291, a cerca de 600 m da Praia Central, com entrega prevista para agosto de 2026. As fontes indicam areas privativas entre 141 m2 e 295 m2 e lazer com piscina descoberta, piscina coberta, bar molhado, lounges, lareira externa, playground, miniquadra, brinquedoteca, eventos, gourmet, adega, jogos, fitness e saunas. A curadoria descarta fontes de outro Sirius em Navegantes e usa apenas o projeto de BC.",
+      "seo_description": "Conheca o Sirius Residence, Reference no Centro de Balneario Camboriu, com entrega prevista para 2026 e lazer completo.",
+      "gallery": [
+        {
+          "title": "Sirius - fachada principal",
+          "category": "Fachada",
+          "image": "https://stayou.sfo3.digitaloceanspaces.com/properties/orulo/1423570-xlarge.webp",
+          "source_url": "https://stayou.com.br/site/rev3-sp/imovel/sirius-residence-reference-empreendimentos",
+          "source_label": "Stayou"
+        },
+        {
+          "title": "Sirius - torre ao entardecer",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/il/imoveis/1538/a1-17443050785588.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-sirius-residence-balneario-camboriu-centro-3-quartos-venda-ref-1538/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Sirius - fachada vertical",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/455/screenshot-14.png?1752242033",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/455/sirius-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Sirius - torre em obra",
+          "category": "Obra",
+          "image": "https://stayou.sfo3.digitaloceanspaces.com/properties/orulo/1423571-xlarge.webp",
+          "source_url": "https://stayou.com.br/site/rev3-sp/imovel/sirius-residence-reference-empreendimentos",
+          "source_label": "Stayou"
+        },
+        {
+          "title": "Sirius - embasamento frontal",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2024/imagens-site-50006-1706276417.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sirius-residence--EM09390",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sirius - base urbana",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2024/imagens-site-50024-1706276421.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sirius-residence--EM09390",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sirius - fachada MySide",
+          "category": "Fachada",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/353503/images/_dbd22ba3145522168729912910887426.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-sirius-residence-balneario-camboriu-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Sirius - construtora Reference",
+          "category": "Fachada",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/companyconstruction/615/images/_4ef30115252118168735126710999712.jpg",
+          "source_url": "https://myside.com.br/apartamento-venda-sirius-residence-balneario-camboriu-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Sirius - terraco de convivencia",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/455/screenshot-15.png?1752242033",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/455/sirius-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Sirius - piscina privativa social",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/455/screenshot-16.png?1752242033",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/455/sirius-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Sirius - piscina externa",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/455/screenshot-17.png?1752242033",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/455/sirius-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Sirius - lounge com lareira",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/455/screenshot-18.png?1752242033",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/455/sirius-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Sirius - miniquadra",
+          "category": "Lazer",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/455/screenshot-19.png?1752242033",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/455/sirius-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Sirius - playground",
+          "category": "Kids",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/455/screenshot-20.png?1752242033",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/455/sirius-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Sirius - rooftop de lazer",
+          "category": "Rooftop",
+          "image": "https://stayou.sfo3.digitaloceanspaces.com/properties/orulo/1423556-xlarge.webp",
+          "source_url": "https://stayou.com.br/site/rev3-sp/imovel/sirius-residence-reference-empreendimentos",
+          "source_label": "Stayou"
+        },
+        {
+          "title": "Sirius - piscina com palmeira",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2024/imagens-site-50004-1706276416.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sirius-residence--EM09390",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sirius - deck panoramico",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2024/imagens-site-50018-1706276419.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sirius-residence--EM09390",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 3250 no Centro",
+          "description": "Endereco a cerca de 600 m da Praia Central e perto de servicos como Carrefour e PZ EcoMall."
+        },
+        {
+          "icon": "Building2",
+          "title": "Reference em BC",
+          "description": "Primeiro projeto da Reference em Balneario Camboriu, com entrega prevista para agosto de 2026."
+        },
+        {
+          "icon": "Waves",
+          "title": "Lazer completo",
+          "description": "Piscinas, bar molhado, lounges, lareira, playground, miniquadra, gourmet, adega, jogos, fitness e saunas."
+        }
+      ],
+      "differentials": [
+        "Fonte incorreta de Navegantes foi descartada da curadoria.",
+        "Galeria usa fachada, obra e lazer do Sirius Residence de Balneario Camboriu.",
+        "Copy reforca Rua 3250, Reference, entrega prevista e areas comuns."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Sirius Residence?",
+          "answer": "Fica na Rua 3250, 291, Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Quando deve ser entregue?",
+          "answer": "A MySide informa previsao de entrega para agosto de 2026."
+        },
+        {
+          "question": "Qual fonte foi descartada?",
+          "answer": "Foi descartada a fonte de um Sirius Residence em Navegantes, pois nao corresponde ao slug de Balneario Camboriu."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, obra, acesso, convivencia, piscina, lazer e outras areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://myside.com.br/apartamento-venda-sirius-residence-balneario-camboriu-sc",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-sirius-residence--EM09390",
+        "https://felicitanegocios.com.br/empreendimento/455/sirius-residence/",
+        "https://stayou.com.br/site/rev3-sp/imovel/sirius-residence-reference-empreendimentos",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-sirius-residence-balneario-camboriu-centro-3-quartos-venda-ref-1538/"
+      ]
+    },
+    {
+      "slug": "soho-village",
+      "hero_image": "https://cdn.imoview.com.br/bryann/Condominios/550/fachada-1.jpg?1779131820",
+      "description": "O SoHo Village, da BenveArtt, fica na Rua 600, no Centro de Balneario Camboriu, a cerca de 750 m da Praia Central. O projeto tem inspiracao cosmopolita em Nova York e entrega informada para agosto de 2024, com lazer completo: piscinas adulto e infantil, raia, jacuzzi, sauna umida, jogos, pub, outdoor grill, beleza, kids, playground, academia, tres ambientes de eventos, gourmet, quadra, pet space e home office. A pagina agora usa fachada, piscina, fitness, jogos, gourmet e convivencia.",
+      "seo_description": "Conheca o SoHo Village, BenveArtt no Centro de Balneario Camboriu, com lazer completo e inspiracao nova-iorquina.",
+      "gallery": [
+        {
+          "title": "SoHo Village - fachada real",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/550/fachada-1.jpg?1779131820",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/550/soho-village/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "SoHo Village - fachada vertical",
+          "category": "Fachada",
+          "image": "https://b.casteldigital.com.br/flyimoveis/ig/il/imoveis/1061/ben_soho_fachada_cp_ef-16963646102272.jpg",
+          "source_url": "https://www.flyimoveis.com.br/imovel/apartamento-no-edificio-soho-village-balneario-camboriu-centro-4-quartos-3-garagens-venda-ref-1061/",
+          "source_label": "Fly Imoveis"
+        },
+        {
+          "title": "SoHo Village - torre frontal",
+          "category": "Fachada",
+          "image": "https://www.benveartt.com.br/uploads/imagens/crop_fachada-soho-village-436.jpg",
+          "source_url": "https://www.benveartt.com.br/empreendimento/soho-village",
+          "source_label": "BenveArtt"
+        },
+        {
+          "title": "SoHo Village - fachada noturna",
+          "category": "Fachada",
+          "image": "https://www.benveartt.com.br/uploads/imagens/800x600_soho-village-26-8599.jpg",
+          "source_url": "https://www.benveartt.com.br/empreendimento/soho-village",
+          "source_label": "BenveArtt"
+        },
+        {
+          "title": "SoHo Village - fachada completa",
+          "category": "Fachada",
+          "image": "https://www.benveartt.com.br/uploads/imagens/800x600_soho-village-26-3914.jpg",
+          "source_url": "https://www.benveartt.com.br/empreendimento/soho-village",
+          "source_label": "BenveArtt"
+        },
+        {
+          "title": "SoHo Village - piscina e paisagismo",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/550/fachada-27.jpg?1779131820",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/550/soho-village/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "SoHo Village - piscina linear",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/550/fachada-29.jpg?1779131820",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/550/soho-village/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "SoHo Village - deck da piscina",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/550/fachada-38.jpg?1779131820",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/550/soho-village/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "SoHo Village - piscina com lounge",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/550/fachada-26.jpg?1779131820",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/550/soho-village/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "SoHo Village - outdoor grill",
+          "category": "Gourmet",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/550/fachada-30.jpg?1779131820",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/550/soho-village/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "SoHo Village - pergolado social",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/550/fachada-31.jpg?1779131820",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/550/soho-village/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "SoHo Village - fitness",
+          "category": "Fitness",
+          "image": "https://www.benveartt.com.br/uploads/imagens/800x600_soho-village-26-6313.jpg",
+          "source_url": "https://www.benveartt.com.br/empreendimento/soho-village",
+          "source_label": "BenveArtt"
+        },
+        {
+          "title": "SoHo Village - terraco social",
+          "category": "Convivencia",
+          "image": "https://www.benveartt.com.br/uploads/imagens/800x600_soho-village-26-9670.jpg",
+          "source_url": "https://www.benveartt.com.br/empreendimento/soho-village",
+          "source_label": "BenveArtt"
+        },
+        {
+          "title": "SoHo Village - jogos",
+          "category": "Jogos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/550/fachada-21.jpg?1779131820",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/550/soho-village/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "SoHo Village - pub e jogos",
+          "category": "Jogos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/550/fachada-23.jpg?1779131820",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/550/soho-village/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "SoHo Village - convivencia interna",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/550/fachada-24.jpg?1779131820",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/550/soho-village/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "SoHo Village - bilhar",
+          "category": "Jogos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/550/fachada-16.jpg?1779131820",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/550/soho-village/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "SoHo Village - eventos",
+          "category": "Eventos",
+          "image": "https://www.benveartt.com.br/uploads/imagens/800x600_soho-village-26-5194.jpg",
+          "source_url": "https://www.benveartt.com.br/empreendimento/soho-village",
+          "source_label": "BenveArtt"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro conectado",
+          "description": "Rua 600, no Centro de Balneario Camboriu, com acesso a servicos e a cerca de 750 m da Praia Central."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer de 22 espacos",
+          "description": "Piscinas, jacuzzi, sauna, jogos, pub, outdoor grill, beleza, kids, academia, eventos, gourmet, quadra, pet e home office."
+        },
+        {
+          "icon": "Building2",
+          "title": "BenveArtt entregue",
+          "description": "Projeto com inspiracao em Nova York e entrega informada para agosto de 2024."
+        }
+      ],
+      "differentials": [
+        "Galeria usa fachada real, piscinas, fitness, jogos, gourmet e eventos.",
+        "Copy reforca BenveArtt, Rua 600 e lazer amplo.",
+        "Placeholders e fotos internas de ofertas foram descartados."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o SoHo Village?",
+          "answer": "Fica na Rua 600, no Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Quando foi entregue?",
+          "answer": "A MySide informa entrega em agosto de 2024."
+        },
+        {
+          "question": "Quais areas aparecem na galeria?",
+          "answer": "Fachada, piscinas, fitness, jogos, gourmet, terraco social, eventos e convivencia."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, piscina, gourmet, convivencia, fitness, jogos e outras areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.benveartt.com.br/empreendimento/soho-village",
+        "https://myside.com.br/apartamento-venda-soho-village-balneario-camboriu-sc",
+        "https://felicitanegocios.com.br/empreendimento/550/soho-village/",
+        "https://www.flyimoveis.com.br/imovel/apartamento-no-edificio-soho-village-balneario-camboriu-centro-4-quartos-3-garagens-venda-ref-1061/"
+      ]
+    },
+    {
+      "slug": "solar-goncalves",
+      "hero_image": "https://cdn.imoview.com.br/bryann/Condominios/384/zuqeo-solar-goncalves-felicita-balneario-camboriu-8-1685538913.jpeg?1695740818",
+      "description": "O Solar Goncalves Residence e um empreendimento Embraed em Pioneiros/Barra Norte, Balneario Camboriu, com leitura proxima ao mar e a Roda Gigante. As fontes descrevem influencia do estilo portugues, privacidade de 1 residencia por andar, 27 a 30 pavimentos conforme a fonte, e lazer com piscina adulto, eventos, jogos, cinema, brinquedoteca, academia, playground, spa, descanso e massagem. A primeira prancha veio fraca, entao foi gerada prancha extra para substituir interiores por fachada, piscina, hall e lazer real.",
+      "seo_description": "Conheca o Solar Goncalves Residence, Embraed em Pioneiros, Balneario Camboriu, com piscina, cinema, fitness e spa.",
+      "gallery": [
+        {
+          "title": "Solar Goncalves - fachada vertical",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/384/zuqeo-solar-goncalves-felicita-balneario-camboriu-8-1685538913.jpeg?1695740818",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/384/edificio-solar-goncalves-residence-embraed/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Solar Goncalves - torre e entorno",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-solar-goncalves-balneario-camboriu-1.1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-solar-goncalves-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Solar Goncalves - fachada em perspectiva",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-solar-goncalves-balneario-camboriu-1.1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-solar-goncalves-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Solar Goncalves - acesso iluminado",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/27072023155044288-1690483844.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-solar-goncalves-residence-EM79292",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Solar Goncalves - base da torre",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/July2023/automacao-nova-marco-liane0000-1689365913.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-solar-goncalves-residence-EM79292",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Solar Goncalves - hall classico",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/July2023/automacao-nova-marco-liane0018-1689365914.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-solar-goncalves-residence-EM79292",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Solar Goncalves - hall Embraed",
+          "category": "Hall",
+          "image": "https://litoralvertical.com/wp-content/uploads/2014/07/edificio-solar-goncalves-balneario-camboriu-qma462-3-1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-solar-goncalves-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Solar Goncalves - lounge social",
+          "category": "Convivencia",
+          "image": "https://litoralvertical.com/wp-content/uploads/2014/07/edificio-solar-goncalves-balneario-camboriu-qma462-4-1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-solar-goncalves-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Solar Goncalves - estar do hall",
+          "category": "Hall",
+          "image": "https://litoralvertical.com/wp-content/uploads/2014/07/edificio-solar-goncalves-balneario-camboriu-qma462-5-1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-solar-goncalves-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Solar Goncalves - piscina adulta",
+          "category": "Piscina",
+          "image": "https://litoralvertical.com/wp-content/uploads/2014/07/edificio-solar-goncalves-balneario-camboriu-qma462-6-1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-solar-goncalves-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Solar Goncalves - eventos",
+          "category": "Eventos",
+          "image": "https://litoralvertical.com/wp-content/uploads/2014/07/edificio-solar-goncalves-balneario-camboriu-qma462-7-1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-solar-goncalves-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Solar Goncalves - fitness",
+          "category": "Fitness",
+          "image": "https://litoralvertical.com/wp-content/uploads/2014/07/edificio-solar-goncalves-balneario-camboriu-qma462-8-1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-solar-goncalves-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Solar Goncalves - jogos",
+          "category": "Jogos",
+          "image": "https://litoralvertical.com/wp-content/uploads/2014/07/edificio-solar-goncalves-balneario-camboriu-qma462-9-1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-solar-goncalves-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Solar Goncalves - brinquedoteca",
+          "category": "Kids",
+          "image": "https://litoralvertical.com/wp-content/uploads/2014/07/edificio-solar-goncalves-balneario-camboriu-qma462-10-1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-solar-goncalves-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Solar Goncalves - cinema",
+          "category": "Cinema",
+          "image": "https://litoralvertical.com/wp-content/uploads/2014/07/edificio-solar-goncalves-balneario-camboriu-qma462-11-1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-solar-goncalves-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Solar Goncalves - spa e massagem",
+          "category": "Wellness",
+          "image": "https://litoralvertical.com/wp-content/uploads/2014/07/edificio-solar-goncalves-balneario-camboriu-qma462-12-1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-solar-goncalves-residence/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Pioneiros e Barra Norte",
+          "description": "Localizacao em Balneario Camboriu, proxima ao mar, a Barra Norte e a Roda Gigante."
+        },
+        {
+          "icon": "Gem",
+          "title": "Padrao Embraed",
+          "description": "Estilo portugues, privacidade de 1 residencia por andar e fachada de alto padrao."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer completo",
+          "description": "Piscina, eventos, jogos, cinema, brinquedoteca, academia, playground, spa, descanso e massagem."
+        }
+      ],
+      "differentials": [
+        "Prancha extra gerada para encontrar lazer real e reduzir fotos internas.",
+        "Galeria usa fachada, piscina, hall, eventos, fitness, jogos, kids, cinema e spa.",
+        "Texto reforca Embraed, Pioneiros/Barra Norte e area comum completa."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Solar Goncalves Residence?",
+          "answer": "Fica em Pioneiros/Barra Norte, Balneario Camboriu, proximo ao mar."
+        },
+        {
+          "question": "Quem assina o empreendimento?",
+          "answer": "As fontes consultadas associam o Solar Goncalves Residence a Embraed."
+        },
+        {
+          "question": "Por que houve prancha extra?",
+          "answer": "Porque a primeira extracao tinha muitas fotos internas; a prancha extra trouxe piscina, hall, cinema, fitness e spa."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, acesso, hall, convivencia, piscina, eventos e outras areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://felicitanegocios.com.br/empreendimento/384/edificio-solar-goncalves-residence-embraed/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-solar-goncalves-residence-EM79292",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-solar-goncalves-residence/"
+      ]
+    },
+    {
+      "slug": "splendia-tower",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2022/07/edificio-splendia-tower-balneario-camboriu-1-1.jpg",
+      "description": "O Splendia Tower, da FG Empreendimentos, fica na Rua 2300, Centro de Balneario Camboriu, em rua reta ao mar. As fontes indicam empreendimento entregue em 2020, 43 a 49 pavimentos conforme a fonte, 2 residencias por andar, 3 elevadores, box de praia, portaria 24h e cerca de 1.600 m2 de lazer. A nova pagina passa a exibir fachada, piscina, playground, jogos, cinema, kids, quadra, eventos e gourmet em vez de fotos internas de ofertas.",
+      "seo_description": "Conheca o Splendia Tower, FG no Centro de Balneario Camboriu, rua reta ao mar, com 1.600 m2 de lazer.",
+      "gallery": [
+        {
+          "title": "Splendia Tower - fachada inferior",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2022/07/edificio-splendia-tower-balneario-camboriu-1-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-splendia-tower/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Splendia Tower - torre vertical",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/125/img-64.jpg?1681619030",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/125/splendia-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Splendia Tower - fachada frontal",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-1759329269.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-splendia-tower-EM54651",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Splendia Tower - acesso da torre",
+          "category": "Acesso",
+          "image": "https://litoralvertical.com/wp-content/uploads/2022/07/edificio-splendia-tower-balneario-camboriu-1-1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-splendia-tower/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Splendia Tower - playground",
+          "category": "Kids",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/125/img-57.jpg?1681619030",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/125/splendia-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Splendia Tower - piscina principal",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/125/img-56.jpg?1681619030",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/125/splendia-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Splendia Tower - piscina e deck",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/01102025113429205-1759329269.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-splendia-tower-EM54651",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Splendia Tower - piscina com raia",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/125/img-55.jpg?1681619030",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/125/splendia-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Splendia Tower - pergolado externo",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/125/img-53.jpg?1681619030",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/125/splendia-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Splendia Tower - deck molhado",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/125/img-52.jpg?1681619030",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/125/splendia-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Splendia Tower - piscina lateral",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/cxm1jgQBAXHy0ehG4WGP.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-splendia-tower-EM54651",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Splendia Tower - kids externo",
+          "category": "Kids",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/bex88dhuVJOYhimd8epk.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-splendia-tower-EM54651",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Splendia Tower - home theater",
+          "category": "Cinema",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/125/img-51.jpg?1681619030",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/125/splendia-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Splendia Tower - cinema",
+          "category": "Cinema",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/125/img-48.jpg?1681619030",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/125/splendia-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Splendia Tower - brinquedoteca",
+          "category": "Kids",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/125/img-47.jpg?1681619030",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/125/splendia-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Splendia Tower - kids colorido",
+          "category": "Kids",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/125/img-46.jpg?1681619030",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/125/splendia-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Splendia Tower - quadra",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/RSspf282Bn8KWHzpLTP2.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-splendia-tower-EM54651",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Splendia Tower - eventos",
+          "category": "Eventos",
+          "image": "https://images.foxter.com.br/rest/image/outer/1024/1/foxter/wm/Development/10150/developmentPictures/19_09_2016_09_20_29_salao_de_festas_2_jpg.jpg",
+          "source_url": "https://www.foxterciaimobiliaria.com.br/empreendimento/10150/splendia-tower-residencial-balneario-camboriu-centro-condominio-vertical-litoral-rs",
+          "source_label": "Foxter"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 2300 reta ao mar",
+          "description": "Endereco no Centro de Balneario Camboriu, com acesso direto a praia e servicos."
+        },
+        {
+          "icon": "Building2",
+          "title": "FG entregue",
+          "description": "Empreendimento FG, entregue em 2020, com 2 residencias por andar, 3 elevadores e box de praia."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "1.600 m2 de lazer",
+          "description": "Piscina, eventos, gourmet, academia, ofuro, cinema, jogos, multimidia, quadra, brinquedoteca e playground."
+        }
+      ],
+      "differentials": [
+        "Galeria prioriza fachada, piscinas e lazer do condominio.",
+        "Copy atualizada com FG, Rua 2300 e area de lazer de 1.600 m2.",
+        "Fotos internas de ofertas foram removidas da narrativa principal."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Splendia Tower?",
+          "answer": "Fica na Rua 2300, no Centro de Balneario Camboriu, em rua reta ao mar."
+        },
+        {
+          "question": "Quem construiu o Splendia Tower?",
+          "answer": "As fontes consultadas indicam FG Empreendimentos."
+        },
+        {
+          "question": "Quais areas comuns foram destacadas?",
+          "answer": "Piscinas, playground, kids, cinema, quadra, eventos e fachada."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, acesso, kids, piscina, convivencia, cinema e outras areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-splendia-tower-EM54651",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-splendia-tower/",
+        "https://felicitanegocios.com.br/empreendimento/125/splendia-tower/",
+        "https://www.foxterciaimobiliaria.com.br/empreendimento/10150/splendia-tower-residencial-balneario-camboriu-centro-condominio-vertical-litoral-rs"
+      ]
+    },
+    {
+      "slug": "splendid-etoile",
+      "hero_image": "https://cdn.imoview.com.br/maximoveis/Condominios/193/i804a8m3h9n64h8_281663e1630d57955.jpg?1749501364",
+      "description": "O Splendid Etoile Residence fica na Rua Jose Menescau do Monte 154, em Cabecudas, Itajai. As fontes indicam condominio pronto, com tipologias de 3 a 5 suites, 124 m2 a 250 m2/297 m2 conforme a fonte, e estrutura com elevador panoramico, salao de festas, jogos, brinquedoteca, piscina adulto e infantil, bicicletario, guarita, academia e gourmet. A curadoria substitui interiores por fachada, acesso, piscina, jogos, gourmet e areas sociais do condominio.",
+      "seo_description": "Conheca o Splendid Etoile Residence, em Cabecudas, Itajai, com piscina, jogos, gourmet, brinquedoteca e guarita.",
+      "gallery": [
+        {
+          "title": "Splendid Etoile - fachada frontal",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/193/i804a8m3h9n64h8_281663e1630d57955.jpg?1749501364",
+          "source_url": "https://maximoveis.com.br/empreendimento/193/splendid-etoile/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Splendid Etoile - fachada de esquina",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/terraitajai/Condominios/216/img-61-22.jpg?1680789315",
+          "source_url": "https://imoveisterra.net/empreendimento/216/splendid-etoile-residence/",
+          "source_label": "Imoveis Terra"
+        },
+        {
+          "title": "Splendid Etoile - acesso lateral",
+          "category": "Acesso",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/193/20250609-115001.jpg?1749501364",
+          "source_url": "https://maximoveis.com.br/empreendimento/193/splendid-etoile/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Splendid Etoile - entrada com rampa",
+          "category": "Acesso",
+          "image": "https://cdn.imoview.com.br/terraitajai/Condominios/216/img-53-22.jpg?1680789315",
+          "source_url": "https://imoveisterra.net/empreendimento/216/splendid-etoile-residence/",
+          "source_label": "Imoveis Terra"
+        },
+        {
+          "title": "Splendid Etoile - guarita e jardim",
+          "category": "Acesso",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/193/20250609-114947.jpg?1749501364",
+          "source_url": "https://maximoveis.com.br/empreendimento/193/splendid-etoile/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Splendid Etoile - fachada na rua",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/July2023/automacao-nova-marco-liane0002-1688405534.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-splendid-etoile-EM53735",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Splendid Etoile - piscina externa",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/193/20250609-114916.jpg?1749501364",
+          "source_url": "https://maximoveis.com.br/empreendimento/193/splendid-etoile/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Splendid Etoile - deck da piscina",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/193/20250609-114856.jpg?1749501364",
+          "source_url": "https://maximoveis.com.br/empreendimento/193/splendid-etoile/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Splendid Etoile - piscina com curva",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/terraitajai/Condominios/216/img-58-20.jpg?1680789315",
+          "source_url": "https://imoveisterra.net/empreendimento/216/splendid-etoile-residence/",
+          "source_label": "Imoveis Terra"
+        },
+        {
+          "title": "Splendid Etoile - piscina e paisagismo",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/terraitajai/Condominios/216/img-54-17.jpg?1680789315",
+          "source_url": "https://imoveisterra.net/empreendimento/216/splendid-etoile-residence/",
+          "source_label": "Imoveis Terra"
+        },
+        {
+          "title": "Splendid Etoile - espaco externo",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/terraitajai/Condominios/216/img-59-14.jpg?1680789315",
+          "source_url": "https://imoveisterra.net/empreendimento/216/splendid-etoile-residence/",
+          "source_label": "Imoveis Terra"
+        },
+        {
+          "title": "Splendid Etoile - piscina infantil",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/terraitajai/Condominios/216/img-57-21.jpg?1680789315",
+          "source_url": "https://imoveisterra.net/empreendimento/216/splendid-etoile-residence/",
+          "source_label": "Imoveis Terra"
+        },
+        {
+          "title": "Splendid Etoile - jacuzzi externa",
+          "category": "Wellness",
+          "image": "https://cdn.imoview.com.br/terraitajai/Condominios/216/img-55-21.jpg?1680789315",
+          "source_url": "https://imoveisterra.net/empreendimento/216/splendid-etoile-residence/",
+          "source_label": "Imoveis Terra"
+        },
+        {
+          "title": "Splendid Etoile - area da piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/July2023/automacao-nova-marco-liane0004-1688405541.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-splendid-etoile-EM53735",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Splendid Etoile - piscina e deck",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/July2023/automacao-nova-marco-liane0001-1688405531.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-splendid-etoile-EM53735",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Splendid Etoile - jogos e estar",
+          "category": "Jogos",
+          "image": "https://cdn.imoview.com.br/terraitajai/Condominios/216/img-50-32.jpg?1680789315",
+          "source_url": "https://imoveisterra.net/empreendimento/216/splendid-etoile-residence/",
+          "source_label": "Imoveis Terra"
+        },
+        {
+          "title": "Splendid Etoile - gourmet",
+          "category": "Gourmet",
+          "image": "https://cdn.imoview.com.br/bryann/Imoveis/5488/gvuig-img-57-1749062366.jpg?1768065611",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/866/splendid-etoile-residence/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Splendid Etoile - convivencia interna",
+          "category": "Convivencia",
+          "image": "https://cdn.imoview.com.br/terraitajai/Condominios/216/img-52-26.jpg?1680789315",
+          "source_url": "https://imoveisterra.net/empreendimento/216/splendid-etoile-residence/",
+          "source_label": "Imoveis Terra"
+        },
+        {
+          "title": "Splendid Etoile - bilhar",
+          "category": "Jogos",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/193/20250609-114637.jpg?1749501364",
+          "source_url": "https://maximoveis.com.br/empreendimento/193/splendid-etoile/",
+          "source_label": "Max Imoveis"
+        },
+        {
+          "title": "Splendid Etoile - jogos internos",
+          "category": "Jogos",
+          "image": "https://cdn.imoview.com.br/maximoveis/Condominios/193/20250609-114620.jpg?1749501364",
+          "source_url": "https://maximoveis.com.br/empreendimento/193/splendid-etoile/",
+          "source_label": "Max Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Cabecudas em Itajai",
+          "description": "Endereco na Rua Jose Menescau do Monte 154, perto da praia e da rotina de Cabecudas."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscinas e gourmet",
+          "description": "Piscina adulto e infantil, deck, gourmet, jogos, brinquedoteca, bicicletario e guarita."
+        },
+        {
+          "icon": "Building2",
+          "title": "Condominio pronto",
+          "description": "Empreendimento de uma torre, com elevador panoramico e tipologias amplas."
+        }
+      ],
+      "differentials": [
+        "Galeria reposicionada com fachada, acesso, piscina, jogos e gourmet.",
+        "Texto reforca Cabecudas, endereco e infraestrutura do condominio.",
+        "Interiores de oferta deixam de dominar a pagina."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Splendid Etoile Residence?",
+          "answer": "Fica na Rua Jose Menescau do Monte 154, em Cabecudas, Itajai."
+        },
+        {
+          "question": "Quais itens de lazer foram identificados?",
+          "answer": "Piscinas, gourmet, jogos, brinquedoteca, academia, bicicletario e guarita."
+        },
+        {
+          "question": "O que mudou na galeria?",
+          "answer": "A galeria passou a mostrar fachada, acesso e areas comuns do condominio."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, acesso, piscina, convivencia, wellness, jogos e outras areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://maximoveis.com.br/empreendimento/193/splendid-etoile/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-splendid-etoile-EM53735",
+        "https://www.vivareal.com.br/condominio/residencial-splendid-etoile-cabecudas-id-10a98d7e-88b4/",
+        "https://imoveisterra.net/empreendimento/216/splendid-etoile-residence/",
+        "https://felicitanegocios.com.br/empreendimento/866/splendid-etoile-residence/"
+      ]
+    }
+  ]
+}

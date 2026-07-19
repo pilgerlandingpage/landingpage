@@ -130,6 +130,7 @@ async function fetchAllLandingPages() {
       .range(from, to)
 
     if (statusFilter) query = query.eq('status', statusFilter)
+    if (slugFilter.size) query = query.in('slug', [...slugFilter])
 
     const { data, error } = await query
     if (error) throw error
@@ -137,7 +138,7 @@ async function fetchAllLandingPages() {
     if (!data || data.length < PAGE_SIZE) break
   }
 
-  return slugFilter.size ? rows.filter(row => slugFilter.has(row.slug)) : rows
+  return rows
 }
 
 function galleryEntry(item) {

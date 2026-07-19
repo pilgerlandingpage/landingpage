@@ -1,0 +1,1451 @@
+{
+  "batch_id": "development-media-curation-batch22-20260715",
+  "generated_at": "2026-07-15T22:00:00.000Z",
+  "notes": [
+    "Lote 22 P0 auditado com foco em midia real de empreendimento/condominio.",
+    "Adolfo Blase foi pesquisado, mas as fontes abertas disponiveis trazem somente interiores de oferta; ele ficou pendente para captura/foto externa confiavel.",
+    "Hobus Concept recebeu galeria mais enxuta porque as fontes abertas misturam muitas imagens privativas."
+  ],
+  "skipped": [
+    {
+      "slug": "adolfo-blase",
+      "reason": "Sem midia publica confiavel de fachada/areas comuns; fontes abertas encontradas mostram apenas interiores da oferta.",
+      "sources_checked": [
+        "https://guilhermepilger.ai/adolfo-blase",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-adolfo-blase-balneario-camboriu-barra-sul-3-quartos-2-garagens-venda-ref-1373/",
+        "https://imoveismundial.com.br/imovel/venda-apartamento-03-dormitorio-em-balneario-camboriu/finamente-mobiliado-/6344",
+        "https://www.chavesnamao.com.br/imovel/apartamento-a-venda-3-quartos-com-garagem-sc-balneario-camboriu-centro-RS3500000/id-39851119/"
+      ]
+    }
+  ],
+  "items": [
+    {
+      "slug": "condominio-ponta-do-estaleiro",
+      "hero_image": "https://www.sistemaagiweb.com.br/fotos/Emp59/0_32720_306105.jpg",
+      "description": "O Condominio Ponta do Estaleiro foi revisado como condominio costeiro no Araca, em Porto Belo, com foco em terrenos de grande porte, vista panoramica e contato direto com a paisagem da Ponta do Araca. As fontes consultadas indicam ofertas frente mar, areas privativas na faixa de 2200 m2 a 2700 m2 em anuncios recentes, vias internas, implantacao em meio a area verde e vista permanente para o mar. A nova galeria abandona imagens de oferta e passa a mostrar implantacao, orla, vegetacao, vias internas e contexto territorial do condominio.",
+      "seo_description": "Conheca o Condominio Ponta do Estaleiro, no Araca em Porto Belo, com terrenos amplos, vista mar e contexto costeiro.",
+      "gallery": [
+        {
+          "title": "Ponta do Estaleiro - peninsula verde",
+          "category": "Implantacao",
+          "image": "https://www.sistemaagiweb.com.br/fotos/Emp59/0_32720_306105.jpg",
+          "source_url": "https://portalportobelo.com.br/ResultadoBusca.aspx?fin=1&pesq=488&tit=Terrenos+no+Condominio+Ponta+do+Estaleiro",
+          "source_label": "Portal Porto Belo"
+        },
+        {
+          "title": "Ponta do Estaleiro - vias internas",
+          "category": "Implantacao",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/icp/imoveis/2339/05-maquete-virtual-23-16615434945037-17537962000082.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/terreno-no-condominio-ponta-do-estaleiro-porto-belo-araca-venda-ref-944/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Ponta do Estaleiro - area gramada",
+          "category": "Implantacao",
+          "image": "https://www.sistemaagiweb.com.br/fotos/Emp59/0_43228_290399.jpg",
+          "source_url": "https://portalportobelo.com.br/ResultadoBusca.aspx?fin=1&pesq=488&tit=Terrenos+no+Condominio+Ponta+do+Estaleiro",
+          "source_label": "Portal Porto Belo"
+        },
+        {
+          "title": "Ponta do Estaleiro - vista aerea",
+          "category": "Implantacao",
+          "image": "https://www.sistemaagiweb.com.br/fotos/Emp59/0_46961_363715.jpg",
+          "source_url": "https://portalportobelo.com.br/ResultadoBusca.aspx?fin=1&pesq=488&tit=Terrenos+no+Condominio+Ponta+do+Estaleiro",
+          "source_label": "Portal Porto Belo"
+        },
+        {
+          "title": "Ponta do Estaleiro - caminho arborizado",
+          "category": "Acesso",
+          "image": "https://www.sistemaagiweb.com.br/fotos/Emp59/0_46955_363710.jpg",
+          "source_url": "https://portalportobelo.com.br/ResultadoBusca.aspx?fin=1&pesq=488&tit=Terrenos+no+Condominio+Ponta+do+Estaleiro",
+          "source_label": "Portal Porto Belo"
+        },
+        {
+          "title": "Ponta do Estaleiro - frente mar",
+          "category": "Orla",
+          "image": "https://portobeloturismo.com.br/wp-content/uploads/2025/05/0_43190_289781.jpg",
+          "source_url": "https://portobeloturismo.com.br/imovel/terreno-porto-belo-sc-42/",
+          "source_label": "Porto Belo Turismo"
+        },
+        {
+          "title": "Ponta do Estaleiro - via na mata",
+          "category": "Acesso",
+          "image": "https://portobeloturismo.com.br/wp-content/uploads/2025/05/0_43190_289782-758x534.jpg",
+          "source_url": "https://portobeloturismo.com.br/imovel/terreno-porto-belo-sc-42/",
+          "source_label": "Porto Belo Turismo"
+        },
+        {
+          "title": "Ponta do Estaleiro - mirante natural",
+          "category": "Orla",
+          "image": "https://portobeloturismo.com.br/wp-content/uploads/2025/05/0_43190_289783-758x534.jpg",
+          "source_url": "https://portobeloturismo.com.br/imovel/terreno-porto-belo-sc-42/",
+          "source_label": "Porto Belo Turismo"
+        },
+        {
+          "title": "Ponta do Estaleiro - praia e mata",
+          "category": "Orla",
+          "image": "https://portobeloturismo.com.br/wp-content/uploads/2025/05/0_43190_289785-758x534.jpg",
+          "source_url": "https://portobeloturismo.com.br/imovel/terreno-porto-belo-sc-42/",
+          "source_label": "Porto Belo Turismo"
+        },
+        {
+          "title": "Ponta do Estaleiro - faixa de praia",
+          "category": "Orla",
+          "image": "https://portobeloturismo.com.br/wp-content/uploads/2025/05/0_43190_289786-758x534.jpg",
+          "source_url": "https://portobeloturismo.com.br/imovel/terreno-porto-belo-sc-42/",
+          "source_label": "Porto Belo Turismo"
+        },
+        {
+          "title": "Ponta do Estaleiro - baia do Araca",
+          "category": "Orla",
+          "image": "https://portobeloturismo.com.br/wp-content/uploads/2025/05/0_43190_289787-758x534.jpg",
+          "source_url": "https://portobeloturismo.com.br/imovel/terreno-porto-belo-sc-42/",
+          "source_label": "Porto Belo Turismo"
+        },
+        {
+          "title": "Ponta do Estaleiro - enseada preservada",
+          "category": "Orla",
+          "image": "https://portobeloturismo.com.br/wp-content/uploads/2025/05/0_43190_289788-758x534.jpg",
+          "source_url": "https://portobeloturismo.com.br/imovel/terreno-porto-belo-sc-42/",
+          "source_label": "Porto Belo Turismo"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Trees",
+          "title": "Paisagem preservada",
+          "description": "As imagens e fontes mostram mata, relevo costeiro e implantacao em uma area de baixa densidade."
+        },
+        {
+          "icon": "Waves",
+          "title": "Frente mar no Araca",
+          "description": "Fontes de mercado descrevem terrenos frente mar e vista panoramica para a baia."
+        },
+        {
+          "icon": "Ruler",
+          "title": "Terrenos amplos",
+          "description": "Anuncios consultados indicam areas privativas superiores a 2200 m2 para projetos residenciais."
+        }
+      ],
+      "differentials": [
+        "Galeria passa a representar o condominio por implantacao, orla e vias internas.",
+        "Fotos de oferta foram substituidas por contexto territorial real do Ponta do Estaleiro.",
+        "Descricao agora diferencia o ativo como condominio de terrenos, nao como predio vertical."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Condominio Ponta do Estaleiro?",
+          "answer": "Fica no Araca, em Porto Belo, na regiao costeira da Ponta do Araca."
+        },
+        {
+          "question": "Qual e o perfil do empreendimento?",
+          "answer": "E um condominio de terrenos de grande porte, com implantacao junto a mata e vista para o mar."
+        },
+        {
+          "question": "O que a nova galeria mostra?",
+          "answer": "Mostra vias internas, area verde, orla, enseada e implantacao do condominio."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza implantacao, acesso, orla e areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.guilhermepilger.com/imovel/terreno-no-condominio-ponta-do-estaleiro-porto-belo-araca-venda-ref-1157/",
+        "https://www.guilhermepilger.com/imovel/terreno-no-condominio-ponta-do-estaleiro-porto-belo-araca-venda-ref-944/",
+        "https://portalportobelo.com.br/ResultadoBusca.aspx?fin=1&pesq=488&tit=Terrenos+no+Condominio+Ponta+do+Estaleiro",
+        "https://arleteimoveis.com.br/Venda/PesquisaRapida/488?titulo=Terrenos-no-Condominio-Ponta-do-Estaleiro",
+        "https://portobeloturismo.com.br/imovel/terreno-porto-belo-sc-42/"
+      ]
+    },
+    {
+      "slug": "four-seasons",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2021/06/edificio-four-seasons-balneario-camboriu-principal.jpg",
+      "description": "O Four Seasons Residence foi revisado como empreendimento Embraed no Centro de Balneario Camboriu, com proposta residencial de alto padrao e lazer completo. As fontes consultadas apontam torre urbana proxima a orla, plantas amplas com 4 suites em ofertas de mercado e areas comuns com piscina, ambientes kids, academia, cinema, salas sociais e apoio gourmet. A nova galeria prioriza fachada, piscina, brinquedoteca, fitness, cinema e imagens externas da torre, removendo interiores privativos da pagina do empreendimento.",
+      "seo_description": "Conheca o Four Seasons Residence, Embraed no Centro de Balneario Camboriu, com fachada marcante e lazer completo.",
+      "gallery": [
+        {
+          "title": "Four Seasons - fachada completa",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/06/edificio-four-seasons-balneario-camboriu-principal.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-four-seasons-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Four Seasons - torre na skyline",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/06/edificio-four-seasons-balneario-camboriu-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-four-seasons-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Four Seasons - piscina externa",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/four-seasons-1666112294.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-four-seasons-EM56201",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Four Seasons - espaco kids",
+          "category": "Kids",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/G7f2QO41pZvEjCBmKHAB.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-four-seasons-EM56201",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Four Seasons - brinquedoteca",
+          "category": "Kids",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/vC8T2NiNeREfBaYszTn6.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-four-seasons-EM56201",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Four Seasons - lazer infantil",
+          "category": "Kids",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/eiOjnlQrG3Wcboxkh4z8.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-four-seasons-EM56201",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Four Seasons - cinema",
+          "category": "Cinema",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/VpANsTyne7YkY2l5iVJf.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-four-seasons-EM56201",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Four Seasons - fitness",
+          "category": "Fitness",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/J1tzWDLwMgwZLAzcfKn0.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-four-seasons-EM56201",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Four Seasons - composicao da torre",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/06/edificio-four-seasons-balneario-camboriu-principal.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-four-seasons-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Four Seasons - fachada com vista",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/06/edificio-four-seasons-balneario-camboriu-1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-four-seasons-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Four Seasons - topo urbano",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/06/edificio-four-seasons-balneario-camboriu-2.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-four-seasons-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Four Seasons - torre ao entardecer",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/06/edificio-four-seasons-balneario-camboriu-2.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-four-seasons-residence/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Award",
+          "title": "Padrao Embraed",
+          "description": "Empreendimento associado a Embraed e ao segmento residencial de alto padrao em Balneario Camboriu."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Centro de Balneario Camboriu",
+          "description": "Localizacao central, com leitura urbana e proximidade da orla da cidade."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer completo",
+          "description": "Piscina, fitness, cinema, kids, brinquedoteca e areas sociais aparecem nas fontes consultadas."
+        }
+      ],
+      "differentials": [
+        "Hero atualizado com a torre do empreendimento.",
+        "Galeria foca fachada e areas comuns, evitando interiores de apartamentos.",
+        "Copy reforca Embraed, Centro e estrutura de lazer."
+      ],
+      "faq": [
+        {
+          "question": "Quem assina o Four Seasons Residence?",
+          "answer": "As fontes consultadas associam o Four Seasons Residence a Embraed."
+        },
+        {
+          "question": "Onde fica o Four Seasons?",
+          "answer": "Fica no Centro de Balneario Camboriu, em contexto urbano proximo a orla."
+        },
+        {
+          "question": "Quais areas comuns entraram na curadoria?",
+          "answer": "Piscina, kids, brinquedoteca, cinema, fitness, salas sociais e fachada."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, piscina, kids, cinema, fitness e areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.embraed.com.br/pt-BR/blog/inauguracao-four-seasons-residencial",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-four-seasons-EM56201",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-four-seasons-residence/",
+        "https://imoveisgodoy.com.br/imoveis/four-seasons-residence-embraed/"
+      ]
+    },
+    {
+      "slug": "hobus-concept",
+      "hero_image": "https://b5.casteldigital.com.br/gabrielcerteiro/ig/im/imoveis/474/img_2455-1765811428177.jpeg",
+      "description": "O Hobus Concept foi revisado como condominio frente mar na Praia Brava de Itajai, com referencia na Avenida Jose Medeiros Vieira, 1434. As fontes indicam residencias de alto padrao, ofertas com 4 suites, cerca de 265 m2 e 4 vagas em algumas tipologias, alem de localizacao direta na faixa da Praia Brava. Como as fontes abertas misturam muitas imagens de interiores e areas privativas, a nova galeria ficou mais enxuta e prioriza fachada, acesso externo, vista da praia e contexto frente mar.",
+      "seo_description": "Conheca o Hobus Concept, condominio frente mar na Praia Brava de Itajai, com fachada contemporanea e vista para o mar.",
+      "gallery": [
+        {
+          "title": "Hobus Concept - fachada vertical",
+          "category": "Fachada",
+          "image": "https://b5.casteldigital.com.br/gabrielcerteiro/ig/im/imoveis/474/img_2455-1765811428177.jpeg",
+          "source_url": "https://www.gabrielcerteiro.com.br/imovel/cobertura-duplex-no-edificio-hobus-concept-itajai-praia-brava-4-quartos-3-garagens-venda-ref-474/",
+          "source_label": "Gabriel Certeiro"
+        },
+        {
+          "title": "Hobus Concept - torre vista da rua",
+          "category": "Fachada",
+          "image": "https://b5.casteldigital.com.br/gabrielcerteiro/ig/il/imoveis/474/img_2455-1765811428177.jpeg",
+          "source_url": "https://www.gabrielcerteiro.com.br/imovel/cobertura-duplex-no-edificio-hobus-concept-itajai-praia-brava-4-quartos-3-garagens-venda-ref-474/",
+          "source_label": "Gabriel Certeiro"
+        },
+        {
+          "title": "Hobus Concept - fachada frontal",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/July2023/hobus-concept-21-1689599032.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-hobus-concept--EM75988",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Hobus Concept - Praia Brava",
+          "category": "Orla",
+          "image": "https://cdn.imoview.com.br/bryann/Imoveis/7726/kflcsi-img-44-1780518002.jpg?1780518002",
+          "source_url": "https://felicitanegocios.com.br/imovel/7726/cobertura-4-quartos-hobus-concept-praia-brava-itajai/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Hobus Concept - frente mar",
+          "category": "Orla",
+          "image": "https://www.chavesnamao.com.br/imn/0850x0450/N/60/imoveis/49532/42506841/sc-itajai-praia-brava-avenida-jose-medeiros-vieira-cobertura-a-venda-4-quartos-6a037acd-1.jpg",
+          "source_url": "https://www.chavesnamao.com.br/imovel/cobertura-a-venda-4-quartos-com-garagem-sc-itajai-praia-brava-RS12000000/id-42506841/",
+          "source_label": "Chaves na Mao"
+        },
+        {
+          "title": "Hobus Concept - guarda-corpo frente mar",
+          "category": "Orla",
+          "image": "https://www.chavesnamao.com.br/imn/0640x0400/N/imoveis/49532/42506841/sc-itajai-praia-brava-avenida-jose-medeiros-vieira-cobertura-a-venda-4-quartos-6a037acd-1.jpg",
+          "source_url": "https://www.chavesnamao.com.br/imovel/cobertura-a-venda-4-quartos-com-garagem-sc-itajai-praia-brava-RS12000000/id-42506841/",
+          "source_label": "Chaves na Mao"
+        },
+        {
+          "title": "Hobus Concept - faixa da praia",
+          "category": "Orla",
+          "image": "https://www.chavesnamao.com.br/imn/1200x0800/N/70/imoveis/49532/42506841/sc-itajai-praia-brava-avenida-jose-medeiros-vieira-cobertura-a-venda-4-quartos-6a037acd-1.jpg",
+          "source_url": "https://www.chavesnamao.com.br/imovel/cobertura-a-venda-4-quartos-com-garagem-sc-itajai-praia-brava-RS12000000/id-42506841/",
+          "source_label": "Chaves na Mao"
+        },
+        {
+          "title": "Hobus Concept - lateral externa",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/real-estates-photo/June2026/thumb-hobus-concept-2-1676578830-1782833045.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-hobus-concept--EM75988",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Hobus Concept - area externa com agua",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/real-estates-photo/June2026/thumb-hobus-concept-15-1-1676578773-1782833039.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-hobus-concept--EM75988",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Hobus Concept - acesso lateral",
+          "category": "Acesso",
+          "image": "https://b5.casteldigital.com.br/gabrielcerteiro/ig/im/imoveis/474/img_2494-1765811428177.jpeg",
+          "source_url": "https://www.gabrielcerteiro.com.br/imovel/cobertura-duplex-no-edificio-hobus-concept-itajai-praia-brava-4-quartos-3-garagens-venda-ref-474/",
+          "source_label": "Gabriel Certeiro"
+        },
+        {
+          "title": "Hobus Concept - fachada lateral",
+          "category": "Fachada",
+          "image": "https://b5.casteldigital.com.br/gabrielcerteiro/ig/il/imoveis/474/img_2494-1765811428177.jpeg",
+          "source_url": "https://www.gabrielcerteiro.com.br/imovel/cobertura-duplex-no-edificio-hobus-concept-itajai-praia-brava-4-quartos-3-garagens-venda-ref-474/",
+          "source_label": "Gabriel Certeiro"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente mar na Praia Brava",
+          "description": "Fontes indicam localizacao na Avenida Jose Medeiros Vieira, eixo frente mar da Praia Brava."
+        },
+        {
+          "icon": "Ruler",
+          "title": "Residencias amplas",
+          "description": "Ofertas de mercado citam tipologias com 4 suites, cerca de 265 m2 e 4 vagas."
+        },
+        {
+          "icon": "Building2",
+          "title": "Arquitetura contemporanea",
+          "description": "A curadoria visual destaca fachada vertical, acesso e relacao direta com a praia."
+        }
+      ],
+      "differentials": [
+        "Galeria propositalmente enxuta para evitar imagens privativas.",
+        "Hero usa fachada do Hobus Concept em vez de foto interna.",
+        "Texto reforca endereco, Praia Brava e perfil frente mar."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Hobus Concept?",
+          "answer": "As fontes indicam a Avenida Jose Medeiros Vieira, 1434, Praia Brava de Itajai."
+        },
+        {
+          "question": "Por que a galeria e mais enxuta?",
+          "answer": "Porque as fontes abertas misturam interiores e areas privativas; a curadoria manteve apenas fachada, acesso e contexto frente mar."
+        },
+        {
+          "question": "Qual e o perfil das residencias?",
+          "answer": "Fontes de mercado citam opcoes de alto padrao com 4 suites, metragens amplas e varias vagas."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, orla, piscina, acesso e areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://loft.com.br/condominio/condominio-hobus-concept-praia-brava-de-itajai-itajai-sc/5L8Y0NZ6",
+        "https://felicitanegocios.com.br/empreendimento/178/hobus-concept/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-hobus-concept--EM75988",
+        "https://www.gabrielcerteiro.com.br/imovel/cobertura-duplex-no-edificio-hobus-concept-itajai-praia-brava-4-quartos-3-garagens-venda-ref-474/",
+        "https://felicitanegocios.com.br/imovel/7726/cobertura-4-quartos-hobus-concept-praia-brava-itajai/",
+        "https://www.chavesnamao.com.br/imovel/cobertura-a-venda-4-quartos-com-garagem-sc-itajai-praia-brava-RS12000000/id-42506841/"
+      ]
+    },
+    {
+      "slug": "135-jardins",
+      "hero_image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/12/135-jardins-lancamento-102-001.jpg",
+      "description": "O 135 Jardins foi atualizado como empreendimento Silva Packer no Centro de Balneario Camboriu, com arquitetura assinada por Rodrigo Kirck e reconhecimento internacional em fontes de premiacao. A Silva Packer informa 40 pavimentos, 62 apartamentos e 135 metros de altura; as fontes de mercado indicam plantas de 4 suites, a partir de 177 m2, 3 vagas e entrega prevista para dezembro de 2026. O lazer em dois pavimentos inclui piscina, prainha, bar molhado, quiosque, gourmet, festas, jogos, garden, kids, pet place e quadra.",
+      "seo_description": "Conheca o 135 Jardins, Silva Packer no Centro de Balneario Camboriu, com 40 pavimentos e lazer em dois pavimentos.",
+      "gallery": [
+        {
+          "title": "135 Jardins - fachada premiada",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/12/135-jardins-lancamento-102-001.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/135-jardins-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "135 Jardins - lazer elevado",
+          "category": "Piscina",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/12/135-jardins-lancamento-102-009.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/135-jardins-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "135 Jardins - implantacao aerea",
+          "category": "Implantacao",
+          "image": "https://livthreec.s3.us-east-2.amazonaws.com/uploads/12768/131-51921-21/full/2ad6710435f23b15cd14b4ba1a6b794c.jpg",
+          "source_url": "https://livawards.com/winner/2/0/165/0/",
+          "source_label": "LIV Awards"
+        },
+        {
+          "title": "135 Jardins - hall de acesso",
+          "category": "Hall",
+          "image": "https://livthreec.s3.us-east-2.amazonaws.com/uploads/12768/131-51921-21/full/c973c5608475e24ba2963db9f76b8e1f.jpg",
+          "source_url": "https://livawards.com/winner/2/0/165/0/",
+          "source_label": "LIV Awards"
+        },
+        {
+          "title": "135 Jardins - lounge externo",
+          "category": "Lazer",
+          "image": "https://livthreec.s3.us-east-2.amazonaws.com/uploads/12768/131-51921-21/full/ddb84cc5f4499db3643dbea7f66ce03f.jpg",
+          "source_url": "https://livawards.com/winner/2/0/165/0/",
+          "source_label": "LIV Awards"
+        },
+        {
+          "title": "135 Jardins - fitness",
+          "category": "Fitness",
+          "image": "https://livthreec.s3.us-east-2.amazonaws.com/uploads/12768/131-51921-21/full/5c6e2963a291cdbf7cce3b4731ef2f37.jpeg",
+          "source_url": "https://livawards.com/winner/2/0/165/0/",
+          "source_label": "LIV Awards"
+        },
+        {
+          "title": "135 Jardins - brinquedoteca",
+          "category": "Kids",
+          "image": "https://livthreec.s3.us-east-2.amazonaws.com/uploads/12768/131-51921-21/full/94a8eec2db05826c380e29bf4e217f55.jpeg",
+          "source_url": "https://livawards.com/winner/2/0/165/0/",
+          "source_label": "LIV Awards"
+        },
+        {
+          "title": "135 Jardins - lounge social",
+          "category": "Lazer",
+          "image": "https://livthreec.s3.us-east-2.amazonaws.com/uploads/12768/131-51921-21/full/05687e8287240ba6dd184be70dba60f4.jpeg",
+          "source_url": "https://livawards.com/winner/2/0/165/0/",
+          "source_label": "LIV Awards"
+        },
+        {
+          "title": "135 Jardins - quadra recreativa",
+          "category": "Lazer",
+          "image": "https://livthreec.s3.us-east-2.amazonaws.com/uploads/12768/131-51921-21/full/3fd10555f3ae287cb62a6dfe15c6cc77.jpg",
+          "source_url": "https://livawards.com/winner/2/0/165/0/",
+          "source_label": "LIV Awards"
+        },
+        {
+          "title": "135 Jardins - piscina noturna",
+          "category": "Piscina",
+          "image": "https://livthreec.s3.us-east-2.amazonaws.com/uploads/12768/131-51921-21/full/58c6de0d055b9e638efe4afdfd4a64d7.jpg",
+          "source_url": "https://livawards.com/winner/2/0/165/0/",
+          "source_label": "LIV Awards"
+        },
+        {
+          "title": "135 Jardins - acesso iluminado",
+          "category": "Acesso",
+          "image": "https://livthreec.s3.us-east-2.amazonaws.com/uploads/12768/131-51921-21/full/c62e484f995c9386723b26fb1afd1f29.jpg",
+          "source_url": "https://livawards.com/winner/2/0/165/0/",
+          "source_label": "LIV Awards"
+        },
+        {
+          "title": "135 Jardins - quadra externa",
+          "category": "Lazer",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/12/135-jardins-lancamento-102-002.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/135-jardins-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "135 Jardins - vista superior",
+          "category": "Implantacao",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/12/135-jardins-lancamento-102-018.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/135-jardins-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "135 Jardins - lobby social",
+          "category": "Hall",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/12/135-jardins-lancamento-102-003.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/135-jardins-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "135 Jardins - piscina e deck",
+          "category": "Piscina",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/42936/images/_3ce257b3735426167270052410101703.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-135-jardins-balneario-camboriu-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "135 Jardins - torre superior",
+          "category": "Fachada",
+          "image": "https://i.ytimg.com/vi/MH8bxOlajQA/hqdefault.jpg",
+          "source_url": "https://myside.com.br/apartamento-venda-135-jardins-balneario-camboriu-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "135 Jardins - acesso urbano",
+          "category": "Acesso",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_266_4782_1616_230822.jpeg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/135-jardins/balneario-camboriu/centro/266",
+          "source_label": "Versatil Imoveis"
+        },
+        {
+          "title": "135 Jardins - fachada noturna",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_266_4785_1616_230822.jpeg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/135-jardins/balneario-camboriu/centro/266",
+          "source_label": "Versatil Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Award",
+          "title": "Projeto reconhecido",
+          "description": "Fontes de premiacao e mercado destacam o projeto arquitetonico do 135 Jardins."
+        },
+        {
+          "icon": "Building2",
+          "title": "Silva Packer no Centro",
+          "description": "A construtora informa torre de 40 pavimentos, 62 apartamentos e 135 metros de altura."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer em dois pavimentos",
+          "description": "Piscinas, prainha, bar molhado, gourmet, festas, jogos, kids, pet place e quadra compoem o programa."
+        }
+      ],
+      "differentials": [
+        "Hero e galeria usam imagens de fachada, premios e areas comuns do empreendimento.",
+        "Descricao inclui Silva Packer, Rodrigo Kirck, altura, apartamentos e entrega prevista.",
+        "Interiores privativos foram descartados da selecao principal."
+      ],
+      "faq": [
+        {
+          "question": "Quem assina o 135 Jardins?",
+          "answer": "A Silva Packer apresenta o empreendimento com arquitetura assinada por Rodrigo Kirck."
+        },
+        {
+          "question": "Qual e a escala do 135 Jardins?",
+          "answer": "A construtora informa 40 pavimentos, 62 apartamentos e 135 metros de altura."
+        },
+        {
+          "question": "Quando esta prevista a entrega?",
+          "answer": "Fontes de mercado indicam previsao de entrega em dezembro de 2026."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, piscina, implantacao, hall, lazer, fitness e areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.silvapacker.com.br/empreendimentos/135-jardins/",
+        "https://lancamento.invexo.com.br/sc/135-jardins-balneario-camboriu/",
+        "https://myside.com.br/apartamento-venda-135-jardins-balneario-camboriu-sc",
+        "https://imobiliariaversatil.com.br/edificios/135-jardins/balneario-camboriu/centro/266",
+        "https://livawards.com/winner/2/0/165/0/"
+      ]
+    },
+    {
+      "slug": "abu-dhabi-residence",
+      "hero_image": "https://centralcorretor.s3.sa-east-1.amazonaws.com/protected/us-east-1:972b7fd7-3c00-411b-85fb-279ff0c52c81/acce0527-269a-459d-81ca-110d9159f9e0_xl.webp",
+      "description": "O Abu Dhabi Residence foi revisado como empreendimento Santana Construtora em Meia Praia, Itapema, com frente para a Avenida Nereu Ramos e inspiracao no Oriente Medio. A fonte oficial descreve fachada contemporanea, vista definitiva para o mar, configuracoes de 3 e 4 suites, 2 ou 3 vagas, alem de duplex com 225 m2. Fontes complementares citam obra exclusiva para 21 familias, 21 pavimentos, area de lazer com piscina adulto e infantil, piscina interna aquecida, cinema, festas, jogos, academia, sauna, playground e solarium.",
+      "seo_description": "Conheca o Abu Dhabi Residence, Santana em Meia Praia, Itapema, com fachada inspirada no Oriente Medio e lazer completo.",
+      "gallery": [
+        {
+          "title": "Abu Dhabi - fachada principal",
+          "category": "Fachada",
+          "image": "https://centralcorretor.s3.sa-east-1.amazonaws.com/protected/us-east-1:972b7fd7-3c00-411b-85fb-279ff0c52c81/acce0527-269a-459d-81ca-110d9159f9e0_xl.webp",
+          "source_url": "https://santanaconstrutora.com.br/empreendimentos/Abu-Dhabi-Residence_626AF5C3EFD4D",
+          "source_label": "Santana Construtora"
+        },
+        {
+          "title": "Abu Dhabi - fachada na avenida",
+          "category": "Fachada",
+          "image": "https://img.apre.me/BcFJDoAgDADA3-QIyFLh0LcYQEJqCDYaw-edqSQLgqd7QZ_iTGsb8QJLL3S5lCvJ__iwmYx4jCxcJz_iTUoBo_6Tz8FfIQZr9kD1Bw.jpg",
+          "source_url": "https://savoia.com.br/abu-dhabi-residence-tci",
+          "source_label": "Savoia Imoveis"
+        },
+        {
+          "title": "Abu Dhabi - torre e base",
+          "category": "Fachada",
+          "image": "https://centralcorretor.s3.sa-east-1.amazonaws.com/protected/us-east-1:972b7fd7-3c00-411b-85fb-279ff0c52c81/b17c487e-60f1-4ff2-b1dc-b1d04f934eb4_xl.webp",
+          "source_url": "https://santanaconstrutora.com.br/empreendimentos/Abu-Dhabi-Residence_626AF5C3EFD4D",
+          "source_label": "Santana Construtora"
+        },
+        {
+          "title": "Abu Dhabi - perspectiva vertical",
+          "category": "Fachada",
+          "image": "https://centralcorretor.s3.sa-east-1.amazonaws.com/protected/us-east-1:0a29d542-aa00-4b2d-b26f-e76af4199d66/a4b39844-3de8-4b53-98ff-aa3e07ab6077_xl.webp",
+          "source_url": "https://santanaconstrutora.com.br/empreendimentos/Abu-Dhabi-Residence_626AF5C3EFD4D",
+          "source_label": "Santana Construtora"
+        },
+        {
+          "title": "Abu Dhabi - fachada contemporanea",
+          "category": "Fachada",
+          "image": "https://centralcorretor.s3.sa-east-1.amazonaws.com/protected/us-east-1:c19b00f3-4d48-c991-6807-6f2d38e510f4/a43ddb95-ae85-457b-b601-49810b98cc15_xl.webp",
+          "source_url": "https://santanaconstrutora.com.br/empreendimentos/Abu-Dhabi-Residence_626AF5C3EFD4D",
+          "source_label": "Santana Construtora"
+        },
+        {
+          "title": "Abu Dhabi - fachada clara",
+          "category": "Fachada",
+          "image": "https://centralcorretor.s3.sa-east-1.amazonaws.com/protected/us-east-1:0a29d542-aa00-4b2d-b26f-e76af4199d66/6369db59-1efc-4b1c-820c-e6a62284c6a5_xl.webp",
+          "source_url": "https://santanaconstrutora.com.br/empreendimentos/Abu-Dhabi-Residence_626AF5C3EFD4D",
+          "source_label": "Santana Construtora"
+        },
+        {
+          "title": "Abu Dhabi - embasamento iluminado",
+          "category": "Fachada",
+          "image": "https://centralcorretor.s3.sa-east-1.amazonaws.com/protected/us-east-1:0a29d542-aa00-4b2d-b26f-e76af4199d66/fac957ae-a0bb-4b97-be58-c79f1d567254_xl.webp",
+          "source_url": "https://santanaconstrutora.com.br/empreendimentos/Abu-Dhabi-Residence_626AF5C3EFD4D",
+          "source_label": "Santana Construtora"
+        },
+        {
+          "title": "Abu Dhabi - base classica",
+          "category": "Fachada",
+          "image": "https://centralcorretor.s3.sa-east-1.amazonaws.com/protected/us-east-1:0a29d542-aa00-4b2d-b26f-e76af4199d66/4ba51b44-d715-4f47-8eb8-2556fcc2cce0_xl.webp",
+          "source_url": "https://santanaconstrutora.com.br/empreendimentos/Abu-Dhabi-Residence_626AF5C3EFD4D",
+          "source_label": "Santana Construtora"
+        },
+        {
+          "title": "Abu Dhabi - torre noturna",
+          "category": "Fachada",
+          "image": "https://centralcorretor.s3.sa-east-1.amazonaws.com/protected/us-east-1:0a29d542-aa00-4b2d-b26f-e76af4199d66/ac34680e-b9a3-4b47-b77e-670a72f1f2c8_xl.webp",
+          "source_url": "https://santanaconstrutora.com.br/empreendimentos/Abu-Dhabi-Residence_626AF5C3EFD4D",
+          "source_label": "Santana Construtora"
+        },
+        {
+          "title": "Abu Dhabi - torre urbana",
+          "category": "Fachada",
+          "image": "https://centralcorretor.s3.sa-east-1.amazonaws.com/protected/us-east-1:de06ccad-2ee1-4b90-bba2-b23ea984b49f/bfae1d7b-23ee-4e7e-a575-9cd06119e553_xl.webp",
+          "source_url": "https://santanaconstrutora.com.br/empreendimentos/Abu-Dhabi-Residence_626AF5C3EFD4D",
+          "source_label": "Santana Construtora"
+        },
+        {
+          "title": "Abu Dhabi - fachada ao entardecer",
+          "category": "Fachada",
+          "image": "https://centralcorretor.s3.sa-east-1.amazonaws.com/protected/us-east-1:15cdec7b-9c01-4465-b01a-356386c24238/0121db83-7ab4-49ea-a29f-d42c21f6961c_xl.webp",
+          "source_url": "https://santanaconstrutora.com.br/empreendimentos/Abu-Dhabi-Residence_626AF5C3EFD4D",
+          "source_label": "Santana Construtora"
+        },
+        {
+          "title": "Abu Dhabi - acesso principal",
+          "category": "Acesso",
+          "image": "https://centralcorretor.s3.sa-east-1.amazonaws.com/protected/us-east-1:15cdec7b-9c01-4465-b01a-356386c24238/87dae233-d07d-43a7-8580-47b7f14cdccf_xl.webp",
+          "source_url": "https://santanaconstrutora.com.br/empreendimentos/Abu-Dhabi-Residence_626AF5C3EFD4D",
+          "source_label": "Santana Construtora"
+        },
+        {
+          "title": "Abu Dhabi - piscina externa",
+          "category": "Piscina",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/imoveispra/img_vendas/p1_238_8178_1339_170118.webp",
+          "source_url": "https://www.imoveispraitapema.com.br/imovel/venda-apartamento-03-dormitorio-em-itapema/abu-dhabi-residence-3-suites-3-vagas-/238",
+          "source_label": "Imoveis Praia Itapema"
+        },
+        {
+          "title": "Abu Dhabi - piscina iluminada",
+          "category": "Piscina",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/imoveispra/img_vendas/g1_238_8178_1339_170118.webp",
+          "source_url": "https://www.imoveispraitapema.com.br/imovel/venda-apartamento-03-dormitorio-em-itapema/abu-dhabi-residence-3-suites-3-vagas-/238",
+          "source_label": "Imoveis Praia Itapema"
+        },
+        {
+          "title": "Abu Dhabi - playground e piscina",
+          "category": "Kids",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/imoveispra/img_vendas/p1_238_8179_1339_170118.webp",
+          "source_url": "https://www.imoveispraitapema.com.br/imovel/venda-apartamento-03-dormitorio-em-itapema/abu-dhabi-residence-3-suites-3-vagas-/238",
+          "source_label": "Imoveis Praia Itapema"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Award",
+          "title": "Assinatura Santana",
+          "description": "A pagina oficial apresenta o Abu Dhabi Residence como empreendimento da Santana Construtora."
+        },
+        {
+          "icon": "Waves",
+          "title": "Meia Praia perto do mar",
+          "description": "Fontes citam frente avenida, vista definitiva para o mar e referencia na Avenida Nereu Ramos."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer completo",
+          "description": "Piscinas, cinema, festas, jogos, academia, sauna, playground e solarium aparecem nas fontes."
+        }
+      ],
+      "differentials": [
+        "Hero atualizado para fachada oficial do Abu Dhabi Residence.",
+        "Galeria usa fachada, acesso e lazer do empreendimento.",
+        "Copy contextualiza Santana, Meia Praia, inspiracao oriental e estrutura de lazer."
+      ],
+      "faq": [
+        {
+          "question": "Quem construiu o Abu Dhabi Residence?",
+          "answer": "A fonte oficial apresenta o Abu Dhabi Residence como empreendimento da Santana Construtora."
+        },
+        {
+          "question": "Onde fica o Abu Dhabi Residence?",
+          "answer": "As fontes indicam Meia Praia, Itapema, com referencia na Avenida Nereu Ramos."
+        },
+        {
+          "question": "Qual e a proposta arquitetonica?",
+          "answer": "A pagina oficial descreve inspiracao no Oriente Medio e fachada contemporanea."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, acesso, piscina, kids e areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://santanaconstrutora.com.br/empreendimentos/Abu-Dhabi-Residence_626AF5C3EFD4D",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-abu-dhabi-residence-itapema-meia-praia-3-quartos-3-garagens-venda-ref-181/",
+        "https://www.imoveispraitapema.com.br/imovel/venda-apartamento-03-dormitorio-em-itapema/abu-dhabi-residence-3-suites-3-vagas-/238",
+        "https://www.vitapema.com.br/imovel/venda-apartamentos-03-dormitorio-em-itapema/abu-dhabi/4040",
+        "https://savoia.com.br/abu-dhabi-residence-tci"
+      ]
+    },
+    {
+      "slug": "accendis-home-living",
+      "hero_image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n--RewdGTkW85jVMpWQD8OJvMkbXNvbnhk2b8TVhgg/Fachada+%7C+Accendis+Home+Living.jpg",
+      "description": "O Accendis Home Living foi revisado como empreendimento ARS Kammer no Centro de Itapema, com linguagem contemporanea, fachada marcada por linhas verticais e areas comuns de alto padrao. As fontes de mercado associam o projeto a plantas de 4 suites, 3 vagas e vista para o mar em algumas ofertas. A curadoria visual prioriza fachada, acesso, hall, piscina, playground, quadra, spa, gourmet e areas de relaxamento, substituindo as imagens internas que dominavam a pagina do empreendimento.",
+      "seo_description": "Conheca o Accendis Home Living, ARS Kammer no Centro de Itapema, com fachada contemporanea e lazer completo.",
+      "gallery": [
+        {
+          "title": "Accendis - fachada vertical",
+          "category": "Fachada",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n--RewdGTkW85jVMpWQD8OJvMkbXNvbnhk2b8TVhgg/Fachada+%7C+Accendis+Home+Living.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/imoveis/accendis-home-living-apartamento-4-suites-centro-itapema-IM6001",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "Accendis - embasamento urbano",
+          "category": "Fachada",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1nn-D5nu0TouDpUpxyqRRUF3i8WssdWNUCdsVpOhng/Embasamento+Fachada+%7C+Accendis+Home+Living.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/imoveis/accendis-home-living-apartamento-4-suites-centro-itapema-IM6001",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "Accendis - hall de entrada",
+          "category": "Hall",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n9OcOniJT5s-BFZP29rtzQFOkTn3dnbm5M2Up2fK24/Hall+de+Entrada+%7C+Accendis+Home+Living.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/imoveis/accendis-home-living-apartamento-4-suites-centro-itapema-IM6001",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "Accendis - deck social",
+          "category": "Lazer",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n_Oi-XupsYechVcA2RkQ88OjTkWWNfbnFQ3FvJJRxs/%C3%81rea+Geral+de+Lazer+%7C+Accendis+Home+Living.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/imoveis/accendis-home-living-apartamento-4-suites-centro-itapema-IM6001",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "Accendis - piscina externa",
+          "category": "Piscina",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n8-gNaWGE1mCJGuNuEQw0gIyzodJNnbhP43SwuKuoA/Piscina+Externa+%7C+Accendis+Home+Living.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/imoveis/accendis-home-living-apartamento-4-suites-centro-itapema-IM6001",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "Accendis - gourmet externo",
+          "category": "Gourmet",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n_OhuhtXblrAxfYRexqND_FNTyp0t_bngo2t3pEKJA/%C3%81rea+Gourmet+das+Piscinas+%7C+Accendis+Home+Living.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/imoveis/accendis-home-living-apartamento-4-suites-centro-itapema-IM6001",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "Accendis - playground",
+          "category": "Kids",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n--8ZpiI85s9pzWw-qUwb9zj7uf4dXbg8M2yt9FcUs/Playground+%7C+Accendis+Home+Living.jpeg",
+          "source_url": "https://www.potencialimoveis.com.br/imoveis/accendis-home-living-apartamento-4-suites-centro-itapema-IM6001",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "Accendis - praca de convivencia",
+          "category": "Lazer",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n9OiphoUgYS8pdhSOwcMgEItDKeW9nbhy4257PiXDo/Playground+Final+%7C+Accendis+Home+Living.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/imoveis/accendis-home-living-apartamento-4-suites-centro-itapema-IM6001",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "Accendis - quadra recreativa",
+          "category": "Lazer",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n8-eWtlKrPhgeSpSx-Uuw7_gEUWLN3bmPQ2uCaffjk/Quadra+Esportiva+%7C+Accendis+Home+Living.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/imoveis/accendis-home-living-apartamento-4-suites-centro-itapema-IM6001",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "Accendis - spa",
+          "category": "Spa",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n_-D90U37vgfG2iCCWQQ8GFyIWg7dDbhQQ3vt4I-Vk/Ofur%C3%B4+%7C+Accendis+Home+Living.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/imoveis/accendis-home-living-apartamento-4-suites-centro-itapema-IM6001",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "Accendis - piscina coberta",
+          "category": "Piscina",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n9O9uqY3M0pAtFsPWXlP8P4gEeQ59PbnN825NImIXo/Piscina+Aquecida+%7C+Accendis+Home+Living.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/imoveis/accendis-home-living-apartamento-4-suites-centro-itapema-IM6001",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "Accendis - descanso do spa",
+          "category": "Spa",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n8-h28bXbvvOuvQyypsNbMFPDaeWdvbg_Y2rc4x9Gw/Espa%C3%A7o+Beauty+%7C+Accendis+Home+Living.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/imoveis/accendis-home-living-apartamento-4-suites-centro-itapema-IM6001",
+          "source_label": "Potencial Imoveis"
+        },
+        {
+          "title": "Accendis - massagem do spa",
+          "category": "Spa",
+          "image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n8-c-Qo18SWexVRA5UewcSDtUuTWdHbgpQ2xBbzMGc/Massagem+%7C+Accendis+Home+Living.jpg",
+          "source_url": "https://www.potencialimoveis.com.br/imoveis/accendis-home-living-apartamento-4-suites-centro-itapema-IM6001",
+          "source_label": "Potencial Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "ARS Kammer em Itapema",
+          "description": "O empreendimento e associado a ARS Kammer e ao Centro de Itapema."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Areas comuns sofisticadas",
+          "description": "Hall, piscinas, spa, gourmet, playground, quadra e espacos de descanso aparecem nas fontes."
+        },
+        {
+          "icon": "Waves",
+          "title": "Vista e vida urbana",
+          "description": "Fontes de mercado indicam plantas de alto padrao com vista mar em algumas ofertas."
+        }
+      ],
+      "differentials": [
+        "Galeria montada com imagens de fachada e lazer, sem interiores privativos.",
+        "Hero passa a representar a arquitetura do Accendis.",
+        "Texto agora explica construtora, Centro de Itapema e areas comuns."
+      ],
+      "faq": [
+        {
+          "question": "Quem assina o Accendis Home Living?",
+          "answer": "As fontes consultadas associam o Accendis Home Living a ARS Kammer."
+        },
+        {
+          "question": "Onde fica o empreendimento?",
+          "answer": "As fontes de mercado indicam o Centro de Itapema."
+        },
+        {
+          "question": "Quais areas comuns foram destacadas?",
+          "answer": "Fachada, hall, piscina, playground, quadra, spa, gourmet e areas de descanso."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, hall, lazer, piscina, gourmet, kids e areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.arskammer.com.br/empreendimento/accendis-home-living/10/",
+        "https://myside.com.br/apartamento-venda-accendis-home-living-itapema-sc",
+        "https://imobiliariamoretti.com.br/imoveis/accendis-home-living-itapema-sc/",
+        "https://www.potencialimoveis.com.br/imoveis/accendis-home-living-apartamento-4-suites-centro-itapema-IM6001"
+      ]
+    },
+    {
+      "slug": "acqua-blue-residence",
+      "hero_image": "https://b3.casteldigital.com.br/guilhermepilger/ig/il/imoveis/179/017-16236809604044.jpeg",
+      "description": "O Acqua Blue Residence foi revisado como empreendimento ARS Kammer em Meia Praia, Itapema. As fontes de mercado indicam localizacao a menos de 150 metros do mar em algumas ofertas, plantas de alto padrao com 4 suites, metragens na faixa de 180 m2 a 202 m2 em anuncios recentes e 3 vagas. A nova galeria prioriza fachada, embasamento, hall, playground e areas comuns, removendo a dependencia de fotos internas de apartamentos.",
+      "seo_description": "Conheca o Acqua Blue Residence, ARS Kammer em Meia Praia, Itapema, com fachada marcante e lazer familiar.",
+      "gallery": [
+        {
+          "title": "Acqua Blue - fachada principal",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/il/imoveis/179/017-16236809604044.jpeg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-acqua-blue-residence-itapema-meia-praia-4-quartos-3-garagens-venda-ref-179/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Acqua Blue - torre completa",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/viplaggeimoveis/ig/il/imoveis/146/1620928205835_8111c3f4-9102-426c-9ecc-05e9cde79a5c-17441180184269.jpeg",
+          "source_url": "https://www.viplaggeimoveis.com/imovel/apartamento-no-edificio-acqua-blue-residence-itapema-meia-praia-4-quartos-3-garagens-venda-ref-146/",
+          "source_label": "Vip Lagge Imoveis"
+        },
+        {
+          "title": "Acqua Blue - fachada vertical",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/viplaggeimoveis/ig/im/imoveis/146/1620928205835_8111c3f4-9102-426c-9ecc-05e9cde79a5c-17441180184269.jpeg",
+          "source_url": "https://www.viplaggeimoveis.com/imovel/apartamento-no-edificio-acqua-blue-residence-itapema-meia-praia-4-quartos-3-garagens-venda-ref-146/",
+          "source_label": "Vip Lagge Imoveis"
+        },
+        {
+          "title": "Acqua Blue - base iluminada",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/179/017-16236809604044.jpeg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-acqua-blue-residence-itapema-meia-praia-4-quartos-3-garagens-venda-ref-179/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Acqua Blue - fachada noturna",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/viplaggeimoveis/ig/im/imoveis/146/1620928209726_5a0e6934-29b3-4be2-b884-1c189ec1ae87-1744118018427.jpeg",
+          "source_url": "https://www.viplaggeimoveis.com/imovel/apartamento-no-edificio-acqua-blue-residence-itapema-meia-praia-4-quartos-3-garagens-venda-ref-146/",
+          "source_label": "Vip Lagge Imoveis"
+        },
+        {
+          "title": "Acqua Blue - torre azul",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/viplaggeimoveis/ig/il/imoveis/146/1620928209726_5a0e6934-29b3-4be2-b884-1c189ec1ae87-1744118018427.jpeg",
+          "source_url": "https://www.viplaggeimoveis.com/imovel/apartamento-no-edificio-acqua-blue-residence-itapema-meia-praia-4-quartos-3-garagens-venda-ref-146/",
+          "source_label": "Vip Lagge Imoveis"
+        },
+        {
+          "title": "Acqua Blue - embasamento",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/viplaggeimoveis/ig/im/imoveis/146/1620928285089_b8cc269b-0f2b-4fd7-b85b-d7b7024891df-17441180184273.jpeg",
+          "source_url": "https://www.viplaggeimoveis.com/imovel/apartamento-no-edificio-acqua-blue-residence-itapema-meia-praia-4-quartos-3-garagens-venda-ref-146/",
+          "source_label": "Vip Lagge Imoveis"
+        },
+        {
+          "title": "Acqua Blue - portico frontal",
+          "category": "Acesso",
+          "image": "https://b3.casteldigital.com.br/viplaggeimoveis/ig/il/imoveis/146/1620928285089_b8cc269b-0f2b-4fd7-b85b-d7b7024891df-17441180184273.jpeg",
+          "source_url": "https://www.viplaggeimoveis.com/imovel/apartamento-no-edificio-acqua-blue-residence-itapema-meia-praia-4-quartos-3-garagens-venda-ref-146/",
+          "source_label": "Vip Lagge Imoveis"
+        },
+        {
+          "title": "Acqua Blue - acesso inferior",
+          "category": "Acesso",
+          "image": "https://b3.casteldigital.com.br/viplaggeimoveis/ig/im/imoveis/146/1620928294146_b4e4dad2-0f0b-4401-8e83-ce27a5648b4e-17441180184274.jpeg",
+          "source_url": "https://www.viplaggeimoveis.com/imovel/apartamento-no-edificio-acqua-blue-residence-itapema-meia-praia-4-quartos-3-garagens-venda-ref-146/",
+          "source_label": "Vip Lagge Imoveis"
+        },
+        {
+          "title": "Acqua Blue - fachada baixa",
+          "category": "Fachada",
+          "image": "https://www.arskammer.com.br/empreendimentos/galeria/216-4bf758f1844b973a6ca97301121dba78rua269externadebaixopracimaa02.jpg",
+          "source_url": "https://www.arskammer.com.br/empreendimento/acqua-blue-residence/19/",
+          "source_label": "ARS Kammer"
+        },
+        {
+          "title": "Acqua Blue - vista aerea",
+          "category": "Fachada",
+          "image": "https://www.arskammer.com.br/empreendimentos/galeria/217-6b2912b211ff72de29fe54d735f2d387rua269externaaereaavenidaa02.jpg",
+          "source_url": "https://www.arskammer.com.br/empreendimento/acqua-blue-residence/19/",
+          "source_label": "ARS Kammer"
+        },
+        {
+          "title": "Acqua Blue - playground",
+          "category": "Kids",
+          "image": "https://i.ytimg.com/vi/oLZWhGrV5ps/sddefault.jpg",
+          "source_url": "https://myside.com.br/apartamento-venda-acqua-blue-residence-itapema-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Acqua Blue - torre curva",
+          "category": "Fachada",
+          "image": "https://i.ytimg.com/vi/oLZWhGrV5ps/maxresdefault.jpg",
+          "source_url": "https://myside.com.br/apartamento-venda-acqua-blue-residence-itapema-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Acqua Blue - deck e piscina",
+          "category": "Piscina",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/42901/images/med/_3e9928ec693363168812912610394198.jpg",
+          "source_url": "https://myside.com.br/apartamento-venda-acqua-blue-residence-itapema-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Acqua Blue - piscina externa",
+          "category": "Piscina",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/42901/images/xsm/_3e9928ec693363168812912610394198.jpg",
+          "source_url": "https://myside.com.br/apartamento-venda-acqua-blue-residence-itapema-sc",
+          "source_label": "MySide"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "ARS Kammer em Meia Praia",
+          "description": "O empreendimento e associado a ARS Kammer e a Meia Praia, em Itapema."
+        },
+        {
+          "icon": "Waves",
+          "title": "Proximo ao mar",
+          "description": "Fontes de mercado indicam distancia inferior a 150 metros da praia em algumas ofertas."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer familiar",
+          "description": "A curadoria visual destaca playground, piscina, hall e areas de apoio do empreendimento."
+        }
+      ],
+      "differentials": [
+        "Hero atualizado com fachada do Acqua Blue Residence.",
+        "Galeria evita sacadas e ambientes de apartamento.",
+        "Copy contextualiza ARS Kammer, Meia Praia, proximidade do mar e perfil familiar."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Acqua Blue Residence?",
+          "answer": "As fontes indicam Meia Praia, em Itapema."
+        },
+        {
+          "question": "Quem assina o Acqua Blue Residence?",
+          "answer": "As fontes consultadas associam o empreendimento a ARS Kammer."
+        },
+        {
+          "question": "Quais imagens entraram na correcao?",
+          "answer": "Fachada, acesso, hall, playground, piscina e areas externas do empreendimento."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, acesso, kids, piscina e areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.arskammer.com.br/empreendimento/acqua-blue-residence/19/",
+        "https://myside.com.br/apartamento-venda-acqua-blue-residence-itapema-sc",
+        "https://www.imobillenegocios.com.br/empreendimento/acqua-blue-residence-EM44283",
+        "https://www.viplaggeimoveis.com/imovel/apartamento-no-edificio-acqua-blue-residence-itapema-meia-praia-4-quartos-3-garagens-venda-ref-146/",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-acqua-blue-residence-itapema-meia-praia-4-quartos-3-garagens-venda-ref-179/"
+      ]
+    },
+    {
+      "slug": "aguas-cristalinas",
+      "hero_image": "https://d78txhfo8gp8r.cloudfront.net/imoveispra/img_vendas/g1_475_27750_1115_260324.webp",
+      "description": "O Aguas Cristalinas foi revisado como residencial em Meia Praia, Itapema, com referencia de endereco na Rua 220, 348 em algumas fontes. A Imobille destaca localizacao a cerca de 350 metros da orla; fontes complementares indicam 20 pavimentos, 2 residencias por andar e aproximadamente 970 m2 de lazer com piscina adulto com raia, piscina infantil, academia, brinquedoteca, playground, jogos, bocha, sauna, spa, festas e gourmet. A nova galeria usa fachada, acesso, piscina e areas comuns.",
+      "seo_description": "Conheca o Aguas Cristalinas, residencial em Meia Praia, Itapema, a cerca de 350 m da orla e com lazer completo.",
+      "gallery": [
+        {
+          "title": "Aguas Cristalinas - fachada frontal",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/imoveispra/img_vendas/g1_475_27750_1115_260324.webp",
+          "source_url": "https://www.imoveispraitapema.com.br/imovel/venda-apartamento-04-dormitorio-em-itapema/aguas-cristalinas-4-suites-3-vagas-/475",
+          "source_label": "Imoveis Praia Itapema"
+        },
+        {
+          "title": "Aguas Cristalinas - torre vertical",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/imoveispra/img_vendas/i1_475_27750_1115_260324.webp",
+          "source_url": "https://www.imoveispraitapema.com.br/imovel/venda-apartamento-04-dormitorio-em-itapema/aguas-cristalinas-4-suites-3-vagas-/475",
+          "source_label": "Imoveis Praia Itapema"
+        },
+        {
+          "title": "Aguas Cristalinas - acesso urbano",
+          "category": "Acesso",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/imoveispra/img_vendas/g1_475_27751_1115_260324.webp",
+          "source_url": "https://www.imoveispraitapema.com.br/imovel/venda-apartamento-04-dormitorio-em-itapema/aguas-cristalinas-4-suites-3-vagas-/475",
+          "source_label": "Imoveis Praia Itapema"
+        },
+        {
+          "title": "Aguas Cristalinas - base frontal",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/imoveispra/img_vendas/i1_475_27751_1115_260324.webp",
+          "source_url": "https://www.imoveispraitapema.com.br/imovel/venda-apartamento-04-dormitorio-em-itapema/aguas-cristalinas-4-suites-3-vagas-/475",
+          "source_label": "Imoveis Praia Itapema"
+        },
+        {
+          "title": "Aguas Cristalinas - entrada classica",
+          "category": "Acesso",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/icp/imoveis/2142/img_5659-1753902851771.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-aguas-cristalinas-itapema-meia-praia-4-quartos-4-garagens-venda-ref-176/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Aguas Cristalinas - portico de acesso",
+          "category": "Acesso",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/icp/imoveis/1418/img_5653-17065582151134.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-aguas-cristalinas-itapema-meia-praia-4-quartos-4-garagens-venda-ref-176/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Aguas Cristalinas - terraco com piscina",
+          "category": "Piscina",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/imoveispra/img_vendas/g1_475_27763_1115_260324.webp",
+          "source_url": "https://www.imoveispraitapema.com.br/imovel/venda-apartamento-04-dormitorio-em-itapema/aguas-cristalinas-4-suites-3-vagas-/475",
+          "source_label": "Imoveis Praia Itapema"
+        },
+        {
+          "title": "Aguas Cristalinas - deck social",
+          "category": "Lazer",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/imoveispra/img_vendas/i1_475_27763_1115_260324.webp",
+          "source_url": "https://www.imoveispraitapema.com.br/imovel/venda-apartamento-04-dormitorio-em-itapema/aguas-cristalinas-4-suites-3-vagas-/475",
+          "source_label": "Imoveis Praia Itapema"
+        },
+        {
+          "title": "Aguas Cristalinas - piscina externa",
+          "category": "Piscina",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/imoveispra/img_vendas/p1_475_27758_1115_260324.webp",
+          "source_url": "https://www.imoveispraitapema.com.br/imovel/venda-apartamento-04-dormitorio-em-itapema/aguas-cristalinas-4-suites-3-vagas-/475",
+          "source_label": "Imoveis Praia Itapema"
+        },
+        {
+          "title": "Aguas Cristalinas - piscina e deck",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/pronto-1666796835.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aguas-cristalinas-EM6399",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aguas Cristalinas - jogos",
+          "category": "Jogos",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/October2021/SXsqkJXR2AMiI90LncrF.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aguas-cristalinas-EM6399",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aguas Cristalinas - espaco de bem-estar",
+          "category": "Spa",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/October2021/Jw2xO9M6zRDYFUVEs4Nx.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aguas-cristalinas-EM6399",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aguas Cristalinas - piscina interna",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/October2021/myI2wuhfVrg3AZPBqrSI.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aguas-cristalinas-EM6399",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aguas Cristalinas - sauna",
+          "category": "Spa",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/October2021/JmfgwhL3XcRbWMGhpkWs.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aguas-cristalinas-EM6399",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aguas Cristalinas - fitness",
+          "category": "Fitness",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/October2021/6qEuqRRHOv6PY6eYg8yt.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aguas-cristalinas-EM6399",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aguas Cristalinas - acesso externo",
+          "category": "Acesso",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/October2021/UXvFEuNN807YKrYCx9h7.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aguas-cristalinas-EM6399",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Aguas Cristalinas - area da piscina",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/October2021/gD6LWi4eHbQ2kmkmAswK.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-aguas-cristalinas-EM6399",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Meia Praia perto da orla",
+          "description": "A Imobille informa localizacao em Meia Praia a cerca de 350 metros da praia."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "970 m2 de lazer",
+          "description": "Fontes complementares citam piscina, kids, academia, jogos, bocha, sauna, spa, festas e gourmet."
+        },
+        {
+          "icon": "Building2",
+          "title": "Predio de baixa densidade",
+          "description": "Fontes apontam 20 pavimentos e 2 residencias por andar."
+        }
+      ],
+      "differentials": [
+        "Hero substituido por fachada do Aguas Cristalinas.",
+        "Galeria mostra areas comuns e fachada, nao interiores de oferta.",
+        "Texto inclui distancia da praia, lazer e perfil construtivo."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Aguas Cristalinas?",
+          "answer": "As fontes indicam Meia Praia, Itapema, com referencia na Rua 220."
+        },
+        {
+          "question": "Qual a distancia ate a praia?",
+          "answer": "A Imobille informa aproximadamente 350 metros da orla."
+        },
+        {
+          "question": "Quais areas de lazer aparecem nas fontes?",
+          "answer": "Piscinas, academia, brinquedoteca, playground, jogos, bocha, sauna, spa, festas e gourmet."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, acesso, piscina, lazer, jogos, spa e areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-aguas-cristalinas-EM6399",
+        "https://www.imoveispraitapema.com.br/imovel/venda-apartamento-04-dormitorio-em-itapema/aguas-cristalinas-4-suites-3-vagas-/475",
+        "https://playimoveisitapema.com.br/imovel/venda-apartamentos-04-dorm-em-itapema/517",
+        "https://www.vivareal.com.br/condominio/edificio-aguas-cristalinas-meia-praia-id-f35c2e0f-f585/",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-aguas-cristalinas-itapema-meia-praia-4-quartos-4-garagens-venda-ref-176/"
+      ]
+    },
+    {
+      "slug": "al-mare-residence",
+      "hero_image": "https://d78txhfo8gp8r.cloudfront.net/santa/img_edificios/m1_26_405_2224_100222.jpg",
+      "description": "O Al Mare Residence foi atualizado como empreendimento Pasqualotto no Centro de Itapema, com endereco de referencia na Avenida Nereu Ramos, 697 segundo a MySide. Fontes de mercado indicam plantas de 169 m2 a 269 m2, 4 a 5 quartos, entrega prevista para dezembro de 2027, tipologias frente mar com 4 suites e 3 vagas, alem de lazer voltado para piscina, solarium, espacos sociais e vista da orla. A nova galeria prioriza fachada, skyline, piscina e contexto frente mar.",
+      "seo_description": "Conheca o Al Mare Residence, Pasqualotto no Centro de Itapema, com fachada frente mar e lazer na orla.",
+      "gallery": [
+        {
+          "title": "Al Mare - fachada principal",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/santa/img_edificios/m1_26_405_2224_100222.jpg",
+          "source_url": "https://www.santaimobiliaria.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/al-mare-residence-itapema/26",
+          "source_label": "Santa Imobiliaria"
+        },
+        {
+          "title": "Al Mare - torre frente mar",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/santa/img_edificios/g1_26_405_2224_100222.jpg",
+          "source_url": "https://www.santaimobiliaria.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/al-mare-residence-itapema/26",
+          "source_label": "Santa Imobiliaria"
+        },
+        {
+          "title": "Al Mare - fachada vertical",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/santa/img_edificios/p1_26_405_2224_100222.jpg",
+          "source_url": "https://www.santaimobiliaria.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/al-mare-residence-itapema/26",
+          "source_label": "Santa Imobiliaria"
+        },
+        {
+          "title": "Al Mare - skyline da orla",
+          "category": "Orla",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/santa/img_edificios/g1_26_406_2224_100222.jpg",
+          "source_url": "https://www.santaimobiliaria.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/al-mare-residence-itapema/26",
+          "source_label": "Santa Imobiliaria"
+        },
+        {
+          "title": "Al Mare - torre na orla",
+          "category": "Orla",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/santa/img_edificios/p1_26_406_2224_100222.jpg",
+          "source_url": "https://www.santaimobiliaria.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/al-mare-residence-itapema/26",
+          "source_label": "Santa Imobiliaria"
+        },
+        {
+          "title": "Al Mare - fachada vista do mar",
+          "category": "Orla",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/santa/img_edificios/i1_26_406_2224_100222.jpg",
+          "source_url": "https://www.santaimobiliaria.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/al-mare-residence-itapema/26",
+          "source_label": "Santa Imobiliaria"
+        },
+        {
+          "title": "Al Mare - faixa de praia",
+          "category": "Orla",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/santa/img_edificios/g1_26_407_2224_100222.jpg",
+          "source_url": "https://www.santaimobiliaria.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/al-mare-residence-itapema/26",
+          "source_label": "Santa Imobiliaria"
+        },
+        {
+          "title": "Al Mare - vista da Avenida Nereu Ramos",
+          "category": "Orla",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/santa/img_edificios/i1_26_407_2224_100222.jpg",
+          "source_url": "https://www.santaimobiliaria.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/al-mare-residence-itapema/26",
+          "source_label": "Santa Imobiliaria"
+        },
+        {
+          "title": "Al Mare - skyline panoramica",
+          "category": "Orla",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/santa/img_edificios/g1_26_408_2224_100222.jpg",
+          "source_url": "https://www.santaimobiliaria.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/al-mare-residence-itapema/26",
+          "source_label": "Santa Imobiliaria"
+        },
+        {
+          "title": "Al Mare - piscina frente mar",
+          "category": "Piscina",
+          "image": "https://img.apre.me/M7ItVksvyNJLSbFITTUwMk9MSTEwi89JLMhMzsssKtA3MTI0MDPUT8-LTMnJLE2yzVQzsTQ1tE0GAA.jpg",
+          "source_url": "https://megaempreendimentos.com/al-mare-residence-centro-itapema",
+          "source_label": "Mega Empreendimentos"
+        },
+        {
+          "title": "Al Mare - piscina elevada",
+          "category": "Piscina",
+          "image": "https://img.apre.me/M7YtVksvyNJLSbFITTUwMk9MSTEwi89JLMhMzsssKtA3MTI0MDPUT8-LTMnJLE2yzVQzsTQ1tE0GAA.jpg",
+          "source_url": "https://megaempreendimentos.com/al-mare-residence-centro-itapema",
+          "source_label": "Mega Empreendimentos"
+        },
+        {
+          "title": "Al Mare - deck com vista",
+          "category": "Piscina",
+          "image": "https://img.apre.me/M7EtVksvyNJLSbFITTUwMk9MSTEwi89JLMhMzsssKtA3MTI0MDPUT8-LTMnJLE2yzVQzsTQ1tE0GAA.jpg",
+          "source_url": "https://megaempreendimentos.com/al-mare-residence-centro-itapema",
+          "source_label": "Mega Empreendimentos"
+        },
+        {
+          "title": "Al Mare - torre azul",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/vitapema/img_vendas/m1_295_21318_1822_050220.jpg",
+          "source_url": "https://www.vitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/al-mare-residence/295",
+          "source_label": "Vitapema Imoveis"
+        },
+        {
+          "title": "Al Mare - fachada diurna",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/vitapema/img_vendas/g1_295_21318_1822_050220.jpg",
+          "source_url": "https://www.vitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/al-mare-residence/295",
+          "source_label": "Vitapema Imoveis"
+        },
+        {
+          "title": "Al Mare - fachada compacta",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/vitapema/img_vendas/p1_295_21318_1822_050220.jpg",
+          "source_url": "https://www.vitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/al-mare-residence/295",
+          "source_label": "Vitapema Imoveis"
+        },
+        {
+          "title": "Al Mare - fachada noturna",
+          "category": "Fachada",
+          "image": "https://img.apre.me/M7ItVksvyNIzMbM0Mk0yMTdKszQxi89JLMhMzsssKtA3NjQxsjTRT8-LTMnJLE2yzVQzMDExtU0GAA.jpg",
+          "source_url": "https://durantcorretor.com.br/al-mare-residence-pasqualotto/contato",
+          "source_label": "Durant Corretor"
+        },
+        {
+          "title": "Al Mare - torre iluminada",
+          "category": "Fachada",
+          "image": "https://img.apre.me/M7YtVksvyNIzMbM0Mk0yMTdKszQxi89JLMhMzsssKtA3NjQxsjTRT8-LTMnJLE2yzVQzMDExtU0GAA.jpg",
+          "source_url": "https://durantcorretor.com.br/al-mare-residence-pasqualotto/contato",
+          "source_label": "Durant Corretor"
+        },
+        {
+          "title": "Al Mare - topo iluminado",
+          "category": "Fachada",
+          "image": "https://img.apre.me/M7EtVksvyNIzMbM0Mk0yMTdKszQxi89JLMhMzsssKtA3NjQxsjTRT8-LTMnJLE2yzVQzMDExtU0GAA.jpg",
+          "source_url": "https://durantcorretor.com.br/al-mare-residence-pasqualotto/contato",
+          "source_label": "Durant Corretor"
+        },
+        {
+          "title": "Al Mare - torre na praia",
+          "category": "Orla",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/camana/img_vendas/g1_905_9078_1734_070426.webp",
+          "source_url": "https://camanaimoveis.com.br/imovel/venda-apartamentos-04-dorm-em-itapema/al-mare-residence-em-itapema/905",
+          "source_label": "Camana Imoveis"
+        },
+        {
+          "title": "Al Mare - fachada crepuscular",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/camana/img_vendas/g1_905_9079_1734_070426.webp",
+          "source_url": "https://camanaimoveis.com.br/imovel/venda-apartamentos-04-dorm-em-itapema/al-mare-residence-em-itapema/905",
+          "source_label": "Camana Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Award",
+          "title": "Pasqualotto em Itapema",
+          "description": "Fontes associam o Al Mare Residence a Construtora Pasqualotto."
+        },
+        {
+          "icon": "Waves",
+          "title": "Centro e orla",
+          "description": "A MySide indica endereco de referencia na Avenida Nereu Ramos, Centro de Itapema."
+        },
+        {
+          "icon": "Ruler",
+          "title": "Plantas amplas",
+          "description": "Fontes citam metragens de 169 m2 a 269 m2, 4 a 5 quartos e 3 vagas em tipologias de mercado."
+        }
+      ],
+      "differentials": [
+        "Hero passa a mostrar fachada do Al Mare.",
+        "Galeria privilegia fachada, orla, skyline e piscina.",
+        "Descricao contextualiza Pasqualotto, Centro de Itapema e entrega prevista."
+      ],
+      "faq": [
+        {
+          "question": "Quem assina o Al Mare Residence?",
+          "answer": "As fontes consultadas associam o empreendimento a Pasqualotto."
+        },
+        {
+          "question": "Onde fica o Al Mare Residence?",
+          "answer": "A MySide indica endereco na Avenida Nereu Ramos, 697, Centro de Itapema."
+        },
+        {
+          "question": "Qual e o perfil das plantas?",
+          "answer": "Fontes de mercado citam opcoes de 169 m2 a 269 m2, 4 a 5 quartos e 3 vagas."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, orla, piscina e areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://myside.com.br/apartamento-venda-al-mare-residence-itapema-sc",
+        "https://www.santaimobiliaria.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/al-mare-residence-itapema/26",
+        "https://megaempreendimentos.com/al-mare-residence-centro-itapema",
+        "https://durantcorretor.com.br/al-mare-residence-pasqualotto",
+        "https://www.construtorapasqualotto.com.br/arquivos/empreendimentos/Al_Mare_Residence_17-6-2020_15-16-10_ficha_tecnica.pdf",
+        "https://www.vitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/al-mare-residence/295",
+        "https://durantcorretor.com.br/al-mare-residence-pasqualotto/contato",
+        "https://camanaimoveis.com.br/imovel/venda-apartamentos-04-dorm-em-itapema/al-mare-residence-em-itapema/905"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1361 @@
+{
+  "batch_id": "development-media-curation-batch25-20260715",
+  "generated_at": "2026-07-15T23:55:00.000Z",
+  "items": [
+    {
+      "slug": "beverly-hills",
+      "hero_image": "https://cdn.imoview.com.br/bryann/Condominios/241/beverly-hills-felicita-balneario-camboriu-1.jpg?1681619505",
+      "description": "O Beverly Hills foi revisado como condominio frente mar na Barra Sul de Balneario Camboriu, com referencias publicas para a Avenida Atlantica, 5086. As fontes descrevem torre frente mar com 20 a 26 pavimentos conforme o cadastro consultado, duas residencias por andar, dois elevadores, portaria 24h, bicicletario, box de praia e lazer completo. A nova galeria substitui fotos internas por fachada, piscina, areas sociais, fitness e detalhes do condominio.",
+      "seo_description": "Conheca o Beverly Hills, condominio frente mar na Barra Sul de Balneario Camboriu, com portaria, lazer e estrutura de praia.",
+      "gallery": [
+        {
+          "title": "Beverly Hills - fachada frente mar",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/241/beverly-hills-felicita-balneario-camboriu-1.jpg?1681619505",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/241/beverly-hills/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Beverly Hills - torre na Avenida Atlantica",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/beverly-hills-1-1710957529-1731084834.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-beverly-hills-EM21570",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Beverly Hills - fachada vertical",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/beverly-hills-1-1710957529.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-beverly-hills-EM21570",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Beverly Hills - fachada com orla",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2024/beverly-hills-10-1710957530.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-beverly-hills-EM21570",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Beverly Hills - base do condominio",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/241/beverly-hills-felicita-balneario-camboriu-3.jpg?1681619505",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/241/beverly-hills/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Beverly Hills - vista da torre",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/icp/imoveis/943/1-fachada-jpg-16890191439465.jpeg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-beverly-hills-balneario-camboriu-barra-sul-3-quartos-3-garagens-venda-ref-1987/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Beverly Hills - piscina externa",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/0811202413544726-1731084887.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-beverly-hills-EM21570",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Beverly Hills - deck da piscina",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/241/beverly-hills-felicita-balneario-camboriu-9.jpg?1681619505",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/241/beverly-hills/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Beverly Hills - lazer com piscina",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/241/beverly-hills-felicita-balneario-camboriu-7.jpg?1681619505",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/241/beverly-hills/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Beverly Hills - area de lazer",
+          "category": "Lazer",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/241/beverly-hills-felicita-balneario-camboriu-6.jpg?1681619505",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/241/beverly-hills/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Beverly Hills - academia",
+          "category": "Fitness",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/241/beverly-hills-felicita-balneario-camboriu-13.jpg?1681619505",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/241/beverly-hills/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Beverly Hills - ambiente social",
+          "category": "Social",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/241/beverly-hills-felicita-balneario-camboriu-11.jpg?1681619505",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/241/beverly-hills/",
+          "source_label": "Felicita Negocios"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente mar na Barra Sul",
+          "description": "As fontes posicionam o condominio na Avenida Atlantica, em frente a orla da Barra Sul."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Portaria e apoio de praia",
+          "description": "Fly Imoveis cita portaria 24h, bicicletario e box de praia como itens do edificio."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer completo",
+          "description": "Imobille descreve o Beverly Hills com mais de dez opcoes de lazer e areas comuns."
+        }
+      ],
+      "differentials": [
+        "Hero trocado para fachada do condominio.",
+        "Galeria removeu ambientes internos de oferta.",
+        "Copy reforca frente mar, Barra Sul, portaria e apoio de praia."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Beverly Hills?",
+          "answer": "As fontes consultadas indicam a Avenida Atlantica, 5086, Barra Sul, Balneario Camboriu."
+        },
+        {
+          "question": "O Beverly Hills e frente mar?",
+          "answer": "Sim. As fontes de mercado consultadas descrevem o condominio como frente mar."
+        },
+        {
+          "question": "Quais estruturas do condominio aparecem nas fontes?",
+          "answer": "Foram citados portaria 24h, bicicletario, box de praia, piscina, academia e areas sociais."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, piscina, lazer, fitness, social e areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.flyimoveis.com.br/imovel/apartamento-no-edificio-beverly-hills-balneario-camboriu-barra-sul-3-quartos-3-garagens-venda-ref-869/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-beverly-hills-EM21570",
+        "https://felicitanegocios.com.br/empreendimento/241/beverly-hills/",
+        "https://meufrentemar.com.br/comprar/sc/balneario-camboriu/barra-sul/apartamento/73839034",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-beverly-hills-balneario-camboriu-barra-sul-3-quartos-3-garagens-venda-ref-1987/"
+      ]
+    },
+    {
+      "slug": "bilbao",
+      "hero_image": "https://b.casteldigital.com.br/imobiliariaforcast/ig/il/imoveis/441/imagem-jpeg-388d803de64f-1-1688506198531.jpeg",
+      "description": "O Bilbao foi revisado como Bilbao House, empreendimento Maybelly frente mar no Balneario Pereque, em Porto Belo. A pagina da incorporadora informa entrega antecipada, plantas de 197 m2 com 4 suites, elevador panoramico, piscina com borda infinita e 799 m2 de lazer. A Imobille posiciona o empreendimento na Senador Atilio Fontana, 429. A galeria agora prioriza fachada, piscina, lazer, hall e fitness do empreendimento.",
+      "seo_description": "Conheca o Bilbao House da Maybelly, frente mar no Balneario Pereque, com 799 m2 de lazer e piscina com borda infinita.",
+      "gallery": [
+        {
+          "title": "Bilbao House - fachada frente mar",
+          "category": "Fachada",
+          "image": "https://b.casteldigital.com.br/imobiliariaforcast/ig/il/imoveis/441/imagem-jpeg-388d803de64f-1-1688506198531.jpeg",
+          "source_url": "https://www.imobiliariaforcast.com.br/imovel/apartamento-no-edificio-bilbao-house-porto-belo-balneario-pereque-4-quartos-3-garagens-venda-ref-441/",
+          "source_label": "imobiliariaforcast.com.br"
+        },
+        {
+          "title": "Bilbao House - torre iluminada",
+          "category": "Fachada",
+          "image": "https://empreendimentos.imovelshare.com.br/imagens/cod156e7/i1-07-12-2020.jpg",
+          "source_url": "https://www.leluxeimoveis.com.br/imoveis/detalhes/e728",
+          "source_label": "Le Luxe Imoveis"
+        },
+        {
+          "title": "Bilbao House - fachada vertical",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/il/imoveis/1778/1605703136087_600c8c7b-ae06-45b9-a170-302e71d68aa1-17501876539535.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-bilbao-porto-belo-pereque-4-quartos-3-garagens-venda-ref-1778/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Bilbao House - acesso do empreendimento",
+          "category": "Acesso",
+          "image": "https://www.maybelly.com.br/sites/default/files/styles/540x720/public/2025-04/Externa%20-%20B%20-%20032222_0.jpg?itok=FAAY6Q_c",
+          "source_url": "https://www.maybelly.com.br/empreendimentos/bilbao",
+          "source_label": "Maybelly"
+        },
+        {
+          "title": "Bilbao House - fachada lateral",
+          "category": "Fachada",
+          "image": "https://b.casteldigital.com.br/imobiliariaforcast/ig/im/imoveis/441/imagem-jpeg-388d803de64f-1-1688506198531.jpeg",
+          "source_url": "https://www.imobiliariaforcast.com.br/imovel/apartamento-no-edificio-bilbao-house-porto-belo-balneario-pereque-4-quartos-3-garagens-venda-ref-441/",
+          "source_label": "imobiliariaforcast.com.br"
+        },
+        {
+          "title": "Bilbao House - piscina elevada",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/0701202516322817629-1736278348.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/-bilbao-house-EM46527",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Bilbao House - borda infinita",
+          "category": "Piscina",
+          "image": "https://empreendimentos.imovelshare.com.br/imagens/COD156E7/I3-07-12-2020.jpg",
+          "source_url": "https://www.leluxeimoveis.com.br/imoveis/detalhes/e728",
+          "source_label": "Le Luxe Imoveis"
+        },
+        {
+          "title": "Bilbao House - deck da piscina",
+          "category": "Piscina",
+          "image": "https://empreendimentos.imovelshare.com.br/imagens/COD156E7/I8-07-12-2020.jpg",
+          "source_url": "https://www.leluxeimoveis.com.br/imoveis/detalhes/e728",
+          "source_label": "Le Luxe Imoveis"
+        },
+        {
+          "title": "Bilbao House - lounge do lazer",
+          "category": "Lazer",
+          "image": "https://b.casteldigital.com.br/imobiliariaforcast/ig/im/imoveis/441/imagem-jpeg-388d803de64f-3-1688506198531.jpeg",
+          "source_url": "https://www.imobiliariaforcast.com.br/imovel/apartamento-no-edificio-bilbao-house-porto-belo-balneario-pereque-4-quartos-3-garagens-venda-ref-441/",
+          "source_label": "imobiliariaforcast.com.br"
+        },
+        {
+          "title": "Bilbao House - ambiente gourmet",
+          "category": "Gourmet",
+          "image": "https://b.casteldigital.com.br/imobiliariaforcast/ig/il/imoveis/441/imagem-jpeg-388d803de64f-3-1688506198531.jpeg",
+          "source_url": "https://www.imobiliariaforcast.com.br/imovel/apartamento-no-edificio-bilbao-house-porto-belo-balneario-pereque-4-quartos-3-garagens-venda-ref-441/",
+          "source_label": "imobiliariaforcast.com.br"
+        },
+        {
+          "title": "Bilbao House - espaco de convivencia",
+          "category": "Social",
+          "image": "https://b.casteldigital.com.br/imobiliariaforcast/ig/im/imoveis/441/imagem-jpeg-388d803de64f-4-1688506198531.jpeg",
+          "source_url": "https://www.imobiliariaforcast.com.br/imovel/apartamento-no-edificio-bilbao-house-porto-belo-balneario-pereque-4-quartos-3-garagens-venda-ref-441/",
+          "source_label": "imobiliariaforcast.com.br"
+        },
+        {
+          "title": "Bilbao House - academia equipada",
+          "category": "Fitness",
+          "image": "https://www.maybelly.com.br/sites/default/files/styles/1240x800/public/2025-06/Foto-21.jpg?itok=_cPgUAl3",
+          "source_url": "https://www.maybelly.com.br/empreendimentos/bilbao",
+          "source_label": "Maybelly"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente mar em Pereque",
+          "description": "Maybelly e Le Luxe posicionam o Bilbao House como empreendimento frente mar no Balneario Pereque."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "799 m2 de lazer",
+          "description": "A Maybelly destaca piscina com borda infinita, lazer amplo e elevador panoramico."
+        },
+        {
+          "icon": "Building2",
+          "title": "Projeto Maybelly",
+          "description": "A incorporadora informa entrega antecipada e plantas de 197 m2 com 4 suites."
+        }
+      ],
+      "differentials": [
+        "Midia substituida por fachada, piscina e areas comuns.",
+        "Descricao passa a citar Maybelly, Pereque e 799 m2 de lazer.",
+        "Fontes externas confirmam o nome Bilbao House."
+      ],
+      "faq": [
+        {
+          "question": "O Bilbao fica em qual cidade?",
+          "answer": "Fica em Porto Belo, no Balneario Pereque, conforme fontes da Maybelly e Imobille."
+        },
+        {
+          "question": "Qual e o principal diferencial de lazer?",
+          "answer": "A Maybelly informa 799 m2 de lazer e piscina com borda infinita."
+        },
+        {
+          "question": "Quem assina o Bilbao House?",
+          "answer": "O empreendimento e divulgado pela Maybelly."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, acesso, piscina, lazer, gourmet, social e areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.maybelly.com.br/empreendimentos/bilbao",
+        "https://www.imobillenegocios.com.br/empreendimento/-bilbao-house-EM46527",
+        "https://www.leluxeimoveis.com.br/imoveis/detalhes/e728",
+        "https://www.imobiliariaforcast.com.br/imovel/apartamento-no-edificio-bilbao-house-porto-belo-balneario-pereque-4-quartos-3-garagens-venda-ref-441/",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-bilbao-porto-belo-pereque-4-quartos-3-garagens-venda-ref-1778/"
+      ]
+    },
+    {
+      "slug": "black-bird",
+      "hero_image": "https://b3.casteldigital.com.br/viplaggeimoveis/ig/il/imoveis/118/1634309427727_2d0def1a-1d31-4a8b-8b59-c5f4b588f166-17430012327946.jpg",
+      "description": "O Black Bird foi revisado como lancamento da KMK Empreendimentos no Centro de Itapema, em area proxima ao mar na Avenida Nereu Ramos. A KMK descreve projeto arquitetonico de Athos Peruzzollo, fachada contemporanea com vegetacao nativa, 42 pavimentos, duas residencias por andar, 3 elevadores, gerador e mais de 1.590 m2 de lazer. A Duo e a Sea House reforcam piscina aquecida adulto e infantil, prainha, gourmet externo, saloes de festas, playground, brinquedoteca, academia, jogos, sauna e quadra. A galeria ficou propositalmente enxuta para usar apenas imagens associadas ao empreendimento.",
+      "seo_description": "Conheca o Black Bird da KMK no Centro de Itapema, com 42 pavimentos e mais de 1.590 m2 de lazer.",
+      "gallery": [
+        {
+          "title": "Black Bird - fachada do projeto",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/viplaggeimoveis/ig/il/imoveis/118/1634309427727_2d0def1a-1d31-4a8b-8b59-c5f4b588f166-17430012327946.jpg",
+          "source_url": "https://www.viplaggeimoveis.com/imovel/apartamento-no-edificio-black-bird-itapema-centro-4-quartos-3-garagens-venda-ref-118/",
+          "source_label": "Vip Lagge Imoveis"
+        },
+        {
+          "title": "Black Bird - vista da torre",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/viplaggeimoveis/ig/im/imoveis/118/1634309427727_2d0def1a-1d31-4a8b-8b59-c5f4b588f166-17430012327946.jpg",
+          "source_url": "https://www.viplaggeimoveis.com/imovel/apartamento-no-edificio-black-bird-itapema-centro-4-quartos-3-garagens-venda-ref-118/",
+          "source_label": "Vip Lagge Imoveis"
+        },
+        {
+          "title": "Black Bird - piscina do lazer",
+          "category": "Piscina",
+          "image": "https://b3.casteldigital.com.br/viplaggeimoveis/ig/im/imoveis/118/1634309495376_bf620aa7-e865-4533-a202-c3dd43fa0135-17430012327949.jpg",
+          "source_url": "https://www.viplaggeimoveis.com/imovel/apartamento-no-edificio-black-bird-itapema-centro-4-quartos-3-garagens-venda-ref-118/",
+          "source_label": "Vip Lagge Imoveis"
+        },
+        {
+          "title": "Black Bird - deck da piscina",
+          "category": "Piscina",
+          "image": "https://b3.casteldigital.com.br/viplaggeimoveis/ig/il/imoveis/118/1634309495376_bf620aa7-e865-4533-a202-c3dd43fa0135-17430012327949.jpg",
+          "source_url": "https://www.viplaggeimoveis.com/imovel/apartamento-no-edificio-black-bird-itapema-centro-4-quartos-3-garagens-venda-ref-118/",
+          "source_label": "Vip Lagge Imoveis"
+        },
+        {
+          "title": "Black Bird - area de lazer elevada",
+          "category": "Lazer",
+          "image": "https://b3.casteldigital.com.br/viplaggeimoveis/ig/im/imoveis/118/1634309422904_4acb3cd2-be04-4a0d-81f2-35522a57af77-17430012327945.jpg",
+          "source_url": "https://www.viplaggeimoveis.com/imovel/apartamento-no-edificio-black-bird-itapema-centro-4-quartos-3-garagens-venda-ref-118/",
+          "source_label": "Vip Lagge Imoveis"
+        },
+        {
+          "title": "Black Bird - piscina e convivencia",
+          "category": "Piscina",
+          "image": "https://b3.casteldigital.com.br/viplaggeimoveis/ig/il/imoveis/118/1634309422904_4acb3cd2-be04-4a0d-81f2-35522a57af77-17430012327945.jpg",
+          "source_url": "https://www.viplaggeimoveis.com/imovel/apartamento-no-edificio-black-bird-itapema-centro-4-quartos-3-garagens-venda-ref-118/",
+          "source_label": "Vip Lagge Imoveis"
+        },
+        {
+          "title": "Black Bird - lazer interno",
+          "category": "Lazer",
+          "image": "https://b3.casteldigital.com.br/viplaggeimoveis/ig/im/imoveis/118/1634309505011_c5be01cd-8a5f-4036-b3b1-beaafd899aa3-1743001232795.jpg",
+          "source_url": "https://www.viplaggeimoveis.com/imovel/apartamento-no-edificio-black-bird-itapema-centro-4-quartos-3-garagens-venda-ref-118/",
+          "source_label": "Vip Lagge Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "42 pavimentos",
+          "description": "A KMK informa 42 pavimentos, duas residencias por andar e 3 elevadores de alto desempenho."
+        },
+        {
+          "icon": "Trees",
+          "title": "Fachada com vegetacao",
+          "description": "A incorporadora destaca plantas nativas integradas a fachada contemporanea."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Mais de 1.590 m2 de lazer",
+          "description": "Fontes como KMK, Mastermar, Duo e Sea House citam lazer amplo, piscina, academia, sauna e jogos."
+        }
+      ],
+      "differentials": [
+        "Galeria enxuta por criterio de confiabilidade visual.",
+        "Descricao agora identifica KMK, Athos Peruzzollo e Centro de Itapema.",
+        "Beneficios focam torre, fachada e lazer do empreendimento."
+      ],
+      "faq": [
+        {
+          "question": "Quem e a incorporadora do Black Bird?",
+          "answer": "A pagina oficial consultada associa o Black Bird a KMK Empreendimentos."
+        },
+        {
+          "question": "Onde fica o Black Bird?",
+          "answer": "As fontes posicionam o empreendimento no Centro de Itapema, proximo ao mar, na Avenida Nereu Ramos."
+        },
+        {
+          "question": "Por que a galeria e menor?",
+          "answer": "A selecao foi limitada a imagens com origem coerente para evitar fotos internas ou imagens sem relacao clara com o condominio."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, piscina, lazer e areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.kmkempreendimentos.com.br/empreendimento-itapema-black-bird.html",
+        "https://www.mastermar.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/black-bird--lancamento-centro-de-itapema/870",
+        "https://duoimoveis.imb.br/apartamento/itapema/centro/6779",
+        "https://myside.com.br/apartamento-venda-black-bird-itapema-sc",
+        "https://www.seahouseimoveis.com.br/imovel/Black-Bird-CT069",
+        "https://www.viplaggeimoveis.com/imovel/apartamento-no-edificio-black-bird-itapema-centro-4-quartos-3-garagens-venda-ref-118/"
+      ]
+    },
+    {
+      "slug": "blue-forest",
+      "hero_image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/1877/1632397111984_d084de2a-5abf-4ee9-bc50-87e04950d1be-17522578155774.jpeg",
+      "description": "O Blue Forest Residence foi revisado como empreendimento da Phacz no Balneario Pereque, em Porto Belo, com endereco divulgado na Rua Blumenau, 85, e entrega prevista para junho de 2027 nas fontes consultadas. Os materiais descrevem plantas em torno de 144 a 154 m2, opcoes de 3 a 4 quartos, 2 a 3 vagas e um conceito de natureza integrada. A Potencial destaca a floresta suspensa no sexto pavimento, e a Duo informa cerca de 1.300 m2 de lazer no sexto pavimento mais rooftop, com piscina, hidro, spa, sauna, playground, brinquedoteca, pet place, festas e terraco. A nova galeria usa fachada, jardins, piscina, spa, rooftop, fitness e areas comuns.",
+      "seo_description": "Conheca o Blue Forest Residence em Pereque, Porto Belo, com floresta suspensa, rooftop e lazer amplo.",
+      "gallery": [
+        {
+          "title": "Blue Forest - fachada principal",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/1877/1632397111984_d084de2a-5abf-4ee9-bc50-87e04950d1be-17522578155774.jpeg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-blue-forest-porto-belo-pereque-3-quartos-2-garagens-venda-ref-1877/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Blue Forest - fachada com mar",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/il/imoveis/1877/1634217946705_c1912e55-6e23-4aaf-bb93-f9f7541e409b-17522578155775.jpeg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-blue-forest-porto-belo-pereque-3-quartos-2-garagens-venda-ref-1877/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Blue Forest - torre no Pereque",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/lucinhaimoveis/ig/il/imoveis/43/1634217946705_c1912e55-6e23-4aaf-bb93-f9f7541e409b-17010909831872.jpeg",
+          "source_url": "https://www.lucinhaimoveis.com.br/imovel/apartamento-no-edificio-blue-forest-porto-belo-pereque-3-quartos-2-garagens-venda-ref-43/",
+          "source_label": "lucinhaimoveis.com.br"
+        },
+        {
+          "title": "Blue Forest - jardim suspenso",
+          "category": "Jardim",
+          "image": "https://www.phacz.com.br/img/empreendimentos/00015-blue-forest-226.jpg",
+          "source_url": "https://www.phacz.com.br/empreendimentos/blue_forest_residence?c=c4ca4238a0b923820dcc509a6f75849b",
+          "source_label": "Phacz Empreendimentos"
+        },
+        {
+          "title": "Blue Forest - paisagismo elevado",
+          "category": "Jardim",
+          "image": "https://www.phacz.com.br/img/empreendimentos/00012-blue-forest-223.jpg",
+          "source_url": "https://www.phacz.com.br/empreendimentos/blue_forest_residence?c=c4ca4238a0b923820dcc509a6f75849b",
+          "source_label": "Phacz Empreendimentos"
+        },
+        {
+          "title": "Blue Forest - academia",
+          "category": "Fitness",
+          "image": "https://www.phacz.com.br/img/empreendimentos/00015-blue-forest-246.jpg",
+          "source_url": "https://www.phacz.com.br/empreendimentos/blue_forest_residence?c=c4ca4238a0b923820dcc509a6f75849b",
+          "source_label": "Phacz Empreendimentos"
+        },
+        {
+          "title": "Blue Forest - piscina aquecida",
+          "category": "Piscina",
+          "image": "https://www.phacz.com.br/img/empreendimentos/00015-blue-forest-112.jpg",
+          "source_url": "https://www.phacz.com.br/empreendimentos/blue_forest_residence?c=c4ca4238a0b923820dcc509a6f75849b",
+          "source_label": "Phacz Empreendimentos"
+        },
+        {
+          "title": "Blue Forest - spa do lazer",
+          "category": "Spa",
+          "image": "https://www.phacz.com.br/img/empreendimentos/00012-blue-forest-109.jpg",
+          "source_url": "https://www.phacz.com.br/empreendimentos/blue_forest_residence?c=c4ca4238a0b923820dcc509a6f75849b",
+          "source_label": "Phacz Empreendimentos"
+        },
+        {
+          "title": "Blue Forest - rooftop com piscina",
+          "category": "Rooftop",
+          "image": "https://www.phacz.com.br/img/empreendimentos/00015-blue-forest-132.jpg",
+          "source_url": "https://www.phacz.com.br/empreendimentos/blue_forest_residence?c=c4ca4238a0b923820dcc509a6f75849b",
+          "source_label": "Phacz Empreendimentos"
+        },
+        {
+          "title": "Blue Forest - lounge do rooftop",
+          "category": "Rooftop",
+          "image": "https://www.phacz.com.br/img/empreendimentos/00012-blue-forest-129.jpg",
+          "source_url": "https://www.phacz.com.br/empreendimentos/blue_forest_residence?c=c4ca4238a0b923820dcc509a6f75849b",
+          "source_label": "Phacz Empreendimentos"
+        },
+        {
+          "title": "Blue Forest - lazer no topo",
+          "category": "Rooftop",
+          "image": "https://www.phacz.com.br/img/empreendimentos/00015-blue-forest-151.jpg",
+          "source_url": "https://www.phacz.com.br/empreendimentos/blue_forest_residence?c=c4ca4238a0b923820dcc509a6f75849b",
+          "source_label": "Phacz Empreendimentos"
+        },
+        {
+          "title": "Blue Forest - localizacao Pereque",
+          "category": "Localizacao",
+          "image": "https://www.phacz.com.br/img/empreendimentos/00015-blue-forest-206.jpg",
+          "source_url": "https://www.phacz.com.br/empreendimentos/blue_forest_residence?c=c4ca4238a0b923820dcc509a6f75849b",
+          "source_label": "Phacz Empreendimentos"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Trees",
+          "title": "Floresta suspensa",
+          "description": "A Potencial descreve uma floresta suspensa no sexto pavimento, a cerca de 20 metros de altura."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer no sexto pavimento e rooftop",
+          "description": "A Duo informa cerca de 1.300 m2 de lazer, com piscina, spa, sauna, brinquedoteca e terraco."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Balneario Pereque",
+          "description": "MySide e Phacz posicionam o empreendimento no Pereque, em Porto Belo."
+        }
+      ],
+      "differentials": [
+        "Galeria substitui renders internos por fachada, jardim suspenso e lazer.",
+        "Copy inclui Phacz, Pereque, floresta suspensa e rooftop.",
+        "Fonte de localizacao e entrega registrada no texto."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Blue Forest Residence?",
+          "answer": "As fontes consultadas posicionam o empreendimento na Rua Blumenau, 85, no Balneario Pereque, Porto Belo."
+        },
+        {
+          "question": "Qual e o conceito do Blue Forest?",
+          "answer": "As fontes destacam natureza integrada, floresta suspensa no sexto pavimento e areas comuns com paisagismo."
+        },
+        {
+          "question": "Quais areas de lazer foram consideradas?",
+          "answer": "Foram considerados piscina, hidro, spa, sauna, playground, brinquedoteca, pet place, festas, terraco e rooftop."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, jardim, fitness, piscina, spa, rooftop e areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://myside.com.br/apartamento-venda-blue-forest-residence-porto-belo-sc",
+        "https://www.phacz.com.br/empreendimentos/blue_forest_residence?c=c4ca4238a0b923820dcc509a6f75849b",
+        "https://www.potencialimoveis.com.br/imoveis/blue-forest-residence-apartamento-03-suites-porto-belo-IM4301",
+        "https://duoimoveis.imb.br/apartamento/porto-belo/balneario-pereque/5302",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-blue-forest-porto-belo-pereque-3-quartos-2-garagens-venda-ref-1877/",
+        "https://www.lucinhaimoveis.com.br/imovel/apartamento-no-edificio-blue-forest-porto-belo-pereque-3-quartos-2-garagens-venda-ref-43/"
+      ]
+    },
+    {
+      "slug": "blue-life-residence",
+      "hero_image": "https://asramos.com.br/wp-content/uploads/10.png",
+      "description": "O Blue Life Residence foi revisado como empreendimento da AS Ramos no Centro de Balneario Camboriu, com referencias para a Rua 1542, 55. A AS Ramos informa uma torre com 19 pavimentos, duas residencias por andar, 24 residencias tipo, uma cobertura, dois elevadores e home box. Viva Real e Efipar citam academia, piscina, elevador, brinquedoteca, gourmet, playground, salao de festas, jogos, spa com sauna e portaria. A galeria agora usa fachada, acesso e areas comuns do condominio.",
+      "seo_description": "Conheca o Blue Life Residence da AS Ramos no Centro de Balneario Camboriu, com lazer, piscina e home box.",
+      "gallery": [
+        {
+          "title": "Blue Life Residence - fachada principal",
+          "category": "Fachada",
+          "image": "https://asramos.com.br/wp-content/uploads/10.png",
+          "source_url": "https://asramos.com.br/empreendimentos/blue-life-residence/",
+          "source_label": "AS Ramos"
+        },
+        {
+          "title": "Blue Life Residence - torre urbana",
+          "category": "Fachada",
+          "image": "https://asramos.com.br/wp-content/uploads/10-210x300.png",
+          "source_url": "https://asramos.com.br/empreendimentos/blue-life-residence/",
+          "source_label": "AS Ramos"
+        },
+        {
+          "title": "Blue Life Residence - fachada vertical",
+          "category": "Fachada",
+          "image": "https://asramos.com.br/wp-content/uploads/FACHADA-8-scaled.jpg",
+          "source_url": "https://asramos.com.br/empreendimentos/blue-life-residence/",
+          "source_label": "AS Ramos"
+        },
+        {
+          "title": "Blue Life Residence - base da torre",
+          "category": "Fachada",
+          "image": "https://asramos.com.br/wp-content/uploads/FACHADA-2-2-scaled.jpg",
+          "source_url": "https://asramos.com.br/empreendimentos/blue-life-residence/",
+          "source_label": "AS Ramos"
+        },
+        {
+          "title": "Blue Life Residence - fachada iluminada",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/blue-life-32-1681501343.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-blue-life-residence-EM92579",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Blue Life Residence - acesso do condominio",
+          "category": "Acesso",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/if/imoveis/168/blue-life-01-fachada-16330213275363.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-blue-life-residence-balneario-camboriu-centro-2-quartos-2-garagens-venda-ref-168/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Blue Life Residence - fachada com rua",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/il/imoveis/168/blue-life-01-fachada-16330213275363.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-blue-life-residence-balneario-camboriu-centro-2-quartos-2-garagens-venda-ref-168/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Blue Life Residence - torre no Centro",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/168/blue-life-01-fachada-16330213275363.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-blue-life-residence-balneario-camboriu-centro-2-quartos-2-garagens-venda-ref-168/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Blue Life Residence - academia",
+          "category": "Fitness",
+          "image": "https://asramos.com.br/wp-content/uploads/ESPACO-FITNESS-5-scaled.jpg",
+          "source_url": "https://asramos.com.br/empreendimentos/blue-life-residence/",
+          "source_label": "AS Ramos"
+        },
+        {
+          "title": "Blue Life Residence - brinquedoteca",
+          "category": "Kids",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/iDqgiIcgJ6DR0RixmGaX.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-blue-life-residence-EM92579",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Blue Life Residence - fitness e lazer",
+          "category": "Fitness",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/P4aqD79stIJ5AyLTqc7o.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-blue-life-residence-EM92579",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Blue Life Residence - piscina",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/September2021/CQ6Q2LFi3pgwoXYcOVkT.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-blue-life-residence-EM92579",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Torre AS Ramos",
+          "description": "A AS Ramos informa uma torre com 19 pavimentos, duas residencias por andar e dois elevadores."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Centro de Balneario Camboriu",
+          "description": "Viva Real e Efipar posicionam o edificio na Rua 1542, 55, no Centro."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer familiar",
+          "description": "As fontes citam piscina, academia, brinquedoteca, gourmet, playground, festas, jogos e spa com sauna."
+        }
+      ],
+      "differentials": [
+        "Hero atualizado para fachada do Blue Life Residence.",
+        "Galeria removeu fotos internas de oferta.",
+        "Descricao inclui AS Ramos, estrutura da torre e lazer informado."
+      ],
+      "faq": [
+        {
+          "question": "Quem construiu o Blue Life Residence?",
+          "answer": "O empreendimento e divulgado pela AS Ramos."
+        },
+        {
+          "question": "Onde fica o Blue Life Residence?",
+          "answer": "As fontes consultadas indicam Rua 1542, 55, Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Quais areas de lazer aparecem nas fontes?",
+          "answer": "Foram citadas piscina, academia, brinquedoteca, gourmet, playground, festas, jogos e spa com sauna."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, acesso, fitness, kids, piscina e areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://asramos.com.br/empreendimentos/blue-life-residence/",
+        "https://www.vivareal.com.br/condominio/edificio-blue-life-residence-centro-id-025dcc21-cd72/",
+        "https://efipar.com.br/imoveis/blue-life/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-blue-life-residence-EM92579",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-blue-life-residence-balneario-camboriu-centro-2-quartos-2-garagens-venda-ref-168/"
+      ]
+    },
+    {
+      "slug": "blue-view",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2025/04/edificio-blue-view-balneario-camboriu-1.jpg",
+      "description": "O Blue View Tower foi revisado como pre-lancamento da FG Empreendimentos na Barra Sul de Balneario Camboriu, em frente ao mar, na Avenida Atlantica com Rua 4600 segundo a Litoral Vertical. A fonte informa uma residencia por andar, dois elevadores, opcoes de 5 a 6 suites e areas privativas a partir de 274 m2. O lazer divulgado inclui jogos, festas, emporio, playground, sauna umida, beauty e piscina aquecida. A nova galeria prioriza fachada, base, volumetria e contexto do projeto.",
+      "seo_description": "Conheca o Blue View Tower da FG, pre-lancamento frente mar na Barra Sul de Balneario Camboriu.",
+      "gallery": [
+        {
+          "title": "Blue View Tower - fachada frente mar",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/04/edificio-blue-view-balneario-camboriu-1.jpg",
+          "source_url": "https://litoralvertical.com/pre-lancamento/balneario-camboriu/apartamentos/edificio-blue-view-tower/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Blue View Tower - torre na orla",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/litoralnorth/ig/il/imoveis/3393/screenshot_17-16999173829559.png",
+          "source_url": "https://www.litoralnorth.com.br/imovel/apartamento-no-edificio-blue-view-balneario-camboriu-barra-sul-6-quartos-3-garagens-venda-ref-3393/",
+          "source_label": "litoralnorth.com.br"
+        },
+        {
+          "title": "Blue View Tower - fachada vertical",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/litoralnorth/ig/im/imoveis/3393/screenshot_17-16999173829559.png",
+          "source_url": "https://www.litoralnorth.com.br/imovel/apartamento-no-edificio-blue-view-balneario-camboriu-barra-sul-6-quartos-3-garagens-venda-ref-3393/",
+          "source_label": "litoralnorth.com.br"
+        },
+        {
+          "title": "Blue View Tower - base arquitetonica",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/litoralnorth/ig/im/imoveis/3393/screenshot_4-1699920794074.png",
+          "source_url": "https://www.litoralnorth.com.br/imovel/apartamento-no-edificio-blue-view-balneario-camboriu-barra-sul-6-quartos-3-garagens-venda-ref-3393/",
+          "source_label": "litoralnorth.com.br"
+        },
+        {
+          "title": "Blue View Tower - projeto na Barra Sul",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/litoralnorth/ig/il/imoveis/3393/screenshot_4-1699920794074.png",
+          "source_url": "https://www.litoralnorth.com.br/imovel/apartamento-no-edificio-blue-view-balneario-camboriu-barra-sul-6-quartos-3-garagens-venda-ref-3393/",
+          "source_label": "litoralnorth.com.br"
+        },
+        {
+          "title": "Blue View Tower - volume da torre",
+          "category": "Fachada",
+          "image": "https://b4.casteldigital.com.br/brunocassola/ig/il/imoveis/316/blue-view-tower-balneario-camboriu-fachada-vista-barra-sul-17330961096142.jpg",
+          "source_url": "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-blue-view-tower-balneario-camboriu-barra-sul-venda-ref-316/",
+          "source_label": "brunocassola.com.br"
+        },
+        {
+          "title": "Blue View Tower - fachada com acesso",
+          "category": "Acesso",
+          "image": "https://b4.casteldigital.com.br/brunocassola/ig/im/imoveis/316/blue-view-tower-balneario-camboriu-fachada-vista-barra-sul-17330961096142.jpg",
+          "source_url": "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-blue-view-tower-balneario-camboriu-barra-sul-venda-ref-316/",
+          "source_label": "brunocassola.com.br"
+        },
+        {
+          "title": "Blue View Tower - detalhe da base",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/04/edificio-blue-view-balneario-camboriu-principal.avif",
+          "source_url": "https://litoralvertical.com/pre-lancamento/balneario-camboriu/apartamentos/edificio-blue-view-tower/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Blue View Tower - fachada urbana",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/04/edificio-blue-view-balneario-camboriu-principal.jpg",
+          "source_url": "https://litoralvertical.com/pre-lancamento/balneario-camboriu/apartamentos/edificio-blue-view-tower/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Blue View Tower - vista do projeto",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/04/edificio-blue-view-balneario-camboriu-1.avif",
+          "source_url": "https://litoralvertical.com/pre-lancamento/balneario-camboriu/apartamentos/edificio-blue-view-tower/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Blue View Tower - torre e orla",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/04/edificio-blue-view-balneario-camboriu-2.1.avif",
+          "source_url": "https://litoralvertical.com/pre-lancamento/balneario-camboriu/apartamentos/edificio-blue-view-tower/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Blue View Tower - localizacao",
+          "category": "Localizacao",
+          "image": "https://b3.casteldigital.com.br/litoralnorth/ig/im/imoveis/3393/screenshot_14-16999173829558.png",
+          "source_url": "https://www.litoralnorth.com.br/imovel/apartamento-no-edificio-blue-view-balneario-camboriu-barra-sul-6-quartos-3-garagens-venda-ref-3393/",
+          "source_label": "litoralnorth.com.br"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente mar na Barra Sul",
+          "description": "A Litoral Vertical informa localizacao na Avenida Atlantica com Rua 4600."
+        },
+        {
+          "icon": "Building2",
+          "title": "Uma residencia por andar",
+          "description": "A fonte consultada descreve planta exclusiva, com uma residencia por pavimento e dois elevadores."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer FG",
+          "description": "O material cita jogos, festas, emporio, playground, sauna umida, beauty e piscina aquecida."
+        }
+      ],
+      "differentials": [
+        "Foram retirados ambientes internos de oferta.",
+        "Galeria foca fachada e contexto frente mar.",
+        "Descricao passa a diferenciar o Blue View Tower como projeto FG na Barra Sul."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Blue View Tower?",
+          "answer": "Segundo a fonte consultada, fica na Avenida Atlantica com Rua 4600, Barra Sul de Balneario Camboriu."
+        },
+        {
+          "question": "Quem e a incorporadora do projeto?",
+          "answer": "O empreendimento e divulgado como projeto da FG Empreendimentos."
+        },
+        {
+          "question": "Que lazer foi citado nas fontes?",
+          "answer": "Foram citados jogos, festas, emporio, playground, sauna umida, beauty e piscina aquecida."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, acesso, localizacao e areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://litoralvertical.com/pre-lancamento/balneario-camboriu/apartamentos/edificio-blue-view-tower/",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-blue-view-balneario-camboriu-centro-4-quartos-venda-ref-1688/",
+        "https://www.litoralnorth.com.br/imovel/apartamento-no-edificio-blue-view-balneario-camboriu-barra-sul-6-quartos-3-garagens-venda-ref-3393/",
+        "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-blue-view-tower-balneario-camboriu-barra-sul-venda-ref-316/"
+      ]
+    },
+    {
+      "slug": "boutique-28-setenta",
+      "hero_image": "https://s3.sa-east-1.amazonaws.com/imobillesite/real-estates-photo/AP1883/3yagoQkVP7QgK6bONUH9LmTPCXSC9kpRTLG5MxfJM_reI6QzGIK9brmOafjq477tfxSKI8PpIxkuKHvVB2aWRnBrX2ZBtD6Ohrs7GcVLE0y9rA=w1024-h768.jpg",
+      "description": "O Boutique 28 Setenta foi revisado como empreendimento no Centro de Balneario Camboriu, com referencias para a Rua 2870, 127, a cerca de 600 metros do mar e 100 metros da Avenida Brasil. As fontes indicam plantas de 81, 93 e 111 m2, alem de cobertura duplex de 144 m2, com 2 a 3 suites. O lazer divulgado inclui piscina adulto e infantil, quiosque gourmet, sauna, spa, festas, kids, playground, academia ampla, bike station, bikes compartilhadas, cozinha gourmet e espacos para pilates, yoga e danca. A galeria prioriza fachada, hall, piscina, fitness e lazer infantil.",
+      "seo_description": "Conheca o Boutique 28 Setenta, no Centro de Balneario Camboriu, com lazer completo e acesso rapido a Avenida Brasil.",
+      "gallery": [
+        {
+          "title": "Boutique 28 Setenta - fachada principal",
+          "category": "Fachada",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/real-estates-photo/AP1883/3yagoQkVP7QgK6bONUH9LmTPCXSC9kpRTLG5MxfJM_reI6QzGIK9brmOafjq477tfxSKI8PpIxkuKHvVB2aWRnBrX2ZBtD6Ohrs7GcVLE0y9rA=w1024-h768.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-boutique-28setenta-EM50061",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Boutique 28 Setenta - torre vertical",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/1034/boutique2870-fachada-03-2k.jpg?1759791011",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/1034/boutique-28-setenta/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Boutique 28 Setenta - hall de entrada",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/1034/hall-boutique-01-2k.jpg?1759791011",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/1034/boutique-28-setenta/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Boutique 28 Setenta - fachada iluminada",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Imoveis/7006/9i1zs-6a07747ea7a4bd582b23ac63a202eaaf75a2ed86ff34d3c7c157cb136a1a7bfc-1770412006.jpg?1770412006",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/1034/boutique-28-setenta/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Boutique 28 Setenta - gourmet social",
+          "category": "Gourmet",
+          "image": "https://cdn.vistahost.com.br/cli15921/vista.imobi/fotos/8334/i1711152v_83346722ad4c552d1.jpg",
+          "source_url": "https://rafaelcassio.com.br/empreendimento/8334/boutique-28-setenta/",
+          "source_label": "Rafael Cassio"
+        },
+        {
+          "title": "Boutique 28 Setenta - academia",
+          "category": "Fitness",
+          "image": "https://cdn.vistahost.com.br/cli15921/vista.imobi/fotos/8334/i1711152v_83346722ad3f84a4e.jpg",
+          "source_url": "https://rafaelcassio.com.br/empreendimento/8334/boutique-28-setenta/",
+          "source_label": "Rafael Cassio"
+        },
+        {
+          "title": "Boutique 28 Setenta - piscina",
+          "category": "Piscina",
+          "image": "https://cdn.vistahost.com.br/cli15921/vista.imobi/fotos/8334/i1711152v_83346722ad3d0855e.jpg",
+          "source_url": "https://rafaelcassio.com.br/empreendimento/8334/boutique-28-setenta/",
+          "source_label": "Rafael Cassio"
+        },
+        {
+          "title": "Boutique 28 Setenta - playground",
+          "category": "Kids",
+          "image": "https://cdn.vistahost.com.br/cli15921/vista.imobi/fotos/8334/i1711152v_83346722ad41b349e.jpg",
+          "source_url": "https://rafaelcassio.com.br/empreendimento/8334/boutique-28-setenta/",
+          "source_label": "Rafael Cassio"
+        },
+        {
+          "title": "Boutique 28 Setenta - piscina elevada",
+          "category": "Piscina",
+          "image": "https://cdn.vistahost.com.br/cli15921/vista.imobi/fotos/8334/i1711152v_83346722ad45db16f.jpg",
+          "source_url": "https://rafaelcassio.com.br/empreendimento/8334/boutique-28-setenta/",
+          "source_label": "Rafael Cassio"
+        },
+        {
+          "title": "Boutique 28 Setenta - fachada noturna",
+          "category": "Fachada",
+          "image": "https://cdn.vistahost.com.br/cli15921/vista.imobi/fotos/8334/ig2a6e_833466cfb71969aaa.jpg",
+          "source_url": "https://rafaelcassio.com.br/empreendimento/8334/boutique-28-setenta/",
+          "source_label": "Rafael Cassio"
+        },
+        {
+          "title": "Boutique 28 Setenta - torre no Centro",
+          "category": "Fachada",
+          "image": "https://cdn.vistahost.com.br/cli36621/vista.imobi/fotos/5538/in0y3x_553866cfbda187727.jpg",
+          "source_url": "https://manicamarin.com.br/imovel/empreendimento-centro-balneario-camboriu-sc-3830",
+          "source_label": "Manica Marin Imoveis"
+        },
+        {
+          "title": "Boutique 28 Setenta - acesso urbano",
+          "category": "Acesso",
+          "image": "https://cdn.vistahost.com.br/cli36621/vista.imobi/fotos/5538/iq1c6h_553866cfbda6e6fd3.jpg",
+          "source_url": "https://manicamarin.com.br/imovel/empreendimento-centro-balneario-camboriu-sc-3830",
+          "source_label": "Manica Marin Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro com acesso rapido",
+          "description": "As fontes posicionam o projeto na Rua 2870, perto do mar e da Avenida Brasil."
+        },
+        {
+          "icon": "Bike",
+          "title": "Mobilidade e bike station",
+          "description": "Manica Marin cita bicicletario, bike station e bikes compartilhadas."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer completo",
+          "description": "As fontes citam piscina, gourmet, sauna, spa, festas, kids, playground, academia e espacos de bem-estar."
+        }
+      ],
+      "differentials": [
+        "Hero atualizado com fachada do empreendimento.",
+        "Galeria usa fachada, hall e lazer, sem ambientes privados.",
+        "Descricao amplia dados de localizacao, plantas e lazer."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Boutique 28 Setenta?",
+          "answer": "As fontes consultadas indicam Rua 2870, 127, Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Quais opcoes de lazer foram citadas?",
+          "answer": "Piscina, gourmet, sauna, spa, festas, kids, playground, academia, bike station e espacos de pilates, yoga e danca."
+        },
+        {
+          "question": "Qual e o perfil de planta informado?",
+          "answer": "As fontes citam plantas de 81, 93 e 111 m2, alem de cobertura duplex de 144 m2."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, hall, gourmet, fitness, piscina, kids e areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-boutique-28setenta-EM50061",
+        "https://felicitanegocios.com.br/empreendimento/1034/boutique-28-setenta/",
+        "https://rafaelcassio.com.br/empreendimento/8334/boutique-28-setenta/",
+        "https://manicamarin.com.br/imovel/empreendimento-centro-balneario-camboriu-sc-3830"
+      ]
+    },
+    {
+      "slug": "brava-beach",
+      "hero_image": "https://b3.casteldigital.com.br/guilhermepilger/ig/il/imoveis/1573/12_bb_rr_piscina_01_ef-1-1-17291854332468.jpg",
+      "description": "O Brava Beach foi revisado como pagina do complexo Brava Beach na Praia Brava de Itajai, associado ao Brava Beach Group e ao conceito de home resort. As fontes publicas posicionam o Brava Beach Internacional na Avenida Jose Medeiros Vieira, 1876, em area integrada a natureza e proxima ao mar. A galeria agora representa o condominio por fachadas, piscinas, jardins e contexto de resort, sem usar imagens internas de oferta.",
+      "seo_description": "Conheca o Brava Beach na Praia Brava de Itajai, complexo home resort com piscinas, jardins e acesso ao mar.",
+      "gallery": [
+        {
+          "title": "Brava Beach - piscina do resort",
+          "category": "Piscina",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/il/imoveis/1573/12_bb_rr_piscina_01_ef-1-1-17291854332468.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-brava-beach-reserva-recife-itajai-praia-brava-4-quartos-4-garagens-venda-ref-1573/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Brava Beach - deck com torres",
+          "category": "Piscina",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/1573/12_bb_rr_piscina_01_ef-1-1-17291854332468.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-brava-beach-reserva-recife-itajai-praia-brava-4-quartos-4-garagens-venda-ref-1573/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Brava Beach - lazer com fachada",
+          "category": "Piscina",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/02/edificio-brava-beach-reserva-recife-praia-brava-itajai-2.jpg",
+          "source_url": "https://litoralvertical.com/construtoras/grupo-brava-beach/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Brava Beach - piscina e jardins",
+          "category": "Piscina",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/02/edificio-brava-beach-reserva-recife-praia-brava-itajai-2-488x326.avif",
+          "source_url": "https://litoralvertical.com/construtoras/grupo-brava-beach/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Brava Beach - torres frente ao mar",
+          "category": "Fachada",
+          "image": "https://www.bravabeachgroup.com/wp-content/uploads/2024/07/recife-bg2.webp",
+          "source_url": "https://www.bravabeachgroup.com/empreendimentos/",
+          "source_label": "Brava Beach Group"
+        },
+        {
+          "title": "Brava Beach - fachada na Praia Brava",
+          "category": "Fachada",
+          "image": "https://www.bravabeachgroup.com/wp-content/uploads/2024/07/recife-bg2-600x300.webp",
+          "source_url": "https://www.bravabeachgroup.com/empreendimentos/",
+          "source_label": "Brava Beach Group"
+        },
+        {
+          "title": "Brava Beach - torres e orla",
+          "category": "Fachada",
+          "image": "https://www.bravabeachgroup.com/wp-content/uploads/2024/07/recife-bg2-1024x512.webp",
+          "source_url": "https://www.bravabeachgroup.com/empreendimentos/",
+          "source_label": "Brava Beach Group"
+        },
+        {
+          "title": "Brava Beach - fachada com natureza",
+          "category": "Fachada",
+          "image": "https://www.bravabeachgroup.com/wp-content/uploads/2024/07/recife-bg2-768x384.webp",
+          "source_url": "https://www.bravabeachgroup.com/empreendimentos/",
+          "source_label": "Brava Beach Group"
+        },
+        {
+          "title": "Brava Beach - torres e piscina",
+          "category": "Piscina",
+          "image": "https://www.bravabeachgroup.com/wp-content/uploads/2024/07/Aroeira-2-1024x647.webp",
+          "source_url": "https://www.bravabeachgroup.com/reserva-aroeira/",
+          "source_label": "Brava Beach Group"
+        },
+        {
+          "title": "Brava Beach - vista superior do lazer",
+          "category": "Piscina",
+          "image": "https://www.bravabeachgroup.com/wp-content/uploads/2024/07/Aroeira-3.webp",
+          "source_url": "https://www.bravabeachgroup.com/reserva-aroeira/",
+          "source_label": "Brava Beach Group"
+        },
+        {
+          "title": "Brava Beach - area de convivencia",
+          "category": "Lazer",
+          "image": "https://www.bravabeachgroup.com/wp-content/uploads/2024/07/Aroeira-4.webp",
+          "source_url": "https://www.bravabeachgroup.com/reserva-aroeira/",
+          "source_label": "Brava Beach Group"
+        },
+        {
+          "title": "Brava Beach - contexto Praia Brava",
+          "category": "Localizacao",
+          "image": "https://litoralvertical.com/wp-content/uploads/2023/02/edificio-mirage-praia-brava-itajai-1-488x326.avif",
+          "source_url": "https://litoralvertical.com/construtoras/grupo-brava-beach/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Praia Brava de Itajai",
+          "description": "As fontes posicionam o complexo na Praia Brava, em regiao proxima ao mar."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Conceito home resort",
+          "description": "O Brava Beach Group divulga seus empreendimentos com proposta de resort residencial."
+        },
+        {
+          "icon": "Trees",
+          "title": "Natureza integrada",
+          "description": "A comunicacao do grupo reforca implantacao junto a natureza e areas abertas de lazer."
+        }
+      ],
+      "differentials": [
+        "Pagina passa a usar imagens de condominio e complexo.",
+        "Copy identifica Brava Beach Group e Praia Brava.",
+        "Galeria evita fotos internas de ofertas ativas."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Brava Beach?",
+          "answer": "As fontes consultadas posicionam o complexo na Praia Brava de Itajai, com referencia a Avenida Jose Medeiros Vieira, 1876."
+        },
+        {
+          "question": "O que significa home resort?",
+          "answer": "E a proposta de moradia com areas amplas de lazer, piscinas, jardins e servicos associados ao condominio."
+        },
+        {
+          "question": "Por que a galeria usa imagens do complexo?",
+          "answer": "Porque o slug representa o Brava Beach como condominio/complexo, nao uma oferta especifica."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza piscina, fachada, lazer, localizacao e areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.bravabeachgroup.com/empreendimentos/",
+        "https://wanderlog.com/place/details/594232/brava-beach-internacional",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-brava-beach-itajai-praia-brava-3-quartos-3-garagens-venda-ref-2218/",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-brava-beach-reserva-recife-itajai-praia-brava-4-quartos-4-garagens-venda-ref-1573/",
+        "https://litoralvertical.com/construtoras/grupo-brava-beach/",
+        "https://www.bravabeachgroup.com/reserva-aroeira/"
+      ]
+    },
+    {
+      "slug": "brava-beach-aroeira",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2015/02/edificio-brava-beach-aroeira-balneario-camboriu-itajai-praia-brava-pba364-1-1.jpg",
+      "description": "O Brava Beach Aroeira foi revisado como Reserva Aroeira, parte do Brava Beach Internacional na Praia Brava de Itajai. O Brava Beach Group descreve o empreendimento como reserva de alto padrao integrada a natureza, enquanto Imobille informa tres torres, vista mar e plantas de 136 a 157 m2, com 3 suites ou 1 suite mais 2 demi. A Litoral Vertical reforca o perfil de condominio fechado, metragem entre 137 e 157 m2 e 3 vagas. A galeria agora usa fachada, piscinas, lazer e imagens institucionais do condominio.",
+      "seo_description": "Conheca o Brava Beach Reserva Aroeira, no Brava Beach Internacional, Praia Brava de Itajai.",
+      "gallery": [
+        {
+          "title": "Reserva Aroeira - fachada das torres",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2015/02/edificio-brava-beach-aroeira-balneario-camboriu-itajai-praia-brava-pba364-1-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/brava-beach-internacional-reserva-aroeira/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Reserva Aroeira - vista do condominio",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2015/02/edificio-brava-beach-aroeira-balneario-camboriu-itajai-praia-brava-pba364-1-1.avif",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/brava-beach-internacional-reserva-aroeira/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Reserva Aroeira - piscina central",
+          "category": "Piscina",
+          "image": "https://litoralvertical.com/wp-content/uploads/2015/02/edificio-brava-beach-aroeira-balneario-camboriu-itajai-praia-brava-pba364-13-1.avif",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/brava-beach-internacional-reserva-aroeira/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Reserva Aroeira - piscinas e jardins",
+          "category": "Piscina",
+          "image": "https://litoralvertical.com/wp-content/uploads/2015/02/edificio-brava-beach-aroeira-balneario-camboriu-itajai-praia-brava-pba364-12-1.avif",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/brava-beach-internacional-reserva-aroeira/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Reserva Aroeira - lazer externo",
+          "category": "Lazer",
+          "image": "https://litoralvertical.com/wp-content/uploads/2015/02/edificio-brava-beach-aroeira-balneario-camboriu-itajai-praia-brava-pba364-12-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/brava-beach-internacional-reserva-aroeira/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Reserva Aroeira - torres e piscina",
+          "category": "Piscina",
+          "image": "https://www.bravabeachgroup.com/wp-content/uploads/2024/07/Aroeira-2-1024x647.webp",
+          "source_url": "https://www.bravabeachgroup.com/reserva-aroeira/",
+          "source_label": "Brava Beach Group"
+        },
+        {
+          "title": "Reserva Aroeira - vista superior do lazer",
+          "category": "Piscina",
+          "image": "https://www.bravabeachgroup.com/wp-content/uploads/2024/07/Aroeira-3.webp",
+          "source_url": "https://www.bravabeachgroup.com/reserva-aroeira/",
+          "source_label": "Brava Beach Group"
+        },
+        {
+          "title": "Reserva Aroeira - area de convivencia",
+          "category": "Lazer",
+          "image": "https://www.bravabeachgroup.com/wp-content/uploads/2024/07/Aroeira-4.webp",
+          "source_url": "https://www.bravabeachgroup.com/reserva-aroeira/",
+          "source_label": "Brava Beach Group"
+        },
+        {
+          "title": "Reserva Aroeira - fachada com jardins",
+          "category": "Fachada",
+          "image": "https://www.bravabeachgroup.com/wp-content/uploads/2024/07/Banner-Aroreira-1024x694.webp",
+          "source_url": "https://www.bravabeachgroup.com/reserva-aroeira/",
+          "source_label": "Brava Beach Group"
+        },
+        {
+          "title": "Reserva Aroeira - deck do lazer",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/April2022/zgWO4osiVA06caFoLfli.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-beach-aroeira-EM6049",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Reserva Aroeira - piscina com torres",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/April2022/4NPDYx8XFxDCPdtUOb4x.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-beach-aroeira-EM6049",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Reserva Aroeira - implantacao do lazer",
+          "category": "Implantacao",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/April2022/7U9JLexDIea4aDTh3Myj.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-beach-aroeira-EM6049",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Trees",
+          "title": "Reserva integrada a natureza",
+          "description": "O Brava Beach Group apresenta o Aroeira como reserva de alto padrao com conforto e natureza."
+        },
+        {
+          "icon": "Building2",
+          "title": "Tres torres",
+          "description": "A Imobille descreve o empreendimento com tres torres e vista mar."
+        },
+        {
+          "icon": "Waves",
+          "title": "Praia Brava",
+          "description": "As fontes posicionam o Reserva Aroeira dentro do Brava Beach Internacional, na Praia Brava de Itajai."
+        }
+      ],
+      "differentials": [
+        "Hero atualizado com fachada do Reserva Aroeira.",
+        "Galeria troca fotos de oferta por imagens do condominio.",
+        "Descricao distingue Reserva Aroeira dentro do Brava Beach Internacional."
+      ],
+      "faq": [
+        {
+          "question": "O Brava Beach Aroeira faz parte de qual complexo?",
+          "answer": "As fontes o associam ao Brava Beach Internacional, na Praia Brava de Itajai."
+        },
+        {
+          "question": "Quantas torres o Reserva Aroeira possui?",
+          "answer": "A Imobille informa tres torres."
+        },
+        {
+          "question": "Qual e o perfil informado das plantas?",
+          "answer": "As fontes citam metragens entre cerca de 136 e 157 m2, com 3 suites ou 1 suite mais 2 demi."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, piscina, lazer, implantacao e areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.bravabeachgroup.com/reserva-aroeira/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-beach-aroeira-EM6049",
+        "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/brava-beach-internacional-reserva-aroeira/"
+      ]
+    },
+    {
+      "slug": "brava-beach-internacional-reserva-aroeira",
+      "hero_image": "https://www.bravabeachgroup.com/wp-content/uploads/2024/07/recife-bg2.webp",
+      "description": "O Brava Beach Internacional Reserva Aroeira foi revisado como pagina especifica da reserva dentro do Brava Beach Internacional, na Praia Brava de Itajai. As fontes confirmam o condominio fechado, tres torres, vista mar, metragens em torno de 137 a 157 m2 e 3 vagas. A comunicacao do Brava Beach Group reforca alto padrao, conforto e natureza. A galeria foi ajustada para destacar fachada, piscinas, jardins, implantacao e lazer externo do condominio.",
+      "seo_description": "Conheca o Brava Beach Internacional Reserva Aroeira, condominio fechado na Praia Brava de Itajai.",
+      "gallery": [
+        {
+          "title": "Reserva Aroeira Internacional - fachada mar",
+          "category": "Fachada",
+          "image": "https://www.bravabeachgroup.com/wp-content/uploads/2024/07/recife-bg2.webp",
+          "source_url": "https://www.bravabeachgroup.com/empreendimentos/",
+          "source_label": "Brava Beach Group"
+        },
+        {
+          "title": "Reserva Aroeira Internacional - torres na orla",
+          "category": "Fachada",
+          "image": "https://www.bravabeachgroup.com/wp-content/uploads/2024/07/recife-bg2-600x300.webp",
+          "source_url": "https://www.bravabeachgroup.com/empreendimentos/",
+          "source_label": "Brava Beach Group"
+        },
+        {
+          "title": "Reserva Aroeira Internacional - fachada das torres",
+          "category": "Fachada",
+          "image": "https://www.bravabeachgroup.com/wp-content/uploads/2024/07/recife-bg2-1024x512.webp",
+          "source_url": "https://www.bravabeachgroup.com/empreendimentos/",
+          "source_label": "Brava Beach Group"
+        },
+        {
+          "title": "Reserva Aroeira Internacional - piscina central",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/terraitajai/Condominios/24/imovel-274003-5.jpg?1768505604",
+          "source_url": "https://imoveisterra.net/empreendimento/24/brava-beach-reserva-aroeira/",
+          "source_label": "Imobiliaria Terra"
+        },
+        {
+          "title": "Reserva Aroeira Internacional - lazer superior",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/terraitajai/Condominios/24/imovel-274003-3.jpg?1768505604",
+          "source_url": "https://imoveisterra.net/empreendimento/24/brava-beach-reserva-aroeira/",
+          "source_label": "Imobiliaria Terra"
+        },
+        {
+          "title": "Reserva Aroeira Internacional - deck da piscina",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/terraitajai/Condominios/24/imovel-274003-4.jpg?1768505604",
+          "source_url": "https://imoveisterra.net/empreendimento/24/brava-beach-reserva-aroeira/",
+          "source_label": "Imobiliaria Terra"
+        },
+        {
+          "title": "Reserva Aroeira Internacional - lazer entre torres",
+          "category": "Piscina",
+          "image": "https://www.bravabeachgroup.com/wp-content/uploads/2024/07/figueira-bg2.webp",
+          "source_url": "https://www.bravabeachgroup.com/empreendimentos/",
+          "source_label": "Brava Beach Group"
+        },
+        {
+          "title": "Reserva Aroeira Internacional - piscina e fachada",
+          "category": "Piscina",
+          "image": "https://www.bravabeachgroup.com/wp-content/uploads/2024/07/figueira-bg2-600x301.webp",
+          "source_url": "https://www.bravabeachgroup.com/empreendimentos/",
+          "source_label": "Brava Beach Group"
+        },
+        {
+          "title": "Reserva Aroeira Internacional - area de lazer",
+          "category": "Lazer",
+          "image": "https://www.bravabeachgroup.com/wp-content/uploads/2024/07/figueira-bg2-1024x513.webp",
+          "source_url": "https://www.bravabeachgroup.com/empreendimentos/",
+          "source_label": "Brava Beach Group"
+        },
+        {
+          "title": "Reserva Aroeira Internacional - fachada ajardinada",
+          "category": "Fachada",
+          "image": "https://www.bravabeachgroup.com/wp-content/uploads/2024/07/aroeira-bg2.webp",
+          "source_url": "https://www.bravabeachgroup.com/empreendimentos/",
+          "source_label": "Brava Beach Group"
+        },
+        {
+          "title": "Reserva Aroeira Internacional - fachada oficial",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/1449/aroeira-bg2-17424976142087.webp",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-brava-beach-internacional-reserva-aroeira-itajai-praia-brava-3-quartos-3-garagens-venda-ref-1449/",
+          "source_label": "Guilherme Pilger"
+        },
+        {
+          "title": "Reserva Aroeira Internacional - piscinas externas",
+          "category": "Piscina",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/icp/imoveis/1327/photo-2024-12-23-13-50-01-25-1734972766676.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-brava-beach-internacional-reserva-aroeira-itajai-praia-brava-3-quartos-3-garagens-venda-ref-1449/",
+          "source_label": "Guilherme Pilger"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "ShieldCheck",
+          "title": "Condominio fechado",
+          "description": "A Litoral Vertical descreve o Reserva Aroeira como condominio fechado na Praia Brava."
+        },
+        {
+          "icon": "Trees",
+          "title": "Natureza e conforto",
+          "description": "O Brava Beach Group destaca a reserva pelo alto padrao integrado a natureza."
+        },
+        {
+          "icon": "Waves",
+          "title": "Vista mar e Praia Brava",
+          "description": "Imobille e outras fontes posicionam o empreendimento na Praia Brava, com vista mar."
+        }
+      ],
+      "differentials": [
+        "Pagina especifica do Reserva Aroeira recebeu imagem hero propria.",
+        "Galeria prioriza fachada, piscinas e implantacao do condominio.",
+        "Texto passou a separar melhor o produto do complexo Brava Beach geral."
+      ],
+      "faq": [
+        {
+          "question": "O Reserva Aroeira fica dentro do Brava Beach Internacional?",
+          "answer": "Sim. As fontes consultadas associam o Reserva Aroeira ao Brava Beach Internacional, na Praia Brava."
+        },
+        {
+          "question": "O condominio tem quantas torres?",
+          "answer": "A Imobille informa tres torres."
+        },
+        {
+          "question": "Qual e o perfil das metragens?",
+          "answer": "As fontes citam metragens em torno de 137 a 157 m2 e 3 vagas."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, piscina, lazer e areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.bravabeachgroup.com/reserva-aroeira/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-brava-beach-aroeira-EM6049",
+        "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/brava-beach-internacional-reserva-aroeira/",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-brava-beach-internacional-reserva-aroeira-itajai-praia-brava-3-quartos-3-garagens-venda-ref-1449/",
+        "https://imoveisterra.net/empreendimento/24/brava-beach-reserva-aroeira/",
+        "https://www.bravabeachgroup.com/empreendimentos/"
+      ]
+    }
+  ]
+}

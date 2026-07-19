@@ -1,0 +1,1503 @@
+{
+  "batch_id": "development-media-curation-batch21-20260715",
+  "generated_at": "2026-07-15T21:00:00.000Z",
+  "notes": [
+    "Lote 21 P0 auditado com foco em midia real de empreendimento/condominio.",
+    "Brava Vita teve fontes de outros imoveis descartadas e ficou restrito a Gard, Litoral Vertical, Manica Marin e Imobille.",
+    "Hyde e Villa Serena priorizam fontes oficiais Embraed quando disponiveis."
+  ],
+  "items": [
+    {
+      "slug": "villa-dos-corais",
+      "hero_image": "https://cdn.sistemasupremo.com.br/552/imoveis/188283/g_20250731132234_1_20250804155119.jpg",
+      "description": "O Villa dos Corais foi revisado como condominio frente mar no Centro de Itapema, com foco em fachada, piscinas e lazer voltado para a orla. As fontes consultadas indicam endereco na Avenida Beira Mar, entrega pela Alianca em 2010, plantas amplas em torno de 350 m2, 4 suites, 3 vagas e infraestrutura social com piscinas, prainha, academia, sauna, cinema, brinquedoteca, playground, jogos, espacos gourmet e ambientes de bem-estar. A nova galeria remove o peso de fotos internas e passa a apresentar o condominio pela experiencia de fachada, deck e areas comuns.",
+      "seo_description": "Conheca o Villa dos Corais, condominio frente mar no Centro de Itapema, com piscinas e lazer completo na orla.",
+      "gallery": [
+        {
+          "title": "Villa dos Corais - fachada frente mar",
+          "category": "Fachada",
+          "image": "https://cdn.sistemasupremo.com.br/552/imoveis/188283/g_20250731132234_1_20250804155119.jpg",
+          "source_url": "https://likehomeii.com.br/imovel/188283/apartamento-para-vender-com-4-quartos-4-sutes-no-bairro-centro-em-itapema",
+          "source_label": "Like Home"
+        },
+        {
+          "title": "Villa dos Corais - deck da piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/060820241428391013-1722965319.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-dos-corais-EM57352",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa dos Corais - base ajardinada",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/lmy6vyq6lejzqbduhdg9-1722965319.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-dos-corais-EM57352",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa dos Corais - piscina na orla",
+          "category": "Piscina",
+          "image": "https://cdn.sistemasupremo.com.br/552/imoveis/188283/g_20250731132235_2_20250804155121.jpg",
+          "source_url": "https://likehomeii.com.br/imovel/188283/apartamento-para-vender-com-4-quartos-4-sutes-no-bairro-centro-em-itapema",
+          "source_label": "Like Home"
+        },
+        {
+          "title": "Villa dos Corais - piscina ampla",
+          "category": "Piscina",
+          "image": "https://cdn.sistemasupremo.com.br/552/imoveis/188283/g_20250731132235_3_20250804155122.jpg",
+          "source_url": "https://likehomeii.com.br/imovel/188283/apartamento-para-vender-com-4-quartos-4-sutes-no-bairro-centro-em-itapema",
+          "source_label": "Like Home"
+        },
+        {
+          "title": "Villa dos Corais - lazer visto do alto",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/March2022/eSZUmgOMZEZnOA54iGHV.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-dos-corais-EM57352",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa dos Corais - piscina coberta",
+          "category": "Piscina",
+          "image": "https://cdn.sistemasupremo.com.br/552/imoveis/188283/g_20250731132236_4_20250804155124.jpg",
+          "source_url": "https://likehomeii.com.br/imovel/188283/apartamento-para-vender-com-4-quartos-4-sutes-no-bairro-centro-em-itapema",
+          "source_label": "Like Home"
+        },
+        {
+          "title": "Villa dos Corais - faixa frente mar",
+          "category": "Orla",
+          "image": "https://cdn.sistemasupremo.com.br/552/imoveis/188283/g_20250731132234_0_20250804155118.jpg",
+          "source_url": "https://likehomeii.com.br/imovel/188283/apartamento-para-vender-com-4-quartos-4-sutes-no-bairro-centro-em-itapema",
+          "source_label": "Like Home"
+        },
+        {
+          "title": "Villa dos Corais - piscina externa",
+          "category": "Piscina",
+          "image": "https://cdn.sistemasupremo.com.br/552/imoveis/188283/g_20250731132236_5_20250804155127.jpg",
+          "source_url": "https://likehomeii.com.br/imovel/188283/apartamento-para-vender-com-4-quartos-4-sutes-no-bairro-centro-em-itapema",
+          "source_label": "Like Home"
+        },
+        {
+          "title": "Villa dos Corais - espelho d agua",
+          "category": "Lazer",
+          "image": "https://cdn.sistemasupremo.com.br/552/imoveis/188283/g_20250731132237_6_20250804155130.jpg",
+          "source_url": "https://likehomeii.com.br/imovel/188283/apartamento-para-vender-com-4-quartos-4-sutes-no-bairro-centro-em-itapema",
+          "source_label": "Like Home"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente mar em Itapema",
+          "description": "Localizacao na Avenida Beira Mar, no Centro, com condominio aberto para a orla."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer de grande porte",
+          "description": "Piscinas, prainha, sauna, cinema, fitness, kids, jogos e espacos gourmet aparecem nas fontes."
+        },
+        {
+          "icon": "Ruler",
+          "title": "Plantas amplas",
+          "description": "Fontes de mercado apontam areas proximas de 350 m2, 4 suites e 3 vagas nas ofertas analisadas."
+        }
+      ],
+      "differentials": [
+        "Hero agora usa fachada e piscina do empreendimento, nao foto interna de oferta.",
+        "Galeria prioriza areas comuns, orla e piscinas do condominio.",
+        "Copy contextualiza entrega, localizacao frente mar e lazer confirmado em fontes abertas."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Villa dos Corais?",
+          "answer": "Fica no Centro de Itapema, com referencia de endereco na Avenida Beira Mar."
+        },
+        {
+          "question": "Que tipo de lazer o condominio oferece?",
+          "answer": "As fontes citam piscinas, prainha, sauna, academia, cinema, brinquedoteca, playground, jogos e gourmet."
+        },
+        {
+          "question": "O que mudou na galeria?",
+          "answer": "A selecao passou a mostrar fachada, piscinas e areas comuns, substituindo imagens internas de oferta."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, piscina, lazer, orla e areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-dos-corais-EM57352",
+        "https://aliancaempreendimentossc.com.br/empreendimentos/Villa-dos-Corais_6859AE03AA910",
+        "https://www.potencialimoveis.com.br/imoveis/residencial-villa-dos-corais-IM6500",
+        "https://likehomeii.com.br/imovel/188283/apartamento-para-vender-com-4-quartos-4-sutes-no-bairro-centro-em-itapema"
+      ]
+    },
+    {
+      "slug": "villa-serena-home-club",
+      "hero_image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1708436523/enterprises/170/villa_serena_home_club_2_medium.jpg",
+      "description": "O Villa Serena Home Club foi reposicionado como empreendimento Embraed entregue em 2013 na regiao da Barra Sul/Centro de Balneario Camboriu. A propria Embraed descreve duas torres residenciais com 46 pavimentos e mais de 10000 m2 de lazer; as demais fontes reforcam alto padrao, acesso exclusivo a praia, decoracao de luxo e estrutura completa de home club. A nova galeria usa torres, piscina, hall, ambientes sociais e fitness para representar o condominio em vez de fotos privativas de apartamentos.",
+      "seo_description": "Conheca o Villa Serena Home Club, Embraed em Balneario Camboriu, com duas torres e lazer de home club.",
+      "gallery": [
+        {
+          "title": "Villa Serena - torres do home club",
+          "category": "Fachada",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1708436523/enterprises/170/villa_serena_home_club_2_medium.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/villa-serena-home-club",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Villa Serena - fachada noturna",
+          "category": "Fachada",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2023/07/0607-villa-serena-tbt-blog-3-banner-1920x900-f29al.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/blog/H%C3%A1-10-anos-Embraed-realizava-a-entrega-do-Villa-Serena-Home-Club",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Villa Serena - piscina com desenho organico",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/16042025141825168-1744823905.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-serena-home-club-EM76088",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Serena - piscina central",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/d1-1744823906.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-serena-home-club-EM76088",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Serena - piscina e torres",
+          "category": "Piscina",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1708436540/enterprises/170/villa_serena_home_club_6_medium.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/villa-serena-home-club",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Villa Serena - lazer elevado",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-marco-liane0005-1666105476.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-serena-home-club-EM76088",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Serena - volume social",
+          "category": "Fachada",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1708436544/enterprises/170/villa_serena_home_club_7_medium.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/villa-serena-home-club",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Villa Serena - atrio social",
+          "category": "Hall",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1708436527/enterprises/170/villa_serena_home_club_3_medium.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/villa-serena-home-club",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Villa Serena - hall classico",
+          "category": "Hall",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1708436552/enterprises/170/villa_serena_home_club_9_medium.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/villa-serena-home-club",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Villa Serena - circulacao social",
+          "category": "Hall",
+          "image": "https://res.cloudinary.com/dkd5j4mdi/image/upload/v1708436568/enterprises/170/villa_serena_home_club_13_medium.jpg",
+          "source_url": "https://sortinvestimentos.com.br/empreendimentos/villa-serena-home-club",
+          "source_label": "Sort Investimentos"
+        },
+        {
+          "title": "Villa Serena - area de bem-estar",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-marco-liane0001-1666105474.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-serena-home-club-EM76088",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Serena - fitness equipado",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-marco-liane0004-1666105475.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-serena-home-club-EM76088",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Serena - ambiente gourmet",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-marco-liane0003-1666105475.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-serena-home-club-EM76088",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Serena - lounge social",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2022/automacao-nova-marco-liane0006-1666105476.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-serena-home-club-EM76088",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Award",
+          "title": "Assinatura Embraed",
+          "description": "Empreendimento entregue pela Embraed e reconhecido pelo padrao de acabamento e estrutura."
+        },
+        {
+          "icon": "Building2",
+          "title": "Duas torres residenciais",
+          "description": "Fontes da Embraed indicam duas torres com 46 pavimentos em formato de home club."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Mais de 10000 m2 de lazer",
+          "description": "O material institucional destaca lazer amplo, piscinas, ambientes sociais, fitness e apoio de praia."
+        }
+      ],
+      "differentials": [
+        "Hero substituido por imagem das torres do home club.",
+        "Galeria evita interiores privativos e usa fachada, piscina, hall, gourmet e fitness.",
+        "Descricao reforca Embraed, entrega, escala do lazer e contexto Barra Sul/Centro."
+      ],
+      "faq": [
+        {
+          "question": "Quem construiu o Villa Serena Home Club?",
+          "answer": "As fontes institucionais associam o Villa Serena Home Club a Embraed, com entrega em 2013."
+        },
+        {
+          "question": "Qual e o destaque do empreendimento?",
+          "answer": "O destaque e o formato home club, com duas torres e lazer superior a 10000 m2 segundo a Embraed."
+        },
+        {
+          "question": "A galeria mostra apartamentos?",
+          "answer": "Nao. A curadoria prioriza torres, piscina, hall e areas sociais do condominio."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, piscina, hall, lazer, fitness, gourmet e areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.embraed.com.br/pt-BR/blog/H%C3%A1-10-anos-Embraed-realizava-a-entrega-do-Villa-Serena-Home-Club",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-serena-home-club-EM76088",
+        "https://sortinvestimentos.com.br/empreendimentos/villa-serena-home-club",
+        "https://felicitanegocios.com.br/empreendimento/154/villa-serena-home-club/"
+      ]
+    },
+    {
+      "slug": "patio-estaleiro",
+      "hero_image": "https://bonusimoveis.com/wp-content/uploads/2025/05/Patio_Estaleiro_Alteracao_Alvenaria_Casa_01.jpg",
+      "description": "O Patio Estaleiro foi revisado como condominio de arquitetura horizontal na Praia do Estaleiro, em Balneario Camboriu, com proposta de baixa densidade, privacidade e contato com a natureza. As fontes indicam implantacao proxima ao mar, plantas amplas em torno de 298 m2 a 344 m2 e lazer com piscina, spa, sauna, academia, gourmet, coworking, kids, playground, pub, pet place, solarium e terracos com vista. A nova galeria mostra fachadas, piscina, volumes externos e ambientes comuns, evitando quartos e cenas internas de moradia.",
+      "seo_description": "Conheca o Patio Estaleiro, condominio na Praia do Estaleiro em Balneario Camboriu, com arquitetura horizontal e lazer completo.",
+      "gallery": [
+        {
+          "title": "Patio Estaleiro - fachada noturna",
+          "category": "Fachada",
+          "image": "https://bonusimoveis.com/wp-content/uploads/2025/05/Patio_Estaleiro_Alteracao_Alvenaria_Casa_01.jpg",
+          "source_url": "https://bonusimoveis.com/empreendimento/patio-estaleiro-praia-do-estaleiro-balneario-camboriu-santa-catarina/",
+          "source_label": "Bonus Imoveis"
+        },
+        {
+          "title": "Patio Estaleiro - acesso urbano",
+          "category": "Acesso",
+          "image": "https://bonusimoveis.com/wp-content/uploads/2025/05/623da181a6ccfb59e87cc7d0a28343affecf38d30ed6afb1fba9f6405d52b10a.jpg",
+          "source_url": "https://bonusimoveis.com/empreendimento/patio-estaleiro-praia-do-estaleiro-balneario-camboriu-santa-catarina/",
+          "source_label": "Bonus Imoveis"
+        },
+        {
+          "title": "Patio Estaleiro - volume principal",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/170220261644301252-1771357470.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-patio-estaleiro-EM69687",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Patio Estaleiro - piscina e fachada",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/real-estates-photo/August2022/automacao-nova-20005-1661275170.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-patio-estaleiro-EM69687",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Patio Estaleiro - fachada iluminada",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2022/automacao-nova-20006-1664469217.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-patio-estaleiro-EM69687",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Patio Estaleiro - bloco ajardinado",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2022/automacao-nova-20003-1664469215.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-patio-estaleiro-EM69687",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Patio Estaleiro - acesso frontal",
+          "category": "Acesso",
+          "image": "https://cdn.vistahost.com.br/cli15921/vista.imobi/fotos/7515/in3f6l_7515656aac95ef4fc.jpg",
+          "source_url": "https://rafaelcassio.com.br/empreendimento/7515/patio-estaleiro/",
+          "source_label": "Rafael Cassio"
+        },
+        {
+          "title": "Patio Estaleiro - fachada clara",
+          "category": "Fachada",
+          "image": "https://cdn.vistahost.com.br/cli15921/vista.imobi/fotos/7515/ic1d3d_7515656aac9c95e95.jpg",
+          "source_url": "https://rafaelcassio.com.br/empreendimento/7515/patio-estaleiro/",
+          "source_label": "Rafael Cassio"
+        },
+        {
+          "title": "Patio Estaleiro - passarela lateral",
+          "category": "Acesso",
+          "image": "https://cdn.vistahost.com.br/cli15921/vista.imobi/fotos/7515/im1r5a_7515656aac9931b48.jpg",
+          "source_url": "https://rafaelcassio.com.br/empreendimento/7515/patio-estaleiro/",
+          "source_label": "Rafael Cassio"
+        },
+        {
+          "title": "Patio Estaleiro - piscina externa",
+          "category": "Piscina",
+          "image": "https://cdn.vistahost.com.br/cli15921/vista.imobi/fotos/7515/iy4o0q_7515656aac9fbb051.jpg",
+          "source_url": "https://rafaelcassio.com.br/empreendimento/7515/patio-estaleiro/",
+          "source_label": "Rafael Cassio"
+        },
+        {
+          "title": "Patio Estaleiro - fachada ao entardecer",
+          "category": "Fachada",
+          "image": "https://cdn.vistahost.com.br/cli15921/vista.imobi/fotos/7515/ix9r4u_7515656aaca2ce783.jpg",
+          "source_url": "https://rafaelcassio.com.br/empreendimento/7515/patio-estaleiro/",
+          "source_label": "Rafael Cassio"
+        },
+        {
+          "title": "Patio Estaleiro - frente social",
+          "category": "Fachada",
+          "image": "https://cdn.vistahost.com.br/cli15921/vista.imobi/fotos/7515/is7f3d_7515663d8ae525541.jpg",
+          "source_url": "https://rafaelcassio.com.br/empreendimento/7515/patio-estaleiro/",
+          "source_label": "Rafael Cassio"
+        },
+        {
+          "title": "Patio Estaleiro - piscina linear",
+          "category": "Piscina",
+          "image": "https://bonusimoveis.com/wp-content/uploads/2025/05/021_-_015_-_A10_CONSTRUTORA_E_INCORPORADORA_-_ETAPA_01_-_IMAGENS_FINAIS_07_-_FINAL.jpg",
+          "source_url": "https://bonusimoveis.com/empreendimento/patio-estaleiro-praia-do-estaleiro-balneario-camboriu-santa-catarina/",
+          "source_label": "Bonus Imoveis"
+        },
+        {
+          "title": "Patio Estaleiro - implantacao aerea",
+          "category": "Lazer",
+          "image": "https://cdn.imoveisgodoy.com.br/wp-content/uploads/2024/07/04152610/Patio-Estaleiro3-6.jpg",
+          "source_url": "https://imoveisgodoy.com.br/imoveis/patio-estaleiro/",
+          "source_label": "Imoveis Godoy"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Trees",
+          "title": "Praia do Estaleiro",
+          "description": "Condominio em uma das regioes mais reservadas de Balneario Camboriu, perto do mar e da mata."
+        },
+        {
+          "icon": "Home",
+          "title": "Arquitetura horizontal",
+          "description": "Projeto com volumes baixos, privacidade e forte integracao entre area externa e paisagismo."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer completo",
+          "description": "Fontes citam piscina, spa, sauna, fitness, gourmet, coworking, kids, pub, pet place e solarium."
+        }
+      ],
+      "differentials": [
+        "Galeria corrigida para fachadas, piscina, implantacao e acesso do condominio.",
+        "Interiores privativos e quarto foram descartados da selecao principal.",
+        "Copy reforca Praia do Estaleiro, baixa densidade e lazer de uso comum."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Patio Estaleiro?",
+          "answer": "Fica na Praia do Estaleiro, em Balneario Camboriu, em regiao de perfil mais reservado."
+        },
+        {
+          "question": "Que tipo de arquitetura o projeto tem?",
+          "answer": "As fontes mostram arquitetura horizontal, volumes baixos e forte relacao com areas externas."
+        },
+        {
+          "question": "Quais areas comuns foram destacadas?",
+          "answer": "Piscina, spa, sauna, academia, gourmet, coworking, kids, pub, pet place, solarium e terracos."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, acesso, piscina, lazer e areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/condominio-patio-estaleiro-EM69687",
+        "https://bonusimoveis.com/empreendimento/patio-estaleiro-praia-do-estaleiro-balneario-camboriu-santa-catarina/",
+        "https://rafaelcassio.com.br/empreendimento/7515/patio-estaleiro/",
+        "https://imoveisgodoy.com.br/imoveis/patio-estaleiro/"
+      ]
+    },
+    {
+      "slug": "elbrus-residence",
+      "hero_image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/03/elbrus-residence-balneario-camboriu-sc-1.jpg",
+      "description": "O Elbrus Residence foi atualizado como empreendimento Cechinel no Centro de Balneario Camboriu, com referencia na Rua 3300. As fontes indicam projeto em desenvolvimento, entrega prevista para dezembro de 2027, plantas de aproximadamente 204 m2 a 563 m2, 4 suites, dois pavimentos tipo por andar em algumas configuracoes e proposta de alto padrao com fachada curva, embasamento escultural, piscina, areas de convivencia e apoio esportivo. A galeria revisada passa a representar a torre e o lazer do empreendimento.",
+      "seo_description": "Conheca o Elbrus Residence, empreendimento Cechinel no Centro de Balneario Camboriu, com fachada curva e lazer elevado.",
+      "gallery": [
+        {
+          "title": "Elbrus - torre Cechinel",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/03/elbrus-residence-balneario-camboriu-sc-1.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/elbrus-residence-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Elbrus - fachada noturna",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/03/elbrus-residence-balneario-camboriu-sc-33.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/elbrus-residence-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Elbrus - topo panoramico",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/03/elbrus-residence-balneario-camboriu-sc-4.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/elbrus-residence-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Elbrus - piscina elevada",
+          "category": "Piscina",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/03/elbrus-residence-balneario-camboriu-sc-5.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/elbrus-residence-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Elbrus - piscina e fachada",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/real-estates-photo/December2024/novas-fotos0000-1734445126.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/apartamento-a-venda-no-edificio-elbrus-da-construtora-cechinel-IM00191",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Elbrus - embasamento curvo",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/real-estates-photo/December2024/novas-fotos0001-1734445126.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/apartamento-a-venda-no-edificio-elbrus-da-construtora-cechinel-IM00191",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Elbrus - torre urbana",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/real-estates-photo/December2024/novas-fotos0003-1734445127.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/apartamento-a-venda-no-edificio-elbrus-da-construtora-cechinel-IM00191",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Elbrus - acesso iluminado",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/real-estates-photo/December2024/novas-fotos0004-1734445128.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/imoveis/apartamento-a-venda-no-edificio-elbrus-da-construtora-cechinel-IM00191",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Elbrus - paisagismo do lazer",
+          "category": "Lazer",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/324409/images/_6fbd841e040829174488952310351808.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-elbrus-balneario-camboriu-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Elbrus - deck da piscina",
+          "category": "Piscina",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/03/elbrus-residence-balneario-camboriu-sc-6.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/elbrus-residence-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Elbrus - apoio esportivo",
+          "category": "Lazer",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/03/elbrus-residence-balneario-camboriu-sc-34.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/elbrus-residence-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        },
+        {
+          "title": "Elbrus - hall de entrada",
+          "category": "Hall",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/03/elbrus-residence-balneario-camboriu-sc-25.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/elbrus-residence-balneario-camboriu/",
+          "source_label": "Invexo Lancamentos"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Cechinel no Centro",
+          "description": "Projeto de alto padrao na Rua 3300, em area central de Balneario Camboriu."
+        },
+        {
+          "icon": "Ruler",
+          "title": "Plantas de alto padrao",
+          "description": "Fontes abertas indicam metragens aproximadas entre 204 m2 e 563 m2, com 4 suites."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer com desenho autoral",
+          "description": "Fachada curva, piscina, deck, areas sociais e apoio esportivo compoem a proposta visual."
+        }
+      ],
+      "differentials": [
+        "Hero agora mostra a torre Elbrus, nao uma imagem de apartamento.",
+        "Galeria usa renders de fachada, piscina, acesso e lazer.",
+        "Texto inclui construtora, rua de referencia, metragens e entrega indicada pelas fontes."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Elbrus Residence?",
+          "answer": "As fontes indicam endereco de referencia na Rua 3300, Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Quem assina o empreendimento?",
+          "answer": "As fontes de mercado associam o Elbrus Residence a Cechinel Incorporadora."
+        },
+        {
+          "question": "Qual e a previsao de entrega?",
+          "answer": "MySide e Invexo indicam previsao em dezembro de 2027."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, piscina, acesso, lazer, hall e areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://lancamento.invexo.com.br/sc/elbrus-residence-balneario-camboriu/",
+        "https://myside.com.br/apartamento-venda-elbrus-balneario-camboriu-sc",
+        "https://www.imobillenegocios.com.br/imoveis/apartamento-a-venda-no-edificio-elbrus-da-construtora-cechinel-IM00191",
+        "https://tonadri.com.br/blog/edificio-elbrus-o-novo-padrao-de-luxo-e-exclusividade-pela-cechinel-incorporadora"
+      ]
+    },
+    {
+      "slug": "hyde",
+      "hero_image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2025/01/hyde-site.jpg",
+      "description": "O Hyde foi revisado como empreendimento Embraed em construcao na Barra Sul de Balneario Camboriu, com comunicacao oficial indicando 4 ou 5 suites, ate 5 vagas e aproximadamente 3600 m2 de lazer. As fontes de mercado citam enderecos de referencia na Avenida Atlantica 4312/Rua 3900, areas entre cerca de 232 m2 e 468 m2 e proposta de alto padrao com fachada biofilica, vistas para a orla, piscinas, lounges e areas comuns sofisticadas. A galeria passa a focar torre, embasamento, piscina e lazer do empreendimento.",
+      "seo_description": "Conheca o Hyde, empreendimento Embraed na Barra Sul de Balneario Camboriu, com fachada biofilica e lazer amplo.",
+      "gallery": [
+        {
+          "title": "Hyde - torre frente mar",
+          "category": "Fachada",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2025/01/hyde-site.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/hyde",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Hyde - horizonte da Barra Sul",
+          "category": "Orla",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2025/10/prancheta-1.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/hyde",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Hyde - embasamento biofilico",
+          "category": "Fachada",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2025/10/embhyf-01-embasamento-observador-p5.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/hyde",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Hyde - fachada noturna",
+          "category": "Fachada",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2025/06/embhy-02-fachada-noturna-cam02-p3.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/hyde",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Hyde - topo iluminado",
+          "category": "Fachada",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2025/01/hyde-topo-1.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/hyde",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Hyde - piscina panoramica",
+          "category": "Piscina",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2025/10/bh.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/hyde",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Hyde - piscina externa",
+          "category": "Piscina",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2023/04/imagem-secundaria-hyde-1.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/hyde",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Hyde - lazer com agua",
+          "category": "Piscina",
+          "image": "https://embraed-empreendimentos.s3.sa-east-1.amazonaws.com/uploaded_files/2023/04/embhy-10-piscina-diurna-cam02-p2-1.jpg",
+          "source_url": "https://www.embraed.com.br/pt-BR/empreendimento/hyde",
+          "source_label": "Embraed"
+        },
+        {
+          "title": "Hyde - fachada ao entardecer",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/1510202510514816743-1760536308.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/hyde-atlantica-4312-EM32177",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Hyde - torre na skyline",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-recuperado-1760536308.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/hyde-atlantica-4312-EM32177",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Hyde - implantacao urbana",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2023/layout-fotos-site-10000-1681926079.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/hyde-atlantica-4312-EM32177",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Hyde - paisagismo da piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2023/layout-fotos-site-10001-1681926079.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/hyde-atlantica-4312-EM32177",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Hyde - piscina noturna",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/April2023/layout-fotos-site-10005-1681926081.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/hyde-atlantica-4312-EM32177",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Hyde - fachada superior",
+          "category": "Fachada",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/324437/images/_35613dde864708168063552910267043.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-hyde-balneario-camboriu-sc",
+          "source_label": "MySide"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Award",
+          "title": "Assinatura Embraed",
+          "description": "Projeto oficial da Embraed para a Barra Sul, com linguagem arquitetonica de alto padrao."
+        },
+        {
+          "icon": "Waves",
+          "title": "Barra Sul e Avenida Atlantica",
+          "description": "Fontes indicam localizacao de referencia na Avenida Atlantica 4312/Rua 3900."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer de 3600 m2",
+          "description": "A pagina oficial informa cerca de 3600 m2 de lazer e configuracoes com 4 ou 5 suites."
+        }
+      ],
+      "differentials": [
+        "Hero usa imagem oficial da torre Hyde.",
+        "Galeria evita interiores e privilegia fachada, piscina, orla e embasamento.",
+        "Descricao atualizada com Embraed, Barra Sul, metragens e escala de lazer."
+      ],
+      "faq": [
+        {
+          "question": "O Hyde e da Embraed?",
+          "answer": "Sim. A pagina oficial da Embraed apresenta o Hyde como empreendimento em Balneario Camboriu."
+        },
+        {
+          "question": "Onde fica o Hyde?",
+          "answer": "As fontes apontam a Barra Sul, com referencias na Avenida Atlantica 4312 e Rua 3900."
+        },
+        {
+          "question": "O que foi corrigido nas imagens?",
+          "answer": "A curadoria substituiu imagens de oferta por torre, embasamento, piscinas, orla e areas comuns."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, orla, piscina, acesso e areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.embraed.com.br/pt-BR/empreendimento/hyde",
+        "https://www.imobillenegocios.com.br/empreendimento/hyde-atlantica-4312-EM32177",
+        "https://myside.com.br/apartamento-venda-hyde-balneario-camboriu-sc",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-hyde/"
+      ]
+    },
+    {
+      "slug": "palacio-triunfo-cna-residence",
+      "hero_image": "https://b3.casteldigital.com.br/guilhermepilger/ig/if/imoveis/265/cnapt_01_fachada_a_high-16269115432798.jpg",
+      "description": "O Palacio Triunfo CNA Residence foi atualizado como empreendimento de perfil classico em Meia Praia, Itapema, associado a CNA Fino Acabamento. As fontes indicam localizacao entre a Avenida Nereu Ramos e a Rua 304, torre com 37 pavimentos, plantas de 4 suites, cerca de 240 m2 a 262 m2 e 3 vagas. A nova galeria usa fachada, base urbana, vista da torre e ambiente de eventos do condominio, corrigindo a pagina que antes dependia de fotos de apartamento.",
+      "seo_description": "Conheca o Palacio Triunfo CNA Residence, empreendimento em Meia Praia, Itapema, com torre classica e 4 suites.",
+      "gallery": [
+        {
+          "title": "Palacio Triunfo - fachada principal",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/if/imoveis/265/cnapt_01_fachada_a_high-16269115432798.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-palacio-triunfo-cna-residence-itapema-meia-praia-4-quartos-3-garagens-venda-ref-265/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Palacio Triunfo - acesso pela Meia Praia",
+          "category": "Acesso",
+          "image": "https://b.casteldigital.com.br/imobiliariaforcast/ig/icp/imoveis/731/gallery_0b5f2f4b107c0a96f2d9976350f4bbaf-17113772233119.jpg",
+          "source_url": "https://www.imobiliariaforcast.com.br/imovel/apartamento-no-edificio-palacio-triunfo-cna-residences-itapema-meia-praia-4-quartos-3-garagens-venda-ref-284/",
+          "source_label": "Forcast Imobiliaria"
+        },
+        {
+          "title": "Palacio Triunfo - fachada lateral",
+          "category": "Fachada",
+          "image": "https://b.casteldigital.com.br/imobiliariaforcast/ig/icp/imoveis/2531/captura-de-tela-2025-05-23-100940-17480058905869.png",
+          "source_url": "https://www.imobiliariaforcast.com.br/imovel/apartamento-no-edificio-palacio-triunfo-cna-residences-itapema-meia-praia-4-quartos-3-garagens-venda-ref-284/",
+          "source_label": "Forcast Imobiliaria"
+        },
+        {
+          "title": "Palacio Triunfo - base envidracada",
+          "category": "Fachada",
+          "image": "https://b.casteldigital.com.br/imobiliariaforcast/ig/icp/imoveis/372/1d2771d2-6668-4f10-b7aa-1b9d9ecc24cf-1685397531768.jpeg",
+          "source_url": "https://www.imobiliariaforcast.com.br/imovel/apartamento-no-edificio-palacio-triunfo-cna-residences-itapema-meia-praia-4-quartos-3-garagens-venda-ref-284/",
+          "source_label": "Forcast Imobiliaria"
+        },
+        {
+          "title": "Palacio Triunfo - entrada classica",
+          "category": "Acesso",
+          "image": "https://b.casteldigital.com.br/imobiliariaforcast/ig/icp/imoveis/1653/gallery_0b5f2f4b107c0a96f2d9976350f4bbaf-17113772233119.jpg",
+          "source_url": "https://www.imobiliariaforcast.com.br/imovel/apartamento-no-edificio-palacio-triunfo-cna-residences-itapema-meia-praia-4-quartos-3-garagens-venda-ref-284/",
+          "source_label": "Forcast Imobiliaria"
+        },
+        {
+          "title": "Palacio Triunfo - torre vertical",
+          "category": "Fachada",
+          "image": "https://b.casteldigital.com.br/imobiliariaforcast/ig/icp/imoveis/2242/captura-de-tela-2025-05-09-155536-1746817422580.png",
+          "source_url": "https://www.imobiliariaforcast.com.br/imovel/apartamento-no-edificio-palacio-triunfo-cna-residences-itapema-meia-praia-4-quartos-3-garagens-venda-ref-284/",
+          "source_label": "Forcast Imobiliaria"
+        },
+        {
+          "title": "Palacio Triunfo - torre completa",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/il/imoveis/265/cnapt_01_fachada_a_high-16269115432798.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-palacio-triunfo-cna-residence-itapema-meia-praia-4-quartos-3-garagens-venda-ref-265/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Palacio Triunfo - perspectiva frontal",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/265/cnapt_01_fachada_a_high-16269115432798.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-palacio-triunfo-cna-residence-itapema-meia-praia-4-quartos-3-garagens-venda-ref-265/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Palacio Triunfo - coroamento com vista",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/265/cnapt_14_fachada_voo_high-16269115432831.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-palacio-triunfo-cna-residence-itapema-meia-praia-4-quartos-3-garagens-venda-ref-265/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Palacio Triunfo - topo frente mar",
+          "category": "Fachada",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/il/imoveis/265/cnapt_14_fachada_voo_high-16269115432831.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-palacio-triunfo-cna-residence-itapema-meia-praia-4-quartos-3-garagens-venda-ref-265/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Palacio Triunfo - base classica",
+          "category": "Fachada",
+          "image": "https://empreendimentosnaplanta.com.br/wp-content/uploads/2025/04/4e4e53aa710998166075631710292909.webp",
+          "source_url": "https://empreendimentosnaplanta.com.br/empreendimento/palacio-triunfo-cna-residence/",
+          "source_label": "Empreendimentos na Planta"
+        },
+        {
+          "title": "Palacio Triunfo - ambiente de eventos",
+          "category": "Eventos",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/265/cnapt_04_salao_festas_high-1626911543281.jpg",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-palacio-triunfo-cna-residence-itapema-meia-praia-4-quartos-3-garagens-venda-ref-265/",
+          "source_label": "guilhermepilger.com"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Meia Praia",
+          "description": "Fontes citam referencia na Avenida Nereu Ramos e Rua 304, em Meia Praia, Itapema."
+        },
+        {
+          "icon": "Building2",
+          "title": "Torre classica",
+          "description": "Empreendimento com linguagem inspirada em palacio e cerca de 37 pavimentos nas fontes."
+        },
+        {
+          "icon": "Ruler",
+          "title": "Plantas amplas",
+          "description": "Materiais de mercado indicam 4 suites, 3 vagas e areas proximas de 240 m2 a 262 m2."
+        }
+      ],
+      "differentials": [
+        "Hero e galeria passaram para fachada e acesso do empreendimento.",
+        "Copy deixa claro o contexto Meia Praia, CNA e torre de perfil classico.",
+        "A selecao evita fotos internas de apartamento na pagina do condominio."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Palacio Triunfo CNA Residence?",
+          "answer": "As fontes indicam Meia Praia, Itapema, com referencia entre Avenida Nereu Ramos e Rua 304."
+        },
+        {
+          "question": "Quem assina o empreendimento?",
+          "answer": "As fontes associam o projeto a CNA Fino Acabamento."
+        },
+        {
+          "question": "Qual e o perfil das plantas?",
+          "answer": "As fontes indicam 4 suites, 3 vagas e areas aproximadas entre 240 m2 e 262 m2."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, acesso, eventos e areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://empreendimentosnaplanta.com.br/empreendimento/palacio-triunfo-cna-residence/",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-palacio-triunfo-cna-residence-itapema-meia-praia-4-quartos-3-garagens-venda-ref-265/",
+        "https://www.imobiliariaforcast.com.br/imovel/apartamento-no-edificio-palacio-triunfo-cna-residences-itapema-meia-praia-4-quartos-3-garagens-venda-ref-284/",
+        "https://www.buyinvest.com.br/imoveis/itapema/cna-palacio-triunfo"
+      ]
+    },
+    {
+      "slug": "porto-alicante",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2024/06/edificio-porto-alicante-balneario-camboriu-2.jpg",
+      "description": "O Porto Alicante foi revisado como residencial da TEX Empreendimentos no bairro Pioneiros, em Balneario Camboriu, com referencia na Avenida Osmar Souza Nunes. A pagina oficial descreve 14 residencias de 2 suites, 2 tipologias duplex de 4 suites e 2 coberturas duplex de 4 suites, com 2 vagas e area social entregue mobiliada, decorada e equipada. O lazer inclui festas, piscina aquecida, brinquedoteca, jogos, academia e pet place. A nova galeria usa fachada, piscina, entrada e ambientes comuns do empreendimento.",
+      "seo_description": "Conheca o Porto Alicante, residencial TEX no bairro Pioneiros, em Balneario Camboriu, com lazer equipado.",
+      "gallery": [
+        {
+          "title": "Porto Alicante - torre principal",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2024/06/edificio-porto-alicante-balneario-camboriu-2.jpg",
+          "source_url": "https://litoralvertical.com/pre-lancamento/balneario-camboriu/apartamentos/edificio-porto-alicante/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Porto Alicante - piscina oficial",
+          "category": "Piscina",
+          "image": "https://pages.greatpages.com.br/www.texempreendimentos.com.br-porto-alicante/1749064441/imagens/desktop/71048-a7595019412462c9b02a427b22ee4e2c.png",
+          "source_url": "https://www.texempreendimentos.com.br/porto-alicante",
+          "source_label": "TEX Empreendimentos"
+        },
+        {
+          "title": "Porto Alicante - deck da piscina",
+          "category": "Piscina",
+          "image": "https://pages.greatpages.com.br/www.texempreendimentos.com.br-porto-alicante/1749064441/imagens/mobile/344530_1_1697831278617812138043692.png",
+          "source_url": "https://www.texempreendimentos.com.br/porto-alicante",
+          "source_label": "TEX Empreendimentos"
+        },
+        {
+          "title": "Porto Alicante - fachada noturna",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2024/06/edificio-porto-alicante-balneario-camboriu-1.avif",
+          "source_url": "https://litoralvertical.com/pre-lancamento/balneario-camboriu/apartamentos/edificio-porto-alicante/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Porto Alicante - fachada azul",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2024/06/edificio-porto-alicante-balneario-camboriu-1.jpg",
+          "source_url": "https://litoralvertical.com/pre-lancamento/balneario-camboriu/apartamentos/edificio-porto-alicante/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Porto Alicante - torre com base",
+          "category": "Fachada",
+          "image": "https://pages.greatpages.com.br/www.texempreendimentos.com.br-porto-alicante/1749064441/imagens/mobile/344530_1_1697831278617812133455927.png",
+          "source_url": "https://www.texempreendimentos.com.br/porto-alicante",
+          "source_label": "TEX Empreendimentos"
+        },
+        {
+          "title": "Porto Alicante - entrada iluminada",
+          "category": "Acesso",
+          "image": "https://pages.greatpages.com.br/www.texempreendimentos.com.br-porto-alicante/1749064441/imagens/mobile/344530_1_376587623617.png",
+          "source_url": "https://www.texempreendimentos.com.br/porto-alicante",
+          "source_label": "TEX Empreendimentos"
+        },
+        {
+          "title": "Porto Alicante - hall de acesso",
+          "category": "Hall",
+          "image": "https://pages.greatpages.com.br/www.texempreendimentos.com.br-porto-alicante/1749064441/imagens/mobile/344530_1_376587389562.png",
+          "source_url": "https://www.texempreendimentos.com.br/porto-alicante",
+          "source_label": "TEX Empreendimentos"
+        },
+        {
+          "title": "Porto Alicante - piscina e lazer",
+          "category": "Piscina",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/enterprise/197410/images/_0cc6928e300721165428098910577603.webp",
+          "source_url": "https://myside.com.br/apartamento-venda-porto-alicante-balneario-camboriu-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Porto Alicante - fachada alta",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2024/06/edificio-porto-alicante-balneario-camboriu-2.avif",
+          "source_url": "https://litoralvertical.com/pre-lancamento/balneario-camboriu/apartamentos/edificio-porto-alicante/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Porto Alicante - perspectiva completa",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2024/06/edificio-porto-alicante-balneario-camboriu-principal.avif",
+          "source_url": "https://litoralvertical.com/pre-lancamento/balneario-camboriu/apartamentos/edificio-porto-alicante/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Porto Alicante - fachada crepuscular",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2024/06/edificio-porto-alicante-balneario-camboriu-principal.jpg",
+          "source_url": "https://litoralvertical.com/pre-lancamento/balneario-camboriu/apartamentos/edificio-porto-alicante/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Porto Alicante - ambiente gourmet",
+          "category": "Gourmet",
+          "image": "https://pages.greatpages.com.br/www.texempreendimentos.com.br-porto-alicante/1749064441/imagens/mobile/344530_1_376586030944.png",
+          "source_url": "https://www.texempreendimentos.com.br/porto-alicante",
+          "source_label": "TEX Empreendimentos"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Residencial TEX",
+          "description": "Projeto da TEX Empreendimentos no bairro Pioneiros, em Balneario Camboriu."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Area social equipada",
+          "description": "Fonte oficial informa ambientes sociais mobiliados, decorados e equipados."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Lazer funcional",
+          "description": "Festas, piscina aquecida, brinquedoteca, jogos, academia e pet place aparecem nas fontes."
+        }
+      ],
+      "differentials": [
+        "Hero atualizado para imagem de fachada do Porto Alicante.",
+        "Galeria usa imagens oficiais/portais do empreendimento, nao cenas internas de oferta.",
+        "Texto inclui TEX, Pioneiros, tipologias e lazer confirmado."
+      ],
+      "faq": [
+        {
+          "question": "Quem assina o Porto Alicante?",
+          "answer": "A pagina oficial apresenta o Porto Alicante como empreendimento da TEX Empreendimentos."
+        },
+        {
+          "question": "Onde fica o Porto Alicante?",
+          "answer": "Fontes de mercado indicam o bairro Pioneiros, em Balneario Camboriu, com referencia na Avenida Osmar Souza Nunes."
+        },
+        {
+          "question": "Quais areas comuns foram destacadas?",
+          "answer": "Festas, piscina aquecida, brinquedoteca, jogos, academia e pet place."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, piscina, acesso, hall, gourmet e areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.texempreendimentos.com.br/porto-alicante",
+        "https://myside.com.br/apartamento-venda-porto-alicante-balneario-camboriu-sc",
+        "https://litoralvertical.com/pre-lancamento/balneario-camboriu/apartamentos/edificio-porto-alicante/",
+        "https://marciocorretorbc.com.br/empreendimento/porto-alicante-pioneiros-balneario-camboriu-santa-catarina/"
+      ]
+    },
+    {
+      "slug": "splendido",
+      "hero_image": "https://cdn.imoview.com.br/bryann/Condominios/58/splendido-felicita-balneario-camboriu-61.jpg?1709389479",
+      "description": "O Splendido foi revisado como empreendimento de alto padrao no bairro Pioneiros, em Balneario Camboriu, associado a Cechinel nas fontes de mercado. As fontes indicam localizacao na Avenida Atlantica, areas aproximadas de 215 m2 a 264 m2, plantas com 4 quartos/suites e 4 vagas em algumas ofertas, alem de mais de 2250 m2 de lazer distribuido em dois pavimentos. A galeria agora mostra fachada, lobby, espelho d agua, lounges, ambientes sociais e lazer elevado, reduzindo o uso de imagens de apartamento.",
+      "seo_description": "Conheca o Splendido, empreendimento de alto padrao no Pioneiros, Balneario Camboriu, com lazer em dois pavimentos.",
+      "gallery": [
+        {
+          "title": "Splendido - fachada vertical",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/58/splendido-felicita-balneario-camboriu-61.jpg?1709389479",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/58/splendido-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Splendido - torre Cechinel",
+          "category": "Fachada",
+          "image": "https://rocket.myside.com.br/application/plugins/module_imobles/uploads/companyconstruction/302/images/_1a996ecc625839165609807410993416.jpg",
+          "source_url": "https://myside.com.br/apartamento-venda-splendido-balneario-camboriu-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Splendido - lobby com agua",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/58/img-81.jpg?1709389479",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/58/splendido-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Splendido - hall social",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/58/img-80.jpg?1709389479",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/58/splendido-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Splendido - lounge iluminado",
+          "category": "Lazer",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/58/img-79.jpg?1709389479",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/58/splendido-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Splendido - convivencia social",
+          "category": "Lazer",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/58/img-78.jpg?1709389479",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/58/splendido-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Splendido - acesso ao lobby",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/58/img-77.jpg?1709389479",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/58/splendido-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Splendido - hall amplo",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/58/img-76.jpg?1709389479",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/58/splendido-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Splendido - ambiente de jogos",
+          "category": "Jogos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/58/img-75.jpg?1709389479",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/58/splendido-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Splendido - corredor social",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/58/img-74.jpg?1709389479",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/58/splendido-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Splendido - lazer interno",
+          "category": "Lazer",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/58/img-73.jpg?1709389479",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/58/splendido-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Splendido - eventos e jogos",
+          "category": "Eventos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/58/img-72.jpg?1709389479",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/58/splendido-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Splendido - lounge de apoio",
+          "category": "Lazer",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/58/img-71.jpg?1709389479",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/58/splendido-tower/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Splendido - lazer superior",
+          "category": "Piscina",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/im/imoveis/2100/1-17621946581033.png",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-splendido-balneario-camboriu-pioneiros-5-quartos-4-garagens-venda-ref-2100/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Splendido - deck elevado",
+          "category": "Piscina",
+          "image": "https://b3.casteldigital.com.br/guilhermepilger/ig/il/imoveis/2100/1-17621946581033.png",
+          "source_url": "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-splendido-balneario-camboriu-pioneiros-5-quartos-4-garagens-venda-ref-2100/",
+          "source_label": "guilhermepilger.com"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Pioneiros e orla",
+          "description": "Fontes indicam localizacao na Avenida Atlantica, no bairro Pioneiros, em Balneario Camboriu."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer em dois pavimentos",
+          "description": "Material de mercado cita mais de 2250 m2 de lazer com ambientes sociais e recreativos."
+        },
+        {
+          "icon": "Building2",
+          "title": "Padrao Cechinel",
+          "description": "Fontes associam o Splendido a Cechinel e a plantas amplas de alto padrao."
+        }
+      ],
+      "differentials": [
+        "Hero substituido por fachada do empreendimento.",
+        "Galeria prioriza lobby, lazer e fachada, sem depender de interiores de apartamento.",
+        "Copy inclui Pioneiros, Avenida Atlantica, Cechinel e escala do lazer."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Splendido?",
+          "answer": "As fontes indicam o bairro Pioneiros, em Balneario Camboriu, com referencia na Avenida Atlantica."
+        },
+        {
+          "question": "Qual e o destaque do lazer?",
+          "answer": "Fontes de mercado citam mais de 2250 m2 de lazer distribuido em dois pavimentos."
+        },
+        {
+          "question": "O que a nova galeria mostra?",
+          "answer": "Fachada, lobby, espelho d agua, lounges, jogos, eventos e lazer superior."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, hall, lazer, jogos, eventos, piscina e areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://myside.com.br/apartamento-venda-splendido-balneario-camboriu-sc",
+        "https://felicitanegocios.com.br/empreendimento/58/splendido-tower/",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-splendido-balneario-camboriu-pioneiros-5-quartos-4-garagens-venda-ref-2100/",
+        "https://rocksinvestments.com/properties/splendido-by-cechinel-pioneiros-2"
+      ]
+    },
+    {
+      "slug": "brava-vita",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2025/02/edificio-brava-vita-praia-brava-itajai-3-1.jpg",
+      "description": "O Brava Vita foi revisado como empreendimento Gard na Praia Brava, em Itajai. A pagina oficial informa 10 pavimentos, 7 tipos, 3 duplex intermediarios, 1 cobertura triplex, 1 cobertura duplex e area construida total de 2582 m2, com configuracoes de 1 suite mais 2 quartos, churrasqueira, sacada e 2 vagas. As fontes de mercado reforcam localizacao na Rua Conselheiro Julio Kumm e lazer com piscina, academia, festas e kids. A nova galeria usa fachada, acesso, piscina e imagens oficiais de lazer, descartando fotos de outros imoveis.",
+      "seo_description": "Conheca o Brava Vita, empreendimento Gard na Praia Brava de Itajai, com piscina, fitness, eventos e kids.",
+      "gallery": [
+        {
+          "title": "Brava Vita - fachada na Praia Brava",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/02/edificio-brava-vita-praia-brava-itajai-3-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/edificio-brava-vita/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Brava Vita - fachada e acesso",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/02/edificio-brava-vita-praia-brava-itajai-1-1.avif",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/edificio-brava-vita/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Brava Vita - conjunto frontal",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/02/edificio-brava-vita-praia-brava-itajai-1-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/edificio-brava-vita/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Brava Vita - torre lateral",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/02/edificio-brava-vita-praia-brava-itajai-4-1.avif",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/edificio-brava-vita/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Brava Vita - fachada urbana",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2025/02/edificio-brava-vita-praia-brava-itajai-4-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/edificio-brava-vita/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Brava Vita - portico frontal",
+          "category": "Acesso",
+          "image": "https://cdn.vistahost.com.br/cli36621/vista.imobi/fotos/8252/i63f8us5f88q619UBR1_82526844732f35438.jpg",
+          "source_url": "https://manicamarin.com.br/imovel/empreendimento-praia-brava-itajai-sc-398144",
+          "source_label": "Manica Marin"
+        },
+        {
+          "title": "Brava Vita - vista da fachada",
+          "category": "Fachada",
+          "image": "https://cdn.vistahost.com.br/cli36621/vista.imobi/fotos/8252/i63f8us5f88q619UBR1_82526844732c863c5.jpg",
+          "source_url": "https://manicamarin.com.br/imovel/empreendimento-praia-brava-itajai-sc-398144",
+          "source_label": "Manica Marin"
+        },
+        {
+          "title": "Brava Vita - entrada ajardinada",
+          "category": "Acesso",
+          "image": "https://cdn.vistahost.com.br/cli36621/vista.imobi/fotos/8252/i63f8us5f88q619UBR1_82526844733231dcd.jpg",
+          "source_url": "https://manicamarin.com.br/imovel/empreendimento-praia-brava-itajai-sc-398144",
+          "source_label": "Manica Marin"
+        },
+        {
+          "title": "Brava Vita - piscina coberta",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/17052025123525-1747496125.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/brava-vita-EM48716",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Brava Vita - lazer oficial",
+          "category": "Lazer",
+          "image": "https://gardconstrutora.com.br/wp-content/uploads/2021/05/Lazer01-min.jpg",
+          "source_url": "https://gardconstrutora.com.br/brava-vita/",
+          "source_label": "Gard Construtora"
+        },
+        {
+          "title": "Brava Vita - gourmet oficial",
+          "category": "Gourmet",
+          "image": "https://gardconstrutora.com.br/wp-content/uploads/2021/05/Lazer02-min.jpg",
+          "source_url": "https://gardconstrutora.com.br/brava-vita/",
+          "source_label": "Gard Construtora"
+        },
+        {
+          "title": "Brava Vita - piscina oficial",
+          "category": "Piscina",
+          "image": "https://gardconstrutora.com.br/wp-content/uploads/2021/05/Piscina01-min-1.jpg",
+          "source_url": "https://gardconstrutora.com.br/brava-vita/",
+          "source_label": "Gard Construtora"
+        },
+        {
+          "title": "Brava Vita - piscina da Gard",
+          "category": "Piscina",
+          "image": "https://gardconstrutora.com.br/wp-content/uploads/2021/05/Piscina01-min.jpg",
+          "source_url": "https://gardconstrutora.com.br/brava-vita/",
+          "source_label": "Gard Construtora"
+        },
+        {
+          "title": "Brava Vita - piscina externa",
+          "category": "Piscina",
+          "image": "https://gardconstrutora.com.br/wp-content/uploads/2021/05/Piscina04-min.jpg",
+          "source_url": "https://gardconstrutora.com.br/brava-vita/",
+          "source_label": "Gard Construtora"
+        },
+        {
+          "title": "Brava Vita - terraco aberto",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/real-estates-photo/January2026/vita-10-1769631959.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/brava-vita-EM48716",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Brava Vita - vista do entorno",
+          "category": "Orla",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/real-estates-photo/January2026/vita-7-1769631958.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/brava-vita-EM48716",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Empreendimento Gard",
+          "description": "A pagina oficial apresenta o Brava Vita como projeto da Gard Construtora na Praia Brava."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Praia Brava de Itajai",
+          "description": "Fontes de mercado citam a Rua Conselheiro Julio Kumm e proximidade com a praia."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer essencial",
+          "description": "Piscina, academia, eventos e kids compoem a estrutura comum indicada nas fontes."
+        }
+      ],
+      "differentials": [
+        "Hero usa fachada real do Brava Vita no lugar de imagem gerada/de oferta.",
+        "Galeria remove imagens de outros imoveis e fica restrita a fontes do empreendimento.",
+        "Texto agora inclui Gard, Praia Brava, composicao da torre e lazer."
+      ],
+      "faq": [
+        {
+          "question": "Quem construiu o Brava Vita?",
+          "answer": "A pagina oficial apresenta o Brava Vita como empreendimento da Gard Construtora."
+        },
+        {
+          "question": "Onde fica o Brava Vita?",
+          "answer": "As fontes indicam Praia Brava, Itajai, com referencia na Rua Conselheiro Julio Kumm."
+        },
+        {
+          "question": "Quais areas comuns foram priorizadas?",
+          "answer": "Piscina, academia, espaco de eventos, kids, fachada e acesso do empreendimento."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, acesso, piscina, lazer, gourmet, orla e areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://gardconstrutora.com.br/brava-vita/",
+        "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/edificio-brava-vita/",
+        "https://manicamarin.com.br/imovel/empreendimento-praia-brava-itajai-sc-398144",
+        "https://www.imobillenegocios.com.br/empreendimento/brava-vita-EM48716"
+      ]
+    },
+    {
+      "slug": "opera-plaza",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2014/07/edificio-opera-plaza-balneario-camboriu-1.jpg",
+      "description": "O Opera Plaza foi revisado como residencial no Centro de Balneario Camboriu, na esquina da Rua 801 com a Avenida Central segundo fontes de mercado. As fontes indicam plantas em torno de 136 m2 a 177 m2, 3 suites e 2 a 4 vagas, alem de lazer com piscina, deck, academia, cinema, churrasqueira/gourmet, brinquedoteca, quadra, areas de convivencia e apoio social. A nova galeria substitui fotos internas de apartamento por fachada, piscina, acesso, fitness, kids e areas comuns do condominio.",
+      "seo_description": "Conheca o Opera Plaza, residencial no Centro de Balneario Camboriu, com 3 suites e lazer completo.",
+      "gallery": [
+        {
+          "title": "Opera Plaza - fachada central",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2014/07/edificio-opera-plaza-balneario-camboriu-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-opera-plaza/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Opera Plaza - fachada vertical",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2014/07/edificio-opera-plaza-balneario-camboriu-1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-opera-plaza/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Opera Plaza - acesso frontal",
+          "category": "Acesso",
+          "image": "https://litoralvertical.com/wp-content/uploads/2014/07/edificio-opera-plaza-balneario-camboriu-2.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-opera-plaza/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Opera Plaza - portaria frontal",
+          "category": "Acesso",
+          "image": "https://litoralvertical.com/wp-content/uploads/2014/07/edificio-opera-plaza-balneario-camboriu-2.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-opera-plaza/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Opera Plaza - entrada social",
+          "category": "Acesso",
+          "image": "https://litoralvertical.com/wp-content/uploads/2014/07/edificio-opera-plaza-balneario-camboriu-3.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-opera-plaza/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Opera Plaza - acesso coberto",
+          "category": "Acesso",
+          "image": "https://litoralvertical.com/wp-content/uploads/2014/07/edificio-opera-plaza-balneario-camboriu-3.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-opera-plaza/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Opera Plaza - torre clara",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/668/img-1.jpg?1727720067",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/668/opera-plaza/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Opera Plaza - fachada lateral",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/668/img-6.jpg?1727720067",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/668/opera-plaza/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Opera Plaza - base urbana",
+          "category": "Fachada",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/668/img-2.jpg?1727720067",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/668/opera-plaza/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Opera Plaza - piscina e deck",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/668/img-49.jpg?1727720067",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/668/opera-plaza/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Opera Plaza - piscina externa",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/668/img-51.jpg?1727720067",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/668/opera-plaza/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Opera Plaza - terraco social",
+          "category": "Lazer",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/668/img-50.jpg?1727720067",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/668/opera-plaza/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Opera Plaza - eventos",
+          "category": "Eventos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/668/img-52.jpg?1727720067",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/668/opera-plaza/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Opera Plaza - fitness",
+          "category": "Fitness",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/668/img-55.jpg?1727720067",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/668/opera-plaza/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Opera Plaza - quadra recreativa",
+          "category": "Lazer",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/668/img-57.jpg?1727720067",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/668/opera-plaza/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Opera Plaza - kids",
+          "category": "Kids",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/668/img-56.jpg?1727720067",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/668/opera-plaza/",
+          "source_label": "Felicita Negocios"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro de Balneario Camboriu",
+          "description": "Fontes indicam localizacao na Rua 801, esquina com Avenida Central."
+        },
+        {
+          "icon": "Ruler",
+          "title": "Plantas de 3 suites",
+          "description": "Fontes de mercado citam areas entre cerca de 136 m2 e 177 m2, com 2 a 4 vagas."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer completo",
+          "description": "Piscina, academia, cinema, gourmet, kids, quadra e convivencia aparecem nas fontes."
+        }
+      ],
+      "differentials": [
+        "Hero atualizado com fachada do Opera Plaza.",
+        "Galeria revisada mostra fachada, piscina, acesso, fitness, kids e quadra.",
+        "Copy deixa de ser generica e passa a explicar endereco, plantas e lazer."
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Opera Plaza?",
+          "answer": "Fontes indicam o Centro de Balneario Camboriu, na Rua 801 com Avenida Central."
+        },
+        {
+          "question": "Qual e o perfil das plantas?",
+          "answer": "As fontes citam 3 suites, areas proximas de 136 m2 a 177 m2 e 2 a 4 vagas."
+        },
+        {
+          "question": "Que imagens entraram na nova galeria?",
+          "answer": "Fachada, acesso, piscina, deck, fitness, kids, eventos e quadra recreativa."
+        },
+        {
+          "question": "Quais imagens entraram na galeria revisada?",
+          "answer": "A galeria prioriza fachada, acesso, piscina, lazer, eventos, fitness e areas comuns verificadas para representar melhor o empreendimento."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-opera-plaza-residencial-EM53602",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-opera-plaza/",
+        "https://felicitanegocios.com.br/empreendimento/668/opera-plaza/",
+        "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-opera-plaza-balneario-camboriu-centro-3-quartos-3-garagens-venda-ref-477/"
+      ]
+    }
+  ]
+}

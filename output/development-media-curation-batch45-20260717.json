@@ -1,0 +1,1296 @@
+{
+  "batch_id": "development-media-curation-batch45-20260717",
+  "generated_at": "2026-07-18T01:55:00.000Z",
+  "items": [
+    {
+      "slug": "singolare",
+      "hero_image": "https://nwoarquitetura.com/wp-content/uploads/2022/11/00-Zen_Singolare_Fachada_01_p02-scaled.jpg",
+      "description": "O Singolare foi revisado com a pagina nominal da NWO Arquitetura, que identifica o Singolare Residence na Praia Brava e oferece imagens de fachada do projeto. A Terra Imobiliaria complementa a leitura do condominio ao citar piscina adulto e infantil, playground, brinquedoteca, quiosque, eventos, gourmet e academia. A pagina passa a mostrar o predio frente mar e a explicar o empreendimento pela arquitetura, localizacao e lazer, sem depender de imagens internas.",
+      "seo_description": "Singolare Residence na Praia Brava, Itajai, com fachada frente mar e lazer com piscina, playground, brinquedoteca, gourmet e academia.",
+      "gallery": [
+        {
+          "title": "Singolare - fachada frente mar",
+          "category": "Fachada",
+          "image": "https://nwoarquitetura.com/wp-content/uploads/2022/11/00-Zen_Singolare_Fachada_01_p02-scaled.jpg",
+          "source_url": "https://nwoarquitetura.com/projeto/singolare-residence/",
+          "source_label": "NWO Arquitetura"
+        },
+        {
+          "title": "Singolare - vista aerea da orla",
+          "category": "Fachada",
+          "image": "https://nwoarquitetura.com/wp-content/uploads/2022/11/Zen_Singolare_Fachada_02_p02_Close-scaled.jpg",
+          "source_url": "https://nwoarquitetura.com/projeto/singolare-residence/",
+          "source_label": "NWO Arquitetura"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente mar na Brava",
+          "description": "As imagens do NWO mostram o edificio implantado junto a orla da Praia Brava, com leitura clara de praia e avenida."
+        },
+        {
+          "icon": "Building2",
+          "title": "Projeto identificado",
+          "description": "A fonte da NWO lista Singolare Residence como projeto de arquitetura imobiliaria na Praia Brava."
+        },
+        {
+          "icon": "Baby",
+          "title": "Lazer familiar",
+          "description": "A Terra cita piscina adulto e infantil, playground e brinquedoteca como recursos de convivencia."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Apoio ao dia a dia",
+          "description": "Academia, gourmet, quiosque e ambiente para eventos completam a estrutura informada nas fontes."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fachada recuperada",
+          "description": "A hero foi trocada por imagem externa do Singolare, com contexto de orla."
+        },
+        {
+          "title": "Galeria conservadora",
+          "description": "A selecao usa somente fachadas verificadas, descartando interiores encontrados em outras paginas."
+        },
+        {
+          "title": "Copy de condominio",
+          "description": "A descricao agora combina projeto, endereco de praia e lazer do empreendimento."
+        }
+      ],
+      "faq": [
+        {
+          "question": "O que mudou no Singolare?",
+          "answer": "A hero e a galeria passaram a usar fachadas do Singolare Residence, e nao fotos internas."
+        },
+        {
+          "question": "Quais fontes sustentam a revisao?",
+          "answer": "NWO Arquitetura foi usada para imagens do projeto e Terra Imobiliaria para comodidades do condominio."
+        },
+        {
+          "question": "Que itens de lazer foram identificados?",
+          "answer": "Piscina adulto e infantil, playground, brinquedoteca, quiosque, ambiente para eventos, gourmet e academia."
+        },
+        {
+          "question": "Por que a galeria e curta?",
+          "answer": "Porque a curadoria preferiu poucas imagens externas confiaveis a uma galeria maior com midia interna ou incerta."
+        }
+      ],
+      "sources": [
+        "https://nwoarquitetura.com/projeto/singolare-residence/",
+        "https://imoveisterra.net/empreendimento/695/singolare-residencial/",
+        "https://www.guilhermepilger.com/imovel/apartamento-no-edificio-singolare-itajai-praia-brava-3-quartos-3-garagens-venda-ref-2568/"
+      ]
+    },
+    {
+      "slug": "sky-tower",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-sky-tower-balneario-camboriu-1-3.jpg",
+      "description": "O Sky Tower foi revisado com fontes nominais de Balneario Camboriu que mostram a torre, a base urbana e areas comuns. O conjunto visual agora privilegia fachada, hall, lounge, fitness, cinema, brinquedoteca, piscina coberta, jogos, gourmet e eventos. A descricao passa a apresentar o empreendimento como uma torre da FG na Barra Norte/Centro, com arquitetura marcante, lazer coberto e apoio social completo para uma rotina perto da orla.",
+      "seo_description": "Sky Tower em Balneario Camboriu, com fachada, hall, piscina coberta, fitness, cinema, jogos, gourmet e eventos.",
+      "gallery": [
+        {
+          "title": "Sky Tower - fachada vertical",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-sky-tower-balneario-camboriu-1-3.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-sky-tower/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Sky Tower - implantacao urbana",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/13112023114633479-1699886793.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sky-tower-EM56130",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sky Tower - hall social",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2023/layout-fotos-site0000-1674578099.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sky-tower-EM56130",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sky Tower - lounge ajardinado",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2023/layout-fotos-site0012-1674578105.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sky-tower-EM56130",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sky Tower - fitness equipado",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2023/layout-fotos-site0001-1674578100.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sky-tower-EM56130",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sky Tower - cinema",
+          "category": "Cinema",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2023/layout-fotos-site0003-1674578101.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sky-tower-EM56130",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sky Tower - brinquedoteca",
+          "category": "Infantil",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2023/layout-fotos-site0004-1674578101.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sky-tower-EM56130",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sky Tower - piscina coberta",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2023/layout-fotos-site0005-1674578101.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sky-tower-EM56130",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sky Tower - jogos",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2023/layout-fotos-site0006-1674578102.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sky-tower-EM56130",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sky Tower - gourmet",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2023/layout-fotos-site0007-1674578102.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sky-tower-EM56130",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sky Tower - eventos",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/January2023/layout-fotos-site0008-1674578103.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sky-tower-EM56130",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sky Tower - fachada lateral",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-sky-tower-balneario-camboriu-1-3.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-sky-tower/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Sky Tower - torre no entorno",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-sky-tower-balneario-camboriu-3.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-sky-tower/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Building2",
+          "title": "Torre FG",
+          "description": "Grupo ODP e fontes comerciais relacionam o Sky Tower a FG Empreendimentos em Balneario Camboriu."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Barra Norte",
+          "description": "As fontes posicionam o empreendimento na regiao norte/central, perto da orla e de servicos urbanos."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina coberta",
+          "description": "A galeria inclui piscina coberta e deck, ajudando a comunicar lazer protegido o ano todo."
+        },
+        {
+          "icon": "Gamepad2",
+          "title": "Entretenimento completo",
+          "description": "Cinema, jogos, brinquedoteca, gourmet e eventos aparecem em fontes nominais do condominio."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Hero externa",
+          "description": "A imagem principal mostra a fachada do Sky Tower, nao ambiente privativo."
+        },
+        {
+          "title": "Lazer documentado",
+          "description": "A nova galeria apresenta uma sequencia clara de areas comuns."
+        },
+        {
+          "title": "Fontes cruzadas",
+          "description": "Imobille, Litoral Vertical, Grupo ODP e Bruno Cassola foram usados para validar contexto e imagem."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Quais imagens foram escolhidas para o Sky Tower?",
+          "answer": "Fachada, hall, lounge, fitness, cinema, brinquedoteca, piscina, jogos, gourmet e eventos."
+        },
+        {
+          "question": "A pagina usa fotos internas de oferta?",
+          "answer": "Nao. A curadoria ficou concentrada em predio e areas comuns."
+        },
+        {
+          "question": "Qual regiao foi considerada?",
+          "answer": "Balneario Camboriu, com leitura de Barra Norte/Centro conforme fontes pesquisadas."
+        },
+        {
+          "question": "Por que a descricao mudou?",
+          "answer": "Para comunicar o empreendimento, sua arquitetura e seu lazer, em vez de um texto generico."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-sky-tower-EM56130",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-sky-tower/",
+        "https://grupoodp.com.br/en/fg-empreendimentos-entrega-edificio-sky-tower/",
+        "https://www.brunocassola.com.br/imovel/apartamento-no-edificio-sky-tower-balneario-camboriu-barra-norte-4-quartos-3-garagens-venda-ref-13/"
+      ]
+    },
+    {
+      "slug": "skyline-itajai",
+      "hero_image": "https://www.lotisa.com.br/wp-content/uploads/2024/12/COMPARTILHAMENTO-SKYLINE.png",
+      "description": "O Skyline Itajai foi alinhado ao Lotisa Skyline, empreendimento no bairro Fazenda com forte relacao com a Beira Rio e o eixo gastronomico de Itajai. A curadoria substitui imagens internas por fachadas, vistas externas, piscina elevada, hall, gourmet, eventos, fitness, lazer e garagem. A copy agora destaca arquitetura de linhas curvas, torre de alto padrao, implantacao urbana qualificada e lazer amplo para quem busca rotina sofisticada junto ao rio.",
+      "seo_description": "Lotisa Skyline em Itajai, bairro Fazenda, com fachada curva, Beira Rio, piscina elevada, hall, gourmet e fitness.",
+      "gallery": [
+        {
+          "title": "Skyline Itajai - torre iluminada",
+          "category": "Fachada",
+          "image": "https://www.lotisa.com.br/wp-content/uploads/2024/12/COMPARTILHAMENTO-SKYLINE.png",
+          "source_url": "https://www.lotisa.com.br/empreendimento/lotisa-skyline/",
+          "source_label": "lotisa.com.br"
+        },
+        {
+          "title": "Skyline Itajai - curva da fachada",
+          "category": "Fachada",
+          "image": "https://www.lotisa.com.br/wp-content/uploads/2024/12/Background-Mobile-skyline.png",
+          "source_url": "https://www.lotisa.com.br/empreendimento/lotisa-skyline/",
+          "source_label": "lotisa.com.br"
+        },
+        {
+          "title": "Skyline Itajai - relacao com Beira Rio",
+          "category": "Entorno",
+          "image": "https://www.lotisa.com.br/wp-content/uploads/2024/12/backgroud-Desktop-skyline.png",
+          "source_url": "https://www.lotisa.com.br/empreendimento/lotisa-skyline/",
+          "source_label": "lotisa.com.br"
+        },
+        {
+          "title": "Skyline Itajai - fachada ascendente",
+          "category": "Fachada",
+          "image": "https://www.lotisa.com.br/wp-content/uploads/2024/12/galeria-skyline_0000_L_SK_FACHADA_DETALHE_01_EF.png",
+          "source_url": "https://www.lotisa.com.br/empreendimento/lotisa-skyline/",
+          "source_label": "lotisa.com.br"
+        },
+        {
+          "title": "Skyline Itajai - skyline urbano",
+          "category": "Fachada",
+          "image": "https://www.lotisa.com.br/wp-content/uploads/2024/12/galeria-skyline_0013_L_SK_FACHADA_FOTOMONTAGEM_EF.png",
+          "source_url": "https://www.lotisa.com.br/empreendimento/lotisa-skyline/",
+          "source_label": "lotisa.com.br"
+        },
+        {
+          "title": "Skyline Itajai - base urbana",
+          "category": "Fachada",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/real-estates-photo/March2022/cyT5Uu7CD5JDX048xlAR.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-skyline-EM42326",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Skyline Itajai - piscina elevada",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/801/l-sk-piscina-ef.jpg?1776275994",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/801/lotisa-skyline/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Skyline Itajai - hall contemporaneo",
+          "category": "Hall",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/801/construtora-lotisa-empreendimento-skyline-sauna-21072021-revisao-02-imagem-24.jpg?1776275994",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/801/lotisa-skyline/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Skyline Itajai - ambiente gourmet",
+          "category": "Gourmet",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/801/construtora-lotisa-skyline-boate-26112021-revisao-02-imagem-05.jpg?1776275994",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/801/lotisa-skyline/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Skyline Itajai - eventos integrados",
+          "category": "Eventos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/801/construtora-lotisa-empreendimento-skyline-gourmetexterno-revisao-03-imagem-02-.jpg?1776275994",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/801/lotisa-skyline/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Skyline Itajai - fitness amplo",
+          "category": "Fitness",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/801/construtora-lotisa-empreendimento-skyline-academia-16092021-revisao-03-imagem-03-.jpg?1776275994",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/801/lotisa-skyline/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Skyline Itajai - vista do lazer",
+          "category": "Lazer",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/801/1659529107297-ba9b780a-84ce-40c6-b500-56300e3dfb44.jpg?1776275994",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/801/lotisa-skyline/",
+          "source_label": "Felicita Negocios"
+        },
+        {
+          "title": "Skyline Itajai - torre diurna",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/09/lotisa-sky-line-itajai-sc-7.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/lotisa-skyline/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Skyline Itajai - varanda e rio",
+          "category": "Entorno",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/09/lotisa-sky-line-itajai-sc-6.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/lotisa-skyline/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Skyline Itajai - garagem tecnica",
+          "category": "Garagem",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/09/lotisa-sky-line-itajai-sc-9.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/lotisa-skyline/",
+          "source_label": "Invexo"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Bairro Fazenda",
+          "description": "As fontes posicionam o Lotisa Skyline no bairro Fazenda, proximo a Beira Rio de Itajai."
+        },
+        {
+          "icon": "Building2",
+          "title": "Arquitetura curva",
+          "description": "A fachada com linhas organicas aparece em fontes oficiais e comerciais do empreendimento."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina elevada",
+          "description": "A galeria mostra lazer com piscina e vista aberta para a cidade e o rio."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Estrutura completa",
+          "description": "Hall, gourmet, eventos, fitness e garagem reforcam a leitura de condominio completo."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fonte oficial Lotisa",
+          "description": "A pagina oficial do empreendimento foi usada como referencia central."
+        },
+        {
+          "title": "Lazer e fachada juntos",
+          "description": "A galeria equilibra arquitetura externa e areas comuns."
+        },
+        {
+          "title": "Contexto urbano claro",
+          "description": "A descricao passa a conectar o projeto ao bairro Fazenda e a Beira Rio."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Qual Skyline foi auditado?",
+          "answer": "O Lotisa Skyline, em Itajai, bairro Fazenda."
+        },
+        {
+          "question": "Quais imagens entraram?",
+          "answer": "Fachadas, vistas do entorno, piscina elevada, hall, gourmet, eventos, fitness e garagem."
+        },
+        {
+          "question": "As fontes confirmam o empreendimento?",
+          "answer": "Sim. Foram usadas Lotisa, Litoral Vertical, Imobille, MySide, Felicita e Invexo."
+        },
+        {
+          "question": "O que a nova descricao valoriza?",
+          "answer": "Arquitetura curva, localizacao na Beira Rio e estrutura de lazer do condominio."
+        }
+      ],
+      "sources": [
+        "https://www.lotisa.com.br/empreendimento/lotisa-skyline/",
+        "https://litoralvertical.com/venda/itajai/apartamentos/edificio-skyline/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-skyline-EM42326",
+        "https://myside.com.br/apartamento-venda-lotisa-skyline-itajai-sc",
+        "https://felicitanegocios.com.br/empreendimento/801/lotisa-skyline/",
+        "https://lancamento.invexo.com.br/sc/lotisa-skyline/"
+      ]
+    },
+    {
+      "slug": "smart-valley",
+      "hero_image": "https://galpaoaluguelevenda.com.br/wp-content/uploads/2026/05/17-9.avif",
+      "description": "O Smart Valley foi tratado como condominio logistico em Canhanduba, Itajai. A auditoria encontrou material nominal da Sempre e do portal Galpao Aluguel e Venda, incluindo imagens de apresentacao do parque, patios de manobra, docas e modulos cobertos. A copy foi reescrita para explicar o produto como estrutura empresarial e logistica, com acesso operacional, escala de armazenagem e implantacao pensada para empresas que precisam de fluxo, seguranca e localizacao estrategica.",
+      "seo_description": "Smart Valley em Itajai, condominio logistico em Canhanduba com patios, docas, modulos cobertos e acesso operacional.",
+      "gallery": [
+        {
+          "title": "Smart Valley - vista aerea logistica",
+          "category": "Logistica",
+          "image": "https://galpaoaluguelevenda.com.br/wp-content/uploads/2026/05/17-9.avif",
+          "source_url": "https://galpaoaluguelevenda.com.br/cidade/itajai/",
+          "source_label": "Galpao Aluguel e Venda"
+        },
+        {
+          "title": "Smart Valley - implantacao geral",
+          "category": "Logistica",
+          "image": "https://cdn.imoview.com.br/sempre/Condominios/1819/copia-de-copia-de-galpes-capa-14.png?1777989988",
+          "source_url": "https://www.sempreimoveis.com.br/condominio/smart-valley/1819",
+          "source_label": "Sempre Negocios Imobiliarios"
+        },
+        {
+          "title": "Smart Valley - acesso de cargas",
+          "category": "Operacao",
+          "image": "https://cdn.imoview.com.br/sempre/Condominios/1819/12.png?1777989988",
+          "source_url": "https://www.sempreimoveis.com.br/condominio/smart-valley/1819",
+          "source_label": "Sempre Negocios Imobiliarios"
+        },
+        {
+          "title": "Smart Valley - docas alinhadas",
+          "category": "Operacao",
+          "image": "https://cdn.imoview.com.br/sempre/Condominios/1819/14.png?1777989988",
+          "source_url": "https://www.sempreimoveis.com.br/condominio/smart-valley/1819",
+          "source_label": "Sempre Negocios Imobiliarios"
+        },
+        {
+          "title": "Smart Valley - patio operacional",
+          "category": "Operacao",
+          "image": "https://cdn.imoview.com.br/sempre/Condominios/1819/11.png?1777989988",
+          "source_url": "https://www.sempreimoveis.com.br/condominio/smart-valley/1819",
+          "source_label": "Sempre Negocios Imobiliarios"
+        },
+        {
+          "title": "Smart Valley - estrutura coberta",
+          "category": "Logistica",
+          "image": "https://cdn.imoview.com.br/sempre/Condominios/1819/10.png?1777989988",
+          "source_url": "https://www.sempreimoveis.com.br/condominio/smart-valley/1819",
+          "source_label": "Sempre Negocios Imobiliarios"
+        },
+        {
+          "title": "Smart Valley - manobra interna",
+          "category": "Operacao",
+          "image": "https://cdn.imoview.com.br/sempre/Condominios/1819/9.png?1777989988",
+          "source_url": "https://www.sempreimoveis.com.br/condominio/smart-valley/1819",
+          "source_label": "Sempre Negocios Imobiliarios"
+        },
+        {
+          "title": "Smart Valley - modulo de entrada",
+          "category": "Acesso",
+          "image": "https://cdn.imoview.com.br/sempre/Condominios/1819/15.png?1777989988",
+          "source_url": "https://www.sempreimoveis.com.br/condominio/smart-valley/1819",
+          "source_label": "Sempre Negocios Imobiliarios"
+        },
+        {
+          "title": "Smart Valley - condominio Itajai",
+          "category": "Logistica",
+          "image": "https://galpaoaluguelevenda.com.br/wp-content/uploads/2026/05/17-9-584x438.avif",
+          "source_url": "https://galpaoaluguelevenda.com.br/cidade/itajai/",
+          "source_label": "Galpao Aluguel e Venda"
+        },
+        {
+          "title": "Smart Valley - areas cobertas",
+          "category": "Logistica",
+          "image": "https://galpaoaluguelevenda.com.br/wp-content/uploads/2026/05/1-26-584x438.avif",
+          "source_url": "https://galpaoaluguelevenda.com.br/cidade/itajai/",
+          "source_label": "Galpao Aluguel e Venda"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Warehouse",
+          "title": "Uso logistico",
+          "description": "As fontes tratam o Smart Valley como condominio voltado a armazenagem e operacao empresarial."
+        },
+        {
+          "icon": "Truck",
+          "title": "Docas e manobra",
+          "description": "A galeria mostra patios, docas e acesso para caminhoes em imagens de apresentacao."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Canhanduba",
+          "description": "O cadastro e as fontes posicionam o empreendimento em Itajai, no eixo de Canhanduba."
+        },
+        {
+          "icon": "ShieldCheck",
+          "title": "Condominio planejado",
+          "description": "A leitura visual indica organizacao interna, modulos cobertos e circulacao operacional."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Categoria corrigida",
+          "description": "A pagina passa a comunicar um condominio logistico, nao um residencial."
+        },
+        {
+          "title": "Imagem de operacao",
+          "description": "Hero e galeria mostram patio, docas, cobertura e implantacao."
+        },
+        {
+          "title": "Texto especifico",
+          "description": "A descricao agora fala de fluxo, armazenagem, manobra e localizacao empresarial."
+        }
+      ],
+      "faq": [
+        {
+          "question": "O Smart Valley e residencial?",
+          "answer": "Nao. A auditoria tratou o cadastro como condominio logistico em Itajai."
+        },
+        {
+          "question": "Quais imagens foram usadas?",
+          "answer": "Imagens de apresentacao com implantacao, patios, docas, acesso de cargas e areas cobertas."
+        },
+        {
+          "question": "As imagens sao fotografias definitivas?",
+          "answer": "Parte do material aparece como imagem ilustrativa nas fontes, por isso a copy foi escrita de forma conservadora."
+        },
+        {
+          "question": "Qual e o foco da pagina revisada?",
+          "answer": "Operacao logistica, acesso, escala de armazenagem e implantacao empresarial."
+        }
+      ],
+      "sources": [
+        "https://www.sempreimoveis.com.br/condominio/smart-valley/1819",
+        "https://galpaoaluguelevenda.com.br/cidade/itajai/",
+        "https://galpaoaluguelevenda.com.br/galpao/galpoes-para-alugar-itajai-sc/"
+      ]
+    },
+    {
+      "slug": "soft-breeze",
+      "hero_image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/05/Soft-Breeze-8.jpg",
+      "description": "O Soft Breeze foi revisado como empreendimento em Pereque, Porto Belo, com fontes que mostram fachada, relacao com o mar, fitness e playground. A pagina deixa de depender de fotos internas e passa a explicar o condominio pela localizacao costeira, pela torre contemporanea e pelo lazer de apoio ao uso familiar. Como algumas fontes comerciais variam nos detalhes de prazo e disponibilidade, a copy prioriza atributos consistentes: fachada, praia, areas de lazer e conveniencia urbana de Porto Belo.",
+      "seo_description": "Soft Breeze em Pereque, Porto Belo, com fachada, vista para o mar, fitness, playground e lazer familiar.",
+      "gallery": [
+        {
+          "title": "Soft Breeze - fachada principal",
+          "category": "Fachada",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/05/Soft-Breeze-8.jpg",
+          "source_url": "https://www.lancamentosportobelo.com.br/lancamentos/soft-breeze/",
+          "source_label": "Lancamentos Porto Belo"
+        },
+        {
+          "title": "Soft Breeze - fitness",
+          "category": "Fitness",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/05/Soft-Breeze-7.jpg",
+          "source_url": "https://www.lancamentosportobelo.com.br/lancamentos/soft-breeze/",
+          "source_label": "Lancamentos Porto Belo"
+        },
+        {
+          "title": "Soft Breeze - playground",
+          "category": "Infantil",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/05/Soft-Breeze-5.jpg",
+          "source_url": "https://www.lancamentosportobelo.com.br/lancamentos/soft-breeze/",
+          "source_label": "Lancamentos Porto Belo"
+        },
+        {
+          "title": "Soft Breeze - torre e mar",
+          "category": "Fachada",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/05/Soft-Breeze-4.jpg",
+          "source_url": "https://www.lancamentosportobelo.com.br/lancamentos/soft-breeze/",
+          "source_label": "Lancamentos Porto Belo"
+        },
+        {
+          "title": "Soft Breeze - fachada vertical",
+          "category": "Fachada",
+          "image": "https://lancamentosemportobelo.com.br/wp-content/uploads/2025/05/Soft-Breeze-8-819x1024.jpg",
+          "source_url": "https://lancamentosemportobelo.com.br/lancamentos/soft-breeze/",
+          "source_label": "Lancamentos em Porto Belo"
+        },
+        {
+          "title": "Soft Breeze - torre residencial",
+          "category": "Fachada",
+          "image": "https://lancamentosemportobelo.com.br/wp-content/uploads/2025/05/Soft-Breeze-8-768x960.jpg",
+          "source_url": "https://lancamentosemportobelo.com.br/lancamentos/soft-breeze/",
+          "source_label": "Lancamentos em Porto Belo"
+        },
+        {
+          "title": "Soft Breeze - fachada lateral",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/costamare/img_edificios/g1_107_2830_1731_051125.webp",
+          "source_url": "https://costamareitapema.com.br/edificios/soft-breeze/porto-belo/pereque/107",
+          "source_label": "Costa Mare"
+        },
+        {
+          "title": "Soft Breeze - vista da torre",
+          "category": "Fachada",
+          "image": "https://static.orulo.com.br/images/properties/large/1318835.jpeg?1680282538",
+          "source_url": "https://modoimob.com.br/imovel/apartamento-a-venda-no-bairro-pereque-em-porto-belo-sc/O-41499-64524",
+          "source_label": "Modo Imob"
+        },
+        {
+          "title": "Soft Breeze - fachada com entorno",
+          "category": "Fachada",
+          "image": "https://static.orulo.com.br/images/properties/large/1318836.jpeg?1680282541",
+          "source_url": "https://modoimob.com.br/imovel/apartamento-a-venda-no-bairro-pereque-em-porto-belo-sc/O-41499-64524",
+          "source_label": "Modo Imob"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Pereque",
+          "description": "As fontes posicionam o Soft Breeze em Pereque, Porto Belo, uma regiao costeira em valorizacao."
+        },
+        {
+          "icon": "Building2",
+          "title": "Fachada contemporanea",
+          "description": "A galeria mostra a torre em diferentes angulos, com linguagem vertical e limpa."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Fitness",
+          "description": "O ambiente de academia aparece em fonte nominal do empreendimento."
+        },
+        {
+          "icon": "Baby",
+          "title": "Playground",
+          "description": "A area infantil reforca o uso familiar do condominio."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Midia filtrada",
+          "description": "Foram descartadas imagens de outros projetos e ambientes privativos."
+        },
+        {
+          "title": "Leitura de praia",
+          "description": "A galeria traz fachada e contexto de mar, sem exagerar dados inconsistentes."
+        },
+        {
+          "title": "Copy objetiva",
+          "description": "O texto concentra o valor em Porto Belo, lazer e apresentacao visual do empreendimento."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Soft Breeze?",
+          "answer": "Em Pereque, Porto Belo, conforme fontes comerciais consultadas."
+        },
+        {
+          "question": "Quais imagens entraram?",
+          "answer": "Fachada, torre, contexto de mar, fitness e playground."
+        },
+        {
+          "question": "Alguma imagem foi descartada?",
+          "answer": "Sim. Varandas e imagens que pareciam privativas foram evitadas."
+        },
+        {
+          "question": "Por que a descricao nao fixa prazo?",
+          "answer": "As fontes variam em alguns detalhes, entao a revisao priorizou informacoes consistentes sobre projeto e lazer."
+        }
+      ],
+      "sources": [
+        "https://myside.com.br/apartamento-venda-soft-breeze-porto-belo-sc",
+        "https://www.lancamentosportobelo.com.br/lancamentos/soft-breeze/",
+        "https://lancamentosemportobelo.com.br/lancamentos/soft-breeze/",
+        "https://costamareitapema.com.br/edificios/soft-breeze/porto-belo/pereque/107",
+        "https://modoimob.com.br/imovel/apartamento-a-venda-no-bairro-pereque-em-porto-belo-sc/O-41499-64524"
+      ]
+    },
+    {
+      "slug": "solar-di-capri-residence",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-solar-di-capri-balneario-camboriu-2-1.jpg",
+      "description": "O Solar di Capri Residence foi revisado com fontes de Balneario Camboriu que identificam o empreendimento na Rua 3100, Centro, e mostram fachada, hall, piscina, deck, eventos e fitness. A curadoria prioriza imagens do predio e das areas comuns, removendo a dependencia de fotos privativas. A nova descricao apresenta o condominio como uma opcao central com lazer bem resolvido, boa estrutura social e leitura visual coerente para quem compara predios prontos na cidade.",
+      "seo_description": "Solar di Capri Residence no Centro de Balneario Camboriu, com fachada, hall, piscina, deck, eventos e fitness.",
+      "gallery": [
+        {
+          "title": "Solar di Capri - fachada vertical",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-solar-di-capri-balneario-camboriu-2-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-solar-di-capri-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Solar di Capri - base da torre",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/modelo-site0006-1732804603.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-solar-di-capri-EM72863",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Solar di Capri - hall de entrada",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/modelo-site0001-1732802440.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-solar-di-capri-EM72863",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Solar di Capri - piscina externa",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/modelo-site0007-1732802438.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-solar-di-capri-EM72863",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Solar di Capri - deck da piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/modelo-site0005-1732802443.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-solar-di-capri-EM72863",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Solar di Capri - lazer aberto",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/modelo-site0005-1732804603.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-solar-di-capri-EM72863",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Solar di Capri - piscina com deck",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/modelo-site0008-1732804606.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-solar-di-capri-EM72863",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Solar di Capri - eventos",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/modelo-site0000-1732804604.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-solar-di-capri-EM72863",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Solar di Capri - apoio social",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/modelo-site0007-1732804605.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-solar-di-capri-EM72863",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Solar di Capri - fachada ao ceu",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-solar-di-capri-balneario-camboriu-3-1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-solar-di-capri-residence/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Solar di Capri - torre lateral",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/05/solar-di-capri-residence-bal-camboriu-sc-014.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/solar-di-capri-residence-balneario-camboriu/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Solar di Capri - piscina e lounge",
+          "category": "Piscina",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/05/solar-di-capri-residence-bal-camboriu-sc-022.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/solar-di-capri-residence-balneario-camboriu/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Solar di Capri - fitness",
+          "category": "Fitness",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/05/solar-di-capri-residence-bal-camboriu-sc-020.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/solar-di-capri-residence-balneario-camboriu/",
+          "source_label": "Invexo"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Rua 3100",
+          "description": "Fontes como MySide e Litoral Vertical associam o empreendimento ao Centro de Balneario Camboriu."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina e deck",
+          "description": "A galeria mostra piscina, deck molhado e areas abertas de descanso."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Fitness",
+          "description": "A academia foi mantida como item visual verificado do condominio."
+        },
+        {
+          "icon": "Users",
+          "title": "Eventos e convivencia",
+          "description": "Ambientes sociais aparecem nas fontes e ajudam a qualificar a rotina do predio."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fachada identificada",
+          "description": "A hero mostra a torre do Solar di Capri Residence."
+        },
+        {
+          "title": "Lazer completo",
+          "description": "Piscina, deck, eventos, hall e fitness compoem a narrativa visual."
+        },
+        {
+          "title": "Base de fontes ampla",
+          "description": "Imobille, Litoral Vertical, MySide e Invexo foram cruzadas na revisao."
+        }
+      ],
+      "faq": [
+        {
+          "question": "O que foi corrigido no Solar di Capri?",
+          "answer": "Hero, galeria e descricao passaram a representar o predio e suas areas comuns."
+        },
+        {
+          "question": "Quais recursos aparecem?",
+          "answer": "Fachada, hall, piscina, deck, eventos, apoio social e fitness."
+        },
+        {
+          "question": "Onde fica o empreendimento?",
+          "answer": "As fontes o posicionam no Centro de Balneario Camboriu, na regiao da Rua 3100."
+        },
+        {
+          "question": "As imagens internas foram mantidas?",
+          "answer": "Nao. A selecao evita ambientes privativos."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-solar-di-capri-EM72863",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-solar-di-capri-residence/",
+        "https://myside.com.br/apartamento-venda-solar-di-capri-residence-balneario-camboriu-sc",
+        "https://lancamento.invexo.com.br/sc/solar-di-capri-residence-balneario-camboriu/"
+      ]
+    },
+    {
+      "slug": "solar-di-mansani",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-solar-di-mansani-balneario-camboriu-2.jpg",
+      "description": "O Solar di Mansani foi revisado com uma abordagem conservadora, porque a midia publica confiavel do empreendimento e limitada. Litoral Vertical e Loft confirmam o edificio no Centro de Balneario Camboriu, na Rua 3100, com informacoes como torre residencial, elevadores e estrutura social. A galeria ficou concentrada em fachadas verificadas, evitando imagens de oferta e interiores. A copy agora explica o predio pelo endereco central, verticalidade e uso pratico de quem busca rotina urbana perto da praia.",
+      "seo_description": "Solar di Mansani no Centro de Balneario Camboriu, Rua 3100, com fachada revisada e copy focada no condominio.",
+      "gallery": [
+        {
+          "title": "Solar di Mansani - fachada principal",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-solar-di-mansani-balneario-camboriu-2.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-solar-di-mansani/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Solar di Mansani - torre central",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-solar-di-mansani-balneario-camboriu-1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-solar-di-mansani/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Solar di Mansani - fachada urbana",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-solar-di-mansani-balneario-camboriu-2.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-solar-di-mansani/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Solar di Mansani - torre no Centro",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-solar-di-mansani-balneario-camboriu-3.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-solar-di-mansani/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro de BC",
+          "description": "Litoral Vertical e Loft posicionam o Solar di Mansani na Rua 3100, regiao central de Balneario Camboriu."
+        },
+        {
+          "icon": "Building2",
+          "title": "Fachada validada",
+          "description": "A hero e a galeria usam somente imagens externas do predio."
+        },
+        {
+          "icon": "Elevator",
+          "title": "Circulacao vertical",
+          "description": "As fontes citam elevadores e organizacao de torre residencial."
+        },
+        {
+          "icon": "Users",
+          "title": "Estrutura social",
+          "description": "O material pesquisado cita ambiente para eventos, reforcando apoio de convivencia."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Galeria curta e segura",
+          "description": "A falta de midia publica ampla levou a uma selecao menor, mas sem imagens duvidosas."
+        },
+        {
+          "title": "Endereco confirmado",
+          "description": "A copy usa fontes de condominio para sustentar a Rua 3100."
+        },
+        {
+          "title": "Sem fotos privativas",
+          "description": "Imagens de oferta foram descartadas para manter foco no empreendimento."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Por que a galeria do Solar di Mansani e curta?",
+          "answer": "Porque havia poucas imagens publicas confiaveis de areas comuns; a selecao ficou so com fachadas."
+        },
+        {
+          "question": "Onde fica o predio?",
+          "answer": "Na Rua 3100, Centro de Balneario Camboriu, conforme Litoral Vertical e Loft."
+        },
+        {
+          "question": "O que a pagina comunica agora?",
+          "answer": "Fachada, endereco central, verticalidade e estrutura basica do condominio."
+        },
+        {
+          "question": "Imagens internas foram usadas?",
+          "answer": "Nao. A curadoria descartou fotos internas e manteve apenas imagens externas."
+        }
+      ],
+      "sources": [
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-solar-di-mansani/",
+        "https://loft.com.br/condominio/residencial-solar-di-mansani-centro-balneario-camboriu-sc/jw2cuq"
+      ]
+    },
+    {
+      "slug": "solar-do-tamarindo",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-solar-do-tamarindo-balneario-camboriu-0.2.jpg",
+      "description": "O Solar do Tamarindo foi revisado com fontes da ERS, Imobille, Litoral Vertical e Loft, que confirmam o Residencial Solar do Tamarindo no Centro de Balneario Camboriu. A galeria agora mostra fachada, torre, piscina e acesso identificado, evitando interiores de oferta. A descricao passa a explicar um predio pronto, com leitura tradicional de centro, lazer pontual e endereco urbano pratico para quem busca mobilidade, praia e servicos proximos.",
+      "seo_description": "Residencial Solar do Tamarindo no Centro de Balneario Camboriu, com fachada, piscina e acesso identificado.",
+      "gallery": [
+        {
+          "title": "Solar do Tamarindo - fachada principal",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-solar-do-tamarindo-balneario-camboriu-0.2.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-solar-do-tamarindo/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Solar do Tamarindo - piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/real-estates-photo/October2024/solar-tamarindo-40-1730208788.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-solar-do-tamarindo-EM53386",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Solar do Tamarindo - torre urbana",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-solar-do-tamarindo-balneario-camboriu-0.1.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-solar-do-tamarindo/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Solar do Tamarindo - fachada ao ceu",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-solar-do-tamarindo-balneario-camboriu-0.2.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-solar-do-tamarindo/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Solar do Tamarindo - fachada lateral",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-solar-do-tamarindo-balneario-camboriu-0.3.avif",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-solar-do-tamarindo/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Solar do Tamarindo - torre renderizada",
+          "category": "Fachada",
+          "image": "https://www.ersempreendimentos.com.br/index.php/img/width/0/0/wrap/larg/400/alt/600/sharpen/32/croptop/jpg-quality/75/file/empreendimentos/8/fachada.jpg",
+          "source_url": "https://www.ersempreendimentos.com.br/empreendimentos/titulo/residencial-solar-do-tamarindo/",
+          "source_label": "ERS Empreendimentos"
+        },
+        {
+          "title": "Solar do Tamarindo - acesso identificado",
+          "category": "Acesso",
+          "image": "https://www.ersempreendimentos.com.br/index.php/img/width/0/0/wrap/larg/1680/alt/1000/sharpen/32/jpg-quality/85/file/empreendimentos/8/052.JPG",
+          "source_url": "https://www.ersempreendimentos.com.br/empreendimentos/titulo/residencial-solar-do-tamarindo/",
+          "source_label": "ERS Empreendimentos"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro consolidado",
+          "description": "As fontes posicionam o empreendimento no Centro de Balneario Camboriu, perto de servicos e da praia."
+        },
+        {
+          "icon": "Building2",
+          "title": "Acesso identificado",
+          "description": "A galeria inclui a entrada com o nome do edificio, reforcando a confianca visual."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina",
+          "description": "Imobille mostra piscina entre as areas comuns do condominio."
+        },
+        {
+          "icon": "Landmark",
+          "title": "Predio tradicional",
+          "description": "A fachada curva e a torre pronta comunicam um endereco residencial ja estabelecido."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fonte oficial ERS",
+          "description": "A pagina da ERS foi usada para validar nome e imagens do empreendimento."
+        },
+        {
+          "title": "Galeria sem interiores",
+          "description": "Foram selecionados fachada, piscina e acesso, nao fotos privativas."
+        },
+        {
+          "title": "Endereco urbano",
+          "description": "A copy reforca a praticidade do Centro de Balneario Camboriu."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Qual nome foi usado?",
+          "answer": "Residencial Solar do Tamarindo, conforme fontes da ERS e paginas comerciais."
+        },
+        {
+          "question": "Quais imagens foram escolhidas?",
+          "answer": "Fachada, torre, piscina e acesso identificado do edificio."
+        },
+        {
+          "question": "O que mudou na descricao?",
+          "answer": "Ela passou a falar de predio pronto, localizacao central e lazer do condominio."
+        },
+        {
+          "question": "A hero foi corrigida?",
+          "answer": "Sim. A imagem principal mostra a fachada do Solar do Tamarindo."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-solar-do-tamarindo-EM53386",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-solar-do-tamarindo/",
+        "https://www.ersempreendimentos.com.br/empreendimentos/titulo/residencial-solar-do-tamarindo/",
+        "https://loft.com.br/condominio/condominio-edificio-residencial-comercial-solar-do-tamarindo-centro-balneario-camboriu-sc/2z6tb1"
+      ]
+    },
+    {
+      "slug": "solares-da-brava",
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-solares-da-brava-praia-brava-itajai-balneario-camboriu-1.jpg",
+      "description": "O Solares da Brava foi revisado com fontes que identificam o empreendimento da Construttore na Praia Brava, Itajai, incluindo Litoral Vertical, Imobille, MySide e Mazzotti. A galeria passa a mostrar fachadas diurnas e noturnas, piscina, lounge e gourmet, substituindo imagens internas ou materiais de projetos vizinhos. A copy agora destaca Avenida Carlos Drummond de Andrade, praia, lazer e perfil de predio pronto em um dos enderecos mais valorizados da Brava.",
+      "seo_description": "Solares da Brava na Praia Brava, Itajai, com fachada, piscina, lounge, gourmet e localizacao na Carlos Drummond de Andrade.",
+      "gallery": [
+        {
+          "title": "Solares da Brava - fachada frontal",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-solares-da-brava-praia-brava-itajai-balneario-camboriu-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/edificio-solares-da-brava/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Solares da Brava - base urbana",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-solares-da-brava-praia-brava-itajai-balneario-camboriu-4.avif",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/edificio-solares-da-brava/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Solares da Brava - fachada com entorno",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2021/08/edificio-solares-da-brava-praia-brava-itajai-balneario-camboriu-7.avif",
+          "source_url": "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/edificio-solares-da-brava/",
+          "source_label": "Litoral Vertical"
+        },
+        {
+          "title": "Solares da Brava - piscina externa",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/1702202616590320-1771358343.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-solares-da-brava-EM15889",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Solares da Brava - torre clara",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/fachada-1767119227.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-solares-da-brava-EM15889",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Solares da Brava - fachada e passeio",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/May2024/solares-da-brava-2-1715022359.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-solares-da-brava-EM15889",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Solares da Brava - fachada noturna",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/mazzotti/img_edificios/g1_1100_12077_1727_250522.jpg",
+          "source_url": "https://mazzottiimoveis.com/edificios/solares-da-brava/itajai/praia-brava/1100",
+          "source_label": "Mazzotti Imoveis"
+        },
+        {
+          "title": "Solares da Brava - piscina noturna",
+          "category": "Piscina",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/mazzotti/img_edificios/g1_1100_12078_1727_250522.jpg",
+          "source_url": "https://mazzottiimoveis.com/edificios/solares-da-brava/itajai/praia-brava/1100",
+          "source_label": "Mazzotti Imoveis"
+        },
+        {
+          "title": "Solares da Brava - lounge social",
+          "category": "Convivencia",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/mazzotti/img_edificios/g1_1100_12080_1727_250522.jpg",
+          "source_url": "https://mazzottiimoveis.com/edificios/solares-da-brava/itajai/praia-brava/1100",
+          "source_label": "Mazzotti Imoveis"
+        },
+        {
+          "title": "Solares da Brava - ambiente gourmet",
+          "category": "Gourmet",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/mazzotti/img_edificios/g1_1100_12081_1727_250522.jpg",
+          "source_url": "https://mazzottiimoveis.com/edificios/solares-da-brava/itajai/praia-brava/1100",
+          "source_label": "Mazzotti Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Praia Brava",
+          "description": "As fontes posicionam o Solares da Brava na Praia Brava, Itajai, em eixo valorizado da regiao."
+        },
+        {
+          "icon": "Building2",
+          "title": "Construttore",
+          "description": "A pagina de projetos da Construttore lista o Solares da Brava entre seus empreendimentos."
+        },
+        {
+          "icon": "Waves",
+          "title": "Piscina",
+          "description": "A galeria mostra piscina externa em imagens verificadas."
+        },
+        {
+          "icon": "Utensils",
+          "title": "Gourmet e lounge",
+          "description": "Ambientes sociais complementam a leitura de lazer e convivencia."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Homonimos filtrados",
+          "description": "Imagens de outros projetos da pagina da construtora foram descartadas."
+        },
+        {
+          "title": "Fachada variada",
+          "description": "A selecao inclui angulos diurnos e noturnos da torre."
+        },
+        {
+          "title": "Lazer identificado",
+          "description": "Piscina, lounge e gourmet ajudam a explicar o condominio alem da fachada."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Solares da Brava?",
+          "answer": "Na Praia Brava, Itajai, com fontes indicando a Avenida Carlos Drummond de Andrade."
+        },
+        {
+          "question": "Quais imagens entraram?",
+          "answer": "Fachadas, piscina, lounge e ambiente gourmet."
+        },
+        {
+          "question": "Alguma fonte foi descartada?",
+          "answer": "Sim. A busca trouxe outros projetos da construtora, e a selecao manteve apenas imagens ligadas ao Solares."
+        },
+        {
+          "question": "O que a nova descricao reforca?",
+          "answer": "Localizacao na Brava, predio pronto, lazer e identidade visual do empreendimento."
+        }
+      ],
+      "sources": [
+        "https://construttore.com.br/cidade/itajai/",
+        "https://litoralvertical.com/venda/itajai/apartamentos/praia-brava/edificio-solares-da-brava/",
+        "https://myside.com.br/apartamento-venda-solares-da-brava-itajai-sc",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-solares-da-brava-EM15889",
+        "https://mazzottiimoveis.com/edificios/solares-da-brava/itajai/praia-brava/1100"
+      ]
+    },
+    {
+      "slug": "sonata-residence",
+      "hero_image": "https://lgdellagnelo.com.br/wp-content/uploads/2022/05/slide2-sonata-residencial.jpg",
+      "description": "O Sonata Residence foi revisado com a fonte oficial da LG Dellagnelo, que apresenta o Residencial Sonata, e com paginas comerciais que confirmam o cadastro em Itapema, Centro/Canto da Praia, frente mar. A galeria ficou restrita a imagens oficiais e nominais de fachada e lazer externo, evitando fotos internas de oferta. A descricao agora comunica o empreendimento como predio costeiro, com torre contemporanea, vista de praia e apoio de lazer para uma rotina central em Itapema.",
+      "seo_description": "Sonata Residence em Itapema, Centro/Canto da Praia, com fachada, lazer externo e perfil frente mar.",
+      "gallery": [
+        {
+          "title": "Sonata Residence - fachada noturna",
+          "category": "Fachada",
+          "image": "https://lgdellagnelo.com.br/wp-content/uploads/2022/05/slide2-sonata-residencial.jpg",
+          "source_url": "https://lgdellagnelo.com.br/residencial-sonata/",
+          "source_label": "LG Dellagnelo"
+        },
+        {
+          "title": "Sonata Residence - torre diurna",
+          "category": "Fachada",
+          "image": "https://lgdellagnelo.com.br/wp-content/uploads/2022/05/slide-sonata-residencial.jpg",
+          "source_url": "https://lgdellagnelo.com.br/residencial-sonata/",
+          "source_label": "LG Dellagnelo"
+        },
+        {
+          "title": "Sonata Residence - lazer externo",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/050620251511591143-1749147119.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sonata-EM16500",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Sonata Residence - fachada azul",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/foto-destaque-535x596px-1749147119.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-sonata-EM16500",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Waves",
+          "title": "Frente mar",
+          "description": "Julio Lobo e outras fontes comerciais descrevem o Sonata Residence em Itapema como frente mar."
+        },
+        {
+          "icon": "Building2",
+          "title": "LG Dellagnelo",
+          "description": "A pagina oficial da LG Dellagnelo apresenta o Residencial Sonata e suas imagens de fachada."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Centro de Itapema",
+          "description": "Golden Itapema identifica o Sonata Residence no Centro/Canto da Praia, na Rua 115 B."
+        },
+        {
+          "icon": "Sun",
+          "title": "Lazer externo",
+          "description": "A imagem nominal da Imobille mostra area externa com piscina e descanso."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Fonte oficial priorizada",
+          "description": "As imagens principais vieram da LG Dellagnelo e de pagina nominal da Imobille."
+        },
+        {
+          "title": "Endereco cruzado",
+          "description": "Golden Itapema foi usado para confirmar o cadastro por nome e localizacao."
+        },
+        {
+          "title": "Galeria sem oferta interna",
+          "description": "Fotos de ambientes privativos encontradas em anuncios foram descartadas."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Qual Sonata foi considerado?",
+          "answer": "O Sonata Residence/Residencial Sonata em Itapema, associado a LG Dellagnelo e fontes comerciais locais."
+        },
+        {
+          "question": "Onde fica o empreendimento?",
+          "answer": "As fontes indicam Itapema, Centro/Canto da Praia, com referencia a Rua 115 B."
+        },
+        {
+          "question": "Quais imagens entraram?",
+          "answer": "Fachadas oficiais e uma imagem nominal de lazer externo."
+        },
+        {
+          "question": "Por que a galeria e enxuta?",
+          "answer": "Porque a auditoria evitou usar fotos internas de oferta e imagens sem confirmacao do predio."
+        }
+      ],
+      "sources": [
+        "https://lgdellagnelo.com.br/residencial-sonata/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-sonata-EM16500",
+        "https://www.julioloboimoveis.com/imovel/venda-apartamentos-03-dormitorio-em-itapema/sonata-residence/5329",
+        "https://www.goldenitapema.com.br/edificios/"
+      ]
+    }
+  ],
+  "skipped": []
+}

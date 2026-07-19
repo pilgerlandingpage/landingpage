@@ -1,0 +1,2860 @@
+{
+  "generated_at": "2026-07-16T18:54:01.149Z",
+  "filters": {
+    "status": "published",
+    "slugs": [
+      "marena-residence",
+      "marina-beach-towers",
+      "marina-residence",
+      "mario-quintana-residence",
+      "mendelssohn",
+      "meridian-tower",
+      "milano-exclusive-residence",
+      "milano-residence",
+      "monaco-residence",
+      "montreal"
+    ]
+  },
+  "totals": {
+    "landing_pages_analyzed": 10,
+    "development_pages": 10,
+    "P0": 10,
+    "P1": 0,
+    "P2": 0,
+    "OK": 0,
+    "hero_matches_unit_image": 10,
+    "gallery_matches_unit_image": 10,
+    "unit_label_gallery": 10,
+    "generic_description": 10,
+    "generic_benefits": 10,
+    "missing_development_copy": 10
+  },
+  "samples": {
+    "P0": [
+      {
+        "id": "046ac8fb-497d-42c7-b1ca-0e4f85c9c193",
+        "slug": "marena-residence",
+        "title": "Marena Residence em Balneário Camboriú | Empreendimento Guilherme Pilger",
+        "status": "published",
+        "development_name": "Marena Residence",
+        "source_condominium_name": "Marena Residence",
+        "city": "Balneário Camboriú",
+        "location_name": "Centro, Balneário Camboriú - SC",
+        "unit_count": 1,
+        "active_gallery_source": "content.custom_gallery",
+        "active_gallery_count": 8,
+        "active_gallery_unit_matches": 8,
+        "active_gallery_unit_match_ratio": 1,
+        "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/562/001-img_4775-16625578713424.jpg",
+        "hero_matches_unit_image": true,
+        "hero_matched_unit": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+        "unit_label_gallery": true,
+        "custom_gallery_count": 8,
+        "development_gallery_count": 8,
+        "unit_image_count": 8,
+        "generic_description": true,
+        "generic_benefits": true,
+        "missing_development_copy": true,
+        "thin_description": true,
+        "missing_benefits": false,
+        "missing_differentials": false,
+        "missing_faq": false,
+        "description_excerpt": "O Marena Residence reune 1 imovel ativo em Centro, Balneário Camboriú - SC, com apartamento, faixa de valor R$ 5.750.000, metragens de 178m2 e configuracao de 4 suites.",
+        "benefit_excerpt": "Unidades reunidas As opcoes ativas do Marena Residence ficam centralizadas para comparacao rapida. Leitura de localizacao Contexto de Centro, Balneário Camboriú - SC para...",
+        "faq_excerpt": "",
+        "search_queries": [
+          "\"Marena Residence\" empreendimento Balneário Camboriú",
+          "\"Marena Residence\" condominio Balneário Camboriú",
+          "\"Marena Residence\" construtora incorporadora",
+          "\"Marena Residence\" \"Centro, Balneário Camboriú - SC\""
+        ],
+        "image_matches": [
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/562/001-img_4775-16625578713424.jpg",
+            "title": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "8c5f08a1-9160-4b21-b1b3-6314f1360ebb",
+              "562",
+              "futuro-lancamento-hide-da-embraed-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/562/002-img_4774-16625578713408.jpg",
+            "title": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "8c5f08a1-9160-4b21-b1b3-6314f1360ebb",
+              "562",
+              "futuro-lancamento-hide-da-embraed-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/562/003-img_4802-16625578713826.jpg",
+            "title": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "8c5f08a1-9160-4b21-b1b3-6314f1360ebb",
+              "562",
+              "futuro-lancamento-hide-da-embraed-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/562/004-img_4801-16625578713813.jpg",
+            "title": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "8c5f08a1-9160-4b21-b1b3-6314f1360ebb",
+              "562",
+              "futuro-lancamento-hide-da-embraed-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/562/005-img_4790-16625578713632.jpg",
+            "title": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "8c5f08a1-9160-4b21-b1b3-6314f1360ebb",
+              "562",
+              "futuro-lancamento-hide-da-embraed-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/562/006-img_4795-16625578713707.jpg",
+            "title": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "8c5f08a1-9160-4b21-b1b3-6314f1360ebb",
+              "562",
+              "futuro-lancamento-hide-da-embraed-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/562/007-img_4794-16625578713695.jpg",
+            "title": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "8c5f08a1-9160-4b21-b1b3-6314f1360ebb",
+              "562",
+              "futuro-lancamento-hide-da-embraed-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/562/008-img_4780-1662557871351.jpg",
+            "title": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "8c5f08a1-9160-4b21-b1b3-6314f1360ebb",
+              "562",
+              "futuro-lancamento-hide-da-embraed-em-balneario-camboriu"
+            ]
+          }
+        ],
+        "aliases": [
+          "Marena Residence"
+        ],
+        "metadata": {
+          "version": "",
+          "generated_by": "generate-development-landing-pages",
+          "source_column": "condominium_name"
+        },
+        "created_at": "2026-07-06T16:00:19.593648+00:00",
+        "updated_at": "2026-07-06T16:06:23.177+00:00",
+        "priority": "P0",
+        "recommended_action": "Substituir hero e galeria por midia real do empreendimento antes de promover a pagina.",
+        "needs_web_research": true
+      },
+      {
+        "id": "02a111e3-fb22-4278-b9e1-11487a455ed4",
+        "slug": "marina-beach-towers",
+        "title": "Marina Beach Towers em Balneário Camboriú | Empreendimento Guilherme Pilger",
+        "status": "published",
+        "development_name": "Marina Beach Towers",
+        "source_condominium_name": "Marina Beach Towers",
+        "city": "Balneário Camboriú",
+        "location_name": "Barra Sul, Balneário Camboriú - SC",
+        "unit_count": 1,
+        "active_gallery_source": "content.custom_gallery",
+        "active_gallery_count": 8,
+        "active_gallery_unit_matches": 8,
+        "active_gallery_unit_match_ratio": 1,
+        "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/73/001-s1-17448175974593.webp",
+        "hero_matches_unit_image": true,
+        "hero_matched_unit": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+        "unit_label_gallery": true,
+        "custom_gallery_count": 8,
+        "development_gallery_count": 8,
+        "unit_image_count": 8,
+        "generic_description": true,
+        "generic_benefits": true,
+        "missing_development_copy": true,
+        "thin_description": true,
+        "missing_benefits": false,
+        "missing_differentials": false,
+        "missing_faq": false,
+        "description_excerpt": "O Marina Beach Towers reune 1 imovel ativo em Barra Sul, Balneário Camboriú - SC, com apartamento, faixa de valor R$ 6.200.000, metragens de 187m2 e configuracao de 3 suites.",
+        "benefit_excerpt": "Unidades reunidas As opcoes ativas do Marina Beach Towers ficam centralizadas para comparacao rapida. Leitura de localizacao Contexto de Barra Sul, Balneário Camboriú - SC para...",
+        "faq_excerpt": "",
+        "search_queries": [
+          "\"Marina Beach Towers\" empreendimento Balneário Camboriú",
+          "\"Marina Beach Towers\" condominio Balneário Camboriú",
+          "\"Marina Beach Towers\" construtora incorporadora",
+          "\"Marina Beach Towers\" \"Barra Sul, Balneário Camboriú - SC\""
+        ],
+        "image_matches": [
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/73/001-s1-17448175974593.webp",
+            "title": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "e098bb0e-7181-4368-a734-a0f83a81a7af",
+              "73",
+              "apartamento-no-ed-marina-beach-towers-na-barra-sul-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/73/002-s2-17448175974595.webp",
+            "title": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "e098bb0e-7181-4368-a734-a0f83a81a7af",
+              "73",
+              "apartamento-no-ed-marina-beach-towers-na-barra-sul-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/73/003-s3-17448175974595.webp",
+            "title": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "e098bb0e-7181-4368-a734-a0f83a81a7af",
+              "73",
+              "apartamento-no-ed-marina-beach-towers-na-barra-sul-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/73/004-s4-17448175974595.webp",
+            "title": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "e098bb0e-7181-4368-a734-a0f83a81a7af",
+              "73",
+              "apartamento-no-ed-marina-beach-towers-na-barra-sul-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/73/005-s5-17448175974595.webp",
+            "title": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "e098bb0e-7181-4368-a734-a0f83a81a7af",
+              "73",
+              "apartamento-no-ed-marina-beach-towers-na-barra-sul-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/73/006-s6-17448175974595.webp",
+            "title": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "e098bb0e-7181-4368-a734-a0f83a81a7af",
+              "73",
+              "apartamento-no-ed-marina-beach-towers-na-barra-sul-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/73/007-s7-17448175974595.webp",
+            "title": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "e098bb0e-7181-4368-a734-a0f83a81a7af",
+              "73",
+              "apartamento-no-ed-marina-beach-towers-na-barra-sul-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/73/008-s8-17448175974595.webp",
+            "title": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "e098bb0e-7181-4368-a734-a0f83a81a7af",
+              "73",
+              "apartamento-no-ed-marina-beach-towers-na-barra-sul-em-balneario-camboriu"
+            ]
+          }
+        ],
+        "aliases": [
+          "Marina Beach Towers"
+        ],
+        "metadata": {
+          "version": "",
+          "generated_by": "generate-development-landing-pages",
+          "source_column": "condominium_name"
+        },
+        "created_at": "2026-07-06T16:00:19.593648+00:00",
+        "updated_at": "2026-07-06T16:06:23.177+00:00",
+        "priority": "P0",
+        "recommended_action": "Substituir hero e galeria por midia real do empreendimento antes de promover a pagina.",
+        "needs_web_research": true
+      },
+      {
+        "id": "73e90762-a1f5-4331-b6cd-64e543ede152",
+        "slug": "marina-residence",
+        "title": "Marina Residence em Balneário Camboriú | Empreendimento Guilherme Pilger",
+        "status": "published",
+        "development_name": "Marina Residence",
+        "source_condominium_name": "Marina Residence",
+        "city": "Balneário Camboriú",
+        "location_name": "Barra Sul, Balneário Camboriú - SC",
+        "unit_count": 1,
+        "active_gallery_source": "content.custom_gallery",
+        "active_gallery_count": 8,
+        "active_gallery_unit_matches": 8,
+        "active_gallery_unit_match_ratio": 1,
+        "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1228/001-whatsapp-image-2024-06-19-at-153554-3-17188230136018.jpeg",
+        "hero_matches_unit_image": true,
+        "hero_matched_unit": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+        "unit_label_gallery": true,
+        "custom_gallery_count": 8,
+        "development_gallery_count": 8,
+        "unit_image_count": 8,
+        "generic_description": true,
+        "generic_benefits": true,
+        "missing_development_copy": true,
+        "thin_description": true,
+        "missing_benefits": false,
+        "missing_differentials": false,
+        "missing_faq": false,
+        "description_excerpt": "O Marina Residence reune 1 imovel ativo em Barra Sul, Balneário Camboriú - SC, com cobertura, faixa de valor R$ 10.000.000, metragens de 380m2 e configuracao de 3 suites.",
+        "benefit_excerpt": "Unidades reunidas As opcoes ativas do Marina Residence ficam centralizadas para comparacao rapida. Leitura de localizacao Contexto de Barra Sul, Balneário Camboriú - SC para...",
+        "faq_excerpt": "",
+        "search_queries": [
+          "\"Marina Residence\" empreendimento Balneário Camboriú",
+          "\"Marina Residence\" condominio Balneário Camboriú",
+          "\"Marina Residence\" construtora incorporadora",
+          "\"Marina Residence\" \"Barra Sul, Balneário Camboriú - SC\""
+        ],
+        "image_matches": [
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1228/001-whatsapp-image-2024-06-19-at-153554-3-17188230136018.jpeg",
+            "title": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+            "category": "Cobertura",
+            "matched_unit": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "487e5f0a-4ea6-4f14-9d3d-a3ddd6ffcae2",
+              "1228",
+              "apartamento-no-ed-marina-residence-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1228/002-whatsapp-image-2024-06-19-at-153555-2-17188230135964.jpeg",
+            "title": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+            "category": "Cobertura",
+            "matched_unit": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "487e5f0a-4ea6-4f14-9d3d-a3ddd6ffcae2",
+              "1228",
+              "apartamento-no-ed-marina-residence-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1228/003-whatsapp-image-2024-06-19-at-153553-17188230136102.jpeg",
+            "title": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+            "category": "Cobertura",
+            "matched_unit": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "487e5f0a-4ea6-4f14-9d3d-a3ddd6ffcae2",
+              "1228",
+              "apartamento-no-ed-marina-residence-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1228/004-whatsapp-image-2024-06-19-at-153552-2-1718823013613.jpeg",
+            "title": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+            "category": "Cobertura",
+            "matched_unit": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "487e5f0a-4ea6-4f14-9d3d-a3ddd6ffcae2",
+              "1228",
+              "apartamento-no-ed-marina-residence-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1228/005-whatsapp-image-2024-06-19-at-153552-17188230136141.jpeg",
+            "title": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+            "category": "Cobertura",
+            "matched_unit": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "487e5f0a-4ea6-4f14-9d3d-a3ddd6ffcae2",
+              "1228",
+              "apartamento-no-ed-marina-residence-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1228/006-whatsapp-image-2024-06-19-at-153555-17188230135988.jpeg",
+            "title": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+            "category": "Cobertura",
+            "matched_unit": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "487e5f0a-4ea6-4f14-9d3d-a3ddd6ffcae2",
+              "1228",
+              "apartamento-no-ed-marina-residence-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1228/007-whatsapp-image-2024-06-19-at-153555-1-17188230135976.jpeg",
+            "title": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+            "category": "Cobertura",
+            "matched_unit": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "487e5f0a-4ea6-4f14-9d3d-a3ddd6ffcae2",
+              "1228",
+              "apartamento-no-ed-marina-residence-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1228/008-whatsapp-image-2024-06-19-at-153555-3-17188230135953.jpeg",
+            "title": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+            "category": "Cobertura",
+            "matched_unit": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "487e5f0a-4ea6-4f14-9d3d-a3ddd6ffcae2",
+              "1228",
+              "apartamento-no-ed-marina-residence-em-balneario-camboriu"
+            ]
+          }
+        ],
+        "aliases": [
+          "Marina Residence"
+        ],
+        "metadata": {
+          "version": "",
+          "generated_by": "generate-development-landing-pages",
+          "source_column": "condominium_name"
+        },
+        "created_at": "2026-07-06T16:00:19.593648+00:00",
+        "updated_at": "2026-07-06T16:06:23.177+00:00",
+        "priority": "P0",
+        "recommended_action": "Substituir hero e galeria por midia real do empreendimento antes de promover a pagina.",
+        "needs_web_research": true
+      },
+      {
+        "id": "25ea2fa0-b40c-43df-880a-1d780e8c8ecf",
+        "slug": "mario-quintana-residence",
+        "title": "Mario Quintana Residence em Balneário Camboriú | Empreendimento Guilherme Pilger",
+        "status": "published",
+        "development_name": "Mario Quintana Residence",
+        "source_condominium_name": "Mario Quintana Residence",
+        "city": "Balneário Camboriú",
+        "location_name": "Centro, Balneário Camboriú - SC",
+        "unit_count": 1,
+        "active_gallery_source": "content.custom_gallery",
+        "active_gallery_count": 8,
+        "active_gallery_unit_matches": 8,
+        "active_gallery_unit_match_ratio": 1,
+        "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1630/001-s1-17470677159627.webp",
+        "hero_matches_unit_image": true,
+        "hero_matched_unit": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+        "unit_label_gallery": true,
+        "custom_gallery_count": 8,
+        "development_gallery_count": 8,
+        "unit_image_count": 8,
+        "generic_description": true,
+        "generic_benefits": true,
+        "missing_development_copy": true,
+        "thin_description": true,
+        "missing_benefits": false,
+        "missing_differentials": false,
+        "missing_faq": false,
+        "description_excerpt": "O Mario Quintana Residence reune 1 imovel ativo em Centro, Balneário Camboriú - SC, com apartamento, faixa de valor R$ 5.500.000, metragens de 308m2 e configuracao de 2 suites.",
+        "benefit_excerpt": "Unidades reunidas As opcoes ativas do Mario Quintana Residence ficam centralizadas para comparacao rapida. Leitura de localizacao Contexto de Centro, Balneário Camboriú - SC...",
+        "faq_excerpt": "",
+        "search_queries": [
+          "\"Mario Quintana Residence\" empreendimento Balneário Camboriú",
+          "\"Mario Quintana Residence\" condominio Balneário Camboriú",
+          "\"Mario Quintana Residence\" construtora incorporadora",
+          "\"Mario Quintana Residence\" \"Centro, Balneário Camboriú - SC\""
+        ],
+        "image_matches": [
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1630/001-s1-17470677159627.webp",
+            "title": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+            "matched_unit_identifiers": [
+              "088c237f-7898-4b1b-a700-5b168218476e",
+              "1630",
+              "apartamento-no-edificio-maria-quintana-residence-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1630/002-s2-17470677159627.webp",
+            "title": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+            "matched_unit_identifiers": [
+              "088c237f-7898-4b1b-a700-5b168218476e",
+              "1630",
+              "apartamento-no-edificio-maria-quintana-residence-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1630/003-s3-17470677159627.webp",
+            "title": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+            "matched_unit_identifiers": [
+              "088c237f-7898-4b1b-a700-5b168218476e",
+              "1630",
+              "apartamento-no-edificio-maria-quintana-residence-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1630/004-s4-17470677159627.webp",
+            "title": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+            "matched_unit_identifiers": [
+              "088c237f-7898-4b1b-a700-5b168218476e",
+              "1630",
+              "apartamento-no-edificio-maria-quintana-residence-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1630/005-s5-17470677159627.webp",
+            "title": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+            "matched_unit_identifiers": [
+              "088c237f-7898-4b1b-a700-5b168218476e",
+              "1630",
+              "apartamento-no-edificio-maria-quintana-residence-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1630/006-s6-17470677159627.webp",
+            "title": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+            "matched_unit_identifiers": [
+              "088c237f-7898-4b1b-a700-5b168218476e",
+              "1630",
+              "apartamento-no-edificio-maria-quintana-residence-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1630/007-s7-17470677159628.webp",
+            "title": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+            "matched_unit_identifiers": [
+              "088c237f-7898-4b1b-a700-5b168218476e",
+              "1630",
+              "apartamento-no-edificio-maria-quintana-residence-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1630/008-s8-17470677159628.webp",
+            "title": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+            "matched_unit_identifiers": [
+              "088c237f-7898-4b1b-a700-5b168218476e",
+              "1630",
+              "apartamento-no-edificio-maria-quintana-residence-em-balneario-camboriu"
+            ]
+          }
+        ],
+        "aliases": [
+          "Mario Quintana Residence"
+        ],
+        "metadata": {
+          "version": "",
+          "generated_by": "generate-development-landing-pages",
+          "source_column": "condominium_name"
+        },
+        "created_at": "2026-07-06T16:00:19.593648+00:00",
+        "updated_at": "2026-07-06T16:06:23.177+00:00",
+        "priority": "P0",
+        "recommended_action": "Substituir hero e galeria por midia real do empreendimento antes de promover a pagina.",
+        "needs_web_research": true
+      },
+      {
+        "id": "6ca6716d-ae43-4f88-b2bc-22def1702bf5",
+        "slug": "mendelssohn",
+        "title": "Mendelssohn em Balneário Camboriú | Empreendimento Guilherme Pilger",
+        "status": "published",
+        "development_name": "Mendelssohn",
+        "source_condominium_name": "Mendelssohn",
+        "city": "Balneário Camboriú",
+        "location_name": "Barra Sul, Balneário Camboriú - SC",
+        "unit_count": 1,
+        "active_gallery_source": "content.custom_gallery",
+        "active_gallery_count": 8,
+        "active_gallery_unit_matches": 8,
+        "active_gallery_unit_match_ratio": 1,
+        "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1552/001-a1-17448120298538.webp",
+        "hero_matches_unit_image": true,
+        "hero_matched_unit": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+        "unit_label_gallery": true,
+        "custom_gallery_count": 8,
+        "development_gallery_count": 8,
+        "unit_image_count": 8,
+        "generic_description": true,
+        "generic_benefits": true,
+        "missing_development_copy": true,
+        "thin_description": true,
+        "missing_benefits": false,
+        "missing_differentials": false,
+        "missing_faq": false,
+        "description_excerpt": "O Mendelssohn reune 1 imovel ativo em Barra Sul, Balneário Camboriú - SC, com apartamento, faixa de valor R$ 3.570.000, metragens de 160m2 e configuracao de 3 suites.",
+        "benefit_excerpt": "Unidades reunidas As opcoes ativas do Mendelssohn ficam centralizadas para comparacao rapida. Leitura de localizacao Contexto de Barra Sul, Balneário Camboriú - SC para avaliar...",
+        "faq_excerpt": "",
+        "search_queries": [
+          "\"Mendelssohn\" empreendimento Balneário Camboriú",
+          "\"Mendelssohn\" condominio Balneário Camboriú",
+          "\"Mendelssohn\" construtora incorporadora",
+          "\"Mendelssohn\" \"Barra Sul, Balneário Camboriú - SC\""
+        ],
+        "image_matches": [
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1552/001-a1-17448120298538.webp",
+            "title": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "1dc916ab-4dbf-412a-935c-cd42cfeeb70f",
+              "1552",
+              "apartamento-no-ed-mendelssohn"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1552/002-a2-17448120298539.webp",
+            "title": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "1dc916ab-4dbf-412a-935c-cd42cfeeb70f",
+              "1552",
+              "apartamento-no-ed-mendelssohn"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1552/003-a4-1744812029854.webp",
+            "title": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "1dc916ab-4dbf-412a-935c-cd42cfeeb70f",
+              "1552",
+              "apartamento-no-ed-mendelssohn"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1552/004-a5-1744812029854.webp",
+            "title": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "1dc916ab-4dbf-412a-935c-cd42cfeeb70f",
+              "1552",
+              "apartamento-no-ed-mendelssohn"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1552/005-a6-1744812029854.webp",
+            "title": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "1dc916ab-4dbf-412a-935c-cd42cfeeb70f",
+              "1552",
+              "apartamento-no-ed-mendelssohn"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1552/006-a7-1744812029854.webp",
+            "title": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "1dc916ab-4dbf-412a-935c-cd42cfeeb70f",
+              "1552",
+              "apartamento-no-ed-mendelssohn"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1552/007-a8-1744812029854.webp",
+            "title": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "1dc916ab-4dbf-412a-935c-cd42cfeeb70f",
+              "1552",
+              "apartamento-no-ed-mendelssohn"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1552/008-a9-1744812029854.webp",
+            "title": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "1dc916ab-4dbf-412a-935c-cd42cfeeb70f",
+              "1552",
+              "apartamento-no-ed-mendelssohn"
+            ]
+          }
+        ],
+        "aliases": [
+          "Mendelssohn"
+        ],
+        "metadata": {
+          "version": "",
+          "generated_by": "generate-development-landing-pages",
+          "source_column": "condominium_name"
+        },
+        "created_at": "2026-07-06T16:00:19.593648+00:00",
+        "updated_at": "2026-07-06T16:06:23.177+00:00",
+        "priority": "P0",
+        "recommended_action": "Substituir hero e galeria por midia real do empreendimento antes de promover a pagina.",
+        "needs_web_research": true
+      },
+      {
+        "id": "49766cf0-789c-4446-b01e-122ab0313075",
+        "slug": "meridian-tower",
+        "title": "Meridian Tower em Balneário Camboriú | Empreendimento Guilherme Pilger",
+        "status": "published",
+        "development_name": "Meridian Tower",
+        "source_condominium_name": "Meridian Tower",
+        "city": "Balneário Camboriú",
+        "location_name": "Centro, Balneário Camboriú - SC",
+        "unit_count": 1,
+        "active_gallery_source": "content.custom_gallery",
+        "active_gallery_count": 8,
+        "active_gallery_unit_matches": 8,
+        "active_gallery_unit_match_ratio": 1,
+        "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/638/001-02_rv_meridian_fachada_esquina_r03-16588420182123.jpg",
+        "hero_matches_unit_image": true,
+        "hero_matched_unit": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+        "unit_label_gallery": true,
+        "custom_gallery_count": 8,
+        "development_gallery_count": 8,
+        "unit_image_count": 8,
+        "generic_description": true,
+        "generic_benefits": true,
+        "missing_development_copy": true,
+        "thin_description": true,
+        "missing_benefits": false,
+        "missing_differentials": false,
+        "missing_faq": false,
+        "description_excerpt": "O Meridian Tower reune 1 imovel ativo em Centro, Balneário Camboriú - SC, com apartamento, faixa de valor R$ 3.961.714, metragens de 181m2 e configuracao de 4 suites.",
+        "benefit_excerpt": "Unidades reunidas As opcoes ativas do Meridian Tower ficam centralizadas para comparacao rapida. Leitura de localizacao Contexto de Centro, Balneário Camboriú - SC para avaliar...",
+        "faq_excerpt": "",
+        "search_queries": [
+          "\"Meridian Tower\" empreendimento Balneário Camboriú",
+          "\"Meridian Tower\" condominio Balneário Camboriú",
+          "\"Meridian Tower\" construtora incorporadora",
+          "\"Meridian Tower\" \"Centro, Balneário Camboriú - SC\""
+        ],
+        "image_matches": [
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/638/001-02_rv_meridian_fachada_esquina_r03-16588420182123.jpg",
+            "title": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "0d56d6dd-3270-4aa1-ad9d-27e5854e5843",
+              "638",
+              "apartamento-no-ed-meridian-tower-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/638/002-04_rv_meridian_fachada_bird_eye-1-16588420182036.jpg",
+            "title": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "0d56d6dd-3270-4aa1-ad9d-27e5854e5843",
+              "638",
+              "apartamento-no-ed-meridian-tower-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/638/003-35_rv_meridian_fachada_embasamento_piscina_r03-1-1658842018200.jpg",
+            "title": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "0d56d6dd-3270-4aa1-ad9d-27e5854e5843",
+              "638",
+              "apartamento-no-ed-meridian-tower-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/638/004-05_rv_meridian_fachada_paineis_r03-1-16588420182055.jpg",
+            "title": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "0d56d6dd-3270-4aa1-ad9d-27e5854e5843",
+              "638",
+              "apartamento-no-ed-meridian-tower-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/638/005-05_rv_meridian_fachada_paineis_r03-16588420182075.jpg",
+            "title": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "0d56d6dd-3270-4aa1-ad9d-27e5854e5843",
+              "638",
+              "apartamento-no-ed-meridian-tower-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/638/006-39_rv_meridian_pb_tipo_r03-16588438799322.jpg",
+            "title": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "0d56d6dd-3270-4aa1-ad9d-27e5854e5843",
+              "638",
+              "apartamento-no-ed-meridian-tower-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/638/007-w1-17435227689828.webp",
+            "title": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "0d56d6dd-3270-4aa1-ad9d-27e5854e5843",
+              "638",
+              "apartamento-no-ed-meridian-tower-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/638/008-w2-17435227689829.webp",
+            "title": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "0d56d6dd-3270-4aa1-ad9d-27e5854e5843",
+              "638",
+              "apartamento-no-ed-meridian-tower-em-balneario-camboriu"
+            ]
+          }
+        ],
+        "aliases": [
+          "Meridian Tower"
+        ],
+        "metadata": {
+          "version": "",
+          "generated_by": "generate-development-landing-pages",
+          "source_column": "condominium_name"
+        },
+        "created_at": "2026-07-06T16:00:19.593648+00:00",
+        "updated_at": "2026-07-06T16:06:23.177+00:00",
+        "priority": "P0",
+        "recommended_action": "Substituir hero e galeria por midia real do empreendimento antes de promover a pagina.",
+        "needs_web_research": true
+      },
+      {
+        "id": "2a4973a5-667d-43a0-8319-3f090f207a79",
+        "slug": "milano-exclusive-residence",
+        "title": "Milano Exclusive Residence em Itapema | Empreendimento Guilherme Pilger",
+        "status": "published",
+        "development_name": "Milano Exclusive Residence",
+        "source_condominium_name": "Milano Exclusive Residence",
+        "city": "Itapema",
+        "location_name": "Canto da Praia, Itapema - SC",
+        "unit_count": 1,
+        "active_gallery_source": "content.custom_gallery",
+        "active_gallery_count": 8,
+        "active_gallery_unit_matches": 8,
+        "active_gallery_unit_match_ratio": 1,
+        "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/833/001-02-1-16787352699983.jpeg",
+        "hero_matches_unit_image": true,
+        "hero_matched_unit": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+        "unit_label_gallery": true,
+        "custom_gallery_count": 8,
+        "development_gallery_count": 8,
+        "unit_image_count": 8,
+        "generic_description": true,
+        "generic_benefits": true,
+        "missing_development_copy": true,
+        "thin_description": true,
+        "missing_benefits": false,
+        "missing_differentials": false,
+        "missing_faq": false,
+        "description_excerpt": "O Milano Exclusive Residence reune 1 imovel ativo em Canto da Praia, Itapema - SC, com apartamento, faixa de valor R$ 7.000.000, metragens de 168m2 e configuracao de 4 suites.",
+        "benefit_excerpt": "Unidades reunidas As opcoes ativas do Milano Exclusive Residence ficam centralizadas para comparacao rapida. Leitura de localizacao Contexto de Canto da Praia, Itapema - SC...",
+        "faq_excerpt": "",
+        "search_queries": [
+          "\"Milano Exclusive Residence\" empreendimento Itapema",
+          "\"Milano Exclusive Residence\" condominio Itapema",
+          "\"Milano Exclusive Residence\" construtora incorporadora",
+          "\"Milano Exclusive Residence\" \"Canto da Praia, Itapema - SC\""
+        ],
+        "image_matches": [
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/833/001-02-1-16787352699983.jpeg",
+            "title": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+            "matched_unit_identifiers": [
+              "e62ecd62-7318-43da-ae52-ce54081cbf82",
+              "833",
+              "apartamento-no-ed-milano-exclusive-residence-em-itapema"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/833/002-02-16787352699971.jpeg",
+            "title": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+            "matched_unit_identifiers": [
+              "e62ecd62-7318-43da-ae52-ce54081cbf82",
+              "833",
+              "apartamento-no-ed-milano-exclusive-residence-em-itapema"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/833/003-00-16787352699943.jpeg",
+            "title": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+            "matched_unit_identifiers": [
+              "e62ecd62-7318-43da-ae52-ce54081cbf82",
+              "833",
+              "apartamento-no-ed-milano-exclusive-residence-em-itapema"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/833/004-01-16787352699958.jpeg",
+            "title": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+            "matched_unit_identifiers": [
+              "e62ecd62-7318-43da-ae52-ce54081cbf82",
+              "833",
+              "apartamento-no-ed-milano-exclusive-residence-em-itapema"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/833/005-03-16787352699991.jpeg",
+            "title": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+            "matched_unit_identifiers": [
+              "e62ecd62-7318-43da-ae52-ce54081cbf82",
+              "833",
+              "apartamento-no-ed-milano-exclusive-residence-em-itapema"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/833/006-04-1678735270001.jpeg",
+            "title": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+            "matched_unit_identifiers": [
+              "e62ecd62-7318-43da-ae52-ce54081cbf82",
+              "833",
+              "apartamento-no-ed-milano-exclusive-residence-em-itapema"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/833/007-05-16787352700018.jpeg",
+            "title": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+            "matched_unit_identifiers": [
+              "e62ecd62-7318-43da-ae52-ce54081cbf82",
+              "833",
+              "apartamento-no-ed-milano-exclusive-residence-em-itapema"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/833/008-05-1-16787352700024.jpeg",
+            "title": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+            "matched_unit_identifiers": [
+              "e62ecd62-7318-43da-ae52-ce54081cbf82",
+              "833",
+              "apartamento-no-ed-milano-exclusive-residence-em-itapema"
+            ]
+          }
+        ],
+        "aliases": [
+          "Milano Exclusive Residence"
+        ],
+        "metadata": {
+          "version": "",
+          "generated_by": "generate-development-landing-pages",
+          "source_column": "condominium_name"
+        },
+        "created_at": "2026-07-06T16:00:19.593648+00:00",
+        "updated_at": "2026-07-06T16:06:23.177+00:00",
+        "priority": "P0",
+        "recommended_action": "Substituir hero e galeria por midia real do empreendimento antes de promover a pagina.",
+        "needs_web_research": true
+      },
+      {
+        "id": "19b25095-02b0-4fad-a020-7851171919f1",
+        "slug": "milano-residence",
+        "title": "Milano Residence em Itapema | Empreendimento Guilherme Pilger",
+        "status": "published",
+        "development_name": "Milano Residence",
+        "source_condominium_name": "Milano Residence",
+        "city": "Itapema",
+        "location_name": "Meia Praia, Itapema - SC",
+        "unit_count": 1,
+        "active_gallery_source": "content.custom_gallery",
+        "active_gallery_count": 8,
+        "active_gallery_unit_matches": 8,
+        "active_gallery_unit_match_ratio": 1,
+        "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2249/001-unnamed-17675661223366.jpg",
+        "hero_matches_unit_image": true,
+        "hero_matched_unit": "Apartamento no Ed. Milano Residence em Itapema",
+        "unit_label_gallery": true,
+        "custom_gallery_count": 8,
+        "development_gallery_count": 8,
+        "unit_image_count": 8,
+        "generic_description": true,
+        "generic_benefits": true,
+        "missing_development_copy": true,
+        "thin_description": true,
+        "missing_benefits": false,
+        "missing_differentials": false,
+        "missing_faq": false,
+        "description_excerpt": "O Milano Residence reune 1 imovel ativo em Meia Praia, Itapema - SC, com apartamento, faixa de valor R$ 4.200.000, metragens de 198m2 e configuracao de 4 suites.",
+        "benefit_excerpt": "Unidades reunidas As opcoes ativas do Milano Residence ficam centralizadas para comparacao rapida. Leitura de localizacao Contexto de Meia Praia, Itapema - SC para avaliar...",
+        "faq_excerpt": "",
+        "search_queries": [
+          "\"Milano Residence\" empreendimento Itapema",
+          "\"Milano Residence\" condominio Itapema",
+          "\"Milano Residence\" construtora incorporadora",
+          "\"Milano Residence\" \"Meia Praia, Itapema - SC\""
+        ],
+        "image_matches": [
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2249/001-unnamed-17675661223366.jpg",
+            "title": "Apartamento no Ed. Milano Residence em Itapema",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Milano Residence em Itapema",
+            "matched_unit_identifiers": [
+              "4826d065-f989-4c19-bb21-fee9c6440df5",
+              "2249",
+              "apartamento-no-ed-milano-residence-em-itapema"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2249/002-whatsapp-image-2026-01-04-at-191545-17675659152919.jpeg",
+            "title": "Apartamento no Ed. Milano Residence em Itapema",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Milano Residence em Itapema",
+            "matched_unit_identifiers": [
+              "4826d065-f989-4c19-bb21-fee9c6440df5",
+              "2249",
+              "apartamento-no-ed-milano-residence-em-itapema"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2249/003-whatsapp-image-2026-01-04-at-192324-1767565915292.jpeg",
+            "title": "Apartamento no Ed. Milano Residence em Itapema",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Milano Residence em Itapema",
+            "matched_unit_identifiers": [
+              "4826d065-f989-4c19-bb21-fee9c6440df5",
+              "2249",
+              "apartamento-no-ed-milano-residence-em-itapema"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2249/004-whatsapp-image-2026-01-04-at-191557-1767565915292.jpeg",
+            "title": "Apartamento no Ed. Milano Residence em Itapema",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Milano Residence em Itapema",
+            "matched_unit_identifiers": [
+              "4826d065-f989-4c19-bb21-fee9c6440df5",
+              "2249",
+              "apartamento-no-ed-milano-residence-em-itapema"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2249/005-whatsapp-image-2026-01-04-at-191505-17675659152919.jpeg",
+            "title": "Apartamento no Ed. Milano Residence em Itapema",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Milano Residence em Itapema",
+            "matched_unit_identifiers": [
+              "4826d065-f989-4c19-bb21-fee9c6440df5",
+              "2249",
+              "apartamento-no-ed-milano-residence-em-itapema"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2249/006-whatsapp-image-2026-01-04-at-192325-17675659152921.jpeg",
+            "title": "Apartamento no Ed. Milano Residence em Itapema",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Milano Residence em Itapema",
+            "matched_unit_identifiers": [
+              "4826d065-f989-4c19-bb21-fee9c6440df5",
+              "2249",
+              "apartamento-no-ed-milano-residence-em-itapema"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2249/007-whatsapp-image-2026-01-04-at-191510-17675659152919.jpeg",
+            "title": "Apartamento no Ed. Milano Residence em Itapema",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Milano Residence em Itapema",
+            "matched_unit_identifiers": [
+              "4826d065-f989-4c19-bb21-fee9c6440df5",
+              "2249",
+              "apartamento-no-ed-milano-residence-em-itapema"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2249/008-whatsapp-image-2026-01-04-at-191416-17675659152917.jpeg",
+            "title": "Apartamento no Ed. Milano Residence em Itapema",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Milano Residence em Itapema",
+            "matched_unit_identifiers": [
+              "4826d065-f989-4c19-bb21-fee9c6440df5",
+              "2249",
+              "apartamento-no-ed-milano-residence-em-itapema"
+            ]
+          }
+        ],
+        "aliases": [
+          "Milano Residence"
+        ],
+        "metadata": {
+          "version": "",
+          "generated_by": "generate-development-landing-pages",
+          "source_column": "condominium_name"
+        },
+        "created_at": "2026-07-06T16:00:19.593648+00:00",
+        "updated_at": "2026-07-06T16:06:23.177+00:00",
+        "priority": "P0",
+        "recommended_action": "Substituir hero e galeria por midia real do empreendimento antes de promover a pagina.",
+        "needs_web_research": true
+      },
+      {
+        "id": "d77f4060-2847-4f9a-bbb1-0c1f4b892ab6",
+        "slug": "monaco-residence",
+        "title": "Mônaco Residence em Itapema | Empreendimento Guilherme Pilger",
+        "status": "published",
+        "development_name": "Mônaco Residence",
+        "source_condominium_name": "Mônaco Residence",
+        "city": "Itapema",
+        "location_name": "Meia Praia, Itapema - SC",
+        "unit_count": 1,
+        "active_gallery_source": "content.custom_gallery",
+        "active_gallery_count": 8,
+        "active_gallery_unit_matches": 8,
+        "active_gallery_unit_match_ratio": 1,
+        "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2535/001-cobertura-duplex-monaco-49-17788525546306.jpg",
+        "hero_matches_unit_image": true,
+        "hero_matched_unit": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+        "unit_label_gallery": true,
+        "custom_gallery_count": 8,
+        "development_gallery_count": 8,
+        "unit_image_count": 8,
+        "generic_description": true,
+        "generic_benefits": true,
+        "missing_development_copy": true,
+        "thin_description": true,
+        "missing_benefits": false,
+        "missing_differentials": false,
+        "missing_faq": false,
+        "description_excerpt": "O Mônaco Residence reune 1 imovel ativo em Meia Praia, Itapema - SC, com cobertura, faixa de valor R$ 6.500.000, metragens de 331m2 e configuracao de 5 suites.",
+        "benefit_excerpt": "Unidades reunidas As opcoes ativas do Mônaco Residence ficam centralizadas para comparacao rapida. Leitura de localizacao Contexto de Meia Praia, Itapema - SC para avaliar...",
+        "faq_excerpt": "",
+        "search_queries": [
+          "\"Mônaco Residence\" empreendimento Itapema",
+          "\"Mônaco Residence\" condominio Itapema",
+          "\"Mônaco Residence\" construtora incorporadora",
+          "\"Mônaco Residence\" \"Meia Praia, Itapema - SC\""
+        ],
+        "image_matches": [
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2535/001-cobertura-duplex-monaco-49-17788525546306.jpg",
+            "title": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+            "category": "Cobertura",
+            "matched_unit": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+            "matched_unit_identifiers": [
+              "7a17c339-d93d-4b67-903c-effb305d3654",
+              "2535",
+              "cobertura-duplex-no-ed-monaco-residence-em-meia-praia-itapema"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2535/002-cobertura-duplex-monaco-39-17788525546307.jpg",
+            "title": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+            "category": "Cobertura",
+            "matched_unit": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+            "matched_unit_identifiers": [
+              "7a17c339-d93d-4b67-903c-effb305d3654",
+              "2535",
+              "cobertura-duplex-no-ed-monaco-residence-em-meia-praia-itapema"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2535/003-cobertura-duplex-monaco-8-1778852554631.jpg",
+            "title": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+            "category": "Cobertura",
+            "matched_unit": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+            "matched_unit_identifiers": [
+              "7a17c339-d93d-4b67-903c-effb305d3654",
+              "2535",
+              "cobertura-duplex-no-ed-monaco-residence-em-meia-praia-itapema"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2535/004-cobertura-duplex-monaco-19-1778852554631.jpg",
+            "title": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+            "category": "Cobertura",
+            "matched_unit": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+            "matched_unit_identifiers": [
+              "7a17c339-d93d-4b67-903c-effb305d3654",
+              "2535",
+              "cobertura-duplex-no-ed-monaco-residence-em-meia-praia-itapema"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2535/005-cobertura-duplex-monaco-32-17788525546309.jpg",
+            "title": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+            "category": "Cobertura",
+            "matched_unit": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+            "matched_unit_identifiers": [
+              "7a17c339-d93d-4b67-903c-effb305d3654",
+              "2535",
+              "cobertura-duplex-no-ed-monaco-residence-em-meia-praia-itapema"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2535/006-cobertura-duplex-monaco-36-17788525546308.jpg",
+            "title": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+            "category": "Cobertura",
+            "matched_unit": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+            "matched_unit_identifiers": [
+              "7a17c339-d93d-4b67-903c-effb305d3654",
+              "2535",
+              "cobertura-duplex-no-ed-monaco-residence-em-meia-praia-itapema"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2535/007-cobertura-duplex-monaco-30-17788525546309.jpg",
+            "title": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+            "category": "Cobertura",
+            "matched_unit": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+            "matched_unit_identifiers": [
+              "7a17c339-d93d-4b67-903c-effb305d3654",
+              "2535",
+              "cobertura-duplex-no-ed-monaco-residence-em-meia-praia-itapema"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2535/008-cobertura-duplex-monaco-28-1778852554631.jpg",
+            "title": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+            "category": "Cobertura",
+            "matched_unit": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+            "matched_unit_identifiers": [
+              "7a17c339-d93d-4b67-903c-effb305d3654",
+              "2535",
+              "cobertura-duplex-no-ed-monaco-residence-em-meia-praia-itapema"
+            ]
+          }
+        ],
+        "aliases": [
+          "Mônaco Residence"
+        ],
+        "metadata": {
+          "version": "",
+          "generated_by": "generate-development-landing-pages",
+          "source_column": "condominium_name"
+        },
+        "created_at": "2026-07-06T16:00:19.593648+00:00",
+        "updated_at": "2026-07-06T16:06:23.177+00:00",
+        "priority": "P0",
+        "recommended_action": "Substituir hero e galeria por midia real do empreendimento antes de promover a pagina.",
+        "needs_web_research": true
+      },
+      {
+        "id": "12ddc12a-452c-4f6d-953d-76eea19592b8",
+        "slug": "montreal",
+        "title": "Montreal em Balneário Camboriú | Empreendimento Guilherme Pilger",
+        "status": "published",
+        "development_name": "Montreal",
+        "source_condominium_name": "Montreal",
+        "city": "Balneário Camboriú",
+        "location_name": "Centro, Balneário Camboriú - SC",
+        "unit_count": 1,
+        "active_gallery_source": "content.custom_gallery",
+        "active_gallery_count": 8,
+        "active_gallery_unit_matches": 8,
+        "active_gallery_unit_match_ratio": 1,
+        "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1010/001-whatsapp-image-2023-10-11-at-104630-1-16970328935558.jpeg",
+        "hero_matches_unit_image": true,
+        "hero_matched_unit": "Apartamento no Ed. Montreal em Balneário Camboriú",
+        "unit_label_gallery": true,
+        "custom_gallery_count": 8,
+        "development_gallery_count": 8,
+        "unit_image_count": 8,
+        "generic_description": true,
+        "generic_benefits": true,
+        "missing_development_copy": true,
+        "thin_description": true,
+        "missing_benefits": false,
+        "missing_differentials": false,
+        "missing_faq": false,
+        "description_excerpt": "O Montreal reune 1 imovel ativo em Centro, Balneário Camboriú - SC, com apartamento, faixa de valor R$ 6.500.000, metragens de 200m2 e configuracao de 3 suites.",
+        "benefit_excerpt": "Unidades reunidas As opcoes ativas do Montreal ficam centralizadas para comparacao rapida. Leitura de localizacao Contexto de Centro, Balneário Camboriú - SC para avaliar...",
+        "faq_excerpt": "",
+        "search_queries": [
+          "\"Montreal\" empreendimento Balneário Camboriú",
+          "\"Montreal\" condominio Balneário Camboriú",
+          "\"Montreal\" construtora incorporadora",
+          "\"Montreal\" \"Centro, Balneário Camboriú - SC\""
+        ],
+        "image_matches": [
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1010/001-whatsapp-image-2023-10-11-at-104630-1-16970328935558.jpeg",
+            "title": "Apartamento no Ed. Montreal em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Montreal em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "a26a1d27-2752-47d9-b6d7-e00f98ead9bc",
+              "1010",
+              "apartamento-no-ed-montreal-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1010/002-whatsapp-image-2023-10-11-at-104630-16970328935569.jpeg",
+            "title": "Apartamento no Ed. Montreal em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Montreal em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "a26a1d27-2752-47d9-b6d7-e00f98ead9bc",
+              "1010",
+              "apartamento-no-ed-montreal-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1010/003-whatsapp-image-2023-10-11-at-104632-16970328935441.jpeg",
+            "title": "Apartamento no Ed. Montreal em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Montreal em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "a26a1d27-2752-47d9-b6d7-e00f98ead9bc",
+              "1010",
+              "apartamento-no-ed-montreal-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1010/004-whatsapp-image-2023-10-11-at-104631-3-16970328935454.jpeg",
+            "title": "Apartamento no Ed. Montreal em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Montreal em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "a26a1d27-2752-47d9-b6d7-e00f98ead9bc",
+              "1010",
+              "apartamento-no-ed-montreal-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1010/005-whatsapp-image-2023-10-11-at-104631-2-16970328935472.jpeg",
+            "title": "Apartamento no Ed. Montreal em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Montreal em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "a26a1d27-2752-47d9-b6d7-e00f98ead9bc",
+              "1010",
+              "apartamento-no-ed-montreal-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1010/006-whatsapp-image-2023-10-11-at-104632-1-16970328935424.jpeg",
+            "title": "Apartamento no Ed. Montreal em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Montreal em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "a26a1d27-2752-47d9-b6d7-e00f98ead9bc",
+              "1010",
+              "apartamento-no-ed-montreal-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1010/007-whatsapp-image-2023-10-11-at-104631-16970328935546.jpeg",
+            "title": "Apartamento no Ed. Montreal em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Montreal em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "a26a1d27-2752-47d9-b6d7-e00f98ead9bc",
+              "1010",
+              "apartamento-no-ed-montreal-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1010/008-whatsapp-image-2023-10-11-at-104638-16970328935615.jpeg",
+            "title": "Apartamento no Ed. Montreal em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Montreal em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "a26a1d27-2752-47d9-b6d7-e00f98ead9bc",
+              "1010",
+              "apartamento-no-ed-montreal-em-balneario-camboriu"
+            ]
+          }
+        ],
+        "aliases": [
+          "Montreal"
+        ],
+        "metadata": {
+          "version": "",
+          "generated_by": "generate-development-landing-pages",
+          "source_column": "condominium_name"
+        },
+        "created_at": "2026-07-06T16:00:19.593648+00:00",
+        "updated_at": "2026-07-06T16:06:23.177+00:00",
+        "priority": "P0",
+        "recommended_action": "Substituir hero e galeria por midia real do empreendimento antes de promover a pagina.",
+        "needs_web_research": true
+      }
+    ],
+    "P1": [],
+    "P2": []
+  },
+  "issues": [
+    {
+      "id": "046ac8fb-497d-42c7-b1ca-0e4f85c9c193",
+      "slug": "marena-residence",
+      "title": "Marena Residence em Balneário Camboriú | Empreendimento Guilherme Pilger",
+      "status": "published",
+      "development_name": "Marena Residence",
+      "source_condominium_name": "Marena Residence",
+      "city": "Balneário Camboriú",
+      "location_name": "Centro, Balneário Camboriú - SC",
+      "unit_count": 1,
+      "active_gallery_source": "content.custom_gallery",
+      "active_gallery_count": 8,
+      "active_gallery_unit_matches": 8,
+      "active_gallery_unit_match_ratio": 1,
+      "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/562/001-img_4775-16625578713424.jpg",
+      "hero_matches_unit_image": true,
+      "hero_matched_unit": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+      "unit_label_gallery": true,
+      "custom_gallery_count": 8,
+      "development_gallery_count": 8,
+      "unit_image_count": 8,
+      "generic_description": true,
+      "generic_benefits": true,
+      "missing_development_copy": true,
+      "thin_description": true,
+      "missing_benefits": false,
+      "missing_differentials": false,
+      "missing_faq": false,
+      "description_excerpt": "O Marena Residence reune 1 imovel ativo em Centro, Balneário Camboriú - SC, com apartamento, faixa de valor R$ 5.750.000, metragens de 178m2 e configuracao de 4 suites.",
+      "benefit_excerpt": "Unidades reunidas As opcoes ativas do Marena Residence ficam centralizadas para comparacao rapida. Leitura de localizacao Contexto de Centro, Balneário Camboriú - SC para...",
+      "faq_excerpt": "",
+      "search_queries": [
+        "\"Marena Residence\" empreendimento Balneário Camboriú",
+        "\"Marena Residence\" condominio Balneário Camboriú",
+        "\"Marena Residence\" construtora incorporadora",
+        "\"Marena Residence\" \"Centro, Balneário Camboriú - SC\""
+      ],
+      "image_matches": [
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/562/001-img_4775-16625578713424.jpg",
+          "title": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "8c5f08a1-9160-4b21-b1b3-6314f1360ebb",
+            "562",
+            "futuro-lancamento-hide-da-embraed-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/562/002-img_4774-16625578713408.jpg",
+          "title": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "8c5f08a1-9160-4b21-b1b3-6314f1360ebb",
+            "562",
+            "futuro-lancamento-hide-da-embraed-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/562/003-img_4802-16625578713826.jpg",
+          "title": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "8c5f08a1-9160-4b21-b1b3-6314f1360ebb",
+            "562",
+            "futuro-lancamento-hide-da-embraed-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/562/004-img_4801-16625578713813.jpg",
+          "title": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "8c5f08a1-9160-4b21-b1b3-6314f1360ebb",
+            "562",
+            "futuro-lancamento-hide-da-embraed-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/562/005-img_4790-16625578713632.jpg",
+          "title": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "8c5f08a1-9160-4b21-b1b3-6314f1360ebb",
+            "562",
+            "futuro-lancamento-hide-da-embraed-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/562/006-img_4795-16625578713707.jpg",
+          "title": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "8c5f08a1-9160-4b21-b1b3-6314f1360ebb",
+            "562",
+            "futuro-lancamento-hide-da-embraed-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/562/007-img_4794-16625578713695.jpg",
+          "title": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "8c5f08a1-9160-4b21-b1b3-6314f1360ebb",
+            "562",
+            "futuro-lancamento-hide-da-embraed-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/562/008-img_4780-1662557871351.jpg",
+          "title": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Marena da Embraed em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "8c5f08a1-9160-4b21-b1b3-6314f1360ebb",
+            "562",
+            "futuro-lancamento-hide-da-embraed-em-balneario-camboriu"
+          ]
+        }
+      ],
+      "aliases": [
+        "Marena Residence"
+      ],
+      "metadata": {
+        "version": "",
+        "generated_by": "generate-development-landing-pages",
+        "source_column": "condominium_name"
+      },
+      "created_at": "2026-07-06T16:00:19.593648+00:00",
+      "updated_at": "2026-07-06T16:06:23.177+00:00",
+      "priority": "P0",
+      "recommended_action": "Substituir hero e galeria por midia real do empreendimento antes de promover a pagina.",
+      "needs_web_research": true
+    },
+    {
+      "id": "02a111e3-fb22-4278-b9e1-11487a455ed4",
+      "slug": "marina-beach-towers",
+      "title": "Marina Beach Towers em Balneário Camboriú | Empreendimento Guilherme Pilger",
+      "status": "published",
+      "development_name": "Marina Beach Towers",
+      "source_condominium_name": "Marina Beach Towers",
+      "city": "Balneário Camboriú",
+      "location_name": "Barra Sul, Balneário Camboriú - SC",
+      "unit_count": 1,
+      "active_gallery_source": "content.custom_gallery",
+      "active_gallery_count": 8,
+      "active_gallery_unit_matches": 8,
+      "active_gallery_unit_match_ratio": 1,
+      "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/73/001-s1-17448175974593.webp",
+      "hero_matches_unit_image": true,
+      "hero_matched_unit": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+      "unit_label_gallery": true,
+      "custom_gallery_count": 8,
+      "development_gallery_count": 8,
+      "unit_image_count": 8,
+      "generic_description": true,
+      "generic_benefits": true,
+      "missing_development_copy": true,
+      "thin_description": true,
+      "missing_benefits": false,
+      "missing_differentials": false,
+      "missing_faq": false,
+      "description_excerpt": "O Marina Beach Towers reune 1 imovel ativo em Barra Sul, Balneário Camboriú - SC, com apartamento, faixa de valor R$ 6.200.000, metragens de 187m2 e configuracao de 3 suites.",
+      "benefit_excerpt": "Unidades reunidas As opcoes ativas do Marina Beach Towers ficam centralizadas para comparacao rapida. Leitura de localizacao Contexto de Barra Sul, Balneário Camboriú - SC para...",
+      "faq_excerpt": "",
+      "search_queries": [
+        "\"Marina Beach Towers\" empreendimento Balneário Camboriú",
+        "\"Marina Beach Towers\" condominio Balneário Camboriú",
+        "\"Marina Beach Towers\" construtora incorporadora",
+        "\"Marina Beach Towers\" \"Barra Sul, Balneário Camboriú - SC\""
+      ],
+      "image_matches": [
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/73/001-s1-17448175974593.webp",
+          "title": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "e098bb0e-7181-4368-a734-a0f83a81a7af",
+            "73",
+            "apartamento-no-ed-marina-beach-towers-na-barra-sul-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/73/002-s2-17448175974595.webp",
+          "title": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "e098bb0e-7181-4368-a734-a0f83a81a7af",
+            "73",
+            "apartamento-no-ed-marina-beach-towers-na-barra-sul-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/73/003-s3-17448175974595.webp",
+          "title": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "e098bb0e-7181-4368-a734-a0f83a81a7af",
+            "73",
+            "apartamento-no-ed-marina-beach-towers-na-barra-sul-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/73/004-s4-17448175974595.webp",
+          "title": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "e098bb0e-7181-4368-a734-a0f83a81a7af",
+            "73",
+            "apartamento-no-ed-marina-beach-towers-na-barra-sul-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/73/005-s5-17448175974595.webp",
+          "title": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "e098bb0e-7181-4368-a734-a0f83a81a7af",
+            "73",
+            "apartamento-no-ed-marina-beach-towers-na-barra-sul-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/73/006-s6-17448175974595.webp",
+          "title": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "e098bb0e-7181-4368-a734-a0f83a81a7af",
+            "73",
+            "apartamento-no-ed-marina-beach-towers-na-barra-sul-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/73/007-s7-17448175974595.webp",
+          "title": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "e098bb0e-7181-4368-a734-a0f83a81a7af",
+            "73",
+            "apartamento-no-ed-marina-beach-towers-na-barra-sul-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/73/008-s8-17448175974595.webp",
+          "title": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Marina Beach Towers na Barra Sul em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "e098bb0e-7181-4368-a734-a0f83a81a7af",
+            "73",
+            "apartamento-no-ed-marina-beach-towers-na-barra-sul-em-balneario-camboriu"
+          ]
+        }
+      ],
+      "aliases": [
+        "Marina Beach Towers"
+      ],
+      "metadata": {
+        "version": "",
+        "generated_by": "generate-development-landing-pages",
+        "source_column": "condominium_name"
+      },
+      "created_at": "2026-07-06T16:00:19.593648+00:00",
+      "updated_at": "2026-07-06T16:06:23.177+00:00",
+      "priority": "P0",
+      "recommended_action": "Substituir hero e galeria por midia real do empreendimento antes de promover a pagina.",
+      "needs_web_research": true
+    },
+    {
+      "id": "73e90762-a1f5-4331-b6cd-64e543ede152",
+      "slug": "marina-residence",
+      "title": "Marina Residence em Balneário Camboriú | Empreendimento Guilherme Pilger",
+      "status": "published",
+      "development_name": "Marina Residence",
+      "source_condominium_name": "Marina Residence",
+      "city": "Balneário Camboriú",
+      "location_name": "Barra Sul, Balneário Camboriú - SC",
+      "unit_count": 1,
+      "active_gallery_source": "content.custom_gallery",
+      "active_gallery_count": 8,
+      "active_gallery_unit_matches": 8,
+      "active_gallery_unit_match_ratio": 1,
+      "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1228/001-whatsapp-image-2024-06-19-at-153554-3-17188230136018.jpeg",
+      "hero_matches_unit_image": true,
+      "hero_matched_unit": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+      "unit_label_gallery": true,
+      "custom_gallery_count": 8,
+      "development_gallery_count": 8,
+      "unit_image_count": 8,
+      "generic_description": true,
+      "generic_benefits": true,
+      "missing_development_copy": true,
+      "thin_description": true,
+      "missing_benefits": false,
+      "missing_differentials": false,
+      "missing_faq": false,
+      "description_excerpt": "O Marina Residence reune 1 imovel ativo em Barra Sul, Balneário Camboriú - SC, com cobertura, faixa de valor R$ 10.000.000, metragens de 380m2 e configuracao de 3 suites.",
+      "benefit_excerpt": "Unidades reunidas As opcoes ativas do Marina Residence ficam centralizadas para comparacao rapida. Leitura de localizacao Contexto de Barra Sul, Balneário Camboriú - SC para...",
+      "faq_excerpt": "",
+      "search_queries": [
+        "\"Marina Residence\" empreendimento Balneário Camboriú",
+        "\"Marina Residence\" condominio Balneário Camboriú",
+        "\"Marina Residence\" construtora incorporadora",
+        "\"Marina Residence\" \"Barra Sul, Balneário Camboriú - SC\""
+      ],
+      "image_matches": [
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1228/001-whatsapp-image-2024-06-19-at-153554-3-17188230136018.jpeg",
+          "title": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+          "category": "Cobertura",
+          "matched_unit": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "487e5f0a-4ea6-4f14-9d3d-a3ddd6ffcae2",
+            "1228",
+            "apartamento-no-ed-marina-residence-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1228/002-whatsapp-image-2024-06-19-at-153555-2-17188230135964.jpeg",
+          "title": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+          "category": "Cobertura",
+          "matched_unit": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "487e5f0a-4ea6-4f14-9d3d-a3ddd6ffcae2",
+            "1228",
+            "apartamento-no-ed-marina-residence-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1228/003-whatsapp-image-2024-06-19-at-153553-17188230136102.jpeg",
+          "title": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+          "category": "Cobertura",
+          "matched_unit": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "487e5f0a-4ea6-4f14-9d3d-a3ddd6ffcae2",
+            "1228",
+            "apartamento-no-ed-marina-residence-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1228/004-whatsapp-image-2024-06-19-at-153552-2-1718823013613.jpeg",
+          "title": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+          "category": "Cobertura",
+          "matched_unit": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "487e5f0a-4ea6-4f14-9d3d-a3ddd6ffcae2",
+            "1228",
+            "apartamento-no-ed-marina-residence-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1228/005-whatsapp-image-2024-06-19-at-153552-17188230136141.jpeg",
+          "title": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+          "category": "Cobertura",
+          "matched_unit": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "487e5f0a-4ea6-4f14-9d3d-a3ddd6ffcae2",
+            "1228",
+            "apartamento-no-ed-marina-residence-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1228/006-whatsapp-image-2024-06-19-at-153555-17188230135988.jpeg",
+          "title": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+          "category": "Cobertura",
+          "matched_unit": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "487e5f0a-4ea6-4f14-9d3d-a3ddd6ffcae2",
+            "1228",
+            "apartamento-no-ed-marina-residence-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1228/007-whatsapp-image-2024-06-19-at-153555-1-17188230135976.jpeg",
+          "title": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+          "category": "Cobertura",
+          "matched_unit": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "487e5f0a-4ea6-4f14-9d3d-a3ddd6ffcae2",
+            "1228",
+            "apartamento-no-ed-marina-residence-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1228/008-whatsapp-image-2024-06-19-at-153555-3-17188230135953.jpeg",
+          "title": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+          "category": "Cobertura",
+          "matched_unit": "Cobertura no Ed. Marina Residence em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "487e5f0a-4ea6-4f14-9d3d-a3ddd6ffcae2",
+            "1228",
+            "apartamento-no-ed-marina-residence-em-balneario-camboriu"
+          ]
+        }
+      ],
+      "aliases": [
+        "Marina Residence"
+      ],
+      "metadata": {
+        "version": "",
+        "generated_by": "generate-development-landing-pages",
+        "source_column": "condominium_name"
+      },
+      "created_at": "2026-07-06T16:00:19.593648+00:00",
+      "updated_at": "2026-07-06T16:06:23.177+00:00",
+      "priority": "P0",
+      "recommended_action": "Substituir hero e galeria por midia real do empreendimento antes de promover a pagina.",
+      "needs_web_research": true
+    },
+    {
+      "id": "25ea2fa0-b40c-43df-880a-1d780e8c8ecf",
+      "slug": "mario-quintana-residence",
+      "title": "Mario Quintana Residence em Balneário Camboriú | Empreendimento Guilherme Pilger",
+      "status": "published",
+      "development_name": "Mario Quintana Residence",
+      "source_condominium_name": "Mario Quintana Residence",
+      "city": "Balneário Camboriú",
+      "location_name": "Centro, Balneário Camboriú - SC",
+      "unit_count": 1,
+      "active_gallery_source": "content.custom_gallery",
+      "active_gallery_count": 8,
+      "active_gallery_unit_matches": 8,
+      "active_gallery_unit_match_ratio": 1,
+      "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1630/001-s1-17470677159627.webp",
+      "hero_matches_unit_image": true,
+      "hero_matched_unit": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+      "unit_label_gallery": true,
+      "custom_gallery_count": 8,
+      "development_gallery_count": 8,
+      "unit_image_count": 8,
+      "generic_description": true,
+      "generic_benefits": true,
+      "missing_development_copy": true,
+      "thin_description": true,
+      "missing_benefits": false,
+      "missing_differentials": false,
+      "missing_faq": false,
+      "description_excerpt": "O Mario Quintana Residence reune 1 imovel ativo em Centro, Balneário Camboriú - SC, com apartamento, faixa de valor R$ 5.500.000, metragens de 308m2 e configuracao de 2 suites.",
+      "benefit_excerpt": "Unidades reunidas As opcoes ativas do Mario Quintana Residence ficam centralizadas para comparacao rapida. Leitura de localizacao Contexto de Centro, Balneário Camboriú - SC...",
+      "faq_excerpt": "",
+      "search_queries": [
+        "\"Mario Quintana Residence\" empreendimento Balneário Camboriú",
+        "\"Mario Quintana Residence\" condominio Balneário Camboriú",
+        "\"Mario Quintana Residence\" construtora incorporadora",
+        "\"Mario Quintana Residence\" \"Centro, Balneário Camboriú - SC\""
+      ],
+      "image_matches": [
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1630/001-s1-17470677159627.webp",
+          "title": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+          "matched_unit_identifiers": [
+            "088c237f-7898-4b1b-a700-5b168218476e",
+            "1630",
+            "apartamento-no-edificio-maria-quintana-residence-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1630/002-s2-17470677159627.webp",
+          "title": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+          "matched_unit_identifiers": [
+            "088c237f-7898-4b1b-a700-5b168218476e",
+            "1630",
+            "apartamento-no-edificio-maria-quintana-residence-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1630/003-s3-17470677159627.webp",
+          "title": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+          "matched_unit_identifiers": [
+            "088c237f-7898-4b1b-a700-5b168218476e",
+            "1630",
+            "apartamento-no-edificio-maria-quintana-residence-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1630/004-s4-17470677159627.webp",
+          "title": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+          "matched_unit_identifiers": [
+            "088c237f-7898-4b1b-a700-5b168218476e",
+            "1630",
+            "apartamento-no-edificio-maria-quintana-residence-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1630/005-s5-17470677159627.webp",
+          "title": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+          "matched_unit_identifiers": [
+            "088c237f-7898-4b1b-a700-5b168218476e",
+            "1630",
+            "apartamento-no-edificio-maria-quintana-residence-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1630/006-s6-17470677159627.webp",
+          "title": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+          "matched_unit_identifiers": [
+            "088c237f-7898-4b1b-a700-5b168218476e",
+            "1630",
+            "apartamento-no-edificio-maria-quintana-residence-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1630/007-s7-17470677159628.webp",
+          "title": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+          "matched_unit_identifiers": [
+            "088c237f-7898-4b1b-a700-5b168218476e",
+            "1630",
+            "apartamento-no-edificio-maria-quintana-residence-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1630/008-s8-17470677159628.webp",
+          "title": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Edifício Maria Quintana Residence em Balneário Camboriu'",
+          "matched_unit_identifiers": [
+            "088c237f-7898-4b1b-a700-5b168218476e",
+            "1630",
+            "apartamento-no-edificio-maria-quintana-residence-em-balneario-camboriu"
+          ]
+        }
+      ],
+      "aliases": [
+        "Mario Quintana Residence"
+      ],
+      "metadata": {
+        "version": "",
+        "generated_by": "generate-development-landing-pages",
+        "source_column": "condominium_name"
+      },
+      "created_at": "2026-07-06T16:00:19.593648+00:00",
+      "updated_at": "2026-07-06T16:06:23.177+00:00",
+      "priority": "P0",
+      "recommended_action": "Substituir hero e galeria por midia real do empreendimento antes de promover a pagina.",
+      "needs_web_research": true
+    },
+    {
+      "id": "6ca6716d-ae43-4f88-b2bc-22def1702bf5",
+      "slug": "mendelssohn",
+      "title": "Mendelssohn em Balneário Camboriú | Empreendimento Guilherme Pilger",
+      "status": "published",
+      "development_name": "Mendelssohn",
+      "source_condominium_name": "Mendelssohn",
+      "city": "Balneário Camboriú",
+      "location_name": "Barra Sul, Balneário Camboriú - SC",
+      "unit_count": 1,
+      "active_gallery_source": "content.custom_gallery",
+      "active_gallery_count": 8,
+      "active_gallery_unit_matches": 8,
+      "active_gallery_unit_match_ratio": 1,
+      "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1552/001-a1-17448120298538.webp",
+      "hero_matches_unit_image": true,
+      "hero_matched_unit": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+      "unit_label_gallery": true,
+      "custom_gallery_count": 8,
+      "development_gallery_count": 8,
+      "unit_image_count": 8,
+      "generic_description": true,
+      "generic_benefits": true,
+      "missing_development_copy": true,
+      "thin_description": true,
+      "missing_benefits": false,
+      "missing_differentials": false,
+      "missing_faq": false,
+      "description_excerpt": "O Mendelssohn reune 1 imovel ativo em Barra Sul, Balneário Camboriú - SC, com apartamento, faixa de valor R$ 3.570.000, metragens de 160m2 e configuracao de 3 suites.",
+      "benefit_excerpt": "Unidades reunidas As opcoes ativas do Mendelssohn ficam centralizadas para comparacao rapida. Leitura de localizacao Contexto de Barra Sul, Balneário Camboriú - SC para avaliar...",
+      "faq_excerpt": "",
+      "search_queries": [
+        "\"Mendelssohn\" empreendimento Balneário Camboriú",
+        "\"Mendelssohn\" condominio Balneário Camboriú",
+        "\"Mendelssohn\" construtora incorporadora",
+        "\"Mendelssohn\" \"Barra Sul, Balneário Camboriú - SC\""
+      ],
+      "image_matches": [
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1552/001-a1-17448120298538.webp",
+          "title": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "1dc916ab-4dbf-412a-935c-cd42cfeeb70f",
+            "1552",
+            "apartamento-no-ed-mendelssohn"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1552/002-a2-17448120298539.webp",
+          "title": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "1dc916ab-4dbf-412a-935c-cd42cfeeb70f",
+            "1552",
+            "apartamento-no-ed-mendelssohn"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1552/003-a4-1744812029854.webp",
+          "title": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "1dc916ab-4dbf-412a-935c-cd42cfeeb70f",
+            "1552",
+            "apartamento-no-ed-mendelssohn"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1552/004-a5-1744812029854.webp",
+          "title": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "1dc916ab-4dbf-412a-935c-cd42cfeeb70f",
+            "1552",
+            "apartamento-no-ed-mendelssohn"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1552/005-a6-1744812029854.webp",
+          "title": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "1dc916ab-4dbf-412a-935c-cd42cfeeb70f",
+            "1552",
+            "apartamento-no-ed-mendelssohn"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1552/006-a7-1744812029854.webp",
+          "title": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "1dc916ab-4dbf-412a-935c-cd42cfeeb70f",
+            "1552",
+            "apartamento-no-ed-mendelssohn"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1552/007-a8-1744812029854.webp",
+          "title": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "1dc916ab-4dbf-412a-935c-cd42cfeeb70f",
+            "1552",
+            "apartamento-no-ed-mendelssohn"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1552/008-a9-1744812029854.webp",
+          "title": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Mendelssohn em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "1dc916ab-4dbf-412a-935c-cd42cfeeb70f",
+            "1552",
+            "apartamento-no-ed-mendelssohn"
+          ]
+        }
+      ],
+      "aliases": [
+        "Mendelssohn"
+      ],
+      "metadata": {
+        "version": "",
+        "generated_by": "generate-development-landing-pages",
+        "source_column": "condominium_name"
+      },
+      "created_at": "2026-07-06T16:00:19.593648+00:00",
+      "updated_at": "2026-07-06T16:06:23.177+00:00",
+      "priority": "P0",
+      "recommended_action": "Substituir hero e galeria por midia real do empreendimento antes de promover a pagina.",
+      "needs_web_research": true
+    },
+    {
+      "id": "49766cf0-789c-4446-b01e-122ab0313075",
+      "slug": "meridian-tower",
+      "title": "Meridian Tower em Balneário Camboriú | Empreendimento Guilherme Pilger",
+      "status": "published",
+      "development_name": "Meridian Tower",
+      "source_condominium_name": "Meridian Tower",
+      "city": "Balneário Camboriú",
+      "location_name": "Centro, Balneário Camboriú - SC",
+      "unit_count": 1,
+      "active_gallery_source": "content.custom_gallery",
+      "active_gallery_count": 8,
+      "active_gallery_unit_matches": 8,
+      "active_gallery_unit_match_ratio": 1,
+      "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/638/001-02_rv_meridian_fachada_esquina_r03-16588420182123.jpg",
+      "hero_matches_unit_image": true,
+      "hero_matched_unit": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+      "unit_label_gallery": true,
+      "custom_gallery_count": 8,
+      "development_gallery_count": 8,
+      "unit_image_count": 8,
+      "generic_description": true,
+      "generic_benefits": true,
+      "missing_development_copy": true,
+      "thin_description": true,
+      "missing_benefits": false,
+      "missing_differentials": false,
+      "missing_faq": false,
+      "description_excerpt": "O Meridian Tower reune 1 imovel ativo em Centro, Balneário Camboriú - SC, com apartamento, faixa de valor R$ 3.961.714, metragens de 181m2 e configuracao de 4 suites.",
+      "benefit_excerpt": "Unidades reunidas As opcoes ativas do Meridian Tower ficam centralizadas para comparacao rapida. Leitura de localizacao Contexto de Centro, Balneário Camboriú - SC para avaliar...",
+      "faq_excerpt": "",
+      "search_queries": [
+        "\"Meridian Tower\" empreendimento Balneário Camboriú",
+        "\"Meridian Tower\" condominio Balneário Camboriú",
+        "\"Meridian Tower\" construtora incorporadora",
+        "\"Meridian Tower\" \"Centro, Balneário Camboriú - SC\""
+      ],
+      "image_matches": [
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/638/001-02_rv_meridian_fachada_esquina_r03-16588420182123.jpg",
+          "title": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "0d56d6dd-3270-4aa1-ad9d-27e5854e5843",
+            "638",
+            "apartamento-no-ed-meridian-tower-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/638/002-04_rv_meridian_fachada_bird_eye-1-16588420182036.jpg",
+          "title": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "0d56d6dd-3270-4aa1-ad9d-27e5854e5843",
+            "638",
+            "apartamento-no-ed-meridian-tower-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/638/003-35_rv_meridian_fachada_embasamento_piscina_r03-1-1658842018200.jpg",
+          "title": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "0d56d6dd-3270-4aa1-ad9d-27e5854e5843",
+            "638",
+            "apartamento-no-ed-meridian-tower-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/638/004-05_rv_meridian_fachada_paineis_r03-1-16588420182055.jpg",
+          "title": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "0d56d6dd-3270-4aa1-ad9d-27e5854e5843",
+            "638",
+            "apartamento-no-ed-meridian-tower-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/638/005-05_rv_meridian_fachada_paineis_r03-16588420182075.jpg",
+          "title": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "0d56d6dd-3270-4aa1-ad9d-27e5854e5843",
+            "638",
+            "apartamento-no-ed-meridian-tower-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/638/006-39_rv_meridian_pb_tipo_r03-16588438799322.jpg",
+          "title": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "0d56d6dd-3270-4aa1-ad9d-27e5854e5843",
+            "638",
+            "apartamento-no-ed-meridian-tower-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/638/007-w1-17435227689828.webp",
+          "title": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "0d56d6dd-3270-4aa1-ad9d-27e5854e5843",
+            "638",
+            "apartamento-no-ed-meridian-tower-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/638/008-w2-17435227689829.webp",
+          "title": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Meridian Tower em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "0d56d6dd-3270-4aa1-ad9d-27e5854e5843",
+            "638",
+            "apartamento-no-ed-meridian-tower-em-balneario-camboriu"
+          ]
+        }
+      ],
+      "aliases": [
+        "Meridian Tower"
+      ],
+      "metadata": {
+        "version": "",
+        "generated_by": "generate-development-landing-pages",
+        "source_column": "condominium_name"
+      },
+      "created_at": "2026-07-06T16:00:19.593648+00:00",
+      "updated_at": "2026-07-06T16:06:23.177+00:00",
+      "priority": "P0",
+      "recommended_action": "Substituir hero e galeria por midia real do empreendimento antes de promover a pagina.",
+      "needs_web_research": true
+    },
+    {
+      "id": "2a4973a5-667d-43a0-8319-3f090f207a79",
+      "slug": "milano-exclusive-residence",
+      "title": "Milano Exclusive Residence em Itapema | Empreendimento Guilherme Pilger",
+      "status": "published",
+      "development_name": "Milano Exclusive Residence",
+      "source_condominium_name": "Milano Exclusive Residence",
+      "city": "Itapema",
+      "location_name": "Canto da Praia, Itapema - SC",
+      "unit_count": 1,
+      "active_gallery_source": "content.custom_gallery",
+      "active_gallery_count": 8,
+      "active_gallery_unit_matches": 8,
+      "active_gallery_unit_match_ratio": 1,
+      "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/833/001-02-1-16787352699983.jpeg",
+      "hero_matches_unit_image": true,
+      "hero_matched_unit": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+      "unit_label_gallery": true,
+      "custom_gallery_count": 8,
+      "development_gallery_count": 8,
+      "unit_image_count": 8,
+      "generic_description": true,
+      "generic_benefits": true,
+      "missing_development_copy": true,
+      "thin_description": true,
+      "missing_benefits": false,
+      "missing_differentials": false,
+      "missing_faq": false,
+      "description_excerpt": "O Milano Exclusive Residence reune 1 imovel ativo em Canto da Praia, Itapema - SC, com apartamento, faixa de valor R$ 7.000.000, metragens de 168m2 e configuracao de 4 suites.",
+      "benefit_excerpt": "Unidades reunidas As opcoes ativas do Milano Exclusive Residence ficam centralizadas para comparacao rapida. Leitura de localizacao Contexto de Canto da Praia, Itapema - SC...",
+      "faq_excerpt": "",
+      "search_queries": [
+        "\"Milano Exclusive Residence\" empreendimento Itapema",
+        "\"Milano Exclusive Residence\" condominio Itapema",
+        "\"Milano Exclusive Residence\" construtora incorporadora",
+        "\"Milano Exclusive Residence\" \"Canto da Praia, Itapema - SC\""
+      ],
+      "image_matches": [
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/833/001-02-1-16787352699983.jpeg",
+          "title": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+          "matched_unit_identifiers": [
+            "e62ecd62-7318-43da-ae52-ce54081cbf82",
+            "833",
+            "apartamento-no-ed-milano-exclusive-residence-em-itapema"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/833/002-02-16787352699971.jpeg",
+          "title": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+          "matched_unit_identifiers": [
+            "e62ecd62-7318-43da-ae52-ce54081cbf82",
+            "833",
+            "apartamento-no-ed-milano-exclusive-residence-em-itapema"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/833/003-00-16787352699943.jpeg",
+          "title": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+          "matched_unit_identifiers": [
+            "e62ecd62-7318-43da-ae52-ce54081cbf82",
+            "833",
+            "apartamento-no-ed-milano-exclusive-residence-em-itapema"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/833/004-01-16787352699958.jpeg",
+          "title": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+          "matched_unit_identifiers": [
+            "e62ecd62-7318-43da-ae52-ce54081cbf82",
+            "833",
+            "apartamento-no-ed-milano-exclusive-residence-em-itapema"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/833/005-03-16787352699991.jpeg",
+          "title": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+          "matched_unit_identifiers": [
+            "e62ecd62-7318-43da-ae52-ce54081cbf82",
+            "833",
+            "apartamento-no-ed-milano-exclusive-residence-em-itapema"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/833/006-04-1678735270001.jpeg",
+          "title": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+          "matched_unit_identifiers": [
+            "e62ecd62-7318-43da-ae52-ce54081cbf82",
+            "833",
+            "apartamento-no-ed-milano-exclusive-residence-em-itapema"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/833/007-05-16787352700018.jpeg",
+          "title": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+          "matched_unit_identifiers": [
+            "e62ecd62-7318-43da-ae52-ce54081cbf82",
+            "833",
+            "apartamento-no-ed-milano-exclusive-residence-em-itapema"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/833/008-05-1-16787352700024.jpeg",
+          "title": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Milano Exclusive Residence em Itapema",
+          "matched_unit_identifiers": [
+            "e62ecd62-7318-43da-ae52-ce54081cbf82",
+            "833",
+            "apartamento-no-ed-milano-exclusive-residence-em-itapema"
+          ]
+        }
+      ],
+      "aliases": [
+        "Milano Exclusive Residence"
+      ],
+      "metadata": {
+        "version": "",
+        "generated_by": "generate-development-landing-pages",
+        "source_column": "condominium_name"
+      },
+      "created_at": "2026-07-06T16:00:19.593648+00:00",
+      "updated_at": "2026-07-06T16:06:23.177+00:00",
+      "priority": "P0",
+      "recommended_action": "Substituir hero e galeria por midia real do empreendimento antes de promover a pagina.",
+      "needs_web_research": true
+    },
+    {
+      "id": "19b25095-02b0-4fad-a020-7851171919f1",
+      "slug": "milano-residence",
+      "title": "Milano Residence em Itapema | Empreendimento Guilherme Pilger",
+      "status": "published",
+      "development_name": "Milano Residence",
+      "source_condominium_name": "Milano Residence",
+      "city": "Itapema",
+      "location_name": "Meia Praia, Itapema - SC",
+      "unit_count": 1,
+      "active_gallery_source": "content.custom_gallery",
+      "active_gallery_count": 8,
+      "active_gallery_unit_matches": 8,
+      "active_gallery_unit_match_ratio": 1,
+      "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2249/001-unnamed-17675661223366.jpg",
+      "hero_matches_unit_image": true,
+      "hero_matched_unit": "Apartamento no Ed. Milano Residence em Itapema",
+      "unit_label_gallery": true,
+      "custom_gallery_count": 8,
+      "development_gallery_count": 8,
+      "unit_image_count": 8,
+      "generic_description": true,
+      "generic_benefits": true,
+      "missing_development_copy": true,
+      "thin_description": true,
+      "missing_benefits": false,
+      "missing_differentials": false,
+      "missing_faq": false,
+      "description_excerpt": "O Milano Residence reune 1 imovel ativo em Meia Praia, Itapema - SC, com apartamento, faixa de valor R$ 4.200.000, metragens de 198m2 e configuracao de 4 suites.",
+      "benefit_excerpt": "Unidades reunidas As opcoes ativas do Milano Residence ficam centralizadas para comparacao rapida. Leitura de localizacao Contexto de Meia Praia, Itapema - SC para avaliar...",
+      "faq_excerpt": "",
+      "search_queries": [
+        "\"Milano Residence\" empreendimento Itapema",
+        "\"Milano Residence\" condominio Itapema",
+        "\"Milano Residence\" construtora incorporadora",
+        "\"Milano Residence\" \"Meia Praia, Itapema - SC\""
+      ],
+      "image_matches": [
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2249/001-unnamed-17675661223366.jpg",
+          "title": "Apartamento no Ed. Milano Residence em Itapema",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Milano Residence em Itapema",
+          "matched_unit_identifiers": [
+            "4826d065-f989-4c19-bb21-fee9c6440df5",
+            "2249",
+            "apartamento-no-ed-milano-residence-em-itapema"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2249/002-whatsapp-image-2026-01-04-at-191545-17675659152919.jpeg",
+          "title": "Apartamento no Ed. Milano Residence em Itapema",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Milano Residence em Itapema",
+          "matched_unit_identifiers": [
+            "4826d065-f989-4c19-bb21-fee9c6440df5",
+            "2249",
+            "apartamento-no-ed-milano-residence-em-itapema"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2249/003-whatsapp-image-2026-01-04-at-192324-1767565915292.jpeg",
+          "title": "Apartamento no Ed. Milano Residence em Itapema",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Milano Residence em Itapema",
+          "matched_unit_identifiers": [
+            "4826d065-f989-4c19-bb21-fee9c6440df5",
+            "2249",
+            "apartamento-no-ed-milano-residence-em-itapema"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2249/004-whatsapp-image-2026-01-04-at-191557-1767565915292.jpeg",
+          "title": "Apartamento no Ed. Milano Residence em Itapema",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Milano Residence em Itapema",
+          "matched_unit_identifiers": [
+            "4826d065-f989-4c19-bb21-fee9c6440df5",
+            "2249",
+            "apartamento-no-ed-milano-residence-em-itapema"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2249/005-whatsapp-image-2026-01-04-at-191505-17675659152919.jpeg",
+          "title": "Apartamento no Ed. Milano Residence em Itapema",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Milano Residence em Itapema",
+          "matched_unit_identifiers": [
+            "4826d065-f989-4c19-bb21-fee9c6440df5",
+            "2249",
+            "apartamento-no-ed-milano-residence-em-itapema"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2249/006-whatsapp-image-2026-01-04-at-192325-17675659152921.jpeg",
+          "title": "Apartamento no Ed. Milano Residence em Itapema",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Milano Residence em Itapema",
+          "matched_unit_identifiers": [
+            "4826d065-f989-4c19-bb21-fee9c6440df5",
+            "2249",
+            "apartamento-no-ed-milano-residence-em-itapema"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2249/007-whatsapp-image-2026-01-04-at-191510-17675659152919.jpeg",
+          "title": "Apartamento no Ed. Milano Residence em Itapema",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Milano Residence em Itapema",
+          "matched_unit_identifiers": [
+            "4826d065-f989-4c19-bb21-fee9c6440df5",
+            "2249",
+            "apartamento-no-ed-milano-residence-em-itapema"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2249/008-whatsapp-image-2026-01-04-at-191416-17675659152917.jpeg",
+          "title": "Apartamento no Ed. Milano Residence em Itapema",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Milano Residence em Itapema",
+          "matched_unit_identifiers": [
+            "4826d065-f989-4c19-bb21-fee9c6440df5",
+            "2249",
+            "apartamento-no-ed-milano-residence-em-itapema"
+          ]
+        }
+      ],
+      "aliases": [
+        "Milano Residence"
+      ],
+      "metadata": {
+        "version": "",
+        "generated_by": "generate-development-landing-pages",
+        "source_column": "condominium_name"
+      },
+      "created_at": "2026-07-06T16:00:19.593648+00:00",
+      "updated_at": "2026-07-06T16:06:23.177+00:00",
+      "priority": "P0",
+      "recommended_action": "Substituir hero e galeria por midia real do empreendimento antes de promover a pagina.",
+      "needs_web_research": true
+    },
+    {
+      "id": "d77f4060-2847-4f9a-bbb1-0c1f4b892ab6",
+      "slug": "monaco-residence",
+      "title": "Mônaco Residence em Itapema | Empreendimento Guilherme Pilger",
+      "status": "published",
+      "development_name": "Mônaco Residence",
+      "source_condominium_name": "Mônaco Residence",
+      "city": "Itapema",
+      "location_name": "Meia Praia, Itapema - SC",
+      "unit_count": 1,
+      "active_gallery_source": "content.custom_gallery",
+      "active_gallery_count": 8,
+      "active_gallery_unit_matches": 8,
+      "active_gallery_unit_match_ratio": 1,
+      "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2535/001-cobertura-duplex-monaco-49-17788525546306.jpg",
+      "hero_matches_unit_image": true,
+      "hero_matched_unit": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+      "unit_label_gallery": true,
+      "custom_gallery_count": 8,
+      "development_gallery_count": 8,
+      "unit_image_count": 8,
+      "generic_description": true,
+      "generic_benefits": true,
+      "missing_development_copy": true,
+      "thin_description": true,
+      "missing_benefits": false,
+      "missing_differentials": false,
+      "missing_faq": false,
+      "description_excerpt": "O Mônaco Residence reune 1 imovel ativo em Meia Praia, Itapema - SC, com cobertura, faixa de valor R$ 6.500.000, metragens de 331m2 e configuracao de 5 suites.",
+      "benefit_excerpt": "Unidades reunidas As opcoes ativas do Mônaco Residence ficam centralizadas para comparacao rapida. Leitura de localizacao Contexto de Meia Praia, Itapema - SC para avaliar...",
+      "faq_excerpt": "",
+      "search_queries": [
+        "\"Mônaco Residence\" empreendimento Itapema",
+        "\"Mônaco Residence\" condominio Itapema",
+        "\"Mônaco Residence\" construtora incorporadora",
+        "\"Mônaco Residence\" \"Meia Praia, Itapema - SC\""
+      ],
+      "image_matches": [
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2535/001-cobertura-duplex-monaco-49-17788525546306.jpg",
+          "title": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+          "category": "Cobertura",
+          "matched_unit": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+          "matched_unit_identifiers": [
+            "7a17c339-d93d-4b67-903c-effb305d3654",
+            "2535",
+            "cobertura-duplex-no-ed-monaco-residence-em-meia-praia-itapema"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2535/002-cobertura-duplex-monaco-39-17788525546307.jpg",
+          "title": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+          "category": "Cobertura",
+          "matched_unit": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+          "matched_unit_identifiers": [
+            "7a17c339-d93d-4b67-903c-effb305d3654",
+            "2535",
+            "cobertura-duplex-no-ed-monaco-residence-em-meia-praia-itapema"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2535/003-cobertura-duplex-monaco-8-1778852554631.jpg",
+          "title": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+          "category": "Cobertura",
+          "matched_unit": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+          "matched_unit_identifiers": [
+            "7a17c339-d93d-4b67-903c-effb305d3654",
+            "2535",
+            "cobertura-duplex-no-ed-monaco-residence-em-meia-praia-itapema"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2535/004-cobertura-duplex-monaco-19-1778852554631.jpg",
+          "title": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+          "category": "Cobertura",
+          "matched_unit": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+          "matched_unit_identifiers": [
+            "7a17c339-d93d-4b67-903c-effb305d3654",
+            "2535",
+            "cobertura-duplex-no-ed-monaco-residence-em-meia-praia-itapema"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2535/005-cobertura-duplex-monaco-32-17788525546309.jpg",
+          "title": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+          "category": "Cobertura",
+          "matched_unit": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+          "matched_unit_identifiers": [
+            "7a17c339-d93d-4b67-903c-effb305d3654",
+            "2535",
+            "cobertura-duplex-no-ed-monaco-residence-em-meia-praia-itapema"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2535/006-cobertura-duplex-monaco-36-17788525546308.jpg",
+          "title": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+          "category": "Cobertura",
+          "matched_unit": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+          "matched_unit_identifiers": [
+            "7a17c339-d93d-4b67-903c-effb305d3654",
+            "2535",
+            "cobertura-duplex-no-ed-monaco-residence-em-meia-praia-itapema"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2535/007-cobertura-duplex-monaco-30-17788525546309.jpg",
+          "title": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+          "category": "Cobertura",
+          "matched_unit": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+          "matched_unit_identifiers": [
+            "7a17c339-d93d-4b67-903c-effb305d3654",
+            "2535",
+            "cobertura-duplex-no-ed-monaco-residence-em-meia-praia-itapema"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/2535/008-cobertura-duplex-monaco-28-1778852554631.jpg",
+          "title": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+          "category": "Cobertura",
+          "matched_unit": "Cobertura Duplex no Ed. Mônaco Residence em Meia Praia - Itapema",
+          "matched_unit_identifiers": [
+            "7a17c339-d93d-4b67-903c-effb305d3654",
+            "2535",
+            "cobertura-duplex-no-ed-monaco-residence-em-meia-praia-itapema"
+          ]
+        }
+      ],
+      "aliases": [
+        "Mônaco Residence"
+      ],
+      "metadata": {
+        "version": "",
+        "generated_by": "generate-development-landing-pages",
+        "source_column": "condominium_name"
+      },
+      "created_at": "2026-07-06T16:00:19.593648+00:00",
+      "updated_at": "2026-07-06T16:06:23.177+00:00",
+      "priority": "P0",
+      "recommended_action": "Substituir hero e galeria por midia real do empreendimento antes de promover a pagina.",
+      "needs_web_research": true
+    },
+    {
+      "id": "12ddc12a-452c-4f6d-953d-76eea19592b8",
+      "slug": "montreal",
+      "title": "Montreal em Balneário Camboriú | Empreendimento Guilherme Pilger",
+      "status": "published",
+      "development_name": "Montreal",
+      "source_condominium_name": "Montreal",
+      "city": "Balneário Camboriú",
+      "location_name": "Centro, Balneário Camboriú - SC",
+      "unit_count": 1,
+      "active_gallery_source": "content.custom_gallery",
+      "active_gallery_count": 8,
+      "active_gallery_unit_matches": 8,
+      "active_gallery_unit_match_ratio": 1,
+      "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1010/001-whatsapp-image-2023-10-11-at-104630-1-16970328935558.jpeg",
+      "hero_matches_unit_image": true,
+      "hero_matched_unit": "Apartamento no Ed. Montreal em Balneário Camboriú",
+      "unit_label_gallery": true,
+      "custom_gallery_count": 8,
+      "development_gallery_count": 8,
+      "unit_image_count": 8,
+      "generic_description": true,
+      "generic_benefits": true,
+      "missing_development_copy": true,
+      "thin_description": true,
+      "missing_benefits": false,
+      "missing_differentials": false,
+      "missing_faq": false,
+      "description_excerpt": "O Montreal reune 1 imovel ativo em Centro, Balneário Camboriú - SC, com apartamento, faixa de valor R$ 6.500.000, metragens de 200m2 e configuracao de 3 suites.",
+      "benefit_excerpt": "Unidades reunidas As opcoes ativas do Montreal ficam centralizadas para comparacao rapida. Leitura de localizacao Contexto de Centro, Balneário Camboriú - SC para avaliar...",
+      "faq_excerpt": "",
+      "search_queries": [
+        "\"Montreal\" empreendimento Balneário Camboriú",
+        "\"Montreal\" condominio Balneário Camboriú",
+        "\"Montreal\" construtora incorporadora",
+        "\"Montreal\" \"Centro, Balneário Camboriú - SC\""
+      ],
+      "image_matches": [
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1010/001-whatsapp-image-2023-10-11-at-104630-1-16970328935558.jpeg",
+          "title": "Apartamento no Ed. Montreal em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Montreal em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "a26a1d27-2752-47d9-b6d7-e00f98ead9bc",
+            "1010",
+            "apartamento-no-ed-montreal-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1010/002-whatsapp-image-2023-10-11-at-104630-16970328935569.jpeg",
+          "title": "Apartamento no Ed. Montreal em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Montreal em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "a26a1d27-2752-47d9-b6d7-e00f98ead9bc",
+            "1010",
+            "apartamento-no-ed-montreal-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1010/003-whatsapp-image-2023-10-11-at-104632-16970328935441.jpeg",
+          "title": "Apartamento no Ed. Montreal em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Montreal em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "a26a1d27-2752-47d9-b6d7-e00f98ead9bc",
+            "1010",
+            "apartamento-no-ed-montreal-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1010/004-whatsapp-image-2023-10-11-at-104631-3-16970328935454.jpeg",
+          "title": "Apartamento no Ed. Montreal em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Montreal em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "a26a1d27-2752-47d9-b6d7-e00f98ead9bc",
+            "1010",
+            "apartamento-no-ed-montreal-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1010/005-whatsapp-image-2023-10-11-at-104631-2-16970328935472.jpeg",
+          "title": "Apartamento no Ed. Montreal em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Montreal em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "a26a1d27-2752-47d9-b6d7-e00f98ead9bc",
+            "1010",
+            "apartamento-no-ed-montreal-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1010/006-whatsapp-image-2023-10-11-at-104632-1-16970328935424.jpeg",
+          "title": "Apartamento no Ed. Montreal em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Montreal em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "a26a1d27-2752-47d9-b6d7-e00f98ead9bc",
+            "1010",
+            "apartamento-no-ed-montreal-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1010/007-whatsapp-image-2023-10-11-at-104631-16970328935546.jpeg",
+          "title": "Apartamento no Ed. Montreal em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Montreal em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "a26a1d27-2752-47d9-b6d7-e00f98ead9bc",
+            "1010",
+            "apartamento-no-ed-montreal-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1010/008-whatsapp-image-2023-10-11-at-104638-16970328935615.jpeg",
+          "title": "Apartamento no Ed. Montreal em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Montreal em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "a26a1d27-2752-47d9-b6d7-e00f98ead9bc",
+            "1010",
+            "apartamento-no-ed-montreal-em-balneario-camboriu"
+          ]
+        }
+      ],
+      "aliases": [
+        "Montreal"
+      ],
+      "metadata": {
+        "version": "",
+        "generated_by": "generate-development-landing-pages",
+        "source_column": "condominium_name"
+      },
+      "created_at": "2026-07-06T16:00:19.593648+00:00",
+      "updated_at": "2026-07-06T16:06:23.177+00:00",
+      "priority": "P0",
+      "recommended_action": "Substituir hero e galeria por midia real do empreendimento antes de promover a pagina.",
+      "needs_web_research": true
+    }
+  ]
+}

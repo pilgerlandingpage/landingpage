@@ -1,0 +1,790 @@
+{
+  "generated_at": "2026-07-15T18:19:55.050Z",
+  "filters": {
+    "status": "published",
+    "slugs": [
+      "condominio-ponta-do-estaleiro",
+      "four-seasons",
+      "hobus-concept",
+      "135-jardins",
+      "abu-dhabi-residence",
+      "accendis-home-living",
+      "acqua-blue-residence",
+      "adolfo-blase",
+      "aguas-cristalinas",
+      "al-mare-residence"
+    ]
+  },
+  "totals": {
+    "landing_pages_analyzed": 10,
+    "development_pages": 10,
+    "P0": 1,
+    "P1": 0,
+    "P2": 0,
+    "OK": 9,
+    "hero_matches_unit_image": 1,
+    "gallery_matches_unit_image": 1,
+    "unit_label_gallery": 1,
+    "generic_description": 1,
+    "generic_benefits": 1,
+    "missing_development_copy": 1
+  },
+  "samples": {
+    "P0": [
+      {
+        "id": "56d28fff-2ad5-4c57-882c-f94f2e763934",
+        "slug": "adolfo-blase",
+        "title": "Adolfo Blase em Balneário Camboriú | Empreendimento Guilherme Pilger",
+        "status": "published",
+        "development_name": "Adolfo Blase",
+        "source_condominium_name": "Adolfo Blase",
+        "city": "Balneário Camboriú",
+        "location_name": "Barra Sul, Balneário Camboriú - SC",
+        "unit_count": 1,
+        "active_gallery_source": "content.custom_gallery",
+        "active_gallery_count": 8,
+        "active_gallery_unit_matches": 8,
+        "active_gallery_unit_match_ratio": 1,
+        "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/001-img_7794-1739824359892.jpeg",
+        "hero_matches_unit_image": true,
+        "hero_matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+        "unit_label_gallery": true,
+        "custom_gallery_count": 8,
+        "development_gallery_count": 8,
+        "unit_image_count": 8,
+        "generic_description": true,
+        "generic_benefits": true,
+        "missing_development_copy": true,
+        "thin_description": true,
+        "missing_benefits": false,
+        "missing_differentials": false,
+        "missing_faq": false,
+        "description_excerpt": "O Adolfo Blase reune 1 imovel ativo em Barra Sul, Balneário Camboriú - SC, com apartamento, faixa de valor R$ 3.800.000, metragens de 167m2 e configuracao de 3 suites.",
+        "benefit_excerpt": "Unidades reunidas As opcoes ativas do Adolfo Blase ficam centralizadas para comparacao rapida. Leitura de localizacao Contexto de Barra Sul, Balneário Camboriú - SC para...",
+        "faq_excerpt": "",
+        "search_queries": [
+          "\"Adolfo Blase\" empreendimento Balneário Camboriú",
+          "\"Adolfo Blase\" condominio Balneário Camboriú",
+          "\"Adolfo Blase\" construtora incorporadora",
+          "\"Adolfo Blase\" \"Barra Sul, Balneário Camboriú - SC\""
+        ],
+        "image_matches": [
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/001-img_7794-1739824359892.jpeg",
+            "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+              "1373",
+              "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/002-img_7793-1739824359892.jpeg",
+            "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+              "1373",
+              "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/003-img_7795-1739824359892.jpeg",
+            "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+              "1373",
+              "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/004-img_7792-1739824359892.jpeg",
+            "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+              "1373",
+              "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/005-img_7796-1739824359892.jpeg",
+            "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+              "1373",
+              "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/006-img_7798-1739824359892.jpeg",
+            "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+              "1373",
+              "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/007-img_7800-1739824359892.jpeg",
+            "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+              "1373",
+              "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+            ]
+          },
+          {
+            "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/008-img_7802-1739824359892.jpeg",
+            "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "category": "Apartamento",
+            "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+            "matched_unit_identifiers": [
+              "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+              "1373",
+              "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+            ]
+          }
+        ],
+        "aliases": [
+          "Adolfo Blase"
+        ],
+        "metadata": {
+          "version": "",
+          "generated_by": "generate-development-landing-pages",
+          "source_column": "condominium_name"
+        },
+        "created_at": "2026-07-06T16:00:16.987549+00:00",
+        "updated_at": "2026-07-06T16:06:23.177+00:00",
+        "priority": "P0",
+        "recommended_action": "Substituir hero e galeria por midia real do empreendimento antes de promover a pagina.",
+        "needs_web_research": true
+      }
+    ],
+    "P1": [],
+    "P2": []
+  },
+  "issues": [
+    {
+      "id": "56d28fff-2ad5-4c57-882c-f94f2e763934",
+      "slug": "adolfo-blase",
+      "title": "Adolfo Blase em Balneário Camboriú | Empreendimento Guilherme Pilger",
+      "status": "published",
+      "development_name": "Adolfo Blase",
+      "source_condominium_name": "Adolfo Blase",
+      "city": "Balneário Camboriú",
+      "location_name": "Barra Sul, Balneário Camboriú - SC",
+      "unit_count": 1,
+      "active_gallery_source": "content.custom_gallery",
+      "active_gallery_count": 8,
+      "active_gallery_unit_matches": 8,
+      "active_gallery_unit_match_ratio": 1,
+      "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/001-img_7794-1739824359892.jpeg",
+      "hero_matches_unit_image": true,
+      "hero_matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+      "unit_label_gallery": true,
+      "custom_gallery_count": 8,
+      "development_gallery_count": 8,
+      "unit_image_count": 8,
+      "generic_description": true,
+      "generic_benefits": true,
+      "missing_development_copy": true,
+      "thin_description": true,
+      "missing_benefits": false,
+      "missing_differentials": false,
+      "missing_faq": false,
+      "description_excerpt": "O Adolfo Blase reune 1 imovel ativo em Barra Sul, Balneário Camboriú - SC, com apartamento, faixa de valor R$ 3.800.000, metragens de 167m2 e configuracao de 3 suites.",
+      "benefit_excerpt": "Unidades reunidas As opcoes ativas do Adolfo Blase ficam centralizadas para comparacao rapida. Leitura de localizacao Contexto de Barra Sul, Balneário Camboriú - SC para...",
+      "faq_excerpt": "",
+      "search_queries": [
+        "\"Adolfo Blase\" empreendimento Balneário Camboriú",
+        "\"Adolfo Blase\" condominio Balneário Camboriú",
+        "\"Adolfo Blase\" construtora incorporadora",
+        "\"Adolfo Blase\" \"Barra Sul, Balneário Camboriú - SC\""
+      ],
+      "image_matches": [
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/001-img_7794-1739824359892.jpeg",
+          "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+            "1373",
+            "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/002-img_7793-1739824359892.jpeg",
+          "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+            "1373",
+            "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/003-img_7795-1739824359892.jpeg",
+          "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+            "1373",
+            "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/004-img_7792-1739824359892.jpeg",
+          "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+            "1373",
+            "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/005-img_7796-1739824359892.jpeg",
+          "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+            "1373",
+            "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/006-img_7798-1739824359892.jpeg",
+          "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+            "1373",
+            "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/007-img_7800-1739824359892.jpeg",
+          "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+            "1373",
+            "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+          ]
+        },
+        {
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1373/008-img_7802-1739824359892.jpeg",
+          "title": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "category": "Apartamento",
+          "matched_unit": "Apartamento no Ed. Adolfo Blase em Balneário Camboriú",
+          "matched_unit_identifiers": [
+            "bff82468-857c-4b8e-b4c6-c856fdda0d30",
+            "1373",
+            "apartamento-no-ed-adolfo-blase-em-balneario-camboriu"
+          ]
+        }
+      ],
+      "aliases": [
+        "Adolfo Blase"
+      ],
+      "metadata": {
+        "version": "",
+        "generated_by": "generate-development-landing-pages",
+        "source_column": "condominium_name"
+      },
+      "created_at": "2026-07-06T16:00:16.987549+00:00",
+      "updated_at": "2026-07-06T16:06:23.177+00:00",
+      "priority": "P0",
+      "recommended_action": "Substituir hero e galeria por midia real do empreendimento antes de promover a pagina.",
+      "needs_web_research": true
+    },
+    {
+      "id": "baec6170-1355-4842-820e-0f4eaae48bdd",
+      "slug": "condominio-ponta-do-estaleiro",
+      "title": "Condomínio Ponta do Estaleiro em Porto Belo | Empreendimento Guilherme Pilger",
+      "status": "published",
+      "development_name": "Condomínio Ponta do Estaleiro",
+      "source_condominium_name": "Condomínio Ponta do Estaleiro",
+      "city": "Porto Belo",
+      "location_name": "Araçá, Porto Belo - SC",
+      "unit_count": 2,
+      "active_gallery_source": "content.custom_gallery",
+      "active_gallery_count": 12,
+      "active_gallery_unit_matches": 0,
+      "active_gallery_unit_match_ratio": 0,
+      "hero_image": "https://www.sistemaagiweb.com.br/fotos/Emp59/0_32720_306105.jpg",
+      "hero_matches_unit_image": false,
+      "hero_matched_unit": "",
+      "unit_label_gallery": false,
+      "custom_gallery_count": 12,
+      "development_gallery_count": 12,
+      "unit_image_count": 10,
+      "generic_description": false,
+      "generic_benefits": false,
+      "missing_development_copy": false,
+      "thin_description": false,
+      "missing_benefits": false,
+      "missing_differentials": false,
+      "missing_faq": false,
+      "description_excerpt": "O Condominio Ponta do Estaleiro foi revisado como condominio costeiro no Araca, em Porto Belo, com foco em terrenos de grande porte, vista panoramica e contato direto com a...",
+      "benefit_excerpt": "Paisagem preservada As imagens e fontes mostram mata, relevo costeiro e implantacao em uma area de baixa densidade. Frente mar no Araca Fontes de mercado descrevem terrenos...",
+      "faq_excerpt": "",
+      "search_queries": [
+        "\"Condomínio Ponta do Estaleiro\" empreendimento Porto Belo",
+        "\"Condomínio Ponta do Estaleiro\" condominio Porto Belo",
+        "\"Condomínio Ponta do Estaleiro\" construtora incorporadora",
+        "\"Condomínio Ponta do Estaleiro\" \"Araçá, Porto Belo - SC\""
+      ],
+      "image_matches": [],
+      "aliases": [
+        "Condomínio Ponta do Estaleiro"
+      ],
+      "metadata": {
+        "version": "",
+        "generated_by": "generate-development-landing-pages",
+        "source_column": "condominium_name"
+      },
+      "created_at": "2026-07-06T16:00:17.483307+00:00",
+      "updated_at": "2026-07-15T18:19:47.6+00:00",
+      "priority": "OK",
+      "recommended_action": "Sem acao prioritaria detectada nesta auditoria automatica.",
+      "needs_web_research": false
+    },
+    {
+      "id": "b035cc70-80f2-41ed-9b46-fb28aaf63ebe",
+      "slug": "four-seasons",
+      "title": "Four Seasons em Balneário Camboriú | Empreendimento Guilherme Pilger",
+      "status": "published",
+      "development_name": "Four Seasons",
+      "source_condominium_name": "Four Seasons",
+      "city": "Balneário Camboriú",
+      "location_name": "Centro, Balneário Camboriú - SC",
+      "unit_count": 2,
+      "active_gallery_source": "content.custom_gallery",
+      "active_gallery_count": 12,
+      "active_gallery_unit_matches": 0,
+      "active_gallery_unit_match_ratio": 0,
+      "hero_image": "https://litoralvertical.com/wp-content/uploads/2021/06/edificio-four-seasons-balneario-camboriu-principal.jpg",
+      "hero_matches_unit_image": false,
+      "hero_matched_unit": "",
+      "unit_label_gallery": false,
+      "custom_gallery_count": 12,
+      "development_gallery_count": 12,
+      "unit_image_count": 9,
+      "generic_description": false,
+      "generic_benefits": false,
+      "missing_development_copy": false,
+      "thin_description": false,
+      "missing_benefits": false,
+      "missing_differentials": false,
+      "missing_faq": false,
+      "description_excerpt": "O Four Seasons Residence foi revisado como empreendimento Embraed no Centro de Balneario Camboriu, com proposta residencial de alto padrao e lazer completo. As fontes...",
+      "benefit_excerpt": "Padrao Embraed Empreendimento associado a Embraed e ao segmento residencial de alto padrao em Balneario Camboriu. Centro de Balneario Camboriu Localizacao central, com leitura...",
+      "faq_excerpt": "",
+      "search_queries": [
+        "\"Four Seasons\" empreendimento Balneário Camboriú",
+        "\"Four Seasons\" condominio Balneário Camboriú",
+        "\"Four Seasons\" construtora incorporadora",
+        "\"Four Seasons\" \"Centro, Balneário Camboriú - SC\""
+      ],
+      "image_matches": [],
+      "aliases": [
+        "Four Seasons"
+      ],
+      "metadata": {
+        "version": "",
+        "generated_by": "generate-development-landing-pages",
+        "source_column": "condominium_name"
+      },
+      "created_at": "2026-07-06T16:00:18.448766+00:00",
+      "updated_at": "2026-07-15T18:19:47.6+00:00",
+      "priority": "OK",
+      "recommended_action": "Sem acao prioritaria detectada nesta auditoria automatica.",
+      "needs_web_research": false
+    },
+    {
+      "id": "27890cbb-57b0-454f-b13f-1e8bcc8c5f00",
+      "slug": "hobus-concept",
+      "title": "Hobus Concept em Itajaí | Empreendimento Guilherme Pilger",
+      "status": "published",
+      "development_name": "Hobus Concept",
+      "source_condominium_name": "Hobus Concept",
+      "city": "Itajaí",
+      "location_name": "Praia Brava, Itajaí - SC",
+      "unit_count": 2,
+      "active_gallery_source": "content.custom_gallery",
+      "active_gallery_count": 11,
+      "active_gallery_unit_matches": 0,
+      "active_gallery_unit_match_ratio": 0,
+      "hero_image": "https://b5.casteldigital.com.br/gabrielcerteiro/ig/im/imoveis/474/img_2455-1765811428177.jpeg",
+      "hero_matches_unit_image": false,
+      "hero_matched_unit": "",
+      "unit_label_gallery": false,
+      "custom_gallery_count": 11,
+      "development_gallery_count": 11,
+      "unit_image_count": 9,
+      "generic_description": false,
+      "generic_benefits": false,
+      "missing_development_copy": false,
+      "thin_description": false,
+      "missing_benefits": false,
+      "missing_differentials": false,
+      "missing_faq": false,
+      "description_excerpt": "O Hobus Concept foi revisado como condominio frente mar na Praia Brava de Itajai, com referencia na Avenida Jose Medeiros Vieira, 1434. As fontes indicam residencias de alto...",
+      "benefit_excerpt": "Frente mar na Praia Brava Fontes indicam localizacao na Avenida Jose Medeiros Vieira, eixo frente mar da Praia Brava. Residencias amplas Ofertas de mercado citam tipologias com...",
+      "faq_excerpt": "",
+      "search_queries": [
+        "\"Hobus Concept\" empreendimento Itajaí",
+        "\"Hobus Concept\" condominio Itajaí",
+        "\"Hobus Concept\" construtora incorporadora",
+        "\"Hobus Concept\" \"Praia Brava, Itajaí - SC\""
+      ],
+      "image_matches": [],
+      "aliases": [
+        "Hobus Concept"
+      ],
+      "metadata": {
+        "version": "",
+        "generated_by": "generate-development-landing-pages",
+        "source_column": "condominium_name"
+      },
+      "created_at": "2026-07-06T16:00:18.448766+00:00",
+      "updated_at": "2026-07-15T18:19:47.6+00:00",
+      "priority": "OK",
+      "recommended_action": "Sem acao prioritaria detectada nesta auditoria automatica.",
+      "needs_web_research": false
+    },
+    {
+      "id": "546312fc-7f81-4927-9ae7-eba44226fdcc",
+      "slug": "135-jardins",
+      "title": "135 Jardins em Balneário Camboriú | Empreendimento Guilherme Pilger",
+      "status": "published",
+      "development_name": "135 Jardins",
+      "source_condominium_name": "135 Jardins",
+      "city": "Balneário Camboriú",
+      "location_name": "Centro, Balneário Camboriú - SC",
+      "unit_count": 1,
+      "active_gallery_source": "content.custom_gallery",
+      "active_gallery_count": 18,
+      "active_gallery_unit_matches": 0,
+      "active_gallery_unit_match_ratio": 0,
+      "hero_image": "https://lancamento.invexo.com.br/wp-content/uploads/2025/12/135-jardins-lancamento-102-001.jpg",
+      "hero_matches_unit_image": false,
+      "hero_matched_unit": "",
+      "unit_label_gallery": false,
+      "custom_gallery_count": 18,
+      "development_gallery_count": 18,
+      "unit_image_count": 8,
+      "generic_description": false,
+      "generic_benefits": false,
+      "missing_development_copy": false,
+      "thin_description": false,
+      "missing_benefits": false,
+      "missing_differentials": false,
+      "missing_faq": false,
+      "description_excerpt": "O 135 Jardins foi atualizado como empreendimento Silva Packer no Centro de Balneario Camboriu, com arquitetura assinada por Rodrigo Kirck e reconhecimento internacional em...",
+      "benefit_excerpt": "Projeto reconhecido Fontes de premiacao e mercado destacam o projeto arquitetonico do 135 Jardins. Silva Packer no Centro A construtora informa torre de 40 pavimentos, 62...",
+      "faq_excerpt": "",
+      "search_queries": [
+        "\"135 Jardins\" empreendimento Balneário Camboriú",
+        "\"135 Jardins\" condominio Balneário Camboriú",
+        "\"135 Jardins\" construtora incorporadora",
+        "\"135 Jardins\" \"Centro, Balneário Camboriú - SC\""
+      ],
+      "image_matches": [],
+      "aliases": [
+        "135 Jardins"
+      ],
+      "metadata": {
+        "version": "",
+        "generated_by": "generate-development-landing-pages",
+        "source_column": "condominium_name"
+      },
+      "created_at": "2026-07-06T16:00:16.987549+00:00",
+      "updated_at": "2026-07-15T18:19:47.6+00:00",
+      "priority": "OK",
+      "recommended_action": "Sem acao prioritaria detectada nesta auditoria automatica.",
+      "needs_web_research": false
+    },
+    {
+      "id": "16b3af8c-ef35-48ee-9922-0a18de45409b",
+      "slug": "abu-dhabi-residence",
+      "title": "Abu Dhabi Residence em Itapema | Empreendimento Guilherme Pilger",
+      "status": "published",
+      "development_name": "Abu Dhabi Residence",
+      "source_condominium_name": "Abu Dhabi Residence",
+      "city": "Itapema",
+      "location_name": "Meia Praia, Itapema - SC",
+      "unit_count": 1,
+      "active_gallery_source": "content.custom_gallery",
+      "active_gallery_count": 15,
+      "active_gallery_unit_matches": 0,
+      "active_gallery_unit_match_ratio": 0,
+      "hero_image": "https://centralcorretor.s3.sa-east-1.amazonaws.com/protected/us-east-1:972b7fd7-3c00-411b-85fb-279ff0c52c81/acce0527-269a-459d-81ca-110d9159f9e0_xl.webp",
+      "hero_matches_unit_image": false,
+      "hero_matched_unit": "",
+      "unit_label_gallery": false,
+      "custom_gallery_count": 15,
+      "development_gallery_count": 15,
+      "unit_image_count": 8,
+      "generic_description": false,
+      "generic_benefits": false,
+      "missing_development_copy": false,
+      "thin_description": false,
+      "missing_benefits": false,
+      "missing_differentials": false,
+      "missing_faq": false,
+      "description_excerpt": "O Abu Dhabi Residence foi revisado como empreendimento Santana Construtora em Meia Praia, Itapema, com frente para a Avenida Nereu Ramos e inspiracao no Oriente Medio. A fonte...",
+      "benefit_excerpt": "Assinatura Santana A pagina oficial apresenta o Abu Dhabi Residence como empreendimento da Santana Construtora. Meia Praia perto do mar Fontes citam frente avenida, vista...",
+      "faq_excerpt": "",
+      "search_queries": [
+        "\"Abu Dhabi Residence\" empreendimento Itapema",
+        "\"Abu Dhabi Residence\" condominio Itapema",
+        "\"Abu Dhabi Residence\" construtora incorporadora",
+        "\"Abu Dhabi Residence\" \"Meia Praia, Itapema - SC\""
+      ],
+      "image_matches": [],
+      "aliases": [
+        "Abu Dhabi Residence"
+      ],
+      "metadata": {
+        "version": "",
+        "generated_by": "generate-development-landing-pages",
+        "source_column": "condominium_name"
+      },
+      "created_at": "2026-07-06T16:00:16.987549+00:00",
+      "updated_at": "2026-07-15T18:19:47.6+00:00",
+      "priority": "OK",
+      "recommended_action": "Sem acao prioritaria detectada nesta auditoria automatica.",
+      "needs_web_research": false
+    },
+    {
+      "id": "9e429b29-64f2-4ee0-b008-4234f6d23ec2",
+      "slug": "accendis-home-living",
+      "title": "Accendis Home Living em Itapema | Empreendimento Guilherme Pilger",
+      "status": "published",
+      "development_name": "Accendis Home Living",
+      "source_condominium_name": "Accendis Home Living",
+      "city": "Itapema",
+      "location_name": "Centro, Itapema - SC",
+      "unit_count": 1,
+      "active_gallery_source": "content.custom_gallery",
+      "active_gallery_count": 13,
+      "active_gallery_unit_matches": 0,
+      "active_gallery_unit_match_ratio": 0,
+      "hero_image": "https://s01.jetimgs.com/trvAWQHuYcArjvEQTh3fetAUCuJnYRnnAUdj7xXosmDo7cPeoFpYQeV2YosZqUT8DT9WlDJimbnl_oBSCIGRVC_0qbWBp7TM1n--RewdGTkW85jVMpWQD8OJvMkbXNvbnhk2b8TVhgg/Fachada+%7C+Accendis+Home+Living.jpg",
+      "hero_matches_unit_image": false,
+      "hero_matched_unit": "",
+      "unit_label_gallery": false,
+      "custom_gallery_count": 13,
+      "development_gallery_count": 13,
+      "unit_image_count": 8,
+      "generic_description": false,
+      "generic_benefits": false,
+      "missing_development_copy": false,
+      "thin_description": false,
+      "missing_benefits": false,
+      "missing_differentials": false,
+      "missing_faq": false,
+      "description_excerpt": "O Accendis Home Living foi revisado como empreendimento ARS Kammer no Centro de Itapema, com linguagem contemporanea, fachada marcada por linhas verticais e areas comuns de...",
+      "benefit_excerpt": "ARS Kammer em Itapema O empreendimento e associado a ARS Kammer e ao Centro de Itapema. Areas comuns sofisticadas Hall, piscinas, spa, gourmet, playground, quadra e espacos de...",
+      "faq_excerpt": "",
+      "search_queries": [
+        "\"Accendis Home Living\" empreendimento Itapema",
+        "\"Accendis Home Living\" condominio Itapema",
+        "\"Accendis Home Living\" construtora incorporadora",
+        "\"Accendis Home Living\" \"Centro, Itapema - SC\""
+      ],
+      "image_matches": [],
+      "aliases": [
+        "Accendis Home Living"
+      ],
+      "metadata": {
+        "version": "",
+        "generated_by": "generate-development-landing-pages",
+        "source_column": "condominium_name"
+      },
+      "created_at": "2026-07-06T16:00:16.987549+00:00",
+      "updated_at": "2026-07-15T18:19:47.6+00:00",
+      "priority": "OK",
+      "recommended_action": "Sem acao prioritaria detectada nesta auditoria automatica.",
+      "needs_web_research": false
+    },
+    {
+      "id": "ea47e35d-6bec-4841-ab43-941f6bc7f2c4",
+      "slug": "acqua-blue-residence",
+      "title": "Acqua Blue Residence em Itapema | Empreendimento Guilherme Pilger",
+      "status": "published",
+      "development_name": "Acqua Blue Residence",
+      "source_condominium_name": "Acqua Blue Residence",
+      "city": "Itapema",
+      "location_name": "Meia Praia, Itapema - SC",
+      "unit_count": 1,
+      "active_gallery_source": "content.custom_gallery",
+      "active_gallery_count": 15,
+      "active_gallery_unit_matches": 0,
+      "active_gallery_unit_match_ratio": 0,
+      "hero_image": "https://b3.casteldigital.com.br/guilhermepilger/ig/il/imoveis/179/017-16236809604044.jpeg",
+      "hero_matches_unit_image": false,
+      "hero_matched_unit": "",
+      "unit_label_gallery": false,
+      "custom_gallery_count": 15,
+      "development_gallery_count": 15,
+      "unit_image_count": 8,
+      "generic_description": false,
+      "generic_benefits": false,
+      "missing_development_copy": false,
+      "thin_description": false,
+      "missing_benefits": false,
+      "missing_differentials": false,
+      "missing_faq": false,
+      "description_excerpt": "O Acqua Blue Residence foi revisado como empreendimento ARS Kammer em Meia Praia, Itapema. As fontes de mercado indicam localizacao a menos de 150 metros do mar em algumas...",
+      "benefit_excerpt": "ARS Kammer em Meia Praia O empreendimento e associado a ARS Kammer e a Meia Praia, em Itapema. Proximo ao mar Fontes de mercado indicam distancia inferior a 150 metros da praia...",
+      "faq_excerpt": "",
+      "search_queries": [
+        "\"Acqua Blue Residence\" empreendimento Itapema",
+        "\"Acqua Blue Residence\" condominio Itapema",
+        "\"Acqua Blue Residence\" construtora incorporadora",
+        "\"Acqua Blue Residence\" \"Meia Praia, Itapema - SC\""
+      ],
+      "image_matches": [],
+      "aliases": [
+        "Acqua Blue Residence"
+      ],
+      "metadata": {
+        "version": "",
+        "generated_by": "generate-development-landing-pages",
+        "source_column": "condominium_name"
+      },
+      "created_at": "2026-07-06T16:00:16.987549+00:00",
+      "updated_at": "2026-07-15T18:19:47.6+00:00",
+      "priority": "OK",
+      "recommended_action": "Sem acao prioritaria detectada nesta auditoria automatica.",
+      "needs_web_research": false
+    },
+    {
+      "id": "9bd61193-e465-4500-8f4c-d1971d4994d1",
+      "slug": "aguas-cristalinas",
+      "title": "Águas Cristalinas em Itapema | Empreendimento Guilherme Pilger",
+      "status": "published",
+      "development_name": "Águas Cristalinas",
+      "source_condominium_name": "Águas Cristalinas",
+      "city": "Itapema",
+      "location_name": "Meia Praia, Itapema - SC",
+      "unit_count": 1,
+      "active_gallery_source": "content.custom_gallery",
+      "active_gallery_count": 17,
+      "active_gallery_unit_matches": 0,
+      "active_gallery_unit_match_ratio": 0,
+      "hero_image": "https://d78txhfo8gp8r.cloudfront.net/imoveispra/img_vendas/g1_475_27750_1115_260324.webp",
+      "hero_matches_unit_image": false,
+      "hero_matched_unit": "",
+      "unit_label_gallery": false,
+      "custom_gallery_count": 17,
+      "development_gallery_count": 17,
+      "unit_image_count": 8,
+      "generic_description": false,
+      "generic_benefits": false,
+      "missing_development_copy": false,
+      "thin_description": false,
+      "missing_benefits": false,
+      "missing_differentials": false,
+      "missing_faq": false,
+      "description_excerpt": "O Aguas Cristalinas foi revisado como residencial em Meia Praia, Itapema, com referencia de endereco na Rua 220, 348 em algumas fontes. A Imobille destaca localizacao a cerca...",
+      "benefit_excerpt": "Meia Praia perto da orla A Imobille informa localizacao em Meia Praia a cerca de 350 metros da praia. 970 m2 de lazer Fontes complementares citam piscina, kids, academia,...",
+      "faq_excerpt": "",
+      "search_queries": [
+        "\"Águas Cristalinas\" empreendimento Itapema",
+        "\"Águas Cristalinas\" condominio Itapema",
+        "\"Águas Cristalinas\" construtora incorporadora",
+        "\"Águas Cristalinas\" \"Meia Praia, Itapema - SC\""
+      ],
+      "image_matches": [],
+      "aliases": [
+        "Águas Cristalinas"
+      ],
+      "metadata": {
+        "version": "",
+        "generated_by": "generate-development-landing-pages",
+        "source_column": "condominium_name"
+      },
+      "created_at": "2026-07-06T16:00:16.987549+00:00",
+      "updated_at": "2026-07-15T18:19:47.6+00:00",
+      "priority": "OK",
+      "recommended_action": "Sem acao prioritaria detectada nesta auditoria automatica.",
+      "needs_web_research": false
+    },
+    {
+      "id": "2063a45a-1744-46f0-b742-dca1c82abee1",
+      "slug": "al-mare-residence",
+      "title": "Al Mare Residence em Itapema | Empreendimento Guilherme Pilger",
+      "status": "published",
+      "development_name": "Al Mare Residence",
+      "source_condominium_name": "Al Mare Residence",
+      "city": "Itapema",
+      "location_name": "Centro, Itapema - SC",
+      "unit_count": 1,
+      "active_gallery_source": "content.custom_gallery",
+      "active_gallery_count": 20,
+      "active_gallery_unit_matches": 0,
+      "active_gallery_unit_match_ratio": 0,
+      "hero_image": "https://d78txhfo8gp8r.cloudfront.net/santa/img_edificios/m1_26_405_2224_100222.jpg",
+      "hero_matches_unit_image": false,
+      "hero_matched_unit": "",
+      "unit_label_gallery": false,
+      "custom_gallery_count": 20,
+      "development_gallery_count": 20,
+      "unit_image_count": 8,
+      "generic_description": false,
+      "generic_benefits": false,
+      "missing_development_copy": false,
+      "thin_description": false,
+      "missing_benefits": false,
+      "missing_differentials": false,
+      "missing_faq": false,
+      "description_excerpt": "O Al Mare Residence foi atualizado como empreendimento Pasqualotto no Centro de Itapema, com endereco de referencia na Avenida Nereu Ramos, 697 segundo a MySide. Fontes de...",
+      "benefit_excerpt": "Pasqualotto em Itapema Fontes associam o Al Mare Residence a Construtora Pasqualotto. Centro e orla A MySide indica endereco de referencia na Avenida Nereu Ramos, Centro de...",
+      "faq_excerpt": "",
+      "search_queries": [
+        "\"Al Mare Residence\" empreendimento Itapema",
+        "\"Al Mare Residence\" condominio Itapema",
+        "\"Al Mare Residence\" construtora incorporadora",
+        "\"Al Mare Residence\" \"Centro, Itapema - SC\""
+      ],
+      "image_matches": [],
+      "aliases": [
+        "Al Mare Residence"
+      ],
+      "metadata": {
+        "version": "",
+        "generated_by": "generate-development-landing-pages",
+        "source_column": "condominium_name"
+      },
+      "created_at": "2026-07-06T16:00:16.987549+00:00",
+      "updated_at": "2026-07-15T18:19:47.6+00:00",
+      "priority": "OK",
+      "recommended_action": "Sem acao prioritaria detectada nesta auditoria automatica.",
+      "needs_web_research": false
+    }
+  ]
+}
