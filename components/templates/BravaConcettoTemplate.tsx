@@ -41,6 +41,7 @@ import WhatsAppCaptureLink from '@/components/common/WhatsAppCaptureLink'
 import PropertyDesktopMediaShowcase from '@/components/property/PropertyDesktopMediaShowcase'
 import PropertyBrokerAvatar from '@/components/property/PropertyBrokerAvatar'
 import PropertyLocationMap, { type PropertyLocationMapProperty } from '@/components/property/PropertyLocationMap'
+import PropertyMobileMapPreview from '@/components/property/PropertyMobileMapPreview'
 import PropertyNearbyBenefits from '@/components/property/PropertyNearbyBenefits'
 import PropertyLandingMobileMenu from '@/components/property/PropertyLandingMobileMenu'
 import PropertyMobileDetailSheet from '@/components/property/PropertyMobileDetailSheet'
@@ -1172,6 +1173,14 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
         () => developmentMobileGallery.map(item => item.image).filter(Boolean),
         [developmentMobileGallery]
     )
+    const developmentMobileMediaBeforeLocation = useMemo(
+        () => developmentLatLng ? developmentMobileGallery.slice(0, 2) : developmentMobileGallery,
+        [developmentLatLng, developmentMobileGallery]
+    )
+    const developmentMobileMediaAfterLocation = useMemo(
+        () => developmentLatLng ? developmentMobileGallery.slice(2) : [],
+        [developmentLatLng, developmentMobileGallery]
+    )
 
     useEffect(() => {
         if (!locationModal) return
@@ -1312,7 +1321,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     <section className="plp-mobile-sheet-experience bc-dev-mobile-sheet-experience">
                         <PropertyMobileDetailSheet
                             media={(
-                                <div className="plp-mobile-media-feed bc-dev-mobile-media-feed" aria-label={`Fotos do empreendimento ${activeDev.name}`}>
+                                <div className="plp-mobile-media-feed bc-dev-mobile-media-feed" aria-label={`Fotos, mapa e Street View do empreendimento ${activeDev.name}`}>
                                     <div className="plp-mobile-media-controls">
                                         <Link href="/busca" className="plp-mobile-back-pill" aria-label="Voltar para busca">
                                             <ChevronLeft size={23} />
@@ -1325,9 +1334,23 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                                         </div>
                                     </div>
 
-                                    {developmentMobileGallery.map((item, index) => (
+                                    {developmentMobileMediaBeforeLocation.map((item, index) => (
                                         <figure className="plp-mobile-media-item bc-dev-mobile-media-item" key={`${item.image}-${index}`}>
                                             <img src={item.image} alt={`${activeDev.name} - ${item.title}`} loading={index === 0 ? 'eager' : 'lazy'} referrerPolicy="no-referrer" />
+                                            <figcaption className="plp-mobile-status-pill">
+                                                <Camera size={13} />
+                                                {item.category || 'Empreendimento'}
+                                            </figcaption>
+                                        </figure>
+                                    ))}
+
+                                    {developmentLatLng && (
+                                        <PropertyMobileMapPreview property={developmentLocationProperty} latLng={developmentLatLng} />
+                                    )}
+
+                                    {developmentMobileMediaAfterLocation.map((item, index) => (
+                                        <figure className="plp-mobile-media-item bc-dev-mobile-media-item" key={`${item.image}-${index + developmentMobileMediaBeforeLocation.length}`}>
+                                            <img src={item.image} alt={`${activeDev.name} - ${item.title}`} loading="lazy" referrerPolicy="no-referrer" />
                                             <figcaption className="plp-mobile-status-pill">
                                                 <Camera size={13} />
                                                 {item.category || 'Empreendimento'}
