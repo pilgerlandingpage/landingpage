@@ -1,0 +1,741 @@
+{
+  "batch_id": "development-media-curation-p2-final-e-20260720",
+  "generated_at": "2026-07-20T01:32:53.360Z",
+  "items": [
+    {
+      "slug": "vivare-residence",
+      "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1624/001-s1-17468051648658.webp",
+      "description": "Vivare Residence teve a pagina revisada como empreendimento em Centro, Balneario Camboriu. As fontes indicam um empreendimento da RTeixeira na Rua 3250, em construcao, com lazer estruturado para uso coletivo. A galeria foi remontada com fachada, acesso, piscina rooftop, lounge externo, gourmet, playground, fitness, hall e terraco de convivencia, priorizando imagens que ajudam a reconhecer o predio e suas areas compartilhadas. A auditoria removeu interiores privados, plantas, retratos, logotipos isolados e registros sem aderencia ao condominio. O resultado substitui a copy automatica de unidade por uma leitura mais objetiva do condominio.",
+      "seo_description": "Vivare Residence em Centro, Balneario Camboriu, com fachada, piscina rooftop, gourmet, playground e fitness revisados para destacar o condominio.",
+      "gallery": [
+        {
+          "title": "Vivare Residence - fachada principal",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1624/001-s1-17468051648658.webp",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Vivare Residence - acesso e embasamento",
+          "category": "Acesso",
+          "image": "https://assets.apto.vc/img/2023/03/n9xcc6fj-vivare-residence-imagens-balneario-camboriu-gabarito-imobiliaria-1.jpg",
+          "source_url": "https://apto.vc/br/sc/balneario-camboriu/centro/vivare-residence",
+          "source_label": "Apto.vc"
+        },
+        {
+          "title": "Vivare Residence - piscina rooftop",
+          "category": "Piscina",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1624/003-s3-17468051648659.webp",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Vivare Residence - lounge externo",
+          "category": "Rooftop",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1624/004-s4-17468051648659.webp",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Vivare Residence - gourmet com vista",
+          "category": "Gourmet",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1624/005-s5-1746805164866.webp",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Vivare Residence - salao gourmet",
+          "category": "Gourmet",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1624/006-s6-1746805164866.webp",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Vivare Residence - playground",
+          "category": "Playground",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1624/008-s8-1746805164866.webp",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Vivare Residence - fitness",
+          "category": "Fitness",
+          "image": "https://b.casteldigital.com.br/flyimoveis/ig/im/imoveis/1452/academiajpg-name-6965e368c59f4d326c5c4f1a2f563e4eadc97337a0258a753079d03ab2ee0351-17152014530836.jpg",
+          "source_url": "https://www.flyimoveis.com.br/imovel/apartamento-no-edificio-vivare-residence-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-1452/",
+          "source_label": "Fly Imoveis"
+        },
+        {
+          "title": "Vivare Residence - hall social",
+          "category": "Hall",
+          "image": "https://b4.casteldigital.com.br/newimoveis/ig/im/imoveis/4066/whatsapp-image-2024-01-16-at-122632-17056687126755.jpeg",
+          "source_url": "https://www.newimoveis.net/imovel/apartamento-no-edificio-vivare-residence-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-4066/",
+          "source_label": "New Imoveis"
+        },
+        {
+          "title": "Vivare Residence - terraco convivio",
+          "category": "Convivencia",
+          "image": "https://b4.casteldigital.com.br/newimoveis/ig/im/imoveis/4066/whatsapp-image-2024-01-16-at-122634-1-17056687126737.jpeg",
+          "source_url": "https://www.newimoveis.net/imovel/apartamento-no-edificio-vivare-residence-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-4066/",
+          "source_label": "New Imoveis"
+        },
+        {
+          "title": "Vivare Residence - piscina apoio",
+          "category": "Piscina",
+          "image": "https://b4.casteldigital.com.br/newimoveis/ig/im/imoveis/4066/whatsapp-image-2024-01-16-at-122633-3-17056687126733.jpeg",
+          "source_url": "https://www.newimoveis.net/imovel/apartamento-no-edificio-vivare-residence-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-4066/",
+          "source_label": "New Imoveis"
+        },
+        {
+          "title": "Vivare Residence - gourmet apoio",
+          "category": "Gourmet",
+          "image": "https://b4.casteldigital.com.br/newimoveis/ig/im/imoveis/4066/whatsapp-image-2024-01-16-at-122632-1-17056687126752.jpeg",
+          "source_url": "https://www.newimoveis.net/imovel/apartamento-no-edificio-vivare-residence-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-4066/",
+          "source_label": "New Imoveis"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Endereco revisado",
+          "description": "Vivare Residence foi tratado em Centro, Balneario Camboriu, com endereco e bairro conferidos nas fontes publicas consultadas."
+        },
+        {
+          "icon": "Building2",
+          "title": "Identidade do empreendimento",
+          "description": "Empreendimento em construcao no Centro de Balneario Camboriu, com fachada marcada, piscina, gourmet, playground e fitness."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer em destaque",
+          "description": "A vitrine passa a mostrar fachada, piscina rooftop, gourmet, playground e fitness, todos ligados ao uso coletivo do condominio."
+        },
+        {
+          "icon": "Images",
+          "title": "Galeria auditada",
+          "description": "A selecao preserva fachada, acesso e lazer, retirando cenas de sala, cozinha, quarto e imagens de corretor."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Reconhecimento visual",
+          "description": "A primeira leitura agora apresenta fachada e acesso do Vivare Residence, facilitando a identificacao do empreendimento."
+        },
+        {
+          "title": "Contexto de mercado",
+          "description": "O texto passa a explicar a localizacao no Centro de Balneario Camboriu e o perfil de obra em construcao."
+        },
+        {
+          "title": "Criterio de imagem",
+          "description": "O acervo aberto mistura renders condominiais com interiores de unidade; a curadoria manteve somente areas compartilhadas e fachada."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Vivare Residence?",
+          "answer": "Vivare Residence foi revisado como empreendimento em Centro, Balneario Camboriu. As fontes cruzam a pagina com a Rua 3250, em Balneario Camboriu."
+        },
+        {
+          "question": "Qual construtora aparece ligada ao Vivare Residence?",
+          "answer": "Apto.vc e anuncios locais ligam o Vivare Residence a RTeixeira, com entrega prevista para dezembro de 2026."
+        },
+        {
+          "question": "O que a galeria mostra no Vivare Residence?",
+          "answer": "A galeria mostra fachada, acesso, piscina rooftop, lounge externo, gourmet, playground, fitness, hall e terraco de convivencia."
+        },
+        {
+          "question": "Como as imagens foram escolhidas?",
+          "answer": "Foram mantidas imagens de fachada, acesso, lazer e ambientes coletivos, descartando plantas, retratos, logotipos isolados e cenas privativas."
+        },
+        {
+          "question": "Quais fontes apoiaram a atualizacao?",
+          "answer": "Foram cruzadas Apto.vc, Fly Imoveis, New Imoveis, Giro Imoveis, VL Imobiliaria, Minha BC, LM Negocios e Praia Imoveis."
+        }
+      ],
+      "sources": [
+        "https://apto.vc/br/sc/balneario-camboriu/centro/vivare-residence",
+        "https://www.flyimoveis.com.br/imovel/apartamento-no-edificio-vivare-residence-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-1452/",
+        "https://www.newimoveis.net/imovel/apartamento-no-edificio-vivare-residence-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-4066/",
+        "https://www.giroimoveis.com.br/imovel/apartamento-no-edificio-vivare-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-692/",
+        "https://www.vlimobiliaria.com.br/imovel/apartamento-no-edificio-vivare-residence-balneario-camboriu-centro-3-quartos-3-garagens-venda-ref-256/",
+        "https://www.minhabcimoveis.com.br/imovel/apartamento-no-edificio-vivare-residence-balneario-camboriu-centro-3-quartos-2-garagens-venda-ref-3953/",
+        "https://www.lmnegociosimobiliarios.com.br/condominio/vivare-residence/367007",
+        "https://praiaimoveis.net.br/vivare-residence",
+        "https://www.guilhermepilger.com/"
+      ],
+      "notes": "Cautela com interiores de unidade e retratos de corretor; nome aparece tambem como Edificio Vivare Residence."
+    },
+    {
+      "slug": "vortex-tower",
+      "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1862/001-zig_fachada_c3_final-1752072492867.jpg",
+      "description": "Vortex Tower teve a pagina revisada como empreendimento em Balneario Pereque, Porto Belo. As fontes indicam um projeto da Zig Empreendimentos em Porto Belo, com perfil de alto padrao, 24 pavimentos e lazer completo. A galeria foi remontada com fachada, embasamento, fitness, jogos, gourmet, lounge, terraco, spa e piscina, priorizando imagens que ajudam a reconhecer o predio e suas areas compartilhadas. A auditoria removeu interiores privados, plantas, retratos, logotipos isolados e registros sem aderencia ao condominio. A pagina deixa de depender de copy gerada por unidade e passa a apresentar o condominio.",
+      "seo_description": "Vortex Tower em Balneario Pereque, Porto Belo, com fachada, fitness, jogos, gourmet, spa e piscina revisados para destacar o condominio.",
+      "gallery": [
+        {
+          "title": "Vortex Tower - fachada vertical",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1862/001-zig_fachada_c3_final-1752072492867.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Vortex Tower - embasamento",
+          "category": "Acesso",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1862/002-2d25108cf9932fc02d669beef6b274172f5752e349bd319e8fd676bdd3316e9e-17520724928668.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Vortex Tower - fachada do lancamento",
+          "category": "Fachada",
+          "image": "https://lancamentosemportobelo.com.br/wp-content/uploads/2025/05/VORTEX-TOWER-2.jpg",
+          "source_url": "https://lancamentosemportobelo.com.br/lancamentos/vortex-tower/",
+          "source_label": "Lancamentos em Porto Belo"
+        },
+        {
+          "title": "Vortex Tower - fitness",
+          "category": "Fitness",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1862/003-whatsapp_image_2024-05-20_at_142608_10-17520724928668.jpeg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Vortex Tower - jogos",
+          "category": "Jogos",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1862/004-whatsapp_image_2024-05-20_at_142608_11-17520724928669.jpeg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Vortex Tower - gourmet externo",
+          "category": "Gourmet",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1862/005-whatsapp_image_2024-05-20_at_142608_12-17520724928669.jpeg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Vortex Tower - lounge comum",
+          "category": "Convivencia",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1862/006-whatsapp_image_2024-05-20_at_142608_13-17520724928669.jpeg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Vortex Tower - terraco gourmet",
+          "category": "Rooftop",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1862/007-zig_gourmet_final_-_copia-1752072492867.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Vortex Tower - lounge externo",
+          "category": "Convivencia",
+          "image": "https://lancamentosemportobelo.com.br/wp-content/uploads/2025/05/VORTEX-TOWER-7-1024x576.jpg",
+          "source_url": "https://lancamentosemportobelo.com.br/lancamentos/vortex-tower/",
+          "source_label": "Lancamentos em Porto Belo"
+        },
+        {
+          "title": "Vortex Tower - fitness apoio",
+          "category": "Fitness",
+          "image": "https://lancamentosemportobelo.com.br/wp-content/uploads/2025/05/VORTEX-TOWER-1.jpeg",
+          "source_url": "https://lancamentosemportobelo.com.br/lancamentos/vortex-tower/",
+          "source_label": "Lancamentos em Porto Belo"
+        },
+        {
+          "title": "Vortex Tower - spa externo",
+          "category": "Spa",
+          "image": "https://lancamentosemportobelo.com.br/wp-content/uploads/2025/05/VORTEX-TOWER-8.jpg",
+          "source_url": "https://lancamentosemportobelo.com.br/lancamentos/vortex-tower/",
+          "source_label": "Lancamentos em Porto Belo"
+        },
+        {
+          "title": "Vortex Tower - piscina",
+          "category": "Piscina",
+          "image": "https://lancamentosemportobelo.com.br/wp-content/uploads/2025/05/VORTEX-TOWER-6.jpg",
+          "source_url": "https://lancamentosemportobelo.com.br/lancamentos/vortex-tower/",
+          "source_label": "Lancamentos em Porto Belo"
+        },
+        {
+          "title": "Vortex Tower - jogos apoio",
+          "category": "Jogos",
+          "image": "https://lancamentosemportobelo.com.br/wp-content/uploads/2025/05/VORTEX-TOWER-2.jpeg",
+          "source_url": "https://lancamentosemportobelo.com.br/lancamentos/vortex-tower/",
+          "source_label": "Lancamentos em Porto Belo"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Endereco revisado",
+          "description": "Vortex Tower foi tratado em Balneario Pereque, Porto Belo, com endereco e bairro conferidos nas fontes publicas consultadas."
+        },
+        {
+          "icon": "Building2",
+          "title": "Identidade do empreendimento",
+          "description": "Torre de alto padrao no Balneario Pereque, com fachada contemporanea e areas comuns de lazer e convivencia."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer em destaque",
+          "description": "A vitrine passa a mostrar fachada, fitness, jogos, gourmet, spa e piscina, todos ligados ao uso coletivo do condominio."
+        },
+        {
+          "icon": "Images",
+          "title": "Galeria auditada",
+          "description": "Foram mantidos fachada, embasamento, fitness, jogos, gourmet, lounge, spa e piscina; imagens de outro produto da Zig ficaram fora."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Reconhecimento visual",
+          "description": "A primeira leitura agora apresenta fachada vertical e lazer do Vortex Tower, facilitando a identificacao do empreendimento."
+        },
+        {
+          "title": "Contexto de mercado",
+          "description": "O texto passa a reforcar a leitura de Porto Belo, a assinatura Zig e o bloco de lazer do empreendimento."
+        },
+        {
+          "title": "Criterio de imagem",
+          "description": "A pagina geral da Zig mistura Vortex com outros projetos; a selecao usou sementes atuais e fontes dedicadas ao Vortex."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Vortex Tower?",
+          "answer": "Vortex Tower foi revisado como empreendimento em Balneario Pereque, Porto Belo. As fontes o posicionam no Balneario Pereque, com foco em proximidade com o mar."
+        },
+        {
+          "question": "Qual construtora aparece ligada ao Vortex Tower?",
+          "answer": "Zig Construtora e Lancamentos Porto Belo apontam o Vortex Tower como empreendimento da Zig Empreendimentos."
+        },
+        {
+          "question": "O que a galeria mostra no Vortex Tower?",
+          "answer": "A galeria mostra fachada, embasamento, fitness, jogos, gourmet, lounge, terraco, spa e piscina."
+        },
+        {
+          "question": "Como as imagens foram escolhidas?",
+          "answer": "Foram mantidas imagens de fachada, acesso, lazer e ambientes coletivos, descartando plantas, retratos, logotipos isolados e cenas privativas."
+        },
+        {
+          "question": "Quais fontes apoiaram a atualizacao?",
+          "answer": "Foram cruzadas Zig Construtora, Lancamentos em Porto Belo, Lancamentos Porto Belo, Imobille, Vitapema e Urbaniza Imob."
+        }
+      ],
+      "sources": [
+        "https://zigconstrutora.com.br/empreendimentos/",
+        "https://lancamentosemportobelo.com.br/lancamentos/vortex-tower/",
+        "https://www.lancamentosportobelo.com.br/lancamentos/vortex-tower/",
+        "https://www.imobillenegocios.com.br/empreendimento/vortex-tower-EM21212",
+        "https://www.vitapema.com.br/imovel/venda-apartamentos-04-dormitorio-em-itapema/vortex-tower/5322",
+        "https://www.urbanizaimob.com.br/imovel/vortex-tower-vista-mar-porto-belo-pereque-4-suites-e-3-vagas-165-m-490-m-de-lazer-45863",
+        "https://www.guilhermepilger.com/"
+      ],
+      "notes": "Cautela por acervo misturado em fonte institucional da Zig; descartar imagens de Vogue, logos, veiculos e interiores privados."
+    },
+    {
+      "slug": "wine-tower",
+      "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1864/001-fachada-17520820644067.jpg",
+      "description": "Wine Tower teve a pagina revisada como empreendimento em Balneario Pereque, Porto Belo. As fontes indicam um lancamento da Zig Empreendimentos inspirado no universo do vinho, com endereco no Pereque e entrega prevista para dezembro de 2030. A galeria foi remontada com fachada, piscina rooftop, piscina coberta, deck, solarium, jogos, adega, gourmet, fitness e kids, priorizando imagens que ajudam a reconhecer o predio e suas areas compartilhadas. A auditoria removeu interiores privados, plantas, retratos, logotipos isolados e registros sem aderencia ao condominio. A pagina passa a comunicar o conceito do empreendimento e suas areas comuns.",
+      "seo_description": "Wine Tower em Balneario Pereque, Porto Belo, com fachada, piscinas, adega, gourmet, fitness e kids revisados para destacar o condominio.",
+      "gallery": [
+        {
+          "title": "Wine Tower - fachada iluminada",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1864/001-fachada-17520820644067.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Wine Tower - fachada detalhe",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1864/002-fachada_1-17520820644066.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Wine Tower - fachada conceito",
+          "category": "Fachada",
+          "image": "https://zigconstrutora.com.br/wp-content/uploads/2025/03/cobertura-1-1.jpg",
+          "source_url": "https://zigconstrutora.com.br/wine-tower/",
+          "source_label": "Zig Construtora"
+        },
+        {
+          "title": "Wine Tower - piscina rooftop",
+          "category": "Piscina",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1864/003-7-17520820644062.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Wine Tower - deck piscina",
+          "category": "Rooftop",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1864/004-8-17520820644062.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Wine Tower - piscina coberta",
+          "category": "Piscina",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1864/005-9-17520820644063.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Wine Tower - lounge externo",
+          "category": "Convivencia",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1864/006-10-17520820644063.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Wine Tower - solarium",
+          "category": "Rooftop",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1864/007-11-17520820644063.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Wine Tower - jogos wine bar",
+          "category": "Jogos",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1864/008-12-17520820644063.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Wine Tower - adega subterranea",
+          "category": "Adega",
+          "image": "https://zigconstrutora.com.br/wp-content/uploads/2025/03/adega-1.jpg",
+          "source_url": "https://zigconstrutora.com.br/wine-tower/",
+          "source_label": "Zig Construtora"
+        },
+        {
+          "title": "Wine Tower - gourmet panoramico",
+          "category": "Gourmet",
+          "image": "https://zigconstrutora.com.br/wp-content/uploads/2025/05/wine-7.jpg",
+          "source_url": "https://zigconstrutora.com.br/wine-tower/",
+          "source_label": "Zig Construtora"
+        },
+        {
+          "title": "Wine Tower - fitness",
+          "category": "Fitness",
+          "image": "https://zigconstrutora.com.br/wp-content/uploads/2025/05/wine-15.jpg",
+          "source_url": "https://zigconstrutora.com.br/wine-tower/",
+          "source_label": "Zig Construtora"
+        },
+        {
+          "title": "Wine Tower - kids",
+          "category": "Kids",
+          "image": "https://zigconstrutora.com.br/wp-content/uploads/2025/05/wine-14.jpg",
+          "source_url": "https://zigconstrutora.com.br/wine-tower/",
+          "source_label": "Zig Construtora"
+        },
+        {
+          "title": "Wine Tower - adega apoio",
+          "category": "Adega",
+          "image": "https://zigconstrutora.com.br/wp-content/uploads/2025/05/wine-16.jpg",
+          "source_url": "https://zigconstrutora.com.br/wine-tower/",
+          "source_label": "Zig Construtora"
+        },
+        {
+          "title": "Wine Tower - wine lockers",
+          "category": "Adega",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/05/Wine-Tower-11.jpg",
+          "source_url": "https://www.lancamentosportobelo.com.br/lancamentos/wine-tower/",
+          "source_label": "Lancamentos Porto Belo"
+        },
+        {
+          "title": "Wine Tower - entrada da adega",
+          "category": "Adega",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/05/Wine-Tower-18.jpg",
+          "source_url": "https://www.lancamentosportobelo.com.br/lancamentos/wine-tower/",
+          "source_label": "Lancamentos Porto Belo"
+        },
+        {
+          "title": "Wine Tower - fitness apoio",
+          "category": "Fitness",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/05/Wine-Tower-19.jpg",
+          "source_url": "https://www.lancamentosportobelo.com.br/lancamentos/wine-tower/",
+          "source_label": "Lancamentos Porto Belo"
+        },
+        {
+          "title": "Wine Tower - piscina coberta apoio",
+          "category": "Piscina",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/05/Wine-Tower-7.jpg",
+          "source_url": "https://www.lancamentosportobelo.com.br/lancamentos/wine-tower/",
+          "source_label": "Lancamentos Porto Belo"
+        },
+        {
+          "title": "Wine Tower - deck rooftop",
+          "category": "Rooftop",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/05/Wine-Tower-23.jpg",
+          "source_url": "https://www.lancamentosportobelo.com.br/lancamentos/wine-tower/",
+          "source_label": "Lancamentos Porto Belo"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Endereco revisado",
+          "description": "Wine Tower foi tratado em Balneario Pereque, Porto Belo, com endereco e bairro conferidos nas fontes publicas consultadas."
+        },
+        {
+          "icon": "Building2",
+          "title": "Identidade do empreendimento",
+          "description": "Projeto de alto padrao no Balneario Pereque, com fachada marcante, areas de lazer e adega subterranea para uso dos moradores."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer em destaque",
+          "description": "A vitrine passa a mostrar fachada, piscinas, adega, gourmet, fitness e kids, todos ligados ao uso coletivo do condominio."
+        },
+        {
+          "icon": "Images",
+          "title": "Galeria auditada",
+          "description": "A selecao foca fachada, piscinas, adega, wine bar, gourmet, fitness e kids, descartando carros, equipe, icones e imagens de outro empreendimento."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Reconhecimento visual",
+          "description": "A primeira leitura agora apresenta fachada iluminada e conceito de adega do Wine Tower, facilitando a identificacao do empreendimento."
+        },
+        {
+          "title": "Contexto de mercado",
+          "description": "O texto conecta o nome Wine Tower ao conceito de adega e ao posicionamento no Pereque, sem depender de dados de uma unidade."
+        },
+        {
+          "title": "Criterio de imagem",
+          "description": "As fontes da Zig tambem trouxeram midia institucional e imagens de outro projeto; foram mantidos somente registros coerentes com Wine Tower."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Wine Tower?",
+          "answer": "Wine Tower foi revisado como empreendimento em Balneario Pereque, Porto Belo. MySide e fontes locais indicam a Rua Onesio Cadore, 57, no Pereque."
+        },
+        {
+          "question": "Qual construtora aparece ligada ao Wine Tower?",
+          "answer": "Zig Construtora, MySide e Lancamentos Porto Belo apresentam o Wine Tower como projeto da Zig Empreendimentos."
+        },
+        {
+          "question": "O que a galeria mostra no Wine Tower?",
+          "answer": "A galeria mostra fachada, piscina rooftop, piscina coberta, deck, solarium, jogos, adega, gourmet, fitness e kids."
+        },
+        {
+          "question": "Como as imagens foram escolhidas?",
+          "answer": "Foram mantidas imagens de fachada, acesso, lazer e ambientes coletivos, descartando plantas, retratos, logotipos isolados e cenas privativas."
+        },
+        {
+          "question": "Quais fontes apoiaram a atualizacao?",
+          "answer": "Foram cruzadas Zig Construtora, Lancamentos Porto Belo, MySide, Bonus Imoveis, Hora da Noticia e Rafael Quintana."
+        }
+      ],
+      "sources": [
+        "https://zigconstrutora.com.br/wine-tower/",
+        "https://www.lancamentosportobelo.com.br/lancamentos/wine-tower/",
+        "https://lancamentosemportobelo.com.br/lancamentos/wine-tower/",
+        "https://myside.com.br/apartamento-venda-wine-tower-porto-belo-sc",
+        "https://bonusimoveis.com/empreendimento/wine-tower-pereque-porto-belo-santa-catarina/",
+        "https://rafaelquintana.com.br/wine-tower",
+        "https://horadanoticialitoralsc.com.br/2025/03/24/zig-empreendimentos-inaugura-nova-sede-e-lanca-o-wine-tower/",
+        "https://www.guilhermepilger.com/"
+      ],
+      "notes": "Cautela com imagens institucionais da Zig, veiculos, Torre Eiffel decorativa, logos e candidatos de Vogue/Downtown."
+    },
+    {
+      "slug": "zion-tower",
+      "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1639/001-02_-_mago_fachada_c4_final-1747246611197.jpg",
+      "description": "Zion Tower teve a pagina revisada como empreendimento em Pereque, Porto Belo. As fontes indicam um empreendimento da Mago Empreendimentos no Pereque, com entrega prevista para dezembro de 2029 e lazer distribuido em areas comuns e rooftop. A galeria foi remontada com fachada, embasamento, salao, spa, academia, pub, kids, rooftop, piscinas, hall e playground, priorizando imagens que ajudam a reconhecer o predio e suas areas compartilhadas. A auditoria removeu interiores privados, plantas, retratos, logotipos isolados e registros sem aderencia ao condominio. A copy final identifica o condominio e troca a descricao automatica por conteudo verificavel.",
+      "seo_description": "Zion Tower em Pereque, Porto Belo, com fachada, rooftop, piscinas, spa, academia, pub e kids revisados para destacar o condominio.",
+      "gallery": [
+        {
+          "title": "Zion Tower - fachada principal",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1639/001-02_-_mago_fachada_c4_final-1747246611197.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Zion Tower - embasamento",
+          "category": "Acesso",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1639/002-01_-_mago_embasamento-17472466111968.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Zion Tower - fachada apoio",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1639/003-03_-_mago_fachada_c2_final-1747246611197.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Zion Tower - salao principal",
+          "category": "Gourmet",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1639/004-04_-_mago_salao_principal_c3-1747246611197.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Zion Tower - spa",
+          "category": "Spa",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1639/005-05_-_mago_spa_c3-17472466111971.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Zion Tower - academia",
+          "category": "Fitness",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1639/006-06_-_mago_academia_c3-17472466111971.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Zion Tower - pub",
+          "category": "Pub",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1639/007-07_-_mago_pub_c3-17472466111971.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Zion Tower - kids",
+          "category": "Kids",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1639/008-08_-_mago_kids_c3-17472466111972.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Zion Tower - rooftop lounge",
+          "category": "Rooftop",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/04/Zion-Tower-4-2.jpg",
+          "source_url": "https://www.lancamentosportobelo.com.br/lancamentos/zion-tower/",
+          "source_label": "Lancamentos Porto Belo"
+        },
+        {
+          "title": "Zion Tower - piscina noturna",
+          "category": "Piscina",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/04/Zion-Tower-13-2.jpg",
+          "source_url": "https://www.lancamentosportobelo.com.br/lancamentos/zion-tower/",
+          "source_label": "Lancamentos Porto Belo"
+        },
+        {
+          "title": "Zion Tower - piscina rooftop",
+          "category": "Piscina",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/04/Zion-Tower-32-2.jpg",
+          "source_url": "https://www.lancamentosportobelo.com.br/lancamentos/zion-tower/",
+          "source_label": "Lancamentos Porto Belo"
+        },
+        {
+          "title": "Zion Tower - piscina coberta",
+          "category": "Piscina",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/04/Zion-Tower-21-2.jpg",
+          "source_url": "https://www.lancamentosportobelo.com.br/lancamentos/zion-tower/",
+          "source_label": "Lancamentos Porto Belo"
+        },
+        {
+          "title": "Zion Tower - hall gourmet",
+          "category": "Hall",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/04/Zion-Tower-27-2.jpg",
+          "source_url": "https://www.lancamentosportobelo.com.br/lancamentos/zion-tower/",
+          "source_label": "Lancamentos Porto Belo"
+        },
+        {
+          "title": "Zion Tower - fitness apoio",
+          "category": "Fitness",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/04/Zion-Tower-28-2.jpg",
+          "source_url": "https://www.lancamentosportobelo.com.br/lancamentos/zion-tower/",
+          "source_label": "Lancamentos Porto Belo"
+        },
+        {
+          "title": "Zion Tower - kids apoio",
+          "category": "Kids",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/04/Zion-Tower-29-2.jpg",
+          "source_url": "https://www.lancamentosportobelo.com.br/lancamentos/zion-tower/",
+          "source_label": "Lancamentos Porto Belo"
+        },
+        {
+          "title": "Zion Tower - playground externo",
+          "category": "Playground",
+          "image": "https://pub-403b040f59b0416cb96ceca413b94173.r2.dev/wp-content/uploads/2025/04/Zion-Tower-7-2.jpg",
+          "source_url": "https://www.lancamentosportobelo.com.br/lancamentos/zion-tower/",
+          "source_label": "Lancamentos Porto Belo"
+        },
+        {
+          "title": "Zion Tower - fachada externa",
+          "category": "Fachada",
+          "image": "https://lancamentosemportobelo.com.br/wp-content/uploads/2025/04/Zion-Tower-18-2.jpg",
+          "source_url": "https://lancamentosemportobelo.com.br/lancamentos/zion-tower/",
+          "source_label": "Lancamentos em Porto Belo"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Endereco revisado",
+          "description": "Zion Tower foi tratado em Pereque, Porto Belo, com endereco e bairro conferidos nas fontes publicas consultadas."
+        },
+        {
+          "icon": "Building2",
+          "title": "Identidade do empreendimento",
+          "description": "Empreendimento no Pereque com fachada contemporanea, salao, spa, academia, pub, kids, rooftop e piscinas."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer em destaque",
+          "description": "A vitrine passa a mostrar fachada, rooftop, piscinas, spa, academia, pub e kids, todos ligados ao uso coletivo do condominio."
+        },
+        {
+          "icon": "Images",
+          "title": "Galeria auditada",
+          "description": "A selecao manteve fachada e areas comuns claras, excluindo plantas, mapas, logos isolados, imagens de outros projetos e dormitorios."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Reconhecimento visual",
+          "description": "A primeira leitura agora apresenta fachada e embasamento do Zion Tower, facilitando a identificacao do empreendimento."
+        },
+        {
+          "title": "Contexto de mercado",
+          "description": "A pagina passa a explicar o endereco no Pereque, a assinatura Mago e a proposta de lazer coletivo."
+        },
+        {
+          "title": "Criterio de imagem",
+          "description": "As paginas agregadoras traziam plantas e imagens de outros empreendimentos; somente imagens coerentes com Zion Tower foram escolhidas."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Zion Tower?",
+          "answer": "Zion Tower foi revisado como empreendimento em Pereque, Porto Belo. MySide e Versatil indicam Avenida Joao Manoel Jacques, 683, no Pereque."
+        },
+        {
+          "question": "Qual construtora aparece ligada ao Zion Tower?",
+          "answer": "Lancamentos Porto Belo, Versatil e fontes do empreendimento associam o Zion Tower a Mago Empreendimentos."
+        },
+        {
+          "question": "O que a galeria mostra no Zion Tower?",
+          "answer": "A galeria mostra fachada, embasamento, salao, spa, academia, pub, kids, rooftop, piscinas, hall e playground."
+        },
+        {
+          "question": "Como as imagens foram escolhidas?",
+          "answer": "Foram mantidas imagens de fachada, acesso, lazer e ambientes coletivos, descartando plantas, retratos, logotipos isolados e cenas privativas."
+        },
+        {
+          "question": "Quais fontes apoiaram a atualizacao?",
+          "answer": "Foram cruzadas Lancamentos Porto Belo, MySide, Nativo Imoveis, Versatil, Imoxs e Petry Imoveis."
+        }
+      ],
+      "sources": [
+        "https://www.lancamentosportobelo.com.br/lancamentos/zion-tower/",
+        "https://lancamentosemportobelo.com.br/lancamentos/zion-tower/",
+        "https://myside.com.br/apartamento-venda-zion-tower-porto-belo-sc",
+        "https://nativoimoveis.com.br/property/zion-tower/",
+        "https://imobiliariaversatil.com.br/edificios/zion-tower/porto-belo/pereque/934",
+        "https://imoxs.com.br/propriedade/5033-zion-tower-2-suites-pereque-porto-be/",
+        "https://www.petryimoveis.com.br/empreendimento/zion-tower-apartamentos-porto-belo-2-a-3-quartos-95-a-141-m/21668483-PETZ",
+        "https://www.guilhermepilger.com/"
+      ],
+      "notes": "Cautela com candidatos de Vittere Park, Jardim Moliere e Nouve que apareceram em pagina agregadora; descartar plantas."
+    }
+  ]
+}

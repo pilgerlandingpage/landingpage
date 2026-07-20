@@ -1,6 +1,6 @@
 # Auditoria de midia e copy dos empreendimentos
 
-Gerado em: 2026-07-19T17:43:02.951Z
+Gerado em: 2026-07-19T22:49:54.694Z
 
 ## Totais
 
@@ -8,12 +8,12 @@ Gerado em: 2026-07-19T17:43:02.951Z
 - Paginas de empreendimento: 800
 - P0 - imagem principal/galeria forte de unidade: 0
 - P1 - galeria com sinais de unidade: 0
-- P2 - copy incompleta ou generica: 170
-- OK automatico: 630
+- P2 - copy incompleta ou generica: 70
+- OK automatico: 730
 - Hero igual a imagem de unidade: 0
 - Galeria com imagem de unidade: 0
-- Descricao generica detectada: 170
-- Beneficios/diferenciais genericos detectados: 170
+- Descricao generica detectada: 70
+- Beneficios/diferenciais genericos detectados: 70
 
 ## Proximos lotes
 
@@ -27,46 +27,46 @@ Gerado em: 2026-07-19T17:43:02.951Z
 
 ### P2 - enriquecer conteudo
 
-- edificio-duo-residence | Edifício Duo Residence | unidades=0 | hero_unidade=nao | galeria_unidade=0/15 | copy_generica=sim
-- edificio-fiorano | Edifício Fiorano | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
-- edificio-granada | Edifício Granada | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
-- edificio-grand-unique | Edifício Grand Unique | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
-- edificio-green-home | Edifício Green Home | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
-- edificio-high-line | Edifício High Line | unidades=0 | hero_unidade=nao | galeria_unidade=0/14 | copy_generica=sim
-- edificio-isola-di-capri | Edificio Isola Di Capri | unidades=0 | hero_unidade=nao | galeria_unidade=0/16 | copy_generica=sim
-- edificio-mero | Edifício Mero | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
-- edificio-palm-coast | Edifício Palm Coast | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
-- edificio-plural | Edifício Plural | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
-- edificio-sonara-home | Edifício Sonara Home | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
-- edificio-soul-city | Edifício Soul City | unidades=0 | hero_unidade=nao | galeria_unidade=0/14 | copy_generica=sim
-- edificio-terrace-360 | Edifício Terrace 360° | unidades=0 | hero_unidade=nao | galeria_unidade=0/14 | copy_generica=sim
-- edififio-brava-park | Edifífio Brava Park | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
-- elegance-tower-residence | Elegance Tower Residence | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
-- emaar-exclusive | Emaar Exclusive | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
-- emmanuel-residence | Emmanuel Residence | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
-- esquina-central | Esquina Central | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
-- essenza-residence | Essenza Residence | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
-- exuberance-residence | Exuberance Residence | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
-- farol-ponta-do-mel | Farol Ponta do Mel | unidades=0 | hero_unidade=nao | galeria_unidade=0/14 | copy_generica=sim
-- flor-de-lotus | Flor de Lótus | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
-- fun-beach-park-residence | FUN Beach Park Residence | unidades=0 | hero_unidade=nao | galeria_unidade=0/4 | copy_generica=sim
-- futura | Futura | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
-- giuseppe-verdi | Giuseppe Verdi | unidades=0 | hero_unidade=nao | galeria_unidade=0/7 | copy_generica=sim
-- grand-mistral-towers | Grand Mistral Towers | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
-- habitah-praia-brava | Habitah Praia Brava | unidades=0 | hero_unidade=nao | galeria_unidade=0/14 | copy_generica=sim
-- hannover | Hannover | unidades=0 | hero_unidade=nao | galeria_unidade=0/14 | copy_generica=sim
-- helsinki-home | Helsinki Home | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
-- holmes-residence | Holmes Residence | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
-- home-square-residence | Home Square Residence | unidades=0 | hero_unidade=nao | galeria_unidade=0/14 | copy_generica=sim
-- iate-clube | Iate Clube | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
-- ilha-da-vitoria | Ilha da Vitória | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
-- ilha-de-capri | Ilha de Capri | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
-- ilha-de-galapagos | Ilha de Galápagos | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
-- ilha-di-cretta | Ilha di Cretta | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
-- ilhas-fiji-residence | Ilhas Fiji Residence | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
-- ilhas-maldivas | Ilhas Maldivas | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
-- illumine-residence | Illuminé Residence | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
-- imperador | imperador | unidades=0 | hero_unidade=nao | galeria_unidade=0/14 | copy_generica=sim
+- puerto-velero | Puerto Velero | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- punta-cana | Punta Cana | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- quadra-27-vivapark | Quadra 27 - VivaPark | unidades=0 | hero_unidade=nao | galeria_unidade=0/14 | copy_generica=sim
+- radial-concept | Radial Concept | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- raro-by-sierra | Raro by Sierra | unidades=0 | hero_unidade=nao | galeria_unidade=0/14 | copy_generica=sim
+- reis-village | Reis Village | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- residencial-alexandrita | Residencial Alexandrita | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- residencial-boulevard-dois-86 | Residencial Boulevard Dois 86 | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- residencial-cannes | Residencial Cannes | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- residencial-dimora-del-sole | Residencial Dimora del Sole | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- residencial-dos-ipes | Residencial dos Ipês | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- residencial-essence | Residencial Essence | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- residencial-malbec | Residencial Malbec | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- residencial-mar-azul-barra-norte | Residencial Mar Azul - Barra Norte | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- residencial-morro-dos-ventos | Residencial Morro dos Ventos | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- residencial-solare | Residencial Solare | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- residencial-spazio-del-mare | Residencial Spazio Del Mare | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- residencial-splendor | Residencial Splendor | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- rhodes | Rhodes | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- rio-siena | Rio Siena | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- riviera-del-mare | Riviera del Mare | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- roma-residenziale | Roma Residenziale | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- rosas-de-provence | Rosas de Provence | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- salt-praia-brava | Salt Praia Brava | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- san-blass | San Blass | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- san-marco | San Marco | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- san-telmo | San Telmo | unidades=0 | hero_unidade=nao | galeria_unidade=0/14 | copy_generica=sim
+- sancho-home-residence | Sancho Home Residence | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- sauer-residence | Sauer Residence | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- selenita | Selenitá | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- selenter-see | Selenter See | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- senses-residence | Senses Residence | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- silva | Silva | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- sistina-tower | Sistina Tower | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- soiree | Soirée | unidades=0 | hero_unidade=nao | galeria_unidade=0/14 | copy_generica=sim
+- sol-nascente | Sol Nascente | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- solar-de-guaruja | Solar de Guarujá | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- solar-di-capri | Solar di Capri | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- spazio-d-art-residence | Spazio DArt Residence | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
+- sunhaus-tower | Sunhaus Tower | unidades=0 | hero_unidade=nao | galeria_unidade=0/8 | copy_generica=sim
 
 ## Criterio automatico
 

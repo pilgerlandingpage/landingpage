@@ -1,0 +1,826 @@
+{
+  "batch_id": "development-media-curation-p2-final-b-20260720",
+  "generated_at": "2026-07-20T01:18:16.944Z",
+  "items": [
+    {
+      "slug": "venice-brava-house",
+      "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1395/001-fachada-noturna-venice-brava-house-570x500-17412887148978.jpg",
+      "description": "Venice Brava House teve a pagina revisada como empreendimento em Praia Brava, Itajai. As fontes da Incorposul mostram um projeto na Praia Brava com plantas compactas, mais de 2.000 m2 de lazer, rooftop no 34 andar e simulador de ondas como diferencial de uso coletivo. A galeria foi remontada com fachada, academia, area gamer, brinquedoteca, espaco pet, mercado interno, mini quadra, piscina coberta, playground, pub, rooftop, gourmet, sauna e simulador de surf, priorizando imagens que ajudam a reconhecer o predio e suas areas compartilhadas. A auditoria removeu interiores privados, plantas, retratos, marcas isoladas e registros sem aderencia ao condominio. O resultado deixa a pagina com leitura mais fiel ao empreendimento e ao conjunto de areas comuns.",
+      "seo_description": "Venice Brava House em Praia Brava, Itajai, com fachada, rooftop, piscina, fitness, gourmet, kids e simulador de surf revisados para destacar o condominio.",
+      "gallery": [
+        {
+          "title": "Venice Brava House - fachada noturna",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1395/001-fachada-noturna-venice-brava-house-570x500-17412887148978.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Venice Brava House - fachada diurna",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1395/002-fachada-diurna-venice-brava-house-17412885989342.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Venice Brava House - academia",
+          "category": "Fitness",
+          "image": "https://www.incorposul.com.br/wp-content/uploads/2024/09/academia-venice-brava-house.jpg",
+          "source_url": "https://www.incorposul.com.br/empreendimentos/em-construcao/venice-brava-house/",
+          "source_label": "Incorposul"
+        },
+        {
+          "title": "Venice Brava House - area gamer",
+          "category": "Jogos",
+          "image": "https://www.incorposul.com.br/wp-content/uploads/2024/09/area-gamer-venice-brava-house.jpg",
+          "source_url": "https://www.incorposul.com.br/empreendimentos/em-construcao/venice-brava-house/",
+          "source_label": "Incorposul"
+        },
+        {
+          "title": "Venice Brava House - brinquedoteca",
+          "category": "Kids",
+          "image": "https://www.incorposul.com.br/wp-content/uploads/2024/09/brinquedoteca-venice-brava-house.jpg",
+          "source_url": "https://www.incorposul.com.br/empreendimentos/em-construcao/venice-brava-house/",
+          "source_label": "Incorposul"
+        },
+        {
+          "title": "Venice Brava House - espaco pet",
+          "category": "Pet",
+          "image": "https://www.incorposul.com.br/wp-content/uploads/2024/09/espaco-pet-venice-brava-house.jpg",
+          "source_url": "https://www.incorposul.com.br/empreendimentos/em-construcao/venice-brava-house/",
+          "source_label": "Incorposul"
+        },
+        {
+          "title": "Venice Brava House - mercado interno",
+          "category": "Convivencia",
+          "image": "https://www.incorposul.com.br/wp-content/uploads/2024/09/mercado-venice-brava-house.jpg",
+          "source_url": "https://www.incorposul.com.br/empreendimentos/em-construcao/venice-brava-house/",
+          "source_label": "Incorposul"
+        },
+        {
+          "title": "Venice Brava House - mini quadra",
+          "category": "Quadra",
+          "image": "https://www.incorposul.com.br/wp-content/uploads/2024/09/mini-quadra-venice-brava-house.jpg",
+          "source_url": "https://www.incorposul.com.br/empreendimentos/em-construcao/venice-brava-house/",
+          "source_label": "Incorposul"
+        },
+        {
+          "title": "Venice Brava House - piscina coberta",
+          "category": "Piscina",
+          "image": "https://www.incorposul.com.br/wp-content/uploads/2024/09/piscina-coberta-aquecida-venice-brava-house.jpg",
+          "source_url": "https://www.incorposul.com.br/empreendimentos/em-construcao/venice-brava-house/",
+          "source_label": "Incorposul"
+        },
+        {
+          "title": "Venice Brava House - playground",
+          "category": "Playground",
+          "image": "https://www.incorposul.com.br/wp-content/uploads/2024/09/playground-venice-brava-house.jpg",
+          "source_url": "https://www.incorposul.com.br/empreendimentos/em-construcao/venice-brava-house/",
+          "source_label": "Incorposul"
+        },
+        {
+          "title": "Venice Brava House - pub",
+          "category": "Convivencia",
+          "image": "https://www.incorposul.com.br/wp-content/uploads/2024/09/pub-venice-brava-house.jpg",
+          "source_url": "https://www.incorposul.com.br/empreendimentos/em-construcao/venice-brava-house/",
+          "source_label": "Incorposul"
+        },
+        {
+          "title": "Venice Brava House - rooftop piscina",
+          "category": "Rooftop",
+          "image": "https://www.incorposul.com.br/wp-content/uploads/2024/09/rooftop-piscina-01-venice-brava-house.jpg",
+          "source_url": "https://www.incorposul.com.br/empreendimentos/em-construcao/venice-brava-house/",
+          "source_label": "Incorposul"
+        },
+        {
+          "title": "Venice Brava House - rooftop piscina apoio",
+          "category": "Rooftop",
+          "image": "https://www.incorposul.com.br/wp-content/uploads/2024/09/rooftop-piscina-02-venice-brava-house.jpg",
+          "source_url": "https://www.incorposul.com.br/empreendimentos/em-construcao/venice-brava-house/",
+          "source_label": "Incorposul"
+        },
+        {
+          "title": "Venice Brava House - rooftop descanso",
+          "category": "Rooftop",
+          "image": "https://www.incorposul.com.br/wp-content/uploads/2024/09/rooftop-redaio-venice-brava-house.jpg",
+          "source_url": "https://www.incorposul.com.br/empreendimentos/em-construcao/venice-brava-house/",
+          "source_label": "Incorposul"
+        },
+        {
+          "title": "Venice Brava House - gourmet social",
+          "category": "Gourmet",
+          "image": "https://www.incorposul.com.br/wp-content/uploads/2024/09/sala-gourmet-venice-brava-house.jpg",
+          "source_url": "https://www.incorposul.com.br/empreendimentos/em-construcao/venice-brava-house/",
+          "source_label": "Incorposul"
+        },
+        {
+          "title": "Venice Brava House - sauna umida",
+          "category": "Sauna",
+          "image": "https://www.incorposul.com.br/wp-content/uploads/2024/09/sauna-umida-venice-brava-house.jpg",
+          "source_url": "https://www.incorposul.com.br/empreendimentos/em-construcao/venice-brava-house/",
+          "source_label": "Incorposul"
+        },
+        {
+          "title": "Venice Brava House - simulador de surf",
+          "category": "Lazer",
+          "image": "https://www.incorposul.com.br/wp-content/uploads/2024/09/simulador-surf-01-venice-brava-house.jpg",
+          "source_url": "https://www.incorposul.com.br/empreendimentos/em-construcao/venice-brava-house/",
+          "source_label": "Incorposul"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Endereco revisado",
+          "description": "Venice Brava House foi tratado em Praia Brava, Itajai, alinhando bairro, cidade e fontes publicas consultadas."
+        },
+        {
+          "icon": "Building2",
+          "title": "Identidade do predio",
+          "description": "Empreendimento na Praia Brava com fachada marcante, rooftop, piscina coberta, fitness, gourmet, kids e simulador de surf."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Areas compartilhadas",
+          "description": "A vitrine destaca fachada, rooftop, piscina, fitness, gourmet, kids e simulador de surf, sempre com foco no uso coletivo do condominio."
+        },
+        {
+          "icon": "Images",
+          "title": "Galeria auditada",
+          "description": "A selecao troca interiores de moradia por fachada, rooftop, lazer, kids, esporte e convivencia."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Reconhecimento visual",
+          "description": "A primeira leitura apresenta fachada e rooftop do Venice Brava House, ajudando a identificar o empreendimento com mais seguranca."
+        },
+        {
+          "title": "Contexto local",
+          "description": "A descricao reforca Praia Brava, Itajai, e organiza o perfil de lazer amplo indicado pela incorporadora."
+        },
+        {
+          "title": "Criterio de imagem",
+          "description": "Foram priorizadas fachada, acesso, hall e lazer; imagens de uso privado ficaram fora da selecao."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Venice Brava House?",
+          "answer": "Venice Brava House foi revisado como empreendimento em Praia Brava, Itajai."
+        },
+        {
+          "question": "O que a galeria mostra no Venice Brava House?",
+          "answer": "A galeria mostra fachada, academia, area gamer, brinquedoteca, espaco pet, mercado interno, mini quadra, piscina coberta, playground, pub, rooftop, gourmet, sauna e simulador de surf."
+        },
+        {
+          "question": "Como as imagens foram escolhidas?",
+          "answer": "Foram mantidas imagens de fachada, acesso, hall, lazer e ambientes coletivos, descartando plantas, retratos, logotipos isolados e cenas privativas."
+        },
+        {
+          "question": "Quais fontes apoiaram a atualizacao?",
+          "answer": "Foram usadas Incorposul, Invexo, Imobille e Felicita."
+        }
+      ],
+      "sources": [
+        "https://www.incorposul.com.br/empreendimentos/em-construcao/venice-brava-house/",
+        "https://lancamento.invexo.com.br/sc/venice-brava-house/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-venice-brava-house--EM24215",
+        "https://felicitanegocios.com.br/empreendimento/653/venice-brava-house/"
+      ],
+      "notes": "Acervo bom; evitar plantas, quartos, cozinhas e renders de unidade privada."
+    },
+    {
+      "slug": "ventura-vivapark",
+      "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1648/001-famex_fachada_blue_c1_pf2-17474048663276.jpg",
+      "description": "Ventura Vivapark teve a pagina revisada como empreendimento em Vivapark, Porto Belo. As fontes da Famex e do Vivapark posicionam o Ventura como lancamento no bairro parque de Porto Belo, com 17 pavimentos, piscina e ofuros no rooftop, jogos, playground, kids, academia e academia ao ar livre. A galeria foi remontada com fachada, fitness, convivencia externa, gourmet, kids, piscina rooftop, ofuros, lounge, terraco e area verde do Vivapark, priorizando imagens que ajudam a reconhecer o predio e suas areas compartilhadas. A auditoria removeu interiores privados, plantas, retratos, marcas isoladas e registros sem aderencia ao condominio. A nova selecao reduz ruido visual e comunica melhor o empreendimento.",
+      "seo_description": "Ventura Vivapark em Vivapark, Porto Belo, com fachada, rooftop, piscina, ofuros, fitness, gourmet e kids revisados para destacar o condominio.",
+      "gallery": [
+        {
+          "title": "Ventura Vivapark - fachada noturna",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1648/001-famex_fachada_blue_c1_pf2-17474048663276.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Ventura Vivapark - fachada diurna",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1648/003-famex_fachada_day_c1_pf2-17474048663277.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Ventura Vivapark - fachada apoio",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1648/004-famex_fachada_day_c3_pf2-17474048663277.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Ventura Vivapark - fitness",
+          "category": "Fitness",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1648/005-famex_fitness_c3_ef-17474048663277.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Ventura Vivapark - fitness apoio",
+          "category": "Fitness",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1648/007-famex_fitness_c5_ef-17474048663277.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Ventura Vivapark - convivencia externa",
+          "category": "Convivencia",
+          "image": "https://panel.famexempreendimentos.com.br/storage/2024/02/convivencia-02-02-2024-17-46-25.jpg",
+          "source_url": "https://famexempreendimentos.com.br/empreendimentos/ventura",
+          "source_label": "Famex Empreendimentos"
+        },
+        {
+          "title": "Ventura Vivapark - gourmet",
+          "category": "Gourmet",
+          "image": "https://panel.famexempreendimentos.com.br/storage/2024/02/gourmet-02-02-2024-17-46-25.jpg",
+          "source_url": "https://famexempreendimentos.com.br/empreendimentos/ventura",
+          "source_label": "Famex Empreendimentos"
+        },
+        {
+          "title": "Ventura Vivapark - espaco kids",
+          "category": "Kids",
+          "image": "https://panel.famexempreendimentos.com.br/storage/2024/02/kids-02-02-2024-17-46-28.jpg",
+          "source_url": "https://famexempreendimentos.com.br/empreendimentos/ventura",
+          "source_label": "Famex Empreendimentos"
+        },
+        {
+          "title": "Ventura Vivapark - piscina rooftop",
+          "category": "Rooftop",
+          "image": "https://panel.famexempreendimentos.com.br/storage/2024/02/piscina-1-02-02-2024-17-46-30.jpg",
+          "source_url": "https://famexempreendimentos.com.br/empreendimentos/ventura",
+          "source_label": "Famex Empreendimentos"
+        },
+        {
+          "title": "Ventura Vivapark - ofuros",
+          "category": "Rooftop",
+          "image": "https://panel.famexempreendimentos.com.br/storage/2024/02/ofuros-02-02-2024-17-46-30.jpg",
+          "source_url": "https://famexempreendimentos.com.br/empreendimentos/ventura",
+          "source_label": "Famex Empreendimentos"
+        },
+        {
+          "title": "Ventura Vivapark - piscina apoio",
+          "category": "Piscina",
+          "image": "https://panel.famexempreendimentos.com.br/storage/2024/02/piscina-2-02-02-2024-17-46-31.jpg",
+          "source_url": "https://famexempreendimentos.com.br/empreendimentos/ventura",
+          "source_label": "Famex Empreendimentos"
+        },
+        {
+          "title": "Ventura Vivapark - lounge rooftop",
+          "category": "Rooftop",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/ventura-014.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/ventura-vivapark-porto-belo/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Ventura Vivapark - area gourmet apoio",
+          "category": "Gourmet",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/ventura-009.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/ventura-vivapark-porto-belo/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Ventura Vivapark - area verde",
+          "category": "Entorno",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/ventura-011.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/ventura-vivapark-porto-belo/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Ventura Vivapark - terraco coberto",
+          "category": "Terraco",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/ventura-008.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/ventura-vivapark-porto-belo/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Ventura Vivapark - area externa vivapark",
+          "category": "Entorno",
+          "image": "https://lancamentosemportobelo.com.br/wp-content/uploads/2025/05/Edificio-Ventura-Vivapark-7.jpg",
+          "source_url": "https://lancamentosemportobelo.com.br/lancamentos/edificio-ventura-vivapark/",
+          "source_label": "Lancamentos em Porto Belo"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Endereco revisado",
+          "description": "Ventura Vivapark foi tratado em Vivapark, Porto Belo, alinhando bairro, cidade e fontes publicas consultadas."
+        },
+        {
+          "icon": "Building2",
+          "title": "Identidade do predio",
+          "description": "Residencial no Vivapark com fachada, rooftop, piscina, ofuros, fitness, gourmet, kids e areas de convivencia."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Areas compartilhadas",
+          "description": "A vitrine destaca fachada, rooftop, piscina, ofuros, fitness, gourmet e kids, sempre com foco no uso coletivo do condominio."
+        },
+        {
+          "icon": "Images",
+          "title": "Galeria auditada",
+          "description": "A curadoria removeu logos, retratos e imagens quebradas, mantendo fachada, rooftop, fitness e lazer coletivo."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Reconhecimento visual",
+          "description": "A primeira leitura apresenta fachada e lazer de rooftop do Ventura Vivapark, ajudando a identificar o empreendimento com mais seguranca."
+        },
+        {
+          "title": "Contexto local",
+          "description": "A pagina passa a reforcar o Vivapark em Porto Belo e o papel do rooftop como centro da experiencia comum."
+        },
+        {
+          "title": "Criterio de imagem",
+          "description": "Foram priorizadas fachada, acesso, hall e lazer; imagens de uso privado ficaram fora da selecao."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Ventura Vivapark?",
+          "answer": "Ventura Vivapark foi revisado como empreendimento em Vivapark, Porto Belo."
+        },
+        {
+          "question": "O que a galeria mostra no Ventura Vivapark?",
+          "answer": "A galeria mostra fachada, fitness, convivencia externa, gourmet, kids, piscina rooftop, ofuros, lounge, terraco e area verde do Vivapark."
+        },
+        {
+          "question": "Como as imagens foram escolhidas?",
+          "answer": "Foram mantidas imagens de fachada, acesso, hall, lazer e ambientes coletivos, descartando plantas, retratos, logotipos isolados e cenas privativas."
+        },
+        {
+          "question": "Quais fontes apoiaram a atualizacao?",
+          "answer": "Foram consultadas Famex Empreendimentos, Invexo, MySide e Lancamentos em Porto Belo."
+        }
+      ],
+      "sources": [
+        "https://famexempreendimentos.com.br/empreendimentos/ventura",
+        "https://lancamento.invexo.com.br/sc/ventura-vivapark-porto-belo/",
+        "https://myside.com.br/apartamento-venda-vivapark-ventura-porto-belo-sc",
+        "https://lancamentosemportobelo.com.br/lancamentos/edificio-ventura-vivapark/",
+        "https://vivaparkexperience.com.br/ventura-at-vivapark/"
+      ],
+      "notes": "Algumas URLs externas estavam quebradas; manter imagens oficiais e evitar retratos, logos e plantas."
+    },
+    {
+      "slug": "venus-de-milo",
+      "hero_image": "https://optimaempreendimentos.com.br/wp-content/uploads/2023/08/Venus-Fachada-min.jpg",
+      "description": "Venus de Milo teve a pagina revisada como empreendimento em Pioneiros, Balneario Camboriu. As fontes da Optima e de portais locais mostram o Venus de Milo como empreendimento entregue em Balneario Camboriu, com arquitetura neoclassica, piscina, salao de festas, academia, playground e brinquedoteca. A galeria foi remontada com fachada, piscina, academia, playground, salao de festas, hall, acesso, deck e lazer infantil, priorizando imagens que ajudam a reconhecer o predio e suas areas compartilhadas. A auditoria removeu interiores privados, plantas, retratos, marcas isoladas e registros sem aderencia ao condominio. A pagina fica mais condominial e menos dependente de fotos de unidade.",
+      "seo_description": "Venus de Milo em Pioneiros, Balneario Camboriu, com fachada, piscina, academia, playground, salao de festas e hall revisados para destacar o condominio.",
+      "gallery": [
+        {
+          "title": "Venus de Milo - fachada principal",
+          "category": "Fachada",
+          "image": "https://optimaempreendimentos.com.br/wp-content/uploads/2023/08/Venus-Fachada-min.jpg",
+          "source_url": "https://optimaempreendimentos.com.br/venus-de-milo/",
+          "source_label": "Optima Empreendimentos"
+        },
+        {
+          "title": "Venus de Milo - fachada na rua",
+          "category": "Fachada",
+          "image": "https://optimaempreendimentos.com.br/wp-content/uploads/2023/08/Fachada-Rua-A-01-min-1-min.jpg",
+          "source_url": "https://optimaempreendimentos.com.br/venus-de-milo/",
+          "source_label": "Optima Empreendimentos"
+        },
+        {
+          "title": "Venus de Milo - piscina",
+          "category": "Piscina",
+          "image": "https://optimaempreendimentos.com.br/wp-content/uploads/2023/08/Piscina-A-03-1-min.jpg",
+          "source_url": "https://optimaempreendimentos.com.br/venus-de-milo/",
+          "source_label": "Optima Empreendimentos"
+        },
+        {
+          "title": "Venus de Milo - academia",
+          "category": "Fitness",
+          "image": "https://optimaempreendimentos.com.br/wp-content/uploads/2023/08/Academia-A-02-min-1-min.jpg",
+          "source_url": "https://optimaempreendimentos.com.br/venus-de-milo/",
+          "source_label": "Optima Empreendimentos"
+        },
+        {
+          "title": "Venus de Milo - playground",
+          "category": "Playground",
+          "image": "https://optimaempreendimentos.com.br/wp-content/uploads/2023/08/Playground-A-03-min-1-1-min.jpg",
+          "source_url": "https://optimaempreendimentos.com.br/venus-de-milo/",
+          "source_label": "Optima Empreendimentos"
+        },
+        {
+          "title": "Venus de Milo - salao de festas",
+          "category": "Eventos",
+          "image": "https://optimaempreendimentos.com.br/wp-content/uploads/2023/08/Salao-de-Festas-A-02-min-1-min.jpg",
+          "source_url": "https://optimaempreendimentos.com.br/venus-de-milo/",
+          "source_label": "Optima Empreendimentos"
+        },
+        {
+          "title": "Venus de Milo - piscina externa",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/04032026153425398-1772649265.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-venus-de-milo-EM61342",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Venus de Milo - hall social",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2024/venus-de-milo-53-1728999737.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-venus-de-milo-EM61342",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Venus de Milo - acesso interno",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2024/venus-de-milo-55-1728999738.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-venus-de-milo-EM61342",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Venus de Milo - piscina apoio",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2024/venus-de-milo-37-1728999729.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-venus-de-milo-EM61342",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Venus de Milo - deck piscina",
+          "category": "Deck",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2024/venus-de-milo-33-1728999726.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-venus-de-milo-EM61342",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Venus de Milo - fitness apoio",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2024/venus-de-milo-35-1728999727.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-venus-de-milo-EM61342",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Venus de Milo - lazer infantil",
+          "category": "Kids",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2024/venus-de-milo-40-1728999731.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-venus-de-milo-EM61342",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Venus de Milo - fachada acervo",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/real-estates-photo/October2024/venus-de-milo-32-1728999452.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-venus-de-milo-EM61342",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Venus de Milo - hall apoio",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/July2026/thumb-venus-de-milo-56-1728999740-1783377161.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-venus-de-milo-EM61342",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Venus de Milo - piscina final",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/July2026/thumb-venus-de-milo-55-1728999738-1783377162.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-venus-de-milo-EM61342",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Venus de Milo - academia final",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/July2026/thumb-venus-de-milo-33-1728999726-1783377165.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-venus-de-milo-EM61342",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Venus de Milo - fachada vertical",
+          "category": "Fachada",
+          "image": "https://litoralvertical.com/wp-content/uploads/2024/06/edificio-venus-de-milo-balneario-camboriu-2-1.jpg",
+          "source_url": "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-venus-de-milo/",
+          "source_label": "Litoral Vertical"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Endereco revisado",
+          "description": "Venus de Milo foi tratado em Pioneiros, Balneario Camboriu, alinhando bairro, cidade e fontes publicas consultadas."
+        },
+        {
+          "icon": "Building2",
+          "title": "Identidade do predio",
+          "description": "Condominio em Pioneiros com fachada neoclassica, piscina, fitness, salao de festas, playground e hall."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Areas compartilhadas",
+          "description": "A vitrine destaca fachada, piscina, academia, playground, salao de festas e hall, sempre com foco no uso coletivo do condominio."
+        },
+        {
+          "icon": "Images",
+          "title": "Galeria auditada",
+          "description": "A selecao descarta plantas, cozinhas, quartos e banheiros, preservando apenas fachada e areas comuns."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Reconhecimento visual",
+          "description": "A primeira leitura apresenta fachada neoclassica e lazer do Venus de Milo, ajudando a identificar o empreendimento com mais seguranca."
+        },
+        {
+          "title": "Contexto local",
+          "description": "A descricao reforca Pioneiros, Balneario Camboriu, e o conjunto de lazer informado pela Optima."
+        },
+        {
+          "title": "Criterio de imagem",
+          "description": "Foram priorizadas fachada, acesso, hall e lazer; imagens de uso privado ficaram fora da selecao."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Venus de Milo?",
+          "answer": "Venus de Milo foi revisado como empreendimento em Pioneiros, Balneario Camboriu."
+        },
+        {
+          "question": "O que a galeria mostra no Venus de Milo?",
+          "answer": "A galeria mostra fachada, piscina, academia, playground, salao de festas, hall, acesso, deck e lazer infantil."
+        },
+        {
+          "question": "Como as imagens foram escolhidas?",
+          "answer": "Foram mantidas imagens de fachada, acesso, hall, lazer e ambientes coletivos, descartando plantas, retratos, logotipos isolados e cenas privativas."
+        },
+        {
+          "question": "Quais fontes apoiaram a atualizacao?",
+          "answer": "Foram usadas Optima Empreendimentos, Imobille, Litoral Vertical, Felicita, Apto.vc e Giro Imoveis."
+        }
+      ],
+      "sources": [
+        "https://optimaempreendimentos.com.br/venus-de-milo/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-venus-de-milo-EM61342",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-venus-de-milo/",
+        "https://felicitanegocios.com.br/empreendimento/773/venus-de-milo/",
+        "https://apto.vc/br/sc/balneario-camboriu/pioneiros/venus-de-milo",
+        "https://www.giroimoveis.com.br/imovel/apartamento-no-edificio-venus-de-milo-balneario-camboriu-pioneiros-3-quartos-2-garagens-venda-ref-1030/"
+      ],
+      "notes": "Nome com acento nas fontes; usar Venus de Milo em ASCII e evitar cozinhas/planta das fontes."
+    },
+    {
+      "slug": "videiras-residence-vivapark",
+      "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1650/001-videiras_-_externa_07-17474085096133.jpg",
+      "description": "Videiras Residence Vivapark teve a pagina revisada como empreendimento em Vivapark, Porto Belo. As fontes do Vivapark e da Invexo indicam o Videiras como projeto da Eccel dentro do bairro parque, perto da Praca Viva Movimento, com design inspirado em biofilia e lazer com piscina, academia, jogos, wine bar, gourmet, charutaria, espaco zen, playground e brinquedoteca. A galeria foi remontada com fachada, hall, rooftop, piscina, pergolado, gourmet, lounge, jogos, acesso, academia, brinquedoteca, deck e fireplace, priorizando imagens que ajudam a reconhecer o predio e suas areas compartilhadas. A auditoria removeu interiores privados, plantas, retratos, marcas isoladas e registros sem aderencia ao condominio. A galeria final preserva o acervo mais confiavel mesmo com fontes que misturavam materiais de outros predios.",
+      "seo_description": "Videiras Residence Vivapark em Vivapark, Porto Belo, com fachada, rooftop, piscina, gourmet, jogos, fitness, kids e hall revisados para destacar o condominio.",
+      "gallery": [
+        {
+          "title": "Videiras Residence Vivapark - fachada principal",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1650/001-videiras_-_externa_07-17474085096133.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Videiras Residence Vivapark - fachada com sacadas",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1650/002-videiras_-_externa_04-17474085096132.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Videiras Residence Vivapark - fachada acesso",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1650/004-videiras_-_externa_02-1747408509613.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Videiras Residence Vivapark - base com paisagismo",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1650/005-videiras_-_externa_03-17474085096131.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Videiras Residence Vivapark - hall de entrada",
+          "category": "Hall",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1650/007-videiras_-_internas_01-17474085096133.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Videiras Residence Vivapark - fachada apoio",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1649/001-videiras_-_externa_04-17474085096132.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Videiras Residence Vivapark - fachada lateral",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/1649/005-videiras_-_externa_03-17474085096131.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Videiras Residence Vivapark - fachada biofilica",
+          "category": "Fachada",
+          "image": "https://vivaparkexperience.com.br/wp-content/uploads/2026/02/lg-videiras-residence-11-46-1.png",
+          "source_url": "https://vivaparkexperience.com.br/videiras-at-vivapark/",
+          "source_label": "Vivapark Experience"
+        },
+        {
+          "title": "Videiras Residence Vivapark - rooftop piscina",
+          "category": "Rooftop",
+          "image": "https://vivaparkexperience.com.br/wp-content/uploads/2026/02/2b6575_e1206658cf8a435d86ba330fd2750bd8_mv2.jpg",
+          "source_url": "https://vivaparkexperience.com.br/videiras-at-vivapark/",
+          "source_label": "Vivapark Experience"
+        },
+        {
+          "title": "Videiras Residence Vivapark - hall social",
+          "category": "Hall",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/videiras-030.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/videiras-residences-porto-belo/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Videiras Residence Vivapark - rooftop pergolado",
+          "category": "Rooftop",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/videiras-029.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/videiras-residences-porto-belo/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Videiras Residence Vivapark - piscina e lounge",
+          "category": "Piscina",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/videiras-025.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/videiras-residences-porto-belo/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Videiras Residence Vivapark - espaco gourmet",
+          "category": "Gourmet",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/videiras-018.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/videiras-residences-porto-belo/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Videiras Residence Vivapark - lounge social",
+          "category": "Convivencia",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/videiras-020.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/videiras-residences-porto-belo/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Videiras Residence Vivapark - jogos",
+          "category": "Jogos",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/videiras-015.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/videiras-residences-porto-belo/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Videiras Residence Vivapark - ambiente gourmet",
+          "category": "Gourmet",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/videiras-019.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/videiras-residences-porto-belo/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Videiras Residence Vivapark - acesso social",
+          "category": "Acesso",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/videiras-017.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/videiras-residences-porto-belo/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Videiras Residence Vivapark - lounge apoio",
+          "category": "Convivencia",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/videiras-010.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/videiras-residences-porto-belo/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Videiras Residence Vivapark - academia",
+          "category": "Fitness",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/videiras-011.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/videiras-residences-porto-belo/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Videiras Residence Vivapark - brinquedoteca",
+          "category": "Kids",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/videiras-014.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/videiras-residences-porto-belo/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Videiras Residence Vivapark - piscina rooftop apoio",
+          "category": "Rooftop",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/videiras-028.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/videiras-residences-porto-belo/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Videiras Residence Vivapark - lounge por do sol",
+          "category": "Rooftop",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/videiras-032.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/videiras-residences-porto-belo/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Videiras Residence Vivapark - deck piscina",
+          "category": "Deck",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/videiras-026.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/videiras-residences-porto-belo/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Videiras Residence Vivapark - fireplace",
+          "category": "Convivencia",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/videiras-027.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/videiras-residences-porto-belo/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Videiras Residence Vivapark - piscina final",
+          "category": "Piscina",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/videiras-031.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/videiras-residences-porto-belo/",
+          "source_label": "Invexo"
+        },
+        {
+          "title": "Videiras Residence Vivapark - fachada final",
+          "category": "Fachada",
+          "image": "https://lancamento.invexo.com.br/wp-content/uploads/2026/04/videiras-002.jpg",
+          "source_url": "https://lancamento.invexo.com.br/sc/videiras-residences-porto-belo/",
+          "source_label": "Invexo"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Endereco revisado",
+          "description": "Videiras Residence Vivapark foi tratado em Vivapark, Porto Belo, alinhando bairro, cidade e fontes publicas consultadas."
+        },
+        {
+          "icon": "Building2",
+          "title": "Identidade do predio",
+          "description": "Residencial no Vivapark com fachada biofilica, rooftop, piscina, hall, gourmet, jogos, fitness, kids e areas de estar."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Areas compartilhadas",
+          "description": "A vitrine destaca fachada, rooftop, piscina, gourmet, jogos, fitness, kids e hall, sempre com foco no uso coletivo do condominio."
+        },
+        {
+          "icon": "Images",
+          "title": "Galeria auditada",
+          "description": "A curadoria removeu retratos, imagens de outros empreendimentos, plantas e cenas de unidade privada."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Reconhecimento visual",
+          "description": "A primeira leitura apresenta fachada biofilica e rooftop do Videiras Residence, ajudando a identificar o empreendimento com mais seguranca."
+        },
+        {
+          "title": "Contexto local",
+          "description": "A pagina reforca o Vivapark em Porto Belo e o perfil de lazer sofisticado do Videiras Residence."
+        },
+        {
+          "title": "Criterio de imagem",
+          "description": "Foram priorizadas fachada, acesso, hall e lazer; imagens de uso privado ficaram fora da selecao."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Videiras Residence Vivapark?",
+          "answer": "Videiras Residence Vivapark foi revisado como empreendimento em Vivapark, Porto Belo."
+        },
+        {
+          "question": "O que a galeria mostra no Videiras Residence Vivapark?",
+          "answer": "A galeria mostra fachada, hall, rooftop, piscina, pergolado, gourmet, lounge, jogos, acesso, academia, brinquedoteca, deck e fireplace."
+        },
+        {
+          "question": "Como as imagens foram escolhidas?",
+          "answer": "Foram mantidas imagens de fachada, acesso, hall, lazer e ambientes coletivos, descartando plantas, retratos, logotipos isolados e cenas privativas."
+        },
+        {
+          "question": "Quais fontes apoiaram a atualizacao?",
+          "answer": "Foram cruzadas Vivapark Experience, Invexo, Vokkan, Litoral Vertical, Vera Bernardes e MySide."
+        }
+      ],
+      "sources": [
+        "https://vivaparkexperience.com.br/videiras-at-vivapark/",
+        "https://lancamento.invexo.com.br/sc/videiras-residences-porto-belo/",
+        "https://vokkan.com.br/post/conheca-o-novo-residencial-de-alto-padrao-do-vivapark-porto-belo",
+        "https://litoralvertical.com/pre-lancamento/porto-belo/apartamentos/edificio-videiras/",
+        "https://www.verabernardes.com.br/empreendimento/venda/50797/videiras-residence-vivapark-porto-belo-jardim-dourado-porto-belo/",
+        "https://myside.com.br/guia-itapema/vivapark-porto-belo-sc"
+      ],
+      "notes": "Acervo com nome e fontes amplas; houve cautela para remover imagens de outros empreendimentos do Vivapark e retratos de corretor."
+    }
+  ]
+}

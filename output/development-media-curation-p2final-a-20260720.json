@@ -1,0 +1,698 @@
+{
+  "batch_id": "development-media-curation-p2-final-a-20260720",
+  "generated_at": "2026-07-20T01:21:52.819Z",
+  "items": [
+    {
+      "slug": "torres-da-brava-brisa",
+      "hero_image": "https://www.lotisa.com.br/wp-content/uploads/2024/12/o-projeto-brisa.png",
+      "description": "Torres da Brava Brisa e a torre Brisa do conjunto Torres da Brava, na Praia Brava de Itajai. A pagina foi revisada com base na Lotisa, que apresenta o empreendimento entregue na Av. Luci Canziani, 100, com arquitetura contemporanea, 35 pavimentos, lazer completo e proximidade da praia. A galeria prioriza fachada, acesso, hall, piscinas, quadra, playground, sala de jogos, pub e areas de convivencia. Imagens de planta, icones, retratos, logotipos isolados e ambientes privativos ficaram fora da selecao.",
+      "seo_description": "Torres da Brava Brisa na Praia Brava de Itajai, com fachada, acesso, hall, piscinas, quadra, playground, pub e lazer revisados.",
+      "gallery": [
+        {
+          "title": "Torres da Brava Brisa - fachada com piscina",
+          "category": "Fachada",
+          "image": "https://www.lotisa.com.br/wp-content/uploads/2024/12/o-projeto-brisa.png",
+          "source_url": "https://www.lotisa.com.br/empreendimento/brisa-torres-da-brava/",
+          "source_label": "lotisa.com.br"
+        },
+        {
+          "title": "Torres da Brava Brisa - torre",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/16092024094418667-1726490658.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torres-da-brava-brisa-em-itajai-EM28840",
+          "source_label": "imobillenegocios.com.br"
+        },
+        {
+          "title": "Torres da Brava Brisa - acesso",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2024/torres-da-brava-1-1726490234.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torres-da-brava-brisa-em-itajai-EM28840",
+          "source_label": "imobillenegocios.com.br"
+        },
+        {
+          "title": "Torres da Brava Brisa - hall",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2024/torres-da-brava-7-1726490232.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torres-da-brava-brisa-em-itajai-EM28840",
+          "source_label": "imobillenegocios.com.br"
+        },
+        {
+          "title": "Torres da Brava Brisa - lounge do hall",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/September2024/torres-da-brava-9-1726490231.webp",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-torres-da-brava-brisa-em-itajai-EM28840",
+          "source_label": "imobillenegocios.com.br"
+        },
+        {
+          "title": "Torres da Brava Brisa - piscina",
+          "category": "Piscina",
+          "image": "https://www.lotisa.com.br/wp-content/uploads/2024/12/BRISA-backgroud-Desktop.png",
+          "source_url": "https://www.lotisa.com.br/empreendimento/brisa-torres-da-brava/",
+          "source_label": "lotisa.com.br"
+        },
+        {
+          "title": "Torres da Brava Brisa - quadra",
+          "category": "Lazer",
+          "image": "https://www.lotisa.com.br/wp-content/uploads/2024/12/Galeria-Brisa_0002_IMG_3581.png",
+          "source_url": "https://www.lotisa.com.br/empreendimento/brisa-torres-da-brava/",
+          "source_label": "lotisa.com.br"
+        },
+        {
+          "title": "Torres da Brava Brisa - piscina infantil",
+          "category": "Piscina",
+          "image": "https://www.lotisa.com.br/wp-content/uploads/2024/12/Galeria-Brisa_0003_IMG_3577.png",
+          "source_url": "https://www.lotisa.com.br/empreendimento/brisa-torres-da-brava/",
+          "source_label": "lotisa.com.br"
+        },
+        {
+          "title": "Torres da Brava Brisa - playground",
+          "category": "Playground",
+          "image": "https://www.lotisa.com.br/wp-content/uploads/2024/12/Galeria-Brisa_0007_IMG_3501.png",
+          "source_url": "https://www.lotisa.com.br/empreendimento/brisa-torres-da-brava/",
+          "source_label": "lotisa.com.br"
+        },
+        {
+          "title": "Torres da Brava Brisa - jogos",
+          "category": "Jogos",
+          "image": "https://www.lotisa.com.br/wp-content/uploads/2024/12/Galeria-Brisa_0004_IMG_3530.png",
+          "source_url": "https://www.lotisa.com.br/empreendimento/brisa-torres-da-brava/",
+          "source_label": "lotisa.com.br"
+        },
+        {
+          "title": "Torres da Brava Brisa - pub",
+          "category": "Lazer",
+          "image": "https://www.lotisa.com.br/wp-content/uploads/2024/12/lazer-brisa.png",
+          "source_url": "https://www.lotisa.com.br/empreendimento/brisa-torres-da-brava/",
+          "source_label": "lotisa.com.br"
+        },
+        {
+          "title": "Torres da Brava Brisa - estar externo",
+          "category": "Convivencia",
+          "image": "https://www.lotisa.com.br/wp-content/uploads/2024/12/Galeria-Brisa_0001_IMG_3595.png",
+          "source_url": "https://www.lotisa.com.br/empreendimento/brisa-torres-da-brava/",
+          "source_label": "lotisa.com.br"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Praia Brava com acesso rapido ao mar",
+          "description": "A Lotisa informa endereco na Av. Luci Canziani, 100, Praia Brava, e destaca a proximidade com a praia."
+        },
+        {
+          "icon": "Waves",
+          "title": "Lazer com piscinas e convivio",
+          "description": "A curadoria visual destaca piscina adulto, piscina infantil, espacos de estar e apoio gourmet do empreendimento."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Rotina de lazer completa",
+          "description": "Quadra, playground, sala de jogos, academia e pub entram como pontos fortes para uso coletivo."
+        },
+        {
+          "icon": "Shield",
+          "title": "Tecnologia no acesso",
+          "description": "A fonte da Lotisa cita controle de acesso facial como diferencial do Torres da Brava Brisa."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Conjunto entregue da Lotisa",
+          "description": "A pagina oficial lista o Brisa como entregue e apresenta galeria propria do empreendimento."
+        },
+        {
+          "title": "Lazer de alto padrao",
+          "description": "A selecao cobre piscina, quadra, playground, jogos, pub e estar externo, sempre em areas compartilhadas."
+        },
+        {
+          "title": "Identidade arquitetonica",
+          "description": "A fachada, o acesso e o hall substituem a leitura curta anterior e ajudam a reconhecer o predio."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Torres da Brava Brisa?",
+          "answer": "Fica na Av. Luci Canziani, 100, na Praia Brava, em Itajai, conforme a pagina da Lotisa."
+        },
+        {
+          "question": "O empreendimento ja foi entregue?",
+          "answer": "Sim. A pagina da Lotisa identifica o Brisa como entregue."
+        },
+        {
+          "question": "Quais areas de lazer foram priorizadas na galeria?",
+          "answer": "Foram priorizadas piscina, quadra, playground, sala de jogos, pub, hall, acesso e espacos de convivencia."
+        },
+        {
+          "question": "O que foi evitado na curadoria de imagens?",
+          "answer": "Foram evitados icones, logos isolados, plantas, retratos e imagens de uso privativo."
+        }
+      ],
+      "sources": [
+        "https://www.lotisa.com.br/empreendimento/brisa-torres-da-brava/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-torres-da-brava-brisa-em-itajai-EM28840"
+      ],
+      "selected_indices": [
+        11,
+        64,
+        66,
+        67,
+        68,
+        7,
+        18,
+        19,
+        22,
+        24,
+        53,
+        17
+      ]
+    },
+    {
+      "slug": "unique-tower",
+      "hero_image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/985/001-fachada-16947872683461.jpg",
+      "description": "Unique Tower e um edificio residencial no Centro de Balneario Camboriu, na Rua 2850, 268. As fontes consultadas indicam construcao da Estrucon, entrega em dezembro de 2022, 26 pavimentos e lazer com piscina, jacuzzi, salao de festas, espaco gourmet, academia, sala de jogos, cinema e playground. A galeria preserva as sementes atuais que mostram fachada e areas comuns, e acrescenta acessos, piscina e playground de fontes externas. A selecao evita cozinhas, dormitorios, banheiros, plantas e imagens de apartamentos.",
+      "seo_description": "Unique Tower no Centro de Balneario Camboriu, com fachada, acesso, cinema, academia, gourmet, hall, piscina, jacuzzi e playground.",
+      "gallery": [
+        {
+          "title": "Unique Tower - fachada",
+          "category": "Fachada",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/985/001-fachada-16947872683461.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Unique Tower - acesso noturno",
+          "category": "Acesso",
+          "image": "https://estrucon.com.br/wp-content/uploads/2024/09/WhatsApp-Image-2024-09-19-at-17.11.53.jpeg",
+          "source_url": "https://estrucon.com.br/portfolio/nome-do-projeto/",
+          "source_label": "estrucon.com.br"
+        },
+        {
+          "title": "Unique Tower - entrada",
+          "category": "Acesso",
+          "image": "https://estrucon.com.br/wp-content/uploads/2024/09/WhatsApp-Image-2024-09-19-at-17.11.41.jpeg",
+          "source_url": "https://estrucon.com.br/portfolio/nome-do-projeto/",
+          "source_label": "estrucon.com.br"
+        },
+        {
+          "title": "Unique Tower - cinema",
+          "category": "Cinema",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/985/002-cinema-16947872683428.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Unique Tower - academia",
+          "category": "Fitness",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/985/003-copia-de-academia-16947872683435.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Unique Tower - salao de festas",
+          "category": "Festas",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/985/004-festas-16947872683484.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Unique Tower - espaco gourmet",
+          "category": "Gourmet",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/985/005-gourmet-16947872683495.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Unique Tower - hall social",
+          "category": "Hall",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/985/006-hall1-16947872683507.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Unique Tower - hall de apoio",
+          "category": "Hall",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/985/007-hall2-16947872683517.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Unique Tower - jacuzzi",
+          "category": "Lazer",
+          "image": "https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/properties/imported/985/008-jacuzzi-16947872683543.jpg",
+          "source_url": "https://www.guilhermepilger.com/",
+          "source_label": "guilhermepilger.com"
+        },
+        {
+          "title": "Unique Tower - playground",
+          "category": "Playground",
+          "image": "https://estrucon.com.br/wp-content/uploads/2024/09/WhatsApp-Image-2024-09-19-at-17.11.45.jpeg",
+          "source_url": "https://estrucon.com.br/portfolio/nome-do-projeto/",
+          "source_label": "estrucon.com.br"
+        },
+        {
+          "title": "Unique Tower - piscina",
+          "category": "Piscina",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/597/img-55.jpg?1717186646",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/597/unique-tower/",
+          "source_label": "felicitanegocios.com.br"
+        },
+        {
+          "title": "Unique Tower - jogos",
+          "category": "Jogos",
+          "image": "https://cdn.imoview.com.br/bryann/Condominios/597/img-49.jpg?1717186646",
+          "source_url": "https://felicitanegocios.com.br/empreendimento/597/unique-tower/",
+          "source_label": "felicitanegocios.com.br"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Centro de Balneario Camboriu",
+          "description": "As fontes localizam o Unique Tower na Rua 2850, proximo a Av. Brasil e a Terceira Avenida."
+        },
+        {
+          "icon": "Building2",
+          "title": "Predio entregue",
+          "description": "A pesquisa indica edificio entregue em dezembro de 2022, com 26 pavimentos."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Lazer variado",
+          "description": "A pagina passa a mostrar cinema, academia, salao de festas, gourmet, jacuzzi, piscina, jogos e playground."
+        },
+        {
+          "icon": "Images",
+          "title": "Galeria sem ambientes privados",
+          "description": "A selecao manteve fachada e areas compartilhadas, removendo fotos de dormitorios, cozinhas, banheiros e plantas."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Um predio facil de reconhecer",
+          "description": "A fachada e os acessos aparecem logo no inicio da galeria para orientar a leitura do empreendimento."
+        },
+        {
+          "title": "Lazer completo no centro",
+          "description": "Piscina, jacuzzi, cinema, sala de jogos, academia, festas e gourmet sustentam a narrativa do edificio."
+        },
+        {
+          "title": "Fontes cruzadas",
+          "description": "A curadoria cruza imagens atuais com Estrucon, Felicita, Litoral Vertical e outras fontes pesquisadas."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Unique Tower?",
+          "answer": "O Unique Tower fica na Rua 2850, 268, no Centro de Balneario Camboriu."
+        },
+        {
+          "question": "Quem construiu o Unique Tower?",
+          "answer": "A fonte Litoral Vertical identifica a Estrucon como construtora do edificio."
+        },
+        {
+          "question": "Quais areas comuns aparecem na nova galeria?",
+          "answer": "A galeria mostra fachada, acesso, cinema, academia, festas, gourmet, hall, jacuzzi, piscina, playground e jogos."
+        },
+        {
+          "question": "Por que interiores de apartamento ficaram fora?",
+          "answer": "Porque o objetivo deste lote e representar o empreendimento e suas areas comuns, nao uma unidade privada."
+        }
+      ],
+      "sources": [
+        "https://estrucon.com.br/portfolio/nome-do-projeto/",
+        "https://litoralvertical.com/venda/balneario-camboriu/apartamentos/edificio-unique-tower/",
+        "https://felicitanegocios.com.br/empreendimento/597/unique-tower/",
+        "https://www.guilhermepilger.com/"
+      ],
+      "selected_indices": [
+        1,
+        12,
+        16,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        18,
+        31,
+        38
+      ]
+    },
+    {
+      "slug": "vale-das-pedras",
+      "hero_image": "https://valedaspedrascondominio.com.br/img/galeria/14.jpg",
+      "description": "Vale das Pedras e um condominio fechado de casas no bairro Casa Branca, em Itapema. A fonte oficial apresenta inspiracao provence, lotes prontos para construir, 78 lotes, dimensoes a partir de 300 m2, area preservada de Mata Atlantica e infraestrutura completa. A nova galeria troca a leitura de anuncio por portico, portaria, piscina, quadras, playground, espaco gourmet, churrasqueira coletiva, ruas internas e areas verdes. Como o acervo mistura banners, obras e fotos de terreno, a selecao foi conservadora e priorizou somente acesso e uso comum.",
+      "seo_description": "Vale das Pedras em Itapema, com portico, piscina, quadras, playground, gourmet, ruas internas e areas verdes revisados.",
+      "gallery": [
+        {
+          "title": "Vale das Pedras - portico de acesso",
+          "category": "Acesso",
+          "image": "https://valedaspedrascondominio.com.br/img/galeria/14.jpg",
+          "source_url": "https://www.valedaspedrascondominio.com.br/",
+          "source_label": "valedaspedrascondominio.com.br"
+        },
+        {
+          "title": "Vale das Pedras - piscina e sede",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/2811202416184417593-1732821524.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-vale-das-pedras-itapema-EM13201",
+          "source_label": "imobillenegocios.com.br"
+        },
+        {
+          "title": "Vale das Pedras - piscina coberta",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/photoshop-novo-1-copia0015-1732820679.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-vale-das-pedras-itapema-EM13201",
+          "source_label": "imobillenegocios.com.br"
+        },
+        {
+          "title": "Vale das Pedras - area verde",
+          "category": "Natureza",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/photoshop-novo-1-copia0002-1732820672.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-vale-das-pedras-itapema-EM13201",
+          "source_label": "imobillenegocios.com.br"
+        },
+        {
+          "title": "Vale das Pedras - playground externo",
+          "category": "Playground",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/photoshop-novo-1-copia0003-1732820673.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-vale-das-pedras-itapema-EM13201",
+          "source_label": "imobillenegocios.com.br"
+        },
+        {
+          "title": "Vale das Pedras - playground",
+          "category": "Playground",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/photoshop-novo-1-copia0010-1732820676.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-vale-das-pedras-itapema-EM13201",
+          "source_label": "imobillenegocios.com.br"
+        },
+        {
+          "title": "Vale das Pedras - quadra esportiva",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/photoshop-novo-1-copia0001-1732820672.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-vale-das-pedras-itapema-EM13201",
+          "source_label": "imobillenegocios.com.br"
+        },
+        {
+          "title": "Vale das Pedras - ruas internas",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/photoshop-novo-1-copia0007-1732820675.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-vale-das-pedras-itapema-EM13201",
+          "source_label": "imobillenegocios.com.br"
+        },
+        {
+          "title": "Vale das Pedras - espaco gourmet",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/photoshop-novo-1-copia0019-1732820681.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-vale-das-pedras-itapema-EM13201",
+          "source_label": "imobillenegocios.com.br"
+        },
+        {
+          "title": "Vale das Pedras - churrasqueira coletiva",
+          "category": "Gourmet",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/photoshop-novo-1-copia0016-1732820679.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-vale-das-pedras-itapema-EM13201",
+          "source_label": "imobillenegocios.com.br"
+        },
+        {
+          "title": "Vale das Pedras - apoio de lazer",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/photoshop-novo-1-copia0014-1732820678.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-vale-das-pedras-itapema-EM13201",
+          "source_label": "imobillenegocios.com.br"
+        },
+        {
+          "title": "Vale das Pedras - quadra",
+          "category": "Lazer",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/photoshop-novo-1-copia0026-1732820685.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-vale-das-pedras-itapema-EM13201",
+          "source_label": "imobillenegocios.com.br"
+        },
+        {
+          "title": "Vale das Pedras - portaria",
+          "category": "Acesso",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/November2024/photoshop-novo-1-copia0024-1732820684.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/condominio-vale-das-pedras-itapema-EM13201",
+          "source_label": "imobillenegocios.com.br"
+        },
+        {
+          "title": "Vale das Pedras - piscina externa",
+          "category": "Piscina",
+          "image": "https://b2.casteldigital.com.br/amandaalmeidaimoveis/ig/im/imoveis/288/986c08dc-0569-4b20-b9dd-beca70b3196d-17788661640187.jfif",
+          "source_url": "https://www.amandaalmeidaimoveis.com.br/imovel/terreno-no-condominio-vale-das-pedras-itapema-castelo-branco-venda-ref-288/",
+          "source_label": "amandaalmeidaimoveis.com.br"
+        },
+        {
+          "title": "Vale das Pedras - passeio interno",
+          "category": "Natureza",
+          "image": "https://b2.casteldigital.com.br/amandaalmeidaimoveis/ig/im/imoveis/288/310d7dc7-d250-4ea6-be74-e297c95dc850-17788661640185.jfif",
+          "source_url": "https://www.amandaalmeidaimoveis.com.br/imovel/terreno-no-condominio-vale-das-pedras-itapema-castelo-branco-venda-ref-288/",
+          "source_label": "amandaalmeidaimoveis.com.br"
+        },
+        {
+          "title": "Vale das Pedras - pergolado",
+          "category": "Convivencia",
+          "image": "https://b2.casteldigital.com.br/amandaalmeidaimoveis/ig/im/imoveis/288/aac499ef-15cc-4631-9022-7ae16b7903d6-17788661640191.jfif",
+          "source_url": "https://www.amandaalmeidaimoveis.com.br/imovel/terreno-no-condominio-vale-das-pedras-itapema-castelo-branco-venda-ref-288/",
+          "source_label": "amandaalmeidaimoveis.com.br"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "Trees",
+          "title": "Condominio integrado ao verde",
+          "description": "A fonte oficial destaca Mata Atlantica preservada e uma proposta de paisagismo ligada ao conceito provence."
+        },
+        {
+          "icon": "Shield",
+          "title": "Controle e estrutura interna",
+          "description": "O empreendimento conta com guarita, vigilancia, circuito interno de TV, ruas internas e infraestrutura urbana do condominio."
+        },
+        {
+          "icon": "Waves",
+          "title": "Lazer ao ar livre",
+          "description": "A curadoria mostra piscinas, quadras, playground, pergolado, churrasqueira coletiva e espacos de convivencia."
+        },
+        {
+          "icon": "MapPin",
+          "title": "Casa Branca em Itapema",
+          "description": "O Vale das Pedras foi revisado como condominio fechado no bairro Casa Branca, em uma area de expansao de Itapema."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Inspiracao provence",
+          "description": "O site oficial associa o projeto a referencias do sul da Franca, com pedra, madeira, vidro, portal e paisagismo."
+        },
+        {
+          "title": "Lazer e natureza",
+          "description": "Piscinas, quadras, playground, trilha, espaco zen, gourmet e areas verdes compoem a leitura do condominio."
+        },
+        {
+          "title": "Curadoria cautelosa",
+          "description": "Banners com texto, fotos de lote seco, imagens de obra e materiais pouco identificaveis foram evitados sempre que havia alternativa melhor."
+        }
+      ],
+      "faq": [
+        {
+          "question": "O que e o Vale das Pedras?",
+          "answer": "E um condominio fechado de casas em Itapema, com conceito inspirado na regiao de Provence, no sul da Franca."
+        },
+        {
+          "question": "Onde fica o Vale das Pedras?",
+          "answer": "Fica no bairro Casa Branca, em Itapema, conforme a fonte oficial do condominio."
+        },
+        {
+          "question": "Quais areas comuns entram na nova galeria?",
+          "answer": "Entram portico, portaria, piscina, quadras, playground, espaco gourmet, churrasqueira coletiva, ruas internas e areas verdes."
+        },
+        {
+          "question": "Quais imagens foram descartadas?",
+          "answer": "Foram descartados logos isolados, banners excessivamente promocionais, plantas, mapas e fotos de terreno sem leitura clara de area comum."
+        }
+      ],
+      "sources": [
+        "https://www.valedaspedrascondominio.com.br/",
+        "https://www.imobillenegocios.com.br/empreendimento/condominio-vale-das-pedras-itapema-EM13201",
+        "https://www.amandaalmeidaimoveis.com.br/imovel/terreno-no-condominio-vale-das-pedras-itapema-castelo-branco-venda-ref-288/"
+      ],
+      "selected_indices": [
+        42,
+        44,
+        46,
+        49,
+        50,
+        53,
+        55,
+        57,
+        58,
+        60,
+        63,
+        65,
+        66,
+        90,
+        108,
+        120
+      ],
+      "caution": "Acervo curto/heterogeneo: mistura imagens oficiais antigas com banners, fotos de obra, lotes e material de imobiliaria."
+    },
+    {
+      "slug": "vancouver-coast",
+      "hero_image": "https://passe.com.br/source/img/vancouver/vancouver-imagens/full/externa-1.webp",
+      "description": "Vancouver Coast Residence e um empreendimento da Pass-e em Pereque, Porto Belo, na Rua Gaudencio Campos, 101. A fonte oficial informa distancia de 60 metros da praia de Pereque, vista para o mar, porteiro eletronico biometrico, coleta de aguas pluviais, infraestrutura para portaria remota e lazer com piscina adulto e infantil, prainha, pet space, playground, academia, gourmet, hall e sala de jogos. A galeria foi remontada com a fachada e as areas comuns oficiais. Plantas, imagens de living, quartos e ambientes de apartamento foram removidas da selecao.",
+      "seo_description": "Vancouver Coast Residence em Pereque, Porto Belo, com fachada, hall, academia, gourmet, jogos, pet space, piscina e playground.",
+      "gallery": [
+        {
+          "title": "Vancouver Coast Residence - fachada externa",
+          "category": "Fachada",
+          "image": "https://passe.com.br/source/img/vancouver/vancouver-imagens/full/externa-1.webp",
+          "source_url": "https://passe.com.br/vancouver",
+          "source_label": "passe.com.br"
+        },
+        {
+          "title": "Vancouver Coast Residence - fachada",
+          "category": "Fachada",
+          "image": "https://passe.com.br/source/img/vancouver/vancouver-fachada.webp",
+          "source_url": "https://passe.com.br/vancouver",
+          "source_label": "passe.com.br"
+        },
+        {
+          "title": "Vancouver Coast Residence - acesso",
+          "category": "Acesso",
+          "image": "https://passe.com.br/source/img/vancouver/vancouver-imagens/full/externa-2.webp",
+          "source_url": "https://passe.com.br/vancouver",
+          "source_label": "passe.com.br"
+        },
+        {
+          "title": "Vancouver Coast Residence - fachada com vista",
+          "category": "Fachada",
+          "image": "https://passe.com.br/source/img/vancouver/vancouver-imagens/full/externa-3.webp",
+          "source_url": "https://passe.com.br/vancouver",
+          "source_label": "passe.com.br"
+        },
+        {
+          "title": "Vancouver Coast Residence - academia",
+          "category": "Fitness",
+          "image": "https://passe.com.br/source/img/vancouver/vancouver-imagens/full/academia.webp",
+          "source_url": "https://passe.com.br/vancouver",
+          "source_label": "passe.com.br"
+        },
+        {
+          "title": "Vancouver Coast Residence - espaco gourmet",
+          "category": "Gourmet",
+          "image": "https://passe.com.br/source/img/vancouver/vancouver-imagens/full/gourmet.webp",
+          "source_url": "https://passe.com.br/vancouver",
+          "source_label": "passe.com.br"
+        },
+        {
+          "title": "Vancouver Coast Residence - hall",
+          "category": "Hall",
+          "image": "https://passe.com.br/source/img/vancouver/vancouver-imagens/full/hall.webp",
+          "source_url": "https://passe.com.br/vancouver",
+          "source_label": "passe.com.br"
+        },
+        {
+          "title": "Vancouver Coast Residence - jogos",
+          "category": "Jogos",
+          "image": "https://passe.com.br/source/img/vancouver/vancouver-imagens/full/jogos.webp",
+          "source_url": "https://passe.com.br/vancouver",
+          "source_label": "passe.com.br"
+        },
+        {
+          "title": "Vancouver Coast Residence - pet space",
+          "category": "Lazer",
+          "image": "https://passe.com.br/source/img/vancouver/vancouver-imagens/full/pet.webp",
+          "source_url": "https://passe.com.br/vancouver",
+          "source_label": "passe.com.br"
+        },
+        {
+          "title": "Vancouver Coast Residence - piscina",
+          "category": "Piscina",
+          "image": "https://passe.com.br/source/img/vancouver/vancouver-imagens/full/piscina.webp",
+          "source_url": "https://passe.com.br/vancouver",
+          "source_label": "passe.com.br"
+        },
+        {
+          "title": "Vancouver Coast Residence - playground",
+          "category": "Playground",
+          "image": "https://passe.com.br/source/img/vancouver/vancouver-imagens/full/play.webp",
+          "source_url": "https://passe.com.br/vancouver",
+          "source_label": "passe.com.br"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Pereque a poucos metros da praia",
+          "description": "A Pass-e informa que o Vancouver Coast Residence fica a 60 metros da praia de Pereque, em Porto Belo."
+        },
+        {
+          "icon": "Shield",
+          "title": "Tecnologia e operacao predial",
+          "description": "A fonte oficial cita porteiro eletronico biometrico, coleta de aguas pluviais e infraestrutura para portaria remota."
+        },
+        {
+          "icon": "Waves",
+          "title": "Lazer externo com piscina",
+          "description": "A galeria destaca piscina, prainha, playground, pet space e areas externas do empreendimento."
+        },
+        {
+          "icon": "Dumbbell",
+          "title": "Areas internas de uso comum",
+          "description": "Academia, espaco gourmet, hall e sala de jogos reforcam o uso coletivo do Vancouver Coast Residence."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Galeria oficial da incorporadora",
+          "description": "A selecao usa principalmente imagens oficiais da Pass-e para fachada e areas comuns."
+        },
+        {
+          "title": "Proximidade da praia",
+          "description": "A pagina oficial posiciona o empreendimento a 60 metros da praia de Pereque."
+        },
+        {
+          "title": "Sem plantas ou interiores privados",
+          "description": "Foram mantidas somente imagens de fachada, hall, lazer e areas comuns do predio."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Vancouver Coast Residence?",
+          "answer": "Fica na Rua Gaudencio Campos, 101, em Pereque, Porto Belo."
+        },
+        {
+          "question": "Qual e a distancia ate a praia?",
+          "answer": "A Pass-e informa que o empreendimento esta a 60 metros da praia de Pereque."
+        },
+        {
+          "question": "Quais areas comuns aparecem na nova galeria?",
+          "answer": "A galeria mostra fachada, acesso, academia, gourmet, hall, sala de jogos, pet space, piscina e playground."
+        },
+        {
+          "question": "O que foi retirado da selecao visual?",
+          "answer": "Foram retiradas plantas e imagens de living, quartos, cozinha e outros ambientes de uso privado."
+        }
+      ],
+      "sources": [
+        "https://passe.com.br/vancouver",
+        "https://www.lancamentosportobelo.com.br/lancamentos/vancouver-coast-residence/"
+      ],
+      "selected_indices": [
+        19,
+        16,
+        21,
+        23,
+        17,
+        25,
+        27,
+        29,
+        33,
+        35,
+        37
+      ]
+    }
+  ]
+}

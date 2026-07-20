@@ -1,0 +1,716 @@
+{
+  "batch_id": "development-media-curation-p2-final-c-20260720",
+  "generated_at": "2026-07-20T01:24:01.041Z",
+  "items": [
+    {
+      "slug": "vila-madalena",
+      "hero_image": "https://concase.com.br/wp-content/uploads/2024/02/003-768x432.jpg",
+      "description": "Vila Madalena teve a pagina revisada como empreendimento em Nacoes, Balneario Camboriu. As fontes da Concase e da MySide posicionam o empreendimento na Rua Jordania, no bairro Nacoes, com lazer decorado, hall, academia, sala de jogos e salao de festas. A galeria foi remontada com fachada, acesso, fitness, sala de jogos, salao de festas e gourmet, priorizando imagens que ajudam a reconhecer o predio e suas areas compartilhadas. A curadoria removeu interiores privados, plantas, logos isolados, mapas e registros sem aderencia ao condominio. O resultado deixa a pagina mais objetiva para reconhecer o edificio e entender seus espacos coletivos.",
+      "seo_description": "Vila Madalena em Nacoes, Balneario Camboriu, com fachada, acesso, fitness, jogos, salao de festas e gourmet revisados para destacar o condominio.",
+      "gallery": [
+        {
+          "title": "Vila Madalena - fachada principal",
+          "category": "Fachada",
+          "image": "https://concase.com.br/wp-content/uploads/2024/02/003-768x432.jpg",
+          "source_url": "https://concase.com.br/empreendimento/vila-madalena/",
+          "source_label": "Concase"
+        },
+        {
+          "title": "Vila Madalena - fachada frontal",
+          "category": "Fachada",
+          "image": "https://concase.com.br/wp-content/uploads/2024/02/002-768x432.jpg",
+          "source_url": "https://concase.com.br/empreendimento/vila-madalena/",
+          "source_label": "Concase"
+        },
+        {
+          "title": "Vila Madalena - fachada lateral",
+          "category": "Fachada",
+          "image": "https://concase.com.br/wp-content/uploads/2024/02/001-768x432.jpg",
+          "source_url": "https://concase.com.br/empreendimento/vila-madalena/",
+          "source_label": "Concase"
+        },
+        {
+          "title": "Vila Madalena - perspectiva da torre",
+          "category": "Fachada",
+          "image": "https://concase.com.br/wp-content/uploads/2024/02/mada1-767x1024.jpg",
+          "source_url": "https://concase.com.br/empreendimento/vila-madalena/",
+          "source_label": "Concase"
+        },
+        {
+          "title": "Vila Madalena - fitness",
+          "category": "Fitness",
+          "image": "https://concase.com.br/wp-content/uploads/2024/02/W_026-ACADEMIA-E04.jpg",
+          "source_url": "https://concase.com.br/empreendimento/vila-madalena/",
+          "source_label": "Concase"
+        },
+        {
+          "title": "Vila Madalena - jogos",
+          "category": "Jogos",
+          "image": "https://concase.com.br/wp-content/uploads/2024/02/W_026-SALA_JOGOS-E04.jpg",
+          "source_url": "https://concase.com.br/empreendimento/vila-madalena/",
+          "source_label": "Concase"
+        },
+        {
+          "title": "Vila Madalena - salao de festas",
+          "category": "Eventos",
+          "image": "https://concase.com.br/wp-content/uploads/2024/02/W_026-SALAO_FESTAS-E04.jpg",
+          "source_url": "https://concase.com.br/empreendimento/vila-madalena/",
+          "source_label": "Concase"
+        },
+        {
+          "title": "Vila Madalena - gourmet",
+          "category": "Gourmet",
+          "image": "https://concase.com.br/wp-content/uploads/2024/02/004-768x432.jpg",
+          "source_url": "https://concase.com.br/empreendimento/vila-madalena/",
+          "source_label": "Concase"
+        },
+        {
+          "title": "Vila Madalena - jogos apoio",
+          "category": "Jogos",
+          "image": "https://concase.com.br/wp-content/uploads/2024/02/008-768x432.jpg",
+          "source_url": "https://concase.com.br/empreendimento/vila-madalena/",
+          "source_label": "Concase"
+        },
+        {
+          "title": "Vila Madalena - fitness apoio",
+          "category": "Fitness",
+          "image": "https://concase.com.br/wp-content/uploads/2024/02/006-768x432.jpg",
+          "source_url": "https://concase.com.br/empreendimento/vila-madalena/",
+          "source_label": "Concase"
+        },
+        {
+          "title": "Vila Madalena - acesso",
+          "category": "Acesso",
+          "image": "https://concase.com.br/wp-content/uploads/2024/02/010-768x512.jpg",
+          "source_url": "https://concase.com.br/empreendimento/vila-madalena/",
+          "source_label": "Concase"
+        },
+        {
+          "title": "Vila Madalena - fachada acervo",
+          "category": "Fachada",
+          "image": "https://myside.com.br/_next/image?url=https%3A%2F%2Frocket.myside.com.br%2Fapplication%2Fplugins%2Fmodule_imobles%2Fuploads%2Fenterprise%2F353581%2Fimages%2F_6950aa02536494176977350710988818.webp&w=640&q=75",
+          "source_url": "https://myside.com.br/apartamento-venda-vila-madalena-balneario-camboriu-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Vila Madalena - fitness final",
+          "category": "Fitness",
+          "image": "https://myside.com.br/_next/image?url=https%3A%2F%2Frocket.myside.com.br%2Fapplication%2Fplugins%2Fmodule_imobles%2Fuploads%2Fenterprise%2F353581%2Fimages%2F_a2ce8f17268552176977352610375608.webp&w=640&q=75",
+          "source_url": "https://myside.com.br/apartamento-venda-vila-madalena-balneario-camboriu-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Vila Madalena - eventos final",
+          "category": "Eventos",
+          "image": "https://myside.com.br/_next/image?url=https%3A%2F%2Frocket.myside.com.br%2Fapplication%2Fplugins%2Fmodule_imobles%2Fuploads%2Fenterprise%2F353581%2Fimages%2F_a61f27ab385396176977353810442857.webp&w=640&q=75",
+          "source_url": "https://myside.com.br/apartamento-venda-vila-madalena-balneario-camboriu-sc",
+          "source_label": "MySide"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Endereco revisado",
+          "description": "Vila Madalena foi organizado em Nacoes, Balneario Camboriu, usando endereco e bairro confirmados nas fontes publicas consultadas."
+        },
+        {
+          "icon": "Building2",
+          "title": "Identidade do predio",
+          "description": "Empreendimento da Concase com fachada identificavel, hall e lazer compacto no bairro Nacoes."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Areas compartilhadas",
+          "description": "A vitrine passa a destacar fachada, acesso, fitness, jogos, salao de festas e gourmet, sempre com foco no uso coletivo do condominio."
+        },
+        {
+          "icon": "Images",
+          "title": "Galeria auditada",
+          "description": "A selecao troca quartos, plantas e interiores de moradia por fachada, acesso e ambientes de uso comum."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Reconhecimento visual",
+          "description": "A primeira imagem e a galeria agora mostram a fachada da Rua Jordania e a area de lazer do Vila Madalena, melhorando a identificacao do empreendimento."
+        },
+        {
+          "title": "Contexto local",
+          "description": "A descricao reforca o bairro Nacoes, a Rua Jordania e a estrutura condominial indicada pelas fontes."
+        },
+        {
+          "title": "Criterio de imagem",
+          "description": "Foram usadas fachadas e areas comuns; quartos, cozinha privativa e plantas foram removidos da selecao."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Vila Madalena?",
+          "answer": "Vila Madalena foi revisado como empreendimento em Nacoes, Balneario Camboriu. As fontes consultadas apontam Rua Jordania, 199."
+        },
+        {
+          "question": "O que a galeria mostra no Vila Madalena?",
+          "answer": "A galeria mostra fachada, acesso, fitness, sala de jogos, salao de festas e gourmet."
+        },
+        {
+          "question": "Como as imagens foram escolhidas?",
+          "answer": "Foram mantidas imagens de fachada, acesso, lazer e ambientes coletivos, descartando plantas, logotipos isolados, retratos, mapas e cenas privativas de apartamento."
+        },
+        {
+          "question": "Quais fontes apoiaram a atualizacao?",
+          "answer": "Foram consultadas Concase, MySide, Max Imoveis, Imoveis Riboli, Manica Marin e Reginaldo Larroyd."
+        }
+      ],
+      "sources": [
+        "https://concase.com.br/empreendimento/vila-madalena/",
+        "https://myside.com.br/apartamento-venda-vila-madalena-balneario-camboriu-sc",
+        "https://maximoveis.com.br/empreendimento/1707/vila-madalena-residencial/",
+        "https://www.imoveisriboli.com.br/lancamento/vila-madalena/474999",
+        "https://manicamarin.com.br/imovel/empreendimento-nacoes-balneario-camboriu-sc-2867",
+        "https://www.reginaldolarroyd.com.br/imovel/apartamento-no-edificio-vila-madalena-residencial-balneario-camboriu-nacoes-2-quartos-1-garagem-venda-ref-19/"
+      ],
+      "notes": "Acervo bom, mas misturado com plantas e interiores privados; usar Concase/MySide como base."
+    },
+    {
+      "slug": "villa-do-mar",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/07102024174503773-1728333903.jpg",
+      "description": "Villa do Mar teve a pagina revisada como empreendimento em Meia Praia, Itapema. As fontes consultadas mostram o Residencial Villa do Mar em Meia Praia, com perfil usado, construcao associada a Pasqualotto e estrutura de lazer ampla perto do mar. A galeria foi remontada com fachada, piscina, spa, salao de festas, brinquedoteca, sala de jogos, lounge, acesso e cinema, priorizando imagens que ajudam a reconhecer o predio e suas areas compartilhadas. A curadoria removeu interiores privados, plantas, logos isolados, mapas e registros sem aderencia ao condominio. A pagina fica menos dependente de fotos privativas e mais fiel ao condominio.",
+      "seo_description": "Villa do Mar em Meia Praia, Itapema, com fachada, piscina, spa, salao de festas, jogos e cinema revisados para destacar o condominio.",
+      "gallery": [
+        {
+          "title": "Villa do Mar - piscina e fachada",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/07102024174503773-1728333903.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-villa-do-mar-EM68216",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa do Mar - fachada vertical",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/photoshop-novo-10025-1728333904.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-villa-do-mar-EM68216",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa do Mar - piscina apoio",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2024/photoshop-novo-10000-1728333868.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-villa-do-mar-EM68216",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa do Mar - spa",
+          "category": "Spa",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2024/photoshop-novo-10001-1728333869.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-villa-do-mar-EM68216",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa do Mar - salao de festas",
+          "category": "Eventos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2024/photoshop-novo-10002-1728333869.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-villa-do-mar-EM68216",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa do Mar - brinquedoteca",
+          "category": "Kids",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2024/photoshop-novo-10004-1728333870.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-villa-do-mar-EM68216",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa do Mar - jogos",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2024/photoshop-novo-10005-1728333871.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-villa-do-mar-EM68216",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa do Mar - estar social",
+          "category": "Convivencia",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2024/photoshop-novo-10027-1728333874.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-villa-do-mar-EM68216",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa do Mar - fachada apoio",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/October2024/photoshop-novo-10025-1728333873.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-villa-do-mar-EM68216",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa do Mar - acesso externo",
+          "category": "Acesso",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_741_20774_1038_110526.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/villa-do-mar/itapema/meia-praia/741",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Villa do Mar - lounge apoio",
+          "category": "Convivencia",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_741_20780_1045_110526.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/villa-do-mar/itapema/meia-praia/741",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Villa do Mar - salao final",
+          "category": "Eventos",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_741_20783_1045_110526.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/villa-do-mar/itapema/meia-praia/741",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Villa do Mar - kids final",
+          "category": "Kids",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_741_20777_1045_110526.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/villa-do-mar/itapema/meia-praia/741",
+          "source_label": "Versatil"
+        },
+        {
+          "title": "Villa do Mar - cinema",
+          "category": "Cinema",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/versatil/img_edificios/g1_741_20786_1045_110526.jpg",
+          "source_url": "https://imobiliariaversatil.com.br/edificios/villa-do-mar/itapema/meia-praia/741",
+          "source_label": "Versatil"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Endereco revisado",
+          "description": "Villa do Mar foi organizado em Meia Praia, Itapema, usando endereco e bairro confirmados nas fontes publicas consultadas."
+        },
+        {
+          "icon": "Building2",
+          "title": "Identidade do predio",
+          "description": "Condominio em Meia Praia com fachada, piscina, spa, salao, jogos, kids e cinema em acervo consistente."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Areas compartilhadas",
+          "description": "A vitrine passa a destacar fachada, piscina, spa, salao de festas, jogos e cinema, sempre com foco no uso coletivo do condominio."
+        },
+        {
+          "icon": "Images",
+          "title": "Galeria auditada",
+          "description": "A galeria final substitui a longa sequencia de salas, cozinhas, quartos e banheiros por areas compartilhadas."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Reconhecimento visual",
+          "description": "A primeira imagem e a galeria agora mostram fachada, piscina e lazer do Villa do Mar, melhorando a identificacao do empreendimento."
+        },
+        {
+          "title": "Contexto local",
+          "description": "A pagina passa a tratar o Villa do Mar como condominio de Meia Praia, com foco no lazer e na proximidade do mar."
+        },
+        {
+          "title": "Criterio de imagem",
+          "description": "Fontes publicas variam entre Rua 222 e Rua 224; a copy evita cravar numero e recomenda validacao antes da visita."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Villa do Mar?",
+          "answer": "Villa do Mar foi revisado como empreendimento em Meia Praia, Itapema. As fontes publicas consultadas apontam Meia Praia e variam no numero da rua; a equipe deve confirmar o ponto exato antes de visita."
+        },
+        {
+          "question": "O que a galeria mostra no Villa do Mar?",
+          "answer": "A galeria mostra fachada, piscina, spa, salao de festas, brinquedoteca, sala de jogos, lounge, acesso e cinema."
+        },
+        {
+          "question": "Como as imagens foram escolhidas?",
+          "answer": "Foram mantidas imagens de fachada, acesso, lazer e ambientes coletivos, descartando plantas, logotipos isolados, retratos, mapas e cenas privativas de apartamento."
+        },
+        {
+          "question": "Quais fontes apoiaram a atualizacao?",
+          "answer": "Foram consultadas Imobille, Versatil, EBC Imobiliaria, Ello Imob e Silvia de Souza."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-residencial-villa-do-mar-EM68216",
+        "https://imobiliariaversatil.com.br/edificios/villa-do-mar/itapema/meia-praia/741",
+        "https://www.ebcimobiliaria.com.br/imovel/apartamento-com-4-quartos-a-venda-e-2-vagas-vila-do-mar-bairro-meia-praia-em-itapema/801807",
+        "https://elloimob.com.br/imovel/edificio-villa-do-mar-03-suites-02-vagas-200m-do-mar-meia-praia-itapema-sc/2123",
+        "https://www.silviadesouzabombinhas.com.br/1675/imoveis/venda-apartamento-4-quartos-meia-praia-itapema-sc"
+      ],
+      "notes": "Cautela por endereco publico divergente entre Rua 222 e Rua 224; manter imagens de fachada e lazer, sem interiores de apartamento."
+    },
+    {
+      "slug": "villa-lobos",
+      "hero_image": "https://myside.com.br/_next/image?url=https%3A%2F%2Frocket.myside.com.br%2Fapplication%2Fplugins%2Fmodule_imobles%2Fuploads%2Fenterprise%2F42619%2Fimages%2F_mark_6bd2a9fd5426028f761adb1a67982250.webp&w=640&q=75",
+      "description": "Villa Lobos teve a pagina revisada como empreendimento em Meia Praia, Itapema. A auditoria separou o Villa Lobos Residence ligado a Rua 319 e a Macom de outros resultados homonimos; as fontes MySide, HJ Junior, Costa Mare, Rafael Cassio e Orulo reforcam esse recorte. A galeria foi remontada com fachada, hall, fitness, sala de jogos, spa externo, deck e playground, priorizando imagens que ajudam a reconhecer o predio e suas areas compartilhadas. A curadoria removeu interiores privados, plantas, logos isolados, mapas e registros sem aderencia ao condominio. O conteudo fica mais claro para identificacao do empreendimento correto.",
+      "seo_description": "Villa Lobos em Meia Praia, Itapema, com fachada, hall, fitness, jogos, spa, deck e playground revisados para destacar o condominio.",
+      "gallery": [
+        {
+          "title": "Villa Lobos - fachada principal",
+          "category": "Fachada",
+          "image": "https://myside.com.br/_next/image?url=https%3A%2F%2Frocket.myside.com.br%2Fapplication%2Fplugins%2Fmodule_imobles%2Fuploads%2Fenterprise%2F42619%2Fimages%2F_mark_6bd2a9fd5426028f761adb1a67982250.webp&w=640&q=75",
+          "source_url": "https://myside.com.br/apartamento-venda-villa-lobos-residence-itapema-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Villa Lobos - fachada apoio",
+          "category": "Fachada",
+          "image": "https://myside.com.br/_next/image?url=https%3A%2F%2Frocket.myside.com.br%2Fapplication%2Fplugins%2Fmodule_imobles%2Fuploads%2Fenterprise%2F42619%2Fimages%2F_mark_6bd2a9fd5426028f761adb1a67982250.webp&w=750&q=75",
+          "source_url": "https://myside.com.br/apartamento-venda-villa-lobos-residence-itapema-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Villa Lobos - fachada vertical",
+          "category": "Fachada",
+          "image": "https://myside.com.br/_next/image?url=https%3A%2F%2Frocket.myside.com.br%2Fapplication%2Fplugins%2Fmodule_imobles%2Fuploads%2Fenterprise%2F42619%2Fimages%2F_mark_6bd2a9fd5426028f761adb1a67982250.webp&w=3840&q=75",
+          "source_url": "https://myside.com.br/apartamento-venda-villa-lobos-residence-itapema-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Villa Lobos - fitness",
+          "category": "Fitness",
+          "image": "https://myside.com.br/_next/image?url=https%3A%2F%2Frocket.myside.com.br%2Fapplication%2Fplugins%2Fmodule_imobles%2Fuploads%2Fenterprise%2F42619%2Fimages%2F_mark_ad8904faec8b6007b3bae91fe0210b3a.webp&w=640&q=75",
+          "source_url": "https://myside.com.br/apartamento-venda-villa-lobos-residence-itapema-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Villa Lobos - hall social",
+          "category": "Hall",
+          "image": "https://myside.com.br/_next/image?url=https%3A%2F%2Frocket.myside.com.br%2Fapplication%2Fplugins%2Fmodule_imobles%2Fuploads%2Fenterprise%2F42619%2Fimages%2F_mark_2339187aa9039df0dba906a724f16464.webp&w=640&q=75",
+          "source_url": "https://myside.com.br/apartamento-venda-villa-lobos-residence-itapema-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Villa Lobos - jogos",
+          "category": "Jogos",
+          "image": "https://myside.com.br/_next/image?url=https%3A%2F%2Frocket.myside.com.br%2Fapplication%2Fplugins%2Fmodule_imobles%2Fuploads%2Fenterprise%2F42619%2Fimages%2F_mark_d34e499fc5079b86e482e01b2fdf8e38.webp&w=640&q=75",
+          "source_url": "https://myside.com.br/apartamento-venda-villa-lobos-residence-itapema-sc",
+          "source_label": "MySide"
+        },
+        {
+          "title": "Villa Lobos - fachada noturna",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/costamare/img_edificios/g1_215_5589_1629_131125.webp",
+          "source_url": "https://costamareitapema.com.br/edificios/villa-lobos/itapema/meia-praia/215",
+          "source_label": "Costa Mare"
+        },
+        {
+          "title": "Villa Lobos - fachada acervo",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/costamare/img_edificios/g1_215_5590_1629_131125.webp",
+          "source_url": "https://costamareitapema.com.br/edificios/villa-lobos/itapema/meia-praia/215",
+          "source_label": "Costa Mare"
+        },
+        {
+          "title": "Villa Lobos - torre e entorno",
+          "category": "Fachada",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/costamare/img_edificios/g1_215_5591_1629_131125.webp",
+          "source_url": "https://costamareitapema.com.br/edificios/villa-lobos/itapema/meia-praia/215",
+          "source_label": "Costa Mare"
+        },
+        {
+          "title": "Villa Lobos - spa externo",
+          "category": "Spa",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/costamare/img_edificios/g1_215_5592_1629_131125.webp",
+          "source_url": "https://costamareitapema.com.br/edificios/villa-lobos/itapema/meia-praia/215",
+          "source_label": "Costa Mare"
+        },
+        {
+          "title": "Villa Lobos - deck",
+          "category": "Deck",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/costamare/img_edificios/g1_215_5593_1629_131125.webp",
+          "source_url": "https://costamareitapema.com.br/edificios/villa-lobos/itapema/meia-praia/215",
+          "source_label": "Costa Mare"
+        },
+        {
+          "title": "Villa Lobos - playground",
+          "category": "Playground",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/costamare/img_edificios/g1_215_5594_1629_131125.webp",
+          "source_url": "https://costamareitapema.com.br/edificios/villa-lobos/itapema/meia-praia/215",
+          "source_label": "Costa Mare"
+        },
+        {
+          "title": "Villa Lobos - hall apoio",
+          "category": "Hall",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/costamare/img_edificios/g1_215_5595_1629_131125.webp",
+          "source_url": "https://costamareitapema.com.br/edificios/villa-lobos/itapema/meia-praia/215",
+          "source_label": "Costa Mare"
+        },
+        {
+          "title": "Villa Lobos - fitness apoio",
+          "category": "Fitness",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/costamare/img_edificios/g1_215_5596_1629_131125.webp",
+          "source_url": "https://costamareitapema.com.br/edificios/villa-lobos/itapema/meia-praia/215",
+          "source_label": "Costa Mare"
+        },
+        {
+          "title": "Villa Lobos - jogos apoio",
+          "category": "Jogos",
+          "image": "https://d78txhfo8gp8r.cloudfront.net/costamare/img_edificios/g1_215_5597_1629_131125.webp",
+          "source_url": "https://costamareitapema.com.br/edificios/villa-lobos/itapema/meia-praia/215",
+          "source_label": "Costa Mare"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Endereco revisado",
+          "description": "Villa Lobos foi organizado em Meia Praia, Itapema, usando endereco e bairro confirmados nas fontes publicas consultadas."
+        },
+        {
+          "icon": "Building2",
+          "title": "Identidade do predio",
+          "description": "Empreendimento em Meia Praia com fachada vertical, hall, fitness, jogos, deck, spa e playground."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Areas compartilhadas",
+          "description": "A vitrine passa a destacar fachada, hall, fitness, jogos, spa, deck e playground, sempre com foco no uso coletivo do condominio."
+        },
+        {
+          "icon": "Images",
+          "title": "Galeria auditada",
+          "description": "A selecao remove plantas, quartos, salas privativas e resultados de outro Villa Lobos, preservando apenas o conjunto visual da Rua 319."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Reconhecimento visual",
+          "description": "A primeira imagem e a galeria agora mostram fachada e lazer do Villa Lobos Residence da Rua 319, melhorando a identificacao do empreendimento."
+        },
+        {
+          "title": "Contexto local",
+          "description": "A pagina passa a indicar Meia Praia e o recorte da Rua 319 com mais cuidado, sem misturar o predio com homonimos."
+        },
+        {
+          "title": "Criterio de imagem",
+          "description": "Nome ambiguo; foram evitadas fontes da Rua 270 e mantidas imagens coerentes com Villa Lobos Residence/Macom na Rua 319."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Villa Lobos?",
+          "answer": "Villa Lobos foi revisado como empreendimento em Meia Praia, Itapema. MySide, Rafael Cassio e Orulo indicam Rua 319, 272; HJ Junior lista Rua 319, 252/2, entao a numeracao deve ser confirmada antes de visita."
+        },
+        {
+          "question": "O que a galeria mostra no Villa Lobos?",
+          "answer": "A galeria mostra fachada, hall, fitness, sala de jogos, spa externo, deck e playground."
+        },
+        {
+          "question": "Como as imagens foram escolhidas?",
+          "answer": "Foram mantidas imagens de fachada, acesso, lazer e ambientes coletivos, descartando plantas, logotipos isolados, retratos, mapas e cenas privativas de apartamento."
+        },
+        {
+          "question": "Quais fontes apoiaram a atualizacao?",
+          "answer": "Foram consultadas MySide, Costa Mare, HJ Junior, JF Imoveis, Rafael Cassio e Orulo; Moretti bloqueou a coleta automatica."
+        }
+      ],
+      "sources": [
+        "https://myside.com.br/apartamento-venda-villa-lobos-residence-itapema-sc",
+        "https://imobiliariamoretti.com.br/imoveis/villa-lobos-residence-itapema-sc/",
+        "https://costamareitapema.com.br/edificios/villa-lobos/itapema/meia-praia/215",
+        "https://hjjuniorimoveis.com.br/edificios/villa-lobos-residence/itapema/506",
+        "https://jfimoveisitapema.com.br/property/villa-lobos-residence-2/",
+        "https://rafaelcassio.com.br/empreendimento/5575/villa-lobos-residence/",
+        "https://www.orulo.com.br/a/paulotonietticorretor/17967"
+      ],
+      "notes": "Slug mais sensivel do lote por nome homonimo; nao usar Residencial Villa Lobos da Rua 270."
+    },
+    {
+      "slug": "villa-toscana",
+      "hero_image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/October2021/gcUQ7HjrAHthWTItMOYc.jpg",
+      "description": "Villa Toscana teve a pagina revisada como empreendimento em Meia Praia, Itapema. A fonte oficial da Gandin e os portais de empreendimento mostram o Villa Toscana como condominio entregue em Meia Praia, com fachada marcante e area de lazer com piscina e hall. A galeria foi remontada com fachada, acesso, piscina, deck, spa, hall e lazer externo, priorizando imagens que ajudam a reconhecer o predio e suas areas compartilhadas. A curadoria removeu interiores privados, plantas, logos isolados, mapas e registros sem aderencia ao condominio. A galeria final representa melhor o condominio e reduz o ruido de material comercial.",
+      "seo_description": "Villa Toscana em Meia Praia, Itapema, com fachada, acesso, piscina, deck, spa e hall revisados para destacar o condominio.",
+      "gallery": [
+        {
+          "title": "Villa Toscana - fachada principal",
+          "category": "Fachada",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/October2021/gcUQ7HjrAHthWTItMOYc.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-toscana-residence-EM32936",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Toscana - torre superior",
+          "category": "Fachada",
+          "image": "https://construtoragandin.com.br/wp-content/uploads/2024/05/Villa-Toscana-Predio.webp",
+          "source_url": "https://construtoragandin.com.br/villa-toscana/",
+          "source_label": "Gandin Construtora"
+        },
+        {
+          "title": "Villa Toscana - fachada aerea",
+          "category": "Fachada",
+          "image": "https://construtoragandin.com.br/wp-content/uploads/2024/05/fachada-vt1.jpg",
+          "source_url": "https://construtoragandin.com.br/villa-toscana/",
+          "source_label": "Gandin Construtora"
+        },
+        {
+          "title": "Villa Toscana - piscina vista aerea",
+          "category": "Piscina",
+          "image": "https://construtoragandin.com.br/wp-content/uploads/2024/05/fachada-vt3.jpg",
+          "source_url": "https://construtoragandin.com.br/villa-toscana/",
+          "source_label": "Gandin Construtora"
+        },
+        {
+          "title": "Villa Toscana - piscina",
+          "category": "Piscina",
+          "image": "https://construtoragandin.com.br/wp-content/uploads/2024/05/fachada-vt4.jpg",
+          "source_url": "https://construtoragandin.com.br/villa-toscana/",
+          "source_label": "Gandin Construtora"
+        },
+        {
+          "title": "Villa Toscana - fachada vertical",
+          "category": "Fachada",
+          "image": "https://construtoragandin.com.br/wp-content/uploads/2024/05/fachada-vt5.jpg",
+          "source_url": "https://construtoragandin.com.br/villa-toscana/",
+          "source_label": "Gandin Construtora"
+        },
+        {
+          "title": "Villa Toscana - hall",
+          "category": "Hall",
+          "image": "https://construtoragandin.com.br/wp-content/uploads/2024/05/2-1.jpg",
+          "source_url": "https://construtoragandin.com.br/villa-toscana/",
+          "source_label": "Gandin Construtora"
+        },
+        {
+          "title": "Villa Toscana - piscina apoio",
+          "category": "Piscina",
+          "image": "https://construtoragandin.com.br/wp-content/uploads/2024/05/7-1.jpg",
+          "source_url": "https://construtoragandin.com.br/villa-toscana/",
+          "source_label": "Gandin Construtora"
+        },
+        {
+          "title": "Villa Toscana - area externa",
+          "category": "Lazer",
+          "image": "https://construtoragandin.com.br/wp-content/uploads/2024/05/8-1.jpg",
+          "source_url": "https://construtoragandin.com.br/villa-toscana/",
+          "source_label": "Gandin Construtora"
+        },
+        {
+          "title": "Villa Toscana - piscina noturna",
+          "category": "Piscina",
+          "image": "https://construtoragandin.com.br/wp-content/uploads/2024/05/fotos-vt.jpg",
+          "source_url": "https://construtoragandin.com.br/villa-toscana/",
+          "source_label": "Gandin Construtora"
+        },
+        {
+          "title": "Villa Toscana - fachada acesso",
+          "category": "Acesso",
+          "image": "https://www.imobillenegocios.com.br/images/enterprise/bg-enterprise.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-toscana-residence-EM32936",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Toscana - piscina acervo",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/October2021/lcpueaLYQmCp3Lv4P5kE.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-toscana-residence-EM32936",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Toscana - lazer externo",
+          "category": "Lazer",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/October2021/EAzKaEUWDTkU7llWhWw6.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-toscana-residence-EM32936",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Toscana - spa",
+          "category": "Spa",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/October2021/zeryAWOb7ViFUC48ed9E.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-toscana-residence-EM32936",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Toscana - piscina final",
+          "category": "Piscina",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/October2021/wWquUogRs0O1N7tBVJYb.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-toscana-residence-EM32936",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Toscana - deck piscina",
+          "category": "Deck",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/October2021/wDYabYyBMZdTpyT4RwTO.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-toscana-residence-EM32936",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Toscana - hall social",
+          "category": "Hall",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/October2021/cSrgQFxrvVPCTVeuqfxs.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-toscana-residence-EM32936",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Villa Toscana - acesso interno",
+          "category": "Acesso",
+          "image": "https://s3.sa-east-1.amazonaws.com/imobillesite/ventures-photo/October2021/l8GntrTMOoKunSdKIErM.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-toscana-residence-EM32936",
+          "source_label": "Imobille"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Endereco revisado",
+          "description": "Villa Toscana foi organizado em Meia Praia, Itapema, usando endereco e bairro confirmados nas fontes publicas consultadas."
+        },
+        {
+          "icon": "Building2",
+          "title": "Identidade do predio",
+          "description": "Condominio da Gandin em Meia Praia com fachada, piscina, deck, spa, hall e area externa."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Areas compartilhadas",
+          "description": "A vitrine passa a destacar fachada, acesso, piscina, deck, spa e hall, sempre com foco no uso coletivo do condominio."
+        },
+        {
+          "icon": "Images",
+          "title": "Galeria auditada",
+          "description": "A curadoria descarta apartamentos decorados, cards promocionais, plantas e imagens com texto, mantendo a leitura condominial."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Reconhecimento visual",
+          "description": "A primeira imagem e a galeria agora mostram fachada e piscina do Villa Toscana, melhorando a identificacao do empreendimento."
+        },
+        {
+          "title": "Contexto local",
+          "description": "A descricao reforca Meia Praia, a Construtora Gandin e o conjunto de areas comuns do residencial."
+        },
+        {
+          "title": "Criterio de imagem",
+          "description": "Foram priorizadas fontes da Gandin, Imobille e Versatil; imagens promocionais com texto e interiores privados ficaram fora."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Villa Toscana?",
+          "answer": "Villa Toscana foi revisado como empreendimento em Meia Praia, Itapema. As fontes e o cadastro trabalham o condominio na Rua 294, Meia Praia."
+        },
+        {
+          "question": "O que a galeria mostra no Villa Toscana?",
+          "answer": "A galeria mostra fachada, acesso, piscina, deck, spa, hall e lazer externo."
+        },
+        {
+          "question": "Como as imagens foram escolhidas?",
+          "answer": "Foram mantidas imagens de fachada, acesso, lazer e ambientes coletivos, descartando plantas, logotipos isolados, retratos, mapas e cenas privativas de apartamento."
+        },
+        {
+          "question": "Quais fontes apoiaram a atualizacao?",
+          "answer": "Foram consultadas Gandin Construtora, Imobille, Versatil, Potencial Imoveis e publicacoes da Gandin."
+        }
+      ],
+      "sources": [
+        "https://construtoragandin.com.br/villa-toscana/",
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-villa-toscana-residence-EM32936",
+        "https://imobiliariaversatil.com.br/edificios/villa-toscana/itapema/meia-praia/575",
+        "https://www.potencialimoveis.com.br/empreendimento/villa-toscana-condominio-residencial-CO96803",
+        "https://www.facebook.com/efaccioimoveis/posts/villa-toscanarua-292-n-220-bloco-c-meia-praia-itapemascempreendimento-30-apartam/380066687266859/"
+      ],
+      "notes": "Acervo amplo, mas com muitos cards e apartamentos decorados; manter fachada, hall e piscina."
+    }
+  ]
+}

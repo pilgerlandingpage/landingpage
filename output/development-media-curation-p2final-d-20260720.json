@@ -1,0 +1,808 @@
+{
+  "batch_id": "development-media-curation-p2-final-d-20260720",
+  "generated_at": "2026-07-20T01:26:52.076Z",
+  "items": [
+    {
+      "slug": "ville-de-lyon",
+      "hero_image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/layout-fotos-site-10000-1678105613-1723233043.jpg",
+      "description": "Ville de Lyon teve a pagina revisada como empreendimento em Rua 242, Meia Praia, Itapema. As fontes de Itapema mostram o Ville de Lyon como condominio em Meia Praia com lazer de piscina, academia, salao, jogos, brinquedoteca e espaco gourmet. A galeria foi remontada com fachada, acesso, hall, piscina, deck, fitness, jogos e playground, priorizando imagens que ajudam a reconhecer o predio e suas areas compartilhadas. Foram removidos registros de moradia privada, plantas, logos isolados, retratos e cenas sem aderencia ao condominio. A pagina passa a representar melhor o condominio e seu lazer compartilhado.",
+      "seo_description": "Ville de Lyon em Meia Praia, Itapema, com fachada, piscina, hall, fitness, jogos e playground revisados para destacar o condominio.",
+      "gallery": [
+        {
+          "title": "Ville de Lyon - fachada principal",
+          "category": "Fachada",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-second-banner/layout-fotos-site-10000-1678105613-1723233043.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ville-de-lyon-em-itapema-EM02095",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ville de Lyon - acesso identificado",
+          "category": "Acesso",
+          "image": "https://b3.casteldigital.com.br/sprot/ig/im/imoveis/1109/img-20250408-wa0013-17441091992684.jpg",
+          "source_url": "https://www.sprot.com.br/imovel/apartamento-no-edificio-ville-de-lyon-itapema-meia-praia-3-quartos-2-garagens-venda-ref-1109/",
+          "source_label": "Sprot"
+        },
+        {
+          "title": "Ville de Lyon - hall",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2023/layout-fotos-site-10001-1678105613.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ville-de-lyon-em-itapema-EM02095",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ville de Lyon - circulacao comum",
+          "category": "Hall",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2023/layout-fotos-site-10002-1678105614.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ville-de-lyon-em-itapema-EM02095",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ville de Lyon - piscina",
+          "category": "Piscina",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-banner/170220261657394166-1771358259.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ville-de-lyon-em-itapema-EM02095",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ville de Lyon - deck piscina",
+          "category": "Deck",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2023/layout-fotos-site-10018-1678105614.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ville-de-lyon-em-itapema-EM02095",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ville de Lyon - fitness",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2023/layout-fotos-site-10019-1678105615.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ville-de-lyon-em-itapema-EM02095",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ville de Lyon - fitness apoio",
+          "category": "Fitness",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2023/layout-fotos-site-10020-1678105615.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ville-de-lyon-em-itapema-EM02095",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ville de Lyon - jogos",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2023/layout-fotos-site-10028-1678105617.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ville-de-lyon-em-itapema-EM02095",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ville de Lyon - jogos apoio",
+          "category": "Jogos",
+          "image": "https://imobillesite.s3.sa-east-1.amazonaws.com/ventures-photo/March2023/layout-fotos-site-10029-1678105618.jpg",
+          "source_url": "https://www.imobillenegocios.com.br/empreendimento/edificio-ville-de-lyon-em-itapema-EM02095",
+          "source_label": "Imobille"
+        },
+        {
+          "title": "Ville de Lyon - playground",
+          "category": "Playground",
+          "image": "https://b3.casteldigital.com.br/sprot/ig/im/imoveis/1109/img-20250408-wa0142-1744109199268.jpg",
+          "source_url": "https://www.sprot.com.br/imovel/apartamento-no-edificio-ville-de-lyon-itapema-meia-praia-3-quartos-2-garagens-venda-ref-1109/",
+          "source_label": "Sprot"
+        },
+        {
+          "title": "Ville de Lyon - piscina apoio",
+          "category": "Piscina",
+          "image": "https://b3.casteldigital.com.br/sprot/ig/im/imoveis/1109/img-20250408-wa0143-1744109199268.jpg",
+          "source_url": "https://www.sprot.com.br/imovel/apartamento-no-edificio-ville-de-lyon-itapema-meia-praia-3-quartos-2-garagens-venda-ref-1109/",
+          "source_label": "Sprot"
+        },
+        {
+          "title": "Ville de Lyon - fitness extra",
+          "category": "Fitness",
+          "image": "https://b3.casteldigital.com.br/sprot/ig/im/imoveis/1109/img-20250408-wa0024-17441091992682.jpg",
+          "source_url": "https://www.sprot.com.br/imovel/apartamento-no-edificio-ville-de-lyon-itapema-meia-praia-3-quartos-2-garagens-venda-ref-1109/",
+          "source_label": "Sprot"
+        },
+        {
+          "title": "Ville de Lyon - jogos extra",
+          "category": "Jogos",
+          "image": "https://b3.casteldigital.com.br/sprot/ig/im/imoveis/1109/img-20250408-wa0014-17441091992683.jpg",
+          "source_url": "https://www.sprot.com.br/imovel/apartamento-no-edificio-ville-de-lyon-itapema-meia-praia-3-quartos-2-garagens-venda-ref-1109/",
+          "source_label": "Sprot"
+        },
+        {
+          "title": "Ville de Lyon - piscina externa",
+          "category": "Piscina",
+          "image": "https://b3.casteldigital.com.br/sprot/ig/im/imoveis/1109/img-20250408-wa0019-17441091992684.jpg",
+          "source_url": "https://www.sprot.com.br/imovel/apartamento-no-edificio-ville-de-lyon-itapema-meia-praia-3-quartos-2-garagens-venda-ref-1109/",
+          "source_label": "Sprot"
+        },
+        {
+          "title": "Ville de Lyon - hall apoio",
+          "category": "Hall",
+          "image": "https://b3.casteldigital.com.br/sprot/ig/im/imoveis/1109/img-20250408-wa0009-17441091992684.jpg",
+          "source_url": "https://www.sprot.com.br/imovel/apartamento-no-edificio-ville-de-lyon-itapema-meia-praia-3-quartos-2-garagens-venda-ref-1109/",
+          "source_label": "Sprot"
+        },
+        {
+          "title": "Ville de Lyon - deck apoio",
+          "category": "Deck",
+          "image": "https://b3.casteldigital.com.br/sprot/ig/im/imoveis/1109/img-20250408-wa0015-17441091992684.jpg",
+          "source_url": "https://www.sprot.com.br/imovel/apartamento-no-edificio-ville-de-lyon-itapema-meia-praia-3-quartos-2-garagens-venda-ref-1109/",
+          "source_label": "Sprot"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Endereco confirmado",
+          "description": "Ville de Lyon foi revisado em Rua 242, Meia Praia, Itapema, com bairro e contexto alinhados as fontes consultadas."
+        },
+        {
+          "icon": "Building2",
+          "title": "Identidade do predio",
+          "description": "Condominio em Meia Praia com fachada reconhecivel e bloco de lazer formado por piscina, deck, fitness, jogos e playground."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Areas compartilhadas",
+          "description": "A pagina passa a destacar fachada, piscina, hall, fitness, jogos e playground, mantendo o foco no uso coletivo do condominio."
+        },
+        {
+          "icon": "Images",
+          "title": "Galeria auditada",
+          "description": "A nova galeria troca fotos de interiores privados por fachada, hall, piscina, fitness, jogos e acesso identificado."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Reconhecimento visual",
+          "description": "A primeira leitura apresenta fachada, acesso e piscina do Ville de Lyon, facilitando a identificacao do empreendimento."
+        },
+        {
+          "title": "Contexto local",
+          "description": "A descricao reforca Meia Praia, Itapema, e organiza os itens de lazer citados pelas fontes."
+        },
+        {
+          "title": "Criterio de imagem",
+          "description": "O acervo externo traz muitos ambientes de moradia; a selecao ficou concentrada em fachada e areas comuns."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Ville de Lyon?",
+          "answer": "Ville de Lyon foi revisado como empreendimento em Rua 242, Meia Praia, Itapema."
+        },
+        {
+          "question": "O que a galeria mostra no Ville de Lyon?",
+          "answer": "A galeria mostra fachada, acesso, hall, piscina, deck, fitness, jogos e playground."
+        },
+        {
+          "question": "Como as imagens foram escolhidas?",
+          "answer": "Foram mantidas imagens de fachada, acesso, hall, lazer e convivencia, descartando plantas, retratos, logos isolados e ambientes privativos."
+        },
+        {
+          "question": "Quais fontes apoiaram a atualizacao?",
+          "answer": "Foram consultadas Imobille, Viva Real, Zaad Itapema, Sprot, Macom e Lopes."
+        }
+      ],
+      "sources": [
+        "https://www.imobillenegocios.com.br/empreendimento/edificio-ville-de-lyon-em-itapema-EM02095",
+        "https://www.vivareal.com.br/condominio/ville-de-lyon-meia-praia-id-9ceffd69-d41f/",
+        "https://zaaditapema.com.br/edificios/ville-de-lyon/itapema/meia-praia/339",
+        "https://www.sprot.com.br/imovel/apartamento-no-edificio-ville-de-lyon-itapema-meia-praia-3-quartos-2-garagens-venda-ref-1109/",
+        "https://macomconstrutora3.hospedagemdesites.ws/obras/ville-de-lyon-residence/",
+        "https://www.lopes.com.br/lancamento/REM18469/ville-de-lyon-itapema-meia-praia"
+      ],
+      "notes": "Acervo com muitos quartos, cozinhas e banheiros; usar somente fachada, acesso e lazer comum."
+    },
+    {
+      "slug": "vision-home-club",
+      "hero_image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-61.jpg",
+      "description": "Vision Home Club teve a pagina revisada como empreendimento em VivaPark, Porto Belo. As fontes da Vokkan e de portais especializados posicionam o projeto como um home club residencial amplo dentro do VivaPark Porto Belo, com lazer familiar e ambientes de convivencia em escala de bairro planejado. A galeria foi remontada com fachada, acesso, lazer externo, fitness, kids, eventos, piscina, playground, deck, gourmet, jogos, sauna e lounge, priorizando imagens que ajudam a reconhecer o predio e suas areas compartilhadas. Foram removidos registros de moradia privada, plantas, logos isolados, retratos e cenas sem aderencia ao condominio. O resultado deixa a pagina mais fiel ao empreendimento e menos dependente de imagens de interiores.",
+      "seo_description": "Vision Home Club em VivaPark, Porto Belo, com fachada, piscina, fitness, kids, gourmet, jogos e lounge revisados para destacar o condominio.",
+      "gallery": [
+        {
+          "title": "Vision Home Club - fachada principal",
+          "category": "Fachada",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-61.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - fachada noturna",
+          "category": "Fachada",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-677.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - acesso urbano",
+          "category": "Acesso",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-916.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - aerea do conjunto",
+          "category": "Fachada",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-247.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - lazer externo",
+          "category": "Lazer",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-755.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - fitness",
+          "category": "Fitness",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-336.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - kids",
+          "category": "Kids",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-925.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - eventos",
+          "category": "Eventos",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-603.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - piscina",
+          "category": "Piscina",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-990.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - playground",
+          "category": "Playground",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-115.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - piscina em altura",
+          "category": "Piscina",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-224.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - bem estar",
+          "category": "Bem-estar",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-403.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - deck piscina",
+          "category": "Deck",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-943.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - playground externo",
+          "category": "Playground",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-77.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - gourmet",
+          "category": "Gourmet",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-522.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - jogos",
+          "category": "Jogos",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-179.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - salao",
+          "category": "Eventos",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-709.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - sauna",
+          "category": "Bem-estar",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-552.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - lounge",
+          "category": "Convivencia",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-998.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Endereco confirmado",
+          "description": "Vision Home Club foi revisado em VivaPark, Porto Belo, com bairro e contexto alinhados as fontes consultadas."
+        },
+        {
+          "icon": "Building2",
+          "title": "Identidade do predio",
+          "description": "Home club no VivaPark com fachadas, piscina, fitness, kids, playground, gourmet, jogos e espacos de bem-estar."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Areas compartilhadas",
+          "description": "A pagina passa a destacar fachada, piscina, fitness, kids, gourmet, jogos e lounge, mantendo o foco no uso coletivo do condominio."
+        },
+        {
+          "icon": "Images",
+          "title": "Galeria auditada",
+          "description": "A selecao usa o acervo oficial e remove quartos, salas, terracos privativos, logos e selos."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Reconhecimento visual",
+          "description": "A primeira leitura apresenta fachadas e lazer do maior home club residencial do VivaPark, facilitando a identificacao do empreendimento."
+        },
+        {
+          "title": "Contexto local",
+          "description": "O texto reforca o VivaPark Porto Belo e a leitura de home club do empreendimento."
+        },
+        {
+          "title": "Criterio de imagem",
+          "description": "Foram priorizados renders oficiais de fachada e areas comuns; cenas de moradia privada ficaram fora da galeria."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Vision Home Club?",
+          "answer": "Vision Home Club foi revisado como empreendimento em VivaPark, Porto Belo."
+        },
+        {
+          "question": "O que a galeria mostra no Vision Home Club?",
+          "answer": "A galeria mostra fachada, acesso, lazer externo, fitness, kids, eventos, piscina, playground, deck, gourmet, jogos, sauna e lounge."
+        },
+        {
+          "question": "Como as imagens foram escolhidas?",
+          "answer": "Foram mantidas imagens de fachada, acesso, hall, lazer e convivencia, descartando plantas, retratos, logos isolados e ambientes privativos."
+        },
+        {
+          "question": "Quais fontes apoiaram a atualizacao?",
+          "answer": "Foram cruzadas Vokkan, MySide, Lancamentos Porto Belo, Skyline e Ello Imob."
+        }
+      ],
+      "sources": [
+        "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+        "https://myside.com.br/apartamento-venda-vision-home-club-porto-belo-sc",
+        "https://www.lancamentosportobelo.com.br/lancamentos/vision-home-club-vivapark/",
+        "https://lancamentosemportobelo.com.br/lancamentos/vision-home-club-vivapark/",
+        "https://skylineimobiliaria.com.br/empreendimento/vision-home-club",
+        "https://elloimob.com.br/imovel/viva-park-porto-belo-n1-vision-pre-lancamento-em-porto-belo-sc/540"
+      ],
+      "notes": "Nome compartilhado entre Vision Home Club e Vision Home Club - VivaPark; tratar como o mesmo empreendimento do VivaPark."
+    },
+    {
+      "slug": "vision-home-club-vivapark",
+      "hero_image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-61.jpg",
+      "description": "Vision Home Club - VivaPark teve a pagina revisada como empreendimento em VivaPark, Porto Belo. As fontes da Vokkan e de portais especializados posicionam o projeto como um home club residencial amplo dentro do VivaPark Porto Belo, com lazer familiar e ambientes de convivencia em escala de bairro planejado. A galeria foi remontada com fachada, acesso, lazer externo, fitness, kids, eventos, piscina, playground, deck, gourmet, jogos, sauna e lounge, priorizando imagens que ajudam a reconhecer o predio e suas areas compartilhadas. Foram removidos registros de moradia privada, plantas, logos isolados, retratos e cenas sem aderencia ao condominio. A pagina passa a comunicar a variante VivaPark com a mesma base visual oficial do empreendimento.",
+      "seo_description": "Vision Home Club - VivaPark em VivaPark, Porto Belo, com fachada, piscina, fitness, kids, gourmet, jogos e lounge revisados para destacar o condominio.",
+      "gallery": [
+        {
+          "title": "Vision Home Club - VivaPark - fachada principal",
+          "category": "Fachada",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-61.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - VivaPark - fachada noturna",
+          "category": "Fachada",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-677.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - VivaPark - acesso urbano",
+          "category": "Acesso",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-916.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - VivaPark - aerea do conjunto",
+          "category": "Fachada",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-247.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - VivaPark - lazer externo",
+          "category": "Lazer",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-755.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - VivaPark - fitness",
+          "category": "Fitness",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-336.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - VivaPark - kids",
+          "category": "Kids",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-925.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - VivaPark - eventos",
+          "category": "Eventos",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-603.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - VivaPark - piscina",
+          "category": "Piscina",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-990.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - VivaPark - playground",
+          "category": "Playground",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-115.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - VivaPark - piscina em altura",
+          "category": "Piscina",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-224.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - VivaPark - bem estar",
+          "category": "Bem-estar",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-403.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - VivaPark - deck piscina",
+          "category": "Deck",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-943.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - VivaPark - playground externo",
+          "category": "Playground",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-77.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - VivaPark - gourmet",
+          "category": "Gourmet",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-522.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - VivaPark - jogos",
+          "category": "Jogos",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-179.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - VivaPark - salao",
+          "category": "Eventos",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-709.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - VivaPark - sauna",
+          "category": "Bem-estar",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-552.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        },
+        {
+          "title": "Vision Home Club - VivaPark - lounge",
+          "category": "Convivencia",
+          "image": "https://vokkan.com.br/uploads/imagens/lg-vision-home-club-8-998.jpg",
+          "source_url": "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+          "source_label": "Vokkan"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Endereco confirmado",
+          "description": "Vision Home Club - VivaPark foi revisado em VivaPark, Porto Belo, com bairro e contexto alinhados as fontes consultadas."
+        },
+        {
+          "icon": "Building2",
+          "title": "Identidade do predio",
+          "description": "Empreendimento no VivaPark com fachadas, piscina, fitness, kids, playground, gourmet, jogos e espacos de bem-estar."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Areas compartilhadas",
+          "description": "A pagina passa a destacar fachada, piscina, fitness, kids, gourmet, jogos e lounge, mantendo o foco no uso coletivo do condominio."
+        },
+        {
+          "icon": "Images",
+          "title": "Galeria auditada",
+          "description": "A selecao usa o acervo oficial e remove quartos, salas, terracos privativos, logos e selos."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Reconhecimento visual",
+          "description": "A primeira leitura apresenta fachadas e lazer do Vision Home Club no VivaPark, facilitando a identificacao do empreendimento."
+        },
+        {
+          "title": "Contexto local",
+          "description": "A descricao reforca o vinculo direto com o VivaPark Porto Belo e o perfil de home club."
+        },
+        {
+          "title": "Criterio de imagem",
+          "description": "Foram priorizados renders oficiais de fachada e areas comuns; cenas de moradia privada ficaram fora da galeria."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Vision Home Club - VivaPark?",
+          "answer": "Vision Home Club - VivaPark foi revisado como empreendimento em VivaPark, Porto Belo."
+        },
+        {
+          "question": "O que a galeria mostra no Vision Home Club - VivaPark?",
+          "answer": "A galeria mostra fachada, acesso, lazer externo, fitness, kids, eventos, piscina, playground, deck, gourmet, jogos, sauna e lounge."
+        },
+        {
+          "question": "Como as imagens foram escolhidas?",
+          "answer": "Foram mantidas imagens de fachada, acesso, hall, lazer e convivencia, descartando plantas, retratos, logos isolados e ambientes privativos."
+        },
+        {
+          "question": "Quais fontes apoiaram a atualizacao?",
+          "answer": "Foram cruzadas Vokkan, MySide, Lancamentos Porto Belo, Skyline e Ello Imob."
+        }
+      ],
+      "sources": [
+        "https://vokkan.com.br/empreendimento/vision-home-club-vivapark-porto-belo/pt",
+        "https://myside.com.br/apartamento-venda-vision-home-club-porto-belo-sc",
+        "https://www.lancamentosportobelo.com.br/lancamentos/vision-home-club-vivapark/",
+        "https://lancamentosemportobelo.com.br/lancamentos/vision-home-club-vivapark/",
+        "https://skylineimobiliaria.com.br/empreendimento/vision-home-club",
+        "https://elloimob.com.br/imovel/viva-park-porto-belo-n1-vision-pre-lancamento-em-porto-belo-sc/540"
+      ],
+      "notes": "Nome compartilhado entre Vision Home Club e Vision Home Club - VivaPark; tratar como o mesmo empreendimento do VivaPark."
+    },
+    {
+      "slug": "vitta-home-resort",
+      "hero_image": "https://itajai.porto5.com.br/wp-content/uploads/2022/01/vitta-home-resort-1024x400.jpg",
+      "description": "Vitta Home Resort teve a pagina revisada como empreendimento em Rua Joao Cunha, 220, Fazenda, Itajai. As fontes da Porto5 descrevem o Vitta Home Resort como condominio club no bairro Fazenda, com infraestrutura de lazer, atmosfera relax e contato com area verde. A galeria foi remontada com fachada, piscina, hall, acesso, quadra, coworking, bike e prancha, lava pes, bike fix, mercado, gourmet, salao, playground e lavanderia, priorizando imagens que ajudam a reconhecer o predio e suas areas compartilhadas. Foram removidos registros de moradia privada, plantas, logos isolados, retratos e cenas sem aderencia ao condominio. A galeria final mostra o condominio de forma mais completa e evita confundir areas privadas com areas comuns.",
+      "seo_description": "Vitta Home Resort em Fazenda, Itajai, com fachada, piscina, hall, quadra, coworking, playground e gourmet revisados para destacar o condominio.",
+      "gallery": [
+        {
+          "title": "Vitta Home Resort - fachada principal",
+          "category": "Fachada",
+          "image": "https://itajai.porto5.com.br/wp-content/uploads/2022/01/vitta-home-resort-1024x400.jpg",
+          "source_url": "https://itajai.porto5.com.br/",
+          "source_label": "Porto5"
+        },
+        {
+          "title": "Vitta Home Resort - fachada noturna",
+          "category": "Fachada",
+          "image": "https://www.porto5.com.br/wp-content/uploads/2023/07/03-Fachada_noturna-3.jpg",
+          "source_url": "https://www.porto5.com.br/empreendimentos/vitta-home-resort/",
+          "source_label": "Porto5"
+        },
+        {
+          "title": "Vitta Home Resort - piscina principal",
+          "category": "Piscina",
+          "image": "https://www.porto5.com.br/wp-content/uploads/2023/07/banner-Vitta-Home-Resort.jpg",
+          "source_url": "https://www.porto5.com.br/empreendimentos/vitta-home-resort/",
+          "source_label": "Porto5"
+        },
+        {
+          "title": "Vitta Home Resort - piscina apoio",
+          "category": "Piscina",
+          "image": "https://www.porto5.com.br/wp-content/uploads/2023/07/18-Piscina_diurna.jpg",
+          "source_url": "https://www.porto5.com.br/empreendimentos/vitta-home-resort/",
+          "source_label": "Porto5"
+        },
+        {
+          "title": "Vitta Home Resort - hall",
+          "category": "Hall",
+          "image": "https://www.porto5.com.br/wp-content/uploads/2023/07/05-Hall_entrada.jpg",
+          "source_url": "https://www.porto5.com.br/empreendimentos/vitta-home-resort/",
+          "source_label": "Porto5"
+        },
+        {
+          "title": "Vitta Home Resort - acesso pedestres",
+          "category": "Acesso",
+          "image": "https://www.porto5.com.br/wp-content/uploads/2023/07/04-Acesso_pedestres.jpg",
+          "source_url": "https://www.porto5.com.br/empreendimentos/vitta-home-resort/",
+          "source_label": "Porto5"
+        },
+        {
+          "title": "Vitta Home Resort - quadra e lazer",
+          "category": "Quadra",
+          "image": "https://itajai.porto5.com.br/wp-content/uploads/2022/01/img.png",
+          "source_url": "https://itajai.porto5.com.br/",
+          "source_label": "Porto5"
+        },
+        {
+          "title": "Vitta Home Resort - acesso ao lazer",
+          "category": "Acesso",
+          "image": "https://itajai.porto5.com.br/wp-content/uploads/2022/01/1-1.jpg",
+          "source_url": "https://itajai.porto5.com.br/",
+          "source_label": "Porto5"
+        },
+        {
+          "title": "Vitta Home Resort - hall apoio",
+          "category": "Hall",
+          "image": "https://itajai.porto5.com.br/wp-content/uploads/2022/01/2-1.jpg",
+          "source_url": "https://itajai.porto5.com.br/",
+          "source_label": "Porto5"
+        },
+        {
+          "title": "Vitta Home Resort - coworking",
+          "category": "Convivencia",
+          "image": "https://itajai.porto5.com.br/wp-content/uploads/2022/01/4.jpg",
+          "source_url": "https://itajai.porto5.com.br/",
+          "source_label": "Porto5"
+        },
+        {
+          "title": "Vitta Home Resort - bike e prancha",
+          "category": "Garagem",
+          "image": "https://itajai.porto5.com.br/wp-content/uploads/2022/01/5.jpg",
+          "source_url": "https://itajai.porto5.com.br/",
+          "source_label": "Porto5"
+        },
+        {
+          "title": "Vitta Home Resort - lava pes",
+          "category": "Lazer",
+          "image": "https://itajai.porto5.com.br/wp-content/uploads/2022/01/6.jpg",
+          "source_url": "https://itajai.porto5.com.br/",
+          "source_label": "Porto5"
+        },
+        {
+          "title": "Vitta Home Resort - bike fix",
+          "category": "Lazer",
+          "image": "https://itajai.porto5.com.br/wp-content/uploads/2022/01/8.jpg",
+          "source_url": "https://itajai.porto5.com.br/",
+          "source_label": "Porto5"
+        },
+        {
+          "title": "Vitta Home Resort - mercado",
+          "category": "Convivencia",
+          "image": "https://itajai.porto5.com.br/wp-content/uploads/2022/01/10.jpg",
+          "source_url": "https://itajai.porto5.com.br/",
+          "source_label": "Porto5"
+        },
+        {
+          "title": "Vitta Home Resort - gourmet",
+          "category": "Gourmet",
+          "image": "https://itajai.porto5.com.br/wp-content/uploads/2022/01/12.jpg",
+          "source_url": "https://itajai.porto5.com.br/",
+          "source_label": "Porto5"
+        },
+        {
+          "title": "Vitta Home Resort - salao",
+          "category": "Eventos",
+          "image": "https://itajai.porto5.com.br/wp-content/uploads/2022/01/13.jpg",
+          "source_url": "https://itajai.porto5.com.br/",
+          "source_label": "Porto5"
+        },
+        {
+          "title": "Vitta Home Resort - playground",
+          "category": "Playground",
+          "image": "https://itajai.porto5.com.br/wp-content/uploads/2022/01/16.jpg",
+          "source_url": "https://itajai.porto5.com.br/",
+          "source_label": "Porto5"
+        },
+        {
+          "title": "Vitta Home Resort - playground apoio",
+          "category": "Playground",
+          "image": "https://itajai.porto5.com.br/wp-content/uploads/2022/01/18.jpg",
+          "source_url": "https://itajai.porto5.com.br/",
+          "source_label": "Porto5"
+        },
+        {
+          "title": "Vitta Home Resort - lavanderia",
+          "category": "Convivencia",
+          "image": "https://itajai.porto5.com.br/wp-content/uploads/2022/01/LP-Vitta-Home-Resort-02.jpg",
+          "source_url": "https://itajai.porto5.com.br/",
+          "source_label": "Porto5"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "MapPin",
+          "title": "Endereco confirmado",
+          "description": "Vitta Home Resort foi revisado em Rua Joao Cunha, 220, Fazenda, Itajai, com bairro e contexto alinhados as fontes consultadas."
+        },
+        {
+          "icon": "Building2",
+          "title": "Identidade do predio",
+          "description": "Condominio club no bairro Fazenda com piscina, hall, quadra, coworking, mercado, lavanderia, playground e apoio para bicicletas/pranchas."
+        },
+        {
+          "icon": "Sparkles",
+          "title": "Areas compartilhadas",
+          "description": "A pagina passa a destacar fachada, piscina, hall, quadra, coworking, playground e gourmet, mantendo o foco no uso coletivo do condominio."
+        },
+        {
+          "icon": "Images",
+          "title": "Galeria auditada",
+          "description": "A selecao remove plantas, logos, fotos de moradia e retratos, preservando fachada, lazer e conveniencias coletivas."
+        }
+      ],
+      "differentials": [
+        {
+          "title": "Reconhecimento visual",
+          "description": "A primeira leitura apresenta fachada e piscina do condominio club em Itajai, facilitando a identificacao do empreendimento."
+        },
+        {
+          "title": "Contexto local",
+          "description": "A pagina passa a reforcar o bairro Fazenda, em Itajai, e a proposta de resort urbano da Porto5."
+        },
+        {
+          "title": "Criterio de imagem",
+          "description": "Foram priorizados renders oficiais e imagens de obra/fachada apenas quando ajudam a identificar o empreendimento."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Onde fica o Vitta Home Resort?",
+          "answer": "Vitta Home Resort foi revisado como empreendimento em Rua Joao Cunha, 220, Fazenda, Itajai."
+        },
+        {
+          "question": "O que a galeria mostra no Vitta Home Resort?",
+          "answer": "A galeria mostra fachada, piscina, hall, acesso, quadra, coworking, bike e prancha, lava pes, bike fix, mercado, gourmet, salao, playground e lavanderia."
+        },
+        {
+          "question": "Como as imagens foram escolhidas?",
+          "answer": "Foram mantidas imagens de fachada, acesso, hall, lazer e convivencia, descartando plantas, retratos, logos isolados e ambientes privativos."
+        },
+        {
+          "question": "Quais fontes apoiaram a atualizacao?",
+          "answer": "Foram usadas Porto5, Porto5 Itajai, MySide, Imobiliaria Suprema, Litoral North e Lourdes Stein Imoveis."
+        }
+      ],
+      "sources": [
+        "https://www.porto5.com.br/empreendimentos/vitta-home-resort/",
+        "https://itajai.porto5.com.br/",
+        "https://myside.com.br/apartamento-venda-vitta-home-resort-itajai-sc",
+        "https://imobiliariasuprema.com.br/imovel/venda-apartamentos-02-dormitorio-em-itajai/vitta-home-resort/1685",
+        "https://www.litoralnorth.com.br/imovel/apartamento-no-edificio-vitta-home-resort-itajai-fazenda-2-quartos-1-garagem-venda-ref-2643/",
+        "https://www.lourdessteinimoveis.com.br/imovel/apartamento-no-edificio-vitta-home-resort-itajai-fazenda-3-quartos-1-garagem-venda-ref-1138/"
+      ],
+      "notes": "Acervo rico, mas com muitas plantas, logos e fotos de moradia; manter fachada, lazer e conveniencias comuns."
+    }
+  ]
+}
