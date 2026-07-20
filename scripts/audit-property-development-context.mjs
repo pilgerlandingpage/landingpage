@@ -101,6 +101,14 @@ function compactKey(value) {
   return normalizeLooseKey(value).replace(/\s+/g, '')
 }
 
+function isTitleInferredLocationCandidate(value) {
+  const normalized = normalizeKey(value)
+  if (!normalized) return true
+  if (['praia brava', 'balneario camboriu', 'itapema', 'porto belo'].includes(normalized)) return true
+
+  return /^(praia|bairro|br|rodovia|avenida|av|quadra|centro|barra|canto da praia|trevo|areia)\b/.test(normalized)
+}
+
 function addLookupVariants(keys, value) {
   const normalized = normalizeKey(value)
   if (!normalized || normalized.length < 3) return
@@ -138,10 +146,11 @@ function inferDevelopmentName(property) {
     /\b(?:no|na|nos|nas)\s+([a-z0-9][a-z0-9\s]{2,90})/g,
   ]
 
-  for (const pattern of patterns) {
+  for (const [patternIndex, pattern] of patterns.entries()) {
     for (const match of title.matchAll(pattern)) {
       const candidate = trimDevelopmentCandidate(match[1] || match[0])
       const loose = normalizeLooseKey(candidate)
+      if (patternIndex === 1 && isTitleInferredLocationCandidate(candidate)) continue
       if (loose && loose.length >= 4 && !['praia brava', 'balneario camboriu', 'itapema', 'porto belo'].includes(loose)) {
         return candidate
       }

@@ -210,6 +210,22 @@ type PropertyDevelopmentContext = {
     unit: PropertyDevelopmentUnitContext
 }
 
+type PropertyDevelopmentCandidate = {
+    page: any
+    content: Record<string, any>
+    contentDevelopment: Record<string, any>
+    development: Record<string, any>
+    relatedUnit: PropertyDevelopmentUnitContext
+    units: PropertyDevelopmentUnitContext[]
+    score: number
+    unitCount: number
+}
+
+type PropertyPrivateDevelopmentMetadata = {
+    condominium_name?: string | null
+    construction_company?: string | null
+}
+
 const PROPERTY_BRAVA_CONCETTO_FALLBACK_DEVELOPMENT = {
     name: 'Brava Concetto',
     pageSlug: 'bravaconceto',
@@ -411,6 +427,14 @@ const PROPERTY_DEVELOPMENT_GENERIC_NOISE_KEYS = new Set([
     'unidade',
 ])
 
+function isTitleInferredLocationCandidate(value: unknown) {
+    const normalized = normalizeComparableText(value)
+    if (!normalized) return true
+    if (PROPERTY_DEVELOPMENT_LOCATION_NOISE_KEYS.has(normalized)) return true
+
+    return /^(praia|bairro|br|rodovia|avenida|av|quadra|centro|barra|canto da praia|trevo|areia)\b/.test(normalized)
+}
+
 function addDevelopmentLookupVariant(keys: Set<string>, value: unknown) {
     const normalized = normalizeComparableText(value)
     if (!normalized) return
@@ -479,10 +503,44 @@ function propertyDevelopmentNameCandidates(property: any) {
     }
 
     for (const match of title.matchAll(/\b(?:no|na|nos|nas)\s+([a-z0-9][a-z0-9\s]{2,100})/g)) {
-        addDevelopmentLookupVariant(candidates, trimDevelopmentTitleCandidate(match[1]))
+        const candidate = trimDevelopmentTitleCandidate(match[1])
+        if (!isTitleInferredLocationCandidate(candidate)) {
+            addDevelopmentLookupVariant(candidates, candidate)
+        }
     }
 
     return candidates
+}
+
+function developmentUnitMatchScore(unit: PropertyDevelopmentUnitContext, property: any) {
+    const propertySourceReference = normalizeSourceSlugKey(property?.source_reference)
+    const propertyId = normalizeSourceSlugKey(property?.id)
+    const propertySourceSlug = normalizeSourceSlugKey(property?.source_slug)
+    const unitReferenceKeys = [unit.sourceReference, unit.id].map(normalizeSourceSlugKey).filter(Boolean)
+    const unitPropertyKeys = [unit.propertyId, unit.id].map(normalizeSourceSlugKey).filter(Boolean)
+    const unitSourceSlug = normalizeSourceSlugKey(unit.sourceSlug)
+    let score = 0
+
+    if (propertyId && unitPropertyKeys.includes(propertyId)) score += 10000
+    if (propertySourceReference && unitReferenceKeys.includes(propertySourceReference)) score += 9000
+    if (propertySourceSlug && unitSourceSlug === propertySourceSlug) score += 8000
+
+    if (score > 0 && priceMatches(unit.price, property?.price)) score += 120
+    if (score > 0 && areaMatches(unit.area, property)) score += 80
+
+    const propertyTitle = normalizeComparableText(property?.title)
+    const unitTitle = normalizeComparableText(unit.title)
+    const unitType = normalizeComparableText(unit.type)
+    if (
+        score > 0 &&
+        propertyTitle &&
+        ((unitTitle && (propertyTitle.includes(unitTitle) || unitTitle.includes(propertyTitle))) ||
+            (unitType && propertyTitle.includes(unitType)))
+    ) {
+        score += 40
+    }
+
+    return score
 }
 
 function developmentPageNameKeys(page: any, content: Record<string, any>, development: Record<string, any>) {
@@ -672,6 +730,23 @@ async function withPropertySecondaryFallback<T>(promise: Promise<T>, label: stri
     }
 }
 
+async function getPropertyPrivateDevelopmentMetadata(
+    supabase: any,
+    propertyId: string
+): Promise<PropertyPrivateDevelopmentMetadata | null> {
+    if (!propertyId) return null
+
+    const { data, error } = await supabase
+        .from('property_private_details')
+        .select('condominium_name, construction_company')
+        .eq('property_id', propertyId)
+        .maybeSingle()
+        .abortSignal(createSupabaseAbortSignal(PROPERTY_SECONDARY_QUERY_TIMEOUT_MS))
+
+    if (error) throw error
+    return data || null
+}
+
 function isRetriablePropertyLookupError(error: unknown) {
     const summary = summarizeSupabaseError(error).toLowerCase()
     return (
@@ -775,6 +850,8 @@ async function getPropertyDevelopmentContext(supabase: any, property: any): Prom
         return null
     }
 
+    const candidates: PropertyDevelopmentCandidate[] = []
+
     for (const page of data || []) {
         const content = asSafeRecord(page.content)
         const contentDevelopment = asSafeRecord(content.development)
@@ -790,6 +867,7 @@ async function getPropertyDevelopmentContext(supabase: any, property: any): Prom
             ? rawUnits.map(normalizeDevelopmentUnitContext).filter((unit): unit is PropertyDevelopmentUnitContext => Boolean(unit))
             : []
         const matchedUnit = pickDevelopmentUnit(units, property)
+        const matchedUnitScore = matchedUnit ? developmentUnitMatchScore(matchedUnit, property) : 0
         const inferredUnit = !matchedUnit && hasDevelopmentContent && developmentPageMatchesProperty(page, content, development, propertyNameKeys)
             ? propertyDevelopmentFallbackUnit(property)
             : null
@@ -797,41 +875,60 @@ async function getPropertyDevelopmentContext(supabase: any, property: any): Prom
 
         if (!relatedUnit) continue
 
-        const name = asSafeText(development.name, asSafeText(content.custom_title, asSafeText(page.title, 'Empreendimento')))
-        const heroImage = asSafeText(development.heroImage ?? development.hero_image ?? content.custom_hero_image, property.featured_image || property.images?.[0] || DEFAULT_OG_IMAGE)
-        const rawDevelopmentGallery = Array.isArray(contentDevelopment.gallery) && contentDevelopment.gallery.length
-            ? contentDevelopment.gallery
-            : (fallbackDevelopment?.gallery || [])
-        const developmentGallery = Array.isArray(rawDevelopmentGallery)
-            ? rawDevelopmentGallery.map((item: unknown) => normalizeDevelopmentGalleryItem(item, name)).filter((item): item is PropertyDevelopmentGalleryItem => Boolean(item))
-            : []
-        const customGallery = Array.isArray(content.custom_gallery)
-            ? content.custom_gallery.map((item: unknown) => normalizeDevelopmentGalleryItem(item, name)).filter((item): item is PropertyDevelopmentGalleryItem => Boolean(item))
-            : []
-        const gallery = uniqueDevelopmentGallery([
-            { image: heroImage, title: name, category: 'Condomínio' },
-            ...developmentGallery,
-            ...customGallery,
-        ]).slice(0, 6)
-        const availableUnitsCount = asSafeNumber(development.availableUnitsCount ?? development.available_units_count ?? content.available_units_count)
-            ?? (units.length || null)
-
-        return {
-            slug: asSafeText(development.pageSlug ?? development.page_slug ?? page.slug),
-            name,
-            locationName: asSafeText(development.locationName ?? development.location_name, locationLabelFromProperty(property)),
-            priceRange: asSafeText(development.priceRange ?? development.price_range, relatedUnit.price),
-            availableUnitsCount,
-            areaRange: asSafeText(development.areaRange ?? development.area_range, relatedUnit.area),
-            suitesRange: asSafeText(development.suitesRange ?? development.suites_range, relatedUnit.suites),
-            heroImage,
-            description: asSafeText(development.description, `Conheça o condomínio ${name} e compare as unidades disponíveis antes da visita.`),
-            gallery,
-            unit: relatedUnit,
-        }
+        candidates.push({
+            page,
+            content,
+            contentDevelopment,
+            development,
+            relatedUnit,
+            units,
+            score: matchedUnit ? matchedUnitScore : 100,
+            unitCount: units.length,
+        })
     }
 
-    return null
+    const bestCandidate = candidates.sort((left, right) => {
+        if (right.score !== left.score) return right.score - left.score
+        if (right.unitCount !== left.unitCount) return right.unitCount - left.unitCount
+        return new Date(right.page?.created_at || 0).getTime() - new Date(left.page?.created_at || 0).getTime()
+    })[0]
+
+    if (!bestCandidate) return null
+
+    const { page, content, contentDevelopment, development, relatedUnit, units } = bestCandidate
+    const fallbackDevelopment = developmentFallbackForPage(page, content)
+    const name = asSafeText(development.name, asSafeText(content.custom_title, asSafeText(page.title, 'Empreendimento')))
+    const heroImage = asSafeText(development.heroImage ?? development.hero_image ?? content.custom_hero_image, property.featured_image || property.images?.[0] || DEFAULT_OG_IMAGE)
+    const rawDevelopmentGallery = Array.isArray(contentDevelopment.gallery) && contentDevelopment.gallery.length
+        ? contentDevelopment.gallery
+        : (fallbackDevelopment?.gallery || [])
+    const developmentGallery = Array.isArray(rawDevelopmentGallery)
+        ? rawDevelopmentGallery.map((item: unknown) => normalizeDevelopmentGalleryItem(item, name)).filter((item): item is PropertyDevelopmentGalleryItem => Boolean(item))
+        : []
+    const customGallery = Array.isArray(content.custom_gallery)
+        ? content.custom_gallery.map((item: unknown) => normalizeDevelopmentGalleryItem(item, name)).filter((item): item is PropertyDevelopmentGalleryItem => Boolean(item))
+        : []
+    const gallery = uniqueDevelopmentGallery([
+        { image: heroImage, title: name, category: 'Condomínio' },
+        ...developmentGallery,
+        ...customGallery,
+    ]).slice(0, 6)
+    const availableUnitsCount = asSafeNumber(development.availableUnitsCount ?? development.available_units_count ?? content.available_units_count)
+        ?? (units.length || null)
+
+    return {
+        slug: asSafeText(development.pageSlug ?? development.page_slug ?? page.slug),
+        name,
+        locationName: asSafeText(development.locationName ?? development.location_name, locationLabelFromProperty(property)),
+        priceRange: asSafeText(development.priceRange ?? development.price_range, relatedUnit.price),
+        availableUnitsCount,
+        areaRange: asSafeText(development.areaRange ?? development.area_range, relatedUnit.area),
+        suitesRange: asSafeText(development.suitesRange ?? development.suites_range, relatedUnit.suites),
+        heroImage,
+        description: asSafeText(development.description, `Conheça o condomínio ${name} e compare as unidades disponíveis antes da visita.`),
+        gallery,
+        unit: relatedUnit,
+    }
 }
 
 async function getPropertyForSeo(identifier: string) {
@@ -1828,11 +1925,26 @@ export default async function PropertyDetailPage({
     }
 
     const adminSupabase = createAdminClient()
-    const responsibleBroker = await withPropertySecondaryFallback(
-        getResponsibleBrokerForProperty(adminSupabase, property.id),
-        'responsible broker',
-        fallbackResponsibleBroker()
-    )
+    const [privateDevelopmentMetadata, responsibleBroker] = await Promise.all([
+        withPropertySecondaryFallback(
+            getPropertyPrivateDevelopmentMetadata(adminSupabase, property.id),
+            'property private development metadata',
+            null
+        ),
+        withPropertySecondaryFallback(
+            getResponsibleBrokerForProperty(adminSupabase, property.id),
+            'responsible broker',
+            fallbackResponsibleBroker()
+        ),
+    ])
+
+    if (privateDevelopmentMetadata) {
+        property = {
+            ...property,
+            condominium_name: privateDevelopmentMetadata.condominium_name || property.condominium_name,
+            construction_company: privateDevelopmentMetadata.construction_company || property.construction_company,
+        }
+    }
     const { count: propertyViewCountRaw, error: propertyViewCountError } = await adminSupabase
         .from('funnel_events')
         .select('id', { count: 'exact', head: true })
