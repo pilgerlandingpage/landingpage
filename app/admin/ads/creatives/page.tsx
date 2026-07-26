@@ -15,6 +15,7 @@ import {
   Wand2,
 } from 'lucide-react'
 import AdminLoadingState from '@/components/admin/AdminLoadingState'
+import CreativeStudioManagerView from '@/components/admin/CreativeStudioManagerView'
 
 type Creative = {
   id: string
@@ -340,7 +341,39 @@ export default function MarketingCreativesPage() {
     }
   }
 
+  const refreshAll = async () => {
+    setError('')
+    setSuccess('')
+    try {
+      await loadAll()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao atualizar criativos.')
+    }
+  }
+
   if (loading) return <AdminLoadingState message="Carregando operacao de criativos..." />
+
+  if (process.env.NEXT_PUBLIC_CREATIVE_STUDIO_LAYOUT !== 'legacy') {
+    return (
+      <CreativeStudioManagerView
+        creatives={creatives}
+        scheduledPosts={scheduledPosts}
+        form={form}
+        setForm={setForm}
+        saving={saving}
+        generating={generating}
+        updatingId={updatingId}
+        error={error}
+        success={success}
+        copyDraft={copyDraft}
+        onRefresh={refreshAll}
+        onSubmit={submit}
+        onGenerateCopy={generateCopy}
+        onUpdateCreativeStatus={updateCreativeStatus}
+        onUpdatePostStatus={updatePostStatus}
+      />
+    )
+  }
 
   return (
     <div>

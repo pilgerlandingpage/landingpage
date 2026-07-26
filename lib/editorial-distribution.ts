@@ -9,6 +9,8 @@ import { resolveEventWhatsAppCtaPhone } from '@/lib/events/whatsapp-cta'
 import { buildTrackedWhatsAppLink } from '@/lib/tracking/whatsapp-links'
 import { normalizeWhatsAppPhone, recordLeadOutboundContext } from '@/lib/whatsapp/lead-sync'
 import { sendMenuMessage, sendWhatsAppMessage } from '@/lib/connectyhub/whatsapp'
+import { createMetaWhatsAppCampaign, type MetaWhatsAppRecipientInput } from '@/lib/meta/whatsapp-campaigns'
+import { inngest } from '@/lib/inngest/client'
 import { isTechnicalBlogSummary, pickPublicBlogSummary } from '@/lib/blog/types'
 import { buildAgentContextBrief, getAgentEcosystemContext, recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
@@ -39,6 +41,11 @@ type EditorialConfig = {
     emailDailyLimit: number
     whatsappDailyLimit: number
     pushDailyLimit: number
+    metaWhatsappBlogTemplateName: string
+    metaWhatsappNewsTemplateName: string
+    metaWhatsappPropertyTemplateName: string
+    metaWhatsappTemplateLanguage: string
+    metaWhatsappDefaultSenderId: string
     recommendationMinScore: number
     recommendationBatchLimit: number
     minHoursBetweenLeadMessages: number
@@ -356,6 +363,11 @@ async function loadConfigMap(supabase: SupabaseAdminLike) {
         'editorial_distribution_push_interval_minutes',
         'editorial_distribution_push_daily_limit',
         'editorial_distribution_push_templates',
+        'meta_whatsapp_default_language',
+        'meta_whatsapp_editorial_blog_template_name',
+        'meta_whatsapp_editorial_news_template_name',
+        'meta_whatsapp_property_followup_template_name',
+        'meta_whatsapp_editorial_default_sender_id',
     ]
 
     const { data, error } = await supabase
@@ -385,6 +397,11 @@ async function loadEditorialConfig(supabase: SupabaseAdminLike): Promise<Editori
         emailDailyLimit: normalizePositiveInt(config.email_agent_daily_limit, 150, 1, 5000),
         whatsappDailyLimit: normalizePositiveInt(config.editorial_distribution_whatsapp_daily_limit, 120, 1, 5000),
         pushDailyLimit: normalizePositiveInt(config.editorial_distribution_push_daily_limit, 300, 1, 10000),
+        metaWhatsappBlogTemplateName: normalizeText(config.meta_whatsapp_editorial_blog_template_name),
+        metaWhatsappNewsTemplateName: normalizeText(config.meta_whatsapp_editorial_news_template_name),
+        metaWhatsappPropertyTemplateName: normalizeText(config.meta_whatsapp_property_followup_template_name),
+        metaWhatsappTemplateLanguage: normalizeText(config.meta_whatsapp_default_language) || 'pt_BR',
+        metaWhatsappDefaultSenderId: normalizeText(config.meta_whatsapp_editorial_default_sender_id),
         recommendationMinScore: Math.max(
             MIN_CONTEXTUAL_RECOMMENDATION_SCORE,
             normalizePositiveInt(config.editorial_distribution_recommendation_min_score, MIN_CONTEXTUAL_RECOMMENDATION_SCORE, 1, 100)
@@ -427,6 +444,28 @@ function whatsappTemplateForTrigger(config: EditorialConfig, trigger: EditorialT
         config.whatsappTemplates.find(template => template.trigger === trigger) ||
         null
     )
+}
+
+function truthyConsent(value: unknown) {
+    if (value === true) return true
+    const normalized = normalizeComparable(value)
+    return ['1', 'true', 'sim', 'yes', 'opt in', 'opt-in', 'autorizado', 'authorized', 'aceito'].includes(normalized)
+}
+
+function leadHasWhatsAppMarketingOptIn(lead: Record<string, any>) {
+    const metadata = metadataRecord(lead.metadata)
+    const whatsapp = metadataRecord(metadata.whatsapp)
+
+    return [
+        lead.whatsapp_opt_in,
+        metadata.whatsapp_marketing_opt_in,
+        metadata.whatsapp_opt_in,
+        metadata.consent_whatsapp,
+        metadata.consent_marketing_whatsapp,
+        metadata.marketing_whatsapp_opt_in,
+        whatsapp.marketing_opt_in,
+        whatsapp.opt_in,
+    ].some(truthyConsent)
 }
 
 function pushTemplateForTrigger(config: EditorialConfig, trigger: EditorialTrigger, audience: string) {
@@ -484,7 +523,7 @@ function leadChannelAvailability(lead: Record<string, any>): LeadChannelAvailabi
     const visitorId = normalizeText(lead.visitor_id || metadata.visitor_id)
     return {
         email: Boolean(normalizeEmail(lead.email)),
-        whatsapp: Boolean(normalizeWhatsAppPhone(lead.phone_e164 || lead.phone)),
+        whatsapp: Boolean(normalizeWhatsAppPhone(lead.phone_e164 || lead.phone)) && leadHasWhatsAppMarketingOptIn(lead),
         push: Boolean(
             visitorId &&
             (lead.push_subscribed === true || lead.push_subscribed_lead === true || metadata.push_subscribed_at)
@@ -2063,6 +2102,224 @@ async function trackedWhatsAppContentUrlFromContext(supabase: SupabaseAdminLike,
     })
 }
 
+function metaTemplateNameForEditorialContext(config: EditorialConfig, context: Record<string, any>) {
+    const contentType = normalizeText(context.content_type).toLowerCase()
+    if (contentType === 'property') return config.metaWhatsappPropertyTemplateName
+    if (contentType === 'news') return config.metaWhatsappNewsTemplateName
+    return config.metaWhatsappBlogTemplateName
+}
+
+function metaTemplateConfigKeyForEditorialContext(context: Record<string, any>) {
+    const contentType = normalizeText(context.content_type).toLowerCase()
+    if (contentType === 'property') return 'meta_whatsapp_property_followup_template_name'
+    if (contentType === 'news') return 'meta_whatsapp_editorial_news_template_name'
+    return 'meta_whatsapp_editorial_blog_template_name'
+}
+
+function metaCampaignTypeForEditorialContext(context: Record<string, any>) {
+    return normalizeText(context.content_type).toLowerCase() === 'property' ? 'followup' : 'editorial'
+}
+
+function metaParameterText(value: unknown, fallback = '-') {
+    const text = stripTechnicalOutboundText(value)
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 900)
+    return text || fallback
+}
+
+function metaTemplateParametersForEditorialContext(context: Record<string, any>) {
+    const contentType = normalizeText(context.content_type).toLowerCase()
+    const title = contentType === 'property'
+        ? normalizeText(context.property_title || context.post_title)
+        : normalizeText(context.post_title)
+    const summary = contentType === 'property'
+        ? normalizeText(context.post_excerpt || context.property_summary || context.text_content)
+        : normalizeText(context.post_excerpt || context.text_content || context.whatsapp_message)
+    const link = normalizeText(context.content_url || context.link_cta)
+    const support = normalizeText(context.link_whatsapp) || 'Atendimento Guilherme Pilger'
+
+    return [
+        metaParameterText(context.target_name || 'tudo bem', 'tudo bem'),
+        metaParameterText(title, contentType === 'property' ? 'Imovel selecionado' : 'Conteudo publicado'),
+        metaParameterText(summary, 'Resumo disponivel no link.'),
+        metaParameterText(link, 'Link disponivel no site.'),
+        metaParameterText(support),
+    ]
+}
+
+function metaCampaignNameForEditorialContext(context: Record<string, any>) {
+    const contentType = normalizeText(context.content_type).toLowerCase()
+    const prefix = contentType === 'property'
+        ? 'Follow-up imovel'
+        : contentType === 'news'
+            ? 'Noticia'
+            : 'Blog'
+    return `${prefix}: ${normalizePostText(context.post_title || context.property_title || 'Campanha editorial', 120)}`
+}
+
+async function handoffEditorialWhatsAppRowsToMeta(
+    supabase: SupabaseAdminLike,
+    config: EditorialConfig,
+    rows: any[]
+) {
+    const validRows = rows.filter(row => {
+        const context = metadataRecord(row.context)
+        return context.channel === 'whatsapp' && !context.meta_whatsapp_campaign_id
+    })
+    if (!validRows.length) return { sent: false, channel: 'whatsapp' as EditorialChannel, reason: 'no_meta_rows', count: 0 }
+
+    const firstContext = metadataRecord(validRows[0].context)
+    const templateName = metaTemplateNameForEditorialContext(config, firstContext)
+    if (!templateName) {
+        throw new Error(`Configure ${metaTemplateConfigKeyForEditorialContext(firstContext)} na Sala de Manutencao antes de aprovar campanhas WhatsApp oficiais.`)
+    }
+
+    const recipients: MetaWhatsAppRecipientInput[] = []
+    for (const row of validRows) {
+        const context = metadataRecord(row.context)
+        const phone = normalizeWhatsAppPhone(context.target_phone || row.lead_phone)
+        if (!phone) continue
+
+        const contentUrl = await trackedWhatsAppContentUrlFromContext(supabase, context, row, phone)
+        context.content_url = contentUrl || context.content_url
+        context.link_cta = contentUrl || context.link_cta
+        context.post_excerpt = stripTechnicalOutboundText(context.post_excerpt)
+        context.whatsapp_message = stripTechnicalOutboundText(context.whatsapp_message)
+
+        recipients.push({
+            phone,
+            name: normalizeText(row.lead_name || context.target_name),
+            leadId: normalizeText(row.lead_id) || undefined,
+            optInSource: normalizeText(context.whatsapp_opt_in_source) || 'site_lead_authorized',
+            templateParameters: metaTemplateParametersForEditorialContext(context),
+            metadata: {
+                editorial_workflow_run_id: row.id,
+                editorial_campaign_id: context.campaign_id,
+                content_type: context.content_type,
+                post_id: context.post_id,
+                post_title: context.post_title,
+                trigger: context.trigger,
+                recommendation_score: context.recommendation_score || null,
+            },
+        })
+    }
+
+    if (!recipients.length) throw new Error('Nenhum destinatario WhatsApp valido para campanha Meta oficial.')
+
+    const created = await createMetaWhatsAppCampaign({
+        name: metaCampaignNameForEditorialContext(firstContext),
+        campaignType: metaCampaignTypeForEditorialContext(firstContext),
+        templateName,
+        templateLanguage: config.metaWhatsappTemplateLanguage,
+        confirmOptIn: true,
+        optInSource: 'site_lead_authorized',
+        recipients,
+        audienceSource: 'editorial_distribution',
+        senderRoutingMode: config.metaWhatsappDefaultSenderId ? 'single' : 'weighted_pool',
+        defaultSenderId: config.metaWhatsappDefaultSenderId || null,
+        metadata: {
+            created_from: 'editorial_distribution',
+            editorial_campaign_id: firstContext.campaign_id,
+            content_type: firstContext.content_type,
+            trigger: firstContext.trigger,
+            post_id: firstContext.post_id,
+            post_title: firstContext.post_title,
+        },
+    }, supabase as any)
+
+    await inngest.send({
+        name: 'meta-whatsapp/campaign-created',
+        data: {
+            campaign_id: created.campaign.id,
+            batch_size: 25,
+            reason: 'editorial_distribution',
+        },
+    })
+
+    const now = new Date().toISOString()
+    await Promise.all(validRows.map(async row => {
+        const context = metadataRecord(row.context)
+        await updateRun(supabase, row.id, {
+            status: 'sent',
+            completed_at: now,
+            last_message_at: now,
+            error_message: null,
+            context: {
+                ...context,
+                sent_at: now,
+                provider: 'meta_whatsapp',
+                meta_whatsapp_campaign_id: created.campaign.id,
+                meta_whatsapp_template_name: templateName,
+                provider_response: {
+                    provider: 'meta_whatsapp',
+                    campaign_id: created.campaign.id,
+                    queued_count: created.queuedCount,
+                    skipped_count: created.skippedCount,
+                },
+            },
+        })
+
+        try {
+            await recordLeadOutboundContext(supabase, {
+                leadId: row.lead_id,
+                phone: row.lead_phone || context.target_phone,
+                channel: 'whatsapp',
+                sourceAgent: 'gabriel_distribuicao',
+                senderAgent: 'meta_whatsapp_official',
+                originAgent: context.content_type === 'property'
+                    ? 'gabriel_recomendacao_imoveis'
+                    : context.content_type === 'news'
+                        ? 'clara_noticias'
+                        : 'isadora_blog',
+                campaignId: context.campaign_id,
+                workflowRunId: row.id,
+                contentType: context.content_type,
+                trigger: context.trigger,
+                contentId: context.post_id,
+                contentTitle: context.post_title,
+                contentSummary: stripTechnicalOutboundText(context.post_excerpt || context.text_content || context.whatsapp_message),
+                contentUrl: context.content_url || context.link_cta,
+                ctaLabel: context.cta_label,
+                recommendationScore: context.recommendation_score,
+                recommendationReason: context.recommendation_reason,
+                recommendationReasons: context.recommendation_reasons,
+                recommendationSourcePropertyIds: context.recommendation_source_property_ids,
+                message: context.whatsapp_message || `${context.post_title || 'Conteudo'} ${context.content_url || context.link_cta || ''}`,
+                sentAt: now,
+            })
+        } catch (memoryError) {
+            console.warn('[editorial-distribution] Meta handoff recorded but outbound memory failed:', memoryError)
+        }
+    }))
+
+    await logEditorialEvent(supabase, {
+        eventType: 'editorial_whatsapp_meta_campaign_created',
+        status: 'sent',
+        message: `Campanha Meta oficial criada com ${created.queuedCount} destinatario(s) WhatsApp.`,
+        metadata: {
+            campaign_id: firstContext.campaign_id,
+            meta_whatsapp_campaign_id: created.campaign.id,
+            post_id: firstContext.post_id,
+            content_type: firstContext.content_type,
+            trigger: firstContext.trigger,
+            template_name: templateName,
+            recipients: recipients.length,
+            queued: created.queuedCount,
+            skipped: created.skippedCount,
+        },
+    })
+
+    return {
+        sent: true,
+        channel: 'whatsapp' as EditorialChannel,
+        count: validRows.length,
+        meta_campaign_id: created.campaign.id,
+        queued: created.queuedCount,
+        skipped: created.skippedCount,
+    }
+}
+
 async function sendEditorialQueueItem(supabase: SupabaseAdminLike, row: any) {
     const context = metadataRecord(row.context)
     const channel = context.channel as EditorialChannel
@@ -2403,9 +2660,11 @@ export async function processDueEditorialDistribution(supabase: SupabaseAdminLik
         .sort(compareDistributionQueueRows)
     const results = []
     const touchedInBatch = new Set<string>()
+    const metaHandoffRunIds = new Set<string>()
 
     for (const row of dueRows) {
         if (results.length >= limit) break
+        if (metaHandoffRunIds.has(row.id)) continue
         const context = metadataRecord(row.context)
         const channel = context.channel as EditorialChannel
         const trigger = normalizeDistributionTrigger(row.trigger_type || context.trigger)
@@ -2460,11 +2719,37 @@ export async function processDueEditorialDistribution(supabase: SupabaseAdminLik
             continue
         }
 
+        if (channel === 'whatsapp') {
+            const campaignId = normalizeText(context.campaign_id)
+            const remainingDaily = Math.max(0, config.whatsappDailyLimit - dailyCounts.whatsapp)
+            const rowsForMetaCampaign = dueRows
+                .filter((candidate: any) => {
+                    if (metaHandoffRunIds.has(candidate.id)) return false
+                    const candidateContext = metadataRecord(candidate.context)
+                    return candidateContext.type === 'editorial_distribution'
+                        && candidateContext.channel === 'whatsapp'
+                        && normalizeText(candidateContext.campaign_id) === campaignId
+                        && !candidateContext.meta_whatsapp_campaign_id
+                })
+                .slice(0, remainingDaily || 1)
+
+            rowsForMetaCampaign.forEach((candidate: any) => metaHandoffRunIds.add(candidate.id))
+            const result = await handoffEditorialWhatsAppRowsToMeta(supabase, config, rowsForMetaCampaign)
+            results.push(result)
+            if (result.sent) {
+                dailyCounts.whatsapp += Number(result.count || 0)
+                for (const metaRow of rowsForMetaCampaign) {
+                    const key = editorialLeadCooldownKey(metaRow, metadataRecord(metaRow.context))
+                    if (key) touchedInBatch.add(key)
+                }
+            }
+            continue
+        }
+
         const result = await sendEditorialQueueItem(supabase, row)
         results.push(result)
 
         if (result.sent && channel === 'email') dailyCounts.email += 1
-        if (result.sent && channel === 'whatsapp') dailyCounts.whatsapp += 1
         if (result.sent && channel === 'push') dailyCounts.push += 1
         if (result.sent && cooldownKey) touchedInBatch.add(cooldownKey)
     }

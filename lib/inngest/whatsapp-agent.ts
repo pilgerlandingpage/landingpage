@@ -33,8 +33,21 @@ import {
     buildWhatsAppGlobalInternalSystemPrompt,
     detectWhatsAppGlobalCommandIntent,
     getOrCreateWhatsAppGlobalSession,
+    isWhatsAppGlobalInstance,
     recordWhatsAppGlobalCommand,
+    resolveWhatsAppGlobalIdentity,
 } from '../whatsapp/global-identity'
+import {
+    detectProfileAssessmentToolIntent,
+    isProfileAssessmentAwaitingProofFollowUp,
+    loadProfileAssessmentGate,
+    PROFILE_ASSESSMENT_VOTE_URL,
+    saveProfileAssessmentGate,
+} from '../whatsapp/profile-assessment-gate'
+import {
+    sendProfileAssessmentReminder,
+    sendProfileAssessmentVoteRequest,
+} from '../whatsapp/profile-assessment-delivery'
 import {
     buildPilgerAgentResultMessage,
     buildPilgerAgentRouterAcknowledgement,
@@ -53,6 +66,48 @@ function getSupabase() {
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
+}
+
+const PENDING_QUEUE_STALE_MINUTES = 60
+const PROFILE_ASSESSMENT_REMINDER_COOLDOWN_MS = 90 * 1000
+
+function pendingQueueStaleCutoffIso() {
+    return new Date(Date.now() - PENDING_QUEUE_STALE_MINUTES * 60 * 1000).toISOString()
+}
+
+function profileAssessmentRecentlyReminded(gate: any) {
+    const lastReminderAt = Date.parse(String(gate?.last_reminder_at || ''))
+    return Number.isFinite(lastReminderAt) && Date.now() - lastReminderAt < PROFILE_ASSESSMENT_REMINDER_COOLDOWN_MS
+}
+
+async function discardOwnPendingQueueMessage(params: {
+    supabase: ReturnType<typeof getSupabase>
+    queuedMessageKey?: string | null
+    reason: string
+    instanceName?: string | null
+    messageType?: string | null
+    fromPhone?: string | null
+    senderName?: string | null
+    messageId?: string | null
+}) {
+    if (!params.queuedMessageKey) return
+    await params.supabase
+        .from('app_config')
+        .delete()
+        .eq('key', params.queuedMessageKey)
+
+    await recordAgentLog(params.supabase, {
+        action: 'agent_pending_queue_discarded',
+        instanceName: params.instanceName,
+        messageType: params.messageType,
+        fromPhone: params.fromPhone,
+        senderName: params.senderName,
+        payload: {
+            reason: params.reason,
+            queuedMessageKey: params.queuedMessageKey,
+            messageId: params.messageId || null,
+        },
+    })
 }
 
 function sanitizeGlobalInternalReply(reply: unknown): string {
@@ -3291,12 +3346,17 @@ async function analyzeIncomingMediaItem(params: {
 
     const fetchStoredMedia = async () => {
         if (!messageId) return null
-        const { data: storedMedia } = await supabase
-            .from('app_config')
-            .select('value')
-            .eq('key', `_wmedia_${messageId}`)
-            .maybeSingle()
-        return parseStoredMediaUrl(storedMedia?.value || null)
+        try {
+            const { data: storedMedia } = await supabase
+                .from('app_config')
+                .select('value')
+                .eq('key', `_wmedia_${messageId}`)
+                .maybeSingle()
+            return parseStoredMediaUrl(storedMedia?.value || null)
+        } catch (error) {
+            console.warn(`[WhatsApp Agent] Stored media lookup failed for message ${messageId}:`, error)
+            return null
+        }
     }
 
     if (mediaUrl && !isLikelyEncryptedWhatsAppMediaUrl(mediaUrl)) {
@@ -3311,7 +3371,27 @@ async function analyzeIncomingMediaItem(params: {
     }
 
     if (!mediaBuffer && messageId) {
-        for (let attempt = 1; attempt <= 5 && !mediaBuffer; attempt++) {
+        for (let attempt = 1; attempt <= 3 && !mediaBuffer; attempt++) {
+            try {
+                console.log(`[WhatsApp Agent] Trying direct media download attempt ${attempt} for message ${messageId}`)
+                const downloaded = await downloadMedia(messageId, instanceToken, { generateMp3: false })
+                mediaBuffer = downloaded
+                const downloadedMimeType = inferMimeType(kind, mediaMimetype || storedMime)
+                if (mediaBuffer && !isLikelyUsableMediaBuffer(kind, downloadedMimeType, mediaBuffer)) {
+                    console.warn(`[WhatsApp Agent] Downloaded media bytes are not usable for ${kind}; message=${messageId}`)
+                    mediaBuffer = null
+                }
+            } catch (error) {
+                console.warn(`[WhatsApp Agent] Direct media download attempt ${attempt} failed for message ${messageId}:`, error)
+            }
+            if (!mediaBuffer && attempt < 3) {
+                await waitMs(1200)
+            }
+        }
+    }
+
+    if (!mediaBuffer && messageId) {
+        for (let attempt = 1; attempt <= 3 && !mediaBuffer; attempt++) {
             const stored = await fetchStoredMedia()
             if (stored?.url) {
                 storedMime = stored.mime || null
@@ -3326,22 +3406,7 @@ async function analyzeIncomingMediaItem(params: {
                 console.log(`[WhatsApp Agent] Stored media not ready on attempt ${attempt} for message ${messageId}`)
             }
 
-            if (!mediaBuffer && attempt < 5) {
-                await waitMs(1500)
-            }
-        }
-    }
-
-    if (!mediaBuffer && messageId) {
-        for (let attempt = 1; attempt <= 2 && !mediaBuffer; attempt++) {
-            console.log(`[WhatsApp Agent] Trying direct media download attempt ${attempt} for message ${messageId}`)
-            mediaBuffer = await downloadMedia(messageId, instanceToken)
-            const downloadedMimeType = inferMimeType(kind, mediaMimetype || storedMime)
-            if (mediaBuffer && !isLikelyUsableMediaBuffer(kind, downloadedMimeType, mediaBuffer)) {
-                console.warn(`[WhatsApp Agent] Downloaded media bytes are not usable for ${kind}; message=${messageId}`)
-                mediaBuffer = null
-            }
-            if (!mediaBuffer && attempt < 2) {
+            if (!mediaBuffer && attempt < 3) {
                 await waitMs(1500)
             }
         }
@@ -3388,18 +3453,6 @@ async function analyzeIncomingMediaItem(params: {
     let analysisText = ''
 
     if (effectiveProvider === 'openai') {
-        if (kind === 'video') {
-            return {
-                text: '',
-                reason: 'openai_video_not_supported',
-                kind,
-                mimeType,
-                size: mediaBuffer.length,
-                fileName: mediaFilename || null,
-                messageId: messageId || null,
-            }
-        }
-
         if (openaiKey && kind === 'image' && mimeType.startsWith('image/')) {
             analysisText = await analyzeMediaWithOpenAIImage(
                 analysisBuffer,
@@ -4605,6 +4658,16 @@ export const processWhatsAppMessage = inngest.createFunction(
 
         if (!broker || !broker.is_active) {
             console.warn(`[WhatsApp Agent] No active broker found for instance ${instanceName}`)
+            await discardOwnPendingQueueMessage({
+                supabase,
+                queuedMessageKey,
+                reason: 'no_active_broker',
+                instanceName,
+                messageType,
+                fromPhone: cleanPhone,
+                senderName,
+                messageId,
+            })
             return { action: 'skipped', reason: 'no_active_broker' }
         }
 
@@ -4675,6 +4738,16 @@ export const processWhatsAppMessage = inngest.createFunction(
         })
 
         if (!conversation) {
+            await discardOwnPendingQueueMessage({
+                supabase,
+                queuedMessageKey,
+                reason: 'could_not_create_conversation',
+                instanceName,
+                messageType,
+                fromPhone: cleanPhone,
+                senderName,
+                messageId,
+            })
             return { action: 'error', reason: 'could_not_create_conversation' }
         }
 
@@ -4689,6 +4762,16 @@ export const processWhatsAppMessage = inngest.createFunction(
                 }).catch(() => { })
             }
             console.log(`[WhatsApp Agent] Agent disabled, skipping`)
+            await discardOwnPendingQueueMessage({
+                supabase,
+                queuedMessageKey,
+                reason: 'agent_disabled',
+                instanceName,
+                messageType,
+                fromPhone: cleanPhone,
+                senderName,
+                messageId,
+            })
             return { action: 'skipped', reason: 'agent_disabled' }
         }
 
@@ -4713,6 +4796,16 @@ export const processWhatsAppMessage = inngest.createFunction(
                 }).catch(() => { })
             }
             console.log(`[WhatsApp Agent] Lead ${cleanPhone} is opted out, skipping`)
+            await discardOwnPendingQueueMessage({
+                supabase,
+                queuedMessageKey,
+                reason: 'lead_opted_out',
+                instanceName,
+                messageType,
+                fromPhone: cleanPhone,
+                senderName,
+                messageId,
+            })
             return { action: 'skipped', reason: 'lead_opted_out' }
         }
 
@@ -4746,6 +4839,16 @@ export const processWhatsAppMessage = inngest.createFunction(
                 markerSuffix: `${cycleDate}_${startKey}_${endKey}`,
             }).catch(() => { })
             console.log(`[WhatsApp Agent] Outside AI schedule (${scheduleStatus.timezone}), skipping`)
+            await discardOwnPendingQueueMessage({
+                supabase,
+                queuedMessageKey,
+                reason: 'outside_ai_schedule',
+                instanceName,
+                messageType,
+                fromPhone: cleanPhone,
+                senderName,
+                messageId,
+            })
             return { action: 'skipped', reason: 'outside_ai_schedule' }
         }
 
@@ -4767,6 +4870,16 @@ export const processWhatsAppMessage = inngest.createFunction(
                             .eq('id', conversation.id)
                     } else {
                         console.log(`[WhatsApp Agent] Reactivation window reached, but outside AI schedule; keeping human takeover`)
+                        await discardOwnPendingQueueMessage({
+                            supabase,
+                            queuedMessageKey,
+                            reason: 'human_takeover_outside_schedule',
+                            instanceName,
+                            messageType,
+                            fromPhone: cleanPhone,
+                            senderName,
+                            messageId,
+                        })
                         return { action: 'skipped', reason: 'human_takeover_outside_schedule' }
                     }
                 } else {
@@ -4779,6 +4892,16 @@ export const processWhatsAppMessage = inngest.createFunction(
                         }).catch(() => { })
                     }
                     console.log(`[WhatsApp Agent] Conversation in human_takeover, skipping`)
+                    await discardOwnPendingQueueMessage({
+                        supabase,
+                        queuedMessageKey,
+                        reason: 'human_takeover',
+                        instanceName,
+                        messageType,
+                        fromPhone: cleanPhone,
+                        senderName,
+                        messageId,
+                    })
                     return { action: 'skipped', reason: 'human_takeover' }
                 }
             } else {
@@ -4791,6 +4914,16 @@ export const processWhatsAppMessage = inngest.createFunction(
                     }).catch(() => { })
                 }
                 console.log(`[WhatsApp Agent] Conversation in human_takeover, skipping`)
+                await discardOwnPendingQueueMessage({
+                    supabase,
+                    queuedMessageKey,
+                    reason: 'human_takeover',
+                    instanceName,
+                    messageType,
+                    fromPhone: cleanPhone,
+                    senderName,
+                    messageId,
+                })
                 return { action: 'skipped', reason: 'human_takeover' }
             }
         }
@@ -4800,6 +4933,34 @@ export const processWhatsAppMessage = inngest.createFunction(
 
         // Quick check: if this event's queue item was already consumed by a
         // previous batch run, skip it even if newer messages exist for the lead.
+        await step.run('cleanup-stale-pending-messages', async () => {
+            const { data: staleRows, error } = await supabase
+                .from('app_config')
+                .delete()
+                .like('key', `_pmq_${cleanPhone}_%`)
+                .lt('updated_at', pendingQueueStaleCutoffIso())
+                .select('key')
+
+            if (error) {
+                console.warn('[WhatsApp Agent] Failed to cleanup stale pending queue:', error.message)
+                return
+            }
+
+            if (staleRows?.length) {
+                await recordAgentLog(supabase, {
+                    action: 'agent_stale_pending_queue_cleaned',
+                    instanceName,
+                    messageType,
+                    fromPhone: cleanPhone,
+                    senderName,
+                    payload: {
+                        count: staleRows.length,
+                        staleMinutes: PENDING_QUEUE_STALE_MINUTES,
+                    },
+                })
+            }
+        })
+
         const queueWork = await step.run('check-queue', async () => {
             const queuePattern = `_pmq_${cleanPhone}_%`
 
@@ -5542,12 +5703,17 @@ export const processWhatsAppMessage = inngest.createFunction(
 
                 const fetchStoredMedia = async () => {
                     if (!messageId) return null
-                    const { data: storedMedia } = await supabase
-                        .from('app_config')
-                        .select('value')
-                        .eq('key', `_wmedia_${messageId}`)
-                        .maybeSingle()
-                    return parseStoredMediaUrl(storedMedia?.value || null)
+                    try {
+                        const { data: storedMedia } = await supabase
+                            .from('app_config')
+                            .select('value')
+                            .eq('key', `_wmedia_${messageId}`)
+                            .maybeSingle()
+                        return parseStoredMediaUrl(storedMedia?.value || null)
+                    } catch (error) {
+                        console.warn(`[WhatsApp Agent] Stored media lookup failed for message ${messageId}:`, error)
+                        return null
+                    }
                 }
 
                 if (mediaUrl && !isLikelyEncryptedWhatsAppMediaUrl(mediaUrl)) {
@@ -5562,7 +5728,27 @@ export const processWhatsAppMessage = inngest.createFunction(
                 }
 
                 if (!mediaBuffer && messageId) {
-                    for (let attempt = 1; attempt <= 5 && !mediaBuffer; attempt++) {
+                    for (let attempt = 1; attempt <= 3 && !mediaBuffer; attempt++) {
+                        try {
+                            console.log(`[WhatsApp Agent] Trying direct media download attempt ${attempt} for message ${messageId}`)
+                            const downloaded = await downloadMedia(messageId, instanceToken, { generateMp3: false })
+                            mediaBuffer = downloaded
+                            const downloadedMimeType = inferMimeType(kind, mediaMimetype || storedMime)
+                            if (mediaBuffer && !isLikelyUsableMediaBuffer(kind, downloadedMimeType, mediaBuffer)) {
+                                console.warn(`[WhatsApp Agent] Downloaded media bytes are not usable for ${kind}; message=${messageId}`)
+                                mediaBuffer = null
+                            }
+                        } catch (error) {
+                            console.warn(`[WhatsApp Agent] Direct media download attempt ${attempt} failed for message ${messageId}:`, error)
+                        }
+                        if (!mediaBuffer && attempt < 3) {
+                            await waitMs(1200)
+                        }
+                    }
+                }
+
+                if (!mediaBuffer && messageId) {
+                    for (let attempt = 1; attempt <= 3 && !mediaBuffer; attempt++) {
                         const stored = await fetchStoredMedia()
                         if (stored?.url) {
                             storedMime = stored.mime || null
@@ -5577,22 +5763,7 @@ export const processWhatsAppMessage = inngest.createFunction(
                             console.log(`[WhatsApp Agent] Stored media not ready on attempt ${attempt} for message ${messageId}`)
                         }
 
-                        if (!mediaBuffer && attempt < 5) {
-                            await waitMs(1500)
-                        }
-                    }
-                }
-
-                if (!mediaBuffer && messageId) {
-                    for (let attempt = 1; attempt <= 2 && !mediaBuffer; attempt++) {
-                        console.log(`[WhatsApp Agent] Trying direct media download attempt ${attempt} for message ${messageId}`)
-                        mediaBuffer = await downloadMedia(messageId, instanceToken)
-                        const downloadedMimeType = inferMimeType(kind, mediaMimetype || storedMime)
-                        if (mediaBuffer && !isLikelyUsableMediaBuffer(kind, downloadedMimeType, mediaBuffer)) {
-                            console.warn(`[WhatsApp Agent] Downloaded media bytes are not usable for ${kind}; message=${messageId}`)
-                            mediaBuffer = null
-                        }
-                        if (!mediaBuffer && attempt < 2) {
+                        if (!mediaBuffer && attempt < 3) {
                             await waitMs(1500)
                         }
                     }
@@ -5641,16 +5812,6 @@ export const processWhatsAppMessage = inngest.createFunction(
                 let analysisText = ''
 
                 if (effectiveProvider === 'openai') {
-                    if (kind === 'video') {
-                        return {
-                            text: '',
-                            reason: 'openai_video_not_supported',
-                            kind,
-                            mimeType,
-                            size: mediaBuffer.length
-                        }
-                    }
-
                     if (openaiKey && kind === 'image' && mimeType.startsWith('image/')) {
                         analysisText = await analyzeMediaWithOpenAIImage(
                             analysisBuffer,
@@ -5877,6 +6038,78 @@ export const processWhatsAppMessage = inngest.createFunction(
                 })
             })
             return { action: 'skipped', reason: 'empty_input' }
+        }
+
+        const profileAssessmentGate = await step.run('handle-profile-assessment-gate', async () => {
+            if (!isWhatsAppGlobalInstance(instance) || !instanceToken) return { handled: false, action: 'profile_assessment_not_global_instance' }
+
+            const identity = await resolveWhatsAppGlobalIdentity({
+                supabase,
+                phone: cleanPhone,
+                senderName,
+            })
+            const deliveryConfigs = {
+                ...configs,
+                whatsapp_tts_voice: String((broker as any)?.voice_id || configs['whatsapp_tts_voice'] || ''),
+            }
+
+            const currentGate = await loadProfileAssessmentGate(supabase, cleanPhone)
+            if (currentGate?.status === 'awaiting_vote_proof') {
+                if (!isProfileAssessmentAwaitingProofFollowUp(inputText)) {
+                    return { handled: false, action: 'profile_assessment_awaiting_proof_normal_conversation_async' }
+                }
+
+                if (profileAssessmentRecentlyReminded(currentGate)) {
+                    return { handled: true, action: 'profile_assessment_waiting_vote_proof_recently_reminded_async' }
+                }
+                await saveProfileAssessmentGate(supabase, cleanPhone, {
+                    ...(currentGate || {}),
+                    status: 'awaiting_vote_proof',
+                    last_reminder_at: new Date().toISOString(),
+                    last_reminder_channel: isAudio ? 'audio' : 'text',
+                })
+                await sendProfileAssessmentReminder({
+                    phone: cleanPhone,
+                    instanceToken,
+                    channel: isAudio ? 'audio' : 'text',
+                    userText: inputText,
+                    name: senderName,
+                    identityType: identity.type,
+                    configs: deliveryConfigs,
+                })
+                return { handled: true, action: 'profile_assessment_waiting_vote_proof_reminder_async' }
+            }
+
+            const intent = await detectProfileAssessmentToolIntent({ text: inputText, configs })
+            if (!intent.matched) return { handled: false, action: 'no_profile_assessment_intent_async', intent }
+
+            await saveProfileAssessmentGate(supabase, cleanPhone, {
+                status: 'awaiting_vote_proof',
+                requested_at: new Date().toISOString(),
+                vote_url: PROFILE_ASSESSMENT_VOTE_URL,
+                intent,
+                identity_type: identity.type,
+                entrypoint: isAudio ? 'audio_transcription' : 'async_agent',
+            })
+
+            await sendProfileAssessmentVoteRequest({
+                phone: cleanPhone,
+                instanceToken,
+                channel: isAudio ? 'audio' : 'text',
+                userText: inputText,
+                name: senderName,
+                identityType: identity.type,
+                configs: deliveryConfigs,
+            })
+
+            return { handled: true, action: 'profile_assessment_vote_requested_async', intent }
+        })
+
+        if (profileAssessmentGate.handled) {
+            return {
+                action: profileAssessmentGate.action,
+                phone: cleanPhone,
+            }
         }
 
         if (isGlobalInternalProcessing) {

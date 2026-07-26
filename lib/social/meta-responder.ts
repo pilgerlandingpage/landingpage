@@ -1,13 +1,13 @@
 import { createAdminClient } from '@/lib/supabase/server'
-
-const META_API_VERSION = 'v21.0'
+import {
+  getFacebookGraphBaseUrl,
+  getInstagramGraphConnection,
+  getInstagramGraphConnectionIssue,
+  type InstagramGraphConnection,
+} from '@/lib/social/instagram-connection'
 
 type SupabaseAdmin = ReturnType<typeof createAdminClient>
 type Platform = 'instagram' | 'facebook'
-
-function getBaseUrl() {
-  return `https://graph.facebook.com/${META_API_VERSION}`
-}
 
 async function readConfigs(supabase: SupabaseAdmin) {
   const { data } = await supabase
@@ -15,24 +15,30 @@ async function readConfigs(supabase: SupabaseAdmin) {
     .select('key, value')
     .in('key', [
       'meta_facebook_page_id',
+      'meta_access_token',
+      'meta_instagram_account_id',
       'facebook_page_access_token',
       'instagram_business_account_id',
       'instagram_business_access_token',
+      'instagram_connected_at',
+      'instagram_token_expires_at',
+      'instagram_token_kind',
       'meta_social_agent_autopilot',
     ])
 
   const configs = Object.fromEntries((data || []).map((row: { key: string; value: string | null }) => [row.key, String(row.value || '')]))
+  const instagramConnection = getInstagramGraphConnection(configs)
   return {
     facebookPageId: configs.meta_facebook_page_id || process.env.META_FACEBOOK_PAGE_ID || '',
     facebookPageToken: configs.facebook_page_access_token || process.env.FACEBOOK_PAGE_ACCESS_TOKEN || '',
-    instagramAccountId: configs.instagram_business_account_id || process.env.INSTAGRAM_BUSINESS_ACCOUNT_ID || '',
-    instagramToken: configs.instagram_business_access_token || process.env.INSTAGRAM_BUSINESS_ACCESS_TOKEN || '',
+    instagramConnection,
+    instagramConnectionIssue: instagramConnection ? '' : getInstagramGraphConnectionIssue(configs),
     autopilot: configs.meta_social_agent_autopilot === 'true',
   }
 }
 
-async function graphPost<T>(path: string, params: Record<string, string>) {
-  const response = await fetch(`${getBaseUrl()}${path.startsWith('/') ? path : `/${path}`}`, {
+async function graphPost<T>(baseUrl: string, path: string, params: Record<string, string>) {
+  const response = await fetch(`${baseUrl}${path.startsWith('/') ? path : `/${path}`}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams(params),
@@ -43,6 +49,11 @@ async function graphPost<T>(path: string, params: Record<string, string>) {
     throw new Error(payload?.error?.message || `Erro Meta Graph ${response.status}`)
   }
   return payload as T
+}
+
+function getInstagramConnectionOrThrow(connection: InstagramGraphConnection | null, issue: string) {
+  if (!connection) throw new Error(issue || 'Instagram Business ID ou Access Token nao configurado.')
+  return connection
 }
 
 function cleanReply(value: unknown) {
@@ -72,14 +83,18 @@ async function sendCommentReply(supabase: SupabaseAdmin, platform: Platform, sou
   if (error || !comment) throw new Error(error?.message || 'Comentario nao encontrado.')
 
   const configs = await readConfigs(supabase)
-  const accessToken = platform === 'instagram' ? configs.instagramToken : configs.facebookPageToken
+  const instagramConnection = platform === 'instagram'
+    ? getInstagramConnectionOrThrow(configs.instagramConnection, configs.instagramConnectionIssue)
+    : undefined
+  const accessToken = instagramConnection?.accessToken || configs.facebookPageToken
   if (!accessToken) throw new Error(`Token de ${platform} nao configurado para responder comentarios.`)
 
   const endpoint = platform === 'instagram'
     ? `/${comment.external_id}/replies`
     : `/${comment.external_id}/comments`
+  const baseUrl = instagramConnection?.baseUrl || getFacebookGraphBaseUrl()
 
-  const result = await graphPost<{ id?: string }>(endpoint, {
+  const result = await graphPost<{ id?: string }>(baseUrl, endpoint, {
     message: reply,
     access_token: accessToken,
   })
@@ -98,18 +113,18 @@ async function sendThreadReply(supabase: SupabaseAdmin, platform: Platform, sour
   if (!thread.participant_id) throw new Error('Conversa sem participant_id para resposta automatica.')
 
   const configs = await readConfigs(supabase)
-  const accessToken = platform === 'instagram' ? configs.instagramToken : configs.facebookPageToken
+  const instagramConnection = platform === 'instagram'
+    ? getInstagramConnectionOrThrow(configs.instagramConnection, configs.instagramConnectionIssue)
+    : undefined
+  const accessToken = instagramConnection?.accessToken || configs.facebookPageToken
   if (!accessToken) throw new Error(`Token de ${platform} nao configurado para responder mensagens.`)
 
-  const endpoint = platform === 'instagram'
-    ? `/${configs.instagramAccountId}/messages`
+  const endpoint = instagramConnection
+    ? `/${instagramConnection.accountId}/messages`
     : '/me/messages'
+  const baseUrl = instagramConnection?.baseUrl || getFacebookGraphBaseUrl()
 
-  if (platform === 'instagram' && !configs.instagramAccountId) {
-    throw new Error('Instagram Business ID nao configurado para Direct.')
-  }
-
-  const result = await graphPost<{ message_id?: string; recipient_id?: string }>(endpoint, {
+  const result = await graphPost<{ message_id?: string; recipient_id?: string }>(baseUrl, endpoint, {
     recipient: JSON.stringify({ id: thread.participant_id }),
     message: JSON.stringify({ text: reply }),
     access_token: accessToken,

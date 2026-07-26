@@ -6,6 +6,13 @@ import {
     manageCampaign,
     listCampaigns,
 } from '@/lib/connectyhub/whatsapp'
+import { inngest } from '@/lib/inngest/client'
+import {
+    createMetaWhatsAppCampaign,
+    getMetaWhatsAppCampaignDetail,
+    listMetaWhatsAppCampaigns,
+    manageMetaWhatsAppCampaign,
+} from '@/lib/meta/whatsapp-campaigns'
 
 function getSupabase() {
     return createClient(
@@ -17,6 +24,24 @@ function getSupabase() {
 // GET — Listar campanhas de uma instância
 export async function GET(request: NextRequest) {
     try {
+        const provider = request.nextUrl.searchParams.get('provider')
+        if (provider === 'meta_whatsapp') {
+            const campaignId = request.nextUrl.searchParams.get('campaign_id')
+            if (campaignId) {
+                const detail = await getMetaWhatsAppCampaignDetail({
+                    campaignId,
+                    limit: Number(request.nextUrl.searchParams.get('limit') || 80),
+                })
+                return NextResponse.json({ success: true, provider: 'meta_whatsapp', ...detail })
+            }
+
+            const result = await listMetaWhatsAppCampaigns({
+                status: request.nextUrl.searchParams.get('status'),
+                limit: Number(request.nextUrl.searchParams.get('limit') || 40),
+            })
+            return NextResponse.json({ success: true, provider: 'meta_whatsapp', ...result })
+        }
+
         const instanceId = request.nextUrl.searchParams.get('instance_id')
         if (!instanceId) {
             return NextResponse.json({ success: false, message: 'instance_id obrigatório' }, { status: 400 })
@@ -47,6 +72,81 @@ export async function POST(request: NextRequest) {
         const supabase = getSupabase()
         const body = await request.json()
         const { action, instanceId, ...campaignData } = body
+
+        if (action === 'meta_whatsapp' || action === 'meta_template') {
+            const result = await createMetaWhatsAppCampaign({
+                name: campaignData.name || campaignData.folder || `Campanha Meta ${new Date().toLocaleDateString('pt-BR')}`,
+                campaignType: campaignData.campaignType || campaignData.campaign_type || 'marketing',
+                templateName: campaignData.templateName || campaignData.template_name,
+                templateLanguage: campaignData.templateLanguage || campaignData.template_language || campaignData.language,
+                numbers: campaignData.numbers,
+                recipients: campaignData.recipients,
+                scheduledFor: campaignData.scheduled_for || campaignData.scheduledFor,
+                confirmOptIn: Boolean(campaignData.confirmOptIn || campaignData.confirm_opt_in),
+                optInSource: campaignData.optInSource || campaignData.opt_in_source || 'site_lead_authorized',
+                senderRoutingMode: campaignData.senderRoutingMode || campaignData.sender_routing_mode || 'weighted_pool',
+                defaultSenderId: campaignData.defaultSenderId || campaignData.default_sender_id || null,
+                templateParameters: campaignData.templateParameters || campaignData.template_parameters || {},
+                audienceSource: campaignData.audienceSource || campaignData.audience_source || 'custom_paste',
+                metadata: {
+                    created_from: 'admin_whatsapp_campaigns',
+                    legacy_instance_id_ignored: instanceId || null,
+                },
+            })
+
+            if (result.queuedCount > 0) {
+                await inngest.send({
+                    name: 'meta-whatsapp/campaign-created',
+                    data: {
+                        campaign_id: result.campaign.id,
+                        reason: 'admin_meta_whatsapp_campaign',
+                        batch_size: Number(campaignData.batchSize || campaignData.batch_size || 25),
+                    },
+                })
+            }
+
+            return NextResponse.json({
+                success: true,
+                campaign: result.campaign,
+                queued: result.queuedCount,
+                skipped: result.skippedCount,
+                message: result.queuedCount > 0
+                    ? `Campanha oficial Meta criada com ${result.queuedCount} contato(s) na fila.`
+                    : 'Campanha oficial Meta criada, mas nenhum contato ficou elegivel para envio.',
+            })
+        }
+
+        if (action === 'meta_manage') {
+            const manageAction = campaignData.manageAction || campaignData.manage_action
+            const normalizedAction = manageAction === 'resume' || manageAction === 'continue'
+                ? 'resume'
+                : manageAction === 'cancel' || manageAction === 'delete'
+                    ? 'cancel'
+                    : 'pause'
+
+            const campaignId = campaignData.campaignId || campaignData.campaign_id
+            const result = await manageMetaWhatsAppCampaign({
+                campaignId,
+                action: normalizedAction,
+            })
+
+            if (result.status === 'queued') {
+                await inngest.send({
+                    name: 'meta-whatsapp/campaign-created',
+                    data: {
+                        campaign_id: campaignId,
+                        reason: 'admin_meta_whatsapp_campaign_resumed',
+                        batch_size: Number(campaignData.batchSize || campaignData.batch_size || 25),
+                    },
+                })
+            }
+
+            return NextResponse.json({
+                success: true,
+                result,
+                message: `Campanha Meta ${result.status}.`,
+            })
+        }
 
         if (!instanceId) {
             return NextResponse.json({ success: false, message: 'instanceId obrigatório' }, { status: 400 })
@@ -130,7 +230,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: true, result })
         }
 
-        return NextResponse.json({ success: false, message: 'action inválida (use: simple, advanced, manage)' }, { status: 400 })
+        return NextResponse.json({ success: false, message: 'action inválida (use: simple, advanced, manage, meta_whatsapp, meta_manage)' }, { status: 400 })
     } catch (error) {
         console.error('[Campaigns POST]', error)
         return NextResponse.json({

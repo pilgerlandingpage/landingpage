@@ -12,6 +12,7 @@ import LeadClock from '@/components/admin/LeadClock'
 import AdsChartFrame from '@/components/admin/AdsChartFrame'
 import AdminLoadingState from '@/components/admin/AdminLoadingState'
 import AdsTrackingSettingsCard from '@/components/admin/AdsTrackingSettingsCard'
+import GoogleAdsManagerView from '@/components/admin/GoogleAdsManagerView'
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
     PieChart, Pie, Cell, AreaChart, Area, Legend
@@ -374,6 +375,40 @@ export default function AdsPage() {
 
     if (loading) {
         return <AdminLoadingState message="Carregando métricas de tráfego..." />
+    }
+
+    const useGoogleAdsManagerLayout = process.env.NEXT_PUBLIC_GOOGLE_ADS_MANAGER_LAYOUT !== 'legacy'
+
+    if (useGoogleAdsManagerLayout) {
+        return (
+            <GoogleAdsManagerView
+                campaigns={campaigns}
+                alerts={alerts}
+                reports={reports}
+                internalStats={internalStats}
+                googleAccountHealth={googleAccountHealth}
+                toast={toast}
+                datePreset={datePreset}
+                startDate={startDate}
+                endDate={endDate}
+                filter={filter}
+                syncing={syncing}
+                analyzing={analyzing}
+                latestScore={latestScore}
+                showHistory={showHistory}
+                expandedReport={expandedReport}
+                onDatePresetChange={handleDateChange}
+                onStartDateChange={setStartDate}
+                onEndDateChange={setEndDate}
+                onCustomDateSearch={handleCustomDateSearch}
+                onSync={handleSync}
+                onAnalyze={handleAnalyze}
+                onFilterChange={setFilter}
+                onShowHistoryChange={setShowHistory}
+                onExpandedReportChange={setExpandedReport}
+                renderMarkdown={renderMarkdown}
+            />
+        )
     }
 
     return (

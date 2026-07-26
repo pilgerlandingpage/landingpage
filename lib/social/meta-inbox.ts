@@ -376,9 +376,32 @@ async function upsertComments(supabase: SupabaseAdmin, platform: PlatformKey, me
 
   if (rows.length === 0) return 0
 
+  const externalIds = rows.map(row => row.external_id).filter(Boolean)
+  const { data: existingRows } = externalIds.length
+    ? await supabase
+        .from('meta_social_comments')
+        .select('external_id, author_id, author_name')
+        .eq('platform', platform)
+        .in('external_id', externalIds)
+    : { data: [] }
+  const existingCommentRows = (existingRows || []) as Array<{
+    external_id: string
+    author_id: string | null
+    author_name: string | null
+  }>
+  const existingByExternalId = new Map(existingCommentRows.map(row => [row.external_id, row]))
+  const rowsWithPreservedAuthors = rows.map(row => {
+    const existing = existingByExternalId.get(row.external_id)
+    return {
+      ...row,
+      author_id: row.author_id || existing?.author_id || null,
+      author_name: row.author_name || existing?.author_name || null,
+    }
+  })
+
   const { error } = await supabase
     .from('meta_social_comments')
-    .upsert(rows, { onConflict: 'platform,external_id' })
+    .upsert(rowsWithPreservedAuthors, { onConflict: 'platform,external_id' })
 
   if (error) throw new Error(error.message)
   return rows.length

@@ -4,10 +4,14 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import {
+    Activity,
+    ArrowRight,
+    BarChart3,
     Bell,
     Building2,
     CircleDollarSign,
     ClipboardCheck,
+    Gauge,
     MapPin,
     Megaphone,
     ShieldCheck,
@@ -485,24 +489,386 @@ export default function AdminOverviewPage() {
         },
     ]), [convertedStep, ecosystemStats.brokersActive, financeSummary.balance, financeSummary.totalEntries, marketingStats.conversionRate, marketingStats.totalLeads, propertyStats.active, propertyStats.incomplete, propertyStats.underReview, qualifiedStep])
 
+    const funnelHealth = mainFunnelTotal > 0 ? Math.round((marketingStats.totalLeads / Math.max(mainFunnelTotal, 1)) * 100) : 0
+    const activeCampaignRate = ecosystemStats.adsCampaignsTotal > 0 ? Math.round((ecosystemStats.adsCampaignsActive / ecosystemStats.adsCampaignsTotal) * 100) : 0
+    const automationHealth = ecosystemStats.whatsappInstancesTotal > 0 ? Math.round((ecosystemStats.whatsappConnected / Math.max(ecosystemStats.whatsappInstancesTotal, 1)) * 100) : 0
+    const reviewBacklog = propertyStats.underReview + propertyStats.incomplete
+    const topLocations = leadLocations.slice(0, 6)
+
+    const overviewTabs = [
+        { label: 'Visao executiva', value: funnelHealth, active: true },
+        { label: 'Marketing', value: marketingStats.totalLeads },
+        { label: 'Comercial', value: qualifiedStep },
+        { label: 'Operacao', value: propertyStats.active },
+        { label: 'Financeiro', value: financeSummary.totalEntries },
+        { label: 'IA', value: ecosystemStats.brokersActive },
+    ]
+
+    const overviewSignals = [
+        {
+            label: 'Saude do funil',
+            value: `${funnelHealth}%`,
+            detail: `${marketingStats.totalLeads.toLocaleString('pt-BR')} leads de ${mainFunnelTotal.toLocaleString('pt-BR')} visitas`,
+            icon: Gauge,
+            tone: funnelHealth >= 4 ? 'good' : funnelHealth >= 2 ? 'watch' : 'neutral',
+        },
+        {
+            label: 'Midia ativa',
+            value: `${ecosystemStats.adsCampaignsActive}/${ecosystemStats.adsCampaignsTotal}`,
+            detail: `${activeCampaignRate}% das campanhas rodando neste periodo`,
+            icon: Megaphone,
+            tone: ecosystemStats.adsCampaignsActive > 0 ? 'good' : 'watch',
+        },
+        {
+            label: 'Atendimento',
+            value: `${ecosystemStats.whatsappConnected}/${ecosystemStats.whatsappInstancesTotal}`,
+            detail: `${automationHealth}% das conexoes WhatsApp ativas`,
+            icon: Smartphone,
+            tone: automationHealth >= 70 ? 'good' : 'watch',
+        },
+        {
+            label: 'Pendencias',
+            value: reviewBacklog.toLocaleString('pt-BR'),
+            detail: `${propertyStats.underReview} em analise e ${propertyStats.incomplete} incompletos`,
+            icon: ClipboardCheck,
+            tone: reviewBacklog > 0 ? 'watch' : 'good',
+        },
+    ]
+
+    const overviewActions = [
+        {
+            title: 'Revisar imoveis pendentes',
+            detail: `${propertyStats.underReview} aguardando aprovacao`,
+            href: '/admin/properties',
+            tone: propertyStats.underReview > 0 ? 'watch' : 'good',
+        },
+        {
+            title: 'Abrir painel de marketing',
+            detail: `${marketingStats.totalLeads.toLocaleString('pt-BR')} leads e ${marketingStats.conversionRate.toFixed(1)}% de conversao`,
+            href: '/admin/marketing',
+            tone: 'neutral',
+        },
+        {
+            title: 'Conferir campanhas pagas',
+            detail: `${formatCurrency(ecosystemStats.adsSpend30d)} investidos no periodo`,
+            href: '/admin/ads',
+            tone: ecosystemStats.adsSpend30d > 0 ? 'good' : 'neutral',
+        },
+    ]
+
+    const compactMetricRows = [
+        {
+            label: 'Leads',
+            primary: marketingStats.totalLeads.toLocaleString('pt-BR'),
+            helper: `${marketingStats.conversionRate.toFixed(1)}% de conversao`,
+            progress: Math.min(100, Math.max(4, funnelHealth)),
+            color: '#b8945f',
+        },
+        {
+            label: 'Qualificados',
+            primary: qualifiedStep.toLocaleString('pt-BR'),
+            helper: `${convertedStep.toLocaleString('pt-BR')} convertidos`,
+            progress: mainFunnelTotal > 0 ? Math.min(100, Math.round((qualifiedStep / mainFunnelTotal) * 100)) : 0,
+            color: '#22c55e',
+        },
+        {
+            label: 'Imoveis ativos',
+            primary: propertyStats.active.toLocaleString('pt-BR'),
+            helper: `${propertyStats.total.toLocaleString('pt-BR')} cadastrados`,
+            progress: propertyStats.total > 0 ? Math.min(100, Math.round((propertyStats.active / propertyStats.total) * 100)) : 0,
+            color: '#8a6d3b',
+        },
+        {
+            label: 'Saldo',
+            primary: formatCurrency(financeSummary.balance),
+            helper: `${financeSummary.totalEntries} lancamentos`,
+            progress: financeSummary.income > 0 ? Math.min(100, Math.round(((financeSummary.balance > 0 ? financeSummary.balance : 0) / financeSummary.income) * 100)) : 0,
+            color: financeSummary.balance >= 0 ? '#22c55e' : '#ef4444',
+        },
+    ]
+
+    const conversionDonutData = [
+        { name: 'Leads', value: marketingStats.totalLeads },
+        { name: 'Visitantes sem lead', value: Math.max(marketingStats.totalVisitors - marketingStats.totalLeads, 0) },
+    ]
+
+    const financeBoardData = [
+        { name: 'Receitas', value: Math.max(financeSummary.income, 0) },
+        { name: 'Despesas', value: Math.max(financeSummary.expense, 0) },
+        { name: 'Trafego', value: Math.max(ecosystemStats.adsSpend30d, 0) },
+    ].filter(item => item.value > 0)
+
+    const leaderboardRows = [
+        {
+            name: 'Marketing',
+            status: `${marketingStats.totalVisitors.toLocaleString('pt-BR')} visitantes`,
+            score: funnelHealth,
+            metric: marketingStats.totalLeads.toLocaleString('pt-BR'),
+            trend: marketingStats.conversionRate.toFixed(1) + '%',
+            href: '/admin/marketing',
+        },
+        {
+            name: 'Comercial',
+            status: `${qualifiedStep.toLocaleString('pt-BR')} qualificados`,
+            score: mainFunnelTotal > 0 ? Math.round((qualifiedStep / mainFunnelTotal) * 100) : 0,
+            metric: convertedStep.toLocaleString('pt-BR'),
+            trend: 'Funil',
+            href: '/admin/leads/crm',
+        },
+        {
+            name: 'Operacao',
+            status: `${propertyStats.total.toLocaleString('pt-BR')} imoveis`,
+            score: propertyStats.total > 0 ? Math.round((propertyStats.active / propertyStats.total) * 100) : 0,
+            metric: propertyStats.active.toLocaleString('pt-BR'),
+            trend: `${reviewBacklog} revisar`,
+            href: '/admin/properties',
+        },
+        {
+            name: 'Financeiro',
+            status: `${financeSummary.totalEntries.toLocaleString('pt-BR')} lancamentos`,
+            score: financeSummary.income > 0 ? Math.round((financeSummary.balance / financeSummary.income) * 100) : 0,
+            metric: formatCurrency(financeSummary.balance),
+            trend: formatCurrency(financeSummary.expense),
+            href: '/admin/finance',
+        },
+        {
+            name: 'IA e automacao',
+            status: `${ecosystemStats.brokersActive}/${ecosystemStats.brokersTotal} agentes`,
+            score: automationHealth,
+            metric: `${ecosystemStats.whatsappConnected}/${ecosystemStats.whatsappInstancesTotal}`,
+            trend: 'Conexoes',
+            href: '/admin/pilger-ai/saude',
+        },
+    ]
+
     if (loading) {
         return <AdminLoadingState message="Carregando dashboard geral..." minHeight="50vh" />
     }
 
     return (
-        <div className="admin-overview-page">
-            <div className="admin-header overview-hero-header">
-                <div>
-                    <span className="overview-eyebrow">Pilger AI Command Center</span>
-                    <h1>Dashboard Geral</h1>
-                    <p>Visao executiva com funil, origem dos leads, operacao, financeiro e governanca dos agentes.</p>
+        <div className="admin-overview-page overview-manager-page overview-board-page">
+            <section className="overview-board-frame" aria-label="Dashboard geral Pilger">
+                <main className="overview-board-main">
+                    <header className="overview-board-header">
+                        <div>
+                            <span>Pilger AI Command Center</span>
+                            <h1>Dashboard Geral</h1>
+                        </div>
+                        <div className="overview-board-context">
+                            <span>Regiao: Litoral SC</span>
+                            <span>Intervalo: 30 dias</span>
+                            <span>Atualizacao: automatica</span>
+                        </div>
+                    </header>
+
+                    <div className="overview-board-filterbar">
+                        <label>
+                            <span>Selecionar visao</span>
+                            <select className="form-input" defaultValue="geral">
+                                <option value="geral">Operacao completa</option>
+                                <option value="marketing">Marketing</option>
+                                <option value="comercial">Comercial</option>
+                                <option value="financeiro">Financeiro</option>
+                            </select>
+                        </label>
+                        <div className="overview-board-range" aria-label="Periodo">
+                            <button type="button">Hoje</button>
+                            <button type="button">7 dias</button>
+                            <button type="button" className="active">30 dias</button>
+                            <button type="button">Este mes</button>
+                        </div>
+                    </div>
+
+                    <section className="overview-board-kpis" aria-label="Indicadores principais">
+                        {compactMetricRows.map(metric => (
+                            <article key={metric.label} className="overview-board-kpi">
+                                <div>
+                                    <span>{metric.label}</span>
+                                    <strong>{metric.primary}</strong>
+                                    <small>{metric.helper}</small>
+                                </div>
+                                <div className="overview-board-kpi-bar">
+                                    <i style={{ width: `${Math.max(0, Math.min(100, metric.progress))}%`, background: metric.color }} />
+                                </div>
+                            </article>
+                        ))}
+                    </section>
+
+                    <section className="overview-board-grid overview-board-grid-top">
+                        <article className="overview-board-panel overview-board-panel-wide">
+                            <div className="overview-board-panel-title">
+                                <span>Performance</span>
+                                <strong>Volume comercial</strong>
+                            </div>
+                            <div className="overview-board-bars">
+                                {[
+                                    { label: 'Visitantes', value: marketingStats.totalVisitors, max: Math.max(marketingStats.totalVisitors, 1), color: '#1a1a1a' },
+                                    { label: 'Leads', value: marketingStats.totalLeads, max: Math.max(marketingStats.totalVisitors, 1), color: '#b8945f' },
+                                    { label: 'Qualificados', value: qualifiedStep, max: Math.max(marketingStats.totalLeads, 1), color: '#22c55e' },
+                                ].map(row => (
+                                    <div key={row.label} className="overview-board-bar-row">
+                                        <span>{row.label}</span>
+                                        <div><i style={{ width: `${Math.max(5, Math.min(100, Math.round((row.value / row.max) * 100)))}%`, background: row.color }} /></div>
+                                        <strong>{row.value.toLocaleString('pt-BR')}</strong>
+                                    </div>
+                                ))}
+                            </div>
+                        </article>
+
+                        <article className="overview-board-panel overview-board-mini">
+                            <div className="overview-board-panel-title">
+                                <span>% plano</span>
+                                <strong>Funil</strong>
+                            </div>
+                            <div className="overview-board-number">
+                                <strong>{funnelHealth}%</strong>
+                                <span>leads sobre visitas</span>
+                            </div>
+                        </article>
+
+                        <article className="overview-board-panel overview-board-mini">
+                            <div className="overview-board-panel-title">
+                                <span>Atendimento</span>
+                                <strong>Conexoes</strong>
+                            </div>
+                            <div className="overview-board-number">
+                                <strong>{automationHealth}%</strong>
+                                <span>{ecosystemStats.whatsappConnected}/{ecosystemStats.whatsappInstancesTotal} WhatsApp</span>
+                            </div>
+                        </article>
+                    </section>
+
+                    <section className="overview-board-grid overview-board-grid-middle">
+                        <article className="overview-board-panel">
+                            <div className="overview-board-panel-title">
+                                <span>ADS e AUR</span>
+                                <strong>Investimento</strong>
+                            </div>
+                            {financeBoardData.length > 0 ? (
+                                <SimpleBarChart data={financeBoardData} color="#b8945f" name="Valor" layout="horizontal" height={190} valueFormatter={formatCurrency} />
+                            ) : (
+                                <div className="overview-board-empty">Sem dados financeiros no periodo.</div>
+                            )}
+                        </article>
+
+                        <article className="overview-board-panel">
+                            <div className="overview-board-panel-title">
+                                <span>Traffic & Conversion</span>
+                                <strong>Visitantes para lead</strong>
+                            </div>
+                            <SimpleDonutChart data={conversionDonutData} colors={['#b8945f', '#eee8dd']} height={190} />
+                        </article>
+
+                        <article className="overview-board-panel">
+                            <div className="overview-board-panel-title">
+                                <span>Timeline</span>
+                                <strong>Visitantes e leads</strong>
+                            </div>
+                            <SimpleLineChart
+                                data={dailyData}
+                                height={190}
+                                series={[
+                                    { key: 'visitors', name: 'Visitantes', color: '#1a1a1a' },
+                                    { key: 'leads', name: 'Leads', color: '#b8945f' },
+                                ]}
+                            />
+                        </article>
+
+                        <article className="overview-board-panel overview-board-worked">
+                            <div className="overview-board-panel-title">
+                                <span>Operacao</span>
+                                <strong>Fila</strong>
+                            </div>
+                            {overviewActions.map(action => (
+                                <Link key={action.title} href={action.href} className={`overview-board-action tone-${action.tone}`}>
+                                    <div>
+                                        <strong>{action.title}</strong>
+                                        <span>{action.detail}</span>
+                                    </div>
+                                    <ArrowRight size={15} />
+                                </Link>
+                            ))}
+                        </article>
+                    </section>
+
+                    <section className="overview-board-grid overview-board-grid-bottom">
+                        <article className="overview-board-panel overview-board-map-panel">
+                            <div className="overview-board-panel-title">
+                                <span>Demanda</span>
+                                <strong>Mapa de leads</strong>
+                            </div>
+                            <DashboardLeadMap locations={leadLocations} title="Mapa real de visitantes e leads" />
+                        </article>
+
+                        <article className="overview-board-panel overview-board-table-panel">
+                            <div className="overview-board-panel-title">
+                                <span>Leaderboard</span>
+                                <strong>Areas do negocio</strong>
+                            </div>
+                            <div className="overview-board-table-wrap">
+                                <table className="overview-board-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Area</th>
+                                            <th>Status</th>
+                                            <th>Score</th>
+                                            <th>Metrica</th>
+                                            <th>Tendencia</th>
+                                            <th />
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {leaderboardRows.map(row => (
+                                            <tr key={row.name}>
+                                                <td><strong>{row.name}</strong></td>
+                                                <td>{row.status}</td>
+                                                <td>
+                                                    <div className="overview-board-score-cell">
+                                                        <i style={{ width: `${Math.max(0, Math.min(100, row.score))}%` }} />
+                                                    </div>
+                                                </td>
+                                                <td>{row.metric}</td>
+                                                <td>{row.trend}</td>
+                                                <td><Link href={row.href}>Abrir</Link></td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </article>
+                    </section>
+                </main>
+            </section>
+
+            {false && (
+            <>
+            <header className="admin-header overview-hero-header overview-manager-topbar">
+                <div className="overview-manager-title">
+                    <span className="overview-manager-logo"><Workflow size={22} /></span>
+                    <div>
+                        <span className="overview-eyebrow">Pilger AI Command Center</span>
+                        <h1>Dashboard Geral</h1>
+                        <p>Visao executiva com funil, origem dos leads, operacao, financeiro e governanca dos agentes.</p>
+                    </div>
                 </div>
-                <div className="overview-hero-score">
-                    <span>Saude do funil</span>
-                    <strong>{mainFunnelTotal > 0 ? Math.round((marketingStats.totalLeads / Math.max(mainFunnelTotal, 1)) * 100) : 0}%</strong>
-                    <small>{marketingStats.totalLeads.toLocaleString('pt-BR')} leads gerados</small>
+                <div className="overview-manager-actions" aria-label="Atalhos do dashboard">
+                    <Link href="/admin/marketing"><BarChart3 size={15} /> Marketing</Link>
+                    <Link href="/admin/ads"><Megaphone size={15} /> Midia</Link>
+                    <Link href="/admin/leads/crm"><Users size={15} /> CRM</Link>
+                    <Link href="/admin/pilger-ai/saude"><ShieldCheck size={15} /> Sistema</Link>
                 </div>
-            </div>
+            </header>
+
+            <nav className="overview-manager-tabs" aria-label="Areas do dashboard geral">
+                {overviewTabs.map(tab => (
+                    <button key={tab.label} type="button" className={tab.active ? 'active' : ''}>
+                        <span>{tab.label}</span>
+                        <strong>{typeof tab.value === 'number' ? tab.value.toLocaleString('pt-BR') : tab.value}</strong>
+                    </button>
+                ))}
+            </nav>
+
+            <section className="overview-manager-shell">
 
             <div className="overview-sector-grid">
                 {sectorCards.map(card => {
@@ -517,6 +883,22 @@ export default function AdminOverviewPage() {
                             <div className="overview-sector-label">{card.label}</div>
                             <p>{card.detail}</p>
                         </div>
+                    )
+                })}
+            </div>
+
+            <div className="overview-signal-grid" aria-label="Sinais principais do negocio">
+                {overviewSignals.map(signal => {
+                    const Icon = signal.icon
+                    return (
+                        <article key={signal.label} className={`overview-signal-card tone-${signal.tone}`}>
+                            <span><Icon size={16} /></span>
+                            <div>
+                                <small>{signal.label}</small>
+                                <strong>{signal.value}</strong>
+                                <p>{signal.detail}</p>
+                            </div>
+                        </article>
                     )
                 })}
             </div>
@@ -726,32 +1108,56 @@ export default function AdminOverviewPage() {
                 </div>
             </div>
 
-            <div className="overview-action-grid">
-                <div className="chart-card overview-action-card">
-                    <div className="overview-action-icon"><ClipboardCheck size={18} /></div>
-                    <div>
-                        <strong>{propertyStats.underReview}</strong>
-                        <span>imoveis aguardando aprovacao</span>
+            <div className="overview-manager-bottom-grid">
+                <section className="overview-manager-queue">
+                    <div className="overview-panel-title">
+                        <div>
+                            <span>Prioridades</span>
+                            <h2><Activity size={18} /> O que olhar agora</h2>
+                        </div>
+                        <strong>{overviewActions.length} acoes</strong>
                     </div>
-                    <Link href="/admin/properties">Revisar</Link>
-                </div>
-                <div className="chart-card overview-action-card">
-                    <div className="overview-action-icon"><Building2 size={18} /></div>
-                    <div>
-                        <strong>{propertyStats.incomplete}</strong>
-                        <span>cadastros com dados incompletos</span>
+                    <div className="overview-manager-action-list">
+                        {overviewActions.map(action => (
+                            <Link key={action.title} href={action.href} className={`overview-manager-action-row tone-${action.tone}`}>
+                                <div>
+                                    <strong>{action.title}</strong>
+                                    <span>{action.detail}</span>
+                                </div>
+                                <ArrowRight size={16} />
+                            </Link>
+                        ))}
                     </div>
-                    <Link href="/admin/properties">Completar</Link>
-                </div>
-                <div className="chart-card overview-action-card">
-                    <div className="overview-action-icon"><Megaphone size={18} /></div>
-                    <div>
-                        <strong>{formatCurrency(ecosystemStats.adsSpend30d)}</strong>
-                        <span>investimento de trafego no mes</span>
+                </section>
+
+                <section className="overview-manager-queue">
+                    <div className="overview-panel-title">
+                        <div>
+                            <span>Regioes</span>
+                            <h2><MapPin size={18} /> Demanda recente</h2>
+                        </div>
+                        <strong>{topLocations.length} top</strong>
                     </div>
-                    <Link href="/admin/ads">Ver midia</Link>
-                </div>
+                    <div className="overview-manager-region-list">
+                        {topLocations.map((location, index) => (
+                            <div key={location.id || `${location.name}-${index}`} className="overview-manager-region-row">
+                                <span>{index + 1}</span>
+                                <div>
+                                    <strong>{location.name}</strong>
+                                    <small>{location.subtitle || location.source}</small>
+                                </div>
+                                <b>{location.source}</b>
+                            </div>
+                        ))}
+                        {topLocations.length === 0 && (
+                            <div className="overview-manager-empty">Sem regioes recentes para exibir.</div>
+                        )}
+                    </div>
+                </section>
             </div>
+            </section>
+            </>
+            )}
         </div>
     )
 }

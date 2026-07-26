@@ -67,6 +67,11 @@ trabalhe-conosco-*.png
 # temp files
 temp_config.json
 /tmp/
+/output/
+supabase/.temp/
+public/images/products/corretor-nota-8-guilherme-hero.jpg
+public/images/products/corretor-nota-8-guilherme-author.jpg
+public/images/products/corretor-nota-8-hero-bg.png
 
 # Claude Code local config
 .claude/

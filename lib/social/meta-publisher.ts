@@ -1,7 +1,11 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { getAgentCentralContext, recordAgentCentralSignal } from '@/lib/intelligence/agent-runtime'
-
-const META_API_VERSION = 'v21.0'
+import {
+  getFacebookGraphBaseUrl,
+  getInstagramGraphConnection,
+  getInstagramGraphConnectionIssue,
+  type InstagramGraphConnection,
+} from '@/lib/social/instagram-connection'
 
 type SupabaseAdmin = ReturnType<typeof createAdminClient>
 
@@ -38,10 +42,6 @@ type PublishResult = {
   reason?: string
 }
 
-function getBaseUrl() {
-  return `https://graph.facebook.com/${META_API_VERSION}`
-}
-
 function normalizeCreative(value: ScheduledPostRow['marketing_creatives']) {
   if (Array.isArray(value)) return value[0] || null
   return value || null
@@ -57,26 +57,32 @@ async function readConfigs(supabase: SupabaseAdmin) {
     .select('key, value')
     .in('key', [
       'meta_facebook_page_id',
+      'meta_access_token',
+      'meta_instagram_account_id',
       'facebook_page_access_token',
       'instagram_business_account_id',
       'instagram_business_access_token',
+      'instagram_connected_at',
+      'instagram_token_expires_at',
+      'instagram_token_kind',
       'marketing_publisher_agent_enabled',
       'marketing_publisher_autopilot',
     ])
 
   const configs = Object.fromEntries((data || []).map((row: { key: string; value: string | null }) => [row.key, String(row.value || '')]))
+  const instagramConnection = getInstagramGraphConnection(configs)
   return {
     facebookPageId: configs.meta_facebook_page_id || process.env.META_FACEBOOK_PAGE_ID || '',
     facebookPageToken: configs.facebook_page_access_token || process.env.FACEBOOK_PAGE_ACCESS_TOKEN || '',
-    instagramAccountId: configs.instagram_business_account_id || process.env.INSTAGRAM_BUSINESS_ACCOUNT_ID || '',
-    instagramToken: configs.instagram_business_access_token || process.env.INSTAGRAM_BUSINESS_ACCESS_TOKEN || '',
+    instagramConnection,
+    instagramConnectionIssue: instagramConnection ? '' : getInstagramGraphConnectionIssue(configs),
     publisherEnabled: configs.marketing_publisher_agent_enabled !== 'false',
     autopilot: configs.marketing_publisher_autopilot === 'true',
   }
 }
 
-async function graphPost<T>(path: string, params: Record<string, string>) {
-  const url = new URL(`${getBaseUrl()}${path.startsWith('/') ? path : `/${path}`}`)
+async function graphPost<T>(baseUrl: string, path: string, params: Record<string, string>) {
+  const url = new URL(`${baseUrl}${path.startsWith('/') ? path : `/${path}`}`)
   const response = await fetch(url.toString(), {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -98,7 +104,7 @@ async function publishFacebook(post: ScheduledPostRow, accessToken: string, page
   if (!pageId || !accessToken) throw new Error('Facebook Page ID ou Page Access Token nao configurado.')
   if (!message && !assetUrl) throw new Error('Informe legenda ou URL de midia para publicar no Facebook.')
 
-  const result = await graphPost<{ id?: string; post_id?: string }>(`/${pageId}/feed`, {
+  const result = await graphPost<{ id?: string; post_id?: string }>(getFacebookGraphBaseUrl(), `/${pageId}/feed`, {
     message,
     ...(assetUrl ? { link: assetUrl } : {}),
     access_token: accessToken,
@@ -110,26 +116,26 @@ async function publishFacebook(post: ScheduledPostRow, accessToken: string, page
   }
 }
 
-async function publishInstagram(post: ScheduledPostRow, accessToken: string, accountId: string) {
+async function publishInstagram(post: ScheduledPostRow, connection: InstagramGraphConnection | null, connectionIssue: string) {
   const creative = normalizeCreative(post.marketing_creatives)
   const caption = firstText(post.caption, post.ai_context, creative?.title)
   const assetUrl = firstText(creative?.asset_url, creative?.thumbnail_url)
   const isVideo = creative?.asset_type === 'video'
 
-  if (!accountId || !accessToken) throw new Error('Instagram Business ID ou Access Token nao configurado.')
+  if (!connection) throw new Error(connectionIssue || 'Instagram Business ID ou Access Token nao configurado.')
   if (!assetUrl) throw new Error('Instagram exige uma URL publica de imagem ou video.')
 
-  const createResult = await graphPost<{ id?: string }>(`/${accountId}/media`, {
+  const createResult = await graphPost<{ id?: string }>(connection.baseUrl, `/${connection.accountId}/media`, {
     ...(isVideo ? { media_type: 'REELS', video_url: assetUrl } : { image_url: assetUrl }),
     caption,
-    access_token: accessToken,
+    access_token: connection.accessToken,
   })
 
   if (!createResult.id) throw new Error('Instagram nao retornou o container de publicacao.')
 
-  const publishResult = await graphPost<{ id?: string }>(`/${accountId}/media_publish`, {
+  const publishResult = await graphPost<{ id?: string }>(connection.baseUrl, `/${connection.accountId}/media_publish`, {
     creation_id: createResult.id,
-    access_token: accessToken,
+    access_token: connection.accessToken,
   })
 
   return {
@@ -200,7 +206,7 @@ export async function publishScheduledPost(postId: string, options: { dryRun?: b
     const result = row.platform === 'facebook'
       ? await publishFacebook(row, configs.facebookPageToken, configs.facebookPageId)
       : row.platform === 'instagram'
-        ? await publishInstagram(row, configs.instagramToken, configs.instagramAccountId)
+        ? await publishInstagram(row, configs.instagramConnection, configs.instagramConnectionIssue)
         : (() => {
             throw new Error(`Publicacao automatica para ${row.platform} ainda nao conectada.`)
           })()

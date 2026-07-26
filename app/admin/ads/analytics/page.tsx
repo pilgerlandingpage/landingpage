@@ -13,6 +13,7 @@ import {
   Users,
 } from 'lucide-react'
 import AdminLoadingState from '@/components/admin/AdminLoadingState'
+import GoogleAnalyticsManagerView from '@/components/admin/GoogleAnalyticsManagerView'
 
 type ChannelRow = {
   channel: string
@@ -125,6 +126,22 @@ export default function GoogleAnalyticsPage() {
   }, [payload?.channels])
 
   if (loading && !payload) return <AdminLoadingState message="Carregando Google Analytics..." />
+
+  const useGoogleAnalyticsManagerLayout = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_MANAGER_LAYOUT !== 'legacy'
+
+  if (useGoogleAnalyticsManagerLayout) {
+    return (
+      <GoogleAnalyticsManagerView
+        payload={payload}
+        days={days}
+        loading={loading}
+        error={error}
+        topChannel={topChannel}
+        onDaysChange={setDays}
+        onRefresh={() => void loadData()}
+      />
+    )
+  }
 
   return (
     <div>

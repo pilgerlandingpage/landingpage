@@ -188,5 +188,20 @@ export const inngest = new Inngest({
                 date?: string | null
             }
         }
+        'meta-whatsapp/campaign-created': {
+            data: {
+                campaign_id: string
+                reason?: string
+                batch_size?: number
+            }
+        }
+        'meta-whatsapp/send-batch': {
+            data: {
+                campaign_id: string
+                batch_number?: number
+                batch_size?: number
+                reason?: string
+            }
+        }
     }>()
 })

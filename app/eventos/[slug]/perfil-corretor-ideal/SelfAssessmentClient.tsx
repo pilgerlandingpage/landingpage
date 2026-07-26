@@ -7,9 +7,13 @@ import {
     BarChart3,
     CheckCircle2,
     ClipboardCheck,
-    ExternalLink,
+    Download,
+    FileText,
     Loader2,
+    MessageCircle,
+    Printer,
     Send,
+    Target,
     Trophy,
     UserRound,
 } from 'lucide-react'
@@ -17,6 +21,7 @@ import {
     SELF_ASSESSMENT_QUESTIONS,
     SELF_ASSESSMENT_VERSION,
     calculateSelfAssessmentSummary,
+    type SelfAssessmentScoredAnswer,
     type SelfAssessmentSummary,
 } from '@/lib/events/self-assessment'
 import { trackEvent } from '@/lib/tracking/client'
@@ -41,8 +46,6 @@ type FormState = {
 }
 
 type Stage = 'registration' | 'questions' | 'result'
-
-const GUILHERME_AWARDS_VOTE_URL = 'https://awards.atrincarealestate.com.br/#/categoria/influenciador-do-ano/candidato/2ba4d003-3f4b-4d1a-b079-43c8a253c9b7'
 
 type ApiResult = {
     success?: boolean
@@ -105,6 +108,138 @@ function formatPhone(value: string) {
     return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`
 }
 
+function reportFileBaseName(name: string, eventSlug: string) {
+    const raw = name.trim() || eventSlug || 'corretor'
+    return raw
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 64) || 'perfil-corretor-ideal'
+}
+
+function recommendationForAnswer(answer: SelfAssessmentScoredAnswer) {
+    const title = answer.title.toLowerCase()
+
+    if (title.includes('crm')) {
+        return {
+            diagnosis: 'A oportunidade pode estar escapando por falta de registro, proximo passo e data clara.',
+            action: 'Atualize todos os leads ativos no CRM e defina uma unica proxima acao para cada contato.',
+            cadence: '15 minutos no fim de cada dia util.',
+            metric: '100% das oportunidades com responsavel, data e proximo passo.',
+        }
+    }
+
+    if (title.includes('conteudo') || title.includes('influenciador')) {
+        return {
+            diagnosis: 'Sua autoridade digital ainda pode gerar mais demanda e lembranca de mercado.',
+            action: 'Grave uma peca curta por dia respondendo uma duvida real de comprador, vendedor ou investidor.',
+            cadence: '5 publicacoes por semana.',
+            metric: '20 conteudos publicados em 30 dias.',
+        }
+    }
+
+    if (title.includes('foco') || title.includes('rotina') || title.includes('disciplina') || title.includes('procrast')) {
+        return {
+            diagnosis: 'O risco principal esta na dispersao entre intencao, prioridade e execucao comercial.',
+            action: 'Escolha tres prioridades do dia e bloqueie dois periodos sem interrupcao para executar.',
+            cadence: 'Todos os dias, antes do primeiro atendimento.',
+            metric: '80% das prioridades concluidas por semana.',
+        }
+    }
+
+    if (title.includes('vender') || title.includes('closer') || title.includes('atendimento')) {
+        return {
+            diagnosis: 'A venda pode melhorar quando a conversa termina com direcao mais objetiva.',
+            action: 'Ao final de cada conversa, valide necessidade, objeção principal e proximo passo combinado.',
+            cadence: 'Em todos os atendimentos da semana.',
+            metric: 'Proximo passo registrado em 90% dos atendimentos.',
+        }
+    }
+
+    if (title.includes('mercado') || title.includes('captar')) {
+        return {
+            diagnosis: 'Existe espaco para ganhar mais seguranca com produto, regiao e oportunidade.',
+            action: 'Mapeie ofertas, precos e diferenciais de uma regiao por dia e transforme em argumento comercial.',
+            cadence: '30 minutos por dia util.',
+            metric: '5 regioes ou nichos revisados por semana.',
+        }
+    }
+
+    if (title.includes('escuta') || title.includes('pessoas') || title.includes('comunic')) {
+        return {
+            diagnosis: 'A qualidade da conversa melhora quando o cliente se sente lido antes de ser conduzido.',
+            action: 'Use tres perguntas de aprofundamento antes de apresentar solucao ou opiniao.',
+            cadence: 'Em todo primeiro atendimento.',
+            metric: 'Resumo de dor, desejo e momento registrado em cada lead.',
+        }
+    }
+
+    return {
+        diagnosis: `Este ponto aparece como prioridade porque recebeu ${answer.score}/10 na sua autoavaliacao.`,
+        action: `Crie um ritual simples para praticar ${answer.title.toLowerCase()} com intencao comercial.`,
+        cadence: 'Revisao duas vezes por semana.',
+        metric: `Aumentar ${answer.title.toLowerCase()} em pelo menos 2 pontos na proxima avaliacao.`,
+    }
+}
+
+function buildReportText(
+    form: FormState,
+    result: SelfAssessmentSummary,
+    eventTitle: string,
+    generatedAt: string,
+) {
+    const blocks = result.block_scores.map(block => `${block.label}: ${block.percentage}%`).join('\n')
+    const strengths = result.strengths.map(item => `- ${item.title}: ${item.score}/10`).join('\n')
+    const improvements = result.improvements.map(item => `- ${item.title}: ${item.score}/10`).join('\n')
+    const priorities = [...result.answers]
+        .sort((a, b) => a.score - b.score)
+        .slice(0, 4)
+        .map((item, index) => {
+            const rec = recommendationForAnswer(item)
+            return [
+                `${index + 1}. ${item.title} (${item.score}/10)`,
+                `Diagnostico: ${rec.diagnosis}`,
+                `Acao pratica: ${rec.action}`,
+                `Cadencia: ${rec.cadence}`,
+                `Indicador: ${rec.metric}`,
+            ].join('\n')
+        })
+        .join('\n\n')
+    const answers = result.answers
+        .map(item => `${item.block_label} | ${item.title}: ${item.score}/10 | ${item.criteria.join(', ')}`)
+        .join('\n')
+
+    return [
+        'RELATORIO - PERFIL DO CORRETOR IDEAL',
+        `Gerado em: ${generatedAt}`,
+        `Evento: ${eventTitle}`,
+        `Nome: ${form.full_name}`,
+        `WhatsApp: ${form.phone}`,
+        `E-mail: ${form.email}`,
+        '',
+        `Resultado geral: ${result.score_percent}/100`,
+        `Classificacao: ${result.classification_label}`,
+        result.classification_description,
+        '',
+        'DIMENSOES',
+        blocks,
+        '',
+        'PONTOS FORTES',
+        strengths,
+        '',
+        'PONTOS PARA EVOLUIR',
+        improvements,
+        '',
+        'PRIORIDADES DE CURTO PRAZO',
+        priorities,
+        '',
+        'DETALHAMENTO DAS RESPOSTAS',
+        answers,
+    ].join('\n')
+}
+
 export default function SelfAssessmentClient({
     eventTitle,
     eventSlug,
@@ -132,6 +267,36 @@ export default function SelfAssessmentClient({
         }))
         return calculateSelfAssessmentSummary(previewAnswers)
     }, [answers])
+
+    const reportGeneratedAt = useMemo(() => (
+        stage === 'result'
+            ? new Date().toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+            })
+            : ''
+    ), [stage])
+
+    const priorityPlan = useMemo(() => (
+        result
+            ? [...result.answers]
+                .sort((a, b) => a.score - b.score)
+                .slice(0, 4)
+                .map(answer => ({ answer, ...recommendationForAnswer(answer) }))
+            : []
+    ), [result])
+
+    const answersByBlock = useMemo(() => (
+        result
+            ? result.block_scores.map(block => ({
+                ...block,
+                answers: result.answers.filter(answer => answer.block === block.block),
+            }))
+            : []
+    ), [result])
 
     useEffect(() => {
         try {
@@ -296,17 +461,37 @@ export default function SelfAssessmentClient({
         setError(null)
     }
 
-    const trackAwardsVoteClick = () => {
-        trackEvent('event_awards_vote_clicked', {
+    const printReport = () => {
+        if (!result) return
+        trackEvent('event_self_assessment_report_printed', {
             event_slug: eventSlug,
             event_title: eventTitle,
             assessment: 'perfil_corretor_ideal',
-            award: 'Real Estate Awards',
-            category: 'Influenciador do Ano',
-            candidate: 'Guilherme Pilger',
-            target_url: GUILHERME_AWARDS_VOTE_URL,
-            score_percent: result?.score_percent,
-            classification: result?.classification_key,
+            score_percent: result.score_percent,
+            classification: result.classification_key,
+        }).catch(() => {})
+        window.print()
+    }
+
+    const downloadReport = () => {
+        if (!result) return
+        const content = buildReportText(form, result, eventTitle, reportGeneratedAt)
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `${reportFileBaseName(form.full_name, eventSlug)}-perfil-corretor-ideal.txt`
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        URL.revokeObjectURL(url)
+
+        trackEvent('event_self_assessment_report_downloaded', {
+            event_slug: eventSlug,
+            event_title: eventTitle,
+            assessment: 'perfil_corretor_ideal',
+            score_percent: result.score_percent,
+            classification: result.classification_key,
         }).catch(() => {})
     }
 
@@ -514,7 +699,7 @@ export default function SelfAssessmentClient({
                                     </button>
                                     <button type="button" className="assessment-primary" onClick={goNext} disabled={loading || progressSaving}>
                                         {loading || progressSaving ? <Loader2 className="spin" size={18} /> : currentIndex === SELF_ASSESSMENT_QUESTIONS.length - 1 ? <Send size={18} /> : <ArrowRight size={18} />}
-                                        {currentIndex === SELF_ASSESSMENT_QUESTIONS.length - 1 ? 'Ver minha nota' : 'Próxima'}
+                                        {currentIndex === SELF_ASSESSMENT_QUESTIONS.length - 1 ? 'Gerar relatório' : 'Próxima'}
                                     </button>
                                 </div>
                             </div>
@@ -522,47 +707,67 @@ export default function SelfAssessmentClient({
 
                         {stage === 'result' && result && (
                             <div className="assessment-result">
-                                <div className="assessment-result-badge">
-                                    <Trophy size={30} />
-                                </div>
-                                <span>Resultado registrado</span>
-                                <h2>{result.score_percent}/100</h2>
-                                <strong>{result.classification_label}</strong>
-                                <p>{result.classification_description}</p>
-
-                                <div className="assessment-awards-cta">
-                                    <span>Próximo passo</span>
-                                    <h3>Agora vote no Guilherme</h3>
-                                    <p>
-                                        Ele está concorrendo ao Real Estate Awards na categoria Influenciador do Ano.
-                                        Seu voto ajuda a fortalecer a presença dele no mercado imobiliário.
-                                    </p>
-                                    <div className="assessment-awards-frame" aria-label="Prévia da página de votação do Real Estate Awards">
-                                        <iframe
-                                            src={GUILHERME_AWARDS_VOTE_URL}
-                                            title="Votação do Guilherme Pilger no Real Estate Awards"
-                                            loading="lazy"
-                                            referrerPolicy="strict-origin-when-cross-origin"
-                                        />
+                                <div className="assessment-result-summary">
+                                    <div className="assessment-result-badge">
+                                        <Trophy size={30} />
                                     </div>
-                                    <a
-                                        href={GUILHERME_AWARDS_VOTE_URL}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        onClick={trackAwardsVoteClick}
-                                    >
-                                        <ExternalLink size={17} />
-                                        Votar no Guilherme
-                                    </a>
+                                    <span>Resultado registrado</span>
+                                    <h2>{result.score_percent}/100</h2>
+                                    <strong>{result.classification_label}</strong>
+                                    <p>{result.classification_description}</p>
                                 </div>
 
-                                <div className="assessment-blocks">
-                                    {result.block_scores.map(block => (
-                                        <div key={block.block}>
-                                            <span>{block.label}</span>
-                                            <strong>{block.percentage}%</strong>
+                                <div className="assessment-result-dashboard">
+                                    <div className="assessment-report-toolbar">
+                                        <div>
+                                            <span>Relatório individual</span>
+                                            <strong>{form.full_name}</strong>
+                                            <small>Gerado em {reportGeneratedAt}</small>
                                         </div>
-                                    ))}
+                                        <div className="assessment-report-actions">
+                                            <button type="button" onClick={printReport}>
+                                                <Printer size={17} />
+                                                Imprimir relatório
+                                            </button>
+                                            <button type="button" onClick={downloadReport}>
+                                                <Download size={17} />
+                                                Baixar relatório
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="assessment-diagnostic-card">
+                                        <FileText size={28} />
+                                        <div>
+                                            <span>Leitura do perfil</span>
+                                            <h3>{result.classification_label}</h3>
+                                            <p>
+                                                Seu resultado mostra {result.score_percent}% de aderência ao Perfil do Corretor Ideal.
+                                                A leitura abaixo transforma suas respostas em diagnóstico, prioridades práticas e
+                                                indicadores simples para os próximos 30 dias.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="assessment-whatsapp-note">
+                                        <MessageCircle size={24} />
+                                        <div>
+                                            <strong>Você também vai receber uma análise em áudio no WhatsApp.</strong>
+                                            <p>
+                                                O agente global vai enviar uma leitura com a voz do Guilherme sobre sua nota,
+                                                seus pontos de melhoria e o próximo passo recomendado.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="assessment-blocks">
+                                        {result.block_scores.map(block => (
+                                            <div key={block.block}>
+                                                <span>{block.label}</span>
+                                                <strong>{block.percentage}%</strong>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
 
                                 <div className="assessment-result-grid">
@@ -579,6 +784,62 @@ export default function SelfAssessmentClient({
                                         ))}
                                     </div>
                                 </div>
+
+                                <section className="assessment-plan-section">
+                                    <div className="assessment-report-heading">
+                                        <span>Plano individual</span>
+                                        <h3>Prioridades de curto prazo</h3>
+                                        <p>Ações observáveis, cadência e indicador para transformar resposta em execução.</p>
+                                    </div>
+                                    <div className="assessment-priority-grid">
+                                        {priorityPlan.map((item, index) => (
+                                            <article key={item.answer.question_id} className="assessment-priority-card">
+                                                <div>
+                                                    <Target size={18} />
+                                                    <span>{String(index + 1).padStart(2, '0')}</span>
+                                                </div>
+                                                <h4>{item.answer.title}</h4>
+                                                <p><strong>Diagnóstico</strong>{item.diagnosis}</p>
+                                                <p><strong>Ação prática</strong>{item.action}</p>
+                                                <dl>
+                                                    <div>
+                                                        <dt>Cadência</dt>
+                                                        <dd>{item.cadence}</dd>
+                                                    </div>
+                                                    <div>
+                                                        <dt>Indicador</dt>
+                                                        <dd>{item.metric}</dd>
+                                                    </div>
+                                                </dl>
+                                            </article>
+                                        ))}
+                                    </div>
+                                </section>
+
+                                <section className="assessment-answer-report">
+                                    <div className="assessment-report-heading">
+                                        <span>Detalhamento</span>
+                                        <h3>Todas as respostas da avaliação</h3>
+                                        <p>Use este quadro para revisar onde está forte, onde precisa ganhar método e o que acompanhar na próxima rodada.</p>
+                                    </div>
+                                    {answersByBlock.map(block => (
+                                        <div key={block.block} className="assessment-answer-block">
+                                            <div>
+                                                <h4>{block.label}</h4>
+                                                <strong>{block.percentage}%</strong>
+                                            </div>
+                                            <div className="assessment-answer-table">
+                                                {block.answers.map(answer => (
+                                                    <div key={answer.question_id}>
+                                                        <span>{answer.title}</span>
+                                                        <small>{answer.criteria.join(' / ')}</small>
+                                                        <strong>{answer.score}/10</strong>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </section>
 
                                 <button type="button" className="assessment-secondary" onClick={resetFlow}>
                                     <UserRound size={17} />
@@ -614,7 +875,7 @@ export default function SelfAssessmentClient({
                 .assessment-kicker,
                 .assessment-section-title span,
                 .assessment-question-top span,
-                .assessment-result > span {
+                .assessment-result-summary > span {
                     color: #e7c265;
                     font-size: 0.74rem;
                     font-weight: 950;
@@ -947,8 +1208,31 @@ export default function SelfAssessmentClient({
                     margin-top: 6px;
                 }
                 .assessment-result {
-                    justify-items: center;
-                    text-align: center;
+                    grid-template-columns: minmax(220px, 0.76fr) minmax(0, 1.24fr);
+                    align-items: stretch;
+                    gap: 16px;
+                    text-align: left;
+                }
+                .assessment-result-summary,
+                .assessment-result-dashboard {
+                    width: 100%;
+                    min-width: 0;
+                }
+                .assessment-result-summary {
+                    display: grid;
+                    align-content: center;
+                    justify-items: start;
+                    gap: 10px;
+                    border: 1px solid rgba(231, 194, 101, 0.22);
+                    border-radius: 8px;
+                    background:
+                        linear-gradient(135deg, rgba(231, 194, 101, 0.1), rgba(66, 211, 146, 0.06)),
+                        rgba(255, 255, 255, 0.05);
+                    padding: clamp(16px, 2.8vw, 22px);
+                }
+                .assessment-result-dashboard {
+                    display: grid;
+                    gap: 12px;
                 }
                 .assessment-result-badge {
                     display: grid;
@@ -960,23 +1244,245 @@ export default function SelfAssessmentClient({
                     color: #e7c265;
                 }
                 .assessment-result h2 {
-                    font-size: clamp(3.4rem, 10vw, 6rem);
+                    max-width: 100%;
+                    font-size: 4rem;
+                    line-height: 0.95;
+                    white-space: nowrap;
                 }
-                .assessment-result strong {
+                .assessment-result-summary > strong {
                     color: #bbf7d0;
                     font-size: 1.16rem;
                 }
-                .assessment-result > p {
-                    max-width: 620px;
+                .assessment-result-summary > p {
                     margin: 0;
                     color: rgba(255, 248, 236, 0.7);
                     line-height: 1.6;
                 }
-                .assessment-awards-cta {
+                .assessment-report-toolbar {
+                    width: 100%;
+                    display: grid;
+                    grid-template-columns: minmax(0, 1fr) auto;
+                    gap: 14px;
+                    align-items: center;
+                    border: 1px solid rgba(231, 194, 101, 0.28);
+                    border-radius: 8px;
+                    background: rgba(255, 255, 255, 0.06);
+                    padding: 14px;
+                    text-align: left;
+                }
+                .assessment-report-toolbar > div:first-child {
+                    display: grid;
+                    gap: 4px;
+                }
+                .assessment-report-toolbar span,
+                .assessment-report-heading span,
+                .assessment-diagnostic-card span {
+                    color: #e7c265;
+                    font-size: 0.68rem;
+                    font-weight: 950;
+                    letter-spacing: 0.12em;
+                    text-transform: uppercase;
+                }
+                .assessment-report-toolbar strong {
+                    color: #fff8ec;
+                    font-size: 1rem;
+                }
+                .assessment-report-toolbar small {
+                    color: rgba(255, 248, 236, 0.58);
+                    font-size: 0.76rem;
+                    font-weight: 700;
+                }
+                .assessment-report-actions {
+                    display: flex;
+                    gap: 8px;
+                    flex-wrap: wrap;
+                    justify-content: flex-end;
+                }
+                .assessment-report-actions button {
+                    min-height: 42px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    border: 1px solid rgba(255, 255, 255, 0.14);
+                    border-radius: 8px;
+                    background: rgba(255, 255, 255, 0.06);
+                    color: #fff8ec;
+                    padding: 0 14px;
+                    font-size: 0.82rem;
+                    font-weight: 900;
+                    cursor: pointer;
+                }
+                .assessment-diagnostic-card,
+                .assessment-whatsapp-note,
+                .assessment-plan-section,
+                .assessment-answer-report {
+                    width: 100%;
+                    border: 1px solid rgba(255, 255, 255, 0.12);
+                    border-radius: 8px;
+                    background: rgba(255, 255, 255, 0.055);
+                    text-align: left;
+                }
+                .assessment-diagnostic-card,
+                .assessment-whatsapp-note {
+                    display: grid;
+                    grid-template-columns: 44px minmax(0, 1fr);
+                    gap: 14px;
+                    align-items: start;
+                    padding: 16px;
+                }
+                .assessment-diagnostic-card svg,
+                .assessment-whatsapp-note svg {
+                    display: block;
+                    color: #e7c265;
+                }
+                .assessment-diagnostic-card h3 {
+                    margin: 6px 0 8px;
+                    color: #fff8ec;
+                    font-family: 'Playfair Display', Georgia, serif;
+                    font-size: clamp(1.35rem, 3vw, 1.9rem);
+                    line-height: 1.1;
+                    letter-spacing: 0;
+                }
+                .assessment-diagnostic-card p,
+                .assessment-whatsapp-note p,
+                .assessment-report-heading p,
+                .assessment-priority-card p,
+                .assessment-answer-table small {
+                    margin: 0;
+                    color: rgba(255, 248, 236, 0.68);
+                    font-size: 0.88rem;
+                    line-height: 1.52;
+                }
+                .assessment-whatsapp-note {
+                    border-color: rgba(66, 211, 146, 0.24);
+                    background: rgba(66, 211, 146, 0.08);
+                }
+                .assessment-whatsapp-note strong {
+                    display: block;
+                    margin-bottom: 5px;
+                    color: #bbf7d0;
+                    font-size: 0.96rem;
+                }
+                .assessment-plan-section,
+                .assessment-answer-report {
+                    display: grid;
+                    gap: 14px;
+                    padding: 16px;
+                }
+                .assessment-report-heading {
+                    display: grid;
+                    gap: 6px;
+                }
+                .assessment-report-heading h3 {
+                    margin: 0;
+                    color: #fff8ec;
+                    font-size: 1.08rem;
+                }
+                .assessment-priority-grid {
+                    display: grid;
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                    gap: 12px;
+                }
+                .assessment-priority-card {
+                    display: grid;
+                    gap: 10px;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 8px;
+                    background: rgba(8, 13, 17, 0.38);
+                    padding: 14px;
+                }
+                .assessment-priority-card > div:first-child {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    color: #e7c265;
+                    font-weight: 950;
+                }
+                .assessment-priority-card h4 {
+                    margin: 0;
+                    color: #fff8ec;
+                    font-size: 1rem;
+                }
+                .assessment-priority-card p strong {
+                    display: block;
+                    margin-bottom: 2px;
+                    color: #e7c265;
+                    font-size: 0.66rem;
+                    letter-spacing: 0.08em;
+                    text-transform: uppercase;
+                }
+                .assessment-priority-card dl {
+                    display: grid;
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                    gap: 8px;
+                    margin: 0;
+                }
+                .assessment-priority-card dl div {
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 8px;
+                    padding: 9px;
+                }
+                .assessment-priority-card dt {
+                    color: rgba(255, 248, 236, 0.52);
+                    font-size: 0.66rem;
+                    font-weight: 900;
+                    text-transform: uppercase;
+                }
+                .assessment-priority-card dd {
+                    margin: 4px 0 0;
+                    color: rgba(255, 248, 236, 0.82);
+                    font-size: 0.82rem;
+                    line-height: 1.35;
+                }
+                .assessment-answer-block {
+                    display: grid;
+                    gap: 10px;
+                }
+                .assessment-answer-block > div:first-child {
+                    display: flex;
+                    justify-content: space-between;
+                    gap: 12px;
+                    align-items: center;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                    padding-bottom: 8px;
+                }
+                .assessment-answer-block h4 {
+                    margin: 0;
+                    color: #fff8ec;
+                    font-size: 0.98rem;
+                }
+                .assessment-answer-block > div:first-child strong {
+                    color: #e7c265;
+                    font-size: 1rem;
+                }
+                .assessment-answer-table {
+                    display: grid;
+                    gap: 7px;
+                }
+                .assessment-answer-table > div {
+                    display: grid;
+                    grid-template-columns: minmax(140px, 0.8fr) minmax(0, 1fr) 62px;
+                    gap: 10px;
+                    align-items: center;
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 8px;
+                    padding: 9px 10px;
+                }
+                .assessment-answer-table span {
+                    color: #fff8ec;
+                    font-size: 0.86rem;
+                    font-weight: 850;
+                }
+                .assessment-answer-table strong {
+                    color: #e7c265;
+                    font-size: 0.92rem;
+                    text-align: right;
+                }
+                .assessment-book-offer {
                     width: min(760px, 100%);
                     display: grid;
-                    justify-items: center;
-                    gap: 12px;
+                    gap: 14px;
                     padding: 18px;
                     border: 1px solid rgba(231, 194, 101, 0.32);
                     border-radius: 8px;
@@ -985,15 +1491,44 @@ export default function SelfAssessmentClient({
                         rgba(10, 15, 18, 0.86);
                     color: #fff8ec;
                     box-shadow: 0 18px 45px rgba(12, 16, 20, 0.18);
+                    text-align: left;
                 }
-                .assessment-awards-cta span {
+                .assessment-book-offer.unlocked {
+                    border-color: rgba(66, 211, 146, 0.42);
+                    background:
+                        radial-gradient(circle at 100% 0%, rgba(66, 211, 146, 0.18), transparent 36%),
+                        rgba(10, 15, 18, 0.86);
+                }
+                .assessment-book-showcase {
+                    display: grid;
+                    grid-template-columns: 118px minmax(0, 1fr);
+                    gap: 18px;
+                    align-items: start;
+                }
+                .assessment-book-cover {
+                    border: 1px solid rgba(231, 194, 101, 0.34);
+                    border-radius: 8px;
+                    background: linear-gradient(180deg, rgba(231, 194, 101, 0.18), rgba(255, 255, 255, 0.04));
+                    padding: 7px;
+                }
+                .assessment-book-cover img {
+                    display: block;
+                    width: 100%;
+                    height: auto;
+                    border-radius: 5px;
+                }
+                .assessment-book-copy {
+                    display: grid;
+                    gap: 10px;
+                }
+                .assessment-book-offer span {
                     color: #f4cc72;
                     font-size: 0.7rem;
                     font-weight: 950;
                     letter-spacing: 0.12em;
                     text-transform: uppercase;
                 }
-                .assessment-awards-cta h3 {
+                .assessment-book-offer h3 {
                     margin: 0;
                     color: #fff8ec;
                     font-family: 'Playfair Display', Georgia, serif;
@@ -1001,45 +1536,204 @@ export default function SelfAssessmentClient({
                     line-height: 1.05;
                     letter-spacing: 0;
                 }
-                .assessment-awards-cta p {
-                    max-width: 500px;
+                .assessment-book-offer p {
+                    max-width: 620px;
                     margin: 0;
                     color: rgba(255, 248, 236, 0.72);
                     font-size: 0.92rem;
                     line-height: 1.5;
                 }
-                .assessment-awards-frame {
-                    width: 100%;
-                    height: clamp(420px, 68vh, 620px);
-                    margin-top: 4px;
-                    overflow: hidden;
-                    border: 1px solid rgba(231, 194, 101, 0.28);
+                .assessment-book-price {
+                    display: grid;
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                    gap: 10px;
+                    margin-top: 2px;
+                }
+                .assessment-book-price div {
+                    border: 1px solid rgba(255, 255, 255, 0.12);
                     border-radius: 8px;
-                    background: #050505;
-                    box-shadow: 0 20px 44px rgba(0, 0, 0, 0.24);
+                    background: rgba(255, 255, 255, 0.055);
+                    padding: 10px 12px;
                 }
-                .assessment-awards-frame iframe {
+                .assessment-book-price small,
+                .assessment-discount-unlocked small {
                     display: block;
-                    width: 100%;
-                    height: 100%;
-                    border: 0;
-                    background: #050505;
+                    color: rgba(255, 248, 236, 0.58);
+                    font-size: 0.72rem;
+                    font-weight: 800;
+                    line-height: 1.35;
                 }
-                .assessment-awards-cta a {
+                .assessment-book-price strong {
+                    display: block;
+                    margin-top: 3px;
+                    color: #fff8ec;
+                    font-size: 1.08rem;
+                }
+                .assessment-book-bullets {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 7px;
+                }
+                .assessment-book-bullets span {
+                    min-height: 30px;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    border: 1px solid rgba(231, 194, 101, 0.24);
+                    border-radius: 999px;
+                    background: rgba(231, 194, 101, 0.08);
+                    color: rgba(255, 248, 236, 0.78);
+                    padding: 0 10px;
+                    font-size: 0.72rem;
+                    letter-spacing: 0;
+                    text-transform: none;
+                }
+                .assessment-book-bullets svg {
+                    color: #42d392;
+                }
+                .assessment-book-actions {
+                    display: grid;
+                    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+                    gap: 10px;
+                }
+                .assessment-discount-button {
+                    min-height: 48px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    border: 1px solid rgba(231, 194, 101, 0.32);
+                    border-radius: 8px;
+                    background: rgba(255, 255, 255, 0.07);
+                    color: #fff8ec;
+                    padding: 0 18px;
+                    font-size: 0.86rem;
+                    font-weight: 950;
+                    cursor: pointer;
+                }
+                .assessment-discount-flow {
+                    display: grid;
+                    gap: 12px;
+                    border-top: 1px solid rgba(255, 255, 255, 0.11);
+                    margin-top: 2px;
+                    padding-top: 14px;
+                }
+                .assessment-discount-steps {
+                    display: grid;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    gap: 8px;
+                }
+                .assessment-discount-steps div {
+                    display: grid;
+                    grid-template-columns: 28px minmax(0, 1fr);
+                    gap: 8px;
+                    align-items: center;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 8px;
+                    background: rgba(255, 255, 255, 0.05);
+                    padding: 10px;
+                }
+                .assessment-discount-steps strong {
+                    width: 28px;
+                    height: 28px;
+                    display: grid;
+                    place-items: center;
+                    border-radius: 50%;
+                    background: rgba(231, 194, 101, 0.18);
+                    color: #f4cc72;
+                    font-size: 0.82rem;
+                }
+                .assessment-discount-steps span {
+                    color: rgba(255, 248, 236, 0.68);
+                    font-size: 0.74rem;
+                    letter-spacing: 0;
+                    line-height: 1.35;
+                    text-transform: none;
+                }
+                .assessment-proof-actions {
+                    display: grid;
+                    grid-template-columns: minmax(0, 0.78fr) minmax(0, 1fr);
+                    gap: 10px;
+                }
+                .assessment-vote-button,
+                .assessment-proof-upload,
+                .assessment-discount-unlocked a {
                     display: inline-flex;
                     align-items: center;
                     justify-content: center;
                     gap: 8px;
                     min-height: 48px;
-                    margin-top: 3px;
                     padding: 0 18px;
                     border-radius: 8px;
-                    background: linear-gradient(135deg, #f4cc72, #d59a2f);
-                    color: #1a1206;
                     font-size: 0.86rem;
                     font-weight: 950;
                     text-decoration: none;
+                }
+                .assessment-vote-button,
+                .assessment-discount-unlocked a {
+                    background: linear-gradient(135deg, #f4cc72, #d59a2f);
+                    color: #1a1206;
                     box-shadow: 0 14px 30px rgba(213, 154, 47, 0.22);
+                }
+                .assessment-proof-upload {
+                    position: relative;
+                    flex-wrap: wrap;
+                    border: 1px dashed rgba(231, 194, 101, 0.42);
+                    background: rgba(255, 255, 255, 0.06);
+                    color: #fff8ec;
+                    cursor: pointer;
+                    text-align: center;
+                }
+                .assessment-proof-upload input {
+                    position: absolute;
+                    inset: 0;
+                    opacity: 0;
+                    cursor: pointer;
+                }
+                .assessment-proof-upload small {
+                    width: 100%;
+                    overflow: hidden;
+                    color: rgba(255, 248, 236, 0.56);
+                    font-size: 0.7rem;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+                .assessment-proof-message {
+                    border: 1px solid rgba(148, 163, 184, 0.24);
+                    border-radius: 8px;
+                    background: rgba(148, 163, 184, 0.1);
+                    color: rgba(255, 248, 236, 0.78);
+                    padding: 11px 12px;
+                    font-size: 0.88rem;
+                    line-height: 1.42;
+                    text-align: left;
+                }
+                .assessment-proof-message.approved {
+                    border-color: rgba(34, 197, 94, 0.3);
+                    background: rgba(34, 197, 94, 0.12);
+                    color: #bbf7d0;
+                }
+                .assessment-proof-message.rejected,
+                .assessment-proof-message.review {
+                    border-color: rgba(248, 113, 113, 0.32);
+                    background: rgba(248, 113, 113, 0.1);
+                    color: #fecaca;
+                }
+                .assessment-discount-unlocked {
+                    display: grid;
+                    grid-template-columns: 34px minmax(0, 1fr) auto;
+                    align-items: center;
+                    gap: 12px;
+                    border: 1px solid rgba(34, 197, 94, 0.28);
+                    border-radius: 8px;
+                    background: rgba(34, 197, 94, 0.1);
+                    padding: 12px;
+                    color: #bbf7d0;
+                }
+                .assessment-discount-unlocked strong {
+                    display: block;
+                    color: #fff8ec;
+                    font-size: 1.1rem;
                 }
                 .assessment-blocks {
                     width: 100%;
@@ -1070,11 +1764,17 @@ export default function SelfAssessmentClient({
                     font-size: 1.18rem;
                 }
                 .assessment-result-grid {
+                    grid-column: 1 / -1;
                     width: 100%;
                     display: grid;
                     grid-template-columns: repeat(2, minmax(0, 1fr));
                     gap: 12px;
                     text-align: left;
+                }
+                .assessment-plan-section,
+                .assessment-answer-report,
+                .assessment-result > .assessment-secondary {
+                    grid-column: 1 / -1;
                 }
                 .assessment-result-grid > div {
                     padding: 16px;
@@ -1108,6 +1808,20 @@ export default function SelfAssessmentClient({
                     .assessment-layout {
                         grid-template-columns: 1fr;
                     }
+                    .assessment-result {
+                        grid-template-columns: 1fr;
+                    }
+                    .assessment-result-summary {
+                        grid-template-columns: 76px minmax(0, 1fr);
+                        align-content: start;
+                        align-items: center;
+                    }
+                    .assessment-result-badge {
+                        grid-row: 1 / 4;
+                    }
+                    .assessment-result-summary > p {
+                        grid-column: 1 / -1;
+                    }
                     .assessment-side {
                         position: static;
                         grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1136,12 +1850,12 @@ export default function SelfAssessmentClient({
                         margin-top: 6px;
                         font-size: clamp(1.42rem, 6vw, 1.75rem);
                         line-height: 1.04;
-                        white-space: nowrap;
+                        white-space: normal;
                     }
                     .assessment-question h2 {
                         font-size: clamp(1.04rem, 4.2vw, 1.22rem);
                         line-height: 1.12;
-                        white-space: nowrap;
+                        white-space: normal;
                     }
                     .assessment-panel,
                     .assessment-side {
@@ -1172,7 +1886,7 @@ export default function SelfAssessmentClient({
                     .assessment-side-mark,
                     .assessment-side-score {
                         gap: 8px;
-                        min-height: 48px;
+                        min-height: 64px;
                         padding: 9px 10px;
                     }
                     .assessment-side-event {
@@ -1180,7 +1894,9 @@ export default function SelfAssessmentClient({
                     }
                     .assessment-side-mark,
                     .assessment-side-score {
-                        grid-template-columns: 22px minmax(0, 1fr);
+                        grid-template-columns: 1fr;
+                        justify-items: center;
+                        text-align: center;
                     }
                     .assessment-side-mark svg,
                     .assessment-side-score svg {
@@ -1188,8 +1904,9 @@ export default function SelfAssessmentClient({
                         height: 18px;
                     }
                     .assessment-side span {
-                        font-size: 0.58rem;
+                        font-size: 0.55rem;
                         line-height: 1.15;
+                        overflow-wrap: anywhere;
                     }
                     .assessment-side strong {
                         margin-top: 1px;
@@ -1213,8 +1930,45 @@ export default function SelfAssessmentClient({
                     .assessment-secondary {
                         width: 100%;
                     }
-                    .assessment-awards-frame {
-                        height: min(560px, 72vh);
+                    .assessment-report-toolbar,
+                    .assessment-diagnostic-card,
+                    .assessment-whatsapp-note,
+                    .assessment-priority-grid,
+                    .assessment-priority-card dl,
+                    .assessment-answer-table > div {
+                        grid-template-columns: 1fr;
+                    }
+                    .assessment-report-actions {
+                        display: grid;
+                        grid-template-columns: 1fr;
+                        justify-content: stretch;
+                    }
+                    .assessment-result-summary {
+                        grid-template-columns: 62px minmax(0, 1fr);
+                        gap: 8px 12px;
+                        padding: 14px;
+                    }
+                    .assessment-result-badge {
+                        width: 58px;
+                        height: 58px;
+                    }
+                    .assessment-result h2 {
+                        font-size: 3.1rem;
+                    }
+                    .assessment-diagnostic-card,
+                    .assessment-whatsapp-note {
+                        grid-template-columns: 36px minmax(0, 1fr);
+                        gap: 12px;
+                        padding: 14px;
+                    }
+                    .assessment-report-actions button {
+                        min-height: 46px;
+                    }
+                    .assessment-answer-table strong {
+                        text-align: left;
+                    }
+                    .assessment-report-heading h3 {
+                        font-size: 1rem;
                     }
                 }
                 .assessment-page {
@@ -1227,7 +1981,7 @@ export default function SelfAssessmentClient({
                 .assessment-kicker,
                 .assessment-section-title span,
                 .assessment-question-top span,
-                .assessment-result > span {
+                .assessment-result-summary > span {
                     color: #9a6817;
                 }
                 .assessment-heading h1,
@@ -1241,7 +1995,7 @@ export default function SelfAssessmentClient({
                 }
                 .assessment-heading p,
                 .assessment-question p,
-                .assessment-result > p {
+                .assessment-result-summary > p {
                     color: #475569;
                 }
                 .assessment-side,
@@ -1256,6 +2010,7 @@ export default function SelfAssessmentClient({
                 .assessment-side-event,
                 .assessment-side-mark,
                 .assessment-side-score,
+                .assessment-result-summary,
                 .assessment-blocks div,
                 .assessment-result-grid > div {
                     border-color: rgba(154, 104, 23, 0.18);
@@ -1320,13 +2075,66 @@ export default function SelfAssessmentClient({
                     background: rgba(220, 252, 231, 0.8);
                     color: #047857;
                 }
-                .assessment-result strong {
+                .assessment-result-summary > strong {
                     color: #047857;
                 }
                 .assessment-result-grid p {
                     color: #475569;
                 }
-                .assessment-awards-cta {
+                .assessment-report-toolbar,
+                .assessment-diagnostic-card,
+                .assessment-plan-section,
+                .assessment-answer-report {
+                    border-color: rgba(154, 104, 23, 0.18);
+                    background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(250, 246, 238, 0.82));
+                    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
+                }
+                .assessment-whatsapp-note {
+                    border-color: rgba(47, 143, 127, 0.22);
+                    background: linear-gradient(135deg, rgba(240, 253, 250, 0.9), rgba(255, 255, 255, 0.82));
+                }
+                .assessment-report-toolbar span,
+                .assessment-report-heading span,
+                .assessment-diagnostic-card span,
+                .assessment-priority-card p strong {
+                    color: #9a6817;
+                }
+                .assessment-report-toolbar strong,
+                .assessment-diagnostic-card h3,
+                .assessment-report-heading h3,
+                .assessment-priority-card h4,
+                .assessment-answer-block h4,
+                .assessment-answer-table span {
+                    color: #172033;
+                }
+                .assessment-report-toolbar small,
+                .assessment-diagnostic-card p,
+                .assessment-report-heading p,
+                .assessment-priority-card p,
+                .assessment-priority-card dd,
+                .assessment-answer-table small {
+                    color: #475569;
+                }
+                .assessment-report-actions button,
+                .assessment-priority-card,
+                .assessment-priority-card dl div,
+                .assessment-answer-table > div {
+                    border-color: rgba(154, 104, 23, 0.16);
+                    background: rgba(255, 255, 255, 0.72);
+                    color: #172033;
+                }
+                .assessment-priority-card > div:first-child,
+                .assessment-answer-block > div:first-child strong,
+                .assessment-answer-table strong {
+                    color: #b57a1c;
+                }
+                .assessment-priority-card dt {
+                    color: #64748b;
+                }
+                .assessment-whatsapp-note strong {
+                    color: #047857;
+                }
+                .assessment-book-offer {
                     border-color: rgba(154, 104, 23, 0.22);
                     background: linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(248, 244, 234, 0.86));
                     color: #172033;
@@ -1334,18 +2142,153 @@ export default function SelfAssessmentClient({
                         0 24px 58px rgba(70, 50, 20, 0.13),
                         inset 0 1px 0 rgba(255, 255, 255, 0.78);
                 }
-                .assessment-awards-cta span {
+                .assessment-book-offer.unlocked {
+                    border-color: rgba(34, 197, 94, 0.28);
+                    background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(236, 253, 245, 0.78));
+                }
+                .assessment-book-cover,
+                .assessment-book-price div,
+                .assessment-discount-steps div {
+                    border-color: rgba(154, 104, 23, 0.18);
+                    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(250, 246, 238, 0.75));
+                }
+                .assessment-book-offer span {
                     color: #9a6817;
                 }
-                .assessment-awards-cta h3 {
+                .assessment-book-offer h3,
+                .assessment-book-price strong,
+                .assessment-discount-unlocked strong {
                     color: #172033;
                 }
-                .assessment-awards-cta p {
+                .assessment-book-offer p {
                     color: #475569;
                 }
-                .assessment-awards-frame {
-                    border-color: rgba(154, 104, 23, 0.18);
-                    box-shadow: 0 22px 48px rgba(70, 50, 20, 0.16);
+                .assessment-book-price small,
+                .assessment-discount-steps span,
+                .assessment-discount-unlocked small {
+                    color: #64748b;
+                }
+                .assessment-book-bullets span {
+                    border-color: rgba(200, 147, 47, 0.22);
+                    background: rgba(248, 211, 120, 0.2);
+                    color: #334155;
+                }
+                .assessment-discount-button {
+                    border-color: rgba(154, 104, 23, 0.24);
+                    background: rgba(255, 255, 255, 0.72);
+                    color: #172033;
+                }
+                .assessment-discount-flow {
+                    border-top-color: rgba(154, 104, 23, 0.16);
+                }
+                .assessment-discount-steps strong {
+                    background: rgba(248, 211, 120, 0.34);
+                    color: #9a6817;
+                }
+                .assessment-proof-upload {
+                    border-color: rgba(154, 104, 23, 0.28);
+                    background: rgba(255, 255, 255, 0.72);
+                    color: #172033;
+                }
+                .assessment-proof-upload small {
+                    color: #64748b;
+                }
+                .assessment-proof-message {
+                    color: #475569;
+                }
+                .assessment-proof-message.approved {
+                    color: #047857;
+                }
+                .assessment-proof-message.rejected,
+                .assessment-proof-message.review {
+                    color: #b91c1c;
+                }
+                .assessment-discount-unlocked {
+                    background: rgba(220, 252, 231, 0.78);
+                    color: #047857;
+                }
+                @media print {
+                    .assessment-page {
+                        color: #111827 !important;
+                        background: #fff !important;
+                    }
+                    .assessment-stage {
+                        width: 100%;
+                        padding: 0;
+                    }
+                    .assessment-heading,
+                    .assessment-side,
+                    .assessment-report-actions,
+                    .assessment-result-badge,
+                    .assessment-result > .assessment-secondary {
+                        display: none !important;
+                    }
+                    .assessment-layout {
+                        display: block;
+                    }
+                    .assessment-panel {
+                        border: 0;
+                        box-shadow: none;
+                        background: #fff;
+                        padding: 0;
+                    }
+                    .assessment-result {
+                        display: block;
+                        text-align: left;
+                    }
+                    .assessment-result-summary {
+                        display: block;
+                        border: 0 !important;
+                        background: transparent !important;
+                        box-shadow: none !important;
+                        padding: 0;
+                    }
+                    .assessment-result-summary > span,
+                    .assessment-report-toolbar span,
+                    .assessment-report-heading span,
+                    .assessment-diagnostic-card span {
+                        color: #8a5a13 !important;
+                    }
+                    .assessment-result h2 {
+                        margin: 8px 0;
+                        font-size: 52px;
+                    }
+                    .assessment-result-summary > strong,
+                    .assessment-result-summary > p,
+                    .assessment-result-summary,
+                    .assessment-report-toolbar,
+                    .assessment-diagnostic-card,
+                    .assessment-whatsapp-note,
+                    .assessment-blocks,
+                    .assessment-result-grid,
+                    .assessment-plan-section,
+                    .assessment-answer-report {
+                        break-inside: avoid;
+                    }
+                    .assessment-report-toolbar,
+                    .assessment-diagnostic-card,
+                    .assessment-whatsapp-note,
+                    .assessment-plan-section,
+                    .assessment-answer-report,
+                    .assessment-blocks div,
+                    .assessment-result-grid > div,
+                    .assessment-priority-card,
+                    .assessment-answer-table > div {
+                        border-color: #d8c6a5 !important;
+                        background: #fff !important;
+                        box-shadow: none !important;
+                    }
+                    .assessment-whatsapp-note {
+                        display: none;
+                    }
+                    .assessment-blocks,
+                    .assessment-result-grid,
+                    .assessment-priority-grid {
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                    }
+                    .assessment-answer-table > div {
+                        grid-template-columns: minmax(130px, 0.8fr) minmax(0, 1fr) 58px;
+                    }
                 }
             `}</style>
         </main>

@@ -3,6 +3,7 @@ import { appendMetaConnectionLog } from '@/lib/social/meta-oauth'
 import { testEditorialImageProvider } from '@/lib/media/editorial-image-providers'
 import { testGoogleAnalyticsConnection } from '@/lib/analytics/google'
 import { GOOGLE_ADS_API_VERSION } from '@/lib/ads/google'
+import { syncMetaWhatsAppAssets, testMetaWhatsAppConnection } from '@/lib/meta/whatsapp-cloud'
 
 function parseJsonText(text: string) {
     if (!text) return {}
@@ -40,6 +41,59 @@ async function getMetaTokenDiagnostics(config: Record<string, string>, accessTok
     } catch {
         return null
     }
+}
+
+function metaApiErrorMessage(payload: any, fallback: string) {
+    return String(payload?.error?.message || payload?.error_message || fallback || 'Erro Meta.')
+}
+
+async function getMetaSocialDiagnostics(config: Record<string, string>, accessToken: string) {
+    const details: string[] = []
+
+    const instagramId = String(config.meta_instagram_account_id || config.instagram_business_account_id || '').trim()
+    if (instagramId) {
+        try {
+            const instagramUrl = new URL(`https://graph.facebook.com/${META_GRAPH_API_VERSION}/${instagramId}`)
+            instagramUrl.searchParams.set('fields', 'id,username,name')
+            instagramUrl.searchParams.set('access_token', accessToken)
+            const res = await fetch(instagramUrl, { cache: 'no-store' })
+            const data = await res.json()
+            if (res.ok && !data.error) {
+                details.push(`Instagram operacional via Meta Graph${data.username ? ` (@${data.username})` : ''}`)
+            } else {
+                details.push(`Instagram Meta Graph com aviso: ${metaApiErrorMessage(data, res.statusText).slice(0, 140)}`)
+            }
+        } catch (error) {
+            details.push(`Instagram Meta Graph nao testado: ${error instanceof Error ? error.message : String(error)}`)
+        }
+    }
+
+    const pageId = String(config.meta_facebook_page_id || '').trim()
+    const pageToken = String(config.facebook_page_access_token || '').trim()
+    if (pageId && pageToken) {
+        try {
+            const pageUrl = new URL(`https://graph.facebook.com/${META_GRAPH_API_VERSION}/${pageId}`)
+            pageUrl.searchParams.set('fields', 'id,name,instagram_business_account{id,username}')
+            pageUrl.searchParams.set('access_token', pageToken)
+            const res = await fetch(pageUrl, { cache: 'no-store' })
+            const data = await res.json()
+            if (res.ok && !data.error) {
+                details.push(`Facebook Page Token valido${data.name ? ` (${data.name})` : ''}`)
+            } else {
+                const message = metaApiErrorMessage(data, res.statusText)
+                const expired = message.toLowerCase().includes('expired')
+                    || message.toLowerCase().includes('invalidated')
+                    || data?.error?.code === 190
+                details.push(expired
+                    ? 'Facebook Page Token expirado; reconecte Facebook Page para Messenger/Page actions'
+                    : `Facebook Page Token com aviso: ${message.slice(0, 140)}`)
+            }
+        } catch (error) {
+            details.push(`Facebook Page Token nao testado: ${error instanceof Error ? error.message : String(error)}`)
+        }
+    }
+
+    return details.join(' | ')
 }
 
 export async function POST(request: NextRequest) {
@@ -85,6 +139,57 @@ export async function POST(request: NextRequest) {
                     return NextResponse.json({
                         success: false,
                         message: `Erro ao conectar: ${e instanceof Error ? e.message : String(e)}`,
+                    })
+                }
+            }
+
+            case 'mercado_pago': {
+                const environment = config.mercado_pago_environment === 'production' ? 'production' : 'sandbox'
+                const publicKey = String(config.mercado_pago_public_key || process.env.NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY || '').trim()
+                const accessToken = String(config.mercado_pago_access_token || process.env.MERCADO_PAGO_ACCESS_TOKEN || '').trim()
+                const webhookUrl = String(config.mercado_pago_webhook_url || process.env.MERCADO_PAGO_WEBHOOK_URL || '').trim()
+
+                if (!publicKey || !accessToken) {
+                    return NextResponse.json({
+                        success: false,
+                        message: 'Preencha Public Key e Access Token do Mercado Pago.',
+                    })
+                }
+
+                const expectsTestCredential = environment === 'sandbox'
+                const publicKeyLooksTest = publicKey.startsWith('TEST-')
+                const accessTokenLooksTest = accessToken.startsWith('TEST-')
+                const credentialWarning = expectsTestCredential !== (publicKeyLooksTest || accessTokenLooksTest)
+                    ? ' Atenção: confira se o ambiente selecionado combina com as credenciais informadas.'
+                    : ''
+
+                try {
+                    const res = await fetch('https://api.mercadolibre.com/users/me', {
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                            Accept: 'application/json',
+                        },
+                    })
+                    const text = await res.text()
+                    const data = parseJsonText(text)
+
+                    if (!res.ok) {
+                        return NextResponse.json({
+                            success: false,
+                            message: `Erro Mercado Pago (${res.status}): ${(data?.message || data?.error || text || res.statusText).slice(0, 180)}`,
+                        })
+                    }
+
+                    const accountLabel = data?.nickname || data?.email || data?.id || 'conta validada'
+                    const webhookLabel = webhookUrl ? ' Webhook informado.' : ' Webhook ainda não informado.'
+                    return NextResponse.json({
+                        success: true,
+                        message: `Mercado Pago conectado (${environment}). Conta: ${accountLabel}.${webhookLabel}${credentialWarning}`,
+                    })
+                } catch (e) {
+                    return NextResponse.json({
+                        success: false,
+                        message: `Erro na conexão com Mercado Pago: ${e instanceof Error ? e.message : String(e)}`,
                     })
                 }
             }
@@ -268,6 +373,8 @@ export async function POST(request: NextRequest) {
                     }
 
                     const data = await res.json()
+                    const socialDiagnostics = await getMetaSocialDiagnostics(config, accessToken)
+                    const socialSuffix = socialDiagnostics ? ` | ${socialDiagnostics}` : ''
 
                     if (adAccountId) {
                         const statusName = data.account_status === 1 ? 'Ativa' :
@@ -276,7 +383,7 @@ export async function POST(request: NextRequest) {
                                     data.account_status === 7 ? 'Pendente de Revisão' :
                                         data.account_status === 101 ? 'Fechada' :
                                             `Status ${data.account_status}`
-                        const message = `Conectado! Conta: ${data.name || adAccountId} (${statusName})`
+                        const message = `Conectado! Conta: ${data.name || adAccountId} (${statusName})${socialSuffix}`
                         await appendMetaConnectionLog({
                             provider: 'meta',
                             action: 'test_connection',
@@ -293,11 +400,11 @@ export async function POST(request: NextRequest) {
                         provider: 'meta',
                         action: 'test_connection',
                         status: 'success',
-                        message: `Token valido. Conectado como: ${data.name || data.id}`,
+                        message: `Token valido. Conectado como: ${data.name || data.id}${socialSuffix}`,
                     })
                     return NextResponse.json({
                         success: true,
-                        message: `Token válido! Conectado como: ${data.name || data.id}`,
+                        message: `Token válido! Conectado como: ${data.name || data.id}${socialSuffix}`,
                     })
 
                 } catch (e) {
@@ -310,6 +417,53 @@ export async function POST(request: NextRequest) {
                     return NextResponse.json({
                         success: false,
                         message: `Erro ao conectar com Meta Ads: ${e instanceof Error ? e.message : String(e)}`,
+                    })
+                }
+            }
+
+            case 'meta_whatsapp': {
+                try {
+                    const result = await testMetaWhatsAppConnection(config || {})
+                    let message = result.message
+
+                    if (result.success) {
+                        try {
+                            const sync = await syncMetaWhatsAppAssets(config || {})
+                            message = `${message} Sincronizado: ${sync.senderCount} numero(s), ${sync.templateCount} template(s).`
+                        } catch (syncError) {
+                            const syncMessage = syncError instanceof Error ? syncError.message : String(syncError)
+                            message = `${message} Aviso: conexao OK, mas a sincronizacao local falhou (${syncMessage.slice(0, 140)}).`
+                            await appendMetaConnectionLog({
+                                provider: 'meta',
+                                action: 'test_whatsapp_connection',
+                                status: 'warning',
+                                message,
+                            })
+                        }
+                    }
+
+                    await appendMetaConnectionLog({
+                        provider: 'meta',
+                        action: 'test_whatsapp_connection',
+                        status: result.success ? 'success' : 'error',
+                        message,
+                    })
+
+                    return NextResponse.json({
+                        success: result.success,
+                        message,
+                    })
+                } catch (e) {
+                    const message = `Erro Meta WhatsApp: ${e instanceof Error ? e.message : String(e)}`
+                    await appendMetaConnectionLog({
+                        provider: 'meta',
+                        action: 'test_whatsapp_connection',
+                        status: 'error',
+                        message,
+                    })
+                    return NextResponse.json({
+                        success: false,
+                        message,
                     })
                 }
             }

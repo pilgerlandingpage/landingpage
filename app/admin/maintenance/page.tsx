@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
-import { Save, Eye, EyeOff, Wifi, WifiOff, MessageSquare, Brain, Bell, RefreshCw, Microscope, Type, Bot, Zap, Megaphone, BarChart3, Search, TrendingUp, Database, Mic, Volume2, Clock3, Activity, AlertTriangle, Bug, Mail, Image as ImageIcon } from 'lucide-react'
+import { Save, Eye, EyeOff, Wifi, WifiOff, MessageSquare, Brain, Bell, RefreshCw, Microscope, Type, Bot, Zap, Megaphone, BarChart3, Search, TrendingUp, Database, Mic, Volume2, Clock3, Activity, AlertTriangle, Bug, Mail, Image as ImageIcon, CreditCard } from 'lucide-react'
 import Link from 'next/link'
 import AdminLoadingState from '@/components/admin/AdminLoadingState'
 
@@ -9,7 +9,7 @@ interface IntegrationCard {
     id: string
     title: string
     description: string
-    icon: 'whatsapp' | 'gemini' | 'vapid' | 'openai' | 'meta_ads' | 'google_ads' | 'google_analytics' | 'serpapi' | 'dataforseo' | 'r2' | 'inngest' | 'elevenlabs' | 'email' | 'image_bank'
+    icon: 'whatsapp' | 'gemini' | 'vapid' | 'openai' | 'meta_ads' | 'google_ads' | 'google_analytics' | 'serpapi' | 'dataforseo' | 'r2' | 'inngest' | 'elevenlabs' | 'email' | 'image_bank' | 'mercado_pago'
     fields: {
         key: string
         label: string
@@ -31,6 +31,116 @@ const INTEGRATIONS: IntegrationCard[] = [
             { key: 'connectyhub_api_token', label: 'CONNECTYHUB_API_TOKEN', placeholder: 'Bearer token do cliente API', isSecret: true },
             { key: 'connectyhub_webhook_secret', label: 'CONNECTYHUB_WEBHOOK_SECRET', placeholder: 'Segredo HMAC do webhook', isSecret: true },
             { key: 'connectyhub_webhook_url', label: 'CONNECTYHUB_WEBHOOK_URL', placeholder: 'https://seu-dominio/api/webhooks/connectyhub', isSecret: false },
+        ],
+    },
+
+    {
+        id: 'meta_whatsapp',
+        title: 'Meta WhatsApp Oficial - Campanhas',
+        description: 'Canal oficial Meta WhatsApp Cloud API para campanhas em massa, blog, noticias e follow-ups de leads autorizados. Atendimento com IA continua nas instancias ConnectyHub.',
+        icon: 'whatsapp',
+        fields: [
+            {
+                key: 'meta_whatsapp_enabled',
+                label: 'Status da API oficial',
+                placeholder: 'Inativo',
+                isSecret: false,
+                type: 'select',
+                options: [
+                    { value: 'true', label: 'Ativo' },
+                    { value: 'false', label: 'Inativo' },
+                ],
+            },
+            { key: 'meta_whatsapp_business_account_id', label: 'WhatsApp Business Account ID', placeholder: 'WABA ID do WhatsApp Manager', isSecret: false },
+            { key: 'meta_whatsapp_default_phone_number_id', label: 'Phone Number ID padrao', placeholder: 'ID do numero oficial de disparo', isSecret: false },
+            { key: 'meta_whatsapp_access_token', label: 'System User Access Token', placeholder: 'Token com whatsapp_business_messaging e whatsapp_business_management', isSecret: true },
+            { key: 'meta_whatsapp_webhook_verify_token', label: 'Webhook Verify Token', placeholder: 'pilger-meta-whatsapp-webhook', isSecret: true },
+            { key: 'meta_whatsapp_app_secret', label: 'App Secret para assinatura', placeholder: 'App Secret usado no app Meta WhatsApp', isSecret: true },
+            { key: 'meta_whatsapp_api_version', label: 'Graph API Version', placeholder: 'v21.0', isSecret: false },
+            { key: 'meta_whatsapp_default_language', label: 'Idioma padrao dos templates', placeholder: 'pt_BR', isSecret: false },
+            { key: 'meta_whatsapp_support_redirect_phone', label: 'Numero ConnectyHub de atendimento', placeholder: '5547999999999', isSecret: false },
+            { key: 'meta_whatsapp_editorial_blog_template_name', label: 'Template oficial para blog', placeholder: 'pilger_blog_editorial', isSecret: false },
+            { key: 'meta_whatsapp_editorial_news_template_name', label: 'Template oficial para noticia', placeholder: 'pilger_news_editorial', isSecret: false },
+            { key: 'meta_whatsapp_property_followup_template_name', label: 'Template oficial para recomendacao', placeholder: 'pilger_property_followup', isSecret: false },
+            { key: 'meta_whatsapp_editorial_default_sender_id', label: 'Remetente oficial editorial opcional', placeholder: 'UUID do numero sincronizado (opcional)', isSecret: false },
+            { key: 'meta_whatsapp_send_rate_per_minute', label: 'Envios por minuto por numero', placeholder: '40', isSecret: false },
+            { key: 'meta_whatsapp_daily_limit_per_number', label: 'Limite diario interno por numero', placeholder: '1000', isSecret: false },
+        ],
+    },
+
+    {
+        id: 'mercado_pago',
+        title: 'Mercado Pago - Checkout, Pix e Pós-venda',
+        description: 'Credenciais para checkout próprio, Pix, webhooks de pagamento, order bump e liberação automática da área de membros. O Access Token deve ficar somente no backend.',
+        icon: 'mercado_pago',
+        fields: [
+            {
+                key: 'mercado_pago_enabled',
+                label: 'Status da integração',
+                placeholder: 'Ativo',
+                isSecret: false,
+                type: 'select',
+                options: [
+                    { value: 'true', label: 'Ativo' },
+                    { value: 'false', label: 'Inativo' },
+                ],
+            },
+            {
+                key: 'mercado_pago_environment',
+                label: 'Ambiente',
+                placeholder: 'Sandbox',
+                isSecret: false,
+                type: 'select',
+                options: [
+                    { value: 'sandbox', label: 'Sandbox / Testes' },
+                    { value: 'production', label: 'Produção' },
+                ],
+            },
+            { key: 'mercado_pago_public_key', label: 'Public Key', placeholder: 'APP_USR-... ou TEST-...', isSecret: false },
+            { key: 'mercado_pago_access_token', label: 'Access Token', placeholder: 'APP_USR-... ou TEST-...', isSecret: true },
+            { key: 'mercado_pago_webhook_secret', label: 'Webhook Secret', placeholder: 'Segredo para validar x-signature', isSecret: true },
+            { key: 'mercado_pago_webhook_url', label: 'Webhook URL', placeholder: 'https://guilhermepilger.ai/api/webhooks/mercadopago', isSecret: false },
+            { key: 'mercado_pago_pix_expiration_minutes', label: 'Expiração do Pix (minutos)', placeholder: '60', isSecret: false },
+            { key: 'mercado_pago_statement_descriptor', label: 'Nome na fatura', placeholder: 'PILGER', isSecret: false },
+            { key: 'commerce_member_area_url', label: 'URL da área de membros', placeholder: 'https://guilhermepilger.ai/membros', isSecret: false },
+            { key: 'commerce_support_whatsapp', label: 'WhatsApp de suporte', placeholder: '5547999999999', isSecret: false },
+            {
+                key: 'commerce_automation_enabled',
+                label: 'Automação comercial',
+                placeholder: 'Ativo',
+                isSecret: false,
+                type: 'select',
+                options: [
+                    { value: 'true', label: 'Ativo' },
+                    { value: 'false', label: 'Inativo' },
+                ],
+            },
+            { key: 'commerce_checkout_abandoned_after_minutes', label: 'Carrinho abandonado após (minutos)', placeholder: '30', isSecret: false },
+            { key: 'commerce_pix_pending_after_minutes', label: 'Pix pendente após (minutos)', placeholder: '10', isSecret: false },
+            { key: 'commerce_pix_expiring_before_minutes', label: 'Avisar Pix vencendo antes de (minutos)', placeholder: '15', isSecret: false },
+            { key: 'commerce_checkout_lost_after_hours', label: 'Marcar checkout perdido após (horas)', placeholder: '24', isSecret: false },
+            {
+                key: 'commerce_whatsapp_notifications_enabled',
+                label: 'Mensagens via WhatsApp Global',
+                placeholder: 'Ativo',
+                isSecret: false,
+                type: 'select',
+                options: [
+                    { value: 'true', label: 'Ativo' },
+                    { value: 'false', label: 'Inativo' },
+                ],
+            },
+            {
+                key: 'commerce_email_notifications_enabled',
+                label: 'E-mails transacionais',
+                placeholder: 'Ativo',
+                isSecret: false,
+                type: 'select',
+                options: [
+                    { value: 'true', label: 'Ativo' },
+                    { value: 'false', label: 'Inativo' },
+                ],
+            },
         ],
     },
 
@@ -723,6 +833,13 @@ export default function MaintenancePage() {
             || !instagramTokenExpiresAt
         )
     )
+    const instagramMetaGraphConnected = Boolean(configs.meta_access_token && configs.meta_instagram_account_id)
+    const instagramLoginConnected = Boolean(
+        configs.instagram_business_access_token
+        && configs.instagram_business_account_id
+        && !instagramTokenNeedsReconnect
+    )
+    const instagramConnected = instagramMetaGraphConnected || instagramLoginConnected
     sectorRecipientsRef.current = sectorRecipients
     const selectedSectorRecipient = sectorRecipients.find(recipient => recipient.key === selectedNotificationSector)
         || sectorRecipients[0]
@@ -1180,7 +1297,7 @@ export default function MaintenancePage() {
     const testConnection = async (integrationId: string) => {
         setTestResults(prev => ({
             ...prev,
-            [integrationId]: { status: 'testing', message: 'Testando conexo...' },
+            [integrationId]: { status: 'testing', message: 'Testando conexão...' },
         }))
 
         try {
@@ -1189,7 +1306,7 @@ export default function MaintenancePage() {
                 if (!savedBeforeTest) {
                     setTestResults(prev => ({
                         ...prev,
-                        [integrationId]: { status: 'error', message: 'Nao foi possivel salvar antes de testar.' },
+                        [integrationId]: { status: 'error', message: 'Não foi possível salvar antes de testar.' },
                     }))
                     return
                 }
@@ -1208,14 +1325,14 @@ export default function MaintenancePage() {
                 ...prev,
                 [integrationId]: {
                     status: data.success ? 'success' : 'error',
-                    message: toDisplayText(data.message, data.success ? 'Conexao testada.' : 'Erro ao testar conexao'),
+                    message: toDisplayText(data.message, data.success ? 'Conexão testada.' : 'Erro ao testar conexão'),
                 },
             }))
-            if (integrationId === 'meta_ads') await fetchConfigs(true)
+            if (integrationId === 'meta_ads' || integrationId === 'meta_whatsapp') await fetchConfigs(true)
         } catch {
             setTestResults(prev => ({
                 ...prev,
-                [integrationId]: { status: 'error', message: 'Erro ao testar conexo' },
+                [integrationId]: { status: 'error', message: 'Erro ao testar conexão' },
             }))
         }
     }
@@ -1236,6 +1353,7 @@ export default function MaintenancePage() {
             case 'elevenlabs': return <Mic size={22} />
             case 'email': return <Mail size={22} />
             case 'image_bank': return <ImageIcon size={22} />
+            case 'mercado_pago': return <CreditCard size={22} />
             default: return null
         }
     }
@@ -1246,6 +1364,10 @@ export default function MaintenancePage() {
             const integration = INTEGRATIONS.find(i => i.id === integrationId)
             const hasConfig = integrationId === 'brevo'
                 ? Boolean(configs.brevo_api_key && configs.brevo_sender_email)
+                : integrationId === 'mercado_pago'
+                    ? Boolean(configs.mercado_pago_public_key && configs.mercado_pago_access_token)
+                : integrationId === 'meta_whatsapp'
+                    ? Boolean(configs.meta_whatsapp_business_account_id && (configs.meta_whatsapp_access_token || configs.meta_access_token))
                 : integration?.fields.some(f => configs[f.key])
             return (
                 <span style={{
@@ -1256,7 +1378,7 @@ export default function MaintenancePage() {
                     color: hasConfig ? 'var(--text-muted)' : '#ef4444',
                 }}>
                     {hasConfig ? <Wifi size={14} /> : <WifiOff size={14} />}
-                    {hasConfig ? 'Configurado' : 'No configurado'}
+                    {hasConfig ? 'Configurado' : 'Não configurado'}
                 </span>
             )
         }
@@ -1395,9 +1517,11 @@ export default function MaintenancePage() {
                                                     onChange={e => updateConfigField(field.key, e.target.value)}
                                                     style={{ appearance: 'none', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', paddingRight: '32px' }}
                                                 >
-                                                    <option value="gpt-4o">GPT-4o (Mais inteligente e rápido)</option>
-                                                    <option value="gpt-4-turbo">GPT-4 Turbo</option>
-                                                    <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Mais rápido e barato)</option>
+                                                    {(field.options || []).map(option => (
+                                                        <option key={option.value} value={option.value}>
+                                                            {option.label}
+                                                        </option>
+                                                    ))}
                                                 </select>
                                             </div>
                                         ) : (
@@ -1523,11 +1647,13 @@ export default function MaintenancePage() {
                                     {[
                                         {
                                             title: 'Instagram do Guilherme',
-                                            description: 'Conecta a conta Instagram Business pelo Instagram Login. Comentarios e publicacao usam este token; Direct precisa token valido e capability de mensagens.',
+                                            description: 'Usa automaticamente Meta Graph quando Business Token e Instagram Business ID estao validos. O Instagram Login direto fica como reforco para recursos que exigem esse app.',
                                             href: '/api/auth/meta/instagram/start',
-                                            connected: Boolean(configs.instagram_business_access_token && configs.instagram_business_account_id && !instagramTokenNeedsReconnect),
-                                            warning: instagramTokenNeedsReconnect,
-                                            detail: configs.instagram_business_account_id
+                                            connected: instagramConnected,
+                                            warning: !instagramMetaGraphConnected && instagramTokenNeedsReconnect,
+                                            detail: instagramMetaGraphConnected
+                                                ? `Operacional via Meta Graph. @${configs.meta_instagram_username || 'guilhermepilger'} | ID: ${configs.meta_instagram_account_id}${instagramTokenNeedsReconnect ? ' | Login Instagram direto expirado/opcional.' : ''}`
+                                                : configs.instagram_business_account_id
                                                 ? `${instagramTokenNeedsReconnect ? 'Reconexao recomendada. ' : ''}ID: ${configs.instagram_business_account_id}${instagramTokenExpiresAt ? ` | expira em ${formatConfigDateTime(instagramTokenExpiresAt)}` : ' | validade nao registrada'}`
                                                 : 'Aguardando autorizacao do dono da conta.',
                                         },
@@ -1642,6 +1768,61 @@ export default function MaintenancePage() {
                                     e
                                     {' '}
                                     <code>{(configs.public_site_url || 'https://guilhermepilger.ai').replace(/\/$/, '')}/api/auth/meta/facebook/callback</code>.
+                                </div>
+                            </div>
+                        )}
+
+                        {integration.id === 'meta_whatsapp' && (
+                            <div style={{
+                                marginTop: '18px',
+                                paddingTop: '18px',
+                                borderTop: '1px solid var(--border-color)',
+                                display: 'grid',
+                                gap: '14px',
+                            }}>
+                                <div style={{
+                                    border: '1px solid var(--border-color)',
+                                    borderRadius: '10px',
+                                    padding: '14px',
+                                    background: 'rgba(34, 197, 94, .06)',
+                                    display: 'grid',
+                                    gap: '10px',
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                                        <strong style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>Checklist Meta WhatsApp</strong>
+                                        <span style={{
+                                            fontSize: '0.72rem',
+                                            fontWeight: 800,
+                                            color: configs.meta_whatsapp_enabled === 'true' ? '#22c55e' : '#f59e0b',
+                                            background: configs.meta_whatsapp_enabled === 'true' ? 'rgba(34,197,94,.1)' : 'rgba(245,158,11,.12)',
+                                            borderRadius: '999px',
+                                            padding: '6px 9px',
+                                        }}>
+                                            {configs.meta_whatsapp_enabled === 'true' ? 'Envio oficial ativo' : 'Aguardando ativacao'}
+                                        </span>
+                                    </div>
+                                    <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem', lineHeight: 1.5, display: 'grid', gap: '6px' }}>
+                                        <span>1. No Meta Developers, abra o app usado para WhatsApp e entre em WhatsApp &gt; API Setup para copiar o WABA ID e o Phone Number ID.</span>
+                                        <span>2. No Business Manager, gere um token de usuario de sistema com permissoes de WhatsApp e atribua o WABA/numeros a esse usuario.</span>
+                                        <span>3. No WhatsApp Manager, crie/aprove templates de Marketing para campanhas e templates Utility para follow-ups operacionais.</span>
+                                        <span>4. Configure o webhook do app para receber mensagens e status em <code>{(configs.public_site_url || 'https://guilhermepilger.ai').replace(/\/$/, '')}/api/webhooks/meta</code>.</span>
+                                    </div>
+                                </div>
+
+                                <div style={{
+                                    border: '1px solid var(--border-color)',
+                                    borderRadius: '10px',
+                                    padding: '14px',
+                                    background: 'var(--bg-primary)',
+                                    color: 'var(--text-muted)',
+                                    fontSize: '0.76rem',
+                                    lineHeight: 1.5,
+                                    display: 'grid',
+                                    gap: '6px',
+                                }}>
+                                    <span><strong style={{ color: 'var(--text-primary)' }}>Uso combinado:</strong> campanhas saem pelos numeros oficiais Meta; atendimento, IA e handoff seguem pela ConnectyHub.</span>
+                                    <span><strong style={{ color: 'var(--text-primary)' }}>CTA recomendado:</strong> os templates de campanha devem ter botao ou link para o numero ConnectyHub de atendimento.</span>
+                                    <span><strong style={{ color: 'var(--text-primary)' }}>Opt-out:</strong> contatos que pedirem SAIR entram na lista de bloqueio antes de novos disparos.</span>
                                 </div>
                             </div>
                         )}

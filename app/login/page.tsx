@@ -39,6 +39,16 @@ function LoginPageContent() {
     const modeType = String(searchParams.get('type') || '').toLowerCase()
     const passwordUpdated = searchParams.get('password_updated') === '1'
     const authError = searchParams.get('auth_error')
+    const nextParam = searchParams.get('next')
+    const safeNextPath = nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//')
+        ? nextParam
+        : ''
+    const passwordUpdatedLoginPath = safeNextPath
+        ? `/login?password_updated=1&next=${encodeURIComponent(safeNextPath)}`
+        : '/login?password_updated=1'
+    const loginSubtitle = safeNextPath.startsWith('/membros')
+        ? 'Acesse sua área de membros Pilger'
+        : 'Acesse o painel administrativo da Pilger'
     const isPasswordSetupMode =
         searchParams.get('first_access') === '1' ||
         searchParams.get('password_reset') === '1' ||
@@ -281,7 +291,7 @@ function LoginPageContent() {
                         search_params: window.location.search,
                     }),
                 }).catch(() => {})
-                router.push('/admin')
+                router.push(safeNextPath || '/admin')
                 router.refresh()
             }
         } catch {
@@ -334,7 +344,7 @@ function LoginPageContent() {
             setPasswordFlowMessage('Senha definida com sucesso. Redirecionando para o login...')
             setTimeout(() => {
                 supabase.auth.signOut().finally(() => {
-                    router.replace('/login?password_updated=1')
+                    router.replace(passwordUpdatedLoginPath)
                     router.refresh()
                 })
             }, 800)
@@ -392,7 +402,7 @@ function LoginPageContent() {
             <div className="login-content">
                 <div className="login-header">
                     <h1 className="login-title">Bem-vindo de volta</h1>
-                    <p className="login-subtitle">Acesse o painel administrativo da Pilger</p>
+                    <p className="login-subtitle">{loginSubtitle}</p>
                 </div>
 
                 <div className="login-card">

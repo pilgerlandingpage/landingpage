@@ -1,8 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { inngest } from '@/lib/inngest/client'
-import { markAsRead, sendCarousel, sendLocationRequest, sendMenuMessage, sendPixButton, sendWhatsAppMessage, setPresenceAvailable } from '@/lib/connectyhub/whatsapp'
+import { downloadMedia, markAsRead, sendCarousel, sendLocationRequest, sendMenuMessage, sendPixButton, sendWhatsAppMessage, setPresenceAvailable } from '@/lib/connectyhub/whatsapp'
 import { uploadImageToR2 } from '@/lib/storage/r2'
+import { analyzeVoteProofMedia } from '@/lib/events/vote-proof-validation'
+import {
+    detectProfileAssessmentToolIntent,
+    isProfileAssessmentAwaitingProofFollowUp,
+    loadProfileAssessmentGate,
+    PROFILE_ASSESSMENT_VOTE_URL,
+    profileAssessmentToolUrl,
+    saveProfileAssessmentGate,
+} from '@/lib/whatsapp/profile-assessment-gate'
+import {
+    sendProfileAssessmentReminder,
+    sendProfileAssessmentToolReleased,
+    sendProfileAssessmentVoteRequest,
+} from '@/lib/whatsapp/profile-assessment-delivery'
 import { appendLeadConversationLog, ensureWhatsAppLead, isGenericWhatsAppLeadName, syncWhatsAppLeadSnapshot } from '@/lib/whatsapp/lead-sync'
 import { generateChatResponse } from '@/lib/ai/generation'
 import { recordGeminiUsage } from '@/lib/ai/gemini-costs'
@@ -49,11 +63,376 @@ import {
     trackBotMessageId,
 } from '@/lib/inngest/whatsapp-agent'
 
+export const maxDuration = 60
+
 function getSupabase() {
     return createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
+}
+
+const MAX_VOTE_PROOF_BYTES = 20 * 1024 * 1024
+type VoteProofMediaKind = 'image' | 'video' | 'document'
+
+function wait(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+function parseStoredMediaUrl(value?: string | null): { url: string; mime?: string | null } | null {
+    if (!value) return null
+    try {
+        const parsed = JSON.parse(value)
+        const url = String(parsed?.url || parsed?.r2Url || '').trim()
+        if (!url) return null
+        return { url, mime: parsed?.mime || null }
+    } catch {
+        const url = String(value || '').trim()
+        return url ? { url } : null
+    }
+}
+
+function isLikelyEncryptedWhatsAppMediaUrl(url?: string | null): boolean {
+    const value = String(url || '').toLowerCase()
+    return value.includes('mmg.whatsapp.net') || value.includes('.enc?') || value.endsWith('.enc')
+}
+
+function detectImageMimeType(buffer: Buffer, fallback?: string | null) {
+    const header4 = buffer.subarray(0, 4).toString('latin1')
+    const header8 = buffer.subarray(0, 8).toString('latin1')
+    const hinted = String(fallback || '').split(';')[0].trim().toLowerCase()
+    if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) return 'image/jpeg'
+    if (header8 === '\x89PNG\r\n\x1a\n') return 'image/png'
+    if (header4 === 'RIFF' && buffer.subarray(8, 12).toString('latin1') === 'WEBP') return 'image/webp'
+    if (header4 === 'GIF8') return 'image/gif'
+    return hinted.startsWith('image/') ? hinted : ''
+}
+
+function detectVoteProofMimeType(kind: VoteProofMediaKind, buffer: Buffer, fallback?: string | null) {
+    const hinted = String(fallback || '').split(';')[0].trim().toLowerCase()
+    const imageMime = detectImageMimeType(buffer, hinted)
+    if (imageMime) return imageMime
+
+    const header4 = buffer.subarray(0, 4).toString('latin1')
+    const at4 = buffer.subarray(4, 8).toString('latin1')
+
+    if (kind === 'video') {
+        if (at4 === 'ftyp') return hinted.startsWith('video/') ? hinted : 'video/mp4'
+        if (buffer[0] === 0x1a && buffer[1] === 0x45 && buffer[2] === 0xdf && buffer[3] === 0xa3) return hinted.startsWith('video/') ? hinted : 'video/webm'
+        if (header4 === 'RIFF' && buffer.subarray(8, 12).toString('latin1') === 'AVI ') return hinted.startsWith('video/') ? hinted : 'video/x-msvideo'
+        return hinted.startsWith('video/') ? hinted : ''
+    }
+
+    if (header4 === '%PDF') return 'application/pdf'
+    if (buffer[0] === 0x50 && buffer[1] === 0x4b) {
+        return hinted.startsWith('application/') ? hinted : 'application/zip'
+    }
+    if (kind === 'document' && (hinted.startsWith('application/') || hinted.startsWith('text/'))) return hinted
+    return ''
+}
+
+function isUsableVoteProofBuffer(kind: VoteProofMediaKind, buffer: Buffer | null, mimeHint?: string | null) {
+    if (!buffer || buffer.length < 64) return false
+    const mimeType = detectVoteProofMimeType(kind, buffer, mimeHint)
+    if (!mimeType) return false
+    if (kind === 'image') return mimeType.startsWith('image/')
+    if (kind === 'video') return mimeType.startsWith('video/')
+    return mimeType.startsWith('application/') || mimeType.startsWith('text/') || mimeType.startsWith('image/')
+}
+
+async function fetchUrlToVoteProofBuffer(url: string, kind: VoteProofMediaKind, mimeHint?: string | null) {
+    const response = await fetch(url, { cache: 'no-store' })
+    if (!response.ok) throw new Error(`download_${response.status}`)
+    const buffer = Buffer.from(await response.arrayBuffer())
+    const contentType = String(response.headers.get('content-type') || mimeHint || '').split(';')[0].trim().toLowerCase()
+    return { buffer, mimeType: detectVoteProofMimeType(kind, buffer, contentType) }
+}
+
+async function fetchVoteProofMedia(params: {
+    kind: VoteProofMediaKind
+    supabase: any
+    instanceToken: string
+    mediaUrl?: string | null
+    mimeHint?: string | null
+    messageId?: string | null
+}) {
+    const errors: string[] = []
+
+    const accept = (buffer: Buffer | null, mimeHint?: string | null) => {
+        if (!buffer) return null
+        if (buffer.length > MAX_VOTE_PROOF_BYTES) {
+            errors.push(`arquivo acima de ${(MAX_VOTE_PROOF_BYTES / 1024 / 1024).toFixed(0)}MB`)
+            return null
+        }
+        const mimeType = detectVoteProofMimeType(params.kind, buffer, mimeHint)
+        if (!isUsableVoteProofBuffer(params.kind, buffer, mimeType)) {
+            errors.push('bytes recebidos não parecem uma mídia válida')
+            return null
+        }
+        return { buffer, mimeType }
+    }
+
+    if (params.mediaUrl && !isLikelyEncryptedWhatsAppMediaUrl(params.mediaUrl)) {
+        try {
+            const direct = await fetchUrlToVoteProofBuffer(params.mediaUrl, params.kind, params.mimeHint)
+            const accepted = accept(direct.buffer, direct.mimeType || params.mimeHint)
+            if (accepted) return accepted
+        } catch (error: any) {
+            errors.push(`url direta: ${error?.message || String(error)}`)
+        }
+    }
+
+    if (params.messageId) {
+        for (let attempt = 1; attempt <= 5; attempt += 1) {
+            try {
+                const downloaded = await downloadMedia(params.messageId, params.instanceToken, { generateMp3: false })
+                const accepted = accept(downloaded, params.mimeHint)
+                if (accepted) return accepted
+            } catch (error: any) {
+                errors.push(`download provider: ${error?.message || String(error)}`)
+            }
+            if (attempt < 5) await wait(1200)
+        }
+
+        for (let attempt = 1; attempt <= 3; attempt += 1) {
+            let stored: { url: string; mime?: string | null } | null = null
+            try {
+                const { data: storedMedia } = await params.supabase
+                    .from('app_config')
+                    .select('value')
+                    .eq('key', `_wmedia_${params.messageId}`)
+                    .maybeSingle()
+                stored = parseStoredMediaUrl(storedMedia?.value || null)
+            } catch (error: any) {
+                errors.push(`mídia armazenada indisponível: ${error?.message || String(error)}`)
+            }
+            if (stored?.url) {
+                try {
+                    const fromStored = await fetchUrlToVoteProofBuffer(stored.url, params.kind, stored.mime || params.mimeHint)
+                    const accepted = accept(fromStored.buffer, fromStored.mimeType || stored.mime || params.mimeHint)
+                    if (accepted) return accepted
+                } catch (error: any) {
+                    errors.push(`mídia armazenada: ${error?.message || String(error)}`)
+                }
+            }
+            if (attempt < 3) await wait(1500)
+        }
+    }
+
+    throw new Error(errors.slice(0, 4).join(' | ') || 'Não foi possível baixar o comprovante como mídia válida.')
+}
+
+const PROFILE_ASSESSMENT_REMINDER_COOLDOWN_MS = 90 * 1000
+
+function recentlySentProfileAssessmentReminder(gate: any) {
+    const lastReminderAt = Date.parse(String(gate?.last_reminder_at || ''))
+    return Number.isFinite(lastReminderAt) && Date.now() - lastReminderAt < PROFILE_ASSESSMENT_REMINDER_COOLDOWN_MS
+}
+
+async function loadProfileAssessmentDeliveryConfigs(supabase: any, instance: any, baseConfigs: Record<string, string>) {
+    const configs = { ...(baseConfigs || {}) }
+    if (!instance?.broker_id) return configs
+
+    try {
+        const { data } = await supabase
+            .from('virtual_brokers')
+            .select('voice_id')
+            .eq('id', instance.broker_id)
+            .maybeSingle()
+        const brokerVoiceId = String(data?.voice_id || '').trim()
+        if (brokerVoiceId) configs.whatsapp_tts_voice = brokerVoiceId
+    } catch {
+        // Keep global voice fallback.
+    }
+
+    return configs
+}
+
+async function clearProfileAssessmentPendingQueue(supabase: any, phone: string) {
+    await supabase
+        .from('app_config')
+        .delete()
+        .like('key', `_pmq_${phone}_%`)
+}
+
+async function maybeHandleProfileAssessmentToolGate(params: {
+    supabase: any
+    instance: any
+    phone: string
+    text: string
+    messageType?: string | null
+    mediaUrl?: string | null
+    mediaMimetype?: string | null
+    messageId?: string | null
+    origin?: string | null
+    isGlobalLead: boolean
+    allowGlobalProfileAssessment?: boolean
+    identityType?: string | null
+    senderName?: string | null
+    saveAudit?: (params: { action: string; statusCode?: number; error?: string }) => Promise<void>
+}) {
+    const { supabase, instance, phone, text, messageType, mediaUrl, mediaMimetype, messageId, origin, isGlobalLead, allowGlobalProfileAssessment, identityType, senderName, saveAudit } = params
+    if ((!isGlobalLead && !allowGlobalProfileAssessment) || !instance?.instance_token) {
+        return { handled: false, action: 'profile_assessment_gate_not_allowed' }
+    }
+
+    const currentGate = await loadProfileAssessmentGate(supabase, phone)
+    const awaitingProof = currentGate?.status === 'awaiting_vote_proof'
+    const normalizedMime = String(mediaMimetype || '').toLowerCase()
+    const isImage = messageType === 'image' || normalizedMime.startsWith('image/')
+    const isVideo = messageType === 'video' || normalizedMime.startsWith('video/')
+    const isDocument = messageType === 'document'
+        || normalizedMime.startsWith('application/')
+        || normalizedMime.startsWith('text/')
+    const proofMediaKind: VoteProofMediaKind | null = isImage
+        ? 'image'
+        : isVideo
+            ? 'video'
+            : isDocument
+                ? 'document'
+                : null
+    const replyChannel = messageType === 'audio' || normalizedMime.startsWith('audio/')
+        ? 'audio'
+        : 'text'
+    const baseConfigs = await loadAIConfigs(supabase, instance.id).catch(() => ({} as Record<string, string>))
+    const deliveryConfigs = await loadProfileAssessmentDeliveryConfigs(supabase, instance, baseConfigs)
+    const isAwaitingProofFollowUp = awaitingProof && isProfileAssessmentAwaitingProofFollowUp(text)
+
+    if (awaitingProof && proofMediaKind) {
+        await clearProfileAssessmentPendingQueue(supabase, phone)
+
+        if (!mediaUrl && !messageId) {
+            await sendWhatsAppMessage({
+                phone,
+                instanceToken: instance.instance_token,
+                message: 'Recebi o arquivo, mas ele ainda não ficou disponível para leitura. Pode reenviar o comprovante da tela final do seu voto em mim? Pode ser print, vídeo curto ou PDF legível.',
+            })
+            await saveAudit?.({ action: 'profile_assessment_vote_proof_missing_media_url' })
+            return { handled: true, action: 'profile_assessment_vote_proof_missing_media_url' }
+        }
+
+        try {
+            const proofMedia = await fetchVoteProofMedia({
+                kind: proofMediaKind,
+                supabase,
+                instanceToken: instance.instance_token,
+                mediaUrl,
+                mimeHint: mediaMimetype,
+                messageId,
+            })
+            const analysis = await analyzeVoteProofMedia(proofMedia.buffer, proofMedia.mimeType, proofMediaKind)
+            const approved = analysis.status === 'approved'
+            const toolUrl = profileAssessmentToolUrl(origin, phone)
+
+            await saveProfileAssessmentGate(supabase, phone, {
+                ...(currentGate || {}),
+                status: approved ? 'approved' : 'awaiting_vote_proof',
+                analyzed_at: new Date().toISOString(),
+                last_analysis_status: analysis.status,
+                analysis,
+                media_url: mediaUrl,
+                message_id: messageId || null,
+                media_kind: proofMediaKind,
+                tool_url: approved ? toolUrl : null,
+            })
+
+            if (approved) {
+                await sendProfileAssessmentToolReleased({
+                    phone,
+                    instanceToken: instance.instance_token,
+                    toolUrl,
+                })
+                await saveAudit?.({ action: 'profile_assessment_tool_released' })
+                return { handled: true, action: 'profile_assessment_tool_released' }
+            }
+
+            await sendWhatsAppMessage({
+                phone,
+                instanceToken: instance.instance_token,
+                message: [
+                    'Ainda não consegui validar esse comprovante como voto concluído em mim.',
+                    analysis.reason,
+                    '',
+                    'Me envie a tela final de confirmação do voto, aparecendo meu nome, Guilherme Pilger, e a categoria Influenciador do Ano. Pode ser print, vídeo curto ou PDF legível.',
+                ].filter(Boolean).join('\n'),
+            })
+            await saveAudit?.({ action: `profile_assessment_vote_proof_${analysis.status}` })
+            return { handled: true, action: `profile_assessment_vote_proof_${analysis.status}` }
+        } catch (error: any) {
+            await sendWhatsAppMessage({
+                phone,
+                instanceToken: instance.instance_token,
+                message: 'Não consegui analisar esse comprovante agora. Pode reenviar a confirmação final do seu voto em mim? Pode ser print, vídeo curto ou PDF legível.',
+            })
+            await saveAudit?.({ action: 'profile_assessment_vote_proof_error', error: error?.message || String(error) })
+            return { handled: true, action: 'profile_assessment_vote_proof_error' }
+        }
+    }
+
+    if (awaitingProof && text.trim()) {
+        if (!isAwaitingProofFollowUp) {
+            await saveAudit?.({ action: 'profile_assessment_awaiting_proof_normal_conversation' })
+            return { handled: false, action: 'profile_assessment_awaiting_proof_normal_conversation' }
+        }
+
+        await clearProfileAssessmentPendingQueue(supabase, phone)
+
+        if (recentlySentProfileAssessmentReminder(currentGate)) {
+            await saveAudit?.({ action: 'profile_assessment_waiting_vote_proof_recently_reminded' })
+            return { handled: true, action: 'profile_assessment_waiting_vote_proof_recently_reminded' }
+        }
+
+        await saveProfileAssessmentGate(supabase, phone, {
+            ...(currentGate || {}),
+            status: 'awaiting_vote_proof',
+            last_reminder_at: new Date().toISOString(),
+            last_reminder_channel: replyChannel,
+        })
+        await sendProfileAssessmentReminder({
+            phone,
+            instanceToken: instance.instance_token,
+            channel: replyChannel,
+            userText: text,
+            name: senderName,
+            identityType: identityType || (isGlobalLead ? 'lead' : 'unknown'),
+            configs: deliveryConfigs,
+        })
+        await saveAudit?.({ action: 'profile_assessment_waiting_vote_proof_reminder' })
+        return { handled: true, action: 'profile_assessment_waiting_vote_proof_reminder' }
+    }
+
+    const intent = await detectProfileAssessmentToolIntent({ text, configs: baseConfigs })
+    if (!intent.matched) {
+        await saveAudit?.({
+            action: intent.method === 'error'
+                ? 'profile_assessment_intent_detection_error'
+                : 'no_profile_assessment_intent',
+            error: intent.method === 'error' ? intent.reason : undefined,
+        })
+        return { handled: false, action: 'no_profile_assessment_intent' }
+    }
+
+    await clearProfileAssessmentPendingQueue(supabase, phone)
+
+    await saveProfileAssessmentGate(supabase, phone, {
+        status: 'awaiting_vote_proof',
+        requested_at: new Date().toISOString(),
+        vote_url: PROFILE_ASSESSMENT_VOTE_URL,
+        intent,
+        identity_type: identityType || (isGlobalLead ? 'lead' : 'unknown'),
+    })
+
+    await sendProfileAssessmentVoteRequest({
+        phone,
+        instanceToken: instance.instance_token,
+        channel: replyChannel,
+        userText: text,
+        name: senderName,
+        identityType: identityType || (isGlobalLead ? 'lead' : 'unknown'),
+        configs: deliveryConfigs,
+    })
+    await saveAudit?.({ action: 'profile_assessment_vote_requested' })
+    return { handled: true, action: 'profile_assessment_vote_requested' }
 }
 
 function safeSlug(input: string): string {
@@ -3813,6 +4192,31 @@ export async function POST(request: NextRequest) {
                 const isRecognizedOperatorMessage = globalIdentity.type !== 'lead' &&
                     isWhatsAppGlobalOperatorMessage(globalMessageText, hasGlobalMedia)
 
+                const canHandleProfileAssessmentGate = globalIdentity.type === 'lead'
+                    || (!isRecognizedOperatorMessage && !isActionableGlobalIntent)
+
+                if (isGlobalEntrypoint && canHandleProfileAssessmentGate) {
+                    const profileAssessmentGate = await maybeHandleProfileAssessmentToolGate({
+                        supabase,
+                        instance,
+                        phone: finalPhone,
+                        text: globalMessageText,
+                        messageType,
+                        mediaUrl: mediaUrl || null,
+                        mediaMimetype: mediaMimetype || null,
+                        messageId: messageId || null,
+                        origin: request.nextUrl.origin,
+                        isGlobalLead: globalIdentity.type === 'lead',
+                        allowGlobalProfileAssessment: globalIdentity.type !== 'lead',
+                        identityType: globalIdentity.type,
+                        senderName,
+                        saveAudit,
+                    })
+                    if (profileAssessmentGate.handled) {
+                        return NextResponse.json({ success: true, action: profileAssessmentGate.action })
+                    }
+                }
+
                 if (
                     globalIdentity.type !== 'lead'
                     && isGlobalEntrypoint
@@ -4414,6 +4818,24 @@ export async function POST(request: NextRequest) {
             && registeredWhatsappIdentity?.type === 'lead'
             && Boolean(storedMessageContent?.trim())
 
+        const profileAssessmentGate = await maybeHandleProfileAssessmentToolGate({
+            supabase,
+            instance,
+            phone: finalPhone,
+            text: storedMessageContent || messageText || '',
+            messageType,
+            mediaUrl: mediaUrl || null,
+            mediaMimetype: mediaMimetype || null,
+            messageId: messageId || null,
+            origin: request.nextUrl.origin,
+            isGlobalLead: isWhatsAppGlobalInstance(instance) && registeredWhatsappIdentity?.type === 'lead',
+            senderName,
+            saveAudit,
+        })
+        if (profileAssessmentGate.handled) {
+            return NextResponse.json({ success: true, action: profileAssessmentGate.action })
+        }
+
         if (instance.broker_id && isSimpleTextForFastPath) {
             try {
                 const fastResult = await tryFastTextBrokerResponse({
@@ -4447,6 +4869,12 @@ export async function POST(request: NextRequest) {
             const msgContent = storedMessageContent
 
             if (msgContent && !isAudio) {
+                await supabase
+                    .from('app_config')
+                    .delete()
+                    .like('key', `_pmq_${finalPhone}_%`)
+                    .lt('updated_at', new Date(Date.now() - 60 * 60 * 1000).toISOString())
+
                 const queuedPayload = {
                     text: msgContent,
                     type: messageType,
@@ -4624,10 +5052,3 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false, message: 'Erro no webhook' }, { status: 500 })
     }
 }
-
-
-
-
-
-
-

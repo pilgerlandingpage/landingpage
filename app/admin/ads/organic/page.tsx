@@ -21,6 +21,7 @@ import {
   Users,
 } from 'lucide-react'
 import AdminLoadingState from '@/components/admin/AdminLoadingState'
+import OrganicTrafficManagerView from '@/components/admin/OrganicTrafficManagerView'
 import {
   SimpleBarChart,
   SimpleDonutChart,
@@ -402,6 +403,23 @@ export default function OrganicTrafficPage() {
   }, [])
 
   if (loading) return <AdminLoadingState message="Carregando trafego organico..." />
+
+  if (process.env.NEXT_PUBLIC_ORGANIC_TRAFFIC_MANAGER_LAYOUT !== 'legacy') {
+    return (
+      <OrganicTrafficManagerView
+        platform={platform}
+        data={data}
+        reports={reports}
+        syncing={syncing}
+        reportLoading={reportLoading}
+        reportError={reportError}
+        error={error}
+        onPlatformChange={setPlatform}
+        onSync={fetchData}
+        onGenerateReport={generateReport}
+      />
+    )
+  }
 
   return (
     <div>

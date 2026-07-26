@@ -12,6 +12,7 @@ import LeadClock from '@/components/admin/LeadClock'
 import AdsChartFrame from '@/components/admin/AdsChartFrame'
 import AdminLoadingState from '@/components/admin/AdminLoadingState'
 import AdsTrackingSettingsCard from '@/components/admin/AdsTrackingSettingsCard'
+import MetaAdsManagerView from '@/components/admin/MetaAdsManagerView'
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
     PieChart, Pie, Cell, AreaChart, Area, Legend
@@ -114,6 +115,7 @@ interface MetricsFallback {
     latestSnapshotAt: string | null
     mode: 'selected_period' | 'latest_historical'
 }
+type AdsManagerTab = 'campaigns' | 'adsets' | 'ads'
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
     draft: { label: 'Rascunho', color: '#94a3b8' },
     pending: { label: 'Publicando...', color: '#f59e0b' },
@@ -265,6 +267,9 @@ export default function AdsPage() {
     const [paidReports, setPaidReports] = useState<PaidAiReport[]>([])
     const [paidReportLoading, setPaidReportLoading] = useState(false)
     const [paidReportError, setPaidReportError] = useState('')
+    const [adsManagerTab, setAdsManagerTab] = useState<AdsManagerTab>('campaigns')
+    const [campaignSearch, setCampaignSearch] = useState('')
+    const [selectedCampaignId, setSelectedCampaignId] = useState('')
     const latestPaidReport = paidReports[0] || null
     const latestPaidMetrics = latestPaidReport?.metrics || null
 
@@ -485,6 +490,32 @@ export default function AdsPage() {
         (filter === 'active' && c.status === 'active') ||
         (filter === 'paused' && c.status === 'paused')
     )
+    const campaignSearchTerm = campaignSearch.trim().toLowerCase()
+    const managerCampaigns = filteredCampaigns.filter(campaign => {
+        if (!campaignSearchTerm) return true
+        const haystack = [
+            campaign.name,
+            campaign.status,
+            campaign.properties?.title || '',
+            campaign.latest_metrics?.quality_ranking || '',
+            campaign.latest_metrics?.source || '',
+        ].join(' ').toLowerCase()
+        return haystack.includes(campaignSearchTerm)
+    })
+    const selectedCampaign = managerCampaigns.find(campaign => campaign.id === selectedCampaignId) || managerCampaigns[0] || null
+    const selectedMetrics = selectedCampaign?.latest_metrics || null
+    const selectedStatus = selectedCampaign ? STATUS_MAP[selectedCampaign.status] || STATUS_MAP.draft : STATUS_MAP.draft
+    const activeCampaigns = campaigns.filter(campaign => campaign.status === 'active').length
+    const pausedCampaigns = campaigns.filter(campaign => campaign.status === 'paused').length
+    const draftCampaigns = campaigns.filter(campaign => campaign.status === 'draft').length
+    const selectedCampaignAlerts = selectedCampaign
+        ? alerts.filter(alert => alert.campaign_id === selectedCampaign.id || alert.campaign_name === selectedCampaign.name)
+        : []
+    const adsManagerTabs: Array<{ key: AdsManagerTab; label: string; count: number }> = [
+        { key: 'campaigns', label: 'Campanhas', count: managerCampaigns.length },
+        { key: 'adsets', label: 'Conjuntos de anuncios', count: 0 },
+        { key: 'ads', label: 'Anuncios', count: 0 },
+    ]
     const campaignSpend = filteredCampaigns.reduce((s, c) => s + (c.latest_metrics?.spend || 0), 0)
     const liveTodaySpend = datePreset === 'today' ? liveAccountStats?.spend || 0 : 0
     const usesLiveSpendFallback = datePreset === 'today' && liveTodaySpend > campaignSpend
@@ -537,6 +568,53 @@ export default function AdsPage() {
 
     if (loading) {
         return <AdminLoadingState message="Carregando métricas de tráfego..." />
+    }
+
+    const useAdsManagerLayout = process.env.NEXT_PUBLIC_ADS_MANAGER_LAYOUT !== 'legacy'
+
+    if (useAdsManagerLayout) {
+        return (
+            <MetaAdsManagerView
+                campaigns={campaigns}
+                alerts={alerts}
+                reports={reports}
+                paidReports={paidReports}
+                paidReportError={paidReportError}
+                paidReportLoading={paidReportLoading}
+                toast={toast}
+                datePreset={datePreset}
+                startDate={startDate}
+                endDate={endDate}
+                filter={filter}
+                adsManagerTab={adsManagerTab}
+                campaignSearch={campaignSearch}
+                selectedCampaignId={selectedCampaignId}
+                showHistory={showHistory}
+                expandedReport={expandedReport}
+                syncing={syncing}
+                analyzing={analyzing}
+                liveAccountStats={liveAccountStats}
+                metaAccountHealth={metaAccountHealth}
+                metaConnectionIssue={metaConnectionIssue}
+                metricsFallback={metricsFallback}
+                latestScore={latestScore}
+                onDatePresetChange={handleDateChange}
+                onStartDateChange={setStartDate}
+                onEndDateChange={setEndDate}
+                onCustomDateSearch={handleCustomDateSearch}
+                onSync={handleSync}
+                onAnalyze={handleAnalyze}
+                onPaidReport={handlePaidReport}
+                onFilterChange={setFilter}
+                onTabChange={setAdsManagerTab}
+                onCampaignSearchChange={setCampaignSearch}
+                onSelectedCampaignChange={setSelectedCampaignId}
+                onShowHistoryChange={setShowHistory}
+                onExpandedReportChange={setExpandedReport}
+                onNotify={showToast}
+                renderMarkdown={renderMarkdown}
+            />
+        )
     }
 
     return (

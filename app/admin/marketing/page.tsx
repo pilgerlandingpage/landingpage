@@ -831,41 +831,61 @@ export default function AdminDashboard() {
     ]
 
     return (
-        <div className="marketing-ceo-page">
-            <div className="admin-header marketing-ceo-header">
-                <div>
-                    <span className="marketing-ceo-kicker">Marketing intelligence</span>
-                    <h1>Painel do CEO</h1>
-                    <p className="marketing-subtitle">Resumo executivo de trafego, funil e demanda comercial.</p>
+        <div className="marketing-ceo-page marketing-manager-page">
+            <header className="admin-header marketing-ceo-header marketing-manager-topbar">
+                <div className="marketing-manager-title">
+                    <span className="marketing-manager-logo"><Megaphone size={21} /></span>
+                    <div>
+                        <span className="marketing-ceo-kicker">Marketing intelligence</span>
+                        <h1>Dashboard Marketing</h1>
+                        <p className="marketing-subtitle">Central operacional de aquisicao, funil, midia paga, organico, criativos e IA.</p>
+                    </div>
                 </div>
-                <div className="marketing-period-filter marketing-period-filter-compact">
-                    <select
-                        value={adDatePreset}
-                        onChange={e => handleAdDateChange(e.target.value)}
-                        className="form-input"
-                    >
-                        <option value="today">Hoje</option>
-                        <option value="yesterday">Ontem</option>
-                        <option value="last_7d">Ultimos 7 dias</option>
-                        <option value="last_14d">Ultimos 14 dias</option>
-                        <option value="last_30d">Ultimos 30 dias</option>
-                        <option value="this_month">Este mes</option>
-                        <option value="last_month">Mes passado</option>
-                        <option value="maximum">Vitalicio</option>
-                        <option value="custom">Personalizado</option>
-                    </select>
-                    {adDatePreset === 'custom' && (
-                        <div className="marketing-custom-range">
-                            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="ads-date-input" />
-                            <span>ate</span>
-                            <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="ads-date-input" />
-                            <button onClick={handleCustomDateSearch} className="btn-gold" type="button">
-                                <Search size={14} />
-                            </button>
-                        </div>
-                    )}
+                <div className="marketing-manager-actions">
+                    <Link href="/admin/ads"><Megaphone size={15} /> Meta Ads</Link>
+                    <Link href="/admin/ads/google"><TrendingUp size={15} /> Google Ads</Link>
+                    <Link href="/admin/ads/analytics"><Eye size={15} /> Analytics</Link>
+                    <Link href="/admin/ads/inbox"><MessageCircle size={15} /> Caixa Meta</Link>
+                    <button type="button" onClick={fetchCommandCenter}>
+                        <Sparkles size={15} /> IA 360
+                    </button>
+                    <div className="marketing-period-filter marketing-period-filter-compact">
+                        <select
+                            value={adDatePreset}
+                            onChange={e => handleAdDateChange(e.target.value)}
+                            className="form-input"
+                        >
+                            <option value="today">Hoje</option>
+                            <option value="yesterday">Ontem</option>
+                            <option value="last_7d">Ultimos 7 dias</option>
+                            <option value="last_14d">Ultimos 14 dias</option>
+                            <option value="last_30d">Ultimos 30 dias</option>
+                            <option value="this_month">Este mes</option>
+                            <option value="last_month">Mes passado</option>
+                            <option value="maximum">Vitalicio</option>
+                            <option value="custom">Personalizado</option>
+                        </select>
+                        {adDatePreset === 'custom' && (
+                            <div className="marketing-custom-range">
+                                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="ads-date-input" />
+                                <span>ate</span>
+                                <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="ads-date-input" />
+                                <button onClick={handleCustomDateSearch} className="btn-gold" type="button">
+                                    <Search size={14} />
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </div>
-            </div>
+            </header>
+
+            <nav className="marketing-manager-channel-tabs" aria-label="Canais de marketing">
+                <button type="button" className="active"><span>Todos</span><strong>{stats.totalVisitors.toLocaleString('pt-BR')}</strong></button>
+                <button type="button"><span>Pago</span><strong>{formatCurrency(adMetrics.totalSpend)}</strong></button>
+                <button type="button"><span>Organico</span><strong>{commandMetrics ? commandMetrics.organic.media.toLocaleString('pt-BR') : '-'}</strong></button>
+                <button type="button"><span>Social IA</span><strong>{commandMetrics ? commandMetrics.social_ai.hot_leads.toLocaleString('pt-BR') : '-'}</strong></button>
+                <button type="button"><span>Criativos</span><strong>{commandMetrics ? commandMetrics.creatives.pending.toLocaleString('pt-BR') : '-'}</strong></button>
+            </nav>
 
             <section className="marketing-executive-section">
                 <div className="marketing-section-title">

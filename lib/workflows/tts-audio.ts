@@ -16,7 +16,7 @@ async function loadConfig(keys: string[]): Promise<TtsConfig> {
 }
 
 function numberUnderThousandToWordsPtBR(value: number): string {
-    const units = ['', 'um', 'dois', 'tres', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove']
+    const units = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove']
     const teens = ['dez', 'onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove']
     const tens = ['', '', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa']
     const hundreds = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 'seiscentos', 'setecentos', 'oitocentos', 'novecentos']
@@ -42,8 +42,8 @@ function integerToWordsPtBR(value: number): string {
     if (number < 1000) return numberUnderThousandToWordsPtBR(number)
 
     const scales = [
-        { value: 1_000_000_000, singular: 'bilhao', plural: 'bilhoes' },
-        { value: 1_000_000, singular: 'milhao', plural: 'milhoes' },
+        { value: 1_000_000_000, singular: 'bilhão', plural: 'bilhões' },
+        { value: 1_000_000, singular: 'milhão', plural: 'milhões' },
         { value: 1_000, singular: 'mil', plural: 'mil' },
     ]
 
@@ -181,38 +181,82 @@ async function uploadWorkflowAudio(buffer: Buffer): Promise<string> {
         .upload(fileName, buffer, { contentType: 'audio/mpeg', upsert: true })
     if (error) throw error
     const { data } = supabase.storage.from('audio').getPublicUrl(fileName)
-    if (!data?.publicUrl) throw new Error('Nao foi possivel publicar o audio gerado.')
+    if (!data?.publicUrl) throw new Error('Não foi possível publicar o áudio gerado.')
     return data.publicUrl
 }
 
 export async function generateWorkflowElevenLabsAudioUrl(text: string, voiceId?: string | null): Promise<string> {
-    const cfg = await loadConfig(['elevenlabs_api_key', 'whatsapp_tts_voice'])
+    const cfg = await loadConfig(['elevenlabs_api_key', 'whatsapp_tts_voice', 'openai_api_key'])
     const apiKey = cfg.elevenlabs_api_key
     const selectedVoice = String(voiceId || cfg.whatsapp_tts_voice || '').trim()
-    if (!apiKey) throw new Error('ElevenLabs API key nao configurada.')
-    if (!selectedVoice) throw new Error('Selecione uma voz ElevenLabs para o audio.')
 
     const spokenText = normalizeTextForWorkflowTTS(text)
-    if (!spokenText) throw new Error('Texto do audio vazio.')
+    if (!spokenText) throw new Error('Texto do áudio vazio.')
 
-    const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${selectedVoice}`, {
-        method: 'POST',
-        headers: {
-            'xi-api-key': apiKey,
-            'Content-Type': 'application/json',
-            Accept: 'audio/mpeg',
-        },
-        body: JSON.stringify({
-            text: spokenText,
-            model_id: 'eleven_multilingual_v2',
-            voice_settings: { stability: 0.5, similarity_boost: 0.75, style: 0.3, use_speaker_boost: true },
-        }),
-    })
+    const openaiFallback = async () => {
+        if (!cfg.openai_api_key) return null
+        const voice = selectedVoice.startsWith('openai:')
+            ? selectedVoice.replace('openai:', '').trim() || 'onyx'
+            : 'onyx'
+        const res = await fetch('https://api.openai.com/v1/audio/speech', {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${cfg.openai_api_key}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                model: 'tts-1',
+                input: spokenText,
+                voice,
+                response_format: 'mp3',
+            }),
+        })
+        if (!res.ok) {
+            const err = await res.text().catch(() => '')
+            throw new Error(`Falha OpenAI TTS: ${res.status}${err ? ` - ${err.slice(0, 180)}` : ''}`)
+        }
+        return uploadWorkflowAudio(Buffer.from(await res.arrayBuffer()))
+    }
 
-    if (!res.ok) {
+    if (selectedVoice.startsWith('openai:') || (!apiKey && cfg.openai_api_key)) {
+        const fallbackUrl = await openaiFallback()
+        if (fallbackUrl) return fallbackUrl
+    }
+
+    if (!apiKey && !cfg.openai_api_key) throw new Error('ElevenLabs/OpenAI TTS não configurado.')
+    if (!selectedVoice) {
+        const fallbackUrl = await openaiFallback()
+        if (fallbackUrl) return fallbackUrl
+        throw new Error('Selecione uma voz ElevenLabs para o áudio.')
+    }
+
+    if (apiKey) {
+        const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${selectedVoice}`, {
+            method: 'POST',
+            headers: {
+                'xi-api-key': apiKey,
+                'Content-Type': 'application/json',
+                Accept: 'audio/mpeg',
+            },
+            body: JSON.stringify({
+                text: spokenText,
+                model_id: 'eleven_multilingual_v2',
+                voice_settings: { stability: 0.5, similarity_boost: 0.75, style: 0.3, use_speaker_boost: true },
+            }),
+        })
+
+        if (res.ok) {
+            return uploadWorkflowAudio(Buffer.from(await res.arrayBuffer()))
+        }
+
+        const fallbackUrl = await openaiFallback()
+        if (fallbackUrl) return fallbackUrl
+
         const err = await res.text().catch(() => '')
         throw new Error(`Falha ElevenLabs TTS: ${res.status}${err ? ` - ${err.slice(0, 180)}` : ''}`)
     }
 
-    return uploadWorkflowAudio(Buffer.from(await res.arrayBuffer()))
+    const fallbackUrl = await openaiFallback()
+    if (fallbackUrl) return fallbackUrl
+    throw new Error('Não foi possível gerar áudio TTS.')
 }

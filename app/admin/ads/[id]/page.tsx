@@ -11,6 +11,7 @@ import {
     ResponsiveContainer, AreaChart, Area
 } from 'recharts'
 import AdminLoadingState from '@/components/admin/AdminLoadingState'
+import MetaCampaignDetailView from '@/components/admin/MetaCampaignDetailView'
 
 // ─── Types ────────────────────────────────────────────────────
 interface Campaign {
@@ -185,6 +186,27 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
 
     if (loading) return <AdminLoadingState message="Carregando campanha..." />
     if (!campaign) return <div style={{ padding: '40px', color: 'var(--danger)' }}>Campanha não encontrada</div>
+
+    const useCampaignManagerLayout = process.env.NEXT_PUBLIC_ADS_CAMPAIGN_DETAIL_LAYOUT !== 'legacy'
+
+    if (useCampaignManagerLayout) {
+        return (
+            <MetaCampaignDetailView
+                campaign={campaign}
+                metrics={metrics}
+                alerts={alerts}
+                actionLogs={actionLogs}
+                actionLoading={actionLoading}
+                chartTab={chartTab}
+                toast={toast}
+                onBack={() => router.push('/admin/ads')}
+                onRefresh={fetchData}
+                onPublish={handlePublish}
+                onExecuteAction={executeAction}
+                onChartTabChange={setChartTab}
+            />
+        )
+    }
 
     const st = STATUS_MAP[campaign.status] || STATUS_MAP.draft
     const latestMetric = metrics.length > 0 ? metrics[metrics.length - 1] : (campaign.latest_metrics || null)

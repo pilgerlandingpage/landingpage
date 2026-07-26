@@ -74,6 +74,23 @@ const ENV_FALLBACKS: Record<string, string> = {
     connectyhub_api_token: 'CONNECTYHUB_API_TOKEN',
     connectyhub_webhook_secret: 'CONNECTYHUB_WEBHOOK_SECRET',
     connectyhub_webhook_url: 'CONNECTYHUB_WEBHOOK_URL',
+    mercado_pago_enabled: 'MERCADO_PAGO_ENABLED',
+    mercado_pago_environment: 'MERCADO_PAGO_ENVIRONMENT',
+    mercado_pago_public_key: 'NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY',
+    mercado_pago_access_token: 'MERCADO_PAGO_ACCESS_TOKEN',
+    mercado_pago_webhook_secret: 'MERCADO_PAGO_WEBHOOK_SECRET',
+    mercado_pago_webhook_url: 'MERCADO_PAGO_WEBHOOK_URL',
+    mercado_pago_pix_expiration_minutes: 'MERCADO_PAGO_PIX_EXPIRATION_MINUTES',
+    mercado_pago_statement_descriptor: 'MERCADO_PAGO_STATEMENT_DESCRIPTOR',
+    commerce_member_area_url: 'COMMERCE_MEMBER_AREA_URL',
+    commerce_support_whatsapp: 'COMMERCE_SUPPORT_WHATSAPP',
+    commerce_automation_enabled: 'COMMERCE_AUTOMATION_ENABLED',
+    commerce_checkout_abandoned_after_minutes: 'COMMERCE_CHECKOUT_ABANDONED_AFTER_MINUTES',
+    commerce_pix_pending_after_minutes: 'COMMERCE_PIX_PENDING_AFTER_MINUTES',
+    commerce_pix_expiring_before_minutes: 'COMMERCE_PIX_EXPIRING_BEFORE_MINUTES',
+    commerce_checkout_lost_after_hours: 'COMMERCE_CHECKOUT_LOST_AFTER_HOURS',
+    commerce_whatsapp_notifications_enabled: 'COMMERCE_WHATSAPP_NOTIFICATIONS_ENABLED',
+    commerce_email_notifications_enabled: 'COMMERCE_EMAIL_NOTIFICATIONS_ENABLED',
     gemini_api_key: 'GEMINI_API_KEY',
     gemini_model: '',
     openai_model: '',
@@ -128,6 +145,21 @@ const ENV_FALLBACKS: Record<string, string> = {
     instagram_business_account_id: 'INSTAGRAM_BUSINESS_ACCOUNT_ID',
     instagram_business_access_token: 'INSTAGRAM_BUSINESS_ACCESS_TOKEN',
     meta_webhook_verify_token: 'META_WEBHOOK_VERIFY_TOKEN',
+    meta_whatsapp_enabled: 'META_WHATSAPP_ENABLED',
+    meta_whatsapp_business_account_id: 'META_WHATSAPP_BUSINESS_ACCOUNT_ID',
+    meta_whatsapp_default_phone_number_id: 'META_WHATSAPP_DEFAULT_PHONE_NUMBER_ID',
+    meta_whatsapp_access_token: 'META_WHATSAPP_ACCESS_TOKEN',
+    meta_whatsapp_webhook_verify_token: 'META_WHATSAPP_WEBHOOK_VERIFY_TOKEN',
+    meta_whatsapp_app_secret: 'META_WHATSAPP_APP_SECRET',
+    meta_whatsapp_api_version: 'META_WHATSAPP_API_VERSION',
+    meta_whatsapp_default_language: 'META_WHATSAPP_DEFAULT_LANGUAGE',
+    meta_whatsapp_support_redirect_phone: 'META_WHATSAPP_SUPPORT_REDIRECT_PHONE',
+    meta_whatsapp_send_rate_per_minute: 'META_WHATSAPP_SEND_RATE_PER_MINUTE',
+    meta_whatsapp_daily_limit_per_number: 'META_WHATSAPP_DAILY_LIMIT_PER_NUMBER',
+    meta_whatsapp_editorial_blog_template_name: 'META_WHATSAPP_EDITORIAL_BLOG_TEMPLATE_NAME',
+    meta_whatsapp_editorial_news_template_name: 'META_WHATSAPP_EDITORIAL_NEWS_TEMPLATE_NAME',
+    meta_whatsapp_property_followup_template_name: 'META_WHATSAPP_PROPERTY_FOLLOWUP_TEMPLATE_NAME',
+    meta_whatsapp_editorial_default_sender_id: 'META_WHATSAPP_EDITORIAL_DEFAULT_SENDER_ID',
 }
 
 const DEFAULT_PROMPTS: Record<string, string> = {
@@ -290,11 +322,43 @@ const DEFAULT_CONFIGS: Record<string, string> = {
     iris_media_voice_enabled: 'true',
     teo_webhooks_events_enabled: 'true',
     meta_webhook_verify_token: 'pilger-meta-webhook',
+    meta_whatsapp_enabled: 'false',
+    meta_whatsapp_business_account_id: '',
+    meta_whatsapp_default_phone_number_id: '',
+    meta_whatsapp_access_token: '',
+    meta_whatsapp_webhook_verify_token: 'pilger-meta-whatsapp-webhook',
+    meta_whatsapp_app_secret: '',
+    meta_whatsapp_api_version: 'v21.0',
+    meta_whatsapp_default_language: 'pt_BR',
+    meta_whatsapp_support_redirect_phone: '',
+    meta_whatsapp_send_rate_per_minute: '40',
+    meta_whatsapp_daily_limit_per_number: '1000',
+    meta_whatsapp_editorial_blog_template_name: '',
+    meta_whatsapp_editorial_news_template_name: '',
+    meta_whatsapp_property_followup_template_name: '',
+    meta_whatsapp_editorial_default_sender_id: '',
     meta_connection_logs: '[]',
     public_site_url: 'https://guilhermepilger.ai',
     meta_social_inbox_enabled: 'true',
     meta_social_agent_enabled: 'false',
     meta_social_agent_autopilot: 'false',
+    mercado_pago_enabled: 'false',
+    mercado_pago_environment: 'sandbox',
+    mercado_pago_public_key: '',
+    mercado_pago_access_token: '',
+    mercado_pago_webhook_secret: '',
+    mercado_pago_webhook_url: 'https://guilhermepilger.ai/api/webhooks/mercadopago',
+    mercado_pago_pix_expiration_minutes: '60',
+    mercado_pago_statement_descriptor: 'PILGER',
+    commerce_member_area_url: 'https://guilhermepilger.ai/membros',
+    commerce_support_whatsapp: '',
+    commerce_automation_enabled: 'true',
+    commerce_checkout_abandoned_after_minutes: '30',
+    commerce_pix_pending_after_minutes: '10',
+    commerce_pix_expiring_before_minutes: '15',
+    commerce_checkout_lost_after_hours: '24',
+    commerce_whatsapp_notifications_enabled: 'true',
+    commerce_email_notifications_enabled: 'true',
     brevo_sender_name: 'Guilherme Pilger',
     brevo_sender_email: 'contato@guilhermepilger.ai',
     brevo_reply_to_email: 'contato@guilhermepilger.ai',
@@ -417,6 +481,13 @@ function normalizeConfigValue(key: string, value: string) {
         editorial_distribution_push_daily_limit: { fallback: DEFAULT_CONFIGS.editorial_distribution_push_daily_limit, min: 1, max: 10000 },
         editorial_distribution_recommendation_min_score: { fallback: DEFAULT_CONFIGS.editorial_distribution_recommendation_min_score, min: 1, max: 100 },
         editorial_distribution_recommendation_batch_limit: { fallback: DEFAULT_CONFIGS.editorial_distribution_recommendation_batch_limit, min: 1, max: 500 },
+        mercado_pago_pix_expiration_minutes: { fallback: DEFAULT_CONFIGS.mercado_pago_pix_expiration_minutes, min: 5, max: 1440 },
+        commerce_checkout_abandoned_after_minutes: { fallback: DEFAULT_CONFIGS.commerce_checkout_abandoned_after_minutes, min: 5, max: 10080 },
+        commerce_pix_pending_after_minutes: { fallback: DEFAULT_CONFIGS.commerce_pix_pending_after_minutes, min: 3, max: 1440 },
+        commerce_pix_expiring_before_minutes: { fallback: DEFAULT_CONFIGS.commerce_pix_expiring_before_minutes, min: 3, max: 1440 },
+        commerce_checkout_lost_after_hours: { fallback: DEFAULT_CONFIGS.commerce_checkout_lost_after_hours, min: 1, max: 720 },
+        meta_whatsapp_send_rate_per_minute: { fallback: DEFAULT_CONFIGS.meta_whatsapp_send_rate_per_minute, min: 1, max: 1000 },
+        meta_whatsapp_daily_limit_per_number: { fallback: DEFAULT_CONFIGS.meta_whatsapp_daily_limit_per_number, min: 1, max: 1000000 },
         wikimedia_commons_priority: { fallback: DEFAULT_CONFIGS.wikimedia_commons_priority, min: 1, max: 4 },
         wikimedia_commons_per_page: { fallback: DEFAULT_CONFIGS.wikimedia_commons_per_page, min: 3, max: 30 },
         google_image_search_priority: { fallback: DEFAULT_CONFIGS.google_image_search_priority, min: 1, max: 4 },
@@ -444,6 +515,61 @@ function normalizeConfigValue(key: string, value: string) {
     if (key === 'meta_social_inbox_enabled') return value === 'false' ? 'false' : 'true'
     if (key === 'meta_social_agent_enabled') return value === 'true' ? 'true' : 'false'
     if (key === 'meta_social_agent_autopilot') return value === 'true' ? 'true' : 'false'
+    if (key === 'meta_whatsapp_enabled') return value === 'true' ? 'true' : 'false'
+    if (key === 'mercado_pago_enabled') return value === 'true' ? 'true' : 'false'
+    if (key === 'commerce_automation_enabled') return value === 'false' ? 'false' : 'true'
+    if (key === 'commerce_whatsapp_notifications_enabled') return value === 'false' ? 'false' : 'true'
+    if (key === 'commerce_email_notifications_enabled') return value === 'false' ? 'false' : 'true'
+    if (key === 'mercado_pago_environment') return value === 'production' ? 'production' : 'sandbox'
+    if (key === 'mercado_pago_statement_descriptor') {
+        const descriptor = String(value || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^A-Z0-9 ]/gi, '')
+            .toUpperCase()
+            .trim()
+            .slice(0, 22)
+        return descriptor || DEFAULT_CONFIGS.mercado_pago_statement_descriptor
+    }
+    if (key === 'commerce_support_whatsapp') {
+        return String(value || '').replace(/\D/g, '').slice(0, 20)
+    }
+    if (key === 'meta_whatsapp_support_redirect_phone') {
+        return String(value || '').replace(/\D/g, '').slice(0, 20)
+    }
+    if (key === 'meta_whatsapp_api_version') {
+        const selected = String(value || '').trim().toLowerCase()
+        return /^v\d+\.\d+$/.test(selected) ? selected : DEFAULT_CONFIGS.meta_whatsapp_api_version
+    }
+    if (key === 'meta_whatsapp_default_language') {
+        const selected = String(value || '').trim().replace('-', '_')
+        return /^[a-z]{2}_[A-Z]{2}$/.test(selected) ? selected : DEFAULT_CONFIGS.meta_whatsapp_default_language
+    }
+    if (
+        key === 'meta_whatsapp_editorial_blog_template_name' ||
+        key === 'meta_whatsapp_editorial_news_template_name' ||
+        key === 'meta_whatsapp_property_followup_template_name'
+    ) {
+        return String(value || '')
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9_]+/g, '_')
+            .replace(/^_+|_+$/g, '')
+            .slice(0, 120)
+    }
+    if (key === 'meta_whatsapp_editorial_default_sender_id') {
+        return String(value || '').trim().slice(0, 80)
+    }
+    if (key === 'mercado_pago_webhook_url' || key === 'commerce_member_area_url') {
+        const selected = String(value || '').trim().slice(0, 300)
+        if (!selected) return DEFAULT_CONFIGS[key] || ''
+        try {
+            const url = new URL(selected)
+            return ['http:', 'https:'].includes(url.protocol) ? url.toString() : (DEFAULT_CONFIGS[key] || '')
+        } catch {
+            return DEFAULT_CONFIGS[key] || ''
+        }
+    }
     if (key === 'organic_report_agent_enabled') return value === 'false' ? 'false' : 'true'
     if (key === 'paid_report_agent_enabled') return value === 'false' ? 'false' : 'true'
     if (key === 'marketing_publisher_agent_enabled') return value === 'false' ? 'false' : 'true'

@@ -196,6 +196,7 @@ export async function POST(request: NextRequest) {
         const searchParams = new URLSearchParams(String(body?.search_params || ''))
         const consentLgpd = Boolean(body?.consent_lgpd)
         const captureMetadata = metadataRecord(body?.metadata)
+        const nowIso = new Date().toISOString()
 
         if (!name || !phoneRaw) {
             return NextResponse.json({ success: false, error: 'name e phone são obrigatórios' }, { status: 400 })
@@ -287,10 +288,26 @@ export async function POST(request: NextRequest) {
             currentLeadClassification = existingByVisitor?.lead_classification || currentLeadClassification
         }
 
+        const previousMetadata = metadataRecord(existingMetadata)
+        const whatsappMarketingOptIn = body?.whatsapp_marketing_opt_in === true
+            || captureMetadata.whatsapp_marketing_opt_in === true
+            || captureMetadata.whatsapp_opt_in === true
+            || previousMetadata.whatsapp_marketing_opt_in === true
+            || previousMetadata.whatsapp_opt_in === true
+        const whatsappOptInAt = whatsappMarketingOptIn
+            ? String(previousMetadata.whatsapp_opt_in_at || captureMetadata.whatsapp_opt_in_at || nowIso)
+            : null
+
         const metadataPatch = {
             ...existingMetadata,
-            form_submitted_at: new Date().toISOString(),
+            form_submitted_at: nowIso,
             consent_lgpd: consentLgpd,
+            whatsapp_marketing_opt_in: whatsappMarketingOptIn,
+            whatsapp_opt_in: whatsappMarketingOptIn,
+            whatsapp_opt_in_at: whatsappOptInAt,
+            whatsapp_opt_in_source: whatsappMarketingOptIn
+                ? String(captureMetadata.whatsapp_opt_in_source || previousMetadata.whatsapp_opt_in_source || 'site_whatsapp_capture')
+                : null,
             capture_source: 'site_form',
             landing_page_slug: landingPageSlug,
             visitor_cookie_id: visitorCookieId,
@@ -366,6 +383,9 @@ export async function POST(request: NextRequest) {
                 name,
                 phone,
                 consent_lgpd: consentLgpd,
+                whatsapp_marketing_opt_in: whatsappMarketingOptIn,
+                whatsapp_opt_in_at: whatsappOptInAt,
+                whatsapp_opt_in_source: metadataPatch.whatsapp_opt_in_source,
                 landing_page_slug: landingPageSlug,
                 visitor_cookie_id: visitorCookieId,
                 tracking: metadataPatch.tracking,

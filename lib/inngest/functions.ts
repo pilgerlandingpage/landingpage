@@ -35,6 +35,8 @@ import {
 } from './whatsapp-agent'
 import { whatsappInstanceSetup } from './whatsapp-setup'
 import { whatsappAttendanceDailyReport, whatsappAttendanceManualRun } from './attendance-monitor'
+import { metaWhatsAppCampaignFunctions } from './meta-whatsapp-campaigns'
+import { editorialDistributionFunctions } from './editorial-distribution'
 import { chatWithGemini } from '../gemini'
 import {
     buildCentralContextPrompt,
@@ -1607,16 +1609,32 @@ export const runAgentWorkflow = inngest.createFunction(
                     }
                 }
 
-                const variables = {
+                const contextVariables: Record<string, string> = Object.fromEntries(
+                    Object.entries(context || {}).map(([key, value]) => {
+                        const stringValue = typeof value === 'string'
+                            ? value
+                            : value === null || value === undefined
+                                ? ''
+                                : Array.isArray(value)
+                                    ? value.map(item => String(item ?? '')).filter(Boolean).join(', ')
+                                    : typeof value === 'object'
+                                        ? JSON.stringify(value)
+                                        : String(value)
+                        return [key, stringValue]
+                    })
+                )
+
+                const variables: Record<string, string> = {
+                    ...contextVariables,
                     workflow_id,
                     workflowId: workflow_id,
-                    name: leadName,
-                    nome_lead: leadName,
+                    name: String(leadName || ''),
+                    nome_lead: String(leadName || ''),
                     phone: leadPhone,
                     telefone: leadPhone,
-                    budget: lead?.lead_budget || '',
-                    prazo: lead?.lead_timeframe || '',
-                    finalidade: lead?.lead_purpose || '',
+                    budget: String(lead?.lead_budget || ''),
+                    prazo: String(lead?.lead_timeframe || ''),
+                    finalidade: String(lead?.lead_purpose || ''),
                 }
 
                 if (action.actionType === 'wait_only') {
@@ -1933,6 +1951,8 @@ export const functions = [
     whatsappInstanceSetup,
     whatsappAttendanceDailyReport,
     whatsappAttendanceManualRun,
+    ...metaWhatsAppCampaignFunctions,
+    ...editorialDistributionFunctions,
     // Eventos
     ...eventFunctions,
     // Trabalhe Conosco / Corretores

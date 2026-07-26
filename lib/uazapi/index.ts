@@ -181,6 +181,9 @@ function encodePathPart(value: string) {
 async function resolveConnectyHubInstanceId(instanceToken?: string) {
     const candidate = String(instanceToken || '').trim()
     if (!candidate) return ''
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(candidate)) {
+        return candidate
+    }
 
     try {
         const { createClient } = await import('@supabase/supabase-js')
@@ -1092,7 +1095,11 @@ export async function setPresenceUnavailable(instanceToken: string) {
 // ═══════════════════════════════════════════════════════════════
 
 /** Download media (audio, image, etc.) from a received message using message ID */
-export async function downloadMedia(messageId: string, instanceToken: string): Promise<Buffer | null> {
+export async function downloadMedia(
+    messageId: string,
+    instanceToken: string,
+    options: { generateMp3?: boolean } = {}
+): Promise<Buffer | null> {
     try {
         console.log(`[ConnectyHub] downloadMedia: id=${messageId}`)
 
@@ -1102,7 +1109,7 @@ export async function downloadMedia(messageId: string, instanceToken: string): P
             body: {
                 id: messageId,
                 return_base64: true,
-                generate_mp3: true,
+                generate_mp3: options.generateMp3 !== false,
                 return_link: false,
             },
         })

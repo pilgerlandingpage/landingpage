@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/server'
 import {
     buildProfileAssessmentPath,
+    PROFILE_ASSESSMENT_EVENT_SLUG,
     PROFILE_ASSESSMENT_PARENT_SLUG,
     resolveProfileAssessmentEventSlug,
 } from '@/lib/events/profile-assessment'
@@ -23,6 +24,20 @@ async function getEvent(slug: string) {
         .eq('slug', slug)
         .eq('status', 'published')
         .maybeSingle()
+
+    if (!data && slug === PROFILE_ASSESSMENT_EVENT_SLUG) {
+        return {
+            id: 'perfil-corretor-ideal-fallback',
+            title: 'Guilherme Pilger - Praia Brava',
+            slug: PROFILE_ASSESSMENT_EVENT_SLUG,
+            subtitle: 'Perfil do Corretor Ideal',
+            description: 'Autoavaliacao ao vivo para corretores.',
+            event_date: '2026-07-09T17:00:00.000Z',
+            location_name: 'Praia Brava',
+            hero_image_url: DEFAULT_EVENT_HERO,
+            status: 'published',
+        }
+    }
 
     return data
 }

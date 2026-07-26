@@ -14,6 +14,8 @@ const ADMIN_MENU_PERMISSIONS = [
     { module_key: 'blog', label: 'Blog', description: 'Gerenciar artigos, rascunhos e aprovacao do agente de blog', category: 'marketing' },
     { module_key: 'news', label: 'Noticias', description: 'Gerenciar noticias, rascunhos e aprovacao do agente de noticias', category: 'marketing' },
     { module_key: 'properties', label: 'Imoveis', description: 'Gerenciar catalogo de imoveis', category: 'operacoes' },
+    { module_key: 'products', label: 'Produtos Digitais', description: 'Gerenciar produtos, ofertas, conteudos e order bumps da plataforma de educacao', category: 'produto_digital' },
+    { module_key: 'commerce', label: 'Ecommerce', description: 'Acompanhar pedidos, clientes, checkout e automacoes comerciais dos produtos digitais', category: 'produto_digital' },
     { module_key: 'homepage', label: 'Configurar Homepage', description: 'Gerenciar secoes e curadoria da homepage', category: 'produto_digital' },
     { module_key: 'brokers', label: 'Corretores IA', description: 'Gerenciar corretores IA', category: 'comercial' },
     { module_key: 'automation', label: 'Automacoes', description: 'Acessar automacoes do sistema', category: 'tecnologia' },

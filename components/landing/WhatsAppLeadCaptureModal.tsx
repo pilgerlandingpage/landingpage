@@ -49,6 +49,7 @@ export default function WhatsAppLeadCaptureModal() {
     const [name, setName] = useState('')
     const [phone, setPhone] = useState('')
     const [email, setEmail] = useState('')
+    const [whatsappMarketingOptIn, setWhatsappMarketingOptIn] = useState(true)
     const [submitting, setSubmitting] = useState(false)
     const [error, setError] = useState('')
 
@@ -136,11 +137,15 @@ export default function WhatsAppLeadCaptureModal() {
                     referrer: document.referrer,
                     search_params: window.location.search,
                     consent_lgpd: true,
+                    whatsapp_marketing_opt_in: whatsappMarketingOptIn,
                     whatsapp_phone: state.phone,
                     metadata: {
                         ...pageMetadata,
                         ...(state.metadata || {}),
                         whatsapp_prefill_message: messagePreview,
+                        whatsapp_marketing_opt_in: whatsappMarketingOptIn,
+                        whatsapp_opt_in_source: 'site_whatsapp_capture',
+                        whatsapp_opt_in_at: whatsappMarketingOptIn ? new Date().toISOString() : null,
                         meta_event_name: 'Lead',
                         meta_event_id: leadMetaEventId,
                         ...getMetaBrowserData(),
@@ -270,6 +275,17 @@ export default function WhatsAppLeadCaptureModal() {
                                 />
                                 <Mail size={15} />
                             </div>
+                        </label>
+
+                        <label style={optInStyle}>
+                            <input
+                                type="checkbox"
+                                checked={whatsappMarketingOptIn}
+                                onChange={(e) => setWhatsappMarketingOptIn(e.target.checked)}
+                                disabled={submitting}
+                                style={checkboxStyle}
+                            />
+                            <span>Autorizo receber novidades, conteudos e oportunidades pelo WhatsApp.</span>
                         </label>
 
                         <p style={privacyStyle}>Ao enviar você está aceitando a <span style={{ textDecoration: 'underline' }}>política de privacidade</span>. * campos obrigatórios</p>
@@ -448,6 +464,24 @@ const inputStyle: CSSProperties = {
     background: 'transparent',
     color: '#1f2428',
     fontSize: 13,
+}
+
+const optInStyle: CSSProperties = {
+    display: 'grid',
+    gridTemplateColumns: '16px minmax(0, 1fr)',
+    alignItems: 'start',
+    gap: 7,
+    color: '#343a40',
+    fontSize: 10,
+    fontWeight: 700,
+    lineHeight: 1.35,
+}
+
+const checkboxStyle: CSSProperties = {
+    width: 13,
+    height: 13,
+    margin: '1px 0 0',
+    accentColor: '#0f9f7a',
 }
 
 const privacyStyle: CSSProperties = {

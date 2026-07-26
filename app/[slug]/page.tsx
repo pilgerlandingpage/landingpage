@@ -8,6 +8,8 @@ import UrgencyTemplate from '@/components/templates/UrgencyTemplate'
 import SocialProofTemplate from '@/components/templates/SocialProofTemplate'
 import VipExclusiveTemplate from '@/components/templates/VipExclusiveTemplate'
 import BravaConcettoTemplate from '@/components/templates/BravaConcettoTemplate'
+import ProductSalesTemplate from '@/components/templates/ProductSalesTemplate'
+import { corretorNota8Content, corretorNota8Offer } from '@/lib/products/corretor-nota-8-content'
 import GlobalHeader from '@/components/layout/GlobalHeader'
 import { LandingPageData } from '@/components/templates/types'
 import { Metadata } from 'next'
@@ -28,6 +30,7 @@ const LANDING_PAGE_SELECT = `
     slug,
     description,
     content,
+    page_type,
     primary_color,
     property_id,
     ai_agent_id,
@@ -117,7 +120,7 @@ async function fetchLandingPageBySlug(slug: string, select: string): Promise<Lan
             }
 
             console.warn('[Landing Page] lookup failed:', summary)
-            throw new Error('Nao foi possivel carregar esta landing page agora.')
+            throw new Error('Não foi possível carregar esta landing page agora.')
         }
 
         await waitForLandingLookupRetry(LANDING_LOOKUP_RETRY_DELAYS_MS[attempt])
@@ -246,6 +249,52 @@ function landingNumber(value: unknown): number | null {
     return null
 }
 
+function isConsultPrice(value: unknown) {
+    return /^consulte/i.test(landingText(value))
+}
+
+function isCorretorNota8Content(content: Record<string, any>) {
+    const product = landingRecord(content.product)
+    const name = landingText(product.name ?? content.custom_title).toLowerCase()
+    return content.template === 'corretor-nota-8' || name === 'corretor nota 8'
+}
+
+function productPriceDisplay(content: Record<string, any>, product: Record<string, any>, fallback = '') {
+    const raw = landingText(content.custom_price ?? product.price, fallback)
+    if (isCorretorNota8Content(content) && (!raw || isConsultPrice(raw))) {
+        return corretorNota8Offer.priceDisplay
+    }
+    return raw || fallback
+}
+
+function normalizeProductLandingContent(content: Record<string, any>) {
+    if (!isCorretorNota8Content(content)) return content
+
+    const product = landingRecord(content.product)
+    const price = productPriceDisplay(content, product, corretorNota8Offer.priceDisplay)
+
+    return {
+        ...content,
+        custom_price: price,
+        custom_cta: landingText(content.custom_cta ?? product.cta, corretorNota8Offer.primaryCtaLabel),
+        custom_description: landingText(content.custom_description ?? product.description, corretorNota8Content.description),
+        custom_hero_image: landingText(content.custom_hero_image ?? product.cover_image, corretorNota8Content.coverImage),
+        product: {
+            ...product,
+            name: landingText(product.name, corretorNota8Offer.productName),
+            subtitle: landingText(product.subtitle, corretorNota8Content.subtitle),
+            badge: landingText(product.badge, corretorNota8Content.badge),
+            author: landingText(product.author, corretorNota8Offer.author),
+            author_bio: landingText(product.author_bio, corretorNota8Content.authorBio),
+            author_quote: landingText(product.author_quote, corretorNota8Content.authorQuote),
+            checkout_url: landingText(product.checkout_url, corretorNota8Offer.checkoutUrl),
+            cover_image: landingText(product.cover_image, corretorNota8Content.coverImage),
+            price,
+            cta: landingText(product.cta, corretorNota8Offer.primaryCtaLabel),
+        },
+    }
+}
+
 function LandingPageUnavailable({ slug }: { slug: string }) {
     return (
         <>
@@ -273,18 +322,18 @@ function LandingPageUnavailable({ slug }: { slug: string }) {
                         fontWeight: 800,
                         letterSpacing: '0.08em',
                         textTransform: 'uppercase',
-                    }}>Pagina indisponivel</span>
+                    }}>Página indisponível</span>
                     <h1 style={{
                         margin: '0 0 12px',
                         color: '#23272a',
                         fontSize: 'clamp(1.7rem, 4vw, 2.5rem)',
                         lineHeight: 1.08,
-                    }}>Nao foi possivel carregar esta pagina agora.</h1>
+                    }}>Não foi possível carregar esta página agora.</h1>
                     <p style={{
                         margin: 0,
                         color: '#5d6874',
                         lineHeight: 1.6,
-                    }}>O banco de dados demorou para responder. Tente novamente em alguns instantes ou continue pela busca de imoveis.</p>
+                    }}>O banco de dados demorou para responder. Tente novamente em alguns instantes ou continue pela busca de imóveis.</p>
                     <div style={{
                         display: 'flex',
                         flexWrap: 'wrap',
@@ -314,7 +363,7 @@ function LandingPageUnavailable({ slug }: { slug: string }) {
                             color: '#171b1f',
                             fontWeight: 800,
                             textDecoration: 'none',
-                        }}>Ver imoveis</Link>
+                        }}>Ver imóveis</Link>
                     </div>
                 </section>
             </main>
@@ -342,11 +391,20 @@ function landingSeo(content: Record<string, any>) {
     return landingRecord(content.seo)
 }
 
+function landingPageType(lp: Record<string, any>, content: Record<string, any>): 'development' | 'product' {
+    const explicit = landingText(lp.page_type)
+    if (explicit === 'product') return 'product'
+    if (landingRecord(content.product).name || content.template === 'corretor-nota-8') return 'product'
+    return 'development'
+}
+
 function landingFaqItems(content: Record<string, any>) {
     const development = landingRecord(content.development)
+    const product = landingRecord(content.product)
     const seo = landingSeo(content)
     const sources = [
         development.faq,
+        product.faq,
         content.aeo_questions,
         content.aeoQuestions,
         seo.aeo_questions,
@@ -358,8 +416,8 @@ function landingFaqItems(content: Record<string, any>) {
         .map(item => {
             const record = landingRecord(item)
             return {
-                question: landingText(record.question ?? record.q),
-                answer: landingText(record.answer ?? record.a),
+                question: landingText(record.question ?? record.q ?? record.title),
+                answer: landingText(record.answer ?? record.a ?? record.description),
             }
         })
         .filter(item => item.question && item.answer)
@@ -371,6 +429,42 @@ function landingFaqItems(content: Record<string, any>) {
         seen.add(key)
         return true
     }).slice(0, 12)
+}
+
+function productJsonLd(content: Record<string, any>, path: string, title: string, description: string, heroImage: string) {
+    const product = landingRecord(content.product)
+    const url = absoluteUrl(path)
+    const isCorretorNota8 = isCorretorNota8Content(content)
+    const price = landingNumber(productPriceDisplay(content, product)) ?? (isCorretorNota8 ? corretorNota8Offer.priceInCents / 100 : null)
+    const checkoutUrl = landingText(product.checkout_url, isCorretorNota8 ? corretorNota8Offer.checkoutUrl : '')
+    const author = landingText(product.author, isCorretorNota8 ? corretorNota8Offer.author : 'Guilherme Pilger')
+
+    return {
+        '@context': 'https://schema.org',
+        '@type': 'Book',
+        '@id': `${url}#product`,
+        name: landingText(product.name, isCorretorNota8 ? corretorNota8Offer.productName : title),
+        url,
+        image: landingText(product.cover_image ?? content.custom_hero_image, isCorretorNota8 ? corretorNota8Content.coverImage : heroImage || DEFAULT_OG_IMAGE),
+        description: landingText(content.custom_description ?? product.description, isCorretorNota8 ? corretorNota8Content.description : description),
+        author: {
+            '@type': 'Person',
+            name: author,
+        },
+        publisher: {
+            '@id': `${absoluteUrl('/')}#organization`,
+        },
+        offers: {
+            '@type': 'Offer',
+            url: checkoutUrl ? absoluteUrl(checkoutUrl) : url,
+            price: price ?? undefined,
+            priceCurrency: 'BRL',
+            availability: 'https://schema.org/InStock',
+            seller: {
+                '@id': `${absoluteUrl('/')}#organization`,
+            },
+        },
+    }
 }
 
 function unitDetailPath(unit: Record<string, any>) {
@@ -398,7 +492,7 @@ function developmentUnitItems(development: Record<string, any>) {
         .map(item => landingRecord(item))
         .map(unit => {
             const url = unitDetailPath(unit)
-            const name = landingText(unit.title, landingText(unit.type, 'Unidade disponivel'))
+            const name = landingText(unit.title, landingText(unit.type, 'Unidade disponível'))
             if (!url || !name) return null
             return {
                 name,
@@ -479,8 +573,8 @@ function developmentJsonLd(content: Record<string, any>, path: string, title: st
     return [
         developmentJsonLd,
         unitItems.length ? itemListJsonLd({
-            name: `Unidades disponiveis no ${name}`,
-            description: `Lista de imoveis ativos vinculados ao empreendimento ${name}.`,
+            name: `Unidades disponíveis no ${name}`,
+            description: `Lista de imóveis ativos vinculados ao empreendimento ${name}.`,
             path,
             items: unitItems.slice(0, 80),
         }) : undefined,
@@ -496,7 +590,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         const supabase = createAdminClient()
         const { data, error } = await supabase
             .from('landing_pages')
-            .select('title, content')
+            .select('title, content, page_type')
             .eq('slug', slug)
             .abortSignal(createSupabaseAbortSignal(3000))
             .maybeSingle()
@@ -508,19 +602,31 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         return { title: 'Guilherme Pilger' }
     }
 
-    if (!lp) return { title: 'Pagina nao encontrada' }
+    if (!lp) return { title: 'Página não encontrada' }
 
-    const content = landingRecord(lp.content)
+    const rawContent = landingRecord(lp.content)
+    const initialPageType = landingPageType(lp as Record<string, any>, rawContent)
+    const content = initialPageType === 'product' ? normalizeProductLandingContent(rawContent) : rawContent
+    const pageType = landingPageType(lp as Record<string, any>, content)
     const development = landingRecord(content.development)
+    const product = landingRecord(content.product)
     const seo = landingSeo(content)
-    const title = landingText(seo.title ?? content.seo_title ?? content.custom_title, lp.title)
+    const isCorretorNota8 = pageType === 'product' && isCorretorNota8Content(content)
+    const title = landingText(
+        seo.title ?? content.seo_title ?? content.custom_title ?? product.name,
+        isCorretorNota8 ? corretorNota8Offer.productName : lp.title
+    )
     const description = landingText(
-        seo.description ?? content.meta_description ?? content.custom_description ?? development.description,
-        'Confira este imovel exclusivo.'
+        seo.description ?? content.meta_description ?? content.custom_description ?? product.description ?? development.description,
+        isCorretorNota8
+            ? 'Conheça o Corretor Nota 8, livro digital de Guilherme Pilger para corretores que querem posicionamento, método e disciplina.'
+            : pageType === 'product'
+            ? 'Conheça este produto de Guilherme Pilger.'
+            : 'Confira este imóvel exclusivo.'
     )
     const image = landingText(
-        seo.og_image ?? seo.image ?? content.custom_hero_image ?? development.heroImage ?? development.hero_image,
-        firstGalleryImage(content, development) || DEFAULT_OG_IMAGE
+        seo.og_image ?? seo.image ?? product.cover_image ?? content.custom_hero_image ?? development.heroImage ?? development.hero_image,
+        isCorretorNota8 ? corretorNota8Content.coverImage : firstGalleryImage(content, development) || DEFAULT_OG_IMAGE
     )
     const canonical = landingText(seo.canonical_path ?? content.canonical_path, `/${slug}`)
 
@@ -560,7 +666,11 @@ export default async function DynamicLandingPage({ params }: { params: Promise<{
         notFound()
     }
 
-    const content = landingRecord(lp.content)
+    const rawContent = landingRecord(lp.content)
+    const initialPageType = landingPageType(lp, rawContent)
+    const content = initialPageType === 'product' ? normalizeProductLandingContent(rawContent) : rawContent
+    const pageType = landingPageType(lp, content)
+    const product = landingRecord(content.product)
     const property = landingRecord(lp.property)
     const agent = landingRecord(lp.agent)
 
@@ -579,16 +689,18 @@ export default async function DynamicLandingPage({ params }: { params: Promise<{
     }
 
     const displayData: LandingPageData = {
-        title: content.custom_title || property.title || lp.title,
-        description: content.custom_description || property.description || 'Descricao nao disponivel.',
-        heroImage: content.custom_hero_image || (property.images && property.images[0]) || '/placeholder-house.jpg',
-        price: content.custom_price || (property.price ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(property.price) : 'Consulte'),
-        cta: content.custom_cta || 'Agendar Visita',
+        title: content.custom_title || product.name || (pageType === 'product' && isCorretorNota8Content(content) ? corretorNota8Offer.productName : property.title) || lp.title,
+        description: content.custom_description || product.description || (pageType === 'product' && isCorretorNota8Content(content) ? corretorNota8Content.description : property.description) || 'Descrição não disponível.',
+        heroImage: product.cover_image || content.custom_hero_image || (pageType === 'product' && isCorretorNota8Content(content) ? corretorNota8Content.coverImage : property.images && property.images[0]) || '/placeholder-house.jpg',
+        price: pageType === 'product'
+            ? productPriceDisplay(content, product, corretorNota8Offer.priceDisplay)
+            : content.custom_price || product.price || (property.price ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(property.price) : 'Consulte'),
+        cta: content.custom_cta || product.cta || (pageType === 'product' ? corretorNota8Offer.primaryCtaLabel : 'Agendar Visita'),
         stats: {
             bedrooms: (content.custom_stats?.bedrooms) ?? (property.bedrooms || 0),
             bathrooms: (content.custom_stats?.bathrooms) ?? (property.bathrooms || 0),
             area: (content.custom_stats?.area) ?? (property.area || property.area_m2 || property.area_private_m2 || 0),
-            location: (content.custom_stats?.location) ?? (property.location || 'Localizacao privilegiada')
+            location: (content.custom_stats?.location) ?? (property.location || 'Localização privilegiada')
         },
         amenities: (content.custom_features && content.custom_features.length > 0)
             ? content.custom_features
@@ -597,7 +709,7 @@ export default async function DynamicLandingPage({ params }: { params: Promise<{
         primaryColor: lp.primary_color || '#c9a96e'
     }
 
-    const templateId = content.template || 'classic'
+    const templateId = content.template || (pageType === 'product' ? 'corretor-nota-8' : 'classic')
     const templateContent = {
         ...content,
         landing_page_created_at: lp.created_at || null,
@@ -611,12 +723,12 @@ export default async function DynamicLandingPage({ params }: { params: Promise<{
         slug: slug,
         landingPageId: lp.id,
         agentName: agent.name,
-        greetingMessage: agent.greeting_message
+        greetingMessage: agent.greeting_message,
     }
     const gallery = getGallery()
     const pageUrl = absoluteUrl(`/${slug}`)
     const faqItems = landingFaqItems(content)
-    const jsonLd = [
+    const baseJsonLd = [
         organizationJsonLd(),
         webPageJsonLd({
             path: `/${slug}`,
@@ -629,46 +741,59 @@ export default async function DynamicLandingPage({ params }: { params: Promise<{
             { name: 'Home', url: '/' },
             { name: displayData.title, url: `/${slug}` },
         ]),
-        ...developmentJsonLd(content, `/${slug}`, displayData.title, displayData.description, displayData.heroImage),
         ...(faqItems.length ? [faqPageJsonLd(faqItems)] : []),
-        property.id ? {
-            '@context': 'https://schema.org',
-            '@type': 'RealEstateListing',
-            '@id': `${pageUrl}#listing`,
-            name: displayData.title,
-            url: pageUrl,
-            image: gallery.length ? gallery : [displayData.heroImage],
-            description: displayData.description,
-            mainEntityOfPage: {
-                '@id': `${pageUrl}#webpage`,
-            },
-            address: {
-                '@type': 'PostalAddress',
-                addressLocality: property.city || displayData.stats.location,
-                addressRegion: property.state || 'SC',
-                addressCountry: 'BR',
-                streetAddress: [property.neighborhood, property.street].filter(Boolean).join(', ') || undefined,
-            },
-            floorSize: property.area_m2 || property.area_private_m2 || displayData.stats.area ? {
-                '@type': 'QuantitativeValue',
-                value: Number(property.area_m2 || property.area_private_m2 || displayData.stats.area),
-                unitCode: 'MTK',
-            } : undefined,
-            numberOfRooms: property.bedrooms || property.suites || displayData.stats.bedrooms || undefined,
-            offers: {
-                '@type': 'Offer',
-                price: property.price || undefined,
-                priceCurrency: 'BRL',
-                availability: 'https://schema.org/InStock',
+    ]
+
+    const jsonLd = pageType === 'product'
+        ? [
+            ...baseJsonLd,
+            productJsonLd(content, `/${slug}`, displayData.title, displayData.description, displayData.heroImage),
+        ].filter(Boolean) as Record<string, unknown>[]
+        : [
+            ...baseJsonLd,
+            ...developmentJsonLd(content, `/${slug}`, displayData.title, displayData.description, displayData.heroImage),
+            property.id ? {
+                '@context': 'https://schema.org',
+                '@type': 'RealEstateListing',
+                '@id': `${pageUrl}#listing`,
+                name: displayData.title,
                 url: pageUrl,
-                seller: {
-                    '@id': `${absoluteUrl('/')}#organization`,
+                image: gallery.length ? gallery : [displayData.heroImage],
+                description: displayData.description,
+                mainEntityOfPage: {
+                    '@id': `${pageUrl}#webpage`,
                 },
-            },
-        } : undefined,
-    ].filter(Boolean) as Record<string, unknown>[]
+                address: {
+                    '@type': 'PostalAddress',
+                    addressLocality: property.city || displayData.stats.location,
+                    addressRegion: property.state || 'SC',
+                    addressCountry: 'BR',
+                    streetAddress: [property.neighborhood, property.street].filter(Boolean).join(', ') || undefined,
+                },
+                floorSize: property.area_m2 || property.area_private_m2 || displayData.stats.area ? {
+                    '@type': 'QuantitativeValue',
+                    value: Number(property.area_m2 || property.area_private_m2 || displayData.stats.area),
+                    unitCode: 'MTK',
+                } : undefined,
+                numberOfRooms: property.bedrooms || property.suites || displayData.stats.bedrooms || undefined,
+                offers: {
+                    '@type': 'Offer',
+                    price: property.price || undefined,
+                    priceCurrency: 'BRL',
+                    availability: 'https://schema.org/InStock',
+                    url: pageUrl,
+                    seller: {
+                        '@id': `${absoluteUrl('/')}#organization`,
+                    },
+                },
+            } : undefined,
+        ].filter(Boolean) as Record<string, unknown>[]
 
     const page = (() => {
+        if (pageType === 'product') {
+            return <ProductSalesTemplate {...commonProps} />
+        }
+
         switch (templateId) {
             case 'brava-concetto':
                 return (

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { approveSocialSuggestion, respondToSocialSuggestion } from '@/lib/social/meta-responder'
+import { handleCommentDmSuggestionAction } from '@/lib/social/meta-comment-dm-automation'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,11 +20,28 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === 'approve') {
+      const commentDm = await handleCommentDmSuggestionAction({
+        suggestionId,
+        action,
+        reply: cleanString(body.reply, 1800),
+      })
+      if (commentDm.handled) return NextResponse.json({ success: true, action: 'approve', ...commentDm })
+
       const suggestion = await approveSocialSuggestion(suggestionId)
       return NextResponse.json({ success: true, action: 'approve', suggestion })
     }
 
     if (action === 'send') {
+      const commentDm = await handleCommentDmSuggestionAction({
+        suggestionId,
+        action,
+        reply: cleanString(body.reply, 1800),
+      })
+      if (commentDm.handled) {
+        const status = commentDm.sent ? 200 : 500
+        return NextResponse.json({ success: commentDm.sent, action: 'send', ...commentDm }, { status })
+      }
+
       const result = await respondToSocialSuggestion({
         suggestionId,
         reply: cleanString(body.reply, 1800),

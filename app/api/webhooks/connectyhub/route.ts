@@ -5,6 +5,7 @@ import { POST as processWhatsAppWebhook } from '../whatsapp/route'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
+export const maxDuration = 60
 
 const MAX_WEBHOOK_BODY_SIZE = 1024 * 1024
 
