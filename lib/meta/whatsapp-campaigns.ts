@@ -267,7 +267,7 @@ export async function listMetaWhatsAppCampaigns(input: ListMetaWhatsAppCampaigns
 
   const { data: templates, error: templatesError } = await supabase
     .from('meta_whatsapp_templates')
-    .select('id, name, language, category, status, quality_score, last_synced_at')
+    .select('id, name, language, category, status, quality_score, components, last_synced_at')
     .order('status', { ascending: true })
     .order('name', { ascending: true })
     .limit(200)
