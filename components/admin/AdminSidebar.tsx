@@ -47,6 +47,8 @@ type SubNavItem = SubNavLink | SubNavGroup
 type NavItem = { href: string; icon: any; label: string; section: string; subItems?: SubNavItem[] }
 type UserSector = { id?: string; name?: string; color?: string; icon?: string }
 
+const META_CAMPAIGNS_PATH = '/admin/whatsapp/campaigns'
+
 const MODULE_NAV: Record<string, NavItem> = {
     dashboard: { href: '/admin/marketing', icon: Megaphone, label: 'Dashboard Marketing', section: 'MARKETING' },
     funnel: { href: '/admin/funnel', icon: Filter, label: 'Funil de Conversao', section: 'MARKETING' },
@@ -133,6 +135,7 @@ const MODULE_NAV: Record<string, NavItem> = {
         section: 'MARKETING',
         subItems: [
             { href: '/admin/ads', label: 'Meta Ads' },
+            { href: META_CAMPAIGNS_PATH, label: 'Campanhas Meta' },
             { href: '/admin/ads/google', label: 'Google Ads' },
             { href: '/admin/ads/analytics', label: 'Google Analytics' },
             { href: '/admin/ads/organic', label: 'Trafego Organico' },
@@ -153,7 +156,6 @@ const MODULE_NAV: Record<string, NavItem> = {
             { href: '/admin/whatsapp', label: 'Conectados' },
             { href: '/admin/whatsapp/global', label: 'WhatsApp Global' },
             { href: '/admin/whatsapp/agenda', label: 'Agenda' },
-            { href: '/admin/whatsapp/campaigns', label: 'Campanhas' },
             { href: '/admin/whatsapp/labels', label: 'Etiquetas' },
             { href: '/admin/whatsapp/quick-replies', label: 'Respostas Rapidas' },
         ],
@@ -218,7 +220,15 @@ export default function AdminSidebar() {
     const isHrefActive = (href: string) => {
         if (href === '/admin') return pathname === '/admin'
         if (href === '/admin/pilger-ai') return pathname === '/admin/pilger-ai'
+        if (href === '/admin/ads') return pathname === href
+        if (href === '/admin/whatsapp') return pathname === href
         return pathname === href || pathname.startsWith(`${href}/`)
+    }
+
+    const isParentHrefActive = (href: string) => {
+        if (href === '/admin/ads') return pathname === href || pathname.startsWith(`${href}/`) || pathname === META_CAMPAIGNS_PATH
+        if (href === '/admin/whatsapp') return pathname === href || (pathname.startsWith(`${href}/`) && pathname !== META_CAMPAIGNS_PATH)
+        return isHrefActive(href)
     }
 
     const toggleSubGroup = (parentHref: string, groupLabel: string) => {
@@ -254,10 +264,10 @@ export default function AdminSidebar() {
     }, [])
 
     useEffect(() => {
-        if (pathname.startsWith('/admin/ads')) {
+        if (pathname.startsWith('/admin/ads') || pathname === META_CAMPAIGNS_PATH) {
             setExpandedMenus(prev => ({ ...prev, '/admin/ads': true }))
         }
-        if (pathname.startsWith('/admin/whatsapp')) {
+        if (pathname.startsWith('/admin/whatsapp') && pathname !== META_CAMPAIGNS_PATH) {
             setExpandedMenus(prev => ({ ...prev, '/admin/whatsapp': true }))
         }
         if (pathname.startsWith('/admin/finance')) {
@@ -429,9 +439,7 @@ export default function AdminSidebar() {
                             <div className="admin-nav-section">{section.label}</div>
                             {section.items.map(item => {
                                 const isExpanded = expandedMenus[item.href] || false
-                                const isParentActive = item.href === '/admin'
-                                    ? pathname === '/admin'
-                                    : pathname === item.href || pathname.startsWith(`${item.href}/`)
+                                const isParentActive = isParentHrefActive(item.href)
 
                                 return (
                                     <div key={item.href}>

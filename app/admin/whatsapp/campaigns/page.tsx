@@ -141,7 +141,7 @@ export default function CampaignsPage() {
     const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
     // Campaign form state
-    const [sendProvider, setSendProvider] = useState<'connectyhub' | 'meta_whatsapp'>('connectyhub')
+    const [sendProvider, setSendProvider] = useState<'connectyhub' | 'meta_whatsapp'>('meta_whatsapp')
     const [msgType, setMsgType] = useState('text')
     const [msgText, setMsgText] = useState('')
     const [mediaUrl, setMediaUrl] = useState('')
@@ -386,10 +386,10 @@ export default function CampaignsPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
                 <div>
                     <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.5rem', margin: 0 }}>
-                        <Send size={26} style={{ color: 'var(--gold)' }} /> Campanhas WhatsApp
+                        <Send size={26} style={{ color: 'var(--gold)' }} /> Campanhas Meta
                     </h1>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '6px' }}>
-                        Envio em massa com controle de velocidade e agendamento
+                        Envios oficiais pelo WhatsApp Cloud API para listas com opt-in
                     </p>
                 </div>
                 <div style={{ display: 'flex', gap: '8px' }}>
@@ -415,8 +415,8 @@ export default function CampaignsPage() {
                 </span>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     {[
-                        { value: 'connectyhub', label: 'ConnectyHub Atendimento' },
                         { value: 'meta_whatsapp', label: 'Meta Oficial Campanhas' },
+                        { value: 'connectyhub', label: 'ConnectyHub Atendimento' },
                     ].map(option => (
                         <button
                             key={option.value}
