@@ -430,7 +430,7 @@ export default function MetaTemplatesPage() {
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <Link href="/admin/whatsapp/campaigns" style={{ color: 'var(--gold)', textDecoration: 'none', fontWeight: 700, padding: '10px 12px' }}>
-            Campanhas Meta
+            Campanhas Meta WhatsApp
           </Link>
           <button type="button" onClick={syncTemplates} disabled={syncing || saving} style={actionButtonStyle(false)}>
             {syncing ? <Loader2 size={16} className="spin" /> : <RefreshCw size={16} />} Sincronizar Meta

@@ -140,7 +140,7 @@ const INTEGRATIONS: IntegrationCard[] = [
     {
         id: 'meta_whatsapp',
         title: 'Campanhas Meta - WhatsApp Oficial',
-        description: 'Canal oficial Meta WhatsApp Cloud API para campanhas em massa, blog, noticias e follow-ups de leads autorizados. Atendimento com IA continua nas instancias ConnectyHub.',
+        description: 'Canal oficial Meta WhatsApp Cloud API para campanhas em massa, blog, noticias e follow-ups de leads autorizados.',
         icon: 'whatsapp',
         fields: [
             {

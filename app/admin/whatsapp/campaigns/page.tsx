@@ -684,10 +684,10 @@ export default function CampaignsPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
                 <div>
                     <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.5rem', margin: 0 }}>
-                        <Send size={26} style={{ color: 'var(--gold)' }} /> Campanhas Meta
+                        <Send size={26} style={{ color: 'var(--gold)' }} /> Campanhas Meta WhatsApp
                     </h1>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '6px' }}>
-                        Envios oficiais pelo WhatsApp Cloud API para listas com opt-in
+                        Crie campanhas no WhatsApp usando a API oficial da Meta para listas com opt-in
                     </p>
                 </div>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -732,14 +732,11 @@ export default function CampaignsPage() {
                         fontWeight: 700,
                         fontSize: '0.82rem',
                     }}>
-                        Meta Oficial Campanhas
-                    </span>
-                    <span style={{ color: 'var(--text-muted)', fontSize: '0.78rem', lineHeight: 1.45 }}>
-                        ConnectyHub fica somente para atendimento dos leads e agentes IA.
+                        WhatsApp Cloud API Oficial
                     </span>
                 </div>
                 <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.78rem', lineHeight: 1.45 }}>
-                    Use somente listas com opt-in e templates aprovados. Follow-ups, campanhas em massa e mensagens ativas saem pela API oficial da Meta.
+                    Use somente listas com opt-in e templates aprovados. Follow-ups, campanhas em massa e mensagens ativas saem pelo WhatsApp oficial da Meta.
                 </p>
             </div>
 
@@ -1388,10 +1385,10 @@ function MetaOfficialCampaignPanel({
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
                     <div>
                         <h2 style={{ fontSize: '1.05rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-                            <MessageSquare size={18} style={{ color: 'var(--gold)' }} /> Campanhas Oficiais Meta
+                            <MessageSquare size={18} style={{ color: 'var(--gold)' }} /> Campanhas Meta WhatsApp
                         </h2>
                         <p style={{ margin: '5px 0 0', color: 'var(--text-muted)', fontSize: '0.78rem' }}>
-                            Fila oficial com templates aprovados, opt-in, status de entrega e varios numeros Meta.
+                            Fila oficial do WhatsApp com templates aprovados, opt-in, status de entrega e varios numeros Meta.
                         </p>
                     </div>
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -1510,7 +1507,7 @@ function MetaOfficialCampaignPanel({
                     color: 'var(--text-muted)',
                 }}>
                     <Send size={32} style={{ opacity: 0.3, marginBottom: '8px' }} />
-                    <p style={{ margin: 0 }}>Nenhuma campanha oficial Meta encontrada.</p>
+                    <p style={{ margin: 0 }}>Nenhuma campanha oficial de WhatsApp encontrada.</p>
                 </div>
             ) : (
                 <div style={{ display: 'grid', gap: '10px' }}>

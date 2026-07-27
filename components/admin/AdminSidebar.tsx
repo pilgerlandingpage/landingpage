@@ -136,7 +136,7 @@ const MODULE_NAV: Record<string, NavItem> = {
         section: 'MARKETING',
         subItems: [
             { href: '/admin/ads', label: 'Meta Ads' },
-            { href: META_CAMPAIGNS_PATH, label: 'Campanhas Meta' },
+            { href: META_CAMPAIGNS_PATH, label: 'Campanhas Meta WhatsApp' },
             { href: META_TEMPLATES_PATH, label: 'Templates Meta' },
             { href: '/admin/ads/google', label: 'Google Ads' },
             { href: '/admin/ads/analytics', label: 'Google Analytics' },
