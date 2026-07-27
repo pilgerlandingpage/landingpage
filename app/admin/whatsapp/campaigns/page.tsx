@@ -238,7 +238,7 @@ export default function CampaignsPage() {
     const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
     // Campaign form state
-    const [sendProvider, setSendProvider] = useState<'connectyhub' | 'meta_whatsapp'>('meta_whatsapp')
+    const [sendProvider] = useState<'connectyhub' | 'meta_whatsapp'>('meta_whatsapp')
     const [msgType, setMsgType] = useState('text')
     const [msgText, setMsgText] = useState('')
     const [mediaUrl, setMediaUrl] = useState('')
@@ -717,39 +717,29 @@ export default function CampaignsPage() {
             <div style={{
                 padding: '16px 20px', borderRadius: '12px', marginBottom: '20px',
                 background: 'var(--bg-secondary)', border: '1px solid var(--border)',
-                display: 'grid', gap: '10px',
+                display: 'grid', gap: '8px',
             }}>
                 <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                    Canal de envio
+                    Canal oficial ativo
                 </span>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    {[
-                        { value: 'meta_whatsapp', label: 'Meta Oficial Campanhas' },
-                        { value: 'connectyhub', label: 'ConnectyHub Atendimento' },
-                    ].map(option => (
-                        <button
-                            key={option.value}
-                            type="button"
-                            onClick={() => setSendProvider(option.value as 'connectyhub' | 'meta_whatsapp')}
-                            style={{
-                                padding: '9px 14px',
-                                borderRadius: '8px',
-                                border: `1px solid ${sendProvider === option.value ? 'var(--gold)' : 'var(--border)'}`,
-                                background: sendProvider === option.value ? 'rgba(201,169,110,0.12)' : 'rgba(255,255,255,0.03)',
-                                color: sendProvider === option.value ? 'var(--gold)' : 'var(--text-secondary)',
-                                cursor: 'pointer',
-                                fontWeight: 700,
-                                fontSize: '0.82rem',
-                            }}
-                        >
-                            {option.label}
-                        </button>
-                    ))}
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <span style={{
+                        padding: '9px 14px',
+                        borderRadius: '8px',
+                        border: '1px solid var(--gold)',
+                        background: 'rgba(201,169,110,0.12)',
+                        color: 'var(--gold)',
+                        fontWeight: 700,
+                        fontSize: '0.82rem',
+                    }}>
+                        Meta Oficial Campanhas
+                    </span>
+                    <span style={{ color: 'var(--text-muted)', fontSize: '0.78rem', lineHeight: 1.45 }}>
+                        ConnectyHub fica somente para atendimento dos leads e agentes IA.
+                    </span>
                 </div>
                 <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.78rem', lineHeight: 1.45 }}>
-                    {sendProvider === 'meta_whatsapp'
-                        ? 'Use somente listas com opt-in e templates aprovados. Respostas devem apontar para o numero ConnectyHub de atendimento.'
-                        : 'Use para fluxos de atendimento, testes internos e operacao dos agentes IA conectados.'}
+                    Use somente listas com opt-in e templates aprovados. Follow-ups, campanhas em massa e mensagens ativas saem pela API oficial da Meta.
                 </p>
             </div>
 
