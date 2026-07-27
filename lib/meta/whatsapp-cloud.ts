@@ -57,6 +57,15 @@ export interface MetaWhatsAppTemplate {
   quality_score?: unknown
 }
 
+export interface MetaWhatsAppTemplateMutationInput {
+  name?: string
+  language?: string
+  category?: string
+  components?: unknown[]
+  templateId?: string
+  messageSendTtlSeconds?: number
+}
+
 export interface SendTemplateMessageInput {
   to: string
   templateName: string
@@ -203,7 +212,7 @@ async function graphRequest<T>(
   resolved: MetaWhatsAppResolvedConfig,
   path: string,
   options: {
-    method?: 'GET' | 'POST'
+    method?: 'GET' | 'POST' | 'DELETE'
     params?: Record<string, string>
     body?: Record<string, unknown>
   } = {}
@@ -309,6 +318,91 @@ export async function listMetaWhatsAppTemplates(config: ConfigMap = {}) {
   })
 
   return payload.data || []
+}
+
+function normalizeTemplateCategory(value?: string) {
+  const selected = cleanText(value || 'MARKETING', 40).toUpperCase()
+  return ['MARKETING', 'UTILITY', 'AUTHENTICATION'].includes(selected) ? selected : 'MARKETING'
+}
+
+export function normalizeMetaWhatsAppTemplateName(value: unknown) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9_]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 512)
+}
+
+function cleanTemplateComponents(value: unknown): unknown[] {
+  if (!Array.isArray(value)) return []
+  return value
+    .filter(component => typeof component === 'object' && component !== null && !Array.isArray(component))
+    .map(component => component as Record<string, unknown>)
+    .filter(component => cleanText(component.type, 30))
+}
+
+export async function createMetaWhatsAppTemplate(input: MetaWhatsAppTemplateMutationInput, config: ConfigMap = {}) {
+  const resolved = resolveMetaWhatsAppConfig(config)
+  if (resolved.missing.length) throw new Error(`Configuracao incompleta: ${resolved.missing.join(', ')}`)
+
+  const name = normalizeMetaWhatsAppTemplateName(input.name)
+  const components = cleanTemplateComponents(input.components)
+  if (!name) throw new Error('Nome do template obrigatorio.')
+  if (!components.some(component => cleanText((component as Record<string, unknown>).type).toUpperCase() === 'BODY')) {
+    throw new Error('Template precisa ter componente BODY.')
+  }
+
+  return graphRequest<{ id?: string; status?: string; category?: string }>(resolved, `/${resolved.wabaId}/message_templates`, {
+    method: 'POST',
+    body: {
+      name,
+      language: normalizeLanguage(input.language || resolved.defaultLanguage),
+      category: normalizeTemplateCategory(input.category),
+      components,
+      ...(input.messageSendTtlSeconds ? { message_send_ttl_seconds: input.messageSendTtlSeconds } : {}),
+    },
+  })
+}
+
+export async function editMetaWhatsAppTemplate(input: MetaWhatsAppTemplateMutationInput, config: ConfigMap = {}) {
+  const resolved = resolveMetaWhatsAppConfig(config)
+  if (!resolved.accessToken) throw new Error('System User Access Token ausente.')
+
+  const templateId = cleanText(input.templateId, 120)
+  const components = cleanTemplateComponents(input.components)
+  if (!templateId) throw new Error('ID Meta do template obrigatorio para editar.')
+
+  const body: Record<string, unknown> = {
+    ...(input.category ? { category: normalizeTemplateCategory(input.category) } : {}),
+    ...(components.length ? { components } : {}),
+    ...(input.messageSendTtlSeconds ? { message_send_ttl_seconds: input.messageSendTtlSeconds } : {}),
+  }
+  if (!Object.keys(body).length) throw new Error('Informe ao menos categoria, componentes ou TTL para editar.')
+
+  return graphRequest<{ success?: boolean; id?: string; status?: string }>(resolved, `/${templateId}`, {
+    method: 'POST',
+    body,
+  })
+}
+
+export async function deleteMetaWhatsAppTemplate(input: MetaWhatsAppTemplateMutationInput, config: ConfigMap = {}) {
+  const resolved = resolveMetaWhatsAppConfig(config)
+  if (resolved.missing.length) throw new Error(`Configuracao incompleta: ${resolved.missing.join(', ')}`)
+
+  const templateId = cleanText(input.templateId, 120)
+  const name = normalizeMetaWhatsAppTemplateName(input.name)
+  if (templateId) {
+    return graphRequest<{ success?: boolean }>(resolved, `/${templateId}`, { method: 'DELETE' })
+  }
+  if (!name) throw new Error('Informe o nome ou ID Meta do template para excluir.')
+
+  return graphRequest<{ success?: boolean }>(resolved, `/${resolved.wabaId}/message_templates`, {
+    method: 'DELETE',
+    params: { name },
+  })
 }
 
 export async function sendMetaWhatsAppTemplateMessage(input: SendTemplateMessageInput) {

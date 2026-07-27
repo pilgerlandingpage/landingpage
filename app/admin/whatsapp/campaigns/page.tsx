@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import {
     Send, Loader2, AlertCircle, CheckCircle2, Clock, Users,
     Plus, Trash2, Pause, Play, FileText, Image, Mic, Video,
@@ -689,7 +690,18 @@ export default function CampaignsPage() {
                         Envios oficiais pelo WhatsApp Cloud API para listas com opt-in
                     </p>
                 </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <Link
+                        href="/admin/ads/meta-templates"
+                        style={{
+                            padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border)',
+                            background: 'rgba(255,255,255,0.04)', color: 'var(--text-primary)',
+                            fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px',
+                            textDecoration: 'none',
+                        }}
+                    >
+                        <FileText size={16} /> Templates Meta
+                    </Link>
                     <button onClick={() => setShowCreateForm(!showCreateForm)}
                         style={{
                             padding: '10px 20px', borderRadius: '10px', border: 'none', cursor: 'pointer',

@@ -48,6 +48,7 @@ type NavItem = { href: string; icon: any; label: string; section: string; subIte
 type UserSector = { id?: string; name?: string; color?: string; icon?: string }
 
 const META_CAMPAIGNS_PATH = '/admin/whatsapp/campaigns'
+const META_TEMPLATES_PATH = '/admin/ads/meta-templates'
 
 const MODULE_NAV: Record<string, NavItem> = {
     dashboard: { href: '/admin/marketing', icon: Megaphone, label: 'Dashboard Marketing', section: 'MARKETING' },
@@ -136,6 +137,7 @@ const MODULE_NAV: Record<string, NavItem> = {
         subItems: [
             { href: '/admin/ads', label: 'Meta Ads' },
             { href: META_CAMPAIGNS_PATH, label: 'Campanhas Meta' },
+            { href: META_TEMPLATES_PATH, label: 'Templates Meta' },
             { href: '/admin/ads/google', label: 'Google Ads' },
             { href: '/admin/ads/analytics', label: 'Google Analytics' },
             { href: '/admin/ads/organic', label: 'Trafego Organico' },
