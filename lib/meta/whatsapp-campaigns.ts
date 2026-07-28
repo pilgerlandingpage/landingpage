@@ -44,6 +44,17 @@ export interface ListMetaWhatsAppCampaignsInput {
   limit?: number
 }
 
+type MetaWhatsAppAnalyticsBucket = {
+  date: string
+  campaigns: number
+  recipients: number
+  accepted: number
+  delivered: number
+  read: number
+  failed: number
+  skipped: number
+}
+
 export interface GetMetaWhatsAppCampaignDetailInput {
   campaignId: string
   limit?: number
@@ -51,6 +62,276 @@ export interface GetMetaWhatsAppCampaignDetailInput {
 
 function cleanText(value: unknown, maxLength = 300) {
   return String(value || '').trim().slice(0, maxLength)
+}
+
+function isMetaSenderReady(sender: any) {
+  const metaStatus = cleanText(sender?.meta_status, 40).toUpperCase()
+  return sender?.local_status === 'active'
+    && metaStatus === 'CONNECTED'
+    && Number(sender.daily_sent_count || 0) < Number(sender.daily_limit || 0)
+}
+
+function asNumber(value: unknown) {
+  const parsed = Number(value || 0)
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
+function percentage(part: number, total: number) {
+  if (!total) return 0
+  return Math.round((part / total) * 1000) / 10
+}
+
+function dateKey(value?: string | null) {
+  const date = value ? new Date(value) : new Date()
+  if (!Number.isFinite(date.getTime())) return new Date().toISOString().slice(0, 10)
+  return date.toISOString().slice(0, 10)
+}
+
+function getMetaErrorHint(code?: string | null, message?: string | null) {
+  const selectedCode = cleanText(code, 40)
+  const selectedMessage = cleanText(message, 260).toLowerCase()
+
+  if (selectedCode === '131042' || selectedMessage.includes('payment')) {
+    return 'Falha de pagamento/elegibilidade da WABA. Verifique metodo de pagamento, linha de credito e cobranca da conta WhatsApp.'
+  }
+  if (selectedCode === '131026') {
+    return 'O destinatario nao pode receber esta mensagem. Valide se o numero existe no WhatsApp e se nao bloqueou o contato.'
+  }
+  if (selectedCode === '131047') {
+    return 'Janela de atendimento expirada. Para iniciar conversa ativa, use um template aprovado.'
+  }
+  if (selectedCode === '132000' || selectedCode === '132001') {
+    return 'Parametros do template nao batem com o modelo aprovado. Confira variaveis, idioma e componentes.'
+  }
+  if (selectedCode === '132015' || selectedCode === '132016') {
+    return 'Template pausado ou desabilitado pela Meta. Revise a qualidade do template e use outro modelo aprovado.'
+  }
+  if (selectedCode === '131056') {
+    return 'Limite de envio atingido para o numero oficial. Aguarde o reset do limite ou distribua em outro numero Meta.'
+  }
+  if (selectedMessage.includes('rate limit') || selectedMessage.includes('limit')) {
+    return 'Limite operacional atingido. Reduza velocidade, use pool de numeros ou aguarde o limite renovar.'
+  }
+  return 'Abra o detalhe da campanha e confira o payload/status retornado pela Meta para a causa exata.'
+}
+
+function extractMetaErrorFromPayload(payload: unknown) {
+  const source = typeof payload === 'object' && payload !== null ? payload as Record<string, any> : {}
+  const firstError = Array.isArray(source.errors) ? source.errors[0] : null
+  const statusError = Array.isArray(source.statuses) && source.statuses[0]?.errors?.length
+    ? source.statuses[0].errors[0]
+    : null
+  const error = firstError || statusError || source.error || null
+  if (!error || typeof error !== 'object') return null
+
+  return {
+    code: cleanText(error.code || error.error_code || source.code || 'sem_codigo', 40),
+    message: cleanText(error.message || error.title || source.message || 'Falha sem mensagem', 260),
+    detail: cleanText(error.error_data?.details || error.details || source.details || '', 300),
+  }
+}
+
+function buildMetaWhatsAppAnalytics(campaigns: any[], senders: any[], recipients: any[], events: any[]) {
+  const summary = campaigns.reduce((acc: any, campaign: any) => {
+    acc.recipients += asNumber(campaign.total_recipients)
+    acc.accepted += asNumber(campaign.total_sent)
+    acc.delivered += asNumber(campaign.total_delivered)
+    acc.read += asNumber(campaign.total_read)
+    acc.failed += asNumber(campaign.total_failed)
+    acc.skipped += asNumber(campaign.total_skipped)
+    return acc
+  }, { recipients: 0, accepted: 0, delivered: 0, read: 0, failed: 0, skipped: 0 })
+
+  const timelineMap = new Map<string, MetaWhatsAppAnalyticsBucket>()
+  for (let index = 13; index >= 0; index -= 1) {
+    const date = new Date()
+    date.setDate(date.getDate() - index)
+    const key = date.toISOString().slice(0, 10)
+    timelineMap.set(key, {
+      date: key,
+      campaigns: 0,
+      recipients: 0,
+      accepted: 0,
+      delivered: 0,
+      read: 0,
+      failed: 0,
+      skipped: 0,
+    })
+  }
+
+  const byTypeMap = new Map<string, any>()
+  const templateMap = new Map<string, any>()
+  for (const campaign of campaigns) {
+    const key = dateKey(campaign.created_at)
+    const bucket = timelineMap.get(key) || {
+      date: key,
+      campaigns: 0,
+      recipients: 0,
+      accepted: 0,
+      delivered: 0,
+      read: 0,
+      failed: 0,
+      skipped: 0,
+    }
+    bucket.campaigns += 1
+    bucket.recipients += asNumber(campaign.total_recipients)
+    bucket.accepted += asNumber(campaign.total_sent)
+    bucket.delivered += asNumber(campaign.total_delivered)
+    bucket.read += asNumber(campaign.total_read)
+    bucket.failed += asNumber(campaign.total_failed)
+    bucket.skipped += asNumber(campaign.total_skipped)
+    timelineMap.set(key, bucket)
+
+    const type = cleanText(campaign.campaign_type || 'campanha', 40)
+    const byType = byTypeMap.get(type) || {
+      type,
+      campaigns: 0,
+      recipients: 0,
+      accepted: 0,
+      delivered: 0,
+      read: 0,
+      failed: 0,
+    }
+    byType.campaigns += 1
+    byType.recipients += asNumber(campaign.total_recipients)
+    byType.accepted += asNumber(campaign.total_sent)
+    byType.delivered += asNumber(campaign.total_delivered)
+    byType.read += asNumber(campaign.total_read)
+    byType.failed += asNumber(campaign.total_failed)
+    byTypeMap.set(type, byType)
+
+    const templateKey = `${campaign.template_name || 'sem_template'}:${campaign.template_language || 'pt_BR'}`
+    const template = templateMap.get(templateKey) || {
+      key: templateKey,
+      template_name: campaign.template_name || 'sem_template',
+      language: campaign.template_language || 'pt_BR',
+      campaigns: 0,
+      recipients: 0,
+      accepted: 0,
+      delivered: 0,
+      read: 0,
+      failed: 0,
+      deliveryRate: 0,
+      readRate: 0,
+      failureRate: 0,
+    }
+    template.campaigns += 1
+    template.recipients += asNumber(campaign.total_recipients)
+    template.accepted += asNumber(campaign.total_sent)
+    template.delivered += asNumber(campaign.total_delivered)
+    template.read += asNumber(campaign.total_read)
+    template.failed += asNumber(campaign.total_failed)
+    templateMap.set(templateKey, template)
+  }
+
+  const eventErrorByMessageId = new Map<string, any>()
+  for (const event of events) {
+    const payloadError = extractMetaErrorFromPayload(event.payload)
+    if (payloadError && event.provider_message_id) {
+      eventErrorByMessageId.set(String(event.provider_message_id), payloadError)
+    }
+  }
+
+  const errorMap = new Map<string, any>()
+  for (const recipient of recipients) {
+    if (recipient.status !== 'failed' && !recipient.error_code && !recipient.error_message) continue
+    const payloadError = recipient.provider_message_id
+      ? eventErrorByMessageId.get(String(recipient.provider_message_id))
+      : null
+    const code = cleanText(recipient.error_code || payloadError?.code || 'sem_codigo', 40)
+    const message = cleanText(recipient.error_message || payloadError?.message || 'Falha sem mensagem', 260)
+    const detail = cleanText(payloadError?.detail || '', 300)
+    const key = `${code}:${message}`
+    const row = errorMap.get(key) || {
+      code,
+      message,
+      detail,
+      count: 0,
+      campaigns: new Set<string>(),
+      lastSeenAt: recipient.failed_at || recipient.created_at || null,
+      hint: getMetaErrorHint(code, message),
+    }
+    row.count += 1
+    if (recipient.campaign_id) row.campaigns.add(String(recipient.campaign_id))
+    const seenAt = recipient.failed_at || recipient.created_at || null
+    if (seenAt && (!row.lastSeenAt || new Date(seenAt).getTime() > new Date(row.lastSeenAt).getTime())) {
+      row.lastSeenAt = seenAt
+    }
+    if (!row.detail && detail) row.detail = detail
+    errorMap.set(key, row)
+  }
+
+  const senderStatsMap = new Map<string, any>()
+  for (const recipient of recipients) {
+    if (!recipient.sender_id) continue
+    const key = String(recipient.sender_id)
+    const row = senderStatsMap.get(key) || {
+      recipients: 0,
+      accepted: 0,
+      delivered: 0,
+      read: 0,
+      failed: 0,
+    }
+    row.recipients += 1
+    if (['sent', 'delivered', 'read'].includes(String(recipient.status))) row.accepted += 1
+    if (['delivered', 'read'].includes(String(recipient.status))) row.delivered += 1
+    if (recipient.status === 'read') row.read += 1
+    if (recipient.status === 'failed') row.failed += 1
+    senderStatsMap.set(key, row)
+  }
+
+  const templatePerformance = Array.from(templateMap.values()).map((template: any) => ({
+    ...template,
+    deliveryRate: percentage(template.delivered, template.accepted || template.recipients),
+    readRate: percentage(template.read, template.delivered || template.accepted || template.recipients),
+    failureRate: percentage(template.failed, template.recipients),
+  }))
+
+  return {
+    rates: {
+      acceptedRate: percentage(summary.accepted, summary.recipients),
+      deliveryRate: percentage(summary.delivered, summary.accepted || summary.recipients),
+      readRate: percentage(summary.read, summary.delivered || summary.accepted || summary.recipients),
+      failureRate: percentage(summary.failed, summary.recipients),
+      optOutRate: percentage(summary.skipped, summary.recipients),
+    },
+    timeline: Array.from(timelineMap.values()).sort((a, b) => a.date.localeCompare(b.date)),
+    byType: Array.from(byTypeMap.values()).sort((a: any, b: any) => b.recipients - a.recipients),
+    errorBreakdown: Array.from(errorMap.values())
+      .map((row: any) => ({ ...row, campaigns: row.campaigns.size }))
+      .sort((a: any, b: any) => b.count - a.count)
+      .slice(0, 8),
+    templatePerformance: templatePerformance
+      .sort((a: any, b: any) => b.recipients - a.recipients)
+      .slice(0, 8),
+    senderHealth: (senders || []).map((sender: any) => {
+      const stats = senderStatsMap.get(String(sender.id)) || {
+        recipients: 0,
+        accepted: 0,
+        delivered: 0,
+        read: 0,
+        failed: 0,
+      }
+      const dailyLimit = asNumber(sender.daily_limit)
+      const dailySent = asNumber(sender.daily_sent_count)
+      return {
+        sender_id: sender.id,
+        display_name: sender.display_name || sender.phone_number || 'Numero Meta',
+        phone_number: sender.phone_number || '',
+        meta_status: sender.meta_status || null,
+        quality_rating: sender.quality_rating || null,
+        daily_limit: dailyLimit,
+        daily_sent_count: dailySent,
+        usageRate: percentage(dailySent, dailyLimit),
+        recipients: stats.recipients,
+        accepted: stats.accepted,
+        delivered: stats.delivered,
+        read: stats.read,
+        failed: stats.failed,
+        failureRate: percentage(stats.failed, stats.recipients),
+      }
+    }),
+  }
 }
 
 function parseScheduledFor(value: CreateMetaWhatsAppCampaignInput['scheduledFor']) {
@@ -150,6 +431,26 @@ export async function createMetaWhatsAppCampaign(input: CreateMetaWhatsAppCampai
 
   if (template?.status && String(template.status).toUpperCase() !== 'APPROVED') {
     throw new Error(`Template ${templateName} existe na base, mas esta com status ${template.status}. Use apenas templates aprovados.`)
+  }
+
+  const { data: senders, error: sendersError } = await supabase
+    .from('meta_whatsapp_senders')
+    .select('id, display_name, phone_number, phone_number_id, local_status, meta_status, daily_limit, daily_sent_count, use_case')
+    .eq('waba_id', resolved.wabaId)
+    .eq('local_status', 'active')
+    .limit(50)
+
+  if (sendersError) throw sendersError
+  const hasReadySender = (senders || []).some((sender: any) => {
+    if (input.defaultSenderId && sender.id !== input.defaultSenderId) return false
+    return isMetaSenderReady(sender)
+  })
+
+  if (!hasReadySender) {
+    const knownStatus = (senders || [])
+      .map((sender: any) => `${sender.display_name || sender.phone_number}: ${sender.meta_status || 'sem status'}`)
+      .join(', ')
+    throw new Error(`Nenhum numero Meta conectado para envio. O Phone Number precisa estar com status CONNECTED na Meta. Status atual: ${knownStatus || 'nenhum numero sincronizado'}.`)
   }
 
   const { data: campaign, error: campaignError } = await supabase
@@ -297,11 +598,46 @@ export async function listMetaWhatsAppCampaigns(input: ListMetaWhatsAppCampaigns
     byStatus: {},
   })
 
+  const campaignIds = (campaigns || []).map((campaign: any) => String(campaign.id)).filter(Boolean)
+  let analyticsRecipients: any[] = []
+  let analyticsEvents: any[] = []
+
+  if (campaignIds.length) {
+    const [recipientsResult, eventsResult] = await Promise.all([
+      supabase
+        .from('meta_whatsapp_campaign_recipients')
+        .select('id, campaign_id, sender_id, recipient_phone, status, provider_message_id, error_code, error_message, sent_at, delivered_at, read_at, failed_at, created_at, updated_at')
+        .in('campaign_id', campaignIds)
+        .order('created_at', { ascending: false })
+        .limit(5000),
+      supabase
+        .from('meta_whatsapp_events')
+        .select('id, campaign_id, provider_message_id, event_type, event_status, recipient_phone, payload, received_at')
+        .in('campaign_id', campaignIds)
+        .order('received_at', { ascending: false })
+        .limit(1500),
+    ])
+
+    if (recipientsResult.error) throw recipientsResult.error
+    if (eventsResult.error) throw eventsResult.error
+
+    analyticsRecipients = recipientsResult.data || []
+    analyticsEvents = eventsResult.data || []
+  }
+
+  const analytics = buildMetaWhatsAppAnalytics(
+    campaigns || [],
+    senders || [],
+    analyticsRecipients,
+    analyticsEvents
+  )
+
   return {
     campaigns: campaigns || [],
     senders: senders || [],
     templates: templates || [],
     summary,
+    analytics,
   }
 }
 
@@ -322,7 +658,7 @@ export async function getMetaWhatsAppCampaignDetail(input: GetMetaWhatsAppCampai
   const [recipientsResult, eventsResult] = await Promise.all([
     supabase
       .from('meta_whatsapp_campaign_recipients')
-      .select('id, recipient_phone, recipient_name, status, provider_message_id, sender_id, error_code, error_message, sent_at, delivered_at, read_at, failed_at, created_at')
+      .select('id, campaign_id, recipient_phone, recipient_name, status, provider_message_id, sender_id, error_code, error_message, sent_at, delivered_at, read_at, failed_at, created_at, updated_at, template_parameters, metadata')
       .eq('campaign_id', campaignId)
       .order('created_at', { ascending: false })
       .limit(limit),
@@ -439,7 +775,7 @@ async function selectSenderForRecipient(supabase: SupabaseAdmin, campaign: any, 
       .select('*')
       .eq('id', recipient.sender_id)
       .maybeSingle()
-    if (data) return data
+    if (data && isMetaSenderReady(data)) return data
   }
 
   if (campaign.default_sender_id) {
@@ -449,7 +785,7 @@ async function selectSenderForRecipient(supabase: SupabaseAdmin, campaign: any, 
       .eq('id', campaign.default_sender_id)
       .eq('local_status', 'active')
       .maybeSingle()
-    if (data && Number(data.daily_sent_count || 0) < Number(data.daily_limit || 0)) return data
+    if (data && isMetaSenderReady(data)) return data
   }
 
   const preferredUseCase = campaign.campaign_type === 'editorial'
@@ -469,8 +805,7 @@ async function selectSenderForRecipient(supabase: SupabaseAdmin, campaign: any, 
 
   if (error) throw error
 
-  return (data || []).find((sender: any) => Number(sender.daily_sent_count || 0) < Number(sender.daily_limit || 0))
-    || null
+  return (data || []).find(isMetaSenderReady) || null
 }
 
 async function markRecipientFailed(supabase: SupabaseAdmin, recipientId: string, error: unknown) {
@@ -533,6 +868,12 @@ async function updateCampaignTotals(supabase: SupabaseAdmin, campaignId: string)
     .eq('id', campaignId)
 
   return { queued, sent, delivered, read, failed, skipped }
+}
+
+export async function refreshMetaWhatsAppCampaignTotals(campaignId: string, supabase = createAdminClient()) {
+  const selected = cleanText(campaignId, 80)
+  if (!selected) throw new Error('campaignId obrigatorio.')
+  return updateCampaignTotals(supabase, selected)
 }
 
 export async function processMetaWhatsAppCampaignBatch(params: {
@@ -608,7 +949,9 @@ export async function processMetaWhatsAppCampaignBatch(params: {
       }
 
       const sender = await selectSenderForRecipient(supabase, campaign, recipient)
-      if (!sender?.phone_number_id) throw new Error('Nenhum numero Meta ativo disponivel para envio.')
+      if (!sender?.phone_number_id) {
+        throw new Error('Nenhum numero Meta conectado disponivel para envio. Sincronize os numeros oficiais e confirme que o status Meta do Phone Number esta CONNECTED.')
+      }
 
       await supabase
         .from('meta_whatsapp_campaign_recipients')

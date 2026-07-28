@@ -6,8 +6,13 @@ import {
     Send, Loader2, AlertCircle, CheckCircle2, Clock, Users,
     Plus, Trash2, Pause, Play, FileText, Image, Mic, Video,
     Tag, RefreshCw, MessageSquare, Calendar, ChevronDown, ChevronUp,
-    Smartphone, Search
+    Smartphone, Search, BarChart3, TrendingUp, Eye, Inbox, Activity,
+    XCircle
 } from 'lucide-react'
+import {
+    Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart,
+    ResponsiveContainer, Tooltip, XAxis, YAxis
+} from 'recharts'
 import AdminLoadingState from '@/components/admin/AdminLoadingState'
 
 interface Instance {
@@ -77,6 +82,8 @@ interface MetaCampaign {
 
 interface MetaCampaignRecipient {
     id: string
+    campaign_id?: string
+    sender_id?: string | null
     recipient_phone: string
     recipient_name?: string | null
     status: string
@@ -88,18 +95,24 @@ interface MetaCampaignRecipient {
     read_at?: string | null
     failed_at?: string | null
     created_at: string
+    updated_at?: string | null
+    template_parameters?: unknown
+    metadata?: unknown
 }
 
 interface MetaCampaignEvent {
     id: string
+    campaign_id?: string | null
     provider_message_id?: string | null
     event_type: string
     event_status?: string | null
     recipient_phone?: string | null
     received_at: string
+    payload?: unknown
 }
 
 interface MetaCampaignDetail {
+    campaign?: MetaCampaign
     recipients: MetaCampaignRecipient[]
     events: MetaCampaignEvent[]
 }
@@ -114,6 +127,76 @@ interface MetaCampaignSummary {
     failed: number
     skipped: number
     byStatus: Record<string, number>
+}
+
+interface MetaCampaignAnalyticsBucket {
+    date: string
+    campaigns: number
+    recipients: number
+    accepted: number
+    delivered: number
+    read: number
+    failed: number
+    skipped: number
+}
+
+interface MetaCampaignAnalytics {
+    rates: {
+        acceptedRate: number
+        deliveryRate: number
+        readRate: number
+        failureRate: number
+        optOutRate: number
+    }
+    timeline: MetaCampaignAnalyticsBucket[]
+    byType: Array<{
+        type: string
+        campaigns: number
+        recipients: number
+        accepted: number
+        delivered: number
+        read: number
+        failed: number
+    }>
+    errorBreakdown: Array<{
+        code: string
+        message: string
+        detail?: string | null
+        count: number
+        campaigns: number
+        lastSeenAt?: string | null
+        hint?: string | null
+    }>
+    templatePerformance: Array<{
+        key: string
+        template_name: string
+        language: string
+        campaigns: number
+        recipients: number
+        accepted: number
+        delivered: number
+        read: number
+        failed: number
+        deliveryRate: number
+        readRate: number
+        failureRate: number
+    }>
+    senderHealth: Array<{
+        sender_id: string
+        display_name: string
+        phone_number: string
+        meta_status?: string | null
+        quality_rating?: string | null
+        daily_limit: number
+        daily_sent_count: number
+        usageRate: number
+        recipients: number
+        accepted: number
+        delivered: number
+        read: number
+        failed: number
+        failureRate: number
+    }>
 }
 
 interface MetaRecipientDraft {
@@ -229,6 +312,7 @@ export default function CampaignsPage() {
     const [metaSenders, setMetaSenders] = useState<MetaSender[]>([])
     const [metaTemplates, setMetaTemplates] = useState<MetaTemplate[]>([])
     const [metaSummary, setMetaSummary] = useState<MetaCampaignSummary | null>(null)
+    const [metaAnalytics, setMetaAnalytics] = useState<MetaCampaignAnalytics | null>(null)
     const [metaStatusFilter, setMetaStatusFilter] = useState('')
     const [expandedMetaCampaignId, setExpandedMetaCampaignId] = useState('')
     const [loadingMetaCampaignDetail, setLoadingMetaCampaignDetail] = useState('')
@@ -304,6 +388,7 @@ export default function CampaignsPage() {
                 setMetaSenders(data.senders || [])
                 setMetaTemplates(data.templates || [])
                 setMetaSummary(data.summary || null)
+                setMetaAnalytics(data.analytics || null)
             } else {
                 setFeedback({ type: 'error', text: data.message || 'Erro ao carregar campanhas Meta' })
             }
@@ -331,6 +416,7 @@ export default function CampaignsPage() {
                 setMetaCampaignDetails(prev => ({
                     ...prev,
                     [campaignId]: {
+                        campaign: data.campaign,
                         recipients: data.recipients || [],
                         events: data.events || [],
                     },
@@ -1272,6 +1358,7 @@ export default function CampaignsPage() {
                     campaigns={metaCampaigns}
                     senders={metaSenders}
                     summary={metaSummary}
+                    analytics={metaAnalytics}
                     loading={loadingMetaCampaigns}
                     statusFilter={metaStatusFilter}
                     expandedCampaignId={expandedMetaCampaignId}
@@ -1316,15 +1403,24 @@ function metaStatusLabel(status: string) {
         completed: 'Concluida',
         cancelled: 'Cancelada',
         failed: 'Falhou',
+        sent: 'Aceita Meta',
+        delivered: 'Entregue',
+        read: 'Lida',
+        skipped: 'Ignorada',
+        opted_out: 'Opt-out',
     }
     return labels[status] || status
 }
 
 function metaStatusColor(status: string) {
     if (status === 'completed') return '#22c55e'
+    if (status === 'read') return '#16a34a'
+    if (status === 'delivered') return '#22c55e'
+    if (status === 'sent') return '#38bdf8'
     if (status === 'failed' || status === 'cancelled') return '#ef4444'
     if (status === 'paused') return '#6366f1'
     if (status === 'scheduled') return '#38bdf8'
+    if (status === 'skipped' || status === 'opted_out') return '#f59e0b'
     if (status === 'queued' || status === 'sending' || status === 'preparing') return '#f59e0b'
     return 'var(--text-muted)'
 }
@@ -1338,10 +1434,107 @@ function metaProgress(campaign: MetaCampaign) {
     return Math.min(100, Math.round((done / total) * 100))
 }
 
+function metricRate(part: number, total: number) {
+    if (!total) return 0
+    return Math.round((part / total) * 1000) / 10
+}
+
+function percentLabel(value?: number | null) {
+    return `${Number(value || 0).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`
+}
+
+function shortDateLabel(value: string) {
+    const date = new Date(`${value}T00:00:00`)
+    if (!Number.isFinite(date.getTime())) return value
+    return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' }).format(date)
+}
+
+function shortProviderId(value?: string | null) {
+    if (!value) return '-'
+    if (value.length <= 18) return value
+    return `${value.slice(0, 10)}...${value.slice(-6)}`
+}
+
+function jsonPreview(value: unknown) {
+    if (!value) return ''
+    try {
+        const text = JSON.stringify(value)
+        return text.length > 180 ? `${text.slice(0, 180)}...` : text
+    } catch {
+        return ''
+    }
+}
+
+function payloadErrorSummary(payload: unknown) {
+    const source = typeof payload === 'object' && payload !== null ? payload as Record<string, any> : {}
+    const firstStatus = Array.isArray(source.statuses) ? source.statuses[0] : null
+    const firstError = Array.isArray(source.errors) ? source.errors[0] : null
+    const statusError = Array.isArray(firstStatus?.errors) ? firstStatus.errors[0] : null
+    const error = firstError || statusError || source.error
+    if (!error || typeof error !== 'object') return ''
+    return [
+        error.code ? `Codigo ${error.code}` : '',
+        error.title || error.message || '',
+        error.error_data?.details || error.details || '',
+    ].filter(Boolean).join(' | ')
+}
+
+function metaErrorHint(code?: string | null, message?: string | null) {
+    const selectedCode = String(code || '')
+    const selectedMessage = String(message || '').toLowerCase()
+    if (selectedCode === '131042' || selectedMessage.includes('payment')) {
+        return 'Pagamento/elegibilidade da WABA. Verifique metodo de pagamento, linha de credito e cobranca do WhatsApp.'
+    }
+    if (selectedCode === '131026') return 'Numero nao pode receber a mensagem. Confira se existe no WhatsApp e se nao bloqueou o contato.'
+    if (selectedCode === '131047') return 'Janela de atendimento expirada. Use template aprovado para iniciar conversa.'
+    if (selectedCode === '132000' || selectedCode === '132001') return 'Variaveis do template nao batem com o modelo aprovado.'
+    if (selectedCode === '132015' || selectedCode === '132016') return 'Template pausado/desabilitado pela Meta.'
+    if (selectedCode === '131056' || selectedMessage.includes('limit')) return 'Limite do numero ou da conta atingido.'
+    return 'Confira o payload Meta e o status do destinatario para a causa exata.'
+}
+
+function campaignErrorGroups(recipients: MetaCampaignRecipient[], events: MetaCampaignEvent[] = []) {
+    const eventErrorByMessageId = new Map<string, string>()
+    for (const event of events) {
+        const summary = payloadErrorSummary(event.payload)
+        if (summary && event.provider_message_id) eventErrorByMessageId.set(event.provider_message_id, summary)
+    }
+
+    const groups = new Map<string, {
+        code: string
+        message: string
+        count: number
+        hint: string
+        detail?: string
+    }>()
+
+    for (const recipient of recipients) {
+        if (recipient.status !== 'failed' && !recipient.error_code && !recipient.error_message) continue
+        const payloadSummary = recipient.provider_message_id ? eventErrorByMessageId.get(recipient.provider_message_id) : ''
+        const code = recipient.error_code || 'sem_codigo'
+        const message = recipient.error_message || payloadSummary || 'Falha sem mensagem'
+        const key = `${code}:${message}`
+        const group = groups.get(key) || {
+            code,
+            message,
+            count: 0,
+            hint: metaErrorHint(code, message),
+            detail: payloadSummary,
+        }
+        group.count += 1
+        groups.set(key, group)
+    }
+
+    return Array.from(groups.values()).sort((a, b) => b.count - a.count)
+}
+
+const META_CHART_COLORS = ['#b08a43', '#22c55e', '#38bdf8', '#ef4444', '#6366f1', '#f59e0b']
+
 function MetaOfficialCampaignPanel({
     campaigns,
     senders,
     summary,
+    analytics,
     loading,
     statusFilter,
     expandedCampaignId,
@@ -1355,6 +1548,7 @@ function MetaOfficialCampaignPanel({
     campaigns: MetaCampaign[]
     senders: MetaSender[]
     summary: MetaCampaignSummary | null
+    analytics: MetaCampaignAnalytics | null
     loading: boolean
     statusFilter: string
     expandedCampaignId: string
@@ -1368,7 +1562,9 @@ function MetaOfficialCampaignPanel({
     const metricItems = [
         { label: 'Campanhas', value: summary?.total || 0, icon: MessageSquare, color: 'var(--gold)' },
         { label: 'Destinatarios', value: summary?.recipients || 0, icon: Users, color: '#38bdf8' },
-        { label: 'Enviadas', value: summary?.sent || 0, icon: CheckCircle2, color: '#22c55e' },
+        { label: 'Aceitas Meta', value: summary?.sent || 0, icon: CheckCircle2, color: '#22c55e' },
+        { label: 'Entregues', value: summary?.delivered || 0, icon: Inbox, color: '#16a34a' },
+        { label: 'Lidas', value: summary?.read || 0, icon: Eye, color: '#0ea5e9' },
         { label: 'Falhas', value: summary?.failed || 0, icon: AlertCircle, color: '#ef4444' },
     ]
 
@@ -1459,6 +1655,12 @@ function MetaOfficialCampaignPanel({
                         )
                     })}
                 </div>
+
+                <MetaCampaignDashboard
+                    summary={summary}
+                    analytics={analytics}
+                    campaigns={campaigns}
+                />
             </div>
 
             <div style={{
@@ -1529,6 +1731,265 @@ function MetaOfficialCampaignPanel({
     )
 }
 
+function MetaCampaignDashboard({
+    summary,
+    analytics,
+    campaigns,
+}: {
+    summary: MetaCampaignSummary | null
+    analytics: MetaCampaignAnalytics | null
+    campaigns: MetaCampaign[]
+}) {
+    const rates = analytics?.rates || {
+        acceptedRate: metricRate(summary?.sent || 0, summary?.recipients || 0),
+        deliveryRate: metricRate(summary?.delivered || 0, summary?.sent || summary?.recipients || 0),
+        readRate: metricRate(summary?.read || 0, summary?.delivered || summary?.sent || summary?.recipients || 0),
+        failureRate: metricRate(summary?.failed || 0, summary?.recipients || 0),
+        optOutRate: metricRate(summary?.skipped || 0, summary?.recipients || 0),
+    }
+
+    const timeline = (analytics?.timeline || []).map(item => ({
+        ...item,
+        label: shortDateLabel(item.date),
+    }))
+    const funnelData = [
+        { name: 'Aceitas', value: summary?.sent || 0, color: '#38bdf8' },
+        { name: 'Entregues', value: summary?.delivered || 0, color: '#22c55e' },
+        { name: 'Lidas', value: summary?.read || 0, color: '#16a34a' },
+        { name: 'Falhas', value: summary?.failed || 0, color: '#ef4444' },
+    ]
+    const statusData = Object.entries(summary?.byStatus || {}).map(([status, value]) => ({
+        name: metaStatusLabel(status),
+        value,
+    }))
+    const topError = analytics?.errorBreakdown?.[0]
+    const bestTemplate = analytics?.templatePerformance?.[0]
+
+    return (
+        <div style={{ display: 'grid', gap: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '10px' }}>
+                {[
+                    { label: 'Taxa aceite', value: percentLabel(rates.acceptedRate), icon: TrendingUp, color: '#38bdf8' },
+                    { label: 'Taxa entrega', value: percentLabel(rates.deliveryRate), icon: Inbox, color: '#22c55e' },
+                    { label: 'Taxa leitura', value: percentLabel(rates.readRate), icon: Eye, color: '#0ea5e9' },
+                    { label: 'Taxa falha', value: percentLabel(rates.failureRate), icon: XCircle, color: '#ef4444' },
+                ].map(item => {
+                    const Icon = item.icon
+                    return (
+                        <div key={item.label} style={{
+                            padding: '11px 12px',
+                            borderRadius: '10px',
+                            border: '1px solid var(--border)',
+                            background: 'rgba(255,255,255,0.025)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '9px',
+                        }}>
+                            <Icon size={16} style={{ color: item.color }} />
+                            <div>
+                                <div style={{ color: 'var(--text-primary)', fontWeight: 900, fontSize: '0.95rem' }}>{item.value}</div>
+                                <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>{item.label}</div>
+                            </div>
+                        </div>
+                    )
+                })}
+            </div>
+
+            {(topError || bestTemplate) && (
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+                    gap: '10px',
+                }}>
+                    {topError && (
+                        <div style={{
+                            border: '1px solid rgba(239,68,68,0.2)',
+                            background: 'rgba(239,68,68,0.06)',
+                            borderRadius: '10px',
+                            padding: '12px',
+                            display: 'grid',
+                            gap: '5px',
+                        }}>
+                            <strong style={{ color: '#ef4444', display: 'flex', gap: '7px', alignItems: 'center', fontSize: '0.82rem' }}>
+                                <AlertCircle size={15} /> Principal erro: {topError.code}
+                            </strong>
+                            <span style={{ color: 'var(--text-secondary)', fontSize: '0.76rem' }}>{topError.message}</span>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>{topError.hint || metaErrorHint(topError.code, topError.message)}</span>
+                        </div>
+                    )}
+                    {bestTemplate && (
+                        <div style={{
+                            border: '1px solid rgba(34,197,94,0.18)',
+                            background: 'rgba(34,197,94,0.05)',
+                            borderRadius: '10px',
+                            padding: '12px',
+                            display: 'grid',
+                            gap: '5px',
+                        }}>
+                            <strong style={{ color: '#22c55e', display: 'flex', gap: '7px', alignItems: 'center', fontSize: '0.82rem' }}>
+                                <BarChart3 size={15} /> Template mais usado
+                            </strong>
+                            <span style={{ color: 'var(--text-secondary)', fontSize: '0.76rem' }}>
+                                {bestTemplate.template_name} ({bestTemplate.language}) | {bestTemplate.recipients} destinatarios
+                            </span>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>
+                                Entrega {percentLabel(bestTemplate.deliveryRate)} | Leitura {percentLabel(bestTemplate.readRate)} | Falha {percentLabel(bestTemplate.failureRate)}
+                            </span>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                gap: '12px',
+            }}>
+                <div style={{
+                    border: '1px solid var(--border)',
+                    borderRadius: '10px',
+                    padding: '12px',
+                    background: 'rgba(255,255,255,0.025)',
+                    minHeight: 250,
+                }}>
+                    <strong style={{ color: 'var(--text-primary)', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '10px' }}>
+                        <Activity size={15} style={{ color: 'var(--gold)' }} /> Evolucao diaria
+                    </strong>
+                    {timeline.length === 0 ? (
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.76rem' }}>Sem dados suficientes.</span>
+                    ) : (
+                        <ResponsiveContainer width="100%" height={205}>
+                            <LineChart data={timeline} margin={{ top: 6, right: 12, left: -20, bottom: 0 }}>
+                                <CartesianGrid stroke="rgba(148,163,184,0.14)" vertical={false} />
+                                <XAxis dataKey="label" tick={{ fill: 'var(--text-muted)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                                <YAxis allowDecimals={false} tick={{ fill: 'var(--text-muted)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                                <Tooltip contentStyle={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 8 }} />
+                                <Line type="monotone" dataKey="accepted" name="Aceitas" stroke="#38bdf8" strokeWidth={2} dot={false} />
+                                <Line type="monotone" dataKey="delivered" name="Entregues" stroke="#22c55e" strokeWidth={2} dot={false} />
+                                <Line type="monotone" dataKey="failed" name="Falhas" stroke="#ef4444" strokeWidth={2} dot={false} />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    )}
+                </div>
+
+                <div style={{
+                    border: '1px solid var(--border)',
+                    borderRadius: '10px',
+                    padding: '12px',
+                    background: 'rgba(255,255,255,0.025)',
+                    minHeight: 250,
+                }}>
+                    <strong style={{ color: 'var(--text-primary)', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '10px' }}>
+                        <BarChart3 size={15} style={{ color: 'var(--gold)' }} /> Funil de entrega
+                    </strong>
+                    <ResponsiveContainer width="100%" height={205}>
+                        <BarChart data={funnelData} margin={{ top: 6, right: 12, left: -20, bottom: 0 }}>
+                            <CartesianGrid stroke="rgba(148,163,184,0.14)" vertical={false} />
+                            <XAxis dataKey="name" tick={{ fill: 'var(--text-muted)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                            <YAxis allowDecimals={false} tick={{ fill: 'var(--text-muted)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                            <Tooltip contentStyle={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 8 }} />
+                            <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                                {funnelData.map(item => <Cell key={item.name} fill={item.color} />)}
+                            </Bar>
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+
+                <div style={{
+                    border: '1px solid var(--border)',
+                    borderRadius: '10px',
+                    padding: '12px',
+                    background: 'rgba(255,255,255,0.025)',
+                    minHeight: 250,
+                }}>
+                    <strong style={{ color: 'var(--text-primary)', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '10px' }}>
+                        <MessageSquare size={15} style={{ color: 'var(--gold)' }} /> Status das campanhas
+                    </strong>
+                    {statusData.length === 0 ? (
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.76rem' }}>Sem campanhas no filtro atual.</span>
+                    ) : (
+                        <ResponsiveContainer width="100%" height={205}>
+                            <PieChart>
+                                <Pie data={statusData} dataKey="value" nameKey="name" innerRadius={48} outerRadius={76} paddingAngle={3}>
+                                    {statusData.map((item, index) => (
+                                        <Cell key={item.name} fill={META_CHART_COLORS[index % META_CHART_COLORS.length]} />
+                                    ))}
+                                </Pie>
+                                <Tooltip contentStyle={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 8 }} />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    )}
+                </div>
+            </div>
+
+            {(analytics?.senderHealth?.length || analytics?.templatePerformance?.length || campaigns.length > 0) && (
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                    gap: '12px',
+                }}>
+                    <MetaMiniRanking
+                        title="Saude dos numeros"
+                        rows={(analytics?.senderHealth || []).map(sender => ({
+                            key: sender.sender_id,
+                            name: sender.display_name || sender.phone_number,
+                            detail: `${sender.meta_status || 'sem status'} | uso diario ${percentLabel(sender.usageRate)} | falha ${percentLabel(sender.failureRate)}`,
+                            value: `${sender.daily_sent_count}/${sender.daily_limit}`,
+                            color: sender.meta_status === 'CONNECTED' ? '#22c55e' : '#f59e0b',
+                        }))}
+                    />
+                    <MetaMiniRanking
+                        title="Templates por desempenho"
+                        rows={(analytics?.templatePerformance || []).map(template => ({
+                            key: template.key,
+                            name: template.template_name,
+                            detail: `${template.language} | entrega ${percentLabel(template.deliveryRate)} | leitura ${percentLabel(template.readRate)}`,
+                            value: String(template.recipients),
+                            color: template.failureRate > 20 ? '#ef4444' : '#22c55e',
+                        }))}
+                    />
+                </div>
+            )}
+        </div>
+    )
+}
+
+function MetaMiniRanking({
+    title,
+    rows,
+}: {
+    title: string
+    rows: Array<{ key: string; name: string; detail: string; value: string; color: string }>
+}) {
+    return (
+        <div style={{
+            border: '1px solid var(--border)',
+            borderRadius: '10px',
+            padding: '12px',
+            background: 'rgba(255,255,255,0.025)',
+            display: 'grid',
+            gap: '9px',
+        }}>
+            <strong style={{ color: 'var(--text-primary)', fontSize: '0.82rem' }}>{title}</strong>
+            {rows.length === 0 ? (
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>Sem dados suficientes.</span>
+            ) : (
+                rows.slice(0, 5).map(row => (
+                    <div key={row.key} style={{ display: 'grid', gap: '3px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                            <span style={{ color: 'var(--text-primary)', fontSize: '0.78rem', fontWeight: 800, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {row.name}
+                            </span>
+                            <span style={{ color: row.color, fontSize: '0.75rem', fontWeight: 900 }}>{row.value}</span>
+                        </div>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>{row.detail}</span>
+                    </div>
+                ))
+            )}
+        </div>
+    )
+}
+
 function MetaCampaignCard({
     campaign,
     sender,
@@ -1551,6 +2012,14 @@ function MetaCampaignCard({
     const finalStatus = ['completed', 'cancelled', 'failed'].includes(campaign.status)
     const canPause = ['scheduled', 'queued', 'sending', 'preparing'].includes(campaign.status)
     const canResume = campaign.status === 'paused'
+    const detailCampaign = detail?.campaign || campaign
+    const detailRecipients = detail?.recipients || []
+    const detailEvents = detail?.events || []
+    const detailErrors = campaignErrorGroups(detailRecipients, detailEvents)
+    const acceptedTotal = detailCampaign.total_sent || detailRecipients.filter(item => ['sent', 'delivered', 'read'].includes(item.status)).length
+    const deliveredTotal = detailCampaign.total_delivered || detailRecipients.filter(item => ['delivered', 'read'].includes(item.status)).length
+    const readTotal = detailCampaign.total_read || detailRecipients.filter(item => item.status === 'read').length
+    const failedTotal = detailCampaign.total_failed || detailRecipients.filter(item => item.status === 'failed').length
 
     return (
         <div style={{
@@ -1655,7 +2124,7 @@ function MetaCampaignCard({
                     <span>{progress}%</span>
                     <span>Total {campaign.total_recipients || 0}</span>
                     <span>Fila {campaign.total_queued || 0}</span>
-                    <span>Enviadas {campaign.total_sent || 0}</span>
+                    <span>Aceitas Meta {campaign.total_sent || 0}</span>
                     <span>Entregues {campaign.total_delivered || 0}</span>
                     <span>Lidas {campaign.total_read || 0}</span>
                     <span>Falhas {campaign.total_failed || 0}</span>
@@ -1675,67 +2144,213 @@ function MetaCampaignCard({
                             <Loader2 size={14} className="spin" /> Carregando detalhes...
                         </div>
                     ) : (
-                        <>
-                            <div style={{ display: 'grid', gap: '8px' }}>
-                                <strong style={{ color: 'var(--text-primary)', fontSize: '0.82rem' }}>Ultimos destinatarios</strong>
-                                {(detail?.recipients || []).length === 0 ? (
-                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.76rem' }}>Nenhum destinatario encontrado.</span>
-                                ) : (
-                                    <div style={{ display: 'grid', gap: '6px' }}>
-                                        {(detail?.recipients || []).slice(0, 12).map(recipient => {
-                                            const color = metaStatusColor(recipient.status)
-                                            return (
-                                                <div key={recipient.id} style={{
-                                                    display: 'grid',
-                                                    gridTemplateColumns: 'minmax(120px, 1fr) minmax(80px, 110px) minmax(120px, 1.2fr)',
-                                                    gap: '8px',
-                                                    alignItems: 'center',
-                                                    padding: '8px 9px',
-                                                    borderRadius: '8px',
-                                                    background: 'rgba(255,255,255,0.03)',
-                                                    border: '1px solid var(--border)',
-                                                    fontSize: '0.74rem',
-                                                }}>
-                                                    <span style={{ color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                        {recipient.recipient_name || recipient.recipient_phone}
-                                                    </span>
-                                                    <span style={{ color, fontWeight: 800 }}>{metaStatusLabel(recipient.status)}</span>
-                                                    <span style={{ color: recipient.error_message ? '#ef4444' : 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                        {recipient.error_message || recipient.provider_message_id || formatMetaDate(recipient.created_at)}
-                                                    </span>
-                                                </div>
-                                            )
-                                        })}
-                                    </div>
-                                )}
-                            </div>
-
-                            <div style={{ display: 'grid', gap: '8px' }}>
-                                <strong style={{ color: 'var(--text-primary)', fontSize: '0.82rem' }}>Ultimos eventos Meta</strong>
-                                {(detail?.events || []).length === 0 ? (
-                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.76rem' }}>Nenhum evento de status recebido ainda.</span>
-                                ) : (
-                                    <div style={{ display: 'flex', gap: '7px', flexWrap: 'wrap' }}>
-                                        {(detail?.events || []).slice(0, 16).map(event => (
-                                            <span key={event.id} style={{
-                                                padding: '6px 8px',
-                                                borderRadius: '999px',
-                                                border: '1px solid var(--border)',
-                                                color: metaStatusColor(event.event_status || event.event_type),
-                                                background: 'rgba(255,255,255,0.03)',
-                                                fontSize: '0.72rem',
-                                                fontWeight: 800,
-                                            }}>
-                                                {event.event_status || event.event_type} | {formatMetaDate(event.received_at)}
-                                            </span>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        </>
+                        <MetaCampaignDetailPanel
+                            campaign={detailCampaign}
+                            recipients={detailRecipients}
+                            events={detailEvents}
+                            errors={detailErrors}
+                            acceptedTotal={acceptedTotal}
+                            deliveredTotal={deliveredTotal}
+                            readTotal={readTotal}
+                            failedTotal={failedTotal}
+                        />
                     )}
                 </div>
             )}
+        </div>
+    )
+}
+
+function MetaCampaignDetailPanel({
+    campaign,
+    recipients,
+    events,
+    errors,
+    acceptedTotal,
+    deliveredTotal,
+    readTotal,
+    failedTotal,
+}: {
+    campaign: MetaCampaign
+    recipients: MetaCampaignRecipient[]
+    events: MetaCampaignEvent[]
+    errors: Array<{ code: string; message: string; count: number; hint: string; detail?: string }>
+    acceptedTotal: number
+    deliveredTotal: number
+    readTotal: number
+    failedTotal: number
+}) {
+    const total = campaign.total_recipients || recipients.length
+    const firstRecipient = recipients[0]
+
+    return (
+        <div style={{ display: 'grid', gap: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px' }}>
+                {[
+                    { label: 'Total', value: total, detail: 'destinatarios', color: 'var(--gold)' },
+                    { label: 'Aceitas Meta', value: acceptedTotal, detail: percentLabel(metricRate(acceptedTotal, total)), color: '#38bdf8' },
+                    { label: 'Entregues', value: deliveredTotal, detail: percentLabel(metricRate(deliveredTotal, acceptedTotal || total)), color: '#22c55e' },
+                    { label: 'Lidas', value: readTotal, detail: percentLabel(metricRate(readTotal, deliveredTotal || acceptedTotal || total)), color: '#0ea5e9' },
+                    { label: 'Falhas', value: failedTotal, detail: percentLabel(metricRate(failedTotal, total)), color: '#ef4444' },
+                ].map(item => (
+                    <div key={item.label} style={{
+                        border: '1px solid var(--border)',
+                        borderRadius: '9px',
+                        background: 'rgba(255,255,255,0.025)',
+                        padding: '10px',
+                        display: 'grid',
+                        gap: '3px',
+                    }}>
+                        <span style={{ color: item.color, fontSize: '0.95rem', fontWeight: 900 }}>{Number(item.value || 0).toLocaleString('pt-BR')}</span>
+                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.72rem', fontWeight: 800 }}>{item.label}</span>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.68rem' }}>{item.detail}</span>
+                    </div>
+                ))}
+            </div>
+
+            {errors.length > 0 && (
+                <div style={{
+                    border: '1px solid rgba(239,68,68,0.22)',
+                    borderRadius: '10px',
+                    background: 'rgba(239,68,68,0.05)',
+                    padding: '12px',
+                    display: 'grid',
+                    gap: '9px',
+                }}>
+                    <strong style={{ color: '#ef4444', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '7px' }}>
+                        <AlertCircle size={15} /> Diagnostico das falhas
+                    </strong>
+                    {errors.slice(0, 5).map(error => (
+                        <div key={`${error.code}:${error.message}`} style={{ display: 'grid', gap: '3px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
+                                <span style={{ color: 'var(--text-primary)', fontSize: '0.78rem', fontWeight: 900 }}>
+                                    {error.code} | {error.count} falha(s)
+                                </span>
+                                <span style={{ color: '#ef4444', fontSize: '0.72rem', fontWeight: 800 }}>{error.message}</span>
+                            </div>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>{error.hint}</span>
+                            {error.detail && <span style={{ color: 'var(--text-muted)', fontSize: '0.68rem' }}>{error.detail}</span>}
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+                gap: '12px',
+            }}>
+                <div style={{
+                    border: '1px solid var(--border)',
+                    borderRadius: '10px',
+                    padding: '12px',
+                    background: 'rgba(255,255,255,0.025)',
+                    display: 'grid',
+                    gap: '8px',
+                }}>
+                    <strong style={{ color: 'var(--text-primary)', fontSize: '0.82rem' }}>Resumo da mensagem</strong>
+                    <MetaDetailLine label="Template" value={`${campaign.template_name || '-'} (${campaign.template_language || 'pt_BR'})`} />
+                    <MetaDetailLine label="Tipo" value={campaign.campaign_type || '-'} />
+                    <MetaDetailLine label="Criada" value={formatMetaDate(campaign.created_at)} />
+                    <MetaDetailLine label="Iniciada" value={formatMetaDate(campaign.started_at)} />
+                    <MetaDetailLine label="Finalizada" value={formatMetaDate(campaign.completed_at)} />
+                    {Boolean(firstRecipient?.template_parameters) && (
+                        <MetaDetailLine label="Variaveis" value={jsonPreview(firstRecipient.template_parameters)} />
+                    )}
+                </div>
+
+                <div style={{
+                    border: '1px solid var(--border)',
+                    borderRadius: '10px',
+                    padding: '12px',
+                    background: 'rgba(255,255,255,0.025)',
+                    display: 'grid',
+                    gap: '8px',
+                }}>
+                    <strong style={{ color: 'var(--text-primary)', fontSize: '0.82rem' }}>Eventos Meta</strong>
+                    {events.length === 0 ? (
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>Nenhum webhook de status recebido ainda.</span>
+                    ) : (
+                        events.slice(0, 8).map(event => {
+                            const summary = payloadErrorSummary(event.payload)
+                            return (
+                                <div key={event.id} style={{ display: 'grid', gap: '2px', borderBottom: '1px solid rgba(148,163,184,0.12)', paddingBottom: '6px' }}>
+                                    <span style={{ color: metaStatusColor(event.event_status || event.event_type), fontSize: '0.75rem', fontWeight: 900 }}>
+                                        {event.event_status || event.event_type} | {formatMetaDate(event.received_at)}
+                                    </span>
+                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.68rem' }}>
+                                        {event.recipient_phone || 'sem telefone'} | {shortProviderId(event.provider_message_id)}
+                                    </span>
+                                    {summary && <span style={{ color: '#ef4444', fontSize: '0.68rem' }}>{summary}</span>}
+                                </div>
+                            )
+                        })
+                    )}
+                </div>
+            </div>
+
+            <div style={{ display: 'grid', gap: '8px' }}>
+                <strong style={{ color: 'var(--text-primary)', fontSize: '0.82rem' }}>Destinatarios</strong>
+                {recipients.length === 0 ? (
+                    <span style={{ color: 'var(--text-muted)', fontSize: '0.76rem' }}>Nenhum destinatario encontrado.</span>
+                ) : (
+                    <div style={{ display: 'grid', gap: '6px' }}>
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'minmax(130px, 1fr) minmax(90px, 120px) minmax(120px, 1.3fr) minmax(100px, 1fr)',
+                            gap: '8px',
+                            color: 'var(--text-muted)',
+                            fontSize: '0.66rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.02em',
+                        }}>
+                            <span>Contato</span>
+                            <span>Status</span>
+                            <span>Erro/retorno</span>
+                            <span>ID Meta</span>
+                        </div>
+                        {recipients.slice(0, 30).map(recipient => {
+                            const color = metaStatusColor(recipient.status)
+                            const errorText = recipient.error_message
+                                ? `${recipient.error_code || 'sem codigo'} | ${recipient.error_message}`
+                                : formatMetaDate(recipient.read_at || recipient.delivered_at || recipient.sent_at || recipient.failed_at || recipient.created_at)
+                            return (
+                                <div key={recipient.id} style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: 'minmax(130px, 1fr) minmax(90px, 120px) minmax(120px, 1.3fr) minmax(100px, 1fr)',
+                                    gap: '8px',
+                                    alignItems: 'center',
+                                    padding: '8px 9px',
+                                    borderRadius: '8px',
+                                    background: 'rgba(255,255,255,0.03)',
+                                    border: '1px solid var(--border)',
+                                    fontSize: '0.74rem',
+                                }}>
+                                    <span style={{ color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                        {recipient.recipient_name || recipient.recipient_phone}
+                                    </span>
+                                    <span style={{ color, fontWeight: 900 }}>{metaStatusLabel(recipient.status)}</span>
+                                    <span style={{ color: recipient.error_message ? '#ef4444' : 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                        {errorText}
+                                    </span>
+                                    <span style={{ color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                        {shortProviderId(recipient.provider_message_id)}
+                                    </span>
+                                </div>
+                            )
+                        })}
+                    </div>
+                )}
+            </div>
+        </div>
+    )
+}
+
+function MetaDetailLine({ label, value }: { label: string; value: string }) {
+    return (
+        <div style={{ display: 'grid', gap: '2px' }}>
+            <span style={{ color: 'var(--text-muted)', fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</span>
+            <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', overflow: 'hidden', textOverflow: 'ellipsis' }}>{value || '-'}</span>
         </div>
     )
 }

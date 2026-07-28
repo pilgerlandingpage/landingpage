@@ -9,6 +9,7 @@ import {
   processInstagramDirectVoteProof,
   shouldAutoprocessWebhook,
 } from '@/lib/social/meta-comment-dm-automation'
+import { refreshMetaWhatsAppCampaignTotals } from '@/lib/meta/whatsapp-campaigns'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -174,6 +175,7 @@ async function ingestMetaWhatsAppWebhook(payload: any) {
   let statusesIngested = 0
   let inboundMessagesIngested = 0
   let warning: string | null = null
+  const touchedCampaignIds = new Set<string>()
 
   try {
     for (const entry of payload?.entry || []) {
@@ -204,6 +206,8 @@ async function ingestMetaWhatsAppWebhook(payload: any) {
               .from('meta_whatsapp_campaign_recipients')
               .update(updatePayload)
               .eq('id', recipient.id)
+
+            if (recipient.campaign_id) touchedCampaignIds.add(recipient.campaign_id)
           }
 
           const { error } = await supabase
@@ -261,6 +265,10 @@ async function ingestMetaWhatsAppWebhook(payload: any) {
           eventsIngested += 1
         }
       }
+    }
+
+    for (const campaignId of touchedCampaignIds) {
+      await refreshMetaWhatsAppCampaignTotals(campaignId, supabase)
     }
   } catch (error) {
     warning = error instanceof Error ? error.message : 'Falha ao salvar webhook WhatsApp oficial.'
