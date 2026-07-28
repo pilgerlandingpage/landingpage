@@ -2020,16 +2020,37 @@ function MetaCampaignCard({
     const deliveredTotal = detailCampaign.total_delivered || detailRecipients.filter(item => ['delivered', 'read'].includes(item.status)).length
     const readTotal = detailCampaign.total_read || detailRecipients.filter(item => item.status === 'read').length
     const failedTotal = detailCampaign.total_failed || detailRecipients.filter(item => item.status === 'failed').length
+    const shouldSkipCardToggle = (target: EventTarget | null) => (
+        target instanceof HTMLElement
+        && Boolean(target.closest('button, a, input, select, textarea'))
+    )
 
     return (
-        <div style={{
-            padding: '16px 18px',
-            borderRadius: '12px',
-            background: 'var(--bg-secondary)',
-            border: '1px solid var(--border)',
-            display: 'grid',
-            gap: '12px',
-        }}>
+        <div
+            role="button"
+            tabIndex={0}
+            aria-expanded={expanded}
+            onClick={event => {
+                if (shouldSkipCardToggle(event.target)) return
+                onToggleDetail(campaign.id)
+            }}
+            onKeyDown={event => {
+                if (!['Enter', ' '].includes(event.key)) return
+                if (shouldSkipCardToggle(event.target)) return
+                event.preventDefault()
+                onToggleDetail(campaign.id)
+            }}
+            style={{
+                padding: '16px 18px',
+                borderRadius: '12px',
+                background: 'var(--bg-secondary)',
+                border: '1px solid var(--border)',
+                display: 'grid',
+                gap: '12px',
+                cursor: 'pointer',
+                outline: 'none',
+            }}
+        >
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
                 <div style={{ minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
