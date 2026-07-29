@@ -13,6 +13,7 @@ import {
   Save,
   Send,
   Trash2,
+  Upload,
 } from 'lucide-react'
 import AdminLoadingState from '@/components/admin/AdminLoadingState'
 
@@ -142,6 +143,8 @@ function getButtonsComponent(components?: unknown[] | null) {
 function parseTemplateToForm(template: MetaTemplateRow | TemplateDraft): TemplateForm {
   const components = Array.isArray(template.components) ? template.components.map(asRecord) : []
   const header = components.find(component => textValue(component.type).toUpperCase() === 'HEADER')
+  const headerExample = asRecord(header?.example)
+  const headerHandles = Array.isArray(headerExample.header_handle) ? headerExample.header_handle : []
   const body = components.find(component => textValue(component.type).toUpperCase() === 'BODY')
   const footer = components.find(component => textValue(component.type).toUpperCase() === 'FOOTER')
   const buttons = components.find(component => textValue(component.type).toUpperCase() === 'BUTTONS')
@@ -158,6 +161,7 @@ function parseTemplateToForm(template: MetaTemplateRow | TemplateDraft): Templat
     category: (template.category || 'MARKETING').toUpperCase() as TemplateForm['category'],
     headerFormat: (textValue(header?.format).toUpperCase() || 'NONE') as HeaderFormat,
     headerText: textValue(header?.text),
+    headerMediaHandle: textValue(headerHandles[0]),
     bodyText: textValue(body?.text),
     footerText: textValue(footer?.text),
     buttons: rawButtons.map(button => ({
@@ -180,6 +184,20 @@ function statusColor(status: string) {
   return '#c9a96e'
 }
 
+function headerMediaAccept(format: HeaderFormat) {
+  if (format === 'IMAGE') return 'image/jpeg,image/png'
+  if (format === 'VIDEO') return 'video/mp4'
+  if (format === 'DOCUMENT') return 'application/pdf'
+  return ''
+}
+
+function headerMediaLabel(format: HeaderFormat) {
+  if (format === 'IMAGE') return 'imagem'
+  if (format === 'VIDEO') return 'video'
+  if (format === 'DOCUMENT') return 'documento'
+  return 'midia'
+}
+
 export default function MetaTemplatesPage() {
   const [templates, setTemplates] = useState<MetaTemplateRow[]>([])
   const [drafts, setDrafts] = useState<TemplateDraft[]>([])
@@ -191,6 +209,8 @@ export default function MetaTemplatesPage() {
   const [form, setForm] = useState<TemplateForm>(emptyForm)
   const [editingTemplate, setEditingTemplate] = useState<MetaTemplateRow | null>(null)
   const [editingDraftId, setEditingDraftId] = useState('')
+  const [uploadingMedia, setUploadingMedia] = useState(false)
+  const [mediaFileLabel, setMediaFileLabel] = useState('')
 
   const bodyVariables = useMemo(() => extractTemplateVariables(form.bodyText), [form.bodyText])
   const headerVariables = useMemo(() => extractTemplateVariables(form.headerText), [form.headerText])
@@ -248,7 +268,8 @@ export default function MetaTemplatesPage() {
           if (!form.headerExample.trim()) throw new Error('Exemplo da variavel do header obrigatorio.')
           header.example = { header_text: [form.headerExample.trim()] }
         }
-      } else if (form.headerMediaHandle.trim()) {
+      } else {
+        if (!form.headerMediaHandle.trim()) throw new Error('Carregue uma midia de exemplo para o header.')
         header.example = { header_handle: [form.headerMediaHandle.trim()] }
       }
       components.push(header)
@@ -302,6 +323,7 @@ export default function MetaTemplatesPage() {
     setForm(emptyForm)
     setEditingTemplate(null)
     setEditingDraftId('')
+    setMediaFileLabel('')
   }
 
   const runAction = async (body: Record<string, unknown>, successFallback: string) => {
@@ -377,6 +399,42 @@ export default function MetaTemplatesPage() {
     setSyncing(false)
   }
 
+  const updateHeaderFormat = (headerFormat: HeaderFormat) => {
+    const isMedia = headerFormat === 'IMAGE' || headerFormat === 'VIDEO' || headerFormat === 'DOCUMENT'
+    const keepExistingHandle = isMedia && form.headerFormat === headerFormat
+    updateForm({
+      headerFormat,
+      ...(keepExistingHandle ? {} : { headerMediaHandle: '' }),
+    })
+    setMediaFileLabel('')
+  }
+
+  const uploadHeaderMedia = async (file?: File) => {
+    if (!file) return
+    setUploadingMedia(true)
+    setFeedback(null)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('headerFormat', form.headerFormat)
+
+      const response = await fetch('/api/admin/whatsapp/templates/media', {
+        method: 'POST',
+        body: formData,
+      })
+      const payload = await response.json()
+      if (!payload.success) throw new Error(payload.message || 'Erro ao carregar midia')
+
+      updateForm({ headerMediaHandle: payload.handle || '' })
+      setMediaFileLabel(payload.file?.name || file.name)
+      setFeedback({ type: 'success', text: payload.message || 'Midia carregada na Meta.' })
+    } catch (error) {
+      setFeedback({ type: 'error', text: error instanceof Error ? error.message : 'Erro ao carregar midia' })
+    } finally {
+      setUploadingMedia(false)
+    }
+  }
+
   const loadIntoBuilder = (template: MetaTemplateRow | TemplateDraft, mode: 'edit' | 'duplicate' | 'draft') => {
     const nextForm = parseTemplateToForm(template)
     setForm(mode === 'duplicate'
@@ -384,6 +442,7 @@ export default function MetaTemplatesPage() {
       : nextForm)
     setEditingTemplate(mode === 'edit' && 'template_external_id' in template ? template : null)
     setEditingDraftId(mode === 'draft' && 'id' in template ? template.id : '')
+    setMediaFileLabel('')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -477,7 +536,7 @@ export default function MetaTemplatesPage() {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10 }}>
               <Field label="Header">
-                <select value={form.headerFormat} onChange={event => updateForm({ headerFormat: event.target.value as HeaderFormat })} style={inputStyle}>
+                <select value={form.headerFormat} onChange={event => updateHeaderFormat(event.target.value as HeaderFormat)} style={inputStyle}>
                   <option value="NONE">Sem header</option>
                   <option value="TEXT">Texto</option>
                   <option value="IMAGE">Imagem</option>
@@ -490,8 +549,28 @@ export default function MetaTemplatesPage() {
                   <input value={form.headerText} onChange={event => updateForm({ headerText: event.target.value })} placeholder="Oportunidade para {{1}}" style={inputStyle} />
                 </Field>
               ) : form.headerFormat !== 'NONE' ? (
-                <Field label="Handle de midia Meta">
-                  <input value={form.headerMediaHandle} onChange={event => updateForm({ headerMediaHandle: event.target.value })} placeholder="Opcional: handle de exemplo da midia" style={inputStyle} />
+                <Field label="Midia de exemplo">
+                  <div style={{ display: 'grid', gap: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                      <label style={{ ...ghostButtonStyle, cursor: uploadingMedia || saving ? 'wait' : 'pointer' }}>
+                        {uploadingMedia ? <Loader2 size={15} className="spin" /> : <Upload size={15} />}
+                        {uploadingMedia ? 'Carregando' : `Carregar ${headerMediaLabel(form.headerFormat).toLowerCase()}`}
+                        <input
+                          type="file"
+                          accept={headerMediaAccept(form.headerFormat)}
+                          disabled={uploadingMedia || saving}
+                          onChange={event => {
+                            const selectedFile = event.currentTarget.files?.[0]
+                            event.currentTarget.value = ''
+                            void uploadHeaderMedia(selectedFile)
+                          }}
+                          style={{ display: 'none' }}
+                        />
+                      </label>
+                      {mediaFileLabel && <span style={successPillStyle}>{mediaFileLabel}</span>}
+                    </div>
+                    <input value={form.headerMediaHandle} onChange={event => updateForm({ headerMediaHandle: event.target.value })} placeholder="Handle gerado pela Meta" style={inputStyle} />
+                  </div>
                 </Field>
               ) : <div />}
               {form.headerFormat === 'TEXT' && headerVariables.length > 0 ? (
@@ -667,10 +746,10 @@ export default function MetaTemplatesPage() {
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <label style={{ display: 'grid', gap: 6 }}>
+    <div style={{ display: 'grid', gap: 6 }}>
       <span style={labelStyle}>{label}</span>
       {children}
-    </label>
+    </div>
   )
 }
 
@@ -815,6 +894,20 @@ const dangerIconButtonStyle: CSSProperties = {
   ...dangerButtonStyle,
   justifyContent: 'center',
   padding: '8px 9px',
+}
+
+const successPillStyle: CSSProperties = {
+  padding: '7px 9px',
+  borderRadius: 999,
+  color: '#22c55e',
+  background: 'rgba(34,197,94,0.1)',
+  border: '1px solid rgba(34,197,94,0.22)',
+  fontSize: '0.78rem',
+  fontWeight: 800,
+  maxWidth: '100%',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
 }
 
 const gridStyle: CSSProperties = {

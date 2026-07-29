@@ -66,6 +66,13 @@ export interface MetaWhatsAppTemplateMutationInput {
   messageSendTtlSeconds?: number
 }
 
+export interface UploadMetaWhatsAppTemplateMediaInput {
+  fileName: string
+  fileType: string
+  fileBuffer: Buffer
+  config?: ConfigMap
+}
+
 export interface SendTemplateMessageInput {
   to: string
   templateName: string
@@ -411,6 +418,63 @@ export async function deleteMetaWhatsAppTemplate(input: MetaWhatsAppTemplateMuta
     method: 'DELETE',
     params: { name },
   })
+}
+
+export async function uploadMetaWhatsAppTemplateHeaderMedia(input: UploadMetaWhatsAppTemplateMediaInput) {
+  const resolved = resolveMetaWhatsAppConfig(input.config || {})
+  if (!resolved.accessToken) throw new Error('System User Access Token ausente.')
+  if (!resolved.appId) throw new Error('Meta App ID ausente.')
+
+  const fileName = cleanText(input.fileName, 255)
+  const fileType = cleanText(input.fileType, 120)
+  if (!fileName) throw new Error('Nome da midia obrigatorio.')
+  if (!fileType) throw new Error('Tipo da midia obrigatorio.')
+  if (!input.fileBuffer.byteLength) throw new Error('Arquivo de midia vazio.')
+
+  const session = await graphRequest<{ id?: string }>(resolved, `/${resolved.appId}/uploads`, {
+    method: 'POST',
+    params: {
+      file_name: fileName,
+      file_length: String(input.fileBuffer.byteLength),
+      file_type: fileType,
+    },
+  })
+
+  const sessionId = cleanText(session.id, 5000)
+  if (!sessionId) throw new Error('A Meta nao retornou a sessao de upload da midia.')
+
+  const response = await fetch(`https://graph.facebook.com/${resolved.apiVersion}/${sessionId}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `OAuth ${resolved.accessToken}`,
+      'Content-Type': fileType,
+      file_offset: '0',
+    },
+    body: input.fileBuffer as unknown as BodyInit,
+    cache: 'no-store',
+  })
+
+  const text = await response.text()
+  let payload: any = {}
+  try {
+    payload = text ? JSON.parse(text) : {}
+  } catch {
+    payload = { message: text }
+  }
+
+  if (!response.ok || payload?.error) {
+    const message = cleanText(payload?.error?.message || payload?.message || response.statusText || 'Erro ao carregar midia na Meta', 500)
+    throw new MetaWhatsAppApiError(message, response.status, payload)
+  }
+
+  const handle = cleanText(payload?.h, 5000)
+  if (!handle) throw new Error('A Meta nao retornou o handle da midia.')
+
+  return {
+    handle,
+    uploadSessionId: sessionId,
+    raw: payload,
+  }
 }
 
 export async function sendMetaWhatsAppTemplateMessage(input: SendTemplateMessageInput) {
