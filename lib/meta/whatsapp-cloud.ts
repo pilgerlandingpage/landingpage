@@ -75,6 +75,14 @@ export interface SendTemplateMessageInput {
   config?: ConfigMap
 }
 
+export interface SendTextMessageInput {
+  to: string
+  text: string
+  phoneNumberId?: string
+  config?: ConfigMap
+  previewUrl?: boolean
+}
+
 export interface MetaWhatsAppConnectionTest {
   success: boolean
   message: string
@@ -425,6 +433,37 @@ export async function sendMetaWhatsAppTemplateMessage(input: SendTemplateMessage
         name: cleanText(input.templateName, 120),
         language: { code: normalizeLanguage(input.language || resolved.defaultLanguage) },
         ...(input.components?.length ? { components: input.components } : {}),
+      },
+    },
+  })
+
+  return {
+    providerMessageId: payload.messages?.[0]?.id || '',
+    raw: payload,
+  }
+}
+
+export async function sendMetaWhatsAppTextMessage(input: SendTextMessageInput) {
+  const resolved = resolveMetaWhatsAppConfig(input.config || {})
+  const phoneNumberId = cleanText(input.phoneNumberId || resolved.defaultPhoneNumberId, 80)
+  const to = normalizeMetaWhatsAppPhone(input.to)
+  const text = cleanText(input.text, 4096)
+
+  if (!resolved.accessToken) throw new Error('System User Access Token ausente.')
+  if (!phoneNumberId) throw new Error('Phone Number ID ausente.')
+  if (!to) throw new Error('Destinatario WhatsApp ausente.')
+  if (!text) throw new Error('Mensagem vazia.')
+
+  const payload = await graphRequest<{ messages?: Array<{ id?: string }> }>(resolved, `/${phoneNumberId}/messages`, {
+    method: 'POST',
+    body: {
+      messaging_product: 'whatsapp',
+      recipient_type: 'individual',
+      to,
+      type: 'text',
+      text: {
+        body: text,
+        preview_url: Boolean(input.previewUrl),
       },
     },
   })

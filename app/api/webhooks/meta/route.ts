@@ -10,6 +10,10 @@ import {
   shouldAutoprocessWebhook,
 } from '@/lib/social/meta-comment-dm-automation'
 import { refreshMetaWhatsAppCampaignTotals } from '@/lib/meta/whatsapp-campaigns'
+import {
+  recordInboundMetaWhatsAppMessage,
+  recordMetaWhatsAppMessageStatus,
+} from '@/lib/meta/whatsapp-chat'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -135,6 +139,13 @@ function normalizeMetaDeliveryStatus(value: unknown) {
   return status || 'unknown'
 }
 
+function getWhatsAppContactName(value: any, fromPhone: string) {
+  const contact = Array.isArray(value?.contacts)
+    ? value.contacts.find((item: any) => normalizeMetaWhatsAppPhone(item?.wa_id) === fromPhone) || value.contacts[0]
+    : null
+  return contact?.profile?.name || null
+}
+
 function isOptOutText(value: unknown) {
   const text = String(value || '')
     .normalize('NFD')
@@ -210,6 +221,14 @@ async function ingestMetaWhatsAppWebhook(payload: any) {
             if (recipient.campaign_id) touchedCampaignIds.add(recipient.campaign_id)
           }
 
+          await recordMetaWhatsAppMessageStatus({
+            providerMessageId,
+            status,
+            receivedAt,
+            errorCode: statusEvent?.errors?.[0]?.code ? String(statusEvent.errors[0].code) : null,
+            errorMessage: statusEvent?.errors?.[0]?.message || statusEvent?.errors?.[0]?.title || null,
+          }, supabase)
+
           const { error } = await supabase
             .from('meta_whatsapp_events')
             .insert({
@@ -234,8 +253,9 @@ async function ingestMetaWhatsAppWebhook(payload: any) {
           const fromPhone = normalizeMetaWhatsAppPhone(message?.from)
           const receivedAt = timestampToIso(message?.timestamp)
           const textBody = message?.text?.body || message?.button?.text || message?.interactive?.button_reply?.title || ''
+          const contactName = getWhatsAppContactName(value, fromPhone)
 
-          const { error } = await supabase
+          const { data: event, error } = await supabase
             .from('meta_whatsapp_events')
             .insert({
               provider_message_id: providerMessageId || null,
@@ -246,8 +266,22 @@ async function ingestMetaWhatsAppWebhook(payload: any) {
               payload: message,
               received_at: receivedAt,
             })
+            .select('id')
+            .single()
 
           if (error) throw error
+
+          await recordInboundMetaWhatsAppMessage({
+            providerMessageId,
+            senderId,
+            phoneNumberId: value?.metadata?.phone_number_id,
+            fromPhone,
+            profileName: contactName,
+            messageType: message?.type || null,
+            payload: message,
+            receivedAt,
+            eventId: event?.id || null,
+          }, supabase)
 
           if (fromPhone && isOptOutText(textBody)) {
             await supabase
