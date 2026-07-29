@@ -35,7 +35,7 @@ export interface CreateMetaWhatsAppCampaignInput {
   senderRoutingMode?: 'single' | 'round_robin' | 'weighted_pool'
   defaultSenderId?: string | null
   templateParameters?: unknown
-  audienceSource?: 'custom_paste' | 'lead_filter' | 'commerce_customers' | 'education_leads' | 'editorial_distribution'
+  audienceSource?: 'custom_paste' | 'saved_contact_list' | 'lead_filter' | 'commerce_customers' | 'education_leads' | 'editorial_distribution'
   metadata?: Record<string, unknown>
 }
 
@@ -62,6 +62,12 @@ export interface GetMetaWhatsAppCampaignDetailInput {
 
 function cleanText(value: unknown, maxLength = 300) {
   return String(value || '').trim().slice(0, maxLength)
+}
+
+function asMetadata(value: unknown): Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : {}
 }
 
 function isMetaSenderReady(sender: any) {
@@ -568,12 +574,16 @@ export async function listMetaWhatsAppCampaigns(input: ListMetaWhatsAppCampaigns
 
   const { data: templates, error: templatesError } = await supabase
     .from('meta_whatsapp_templates')
-    .select('id, name, language, category, status, quality_score, components, last_synced_at')
+    .select('id, name, language, category, status, quality_score, components, metadata, last_synced_at')
     .order('status', { ascending: true })
     .order('name', { ascending: true })
     .limit(200)
 
   if (templatesError) throw templatesError
+  const campaignTemplates = (templates || []).filter((template: any) => {
+    const metadata = asMetadata(template.metadata)
+    return Boolean(metadata.managed_from_panel || metadata.created_from_panel)
+  })
 
   const summary = (campaigns || []).reduce((acc: any, campaign: any) => {
     acc.total += 1
@@ -635,7 +645,7 @@ export async function listMetaWhatsAppCampaigns(input: ListMetaWhatsAppCampaigns
   return {
     campaigns: campaigns || [],
     senders: senders || [],
-    templates: templates || [],
+    templates: campaignTemplates,
     summary,
     analytics,
   }

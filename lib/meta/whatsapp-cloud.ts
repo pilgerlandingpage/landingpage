@@ -117,6 +117,12 @@ function cleanText(value: unknown, maxLength = 300) {
   return String(value || '').trim().slice(0, maxLength)
 }
 
+function asMetadata(value: unknown): Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : {}
+}
+
 function firstText(...values: unknown[]) {
   for (const value of values) {
     const selected = cleanText(value, 5000)
@@ -570,17 +576,43 @@ export async function syncMetaWhatsAppAssets(config: ConfigMap = {}, supabase = 
   }
 
   if (templates.length) {
+    const { data: existingTemplates, error: existingTemplatesError } = await supabase
+      .from('meta_whatsapp_templates')
+      .select('waba_id, name, language, metadata')
+      .eq('waba_id', resolved.wabaId)
+
+    if (existingTemplatesError) throw existingTemplatesError
+
+    const existingMetadataByTemplate = new Map<string, Record<string, unknown>>()
+    for (const row of existingTemplates || []) {
+      existingMetadataByTemplate.set(
+        `${row.waba_id}:${row.name}:${row.language}`,
+        asMetadata(row.metadata)
+      )
+    }
+
     const templateRows = templates.map(template => ({
-      waba_id: resolved.wabaId,
-      template_external_id: template.id || null,
-      name: template.name,
-      language: template.language || resolved.defaultLanguage,
-      category: template.category || 'UNKNOWN',
-      status: template.status || 'unknown',
-      quality_score: typeof template.quality_score === 'string' ? template.quality_score : null,
-      components: Array.isArray(template.components) ? template.components : [],
-      last_synced_at: new Date().toISOString(),
-      metadata: template as unknown as Record<string, unknown>,
+      ...(() => {
+        const language = template.language || resolved.defaultLanguage
+        const existingMetadata = existingMetadataByTemplate.get(`${resolved.wabaId}:${template.name}:${language}`) || {}
+        return {
+          waba_id: resolved.wabaId,
+          template_external_id: template.id || null,
+          name: template.name,
+          language,
+          category: template.category || 'UNKNOWN',
+          status: template.status || 'unknown',
+          quality_score: typeof template.quality_score === 'string' ? template.quality_score : null,
+          components: Array.isArray(template.components) ? template.components : [],
+          last_synced_at: new Date().toISOString(),
+          metadata: {
+            ...existingMetadata,
+            ...(template as unknown as Record<string, unknown>),
+            managed_from_panel: Boolean(existingMetadata.managed_from_panel || existingMetadata.created_from_panel),
+            created_from_panel: Boolean(existingMetadata.created_from_panel),
+          },
+        }
+      })()
     }))
 
     const { error } = await supabase

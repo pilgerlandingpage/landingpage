@@ -74,6 +74,25 @@ export async function POST(request: NextRequest) {
         const { action, instanceId, ...campaignData } = body
 
         if (action === 'meta_whatsapp' || action === 'meta_template') {
+            let contactListMetadata: Record<string, unknown> = {}
+            const contactListId = String(campaignData.contactListId || campaignData.contact_list_id || '').trim()
+            if (contactListId) {
+                const { data: contactList } = await supabase
+                    .from('meta_whatsapp_contact_lists')
+                    .select('id, name, valid_contacts, source_file_name')
+                    .eq('id', contactListId)
+                    .maybeSingle()
+
+                if (contactList) {
+                    contactListMetadata = {
+                        contact_list_id: contactList.id,
+                        contact_list_name: contactList.name,
+                        contact_list_valid_contacts: contactList.valid_contacts,
+                        contact_list_source_file_name: contactList.source_file_name,
+                    }
+                }
+            }
+
             const result = await createMetaWhatsAppCampaign({
                 name: campaignData.name || campaignData.folder || `Campanha Meta ${new Date().toLocaleDateString('pt-BR')}`,
                 campaignType: campaignData.campaignType || campaignData.campaign_type || 'marketing',
@@ -87,8 +106,9 @@ export async function POST(request: NextRequest) {
                 senderRoutingMode: campaignData.senderRoutingMode || campaignData.sender_routing_mode || 'weighted_pool',
                 defaultSenderId: campaignData.defaultSenderId || campaignData.default_sender_id || null,
                 templateParameters: campaignData.templateParameters || campaignData.template_parameters || {},
-                audienceSource: campaignData.audienceSource || campaignData.audience_source || 'custom_paste',
+                audienceSource: contactListId ? 'saved_contact_list' : campaignData.audienceSource || campaignData.audience_source || 'custom_paste',
                 metadata: {
+                    ...contactListMetadata,
                     created_from: 'admin_whatsapp_campaigns',
                     legacy_instance_id_ignored: instanceId || null,
                 },

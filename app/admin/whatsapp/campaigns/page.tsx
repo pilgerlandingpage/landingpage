@@ -56,6 +56,7 @@ interface MetaTemplate {
     status: string
     quality_score?: string | null
     components?: unknown[] | null
+    metadata?: unknown
     last_synced_at?: string | null
 }
 
@@ -205,6 +206,33 @@ interface MetaRecipientDraft {
     templateParameters?: unknown
     metadata?: Record<string, unknown>
     missingVariables?: string[]
+}
+
+interface MetaContactList {
+    id: string
+    name: string
+    description?: string | null
+    source_file_name?: string | null
+    source_sheet_name?: string | null
+    status: string
+    total_contacts: number
+    valid_contacts: number
+    duplicate_contacts: number
+    invalid_contacts: number
+    created_at: string
+    updated_at: string
+}
+
+interface MetaContactListContact {
+    id?: string
+    list_id?: string
+    phone_e164: string
+    name?: string | null
+    email?: string | null
+    city?: string | null
+    tags?: string[] | null
+    template_variables?: Record<string, unknown> | null
+    metadata?: unknown
 }
 
 const MSG_TYPES = [
@@ -413,6 +441,12 @@ export default function CampaignsPage() {
     const [metaCampaigns, setMetaCampaigns] = useState<MetaCampaign[]>([])
     const [metaSenders, setMetaSenders] = useState<MetaSender[]>([])
     const [metaTemplates, setMetaTemplates] = useState<MetaTemplate[]>([])
+    const [metaContactLists, setMetaContactLists] = useState<MetaContactList[]>([])
+    const [selectedContactListId, setSelectedContactListId] = useState('')
+    const [selectedContactListContacts, setSelectedContactListContacts] = useState<MetaContactListContact[]>([])
+    const [contactListName, setContactListName] = useState('')
+    const [savingContactList, setSavingContactList] = useState(false)
+    const [loadingContactLists, setLoadingContactLists] = useState(false)
     const [metaSummary, setMetaSummary] = useState<MetaCampaignSummary | null>(null)
     const [metaAnalytics, setMetaAnalytics] = useState<MetaCampaignAnalytics | null>(null)
     const [metaStatusFilter, setMetaStatusFilter] = useState('')
@@ -501,6 +535,21 @@ export default function CampaignsPage() {
         }
     }
 
+    const loadMetaContactLists = async () => {
+        setLoadingContactLists(true)
+        try {
+            const res = await fetch('/api/admin/whatsapp/contact-lists')
+            const data = await res.json()
+            if (data.success) {
+                setMetaContactLists(data.lists || [])
+            }
+        } catch {
+            setFeedback({ type: 'error', text: 'Erro ao carregar listas salvas Meta' })
+        } finally {
+            setLoadingContactLists(false)
+        }
+    }
+
     const toggleMetaCampaignDetail = async (campaignId: string) => {
         if (expandedMetaCampaignId === campaignId) {
             setExpandedMetaCampaignId('')
@@ -534,7 +583,10 @@ export default function CampaignsPage() {
     }
 
     useEffect(() => {
-        if (sendProvider === 'meta_whatsapp') loadMetaCampaigns()
+        if (sendProvider === 'meta_whatsapp') {
+            loadMetaCampaigns()
+            loadMetaContactLists()
+        }
     }, [sendProvider, metaStatusFilter])
 
     const parseNumbers = (): string[] => {
@@ -640,6 +692,97 @@ export default function CampaignsPage() {
         } catch {
             setFeedback({ type: 'error', text: 'Nao consegui ler este arquivo. Use CSV ou TXT com telefone e nome.' })
         }
+    }
+
+    const buildAudienceLinesFromContacts = (contacts: MetaContactListContact[]) => {
+        return contacts
+            .map(contact => {
+                const templateVariables = asRecord(contact.template_variables)
+                const name = textValue(contact.name) || ''
+                const variableValues = selectedBodyVariables.map(variable => {
+                    const key = String(variable)
+                    const value = textValue(templateVariables[key])
+                    if (value) return value
+                    if (variable === 1) return name
+                    return ''
+                })
+
+                return [contact.phone_e164, name, ...variableValues].map(escapeAudienceCell).join('; ')
+            })
+            .join('\n')
+    }
+
+    const loadSavedContactListIntoAudience = async (listId: string) => {
+        if (!listId) return
+
+        try {
+            const res = await fetch(`/api/admin/whatsapp/contact-lists?list_id=${encodeURIComponent(listId)}`)
+            const data = await res.json()
+            if (!data.success) {
+                setFeedback({ type: 'error', text: data.message || 'Erro ao carregar lista salva.' })
+                return
+            }
+
+            const contacts = data.contacts || []
+            setSelectedContactListId(listId)
+            setSelectedContactListContacts(contacts)
+            setNumbersInput(buildAudienceLinesFromContacts(contacts))
+            setMetaAudiencePersonalized(true)
+            setFeedback({ type: 'success', text: `Lista "${data.list?.name || 'salva'}" carregada com ${contacts.length} contato(s).` })
+        } catch {
+            setFeedback({ type: 'error', text: 'Erro ao carregar lista salva.' })
+        }
+    }
+
+    const uploadSavedContactList = async (file?: File) => {
+        if (!file) return
+
+        setSavingContactList(true)
+        setFeedback(null)
+        try {
+            const form = new FormData()
+            form.append('file', file)
+            form.append('name', contactListName)
+
+            const res = await fetch('/api/admin/whatsapp/contact-lists', {
+                method: 'POST',
+                body: form,
+            })
+            const data = await res.json()
+
+            if (!data.success) {
+                setFeedback({ type: 'error', text: data.message || 'Erro ao salvar lista.' })
+                return
+            }
+
+            const list = data.list as MetaContactList
+            const contacts = (data.contacts || []) as MetaContactListContact[]
+            setMetaContactLists(prev => [list, ...prev.filter(item => item.id !== list.id)])
+            setSelectedContactListId(list.id)
+            setSelectedContactListContacts(contacts)
+            setNumbersInput(buildAudienceLinesFromContacts(contacts))
+            setMetaAudiencePersonalized(true)
+            setContactListName('')
+
+            if (list.valid_contacts > contacts.length) {
+                await loadSavedContactListIntoAudience(list.id)
+            }
+
+            const summary = data.summary || {}
+            setFeedback({
+                type: 'success',
+                text: `${data.message} Duplicados ignorados: ${summary.duplicateContacts || 0}. Invalidos: ${summary.invalidContacts || 0}.`,
+            })
+        } catch {
+            setFeedback({ type: 'error', text: 'Nao consegui salvar essa lista. Use XLSX, CSV ou TXT com coluna de telefone.' })
+        } finally {
+            setSavingContactList(false)
+        }
+    }
+
+    const clearSavedContactListSelection = () => {
+        setSelectedContactListId('')
+        setSelectedContactListContacts([])
     }
 
     const resetMetaTemplateBuilder = () => {
@@ -859,6 +1002,7 @@ export default function CampaignsPage() {
                         templateName: metaTemplateName.trim(),
                         templateLanguage: metaTemplateLanguage.trim() || 'pt_BR',
                         templateParameters,
+                        contactListId: selectedContactListId || undefined,
                         confirmOptIn,
                         optInSource: 'site_lead_authorized',
                         campaignType: metaCampaignType,
@@ -883,6 +1027,7 @@ export default function CampaignsPage() {
                 setFeedback({ type: 'success', text: `✅ ${data.message}` })
                 setShowCreateForm(false)
                 setNumbersInput('')
+                clearSavedContactListSelection()
                 setMsgText('')
                 setMediaUrl('')
                 resetMetaTemplateBuilder()
@@ -944,6 +1089,7 @@ export default function CampaignsPage() {
     const currentInstance = instances.find(i => i.id === selectedInstance)
     const approvedMetaTemplates = metaTemplates.filter(template => String(template.status || '').toUpperCase() === 'APPROVED')
     const activeMetaSenders = metaSenders.filter(sender => sender.local_status === 'active')
+    const selectedContactList = metaContactLists.find(list => list.id === selectedContactListId) || null
     const selectedMetaTemplate = approvedMetaTemplates.find(template => template.name === metaTemplateName && template.language === metaTemplateLanguage) || null
     const selectedHeaderComponent = findTemplateComponent(selectedMetaTemplate, 'HEADER')
     const selectedBodyComponent = findTemplateComponent(selectedMetaTemplate, 'BODY')
@@ -961,6 +1107,13 @@ export default function CampaignsPage() {
     const parsedNumbers = sendProvider === 'meta_whatsapp' && metaAudiencePersonalized
         ? parsedMetaRecipientDrafts.map(recipient => recipient.phone)
         : parseNumbers()
+    const selectedBodyVariablesKey = selectedBodyVariables.join(',')
+
+    useEffect(() => {
+        if (!selectedContactListId || selectedContactListContacts.length === 0) return
+        setNumbersInput(buildAudienceLinesFromContacts(selectedContactListContacts))
+        setMetaAudiencePersonalized(true)
+    }, [selectedContactListId, selectedContactListContacts, selectedBodyVariablesKey])
 
     if (loading) return <AdminLoadingState minHeight="400px" />
 
@@ -1125,13 +1278,17 @@ export default function CampaignsPage() {
                                                 ))}
                                             </select>
                                         ) : (
-                                            <input value={metaTemplateName} onChange={e => setMetaTemplateName(e.target.value)}
-                                                placeholder="ex: blog_news_update"
-                                                style={{
-                                                    width: '100%', padding: '10px 14px', borderRadius: '8px', fontSize: '0.9rem',
-                                                    background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)',
-                                                    color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box',
-                                                }} />
+                                            <div style={{
+                                                padding: '10px 12px',
+                                                borderRadius: '8px',
+                                                border: '1px solid rgba(201,169,110,0.28)',
+                                                background: 'rgba(201,169,110,0.08)',
+                                                color: 'var(--text-secondary)',
+                                                fontSize: '0.82rem',
+                                                lineHeight: 1.45,
+                                            }}>
+                                                Nenhum template aprovado criado pelo painel foi encontrado. Crie um novo em Templates Meta e sincronize apos aprovacao.
+                                            </div>
                                         )}
                                     </div>
                                     <div>
@@ -1428,6 +1585,178 @@ export default function CampaignsPage() {
                             </div>
                         )}
                         </>
+                        )}
+
+                        {sendProvider === 'meta_whatsapp' && (
+                            <div style={{
+                                display: 'grid',
+                                gap: '14px',
+                                padding: '14px',
+                                borderRadius: '12px',
+                                border: '1px solid var(--border)',
+                                background: 'rgba(255,255,255,0.03)',
+                            }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                    <div>
+                                        <h3 style={{ margin: 0, fontSize: '0.98rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <Users size={17} style={{ color: 'var(--gold)' }} /> Listas salvas de contatos
+                                        </h3>
+                                        <p style={{ margin: '4px 0 0', color: 'var(--text-muted)', fontSize: '0.78rem', lineHeight: 1.45 }}>
+                                            Salve listas com nome, telefone e variaveis para reutilizar em campanhas futuras.
+                                        </p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={loadMetaContactLists}
+                                        disabled={loadingContactLists}
+                                        style={{
+                                            padding: '8px 10px',
+                                            borderRadius: '8px',
+                                            border: '1px solid var(--border)',
+                                            background: 'rgba(255,255,255,0.04)',
+                                            color: 'var(--text-secondary)',
+                                            cursor: loadingContactLists ? 'not-allowed' : 'pointer',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '6px',
+                                            fontSize: '0.78rem',
+                                            fontWeight: 700,
+                                        }}
+                                    >
+                                        <RefreshCw size={14} className={loadingContactLists ? 'spin' : ''} /> Atualizar listas
+                                    </button>
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+                                    <div>
+                                        <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
+                                            Usar lista existente
+                                        </label>
+                                        <select
+                                            value={selectedContactListId}
+                                            onChange={event => {
+                                                const listId = event.target.value
+                                                if (!listId) {
+                                                    clearSavedContactListSelection()
+                                                    return
+                                                }
+                                                void loadSavedContactListIntoAudience(listId)
+                                            }}
+                                            style={{
+                                                width: '100%',
+                                                padding: '10px 14px',
+                                                borderRadius: '8px',
+                                                fontSize: '0.9rem',
+                                                background: 'rgba(255,255,255,0.06)',
+                                                border: '1px solid var(--border)',
+                                                color: 'var(--text-primary)',
+                                                outline: 'none',
+                                                boxSizing: 'border-box',
+                                            }}
+                                        >
+                                            <option value="">Selecione uma lista salva</option>
+                                            {metaContactLists.map(list => (
+                                                <option key={list.id} value={list.id}>
+                                                    {list.name} ({list.valid_contacts} contatos)
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
+                                            Nome da nova lista
+                                        </label>
+                                        <input
+                                            value={contactListName}
+                                            onChange={event => setContactListName(event.target.value)}
+                                            placeholder="Ex: Midhaus Selecao 250 Leads"
+                                            style={{
+                                                width: '100%',
+                                                padding: '10px 14px',
+                                                borderRadius: '8px',
+                                                fontSize: '0.9rem',
+                                                background: 'rgba(255,255,255,0.06)',
+                                                border: '1px solid var(--border)',
+                                                color: 'var(--text-primary)',
+                                                outline: 'none',
+                                                boxSizing: 'border-box',
+                                            }}
+                                        />
+                                    </div>
+
+                                    <div style={{ display: 'flex', alignItems: 'end', gap: '8px', flexWrap: 'wrap' }}>
+                                        <label
+                                            style={{
+                                                padding: '10px 12px',
+                                                borderRadius: '8px',
+                                                border: '1px solid var(--gold)',
+                                                background: 'rgba(201,169,110,0.12)',
+                                                color: 'var(--gold)',
+                                                cursor: savingContactList ? 'not-allowed' : 'pointer',
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                gap: '6px',
+                                                fontSize: '0.82rem',
+                                                fontWeight: 700,
+                                                minHeight: '42px',
+                                            }}
+                                        >
+                                            {savingContactList ? <Loader2 size={14} className="spin" /> : <Upload size={14} />}
+                                            Salvar lista
+                                            <input
+                                                type="file"
+                                                accept=".xlsx,.csv,.txt,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,text/plain"
+                                                disabled={savingContactList}
+                                                onChange={event => {
+                                                    const selectedFile = event.currentTarget.files?.[0]
+                                                    event.currentTarget.value = ''
+                                                    void uploadSavedContactList(selectedFile)
+                                                }}
+                                                style={{ display: 'none' }}
+                                            />
+                                        </label>
+                                        {selectedContactListId && (
+                                            <button
+                                                type="button"
+                                                onClick={clearSavedContactListSelection}
+                                                style={{
+                                                    padding: '10px 12px',
+                                                    borderRadius: '8px',
+                                                    border: '1px solid var(--border)',
+                                                    background: 'rgba(255,255,255,0.04)',
+                                                    color: 'var(--text-secondary)',
+                                                    cursor: 'pointer',
+                                                    fontSize: '0.82rem',
+                                                    fontWeight: 700,
+                                                    minHeight: '42px',
+                                                }}
+                                            >
+                                                Desvincular
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {selectedContactList && (
+                                    <div style={{
+                                        padding: '10px 12px',
+                                        borderRadius: '10px',
+                                        border: '1px solid rgba(34,197,94,0.22)',
+                                        background: 'rgba(34,197,94,0.08)',
+                                        color: 'var(--text-secondary)',
+                                        fontSize: '0.8rem',
+                                        lineHeight: 1.45,
+                                    }}>
+                                        <strong style={{ color: 'var(--text-primary)' }}>{selectedContactList.name}</strong>
+                                        {' '}carregada com {selectedContactListContacts.length || selectedContactList.valid_contacts} contato(s).
+                                        {selectedContactList.source_file_name ? ` Origem: ${selectedContactList.source_file_name}.` : ''}
+                                        {selectedContactList.duplicate_contacts || selectedContactList.invalid_contacts ? (
+                                            <> Ignorados: {selectedContactList.duplicate_contacts} duplicado(s), {selectedContactList.invalid_contacts} invalido(s).</>
+                                        ) : null}
+                                    </div>
+                                )}
+                            </div>
                         )}
 
                         {/* Numbers */}
