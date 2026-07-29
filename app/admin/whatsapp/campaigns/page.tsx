@@ -690,7 +690,7 @@ export default function CampaignsPage() {
             if (shouldPersonalize) setMetaAudiencePersonalized(true)
             setFeedback({ type: 'success', text: `${importedLines.length} contato(s) importado(s) para a campanha.` })
         } catch {
-            setFeedback({ type: 'error', text: 'Nao consegui ler este arquivo. Use CSV ou TXT com telefone e nome.' })
+            setFeedback({ type: 'error', text: 'Nao consegui ler este arquivo. Use CSV ou TXT aqui, ou use Listas salvas para subir XLSX.' })
         }
     }
 
@@ -736,6 +736,15 @@ export default function CampaignsPage() {
 
     const uploadSavedContactList = async (file?: File) => {
         if (!file) return
+
+        const lowerFileName = file.name.toLowerCase()
+        if (lowerFileName.endsWith('.xls') && !lowerFileName.endsWith('.xlsx')) {
+            setFeedback({
+                type: 'error',
+                text: 'Arquivo .xls antigo nao e aceito. Abra no Excel e salve como .xlsx, ou use o modelo CSV baixado pelo painel.',
+            })
+            return
+        }
 
         setSavingContactList(true)
         setFeedback(null)
@@ -1602,7 +1611,7 @@ export default function CampaignsPage() {
                                             <Users size={17} style={{ color: 'var(--gold)' }} /> Listas salvas de contatos
                                         </h3>
                                         <p style={{ margin: '4px 0 0', color: 'var(--text-muted)', fontSize: '0.78rem', lineHeight: 1.45 }}>
-                                            Salve listas com nome, telefone e variaveis para reutilizar em campanhas futuras.
+                                            Salve listas XLSX, CSV ou TXT com nome, telefone e variaveis para reutilizar em campanhas futuras.
                                         </p>
                                     </div>
                                     <button
@@ -1703,7 +1712,7 @@ export default function CampaignsPage() {
                                             }}
                                         >
                                             {savingContactList ? <Loader2 size={14} className="spin" /> : <Upload size={14} />}
-                                            Salvar lista
+                                            Salvar CSV/XLSX
                                             <input
                                                 type="file"
                                                 accept=".xlsx,.csv,.txt,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,text/plain"
@@ -1737,6 +1746,10 @@ export default function CampaignsPage() {
                                         )}
                                     </div>
                                 </div>
+
+                                <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.74rem', lineHeight: 1.45 }}>
+                                    O modelo baixado pelo painel e CSV e pode ser enviado aqui. Se o Excel gerar um arquivo .xls antigo, salve novamente como .xlsx antes de subir.
+                                </p>
 
                                 {selectedContactList && (
                                     <div style={{
@@ -1778,7 +1791,7 @@ export default function CampaignsPage() {
                                             fontSize: '0.78rem', fontWeight: 700,
                                         }}
                                     >
-                                        <Download size={14} /> Baixar modelo
+                                        <Download size={14} /> Baixar modelo CSV
                                     </button>
                                     <label
                                         style={{
@@ -1788,7 +1801,7 @@ export default function CampaignsPage() {
                                             fontSize: '0.78rem', fontWeight: 700,
                                         }}
                                     >
-                                        <Upload size={14} /> Importar lista
+                                        <Upload size={14} /> Importar CSV/TXT rapido
                                         <input
                                             type="file"
                                             accept=".csv,.txt,text/csv,text/plain"
