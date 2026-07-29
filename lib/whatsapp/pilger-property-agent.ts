@@ -1,5 +1,6 @@
 import { getPublicAppUrl } from '@/lib/app-url'
 import { recordAgentCentralSignal, saveAgentCentralSnapshot } from '@/lib/intelligence/agent-runtime'
+import { formatPublicPropertyPrice } from '@/lib/properties/public-policy'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 import { sendWhatsAppMessage } from '@/lib/connectyhub/whatsapp'
 
@@ -189,9 +190,7 @@ async function loadActiveProperties(supabase: SupabaseLike) {
 }
 
 function formatCurrency(value: unknown) {
-  const numeric = Number(value || 0)
-  if (!Number.isFinite(numeric) || numeric <= 0) return ''
-  return `R$ ${numeric.toLocaleString('pt-BR')}`
+  return formatPublicPropertyPrice(value)
 }
 
 function formatPropertyLine(property: any, index: number, origin?: string | null) {

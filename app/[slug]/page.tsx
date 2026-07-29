@@ -1,5 +1,5 @@
 import { createAdminClient, createSupabaseAbortSignal, summarizeSupabaseError } from '@/lib/supabase/server'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import ClassicTemplate from '@/components/templates/ClassicTemplate'
 import ModernLuxuryTemplate from '@/components/templates/ModernLuxuryTemplate'
@@ -15,6 +15,7 @@ import { LandingPageData } from '@/components/templates/types'
 import { Metadata } from 'next'
 import { JsonLd, absoluteUrl, breadcrumbJsonLd, organizationJsonLd, webPageJsonLd, DEFAULT_OG_IMAGE, faqPageJsonLd, itemListJsonLd } from '@/lib/seo/json-ld'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
+import { isPublicPriceVisible, maskPublicPriceText } from '@/lib/properties/public-policy'
 
 export const revalidate = 300
 
@@ -30,6 +31,7 @@ const LANDING_PAGE_SELECT = `
     slug,
     description,
     content,
+    metadata,
     page_type,
     primary_color,
     property_id,
@@ -238,6 +240,18 @@ function landingRecord(value: unknown): Record<string, any> {
 
 function landingText(value: unknown, fallback = '') {
     return typeof value === 'string' && value.trim() ? value.trim() : fallback
+}
+
+function landingRedirectSlug(lp: Record<string, any>, content: Record<string, any>, currentSlug: string) {
+    const metadata = landingRecord(lp.metadata)
+    const target = landingText(
+        metadata.redirect_to_slug ??
+        metadata.redirectToSlug ??
+        content.redirect_to_slug ??
+        content.redirectToSlug
+    )
+    if (!target || target === currentSlug || target === lp.slug) return ''
+    return target.replace(/^\/+/, '').split('/').filter(Boolean)[0] || ''
 }
 
 function landingNumber(value: unknown): number | null {
@@ -501,7 +515,7 @@ function developmentUnitItems(development: Record<string, any>) {
                     landingText(unit.area),
                     landingText(unit.suites),
                     landingText(unit.vagas),
-                    landingText(unit.price),
+                    maskPublicPriceText(landingText(unit.price)),
                 ].filter(Boolean).join(' | '),
                 image: landingText(unit.image) || (Array.isArray(unit.images) ? landingText(unit.images[0]) : ''),
                 type: 'RealEstateListing',
@@ -667,6 +681,9 @@ export default async function DynamicLandingPage({ params }: { params: Promise<{
     }
 
     const rawContent = landingRecord(lp.content)
+    const redirectSlug = landingRedirectSlug(lp, rawContent, slug)
+    if (redirectSlug) redirect(`/${redirectSlug}`)
+
     const initialPageType = landingPageType(lp, rawContent)
     const content = initialPageType === 'product' ? normalizeProductLandingContent(rawContent) : rawContent
     const pageType = landingPageType(lp, content)
@@ -694,7 +711,7 @@ export default async function DynamicLandingPage({ params }: { params: Promise<{
         heroImage: product.cover_image || content.custom_hero_image || (pageType === 'product' && isCorretorNota8Content(content) ? corretorNota8Content.coverImage : property.images && property.images[0]) || '/placeholder-house.jpg',
         price: pageType === 'product'
             ? productPriceDisplay(content, product, corretorNota8Offer.priceDisplay)
-            : content.custom_price || product.price || (property.price ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(property.price) : 'Consulte'),
+            : maskPublicPriceText(content.custom_price || product.price || property.price),
         cta: content.custom_cta || product.cta || (pageType === 'product' ? corretorNota8Offer.primaryCtaLabel : 'Agendar Visita'),
         stats: {
             bedrooms: (content.custom_stats?.bedrooms) ?? (property.bedrooms || 0),
@@ -778,7 +795,7 @@ export default async function DynamicLandingPage({ params }: { params: Promise<{
                 numberOfRooms: property.bedrooms || property.suites || displayData.stats.bedrooms || undefined,
                 offers: {
                     '@type': 'Offer',
-                    price: property.price || undefined,
+                    price: isPublicPriceVisible(property.price) ? property.price : undefined,
                     priceCurrency: 'BRL',
                     availability: 'https://schema.org/InStock',
                     url: pageUrl,

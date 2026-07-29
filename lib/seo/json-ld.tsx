@@ -67,7 +67,7 @@ export function organizationJsonLd() {
     description: BUSINESS_DESCRIPTION,
     telephone: BUSINESS_PHONE,
     email: BUSINESS_EMAIL,
-    priceRange: 'R$ 1.000.000+',
+    priceRange: 'R$ 4.000.000+',
     areaServed: [
       'Balneário Camboriú',
       'Praia Brava',

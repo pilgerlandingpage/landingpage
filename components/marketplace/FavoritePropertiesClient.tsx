@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Heart, MessageCircle, Scale, Search, Trash2 } from 'lucide-react'
 import PropertyCard from './PropertyCard'
 import { getPropertyIntelligenceLabels, getPropertyPricePerM2, toPropertyNumber } from '@/lib/properties/intelligence'
+import { formatPublicPropertyPrice, isPublicPriceVisible } from '@/lib/properties/public-policy'
 import { displayLocationName, normalizeLocationName, replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
 import { openWhatsAppWithLeadCapture } from '@/lib/tracking/whatsapp-capture'
 import { trackEvent } from '@/lib/tracking/client'
@@ -53,14 +54,18 @@ function writeFavoriteIds(ids: string[]) {
 }
 
 function formatMoney(value?: number | string | null) {
-    const number = toPropertyNumber(value)
-    if (!number) return 'Sob consulta'
+    return formatPublicPropertyPrice(value)
+}
 
-    return new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-        maximumFractionDigits: 0,
-    }).format(number)
+function formatMetricMoney(value?: number | string | null, fallback = '-') {
+    const number = toPropertyNumber(value)
+    if (!number) return fallback
+    return number.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })
+}
+
+function formatPricePerM2(property: FavoriteProperty) {
+    if (!isPublicPriceVisible(property.price)) return 'Sob consulta'
+    return formatMetricMoney(getPropertyPricePerM2(property), 'Sob consulta')
 }
 
 function formatNumber(value?: number | string | null, suffix = '') {
@@ -295,7 +300,7 @@ export default function FavoritePropertiesClient() {
                                     </tr>
                                     <tr>
                                         <td>R$/m²</td>
-                                        {comparedProperties.map(property => <td key={property.id}>{formatMoney(getPropertyPricePerM2(property))}</td>)}
+                                        {comparedProperties.map(property => <td key={property.id}>{formatPricePerM2(property)}</td>)}
                                     </tr>
                                     <tr>
                                         <td>Sinais</td>

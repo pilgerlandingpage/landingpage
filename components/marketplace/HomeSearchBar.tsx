@@ -7,6 +7,7 @@ import type { FormEvent, KeyboardEvent, MouseEvent as ReactMouseEvent } from 're
 import { replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 import { appendNaturalSearchParams } from '@/lib/properties/natural-search'
+import { formatPublicPropertyPrice } from '@/lib/properties/public-policy'
 import { trackEvent } from '@/lib/tracking/client'
 
 type Suggestion = {
@@ -77,6 +78,20 @@ const PROPERTY_TYPE_OPTIONS = [
     { value: 'all', label: 'Todos os Imóveis' },
     ...PROPERTY_TYPE_GROUPS.flatMap(group => group.options),
 ]
+
+const HOME_PROPERTY_TYPE_GROUPS = PROPERTY_TYPE_GROUPS
+    .map(group => ({
+        ...group,
+        options: group.options.filter(option => ![
+            'subtype:predio-residencial',
+            'type:Terreno',
+            'subtype:terreno-comercial',
+            'subtype:terreno-condominio',
+            'subtype:galpao',
+            'subtype:sala-comercial',
+        ].includes(option.value)),
+    }))
+    .filter(group => group.options.length > 0)
 
 const PRICE_OPTIONS = [
     { value: 'all', label: 'Todos os Valores' },
@@ -172,11 +187,7 @@ function displaySuggestion(suggestion: Suggestion): Suggestion {
 }
 
 function formatPrice(price: number) {
-    return new Intl.NumberFormat('pt-BR', {
-        currency: 'BRL',
-        maximumFractionDigits: 0,
-        style: 'currency',
-    }).format(price)
+    return formatPublicPropertyPrice(price)
 }
 
 export default function HomeSearchBar({
@@ -198,6 +209,7 @@ export default function HomeSearchBar({
     const [locationValue, setLocationValue] = useState(initialValues.locationValue || '')
     const [typeValue, setTypeValue] = useState(initialValues.typeValue)
     const [priceValue, setPriceValue] = useState(initialValues.priceValue)
+    const propertyTypeGroups = variant === 'results' ? PROPERTY_TYPE_GROUPS : HOME_PROPERTY_TYPE_GROUPS
     const [suggestions, setSuggestions] = useState<Suggestion[]>([])
     const [showSuggestions, setShowSuggestions] = useState(false)
     const [hasTypedLocationQuery, setHasTypedLocationQuery] = useState(false)
@@ -476,7 +488,7 @@ export default function HomeSearchBar({
                         <span>Tipo de imóvel</span>
                         <select value={typeValue} onChange={event => setTypeValue(event.target.value)}>
                             <option value="all">Todos os Imóveis</option>
-                            {PROPERTY_TYPE_GROUPS.map(group => (
+                            {propertyTypeGroups.map(group => (
                                 <optgroup label={group.label} key={group.label}>
                                     {group.options.map(option => (
                                         <option key={option.value} value={option.value}>{option.label}</option>

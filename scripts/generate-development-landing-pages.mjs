@@ -10,6 +10,7 @@ const APPLY = process.argv.includes('--apply')
 const AUDIT_ONLY = process.argv.includes('--audit-only')
 const NOW = new Date().toISOString()
 const PAGE_SIZE = 1000
+const PUBLIC_PRICE_CONSULTATION_THRESHOLD = 4000000
 const SOURCE_REFS_ARG = process.argv.find(arg => arg.startsWith('--source-refs='))
 const SOURCE_REF_MIN_ARG = process.argv.find(arg => arg.startsWith('--source-ref-min='))
 const SOURCE_REF_MAX_ARG = process.argv.find(arg => arg.startsWith('--source-ref-max='))
@@ -114,6 +115,10 @@ function normalizeLooseKey(value) {
     .replace(/\s+/g, ' ')
 }
 
+function compactKey(value) {
+  return normalizeLooseKey(value).replace(/\s+/g, '')
+}
+
 function slugify(value, fallback = 'empreendimento') {
   const slug = normalizeText(value)
     .replace(/[^a-z0-9]+/g, '-')
@@ -130,7 +135,8 @@ const DEVELOPMENT_ALIAS_TARGET_SLUGS = new Map([
 ].flatMap(([alias, slug]) => {
   const key = normalizeKey(alias)
   const looseKey = normalizeLooseKey(alias)
-  return key === looseKey ? [[key, slug]] : [[key, slug], [looseKey, slug]]
+  const compact = compactKey(alias)
+  return [...new Set([key, looseKey, compact])].filter(Boolean).map(item => [item, slug])
 }))
 
 function asRecord(value) {
@@ -183,12 +189,21 @@ function formatCurrency(value) {
 }
 
 function formatMoneyRange(values) {
-  const numbers = values.map(number).filter(value => value !== null && value > 0).sort((a, b) => a - b)
-  if (!numbers.length) return 'Consultar valores'
+  const numbers = values
+    .map(number)
+    .filter(value => value !== null && value >= PUBLIC_PRICE_CONSULTATION_THRESHOLD)
+    .sort((a, b) => a - b)
+  if (!numbers.length) return 'Sob consulta'
   const min = numbers[0]
   const max = numbers[numbers.length - 1]
   if (min === max) return formatCurrency(min)
   return `${formatCurrency(min)} a ${formatCurrency(max)}`
+}
+
+function formatPublicCurrency(value) {
+  const numeric = number(value)
+  if (numeric === null || numeric < PUBLIC_PRICE_CONSULTATION_THRESHOLD) return 'Sob consulta'
+  return formatCurrency(numeric)
 }
 
 function formatNumberRange(values, suffix, fallback) {
@@ -312,6 +327,33 @@ function inferredDevelopmentNameV2(property) {
   return ''
 }
 
+function normalizedPropertyType(property) {
+  return normalizeKey(property.property_type)
+}
+
+function titleHasDevelopmentSignal(property) {
+  const title = normalizeKey(property.title)
+  return /\b(cond|condominio|ed|edificio|residencial|viva\s*park|vivapark)\b/.test(title)
+}
+
+function isStandalonePropertyWithoutExpectedDevelopment(property) {
+  const type = normalizedPropertyType(property)
+
+  if (type.includes('galpao') || type.includes('deposito')) return true
+  if (type.includes('predio residencial')) return true
+
+  if (
+    type.includes('apartamento') ||
+    type.includes('cobertura') ||
+    type.includes('condominio') ||
+    titleHasDevelopmentSignal(property)
+  ) {
+    return false
+  }
+
+  return true
+}
+
 function stageLabel(stage) {
   if (stage === 'launch') return 'Lancamento'
   return 'Pronto'
@@ -411,7 +453,7 @@ function buildUnits(properties, developmentName) {
         area: formatNumberRange([property.area_private_m2 || property.area_m2], 'm2', 'Consulte'),
         suites: formatCountRange([property.suites || property.bedrooms], 'suite', 'suites', 'Consulte'),
         vagas: formatCountRange([property.parking_spaces], 'vaga', 'vagas', 'Consulte'),
-        price: formatCurrency(property.price) || 'Consulte',
+        price: formatPublicCurrency(property.price),
         image: firstImage(property),
         images: imageList(property),
         status: text(property.source_status, 'Disponivel'),
@@ -764,7 +806,7 @@ async function hydrateLandingPagesForGroups(landingPages, groups) {
   const targetIds = new Set()
 
   for (const group of groups) {
-    const existing = byDevelopmentKey.get(group.key) || byDevelopmentKey.get(group.looseKey)
+    const existing = byDevelopmentKey.get(group.key) || byDevelopmentKey.get(group.looseKey) || byDevelopmentKey.get(group.compactKey)
     if (existing?.id) targetIds.add(existing.id)
   }
 
@@ -825,6 +867,8 @@ function buildGroups(activeProperties) {
 
   for (const property of activeProperties) {
     const privateName = text(property.condominium_name)
+    if (!privateName && isStandalonePropertyWithoutExpectedDevelopment(property)) continue
+
     const inferredName = privateName ? '' : inferredDevelopmentNameV2(property)
     const rawName = privateName || inferredName
     const key = normalizeKey(rawName)
@@ -857,6 +901,7 @@ function buildGroups(activeProperties) {
     groups: [...groups.values()].map(group => ({
       ...group,
       looseKey: normalizeLooseKey(group.rawName),
+      compactKey: compactKey(group.rawName),
       name: mostCommon(group.names, group.rawName),
     })).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR')),
     unnamed,
@@ -869,6 +914,8 @@ function existingPageIndexes(landingPages) {
   const byDevelopmentKey = new Map()
 
   for (const page of landingPages) {
+    if (pageRedirectSlug(page)) continue
+
     const content = asRecord(page.content)
     const development = asRecord(content.development)
     bySlug.set(page.slug, page)
@@ -889,10 +936,23 @@ function existingPageIndexes(landingPages) {
       if (key && !byDevelopmentKey.has(key)) byDevelopmentKey.set(key, page)
       const looseKey = normalizeLooseKey(candidate)
       if (looseKey && !byDevelopmentKey.has(looseKey)) byDevelopmentKey.set(looseKey, page)
+      const compact = compactKey(candidate)
+      if (compact && !byDevelopmentKey.has(compact)) byDevelopmentKey.set(compact, page)
     }
   }
 
   return { bySlug, byDevelopmentKey }
+}
+
+function pageRedirectSlug(page) {
+  const content = asRecord(page.content)
+  const metadata = asRecord(page.metadata)
+  return text(
+    metadata.redirect_to_slug ||
+    metadata.redirectToSlug ||
+    content.redirect_to_slug ||
+    content.redirectToSlug
+  )
 }
 
 function zeroStockGroupFromPage(page) {
@@ -946,7 +1006,7 @@ function prepareRows(groups, landingPages, zeroStockPages = []) {
 
   for (const group of ZERO_STOCK_ONLY ? [] : groups) {
     const aliasTargetSlug = DEVELOPMENT_ALIAS_TARGET_SLUGS.get(group.key) || DEVELOPMENT_ALIAS_TARGET_SLUGS.get(group.looseKey)
-    const existing = (aliasTargetSlug ? bySlug.get(aliasTargetSlug) : null) || byDevelopmentKey.get(group.key) || byDevelopmentKey.get(group.looseKey)
+    const existing = (aliasTargetSlug ? bySlug.get(aliasTargetSlug) : null) || byDevelopmentKey.get(group.key) || byDevelopmentKey.get(group.looseKey) || byDevelopmentKey.get(group.compactKey)
     if (existing) {
       const current = updateTargets.get(existing.id)
       if (current) {
@@ -1014,9 +1074,10 @@ function pageHasRankingRequirements(page) {
 
 function auditLandingCoverage(groups, landingPages) {
   const { byDevelopmentKey } = existingPageIndexes(landingPages.filter(page => page.status === 'published'))
-  const missingGroups = groups.filter(group => !byDevelopmentKey.has(group.key))
+  const missingGroups = groups.filter(group => !byDevelopmentKey.has(group.key) && !byDevelopmentKey.has(group.looseKey) && !byDevelopmentKey.has(group.compactKey))
   const pages = landingPages.filter(page => page.status === 'published')
   const developmentPages = pages.filter(page => {
+    if (pageRedirectSlug(page)) return false
     const content = asRecord(page.content)
     return !content.template || content.template === 'brava-concetto'
   })
@@ -1043,6 +1104,15 @@ function auditLandingCoverage(groups, landingPages) {
   return {
     publishedDevelopmentPages: developmentPages.length,
     missingGroups: missingGroups.length,
+    missingGroupSamples: missingGroups.slice(0, 12).map(group => ({
+      key: group.key,
+      looseKey: group.looseKey,
+      compactKey: group.compactKey,
+      name: group.name,
+      sourceKind: group.sourceKind,
+      propertyCount: group.properties.length,
+      sourceReferences: group.properties.slice(0, 12).map(property => property.source_reference),
+    })),
     rankingGaps: rankingGaps.length,
     linkedProperties: linkedProperties.length,
     rankingGapSamples: rankingGaps.slice(0, 12).map(item => ({

@@ -8,6 +8,7 @@ import { Bath, BedDouble, Camera, Car, ChevronLeft, ChevronRight, Eye, Heart, Ma
 import { displayLocationName, normalizeLocationName, replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 import { getPropertyIntelligenceLabels, getPropertyPrimaryQualityLabel } from '@/lib/properties/intelligence'
+import { formatPublicPropertyPrice } from '@/lib/properties/public-policy'
 import { trackEvent } from '@/lib/tracking/client'
 
 interface PropertyCardProps {
@@ -62,16 +63,6 @@ function readFavoriteIds() {
 function writeFavoriteIds(ids: string[]) {
     window.localStorage.setItem(FAVORITES_KEY, JSON.stringify(ids.slice(0, 80)))
     window.dispatchEvent(new CustomEvent('pilger:favorites-changed', { detail: { ids } }))
-}
-
-function formatPrice(price: number | null) {
-    if (!price) return 'Sob Consulta'
-
-    return new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-        maximumFractionDigits: 0,
-    }).format(price)
 }
 
 function formatCompactNumber(value: number) {
@@ -188,7 +179,7 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
     const imageSwipeIntentRef = useRef<'horizontal' | 'vertical' | null>(null)
     const imageLinkRef = useRef<HTMLAnchorElement | null>(null)
     const suppressImageClickRef = useRef(false)
-    const formattedPrice = property.price ? formatPrice(property.price) : isHomeCompact ? 'Consulte-nos' : formatPrice(property.price)
+    const formattedPrice = formatPublicPropertyPrice(property.price)
     const detailsHref = propertyDetailsPath(property)
     const href = isHomeCompact ? detailsHref : landingPageSlug ? `/${landingPageSlug}` : detailsHref
     const galleryImages = useMemo(() => {

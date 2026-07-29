@@ -6,6 +6,7 @@ import GlobalHeader from '@/components/layout/GlobalHeader'
 import { JsonLd, absoluteUrl, breadcrumbJsonLd, organizationJsonLd, webPageJsonLd, DEFAULT_OG_IMAGE } from '@/lib/seo/json-ld'
 import { normalizeLocationName } from '@/lib/locations/display'
 import { parseNaturalSearch } from '@/lib/properties/natural-search'
+import { maskPublicPriceText } from '@/lib/properties/public-policy'
 
 export const metadata: Metadata = {
     title: 'Busca de imóveis de luxo',
@@ -410,7 +411,7 @@ function normalizeSearchDevelopment(page: Record<string, any>, rawTerm: string):
         slug,
         name,
         locationName: asText(development.locationName ?? development.location_name, 'Litoral catarinense'),
-        priceRange: asText(development.priceRange ?? development.price_range, 'Consultar valores'),
+        priceRange: maskPublicPriceText(asText(development.priceRange ?? development.price_range, 'Consultar valores'), 'Consultar valores'),
         availableUnitsCount: asOptionalNumber(development.availableUnitsCount ?? development.available_units_count ?? content.available_units_count) ?? (units.length || null),
         heroImage: asText(development.heroImage ?? development.hero_image ?? content.custom_hero_image, firstImageFromGallery(content)),
         stage,

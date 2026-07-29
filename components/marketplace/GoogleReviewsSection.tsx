@@ -14,6 +14,18 @@ function formatReviewCount(value: number) {
   return value.toLocaleString('pt-BR')
 }
 
+function normalizeReviewText(value: unknown) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+}
+
+function isHomeResidentialReview(review: HomepageGoogleReview) {
+  const text = normalizeReviewText(review.text)
+  return !/terreno|lote|loteamento|galp|deposito|dep.sito|sala comercial|comercial|predio|pr.dio/.test(text)
+}
+
 function ReviewStars({ rating, size = 14 }: { rating: number; size?: number }) {
   const rounded = Math.round(rating)
 
@@ -74,7 +86,7 @@ function GoogleWordmark() {
 }
 
 export default function GoogleReviewsSection({ data }: { data: HomepageGoogleReviews | null }) {
-  const reviews = data?.reviews || []
+  const reviews = (data?.reviews || []).filter(isHomeResidentialReview)
   const reviewCount = reviews.length
   const [activeReviewIndex, setActiveReviewIndex] = useState(0)
   const [isCarouselPaused, setIsCarouselPaused] = useState(false)

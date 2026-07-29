@@ -49,6 +49,7 @@ import PropertyLandingStyles from '@/app/imovel/[id]/PropertyLandingStyles'
 import type { HomepageGoogleReviews } from '@/lib/google-reviews'
 import { openWhatsAppWithLeadCapture } from '@/lib/tracking/whatsapp-capture'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
+import { maskPublicPriceText } from '@/lib/properties/public-policy'
 import { GLOBAL_PROPERTY_BROKER_NAME, GLOBAL_PROPERTY_WHATSAPP_PHONE } from '@/lib/properties/responsible-broker'
 import { absoluteUrl } from '@/lib/seo/json-ld'
 import { TemplateProps } from './types'
@@ -448,7 +449,7 @@ function normalizeUnit(value: unknown): Unit | null {
         area: asText(value.area, 'Consulte'),
         suites: asText(value.suites, 'Consulte'),
         vagas: asText(value.vagas, 'Consulte'),
-        price: asText(value.price, 'Consulte'),
+        price: maskPublicPriceText(asText(value.price, 'Sob consulta'), 'Sob consulta'),
         image,
         images,
         status: asText(value.status, 'Disponivel'),
@@ -631,7 +632,7 @@ function normalizeDevelopment(value: unknown): Development | null {
         city: asText(value.city, fallback?.city || 'Santa Catarina'),
         locationName: asText(value.locationName ?? value.location_name, fallback?.locationName || 'Localizacao privilegiada'),
         tagline: asText(value.tagline, fallback?.tagline || 'Empreendimento de alto padrao com curadoria Guilherme Pilger.'),
-        priceRange: asText(value.priceRange ?? value.price_range, fallback?.priceRange || 'Consulte'),
+        priceRange: maskPublicPriceText(asText(value.priceRange ?? value.price_range, fallback?.priceRange || 'Sob consulta'), 'Sob consulta'),
         availableUnitsCount: displayUnits.length,
         areaRange: asText(value.areaRange ?? value.area_range, fallback?.areaRange || 'Consulte'),
         suitesRange: asText(value.suitesRange ?? value.suites_range, fallback?.suitesRange || 'Consulte'),

@@ -18,6 +18,7 @@ import HomeBlogSection, { type HomeBlogPost } from '@/components/marketplace/Hom
 import HeroVideoBackground from '@/components/marketplace/HeroVideoBackground'
 import { normalizeLocationName } from '@/lib/locations/display'
 import { isPropertyFrontSea, isPropertyLaunch } from '@/lib/properties/intelligence'
+import { PUBLIC_PRICE_CONSULTATION_THRESHOLD, isHighStandardHomeProperty } from '@/lib/properties/public-policy'
 import { extractPropertyIdFromSeoSlug } from '@/lib/properties/seo-url'
 import { attachBlogPostViewCounts, getBlogPostViewCounts } from '@/lib/blog/views'
 import { getHomepageGoogleReviews } from '@/lib/google-reviews'
@@ -49,7 +50,6 @@ export const revalidate = 300
 const HOME_EXCLUDED_CITIES = new Set(['camboriu', 'navegantes', 'blumenau'])
 const HOME_PROPERTY_DESCRIPTION_LIMIT = 240
 const HOME_PROPERTY_IMAGE_LIMIT = 2
-const HOME_MAP_MIN_PRICE = 4000000
 const HOME_BASE_DATA_TIMEOUT_MS = 12000
 const HOME_SECONDARY_DATA_TIMEOUT_MS = 8000
 const HOME_BASE_REVALIDATE_SECONDS = 300
@@ -135,6 +135,7 @@ async function fetchHomeProperties(supabase: ReturnType<typeof createSupabaseAdm
     .from('properties')
     .select(HOME_PROPERTY_FIELDS)
     .eq('status', 'active')
+    .gte('price', PUBLIC_PRICE_CONSULTATION_THRESHOLD)
     .order('created_at', { ascending: false })
     .limit(limit)
     .abortSignal(createSupabaseAbortSignal(timeoutMs))
@@ -236,7 +237,7 @@ const getCachedHomeBaseData = unstable_cache(
       },
     }
   },
-  ['marketplace-home-base-data-v3'],
+  ['marketplace-home-base-data-v4'],
   {
     revalidate: HOME_BASE_REVALIDATE_SECONDS,
     tags: ['marketplace-home'],
@@ -328,7 +329,7 @@ function normalizeCityName(value: unknown) {
 }
 
 function isAllowedOnHome(property: any) {
-  return !HOME_EXCLUDED_CITIES.has(normalizeCityName(property?.city))
+  return !HOME_EXCLUDED_CITIES.has(normalizeCityName(property?.city)) && isHighStandardHomeProperty(property)
 }
 
 function parseHomeSectionsEnabled(value: unknown) {
@@ -424,7 +425,7 @@ export default async function MarketplaceHome() {
     HOME_BLOG_POST_LIMIT
   )
   const homeProperties = properties.filter(isAllowedOnHome)
-  const homeMapProperties = homeProperties.filter(property => Number(property.price || property.rent || 0) >= HOME_MAP_MIN_PRICE)
+  const homeMapProperties = homeProperties
   const homeJsonLd = [
     organizationJsonLd(),
     websiteJsonLd(),

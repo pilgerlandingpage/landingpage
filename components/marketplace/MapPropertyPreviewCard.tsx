@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation'
 import { displayLocationName, replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 import { getPropertyPrimaryQualityLabel } from '@/lib/properties/intelligence'
+import { formatPublicPropertyPrice } from '@/lib/properties/public-policy'
 import { trackEvent } from '@/lib/tracking/client'
 
 type PreviewProperty = {
@@ -53,13 +54,7 @@ const DESKTOP_DRAG_THRESHOLD = 5
 const DESKTOP_DRAG_SNAP_THRESHOLD = 24
 
 function formatPrice(price?: number | null) {
-    if (!price) return 'Sob consulta'
-
-    return new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-        maximumFractionDigits: 0,
-    }).format(price)
+    return formatPublicPropertyPrice(price)
 }
 
 function compactNumber(value?: number | null) {

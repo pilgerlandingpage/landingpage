@@ -24,6 +24,7 @@ import {
 } from '../whatsapp/lead-sync'
 import { getPublicAppUrl } from '../app-url'
 import { buildTrackedWhatsAppLink } from '../tracking/whatsapp-links'
+import { formatPublicPropertyPrice } from '../properties/public-policy'
 import { recordGeminiUsage } from '../ai/gemini-costs'
 import { generateChatResponse } from '../ai/generation'
 import { DEFAULT_WHATSAPP_GLOBAL_SYSTEM_PROMPT, WHATSAPP_GLOBAL_RUNTIME_GUARDRAILS } from '../whatsapp/agent-global-prompt'
@@ -2498,7 +2499,7 @@ function formatPropertyCatalogItem(property: any, index: number, appUrl: string)
     parts.push(`${index + 1}. ${property.title || 'Imovel selecionado'}`)
     const location = [property.neighborhood, property.city, property.state].filter(Boolean).join(' - ')
     if (location) parts.push(`Local: ${location}`)
-    if (property.price) parts.push(`Valor: R$ ${Number(property.price).toLocaleString('pt-BR')}`)
+    if (property.price) parts.push(`Valor: ${formatPublicPropertyPrice(property.price)}`)
     if (property.property_type) parts.push(`Tipo: ${property.property_type}`)
     const specs: string[] = []
     if (property.suites) specs.push(`${property.suites} suites`)

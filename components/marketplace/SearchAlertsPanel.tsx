@@ -17,6 +17,7 @@ import {
     X,
 } from 'lucide-react'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
+import { formatPublicPropertyPrice } from '@/lib/properties/public-policy'
 import { getVisitorId, trackEvent } from '@/lib/tracking/client'
 import { markSearchAlertMatchOpenIfNeeded } from '@/lib/tracking/search-alert-session'
 
@@ -83,12 +84,7 @@ function formatDate(value?: string | null) {
 }
 
 function formatCurrency(value?: number | null) {
-    if (!value) return 'Sob consulta'
-    return value.toLocaleString('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-        maximumFractionDigits: 0,
-    })
+    return formatPublicPropertyPrice(value)
 }
 
 function alertFilterLabels(alert: SearchAlert) {
