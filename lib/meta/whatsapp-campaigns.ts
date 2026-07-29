@@ -768,12 +768,13 @@ function bodyParametersFromTemplateParameters(value: unknown) {
   }]
 }
 
-async function selectSenderForRecipient(supabase: SupabaseAdmin, campaign: any, recipient: any) {
+async function selectSenderForRecipient(supabase: SupabaseAdmin, campaign: any, recipient: any, wabaId: string) {
   if (recipient.sender_id) {
     const { data } = await supabase
       .from('meta_whatsapp_senders')
       .select('*')
       .eq('id', recipient.sender_id)
+      .eq('waba_id', wabaId)
       .maybeSingle()
     if (data && isMetaSenderReady(data)) return data
   }
@@ -783,6 +784,7 @@ async function selectSenderForRecipient(supabase: SupabaseAdmin, campaign: any, 
       .from('meta_whatsapp_senders')
       .select('*')
       .eq('id', campaign.default_sender_id)
+      .eq('waba_id', wabaId)
       .eq('local_status', 'active')
       .maybeSingle()
     if (data && isMetaSenderReady(data)) return data
@@ -797,6 +799,7 @@ async function selectSenderForRecipient(supabase: SupabaseAdmin, campaign: any, 
   const { data, error } = await supabase
     .from('meta_whatsapp_senders')
     .select('*')
+    .eq('waba_id', wabaId)
     .eq('local_status', 'active')
     .in('use_case', preferredUseCase)
     .order('daily_sent_count', { ascending: true })
@@ -948,7 +951,7 @@ export async function processMetaWhatsAppCampaignBatch(params: {
         continue
       }
 
-      const sender = await selectSenderForRecipient(supabase, campaign, recipient)
+      const sender = await selectSenderForRecipient(supabase, campaign, recipient, resolved.wabaId)
       if (!sender?.phone_number_id) {
         throw new Error('Nenhum numero Meta conectado disponivel para envio. Sincronize os numeros oficiais e confirme que o status Meta do Phone Number esta CONNECTED.')
       }
