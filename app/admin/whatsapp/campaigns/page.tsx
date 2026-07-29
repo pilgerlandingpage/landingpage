@@ -7,7 +7,7 @@ import {
     Plus, Trash2, Pause, Play, FileText, Image, Mic, Video,
     Tag, RefreshCw, MessageSquare, Calendar, ChevronDown, ChevronUp,
     Smartphone, Search, BarChart3, TrendingUp, Eye, Inbox, Activity,
-    XCircle
+    XCircle, Upload, Download
 } from 'lucide-react'
 import {
     Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart,
@@ -260,11 +260,113 @@ function buttonNeedsCouponCode(button: TemplateButtonRecord) {
     return type === 'COPY_CODE' || type === 'COUPON_CODE'
 }
 
+function countDelimiter(line: string, delimiter: string) {
+    let count = 0
+    let quoted = false
+
+    for (let index = 0; index < line.length; index += 1) {
+        const char = line[index]
+        if (char === '"') {
+            quoted = !quoted
+            continue
+        }
+        if (!quoted && char === delimiter) count += 1
+    }
+
+    return count
+}
+
+function detectAudienceDelimiter(line: string) {
+    return ['\t', ';', '|', ',']
+        .map(delimiter => ({ delimiter, count: countDelimiter(line, delimiter) }))
+        .sort((a, b) => b.count - a.count)[0]?.delimiter || ','
+}
+
 function splitAudienceRow(line: string) {
-    if (line.includes('\t')) return line.split('\t')
-    if (line.includes(';')) return line.split(';')
-    if (line.includes('|')) return line.split('|')
-    return line.split(',')
+    const delimiter = detectAudienceDelimiter(line)
+    const columns: string[] = []
+    let current = ''
+    let quoted = false
+
+    for (let index = 0; index < line.length; index += 1) {
+        const char = line[index]
+        const next = line[index + 1]
+
+        if (char === '"' && quoted && next === '"') {
+            current += '"'
+            index += 1
+            continue
+        }
+
+        if (char === '"') {
+            quoted = !quoted
+            continue
+        }
+
+        if (!quoted && char === delimiter) {
+            columns.push(current.trim())
+            current = ''
+            continue
+        }
+
+        current += char
+    }
+
+    columns.push(current.trim())
+    return columns
+}
+
+function normalizeAudienceHeader(value: string) {
+    return value
+        .trim()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9{}]+/g, '')
+}
+
+function findHeaderIndex(headers: string[], candidates: string[]) {
+    const normalizedCandidates = new Set(candidates.map(normalizeAudienceHeader))
+    return headers.findIndex(header => normalizedCandidates.has(header))
+}
+
+function rowLooksLikeAudienceHeader(row: string[]) {
+    const headers = row.map(normalizeAudienceHeader)
+    return headers.some(header =>
+        ['telefone', 'phone', 'whatsapp', 'celular', 'numero', 'numerodetelefone', 'nome', 'name', 'lead', 'cliente'].includes(header)
+        || /^var\d+$/.test(header)
+        || /^variavel\d+$/.test(header)
+        || /^\{\{\d+\}\}$/.test(header)
+    )
+}
+
+function guessPhoneColumn(rows: string[][]) {
+    const columnScores = new Map<number, number>()
+
+    rows.slice(0, 20).forEach(row => {
+        row.forEach((cell, index) => {
+            const digits = cell.replace(/\D/g, '')
+            if (digits.length >= 10) columnScores.set(index, (columnScores.get(index) || 0) + 1)
+        })
+    })
+
+    return Array.from(columnScores.entries()).sort((a, b) => b[1] - a[1])[0]?.[0] ?? 0
+}
+
+function escapeAudienceCell(value: string) {
+    const cleaned = value.replace(/\r?\n/g, ' ').trim()
+    if (/[;,"\t]/.test(cleaned)) return `"${cleaned.replace(/"/g, '""')}"`
+    return cleaned
+}
+
+function variableHeaderCandidates(variable: number) {
+    const number = String(variable)
+    const candidates = [`var${number}`, `variavel${number}`, `{{${number}}}`, `valor${number}`]
+
+    if (variable === 2) candidates.push('imovel', 'empreendimento', 'interesse', 'produto', 'oportunidade')
+    if (variable === 3) candidates.push('link', 'url', 'site', 'pagina')
+
+    return candidates
 }
 
 function buildHeaderParameter(format: string, value: string) {
@@ -440,6 +542,104 @@ export default function CampaignsPage() {
             .split(/[\n,;]+/)
             .map(n => n.replace(/\D/g, '').trim())
             .filter(n => n.length >= 10)
+    }
+
+    const downloadAudienceTemplate = () => {
+        const variables = selectedBodyVariables.length > 0 ? selectedBodyVariables : [1, 2, 3]
+        const headers = ['telefone', 'nome', ...variables.map(variable => `var${variable}`)]
+        const sampleValues = ['554788271085', 'Maria', ...variables.map((variable, index) => {
+            if (variable === 1) return 'Maria'
+            if (variable === 2) return 'Apartamento frente mar'
+            if (variable === 3) return 'https://guilhermepilger.ai/imovel'
+            return `valor ${index + 1}`
+        })]
+        const csv = [
+            headers.map(escapeAudienceCell).join(';'),
+            sampleValues.map(escapeAudienceCell).join(';'),
+        ].join('\n')
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+        const url = URL.createObjectURL(blob)
+        const anchor = document.createElement('a')
+
+        anchor.href = url
+        anchor.download = 'modelo-contatos-meta-whatsapp.csv'
+        anchor.click()
+        URL.revokeObjectURL(url)
+    }
+
+    const importAudienceFile = async (file?: File) => {
+        if (!file) return
+
+        try {
+            const text = await file.text()
+            const rows = text
+                .split(/\r?\n/)
+                .map(line => splitAudienceRow(line))
+                .filter(row => row.some(column => column.trim()))
+
+            if (!rows.length) {
+                setFeedback({ type: 'error', text: 'A lista importada esta vazia.' })
+                return
+            }
+
+            const hasHeader = rowLooksLikeAudienceHeader(rows[0])
+            const headers = hasHeader ? rows[0].map(normalizeAudienceHeader) : []
+            const dataRows = hasHeader ? rows.slice(1) : rows
+            const phoneIndex = hasHeader
+                ? findHeaderIndex(headers, ['telefone', 'phone', 'whatsapp', 'celular', 'numero', 'numero de telefone', 'numero do telefone'])
+                : guessPhoneColumn(dataRows)
+            const nameIndex = hasHeader
+                ? findHeaderIndex(headers, ['nome', 'name', 'lead', 'cliente', 'contato'])
+                : (phoneIndex === 0 ? 1 : 0)
+            const shouldPersonalize = sendProvider === 'meta_whatsapp' && (metaAudiencePersonalized || selectedBodyVariables.length > 0)
+            const seenPhones = new Set<string>()
+            const importedLines: string[] = []
+
+            if (phoneIndex < 0) {
+                setFeedback({ type: 'error', text: 'Nao encontrei uma coluna de telefone na lista.' })
+                return
+            }
+
+            dataRows.forEach(row => {
+                const phone = (row[phoneIndex] || '').replace(/\D/g, '').slice(0, 20)
+                if (phone.length < 10 || seenPhones.has(phone)) return
+
+                seenPhones.add(phone)
+
+                if (!shouldPersonalize) {
+                    importedLines.push(phone)
+                    return
+                }
+
+                const name = nameIndex >= 0 && nameIndex !== phoneIndex ? (row[nameIndex] || '').trim() : ''
+                const usedColumns = new Set([phoneIndex, nameIndex].filter(index => index >= 0))
+                const freeColumns = row.map((_, index) => index).filter(index => !usedColumns.has(index))
+                const variableValues = selectedBodyVariables.map((variable, variableIndex) => {
+                    const headerIndex = hasHeader ? findHeaderIndex(headers, variableHeaderCandidates(variable)) : -1
+                    const fallbackIndex = freeColumns[variableIndex]
+                    const value = headerIndex >= 0
+                        ? row[headerIndex]
+                        : fallbackIndex !== undefined ? row[fallbackIndex] : ''
+                    const cleaned = (value || '').trim()
+                    if (cleaned) return cleaned
+                    if (variable === 1 && name) return name
+                    return ''
+                })
+
+                importedLines.push([phone, name, ...variableValues].map(escapeAudienceCell).join('; '))
+            })
+
+            if (!importedLines.length) {
+                setFeedback({ type: 'error', text: 'Nenhum telefone valido foi encontrado na lista.' })
+                return
+            }
+
+            setNumbersInput(prev => [prev.trim(), importedLines.join('\n')].filter(Boolean).join('\n'))
+            if (shouldPersonalize) setMetaAudiencePersonalized(true)
+            setFeedback({ type: 'success', text: `${importedLines.length} contato(s) importado(s) para a campanha.` })
+        } catch {
+            setFeedback({ type: 'error', text: 'Nao consegui ler este arquivo. Use CSV ou TXT com telefone e nome.' })
+        }
     }
 
     const resetMetaTemplateBuilder = () => {
@@ -1232,11 +1432,47 @@ export default function CampaignsPage() {
 
                         {/* Numbers */}
                         <div>
-                            <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
-                                {sendProvider === 'meta_whatsapp' && metaAudiencePersonalized
-                                    ? 'Lista personalizada'
-                                    : 'Números (um por linha, ou separados por vírgula)'}
-                            </label>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '6px' }}>
+                                <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block' }}>
+                                    {sendProvider === 'meta_whatsapp' && metaAudiencePersonalized
+                                        ? 'Lista personalizada'
+                                        : 'Numeros (um por linha, ou separados por virgula)'}
+                                </label>
+                                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                    <button
+                                        type="button"
+                                        onClick={downloadAudienceTemplate}
+                                        style={{
+                                            padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--border)',
+                                            background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)',
+                                            cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                            fontSize: '0.78rem', fontWeight: 700,
+                                        }}
+                                    >
+                                        <Download size={14} /> Baixar modelo
+                                    </button>
+                                    <label
+                                        style={{
+                                            padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--gold)',
+                                            background: 'rgba(201,169,110,0.12)', color: 'var(--gold)',
+                                            cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                            fontSize: '0.78rem', fontWeight: 700,
+                                        }}
+                                    >
+                                        <Upload size={14} /> Importar lista
+                                        <input
+                                            type="file"
+                                            accept=".csv,.txt,text/csv,text/plain"
+                                            onChange={event => {
+                                                const selectedFile = event.currentTarget.files?.[0]
+                                                event.currentTarget.value = ''
+                                                void importAudienceFile(selectedFile)
+                                            }}
+                                            style={{ display: 'none' }}
+                                        />
+                                    </label>
+                                </div>
+                            </div>
                             <textarea value={numbersInput} onChange={e => setNumbersInput(e.target.value)}
                                 placeholder={sendProvider === 'meta_whatsapp' && metaAudiencePersonalized
                                     ? "5547999999999; Maria; Maria; Apartamento frente mar; https://guilhermepilger.ai/imovel\n5547888888888; Joao; Joao; Cobertura vista mar; https://guilhermepilger.ai/imovel-2"
@@ -1256,7 +1492,7 @@ export default function CampaignsPage() {
                             </div>
                             {sendProvider === 'meta_whatsapp' && metaAudiencePersonalized && (
                                 <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '6px', lineHeight: 1.45 }}>
-                                    Formato: telefone; nome; valor para {'{{1}}'}; valor para {'{{2}}'}; valor para {'{{3}}'}.
+                                    Formato: telefone; nome{selectedBodyVariables.map(variable => `; valor para {{${variable}}}`).join('') || '; valor para {{1}}'}.
                                     {parsedMetaRecipientDrafts.some(recipient => (recipient.missingVariables || []).length > 0) && (
                                         <span style={{ color: '#ef4444', display: 'block', marginTop: '4px' }}>
                                             Existem linhas com variaveis obrigatorias vazias.

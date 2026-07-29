@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import Link from 'next/link'
 import {
@@ -211,6 +211,7 @@ export default function MetaTemplatesPage() {
   const [editingDraftId, setEditingDraftId] = useState('')
   const [uploadingMedia, setUploadingMedia] = useState(false)
   const [mediaFileLabel, setMediaFileLabel] = useState('')
+  const bodyTextareaRef = useRef<HTMLTextAreaElement | null>(null)
 
   const bodyVariables = useMemo(() => extractTemplateVariables(form.bodyText), [form.bodyText])
   const headerVariables = useMemo(() => extractTemplateVariables(form.headerText), [form.headerText])
@@ -250,6 +251,28 @@ export default function MetaTemplatesPage() {
   }, [])
 
   const updateForm = (patch: Partial<TemplateForm>) => setForm(prev => ({ ...prev, ...patch }))
+
+  const insertBodyVariable = (example: string) => {
+    const nextVariable = Math.max(0, ...bodyVariables) + 1
+    const token = `{{${nextVariable}}}`
+    const textarea = bodyTextareaRef.current
+    const currentBody = form.bodyText
+    const selectionStart = textarea?.selectionStart ?? currentBody.length
+    const selectionEnd = textarea?.selectionEnd ?? selectionStart
+    const nextBody = `${currentBody.slice(0, selectionStart)}${token}${currentBody.slice(selectionEnd)}`
+    const nextExamples = form.bodyExamples.split(/[;\n,]+/).map(item => item.trim()).filter(Boolean)
+
+    while (nextExamples.length < nextVariable) nextExamples.push('')
+    if (!nextExamples[nextVariable - 1]) nextExamples[nextVariable - 1] = example
+
+    updateForm({ bodyText: nextBody, bodyExamples: nextExamples.join('; ') })
+
+    requestAnimationFrame(() => {
+      const nextPosition = selectionStart + token.length
+      bodyTextareaRef.current?.focus()
+      bodyTextareaRef.current?.setSelectionRange(nextPosition, nextPosition)
+    })
+  }
 
   const buildComponents = () => {
     const components: Record<string, unknown>[] = []
@@ -581,7 +604,29 @@ export default function MetaTemplatesPage() {
             </div>
 
             <Field label="Corpo">
-              <textarea value={form.bodyText} onChange={event => updateForm({ bodyText: event.target.value })} placeholder={'Ola {{1}}, separei esta oportunidade para voce:\n\n{{2}}\n\nClique no botao abaixo para ver os detalhes.'} rows={6} style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.45 }} />
+              <div style={{ display: 'grid', gap: 8 }}>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {[
+                    { label: 'Nome', example: 'Maria' },
+                    { label: 'Imovel', example: 'Apartamento frente mar' },
+                    { label: 'Link', example: 'https://guilhermepilger.ai/imovel' },
+                    { label: 'Corretor', example: 'Guilherme Pilger' },
+                  ].map(item => (
+                    <button key={item.label} type="button" onClick={() => insertBodyVariable(item.example)} style={ghostButtonStyle}>
+                      <Plus size={14} /> {item.label}
+                    </button>
+                  ))}
+                  <button type="button" onClick={() => insertBodyVariable('exemplo')} style={ghostButtonStyle}>
+                    <Plus size={14} /> Nova variavel
+                  </button>
+                </div>
+                {bodyVariables.length > 0 && (
+                  <div style={{ color: 'var(--text-muted)', fontSize: '0.76rem', lineHeight: 1.45 }}>
+                    Variaveis no texto: {bodyVariables.map(item => `{{${item}}}`).join(', ')}. Os exemplos abaixo seguem essa mesma ordem.
+                  </div>
+                )}
+                <textarea ref={bodyTextareaRef} value={form.bodyText} onChange={event => updateForm({ bodyText: event.target.value })} placeholder={'Ola {{1}}, separei esta oportunidade para voce:\n\n{{2}}\n\nClique no botao abaixo para ver os detalhes.'} rows={6} style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.45 }} />
+              </div>
             </Field>
 
             {bodyVariables.length > 0 && (
