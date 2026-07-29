@@ -535,6 +535,28 @@ export default function CampaignsPage() {
         }
     }
 
+    const syncMetaTemplatesForCampaigns = async () => {
+        setFeedback(null)
+        try {
+            const res = await fetch('/api/admin/whatsapp/templates', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'sync' }),
+            })
+            const data = await res.json()
+
+            if (!data.success) {
+                setFeedback({ type: 'error', text: data.message || 'Erro ao sincronizar templates Meta.' })
+                return
+            }
+
+            await loadMetaCampaigns()
+            setFeedback({ type: 'success', text: data.message || 'Templates Meta sincronizados.' })
+        } catch {
+            setFeedback({ type: 'error', text: 'Erro ao sincronizar templates Meta.' })
+        }
+    }
+
     const loadMetaContactLists = async () => {
         setLoadingContactLists(true)
         try {
@@ -1297,6 +1319,27 @@ export default function CampaignsPage() {
                                                 lineHeight: 1.45,
                                             }}>
                                                 Nenhum template aprovado criado pelo painel foi encontrado. Crie um novo em Templates Meta e sincronize apos aprovacao.
+                                                <button
+                                                    type="button"
+                                                    onClick={syncMetaTemplatesForCampaigns}
+                                                    disabled={loadingMetaCampaigns}
+                                                    style={{
+                                                        marginTop: '8px',
+                                                        padding: '8px 10px',
+                                                        borderRadius: '8px',
+                                                        border: '1px solid rgba(201,169,110,0.45)',
+                                                        background: 'rgba(201,169,110,0.12)',
+                                                        color: 'var(--gold)',
+                                                        cursor: loadingMetaCampaigns ? 'not-allowed' : 'pointer',
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: '6px',
+                                                        fontSize: '0.78rem',
+                                                        fontWeight: 700,
+                                                    }}
+                                                >
+                                                    <RefreshCw size={14} className={loadingMetaCampaigns ? 'spin' : ''} /> Sincronizar templates
+                                                </button>
                                             </div>
                                         )}
                                     </div>

@@ -70,6 +70,20 @@ function asMetadata(value: unknown): Record<string, unknown> {
     : {}
 }
 
+function isLegacySyncedTemplate(template: any) {
+  const name = cleanText(template?.name, 160)
+  return /^sir\d+_\d+_[a-f0-9]+$/i.test(name)
+}
+
+function isCampaignTemplateEligible(template: any) {
+  const metadata = asMetadata(template?.metadata)
+  if (metadata.deleted_from_panel_at) return false
+  if (metadata.managed_from_panel || metadata.created_from_panel) return true
+
+  const status = cleanText(template?.status, 40).toUpperCase()
+  return status === 'APPROVED' && !isLegacySyncedTemplate(template)
+}
+
 function isMetaSenderReady(sender: any) {
   const metaStatus = cleanText(sender?.meta_status, 40).toUpperCase()
   return sender?.local_status === 'active'
@@ -580,10 +594,7 @@ export async function listMetaWhatsAppCampaigns(input: ListMetaWhatsAppCampaigns
     .limit(200)
 
   if (templatesError) throw templatesError
-  const campaignTemplates = (templates || []).filter((template: any) => {
-    const metadata = asMetadata(template.metadata)
-    return Boolean(metadata.managed_from_panel || metadata.created_from_panel)
-  })
+  const campaignTemplates = (templates || []).filter(isCampaignTemplateEligible)
 
   const summary = (campaigns || []).reduce((acc: any, campaign: any) => {
     acc.total += 1
