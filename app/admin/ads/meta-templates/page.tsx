@@ -7,6 +7,7 @@ import {
   Copy,
   Edit3,
   FileText,
+  ImageIcon,
   Loader2,
   Plus,
   RefreshCw,
@@ -14,6 +15,7 @@ import {
   Send,
   Trash2,
   Upload,
+  Video,
 } from 'lucide-react'
 import AdminLoadingState from '@/components/admin/AdminLoadingState'
 
@@ -66,6 +68,13 @@ interface TemplateForm {
   footerText: string
   buttons: ButtonDraft[]
   messageSendTtlSeconds: string
+}
+
+interface MediaPreview {
+  url: string
+  type: string
+  name: string
+  format: HeaderFormat
 }
 
 const emptyButton: ButtonDraft = {
@@ -198,6 +207,77 @@ function headerMediaLabel(format: HeaderFormat) {
   return 'midia'
 }
 
+function HeaderMediaPreview({
+  format,
+  preview,
+  handle,
+  compact = false,
+}: {
+  format: HeaderFormat
+  preview: MediaPreview | null
+  handle?: string
+  compact?: boolean
+}) {
+  const activePreview = preview?.format === format ? preview : null
+  const shellStyle: CSSProperties = {
+    width: '100%',
+    minHeight: compact ? 106 : 126,
+    borderRadius: compact ? 10 : 9,
+    background: '#dbe4ec',
+    border: compact ? '1px solid var(--border)' : 'none',
+    display: 'grid',
+    placeItems: 'center',
+    overflow: 'hidden',
+    color: '#475569',
+    fontWeight: 800,
+    marginBottom: compact ? 0 : 8,
+  }
+
+  if (activePreview && format === 'IMAGE') {
+    return (
+      <div style={shellStyle}>
+        <img
+          src={activePreview.url}
+          alt={`Previa de ${activePreview.name}`}
+          style={{ width: '100%', height: '100%', maxHeight: compact ? 170 : 210, objectFit: 'contain', display: 'block' }}
+        />
+      </div>
+    )
+  }
+
+  if (activePreview && format === 'VIDEO') {
+    return (
+      <div style={shellStyle}>
+        <video
+          src={activePreview.url}
+          controls
+          muted
+          style={{ width: '100%', maxHeight: compact ? 190 : 230, display: 'block', background: '#0f172a' }}
+        />
+      </div>
+    )
+  }
+
+  if (activePreview && format === 'DOCUMENT') {
+    return (
+      <div style={{ ...shellStyle, padding: 12, boxSizing: 'border-box', alignContent: 'center' }}>
+        <FileText size={compact ? 24 : 30} />
+        <span style={{ marginTop: 6, textAlign: 'center', fontSize: compact ? '0.78rem' : '0.84rem' }}>{activePreview.name}</span>
+      </div>
+    )
+  }
+
+  const Icon = format === 'IMAGE' ? ImageIcon : format === 'VIDEO' ? Video : FileText
+  return (
+    <div style={{ ...shellStyle, padding: 12, boxSizing: 'border-box', alignContent: 'center' }}>
+      <Icon size={compact ? 24 : 30} />
+      <span style={{ marginTop: 6, textAlign: 'center', fontSize: compact ? '0.78rem' : '0.84rem' }}>
+        {handle ? `${headerMediaLabel(format)} carregada na Meta` : `Previa de ${headerMediaLabel(format)}`}
+      </span>
+    </div>
+  )
+}
+
 export default function MetaTemplatesPage() {
   const [templates, setTemplates] = useState<MetaTemplateRow[]>([])
   const [drafts, setDrafts] = useState<TemplateDraft[]>([])
@@ -211,7 +291,9 @@ export default function MetaTemplatesPage() {
   const [editingDraftId, setEditingDraftId] = useState('')
   const [uploadingMedia, setUploadingMedia] = useState(false)
   const [mediaFileLabel, setMediaFileLabel] = useState('')
+  const [mediaPreview, setMediaPreview] = useState<MediaPreview | null>(null)
   const bodyTextareaRef = useRef<HTMLTextAreaElement | null>(null)
+  const mediaPreviewUrlRef = useRef<string | null>(null)
 
   const bodyVariables = useMemo(() => extractTemplateVariables(form.bodyText), [form.bodyText])
   const headerVariables = useMemo(() => extractTemplateVariables(form.headerText), [form.headerText])
@@ -251,6 +333,30 @@ export default function MetaTemplatesPage() {
   }, [])
 
   const updateForm = (patch: Partial<TemplateForm>) => setForm(prev => ({ ...prev, ...patch }))
+
+  useEffect(() => () => {
+    if (mediaPreviewUrlRef.current) URL.revokeObjectURL(mediaPreviewUrlRef.current)
+  }, [])
+
+  const clearMediaPreview = () => {
+    if (mediaPreviewUrlRef.current) {
+      URL.revokeObjectURL(mediaPreviewUrlRef.current)
+      mediaPreviewUrlRef.current = null
+    }
+    setMediaPreview(null)
+  }
+
+  const setLocalMediaPreview = (file: File, format: HeaderFormat) => {
+    clearMediaPreview()
+    const url = URL.createObjectURL(file)
+    mediaPreviewUrlRef.current = url
+    setMediaPreview({
+      url,
+      type: file.type,
+      name: file.name,
+      format,
+    })
+  }
 
   const insertBodyVariable = (example: string) => {
     const nextVariable = Math.max(0, ...bodyVariables) + 1
@@ -347,6 +453,7 @@ export default function MetaTemplatesPage() {
     setEditingTemplate(null)
     setEditingDraftId('')
     setMediaFileLabel('')
+    clearMediaPreview()
   }
 
   const runAction = async (body: Record<string, unknown>, successFallback: string) => {
@@ -425,6 +532,7 @@ export default function MetaTemplatesPage() {
   const updateHeaderFormat = (headerFormat: HeaderFormat) => {
     const isMedia = headerFormat === 'IMAGE' || headerFormat === 'VIDEO' || headerFormat === 'DOCUMENT'
     const keepExistingHandle = isMedia && form.headerFormat === headerFormat
+    if (!keepExistingHandle) clearMediaPreview()
     updateForm({
       headerFormat,
       ...(keepExistingHandle ? {} : { headerMediaHandle: '' }),
@@ -436,6 +544,9 @@ export default function MetaTemplatesPage() {
     if (!file) return
     setUploadingMedia(true)
     setFeedback(null)
+    setMediaFileLabel('')
+    setLocalMediaPreview(file, form.headerFormat)
+    updateForm({ headerMediaHandle: '' })
     try {
       const formData = new FormData()
       formData.append('file', file)
@@ -452,6 +563,7 @@ export default function MetaTemplatesPage() {
       setMediaFileLabel(payload.file?.name || file.name)
       setFeedback({ type: 'success', text: payload.message || 'Midia carregada na Meta.' })
     } catch (error) {
+      updateForm({ headerMediaHandle: '' })
       setFeedback({ type: 'error', text: error instanceof Error ? error.message : 'Erro ao carregar midia' })
     } finally {
       setUploadingMedia(false)
@@ -466,6 +578,7 @@ export default function MetaTemplatesPage() {
     setEditingTemplate(mode === 'edit' && 'template_external_id' in template ? template : null)
     setEditingDraftId(mode === 'draft' && 'id' in template ? template.id : '')
     setMediaFileLabel('')
+    clearMediaPreview()
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -593,6 +706,14 @@ export default function MetaTemplatesPage() {
                       {mediaFileLabel && <span style={successPillStyle}>{mediaFileLabel}</span>}
                     </div>
                     <input value={form.headerMediaHandle} onChange={event => updateForm({ headerMediaHandle: event.target.value })} placeholder="Handle gerado pela Meta" style={inputStyle} />
+                    {(mediaPreview || form.headerMediaHandle) && (
+                      <HeaderMediaPreview
+                        format={form.headerFormat}
+                        preview={mediaPreview}
+                        handle={form.headerMediaHandle}
+                        compact
+                      />
+                    )}
                   </div>
                 </Field>
               ) : <div />}
@@ -696,9 +817,11 @@ export default function MetaTemplatesPage() {
           <div style={{ borderRadius: 18, padding: 14, background: '#efe7dc', color: '#111827', minHeight: 360 }}>
             <div style={{ maxWidth: '88%', marginLeft: 'auto', borderRadius: '12px 12px 3px 12px', padding: '10px 12px', background: '#dcf8c6', boxShadow: '0 1px 2px rgba(0,0,0,0.16)', fontSize: '0.86rem', lineHeight: 1.45, whiteSpace: 'pre-wrap' }}>
               {form.headerFormat !== 'NONE' && form.headerFormat !== 'TEXT' && (
-                <div style={{ minHeight: 92, borderRadius: 10, background: '#cbd5e1', display: 'grid', placeItems: 'center', color: '#475569', fontWeight: 800, marginBottom: 8 }}>
-                  {form.headerFormat}
-                </div>
+                <HeaderMediaPreview
+                  format={form.headerFormat}
+                  preview={mediaPreview}
+                  handle={form.headerMediaHandle}
+                />
               )}
               {form.headerFormat === 'TEXT' && form.headerText && (
                 <div style={{ fontWeight: 800, marginBottom: 6 }}>
