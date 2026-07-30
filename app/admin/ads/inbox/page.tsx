@@ -1234,14 +1234,158 @@ export default function MetaInboxPage() {
               </label>
 
               <label>
-                Link do botao
-                <input
-                  value={campaignForm.button_url}
-                  onChange={event => setCampaignForm({ ...campaignForm, button_url: event.target.value })}
-                  placeholder="https://..."
-                />
-                <small>Quando preenchido, vira o botao da mensagem. Se a Meta recusar o botao, o link entra no texto como fallback.</small>
+                Fluxo do Direct
+                <select
+                  value={campaignForm.flow_type}
+                  onChange={event => setCampaignForm({ ...campaignForm, flow_type: event.target.value as CampaignForm['flow_type'] })}
+                >
+                  <option value="vote_discount">Votacao + livro</option>
+                  <option value="simple_link">Mensagem com botao simples</option>
+                </select>
               </label>
+
+              {campaignForm.flow_type === 'simple_link' ? (
+                <label>
+                  Link do botao
+                  <input
+                    value={campaignForm.button_url}
+                    onChange={event => setCampaignForm({ ...campaignForm, button_url: event.target.value })}
+                    placeholder="https://..."
+                  />
+                  <small>Quando preenchido, vira o botao da mensagem. Se a Meta recusar o botao, o link entra no texto como fallback.</small>
+                </label>
+              ) : (
+                <div className="meta-comment-dm-flow-box">
+                  <div className="meta-comment-dm-flow-title">
+                    <MousePointerClick size={16} />
+                    <strong>Botoes iniciais</strong>
+                  </div>
+                  <div className="meta-comment-dm-two even">
+                    <label>
+                      Botao 1
+                      <input
+                        value={campaignForm.initial_button_voted_label}
+                        maxLength={20}
+                        onChange={event => setCampaignForm({ ...campaignForm, initial_button_voted_label: event.target.value })}
+                      />
+                    </label>
+                    <label>
+                      Botao 2
+                      <input
+                        value={campaignForm.initial_button_vote_label}
+                        maxLength={20}
+                        onChange={event => setCampaignForm({ ...campaignForm, initial_button_vote_label: event.target.value })}
+                      />
+                    </label>
+                  </div>
+
+                  <div className="meta-comment-dm-flow-title">
+                    <ShoppingCart size={16} />
+                    <strong>Se clicar em Ja votei</strong>
+                  </div>
+                  <label>
+                    Mensagem do desconto
+                    <textarea
+                      rows={3}
+                      value={campaignForm.voted_message}
+                      onChange={event => setCampaignForm({ ...campaignForm, voted_message: event.target.value })}
+                    />
+                  </label>
+                  <div className="meta-comment-dm-two">
+                    <label>
+                      Link do livro
+                      <input
+                        value={campaignForm.discount_button_url}
+                        onChange={event => setCampaignForm({ ...campaignForm, discount_button_url: event.target.value })}
+                        placeholder="https://..."
+                      />
+                    </label>
+                    <label>
+                      Botao
+                      <input
+                        value={campaignForm.discount_button_title}
+                        maxLength={20}
+                        onChange={event => setCampaignForm({ ...campaignForm, discount_button_title: event.target.value })}
+                      />
+                    </label>
+                  </div>
+
+                  <div className="meta-comment-dm-flow-title">
+                    <ExternalLink size={16} />
+                    <strong>Se clicar em Vou votar</strong>
+                  </div>
+                  <label>
+                    Mensagem de votacao
+                    <textarea
+                      rows={3}
+                      value={campaignForm.vote_message}
+                      onChange={event => setCampaignForm({ ...campaignForm, vote_message: event.target.value })}
+                    />
+                  </label>
+                  <div className="meta-comment-dm-two">
+                    <label>
+                      Link da votacao
+                      <input
+                        value={campaignForm.vote_url}
+                        onChange={event => setCampaignForm({ ...campaignForm, vote_url: event.target.value })}
+                        placeholder="https://..."
+                      />
+                    </label>
+                    <label>
+                      Botao
+                      <input
+                        value={campaignForm.vote_button_title}
+                        maxLength={20}
+                        onChange={event => setCampaignForm({ ...campaignForm, vote_button_title: event.target.value })}
+                      />
+                    </label>
+                  </div>
+
+                  <div className="meta-comment-dm-flow-title with-control">
+                    <span>
+                      <Clock size={16} />
+                      <strong>Follow-up automatico</strong>
+                    </span>
+                    <label className="meta-comment-dm-check">
+                      <input
+                        type="checkbox"
+                        checked={campaignForm.followup_enabled}
+                        onChange={event => setCampaignForm({ ...campaignForm, followup_enabled: event.target.checked })}
+                      />
+                      Ativo
+                    </label>
+                  </div>
+                  <div className="meta-comment-dm-two">
+                    <label>
+                      Mensagem depois do atraso
+                      <textarea
+                        rows={3}
+                        value={campaignForm.followup_message}
+                        onChange={event => setCampaignForm({ ...campaignForm, followup_message: event.target.value })}
+                      />
+                    </label>
+                    <label>
+                      Minutos
+                      <input
+                        type="number"
+                        min={1}
+                        max={1440}
+                        value={campaignForm.followup_delay_minutes}
+                        onChange={event => setCampaignForm({ ...campaignForm, followup_delay_minutes: Number(event.target.value || 3) })}
+                      />
+                    </label>
+                  </div>
+                  <label>
+                    Texto do botao do follow-up
+                    <input
+                      value={campaignForm.followup_button_title}
+                      maxLength={20}
+                      onChange={event => setCampaignForm({ ...campaignForm, followup_button_title: event.target.value })}
+                    />
+                    <small>O follow-up usa o mesmo link do livro cadastrado acima.</small>
+                  </label>
+                </div>
+              )}
 
               <div className="meta-suite-form-grid">
                 <label>
@@ -2622,6 +2766,36 @@ export default function MetaInboxPage() {
           display: grid;
           grid-template-columns: 1fr 1fr 1fr;
           gap: 8px;
+        }
+        .meta-suite-compact-form .meta-comment-dm-flow-box {
+          margin-top: 2px;
+        }
+        .meta-suite-compact-form .meta-comment-dm-two {
+          grid-template-columns: minmax(0, 1fr) minmax(82px, .42fr);
+          gap: 8px;
+        }
+        .meta-suite-compact-form .meta-comment-dm-two.even {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .meta-suite-compact-form .meta-comment-dm-flow-title {
+          text-transform: none;
+        }
+        .meta-suite-compact-form .meta-comment-dm-check {
+          display: inline-flex;
+          grid-template-columns: unset;
+          align-items: center;
+          gap: 6px;
+          color: var(--text-muted);
+          font-size: .68rem;
+          letter-spacing: 0;
+          text-transform: none;
+          cursor: pointer;
+        }
+        .meta-suite-compact-form .meta-comment-dm-check input {
+          width: 16px;
+          height: 16px;
+          padding: 0;
+          accent-color: var(--gold);
         }
         .meta-suite-side-section {
           border-bottom: 1px solid rgba(17, 24, 39, .08);
