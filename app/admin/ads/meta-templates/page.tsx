@@ -4,15 +4,19 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import Link from 'next/link'
 import {
+  AlertTriangle,
+  CheckCircle2,
   Copy,
   Edit3,
   FileText,
   ImageIcon,
+  Link2,
   Loader2,
   Plus,
   RefreshCw,
   Save,
   Send,
+  Sparkles,
   Trash2,
   Upload,
   Video,
@@ -80,6 +84,35 @@ interface MediaPreview {
   format: HeaderFormat
 }
 
+interface TemplatePreset {
+  id: string
+  title: string
+  description: string
+  name: string
+  category: TemplateForm['category']
+  headerFormat: HeaderFormat
+  bodyText: string
+  bodyExamples: string[]
+  footerText: string
+  buttons: ButtonDraft[]
+  messageSendTtlSeconds?: string
+  useCase: string
+}
+
+interface VariableShortcut {
+  label: string
+  description: string
+  example: string
+}
+
+type ApprovalCheckStatus = 'ok' | 'warn' | 'danger'
+
+interface ApprovalCheck {
+  label: string
+  description: string
+  status: ApprovalCheckStatus
+}
+
 const emptyButton: ButtonDraft = {
   type: 'QUICK_REPLY',
   text: '',
@@ -104,6 +137,130 @@ const emptyForm: TemplateForm = {
   buttons: [],
   messageSendTtlSeconds: '',
 }
+
+const variableShortcuts: VariableShortcut[] = [
+  { label: 'Nome do lead', description: 'Personaliza a abertura da mensagem.', example: 'Maria' },
+  { label: 'Imovel', description: 'Nome curto da oportunidade ou empreendimento.', example: 'Cobertura frente mar' },
+  { label: 'Link', description: 'URL da pagina do imovel, landing page ou blog.', example: 'https://guilhermepilger.ai/imovel' },
+  { label: 'Cidade', description: 'Cidade ou bairro de interesse.', example: 'Balneario Camboriu' },
+  { label: 'Corretor', description: 'Nome da pessoa que vai atender o lead.', example: 'Guilherme Pilger' },
+]
+
+const buttonPresets: Array<ButtonDraft & { label: string; description: string }> = [
+  {
+    ...emptyButton,
+    label: 'Ver oportunidade',
+    description: 'Botao de link para pagina do imovel.',
+    type: 'URL',
+    text: 'Ver detalhes',
+    url: 'https://guilhermepilger.ai/imovel/{{1}}',
+    example: 'https://guilhermepilger.ai/imovel/cobertura-frente-mar',
+  },
+  {
+    ...emptyButton,
+    label: 'Falar no WhatsApp',
+    description: 'Leva o lead para atendimento humano ou IA.',
+    type: 'URL',
+    text: 'Falar com equipe',
+    url: 'https://wa.me/554788271085',
+  },
+  {
+    ...emptyButton,
+    label: 'Tenho interesse',
+    description: 'Resposta rapida para medir interesse.',
+    type: 'QUICK_REPLY',
+    text: 'Tenho interesse',
+  },
+]
+
+const templatePresets: TemplatePreset[] = [
+  {
+    id: 'lancamento_alto_padrao',
+    title: 'Lancamento alto padrao',
+    description: 'Primeiro contato para lead opt-in que pediu novidades de um empreendimento.',
+    name: 'pilger_lancamento_alto_padrao',
+    category: 'MARKETING',
+    headerFormat: 'IMAGE',
+    bodyText: 'Ola {{1}}, separei uma oportunidade de alto padrao para voce em {{2}}.\n\nEla combina com o perfil que voce deixou no nosso site. Toque no botao abaixo para ver os detalhes.',
+    bodyExamples: ['Maria', 'Balneario Camboriu'],
+    footerText: 'Guilherme Pilger Imoveis',
+    buttons: [buttonPresets[0]],
+    useCase: 'Campanha para leads novos',
+  },
+  {
+    id: 'follow_up_imovel',
+    title: 'Follow-up de imovel',
+    description: 'Retomar conversa com quem demonstrou interesse em um imovel especifico.',
+    name: 'pilger_followup_imovel',
+    category: 'MARKETING',
+    headerFormat: 'IMAGE',
+    bodyText: 'Ola {{1}}, vi que voce demonstrou interesse em {{2}}.\n\nSeparei os detalhes atualizados para facilitar sua analise. Posso te ajudar com valores, visita ou disponibilidade?',
+    bodyExamples: ['Maria', 'Cobertura duplex no Ed. Costa Splendida'],
+    footerText: 'Guilherme Pilger Imoveis',
+    buttons: [buttonPresets[0], buttonPresets[2]],
+    useCase: 'Follow-up ativo',
+  },
+  {
+    id: 'convite_visita',
+    title: 'Convite para visita',
+    description: 'Convite curto para agendar visita ou chamada com o lead.',
+    name: 'pilger_convite_visita',
+    category: 'MARKETING',
+    headerFormat: 'NONE',
+    bodyText: 'Ola {{1}}, tudo bem?\n\nTemos uma janela de atendimento para apresentar {{2}} com mais detalhes. Qual horario fica melhor para voce?',
+    bodyExamples: ['Maria', 'as opcoes em Balneario Camboriu'],
+    footerText: 'Guilherme Pilger Imoveis',
+    buttons: [
+      { ...emptyButton, type: 'QUICK_REPLY', text: 'Quero agendar' },
+      { ...emptyButton, type: 'QUICK_REPLY', text: 'Enviar opcoes' },
+    ],
+    useCase: 'Agendamento',
+  },
+  {
+    id: 'conteudo_blog',
+    title: 'Conteudo/blog',
+    description: 'Enviar noticia, guia ou analise de mercado para lista interessada.',
+    name: 'pilger_conteudo_mercado',
+    category: 'MARKETING',
+    headerFormat: 'IMAGE',
+    bodyText: 'Ola {{1}}, publicamos um conteudo novo que pode te ajudar na decisao:\n\n{{2}}\n\nO material esta no link abaixo.',
+    bodyExamples: ['Maria', 'Guia para investir em imoveis de alto padrao'],
+    footerText: 'Guilherme Pilger Imoveis',
+    buttons: [
+      { ...emptyButton, type: 'URL', text: 'Ler conteudo', url: 'https://guilhermepilger.ai/blog/{{1}}', example: 'https://guilhermepilger.ai/blog/mercado-alto-padrao' },
+    ],
+    useCase: 'Nutrir base opt-in',
+  },
+  {
+    id: 'reativacao_lead',
+    title: 'Reativacao leve',
+    description: 'Mensagem cuidadosa para lead antigo que aceitou contato.',
+    name: 'pilger_reativacao_lead',
+    category: 'MARKETING',
+    headerFormat: 'NONE',
+    bodyText: 'Ola {{1}}, tudo bem?\n\nFaz um tempo que voce deixou interesse em imoveis de alto padrao. Ainda faz sentido receber uma selecao atualizada em {{2}}?',
+    bodyExamples: ['Maria', 'Balneario Camboriu'],
+    footerText: 'Guilherme Pilger Imoveis',
+    buttons: [
+      { ...emptyButton, type: 'QUICK_REPLY', text: 'Sim, quero' },
+      { ...emptyButton, type: 'QUICK_REPLY', text: 'Agora nao' },
+    ],
+    useCase: 'Base fria opt-in',
+  },
+  {
+    id: 'utility_documentos',
+    title: 'Atualizacao operacional',
+    description: 'Uso utility para informacoes solicitadas, documentos ou andamento.',
+    name: 'pilger_atualizacao_operacional',
+    category: 'UTILITY',
+    headerFormat: 'DOCUMENT',
+    bodyText: 'Ola {{1}}, conforme solicitado, segue a atualizacao sobre {{2}}.\n\nSe precisar, responda esta mensagem que nossa equipe acompanha por aqui.',
+    bodyExamples: ['Maria', 'a proposta do imovel'],
+    footerText: 'Guilherme Pilger Imoveis',
+    buttons: [buttonPresets[1]],
+    useCase: 'Follow-up operacional',
+  },
+]
 
 function asRecord(value: unknown): Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -141,8 +298,90 @@ function extractTemplateVariables(text: string) {
   return Array.from(new Set(matches.map(match => Number(match[1])))).filter(Number.isFinite).sort((a, b) => a - b)
 }
 
+function parseBodyExamples(value: string) {
+  return value.split(/[;\n,]+/).map(item => item.trim())
+}
+
 function replaceTemplateVariables(text: string, values: string[]) {
   return text.replace(/{{\s*(\d+)\s*}}/g, (_, index: string) => values[Number(index) - 1] || `{{${index}}}`)
+}
+
+function getBodyExampleValue(examples: string[], variables: number[], variable: number) {
+  const index = variables.indexOf(variable)
+  return index >= 0 ? examples[index] || '' : ''
+}
+
+function setBodyExampleValue(currentExamples: string[], variables: number[], variable: number, value: string) {
+  const nextExamples = [...currentExamples]
+  const index = variables.indexOf(variable)
+  if (index >= 0) nextExamples[index] = value
+  return nextExamples.join('; ')
+}
+
+function approvalStatusColor(status: ApprovalCheckStatus) {
+  if (status === 'ok') return '#22c55e'
+  if (status === 'danger') return '#ef4444'
+  return '#f59e0b'
+}
+
+function getApprovalChecks(form: TemplateForm, bodyVariables: number[], bodyExamples: string[]): ApprovalCheck[] {
+  const body = form.bodyText.trim()
+  const filledExamples = bodyVariables.every(variable => getBodyExampleValue(bodyExamples, bodyVariables, variable).trim())
+  const hasButton = form.buttons.some(button => button.text.trim())
+  const hasMediaHeader = ['IMAGE', 'VIDEO', 'DOCUMENT'].includes(form.headerFormat)
+  const hasMediaReady = !hasMediaHeader || Boolean(form.headerMediaHandle.trim() && form.headerMediaUrl.trim())
+  const hasClearOptOut = /sair|parar|cancelar|descadastrar|remover/i.test(body)
+  const riskyWords = [
+    'garantido',
+    'sem risco',
+    'renda garantida',
+    'credito aprovado',
+    'ultimas unidades',
+    'imperdivel',
+    'gratis',
+    'clique agora',
+  ].filter(word => body.toLowerCase().includes(word))
+
+  return [
+    {
+      label: 'Corpo da mensagem',
+      description: body ? `${body.length}/1024 caracteres` : 'Escreva uma mensagem objetiva antes de enviar.',
+      status: !body ? 'danger' : body.length > 1024 ? 'danger' : body.length > 750 ? 'warn' : 'ok',
+    },
+    {
+      label: 'Exemplos das variaveis',
+      description: bodyVariables.length ? `${bodyVariables.length} variavel(is) detectada(s)` : 'Sem variaveis obrigatorias no corpo.',
+      status: bodyVariables.length && !filledExamples ? 'danger' : 'ok',
+    },
+    {
+      label: 'Midia do header',
+      description: hasMediaHeader ? 'A midia precisa estar carregada na Meta e salva para campanhas.' : 'Template sem midia no topo.',
+      status: hasMediaReady ? 'ok' : 'danger',
+    },
+    {
+      label: 'CTA',
+      description: hasButton ? 'Template tem botao para proxima acao.' : 'Adicionar botao costuma melhorar resposta e rastreio.',
+      status: hasButton ? 'ok' : 'warn',
+    },
+    {
+      label: 'Opt-out',
+      description: hasClearOptOut ? 'Texto menciona saida/cancelamento.' : 'Para campanhas grandes, inclua uma saida simples quando fizer sentido.',
+      status: hasClearOptOut || form.category === 'UTILITY' ? 'ok' : 'warn',
+    },
+    {
+      label: 'Linguagem de risco',
+      description: riskyWords.length ? `Revise: ${riskyWords.join(', ')}` : 'Sem termos de promessa exagerada detectados.',
+      status: riskyWords.length ? 'warn' : 'ok',
+    },
+  ]
+}
+
+function getApprovalSummary(checks: ApprovalCheck[]) {
+  const danger = checks.filter(check => check.status === 'danger').length
+  const warn = checks.filter(check => check.status === 'warn').length
+  if (danger) return { label: `${danger} item(ns) obrigatorio(s) pendente(s)`, status: 'danger' as ApprovalCheckStatus }
+  if (warn) return { label: `${warn} ponto(s) para revisar`, status: 'warn' as ApprovalCheckStatus }
+  return { label: 'Pronto para enviar para aprovacao', status: 'ok' as ApprovalCheckStatus }
 }
 
 function renderPreviewText(text: string) {
@@ -329,7 +568,9 @@ export default function MetaTemplatesPage() {
 
   const bodyVariables = useMemo(() => extractTemplateVariables(form.bodyText), [form.bodyText])
   const headerVariables = useMemo(() => extractTemplateVariables(form.headerText), [form.headerText])
-  const bodyExamples = useMemo(() => form.bodyExamples.split(/[;\n,]+/).map(item => item.trim()).filter(Boolean), [form.bodyExamples])
+  const bodyExamples = useMemo(() => parseBodyExamples(form.bodyExamples), [form.bodyExamples])
+  const approvalChecks = useMemo(() => getApprovalChecks(form, bodyVariables, bodyExamples), [form, bodyVariables, bodyExamples])
+  const approvalSummary = useMemo(() => getApprovalSummary(approvalChecks), [approvalChecks])
 
   const filteredTemplates = useMemo(() => {
     if (activeStatus === 'drafts') return []
@@ -398,7 +639,7 @@ export default function MetaTemplatesPage() {
     const selectionStart = textarea?.selectionStart ?? currentBody.length
     const selectionEnd = textarea?.selectionEnd ?? selectionStart
     const nextBody = `${currentBody.slice(0, selectionStart)}${token}${currentBody.slice(selectionEnd)}`
-    const nextExamples = form.bodyExamples.split(/[;\n,]+/).map(item => item.trim()).filter(Boolean)
+    const nextExamples = parseBodyExamples(form.bodyExamples)
 
     while (nextExamples.length < nextVariable) nextExamples.push('')
     if (!nextExamples[nextVariable - 1]) nextExamples[nextVariable - 1] = example
@@ -441,11 +682,11 @@ export default function MetaTemplatesPage() {
       text: normalizedBody,
     }
     if (bodyVariables.length) {
-      if (bodyExamples.length < bodyVariables.length) {
+      if (bodyVariables.some(variable => !getBodyExampleValue(bodyExamples, bodyVariables, variable).trim())) {
         throw new Error(`Informe ${bodyVariables.length} exemplo(s) para as variaveis do corpo.`)
       }
       body.example = {
-        body_text: [bodyVariables.map((_, index) => bodyExamples[index] || `exemplo_${index + 1}`)],
+        body_text: [bodyVariables.map(variable => getBodyExampleValue(bodyExamples, bodyVariables, variable))],
       }
     }
     components.push(body)
@@ -652,6 +893,39 @@ export default function MetaTemplatesPage() {
     updateForm({ buttons: form.buttons.filter((_, current) => current !== index) })
   }
 
+  const updateBodyExample = (variable: number, value: string) => {
+    updateForm({ bodyExamples: setBodyExampleValue(bodyExamples, bodyVariables, variable, value) })
+  }
+
+  const addButtonPreset = (preset: ButtonDraft) => {
+    if (form.buttons.length >= 3) {
+      setFeedback({ type: 'error', text: 'A Meta permite ate 3 botoes neste formato de template.' })
+      return
+    }
+    updateForm({ buttons: [...form.buttons, { ...emptyButton, ...preset }] })
+  }
+
+  const applyPreset = (preset: TemplatePreset) => {
+    clearMediaPreview()
+    setMediaFileLabel('')
+    setEditingTemplate(null)
+    setEditingDraftId('')
+    setForm({
+      ...emptyForm,
+      name: preset.name,
+      language: form.language || 'pt_BR',
+      category: preset.category,
+      headerFormat: preset.headerFormat,
+      bodyText: preset.bodyText,
+      bodyExamples: preset.bodyExamples.join('; '),
+      footerText: preset.footerText,
+      buttons: preset.buttons.map(button => ({ ...emptyButton, ...button })),
+      messageSendTtlSeconds: preset.messageSendTtlSeconds || '',
+    })
+    setFeedback({ type: 'success', text: `Modelo "${preset.title}" carregado. Ajuste o texto e envie para aprovacao.` })
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   if (loading) return <AdminLoadingState minHeight="420px" />
 
   const previewBody = replaceTemplateVariables(form.bodyText, bodyExamples)
@@ -690,6 +964,37 @@ export default function MetaTemplatesPage() {
           {feedback.text}
         </div>
       )}
+
+      <section style={panelStyle}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap', marginBottom: 14 }}>
+          <div>
+            <h2 style={{ ...sectionTitleStyle, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Sparkles size={18} style={{ color: 'var(--gold)' }} /> Biblioteca imobiliaria
+            </h2>
+            <p style={{ margin: '5px 0 0', color: 'var(--text-muted)', fontSize: '0.82rem', lineHeight: 1.45 }}>
+              Comece por uma estrutura segura para leads opt-in e ajuste nomes, links e midia antes de enviar para a Meta.
+            </p>
+          </div>
+          <span style={successPillStyle}>Fase 1: templates guiados</span>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 10 }}>
+          {templatePresets.map(preset => (
+            <article key={preset.id} style={{ padding: 13, borderRadius: 10, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.035)', display: 'grid', gap: 9 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+                <strong style={{ color: 'var(--text-primary)', fontSize: '0.92rem' }}>{preset.title}</strong>
+                <span style={{ color: 'var(--gold)', fontSize: '0.68rem', fontWeight: 900, textTransform: 'uppercase' }}>{preset.category}</span>
+              </div>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', lineHeight: 1.45, margin: 0 }}>{preset.description}</p>
+              <div style={{ display: 'flex', gap: 7, alignItems: 'center', color: 'var(--text-muted)', fontSize: '0.72rem' }}>
+                <FileText size={13} /> {preset.useCase}
+              </div>
+              <button type="button" onClick={() => applyPreset(preset)} style={{ ...ghostButtonStyle, justifyContent: 'center' }}>
+                <Sparkles size={14} /> Usar modelo
+              </button>
+            </article>
+          ))}
+        </div>
+      </section>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 18, alignItems: 'start' }}>
         <section style={panelStyle}>
@@ -778,13 +1083,8 @@ export default function MetaTemplatesPage() {
             <Field label="Corpo">
               <div style={{ display: 'grid', gap: 8 }}>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  {[
-                    { label: 'Nome', example: 'Maria' },
-                    { label: 'Imovel', example: 'Apartamento frente mar' },
-                    { label: 'Link', example: 'https://guilhermepilger.ai/imovel' },
-                    { label: 'Corretor', example: 'Guilherme Pilger' },
-                  ].map(item => (
-                    <button key={item.label} type="button" onClick={() => insertBodyVariable(item.example)} style={ghostButtonStyle}>
+                  {variableShortcuts.map(item => (
+                    <button key={item.label} type="button" onClick={() => insertBodyVariable(item.example)} title={item.description} style={ghostButtonStyle}>
                       <Plus size={14} /> {item.label}
                     </button>
                   ))}
@@ -802,9 +1102,23 @@ export default function MetaTemplatesPage() {
             </Field>
 
             {bodyVariables.length > 0 && (
-              <Field label={`Exemplos do corpo (${bodyVariables.map(item => `{{${item}}}`).join(', ')})`}>
-                <input value={form.bodyExamples} onChange={event => updateForm({ bodyExamples: event.target.value })} placeholder="Maria; Apartamento frente mar; https://..." style={inputStyle} />
-              </Field>
+              <div style={{ display: 'grid', gap: 8 }}>
+                <span style={labelStyle}>Exemplos do corpo</span>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 8 }}>
+                  {bodyVariables.map(variable => (
+                    <input
+                      key={variable}
+                      value={getBodyExampleValue(bodyExamples, bodyVariables, variable)}
+                      onChange={event => updateBodyExample(variable, event.target.value)}
+                      placeholder={`Exemplo para {{${variable}}}`}
+                      style={inputStyle}
+                    />
+                  ))}
+                </div>
+                <div style={{ color: 'var(--text-muted)', fontSize: '0.76rem', lineHeight: 1.45 }}>
+                  Esses exemplos sao enviados para aprovacao da Meta e tambem ajudam o preview do WhatsApp.
+                </div>
+              </div>
             )}
 
             <Field label="Footer">
@@ -817,6 +1131,20 @@ export default function MetaTemplatesPage() {
                 <button type="button" onClick={addButton} disabled={form.buttons.length >= 3} style={ghostButtonStyle}>
                   <Plus size={14} /> Adicionar botao
                 </button>
+              </div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {buttonPresets.map(preset => (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    onClick={() => addButtonPreset(preset)}
+                    title={preset.description}
+                    disabled={form.buttons.length >= 3}
+                    style={ghostButtonStyle}
+                  >
+                    {preset.type === 'URL' ? <Link2 size={14} /> : <Plus size={14} />} {preset.label}
+                  </button>
+                ))}
               </div>
               {form.buttons.map((button, index) => (
                 <div key={index} style={{ padding: 10, borderRadius: 10, border: '1px solid var(--border)', display: 'grid', gap: 8 }}>
@@ -897,6 +1225,30 @@ export default function MetaTemplatesPage() {
             <MiniStat label="Templates" value={templates.length} />
             <MiniStat label="Com corpo" value={bodyComponentCount} />
             <MiniStat label="Rascunhos" value={drafts.length} />
+          </div>
+          <div style={{ marginTop: 14, padding: 12, borderRadius: 12, border: `1px solid ${approvalStatusColor(approvalSummary.status)}33`, background: `${approvalStatusColor(approvalSummary.status)}0f`, display: 'grid', gap: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
+              <strong style={{ color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 7 }}>
+                {approvalSummary.status === 'ok' ? <CheckCircle2 size={16} style={{ color: '#22c55e' }} /> : <AlertTriangle size={16} style={{ color: approvalStatusColor(approvalSummary.status) }} />}
+                Assistente de aprovacao
+              </strong>
+              <span style={{ color: approvalStatusColor(approvalSummary.status), fontSize: '0.76rem', fontWeight: 900 }}>{approvalSummary.label}</span>
+            </div>
+            <div style={{ display: 'grid', gap: 7 }}>
+              {approvalChecks.map(check => (
+                <div key={check.label} style={{ display: 'grid', gridTemplateColumns: '18px 1fr', gap: 8, alignItems: 'start' }}>
+                  {check.status === 'ok' ? (
+                    <CheckCircle2 size={15} style={{ color: '#22c55e', marginTop: 2 }} />
+                  ) : (
+                    <AlertTriangle size={15} style={{ color: approvalStatusColor(check.status), marginTop: 2 }} />
+                  )}
+                  <div>
+                    <div style={{ color: 'var(--text-primary)', fontSize: '0.8rem', fontWeight: 800 }}>{check.label}</div>
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.74rem', lineHeight: 1.4 }}>{check.description}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
       </div>
