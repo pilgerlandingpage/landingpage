@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import {
-    Send, Loader2, AlertCircle, CheckCircle2, Clock, Users,
+    Send, Loader2, AlertCircle, CheckCircle2, Users,
     Plus, Trash2, Pause, Play, FileText, Image, Mic, Video,
-    Tag, RefreshCw, MessageSquare, Calendar, ChevronDown, ChevronUp,
+    Tag, RefreshCw, MessageSquare, ChevronUp,
     Smartphone, Search, BarChart3, TrendingUp, Eye, Inbox, Activity,
     XCircle, Upload, Download
 } from 'lucide-react'
@@ -2496,6 +2496,18 @@ function MetaOfficialCampaignPanel({
     retryingCampaignId: string
     onRetryFailed: (campaignId: string, failedCount: number) => void
 }) {
+    const [searchTerm, setSearchTerm] = useState('')
+    const normalizedSearch = searchTerm.trim().toLowerCase()
+    const statusCounts = summary?.byStatus || {}
+    const statusOptions = [
+        { value: '', label: 'Todas', count: summary?.total || campaigns.length },
+        { value: 'queued', label: 'Fila', count: statusCounts.queued || 0 },
+        { value: 'sending', label: 'Enviando', count: statusCounts.sending || 0 },
+        { value: 'completed', label: 'Concluidas', count: statusCounts.completed || 0 },
+        { value: 'failed', label: 'Falhas', count: statusCounts.failed || 0 },
+        { value: 'paused', label: 'Pausadas', count: statusCounts.paused || 0 },
+        { value: 'scheduled', label: 'Agendadas', count: statusCounts.scheduled || 0 },
+    ]
     const metricItems = [
         { label: 'Campanhas', value: summary?.total || 0, icon: MessageSquare, color: 'var(--gold)' },
         { label: 'Destinatarios', value: summary?.recipients || 0, icon: Users, color: '#38bdf8' },
@@ -2504,169 +2516,756 @@ function MetaOfficialCampaignPanel({
         { label: 'Lidas', value: summary?.read || 0, icon: Eye, color: '#0ea5e9' },
         { label: 'Falhas', value: summary?.failed || 0, icon: AlertCircle, color: '#ef4444' },
     ]
+    const rateItems = [
+        { label: 'Taxa aceite', value: percentLabel(analytics?.rates?.acceptedRate ?? metricRate(summary?.sent || 0, summary?.recipients || 0)), color: '#38bdf8' },
+        { label: 'Entrega', value: percentLabel(analytics?.rates?.deliveryRate ?? metricRate(summary?.delivered || 0, summary?.sent || summary?.recipients || 0)), color: '#22c55e' },
+        { label: 'Leitura', value: percentLabel(analytics?.rates?.readRate ?? metricRate(summary?.read || 0, summary?.delivered || summary?.sent || summary?.recipients || 0)), color: '#0ea5e9' },
+        { label: 'Falha', value: percentLabel(analytics?.rates?.failureRate ?? metricRate(summary?.failed || 0, summary?.recipients || 0)), color: '#ef4444' },
+    ]
+    const filteredCampaigns = campaigns.filter(campaign => {
+        if (!normalizedSearch) return true
+        const sender = senders.find(item => item.id === campaign.default_sender_id)
+        return [
+            campaign.name,
+            campaign.status,
+            campaign.template_name,
+            campaign.template_language,
+            campaign.campaign_type,
+            sender?.display_name,
+            sender?.phone_number,
+        ].some(value => String(value || '').toLowerCase().includes(normalizedSearch))
+    })
+    const selectedCampaign = (
+        filteredCampaigns.find(item => item.id === expandedCampaignId)
+        || campaigns.find(item => item.id === expandedCampaignId)
+        || filteredCampaigns[0]
+        || null
+    )
+    const selectedSender = selectedCampaign
+        ? senders.find(item => item.id === selectedCampaign.default_sender_id)
+        : undefined
+    const selectedDetail = selectedCampaign ? campaignDetails[selectedCampaign.id] : undefined
+    const selectedCampaignId = selectedCampaign?.id || ''
+    const selectCampaign = (campaignId: string) => {
+        if (expandedCampaignId === campaignId) return
+        onToggleDetail(campaignId)
+    }
 
     return (
         <div style={{ display: 'grid', gap: '14px' }}>
             <div style={{
-                padding: '18px 20px',
                 borderRadius: '12px',
                 background: 'var(--bg-secondary)',
                 border: '1px solid var(--border)',
-                display: 'grid',
-                gap: '14px',
+                overflow: 'hidden',
             }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-                    <div>
-                        <h2 style={{ fontSize: '1.05rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-                            <MessageSquare size={18} style={{ color: 'var(--gold)' }} /> Campanhas Meta WhatsApp
-                        </h2>
-                        <p style={{ margin: '5px 0 0', color: 'var(--text-muted)', fontSize: '0.78rem' }}>
-                            Fila oficial do WhatsApp com templates aprovados, opt-in, status de entrega e varios numeros Meta.
-                        </p>
-                    </div>
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                        <select
-                            value={statusFilter}
-                            onChange={e => onStatusFilterChange(e.target.value)}
-                            style={{
-                                padding: '8px 10px',
-                                borderRadius: '8px',
-                                border: '1px solid var(--border)',
-                                background: 'rgba(255,255,255,0.06)',
-                                color: 'var(--text-primary)',
-                                fontSize: '0.82rem',
-                            }}
-                        >
-                            <option value="">Todos os status</option>
-                            <option value="scheduled">Agendadas</option>
-                            <option value="queued">Na fila</option>
-                            <option value="sending">Enviando</option>
-                            <option value="paused">Pausadas</option>
-                            <option value="completed">Concluidas</option>
-                            <option value="failed">Falhas</option>
-                            <option value="cancelled">Canceladas</option>
-                        </select>
-                        <button
-                            type="button"
-                            onClick={onRefresh}
-                            disabled={loading}
-                            style={{
-                                padding: '8px 12px',
-                                borderRadius: '8px',
-                                border: '1px solid var(--border)',
-                                background: 'rgba(255,255,255,0.04)',
-                                color: 'var(--text-secondary)',
-                                cursor: loading ? 'not-allowed' : 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '6px',
-                            }}
-                        >
-                            <RefreshCw size={14} className={loading ? 'spin' : ''} />
-                            Atualizar
-                        </button>
-                    </div>
+                <div style={{
+                    padding: '12px 14px 10px',
+                    borderBottom: '1px solid var(--border)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    flexWrap: 'wrap',
+                }}>
+                    {statusOptions.map(option => {
+                        const active = statusFilter === option.value
+                        return (
+                            <button
+                                key={option.value || 'all'}
+                                type="button"
+                                onClick={() => onStatusFilterChange(option.value)}
+                                style={{
+                                    minHeight: '34px',
+                                    padding: '7px 11px',
+                                    borderRadius: '8px',
+                                    border: active ? '1px solid rgba(176,138,67,0.36)' : '1px solid var(--border)',
+                                    background: active ? 'rgba(176,138,67,0.13)' : 'rgba(255,255,255,0.04)',
+                                    color: active ? 'var(--gold)' : 'var(--text-primary)',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '7px',
+                                    fontSize: '0.78rem',
+                                    fontWeight: 800,
+                                }}
+                            >
+                                {option.label}
+                                <span style={{
+                                    minWidth: '20px',
+                                    height: '20px',
+                                    borderRadius: '999px',
+                                    background: active ? 'rgba(176,138,67,0.18)' : 'rgba(148,163,184,0.14)',
+                                    color: active ? 'var(--gold)' : 'var(--text-muted)',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    padding: '0 6px',
+                                    fontSize: '0.68rem',
+                                    lineHeight: 1,
+                                }}>
+                                    {Number(option.count || 0).toLocaleString('pt-BR')}
+                                </span>
+                            </button>
+                        )
+                    })}
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '10px' }}>
+                <div style={{
+                    padding: '10px 14px',
+                    borderBottom: '1px solid var(--border)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    flexWrap: 'wrap',
+                }}>
+                    <label style={{
+                        flex: '1 1 260px',
+                        minHeight: '38px',
+                        borderRadius: '8px',
+                        border: '1px solid var(--border)',
+                        background: 'rgba(255,255,255,0.04)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '0 10px',
+                        color: 'var(--text-muted)',
+                    }}>
+                        <Search size={15} />
+                        <input
+                            value={searchTerm}
+                            onChange={event => setSearchTerm(event.target.value)}
+                            placeholder="Pesquisar campanha, template, numero ou status"
+                            style={{
+                                border: 0,
+                                outline: 'none',
+                                background: 'transparent',
+                                color: 'var(--text-primary)',
+                                width: '100%',
+                                fontSize: '0.82rem',
+                            }}
+                        />
+                    </label>
+                    <select
+                        value={statusFilter}
+                        onChange={e => onStatusFilterChange(e.target.value)}
+                        style={{
+                            minHeight: '38px',
+                            padding: '8px 10px',
+                            borderRadius: '8px',
+                            border: '1px solid var(--border)',
+                            background: 'rgba(255,255,255,0.06)',
+                            color: 'var(--text-primary)',
+                            fontSize: '0.82rem',
+                        }}
+                    >
+                        <option value="">Todos os status</option>
+                        <option value="scheduled">Agendadas</option>
+                        <option value="queued">Na fila</option>
+                        <option value="sending">Enviando</option>
+                        <option value="paused">Pausadas</option>
+                        <option value="completed">Concluidas</option>
+                        <option value="failed">Falhas</option>
+                        <option value="cancelled">Canceladas</option>
+                    </select>
+                    <button
+                        type="button"
+                        onClick={onRefresh}
+                        disabled={loading}
+                        style={{
+                            minHeight: '38px',
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            border: '1px solid var(--border)',
+                            background: 'rgba(255,255,255,0.04)',
+                            color: 'var(--text-secondary)',
+                            cursor: loading ? 'not-allowed' : 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            fontWeight: 800,
+                        }}
+                    >
+                        <RefreshCw size={14} className={loading ? 'spin' : ''} />
+                        Atualizar
+                    </button>
+                </div>
+
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(6, minmax(118px, 1fr))',
+                    borderBottom: '1px solid var(--border)',
+                    overflowX: 'auto',
+                }}>
                     {metricItems.map(item => {
                         const Icon = item.icon
                         return (
                             <div key={item.label} style={{
+                                minWidth: '118px',
                                 padding: '12px',
-                                borderRadius: '10px',
-                                border: '1px solid var(--border)',
-                                background: 'rgba(255,255,255,0.03)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '10px',
+                                borderRight: '1px solid var(--border)',
+                                background: 'rgba(255,255,255,0.02)',
+                                display: 'grid',
+                                gap: '6px',
                             }}>
-                                <Icon size={17} style={{ color: item.color }} />
-                                <div>
-                                    <div style={{ fontSize: '1rem', color: 'var(--text-primary)', fontWeight: 800 }}>
-                                        {Number(item.value || 0).toLocaleString('pt-BR')}
-                                    </div>
-                                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{item.label}</div>
-                                </div>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', fontSize: '0.66rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                                    <Icon size={13} style={{ color: item.color }} />
+                                    {item.label}
+                                </span>
+                                <strong style={{ color: 'var(--text-primary)', fontSize: '0.92rem' }}>
+                                    {Number(item.value || 0).toLocaleString('pt-BR')}
+                                </strong>
                             </div>
                         )
                     })}
                 </div>
 
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(4, minmax(120px, 1fr))',
+                    borderBottom: '1px solid var(--border)',
+                    overflowX: 'auto',
+                }}>
+                    {rateItems.map(item => (
+                        <div key={item.label} style={{
+                            minWidth: '120px',
+                            padding: '10px 12px',
+                            borderRight: '1px solid var(--border)',
+                            display: 'grid',
+                            gap: '3px',
+                        }}>
+                            <strong style={{ color: item.color, fontSize: '0.9rem' }}>{item.value}</strong>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>{item.label}</span>
+                        </div>
+                    ))}
+                </div>
+
+                <div style={{
+                    padding: '10px 14px',
+                    borderBottom: '1px solid var(--border)',
+                    display: 'flex',
+                    gap: '8px',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                }}>
+                    <strong style={{ color: 'var(--text-primary)', fontSize: '0.78rem', marginRight: '4px' }}>Numeros oficiais</strong>
+                    {senders.length === 0 ? (
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.76rem' }}>
+                            Nenhum numero Meta sincronizado.
+                        </span>
+                    ) : (
+                        senders.map(sender => (
+                            <span key={sender.id} style={{
+                                padding: '6px 9px',
+                                borderRadius: '999px',
+                                border: '1px solid var(--border)',
+                                color: sender.local_status === 'active' ? '#22c55e' : 'var(--text-muted)',
+                                background: sender.local_status === 'active' ? 'rgba(34,197,94,0.08)' : 'rgba(255,255,255,0.03)',
+                                fontSize: '0.72rem',
+                                fontWeight: 800,
+                            }}>
+                                {sender.display_name || sender.phone_number} | {sender.daily_sent_count}/{sender.daily_limit}
+                            </span>
+                        ))
+                    )}
+                </div>
+
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'minmax(0, 1fr) minmax(360px, 430px)',
+                    minHeight: '470px',
+                }}>
+                    <div style={{
+                        minWidth: 0,
+                        borderRight: '1px solid var(--border)',
+                        overflowX: 'auto',
+                    }}>
+                        <div style={{
+                            minWidth: '880px',
+                            display: 'grid',
+                            gridTemplateColumns: '92px minmax(250px, 1.35fr) 125px 105px 105px 105px 105px 118px',
+                            gap: '0',
+                            padding: '9px 12px',
+                            borderBottom: '1px solid var(--border)',
+                            color: 'var(--text-muted)',
+                            fontSize: '0.66rem',
+                            fontWeight: 900,
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.04em',
+                            background: 'rgba(255,255,255,0.025)',
+                        }}>
+                            <span>Status</span>
+                            <span>Campanha</span>
+                            <span>Destinatarios</span>
+                            <span>Aceitas</span>
+                            <span>Entregues</span>
+                            <span>Lidas</span>
+                            <span>Falhas</span>
+                            <span>Acoes</span>
+                        </div>
+
+                        {loading ? (
+                            <div style={{ minWidth: '880px', padding: '34px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                                <Loader2 size={18} className="spin" /> Carregando campanhas Meta...
+                            </div>
+                        ) : campaigns.length === 0 ? (
+                            <div style={{ minWidth: '880px', textAlign: 'center', padding: '46px', color: 'var(--text-muted)' }}>
+                                <Send size={32} style={{ opacity: 0.3, marginBottom: '8px' }} />
+                                <p style={{ margin: 0 }}>Nenhuma campanha oficial de WhatsApp encontrada.</p>
+                            </div>
+                        ) : filteredCampaigns.length === 0 ? (
+                            <div style={{ minWidth: '880px', textAlign: 'center', padding: '38px', color: 'var(--text-muted)' }}>
+                                Nenhuma campanha encontrada para a busca atual.
+                            </div>
+                        ) : (
+                            <div style={{ minWidth: '880px' }}>
+                                {filteredCampaigns.map(campaign => (
+                                    <MetaCampaignTableRow
+                                        key={campaign.id}
+                                        campaign={campaign}
+                                        sender={senders.find(item => item.id === campaign.default_sender_id)}
+                                        selected={campaign.id === selectedCampaignId}
+                                        loadingDetail={loadingDetailCampaignId === campaign.id}
+                                        retrying={retryingCampaignId === campaign.id}
+                                        onSelect={selectCampaign}
+                                        onManage={onManage}
+                                        onRetryFailed={onRetryFailed}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    <MetaSelectedCampaignAside
+                        campaign={selectedCampaign}
+                        sender={selectedSender}
+                        detail={selectedDetail}
+                        loadingDetail={Boolean(selectedCampaign && loadingDetailCampaignId === selectedCampaign.id)}
+                        retrying={Boolean(selectedCampaign && retryingCampaignId === selectedCampaign.id)}
+                        onSelect={selectCampaign}
+                        onManage={onManage}
+                        onRetryFailed={onRetryFailed}
+                    />
+                </div>
+            </div>
+
+            <div style={{
+                borderRadius: '12px',
+                background: 'var(--bg-secondary)',
+                border: '1px solid var(--border)',
+                padding: '14px',
+            }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', marginBottom: '12px', flexWrap: 'wrap' }}>
+                    <div>
+                        <strong style={{ color: 'var(--text-primary)', fontSize: '0.92rem' }}>Relatorios e diagnosticos</strong>
+                        <p style={{ margin: '4px 0 0', color: 'var(--text-muted)', fontSize: '0.74rem' }}>
+                            Indicadores de saude, funil e principais erros das campanhas oficiais.
+                        </p>
+                    </div>
+                </div>
                 <MetaCampaignDashboard
                     summary={summary}
                     analytics={analytics}
                     campaigns={campaigns}
                 />
             </div>
+        </div>
+    )
+}
 
-            <div style={{
-                padding: '14px 18px',
-                borderRadius: '12px',
-                background: 'var(--bg-secondary)',
-                border: '1px solid var(--border)',
+function MetaCampaignTableRow({
+    campaign,
+    sender,
+    selected,
+    loadingDetail,
+    retrying,
+    onSelect,
+    onManage,
+    onRetryFailed,
+}: {
+    campaign: MetaCampaign
+    sender?: MetaSender
+    selected: boolean
+    loadingDetail: boolean
+    retrying: boolean
+    onSelect: (campaignId: string) => void
+    onManage: (campaignId: string, action: 'pause' | 'resume' | 'cancel') => void
+    onRetryFailed: (campaignId: string, failedCount: number) => void
+}) {
+    const progress = metaProgress(campaign)
+    const statusColor = metaStatusColor(campaign.status)
+    const finalStatus = ['completed', 'cancelled', 'failed'].includes(campaign.status)
+    const canPause = ['scheduled', 'queued', 'sending', 'preparing'].includes(campaign.status)
+    const canResume = campaign.status === 'paused'
+    const canRetryFailed = campaign.total_failed > 0 && !['queued', 'sending', 'scheduled', 'preparing', 'cancelled'].includes(campaign.status)
+
+    return (
+        <div
+            role="button"
+            tabIndex={0}
+            onClick={() => onSelect(campaign.id)}
+            onKeyDown={event => {
+                if (!['Enter', ' '].includes(event.key)) return
+                event.preventDefault()
+                onSelect(campaign.id)
+            }}
+            style={{
                 display: 'grid',
-                gap: '8px',
+                gridTemplateColumns: '92px minmax(250px, 1.35fr) 125px 105px 105px 105px 105px 118px',
+                gap: '0',
+                alignItems: 'center',
+                padding: '10px 12px',
+                borderBottom: '1px solid var(--border)',
+                background: selected ? 'rgba(176,138,67,0.08)' : 'transparent',
+                cursor: 'pointer',
+                outline: 'none',
+            }}
+        >
+            <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '7px',
+                color: statusColor,
+                fontSize: '0.72rem',
+                fontWeight: 900,
             }}>
-                <strong style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>Numeros oficiais sincronizados</strong>
-                {senders.length === 0 ? (
-                    <span style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>
-                        Nenhum numero Meta sincronizado ainda. Use Testar Conexao na Sala de Manutencao para sincronizar.
+                <span style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    background: statusColor,
+                    boxShadow: campaign.status === 'sending' ? '0 0 8px rgba(245,158,11,0.5)' : 'none',
+                }} />
+                {metaStatusLabel(campaign.status)}
+            </span>
+
+            <div style={{ minWidth: 0, display: 'grid', gap: '4px' }}>
+                <strong style={{
+                    color: 'var(--text-primary)',
+                    fontSize: '0.78rem',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                }}>
+                    {campaign.name || 'Campanha Meta'}
+                </strong>
+                <span style={{
+                    color: 'var(--text-muted)',
+                    fontSize: '0.7rem',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                }}>
+                    {campaign.template_name || '-'} ({campaign.template_language || 'pt_BR'})
+                    {sender ? ` | ${sender.display_name || sender.phone_number}` : ''}
+                </span>
+                <div style={{ height: '5px', borderRadius: '999px', background: 'rgba(148,163,184,0.16)', overflow: 'hidden' }}>
+                    <div style={{
+                        width: `${progress}%`,
+                        height: '100%',
+                        borderRadius: '999px',
+                        background: campaign.total_failed > 0 ? '#ef4444' : '#22c55e',
+                    }} />
+                </div>
+            </div>
+
+            <MetaTableNumber value={campaign.total_recipients} sub={`${progress}%`} />
+            <MetaTableNumber value={campaign.total_sent} />
+            <MetaTableNumber value={campaign.total_delivered} />
+            <MetaTableNumber value={campaign.total_read} />
+            <MetaTableNumber value={campaign.total_failed} color={campaign.total_failed > 0 ? '#ef4444' : 'var(--text-primary)'} />
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <button
+                    type="button"
+                    onClick={event => {
+                        event.stopPropagation()
+                        onSelect(campaign.id)
+                    }}
+                    title="Abrir detalhes"
+                    style={{ padding: '7px', borderRadius: '7px', border: '1px solid var(--border)', background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                >
+                    {loadingDetail ? <Loader2 size={14} className="spin" /> : <Search size={14} />}
+                </button>
+                {canRetryFailed && (
+                    <button
+                        type="button"
+                        onClick={event => {
+                            event.stopPropagation()
+                            onRetryFailed(campaign.id, campaign.total_failed)
+                        }}
+                        disabled={retrying}
+                        title="Reenviar falhas"
+                        style={{ padding: '7px', borderRadius: '7px', border: '1px solid rgba(245,158,11,0.22)', background: 'rgba(245,158,11,0.1)', color: '#f59e0b', cursor: retrying ? 'not-allowed' : 'pointer', opacity: retrying ? 0.7 : 1 }}
+                    >
+                        {retrying ? <Loader2 size={14} className="spin" /> : <RefreshCw size={14} />}
+                    </button>
+                )}
+                {canPause && (
+                    <button
+                        type="button"
+                        onClick={event => {
+                            event.stopPropagation()
+                            onManage(campaign.id, 'pause')
+                        }}
+                        title="Pausar"
+                        style={{ padding: '7px', borderRadius: '7px', border: '1px solid rgba(245,158,11,0.2)', background: 'rgba(245,158,11,0.1)', color: '#f59e0b', cursor: 'pointer' }}
+                    >
+                        <Pause size={14} />
+                    </button>
+                )}
+                {canResume && (
+                    <button
+                        type="button"
+                        onClick={event => {
+                            event.stopPropagation()
+                            onManage(campaign.id, 'resume')
+                        }}
+                        title="Retomar"
+                        style={{ padding: '7px', borderRadius: '7px', border: '1px solid rgba(34,197,94,0.2)', background: 'rgba(34,197,94,0.1)', color: '#22c55e', cursor: 'pointer' }}
+                    >
+                        <Play size={14} />
+                    </button>
+                )}
+                {!finalStatus && (
+                    <button
+                        type="button"
+                        onClick={event => {
+                            event.stopPropagation()
+                            onManage(campaign.id, 'cancel')
+                        }}
+                        title="Cancelar"
+                        style={{ padding: '7px', borderRadius: '7px', border: '1px solid rgba(239,68,68,0.16)', background: 'rgba(239,68,68,0.08)', color: '#ef4444', cursor: 'pointer' }}
+                    >
+                        <Trash2 size={14} />
+                    </button>
+                )}
+            </div>
+        </div>
+    )
+}
+
+function MetaTableNumber({
+    value,
+    sub,
+    color = 'var(--text-primary)',
+}: {
+    value: number
+    sub?: string
+    color?: string
+}) {
+    return (
+        <span style={{ display: 'grid', gap: '2px', color, fontSize: '0.78rem', fontWeight: 800 }}>
+            {Number(value || 0).toLocaleString('pt-BR')}
+            {sub && <small style={{ color: 'var(--text-muted)', fontSize: '0.66rem', fontWeight: 600 }}>{sub}</small>}
+        </span>
+    )
+}
+
+function MetaSelectedCampaignAside({
+    campaign,
+    sender,
+    detail,
+    loadingDetail,
+    retrying,
+    onSelect,
+    onManage,
+    onRetryFailed,
+}: {
+    campaign: MetaCampaign | null
+    sender?: MetaSender
+    detail?: MetaCampaignDetail
+    loadingDetail: boolean
+    retrying: boolean
+    onSelect: (campaignId: string) => void
+    onManage: (campaignId: string, action: 'pause' | 'resume' | 'cancel') => void
+    onRetryFailed: (campaignId: string, failedCount: number) => void
+}) {
+    if (!campaign) {
+        return (
+            <aside style={{ padding: '22px', color: 'var(--text-muted)', display: 'grid', placeItems: 'center', textAlign: 'center' }}>
+                <div>
+                    <MessageSquare size={28} style={{ opacity: 0.35, marginBottom: '8px' }} />
+                    <p style={{ margin: 0, fontSize: '0.8rem' }}>Selecione uma campanha para ver os detalhes.</p>
+                </div>
+            </aside>
+        )
+    }
+
+    const detailCampaign = detail?.campaign || campaign
+    const recipients = detail?.recipients || []
+    const events = detail?.events || []
+    const errors = campaignErrorGroups(recipients, events)
+    const acceptedTotal = detailCampaign.total_sent || recipients.filter(item => ['sent', 'delivered', 'read'].includes(item.status)).length
+    const deliveredTotal = detailCampaign.total_delivered || recipients.filter(item => ['delivered', 'read'].includes(item.status)).length
+    const readTotal = detailCampaign.total_read || recipients.filter(item => item.status === 'read').length
+    const failedTotal = detailCampaign.total_failed || recipients.filter(item => item.status === 'failed').length
+    const progress = metaProgress(detailCampaign)
+    const statusColor = metaStatusColor(detailCampaign.status)
+    const finalStatus = ['completed', 'cancelled', 'failed'].includes(detailCampaign.status)
+    const canPause = ['scheduled', 'queued', 'sending', 'preparing'].includes(detailCampaign.status)
+    const canResume = detailCampaign.status === 'paused'
+    const canRetryFailed = failedTotal > 0 && !['queued', 'sending', 'scheduled', 'preparing', 'cancelled'].includes(detailCampaign.status)
+
+    return (
+        <aside style={{
+            minWidth: 0,
+            background: 'rgba(255,255,255,0.02)',
+            display: 'grid',
+            gridTemplateRows: 'auto 1fr',
+        }}>
+            <div style={{ padding: '18px 18px 14px', borderBottom: '1px solid var(--border)', display: 'grid', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                    <span style={{
+                        width: '42px',
+                        height: '42px',
+                        borderRadius: '50%',
+                        background: 'rgba(176,138,67,0.14)',
+                        color: 'var(--gold)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 900,
+                        flexShrink: 0,
+                    }}>
+                        {(campaign.name || 'M').slice(0, 1).toUpperCase()}
                     </span>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                        <strong style={{ color: 'var(--text-primary)', fontSize: '0.92rem', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {campaign.name || 'Campanha Meta'}
+                        </strong>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem', display: 'block', marginTop: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {campaign.template_name || '-'} | {sender?.display_name || sender?.phone_number || 'Pool automatico'}
+                        </span>
+                    </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <span style={{
+                        color: statusColor,
+                        background: 'rgba(255,255,255,0.04)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '999px',
+                        padding: '4px 9px',
+                        fontSize: '0.7rem',
+                        fontWeight: 900,
+                    }}>
+                        {metaStatusLabel(detailCampaign.status)}
+                    </span>
+                    <button
+                        type="button"
+                        onClick={() => onSelect(campaign.id)}
+                        disabled={loadingDetail}
+                        style={{
+                            padding: '7px 10px',
+                            borderRadius: '8px',
+                            border: '1px solid var(--border)',
+                            background: 'rgba(255,255,255,0.04)',
+                            color: 'var(--text-secondary)',
+                            cursor: loadingDetail ? 'not-allowed' : 'pointer',
+                            display: 'inline-flex',
+                            gap: '6px',
+                            alignItems: 'center',
+                            fontSize: '0.72rem',
+                            fontWeight: 800,
+                        }}
+                    >
+                        {loadingDetail ? <Loader2 size={13} className="spin" /> : <Search size={13} />}
+                        Detalhes
+                    </button>
+                    {canRetryFailed && (
+                        <button
+                            type="button"
+                            onClick={() => onRetryFailed(campaign.id, failedTotal)}
+                            disabled={retrying}
+                            style={{
+                                padding: '7px 10px',
+                                borderRadius: '8px',
+                                border: '1px solid rgba(245,158,11,0.22)',
+                                background: 'rgba(245,158,11,0.1)',
+                                color: '#f59e0b',
+                                cursor: retrying ? 'not-allowed' : 'pointer',
+                                display: 'inline-flex',
+                                gap: '6px',
+                                alignItems: 'center',
+                                fontSize: '0.72rem',
+                                fontWeight: 800,
+                            }}
+                        >
+                            {retrying ? <Loader2 size={13} className="spin" /> : <RefreshCw size={13} />}
+                            Reenviar
+                        </button>
+                    )}
+                    {canPause && (
+                        <button type="button" onClick={() => onManage(campaign.id, 'pause')} title="Pausar" style={{ padding: '7px', borderRadius: '8px', border: '1px solid rgba(245,158,11,0.2)', background: 'rgba(245,158,11,0.1)', color: '#f59e0b', cursor: 'pointer' }}>
+                            <Pause size={14} />
+                        </button>
+                    )}
+                    {canResume && (
+                        <button type="button" onClick={() => onManage(campaign.id, 'resume')} title="Retomar" style={{ padding: '7px', borderRadius: '8px', border: '1px solid rgba(34,197,94,0.2)', background: 'rgba(34,197,94,0.1)', color: '#22c55e', cursor: 'pointer' }}>
+                            <Play size={14} />
+                        </button>
+                    )}
+                    {!finalStatus && (
+                        <button type="button" onClick={() => onManage(campaign.id, 'cancel')} title="Cancelar" style={{ padding: '7px', borderRadius: '8px', border: '1px solid rgba(239,68,68,0.16)', background: 'rgba(239,68,68,0.08)', color: '#ef4444', cursor: 'pointer' }}>
+                            <Trash2 size={14} />
+                        </button>
+                    )}
+                </div>
+
+                <div style={{ display: 'grid', gap: '6px' }}>
+                    <div style={{ height: '7px', borderRadius: '999px', background: 'rgba(148,163,184,0.16)', overflow: 'hidden' }}>
+                        <div style={{
+                            width: `${progress}%`,
+                            height: '100%',
+                            borderRadius: '999px',
+                            background: failedTotal > 0 ? '#ef4444' : '#22c55e',
+                        }} />
+                    </div>
+                    <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>
+                        {progress}% | Total {detailCampaign.total_recipients || 0} | Falhas {failedTotal}
+                    </span>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '8px' }}>
+                    {[
+                        { label: 'Aceitas', value: acceptedTotal, color: '#38bdf8' },
+                        { label: 'Entregues', value: deliveredTotal, color: '#22c55e' },
+                        { label: 'Lidas', value: readTotal, color: '#0ea5e9' },
+                        { label: 'Falhas', value: failedTotal, color: failedTotal > 0 ? '#ef4444' : 'var(--text-primary)' },
+                    ].map(item => (
+                        <div key={item.label} style={{ border: '1px solid var(--border)', borderRadius: '8px', padding: '9px', display: 'grid', gap: '2px', background: 'rgba(255,255,255,0.025)' }}>
+                            <strong style={{ color: item.color, fontSize: '0.88rem' }}>{Number(item.value || 0).toLocaleString('pt-BR')}</strong>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.68rem' }}>{item.label}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <div style={{ minHeight: 0, overflowY: 'auto', padding: '14px' }}>
+                {loadingDetail && !detail ? (
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '7px' }}>
+                        <Loader2 size={14} className="spin" /> Carregando detalhes...
+                    </div>
+                ) : detail ? (
+                    <MetaCampaignDetailPanel
+                        campaign={detailCampaign}
+                        recipients={recipients}
+                        events={events}
+                        errors={errors}
+                        acceptedTotal={acceptedTotal}
+                        deliveredTotal={deliveredTotal}
+                        readTotal={readTotal}
+                        failedTotal={failedTotal}
+                        retrying={retrying}
+                        onRetryFailed={onRetryFailed}
+                    />
                 ) : (
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                        {senders.map(sender => (
-                            <span key={sender.id} style={{
-                                padding: '7px 9px',
-                                borderRadius: '999px',
-                                border: '1px solid var(--border)',
-                                color: sender.local_status === 'active' ? '#22c55e' : 'var(--text-muted)',
-                                background: sender.local_status === 'active' ? 'rgba(34,197,94,0.08)' : 'rgba(255,255,255,0.03)',
-                                fontSize: '0.74rem',
-                                fontWeight: 700,
-                            }}>
-                                {sender.display_name || sender.phone_number} | {sender.daily_sent_count}/{sender.daily_limit}
-                            </span>
-                        ))}
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.76rem', lineHeight: 1.45 }}>
+                        Clique em Detalhes para carregar destinatarios, eventos da Meta e diagnostico de falhas desta campanha.
                     </div>
                 )}
             </div>
-
-            {loading ? (
-                <div style={{ textAlign: 'center', padding: '34px', color: 'var(--text-muted)' }}>
-                    <Loader2 size={20} className="spin" /> Carregando campanhas Meta...
-                </div>
-            ) : campaigns.length === 0 ? (
-                <div style={{
-                    textAlign: 'center',
-                    padding: '34px',
-                    borderRadius: '12px',
-                    background: 'var(--bg-secondary)',
-                    border: '1px solid var(--border)',
-                    color: 'var(--text-muted)',
-                }}>
-                    <Send size={32} style={{ opacity: 0.3, marginBottom: '8px' }} />
-                    <p style={{ margin: 0 }}>Nenhuma campanha oficial de WhatsApp encontrada.</p>
-                </div>
-            ) : (
-                <div style={{ display: 'grid', gap: '10px' }}>
-                    {campaigns.map(campaign => (
-                        <MetaCampaignCard
-                            key={campaign.id}
-                            campaign={campaign}
-                            sender={senders.find(item => item.id === campaign.default_sender_id)}
-                            detail={campaignDetails[campaign.id]}
-                            expanded={expandedCampaignId === campaign.id}
-                            loadingDetail={loadingDetailCampaignId === campaign.id}
-                            onToggleDetail={onToggleDetail}
-                            onManage={onManage}
-                            retrying={retryingCampaignId === campaign.id}
-                            onRetryFailed={onRetryFailed}
-                        />
-                    ))}
-                </div>
-            )}
-        </div>
+        </aside>
     )
 }
 
@@ -2924,224 +3523,6 @@ function MetaMiniRanking({
                         <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>{row.detail}</span>
                     </div>
                 ))
-            )}
-        </div>
-    )
-}
-
-function MetaCampaignCard({
-    campaign,
-    sender,
-    detail,
-    expanded,
-    loadingDetail,
-    onToggleDetail,
-    onManage,
-    retrying,
-    onRetryFailed,
-}: {
-    campaign: MetaCampaign
-    sender?: MetaSender
-    detail?: MetaCampaignDetail
-    expanded: boolean
-    loadingDetail: boolean
-    onToggleDetail: (campaignId: string) => void
-    onManage: (campaignId: string, action: 'pause' | 'resume' | 'cancel') => void
-    retrying: boolean
-    onRetryFailed: (campaignId: string, failedCount: number) => void
-}) {
-    const progress = metaProgress(campaign)
-    const statusColor = metaStatusColor(campaign.status)
-    const finalStatus = ['completed', 'cancelled', 'failed'].includes(campaign.status)
-    const canPause = ['scheduled', 'queued', 'sending', 'preparing'].includes(campaign.status)
-    const canResume = campaign.status === 'paused'
-    const detailCampaign = detail?.campaign || campaign
-    const detailRecipients = detail?.recipients || []
-    const detailEvents = detail?.events || []
-    const detailErrors = campaignErrorGroups(detailRecipients, detailEvents)
-    const acceptedTotal = detailCampaign.total_sent || detailRecipients.filter(item => ['sent', 'delivered', 'read'].includes(item.status)).length
-    const deliveredTotal = detailCampaign.total_delivered || detailRecipients.filter(item => ['delivered', 'read'].includes(item.status)).length
-    const readTotal = detailCampaign.total_read || detailRecipients.filter(item => item.status === 'read').length
-    const failedTotal = detailCampaign.total_failed || detailRecipients.filter(item => item.status === 'failed').length
-    const canRetryFailed = failedTotal > 0 && !['queued', 'sending', 'scheduled', 'preparing', 'cancelled'].includes(detailCampaign.status || campaign.status)
-    const shouldSkipCardToggle = (target: EventTarget | null) => (
-        target instanceof HTMLElement
-        && Boolean(target.closest('button, a, input, select, textarea'))
-    )
-
-    return (
-        <div
-            role="button"
-            tabIndex={0}
-            aria-expanded={expanded}
-            onClick={event => {
-                if (shouldSkipCardToggle(event.target)) return
-                onToggleDetail(campaign.id)
-            }}
-            onKeyDown={event => {
-                if (!['Enter', ' '].includes(event.key)) return
-                if (shouldSkipCardToggle(event.target)) return
-                event.preventDefault()
-                onToggleDetail(campaign.id)
-            }}
-            style={{
-                padding: '16px 18px',
-                borderRadius: '12px',
-                background: 'var(--bg-secondary)',
-                border: '1px solid var(--border)',
-                display: 'grid',
-                gap: '12px',
-                cursor: 'pointer',
-                outline: 'none',
-            }}
-        >
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-                <div style={{ minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                        <span style={{
-                            width: '9px',
-                            height: '9px',
-                            borderRadius: '50%',
-                            background: statusColor,
-                            boxShadow: campaign.status === 'sending' ? '0 0 8px rgba(245,158,11,0.5)' : 'none',
-                        }} />
-                        <strong style={{ color: 'var(--text-primary)', fontSize: '0.92rem' }}>
-                            {campaign.name || 'Campanha Meta'}
-                        </strong>
-                        <span style={{
-                            color: statusColor,
-                            background: 'rgba(255,255,255,0.04)',
-                            border: '1px solid var(--border)',
-                            borderRadius: '999px',
-                            padding: '3px 8px',
-                            fontSize: '0.68rem',
-                            fontWeight: 900,
-                        }}>
-                            {metaStatusLabel(campaign.status)}
-                        </span>
-                    </div>
-                    <div style={{ marginTop: '5px', color: 'var(--text-muted)', fontSize: '0.76rem', lineHeight: 1.45 }}>
-                        Template: {campaign.template_name || '-'} ({campaign.template_language || 'pt_BR'})
-                        {' | '}
-                        Tipo: {campaign.campaign_type}
-                        {sender ? ` | Numero: ${sender.display_name || sender.phone_number}` : ''}
-                    </div>
-                    <div style={{ marginTop: '3px', color: 'var(--text-muted)', fontSize: '0.74rem', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                        <Clock size={13} />
-                        Criada em {formatMetaDate(campaign.created_at)}
-                        {campaign.scheduled_for ? ` | agendada para ${formatMetaDate(campaign.scheduled_for)}` : ''}
-                    </div>
-                </div>
-
-                <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
-                    <button
-                        type="button"
-                        onClick={() => onToggleDetail(campaign.id)}
-                        title="Detalhes"
-                        style={{ padding: '7px', borderRadius: '7px', background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border)', color: 'var(--text-secondary)', cursor: 'pointer' }}
-                    >
-                        {loadingDetail ? <Loader2 size={14} className="spin" /> : expanded ? <ChevronUp size={14} /> : <Search size={14} />}
-                    </button>
-                    {canRetryFailed && (
-                        <button
-                            type="button"
-                            onClick={() => onRetryFailed(campaign.id, failedTotal)}
-                            disabled={retrying}
-                            title="Reenviar falhas"
-                            style={{
-                                padding: '7px',
-                                borderRadius: '7px',
-                                background: 'rgba(245,158,11,0.1)',
-                                border: '1px solid rgba(245,158,11,0.22)',
-                                color: '#f59e0b',
-                                cursor: retrying ? 'not-allowed' : 'pointer',
-                                opacity: retrying ? 0.7 : 1,
-                            }}
-                        >
-                            {retrying ? <Loader2 size={14} className="spin" /> : <RefreshCw size={14} />}
-                        </button>
-                    )}
-                    {canPause && (
-                        <button
-                            type="button"
-                            onClick={() => onManage(campaign.id, 'pause')}
-                            title="Pausar"
-                            style={{ padding: '7px', borderRadius: '7px', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', color: '#f59e0b', cursor: 'pointer' }}
-                        >
-                            <Pause size={14} />
-                        </button>
-                    )}
-                    {canResume && (
-                        <button
-                            type="button"
-                            onClick={() => onManage(campaign.id, 'resume')}
-                            title="Retomar"
-                            style={{ padding: '7px', borderRadius: '7px', background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)', color: '#22c55e', cursor: 'pointer' }}
-                        >
-                            <Play size={14} />
-                        </button>
-                    )}
-                    {!finalStatus && (
-                        <button
-                            type="button"
-                            onClick={() => onManage(campaign.id, 'cancel')}
-                            title="Cancelar"
-                            style={{ padding: '7px', borderRadius: '7px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', color: '#ef4444', cursor: 'pointer' }}
-                        >
-                            <Trash2 size={14} />
-                        </button>
-                    )}
-                </div>
-            </div>
-
-            <div style={{ display: 'grid', gap: '7px' }}>
-                <div style={{ height: '7px', borderRadius: '999px', background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
-                    <div style={{
-                        width: `${progress}%`,
-                        height: '100%',
-                        background: campaign.status === 'completed' ? '#22c55e' : 'var(--gold)',
-                        borderRadius: '999px',
-                        transition: 'width 0.3s',
-                    }} />
-                </div>
-                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', color: 'var(--text-muted)', fontSize: '0.74rem' }}>
-                    <span>{progress}%</span>
-                    <span>Total {campaign.total_recipients || 0}</span>
-                    <span>Fila {campaign.total_queued || 0}</span>
-                    <span>Aceitas Meta {campaign.total_sent || 0}</span>
-                    <span>Entregues {campaign.total_delivered || 0}</span>
-                    <span>Lidas {campaign.total_read || 0}</span>
-                    <span>Falhas {campaign.total_failed || 0}</span>
-                    <span>Bloqueadas/opt-out {campaign.total_skipped || 0}</span>
-                </div>
-            </div>
-
-            {expanded && (
-                <div style={{
-                    display: 'grid',
-                    gap: '12px',
-                    paddingTop: '12px',
-                    borderTop: '1px solid var(--border)',
-                }}>
-                    {loadingDetail && !detail ? (
-                        <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '7px' }}>
-                            <Loader2 size={14} className="spin" /> Carregando detalhes...
-                        </div>
-                    ) : (
-                        <MetaCampaignDetailPanel
-                            campaign={detailCampaign}
-                            recipients={detailRecipients}
-                            events={detailEvents}
-                            errors={detailErrors}
-                            acceptedTotal={acceptedTotal}
-                            deliveredTotal={deliveredTotal}
-                            readTotal={readTotal}
-                            failedTotal={failedTotal}
-                            retrying={retrying}
-                            onRetryFailed={onRetryFailed}
-                        />
-                    )}
-                </div>
             )}
         </div>
     )
