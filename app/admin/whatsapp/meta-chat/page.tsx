@@ -2,21 +2,27 @@
 
 import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
 import {
+  Archive,
   Check,
   CheckCheck,
+  ChevronDown,
   Clock3,
-  Filter,
+  CircleDot,
   Inbox,
+  ListPlus,
   Loader2,
+  Mic,
   MessageCircle,
   MessageSquareText,
   MoreVertical,
-  Paperclip,
   Phone,
+  Plus,
   RefreshCw,
   Search,
   Send,
   Smile,
+  Settings,
+  UsersRound,
   UserRound,
   Video,
   XCircle,
@@ -110,7 +116,7 @@ type ChatPayload = {
 }
 
 const statusOptions: Array<{ value: 'all' | ConversationStatus; label: string }> = [
-  { value: 'all', label: 'Todas' },
+  { value: 'all', label: 'Tudo' },
   { value: 'open', label: 'Abertas' },
   { value: 'pending', label: 'Pendentes' },
   { value: 'closed', label: 'Fechadas' },
@@ -185,6 +191,13 @@ function initials(value?: string | null) {
   return parts.slice(0, 2).map(part => part[0]?.toUpperCase()).join('')
 }
 
+function cleanAvatarUrl(value?: string | null) {
+  const url = String(value || '').trim()
+  if (!url || url === 'null' || url === 'undefined') return null
+  if (url.startsWith('https://') || url.startsWith('http://') || url.startsWith('data:image/')) return url
+  return null
+}
+
 function statusIcon(status: string) {
   const selected = String(status || '').toLowerCase()
   if (selected === 'read') return <CheckCheck size={15} className="read" />
@@ -195,10 +208,19 @@ function statusIcon(status: string) {
 }
 
 function LeadAvatar({ name, src, size = 'md' }: { name?: string | null; src?: string | null; size?: 'sm' | 'md' | 'lg' }) {
+  const avatarUrl = cleanAvatarUrl(src)
+  const [failedUrl, setFailedUrl] = useState<string | null>(null)
+  const showImage = Boolean(avatarUrl && avatarUrl !== failedUrl)
+
   return (
     <span className={`lead-avatar ${size}`}>
-      {src ? (
-        <img src={src} alt={`Foto de ${name || 'lead'}`} />
+      {showImage ? (
+        <img
+          src={avatarUrl || ''}
+          alt={`Foto de ${name || 'lead'}`}
+          referrerPolicy="no-referrer"
+          onError={() => setFailedUrl(avatarUrl)}
+        />
       ) : (
         <span>{initials(name)}</span>
       )}
@@ -404,18 +426,51 @@ export default function MetaWhatsAppChatPage() {
       )}
 
       <main className="wa-shell">
+        <aside className="wa-rail" aria-label="Atalhos WhatsApp">
+          <div className="wa-rail-top">
+            <button type="button" className="rail-button active" aria-label="Conversas">
+              <MessageCircle size={22} />
+            </button>
+            <button type="button" className="rail-button" aria-label="Chamadas">
+              <Phone size={21} />
+            </button>
+            <button type="button" className="rail-button" aria-label="Atualizacoes">
+              <CircleDot size={21} />
+            </button>
+            <button type="button" className="rail-button" aria-label="Comunidades">
+              <UsersRound size={21} />
+            </button>
+            <button type="button" className="rail-button" aria-label="Arquivadas">
+              <Archive size={21} />
+            </button>
+          </div>
+          <div className="wa-rail-bottom">
+            <button type="button" className="rail-button" aria-label="Configuracoes">
+              <Settings size={21} />
+            </button>
+            <LeadAvatar name={selectedSender?.display_name || 'Conta oficial'} src={null} size="sm" />
+          </div>
+        </aside>
+
         <aside className="wa-sidebar">
           <div className="wa-sidebar-header">
             <div className="wa-account">
-              <span className="wa-account-icon"><MessageCircle size={20} /></span>
               <div>
-                <strong>Atendimento oficial</strong>
-                <span>{summary?.total || 0} conversa(s) sincronizada(s)</span>
+                <strong>WhatsApp</strong>
+                <span>{summary?.total || 0} conversa(s)</span>
               </div>
             </div>
-            <button type="button" className="icon-button" onClick={() => loadConversations(true)} aria-label="Atualizar conversas">
-              {loading ? <Loader2 size={17} className="spin" /> : <RefreshCw size={17} />}
-            </button>
+            <div className="wa-sidebar-actions">
+              <button type="button" className="icon-button" aria-label="Nova conversa">
+                <MessageSquareText size={18} />
+              </button>
+              <button type="button" className="icon-button" onClick={() => loadConversations(true)} aria-label="Atualizar conversas">
+                {loading ? <Loader2 size={17} className="spin" /> : <RefreshCw size={17} />}
+              </button>
+              <button type="button" className="icon-button" aria-label="Mais opcoes">
+                <MoreVertical size={18} />
+              </button>
+            </div>
           </div>
 
           <div className="wa-search">
@@ -423,12 +478,11 @@ export default function MetaWhatsAppChatPage() {
             <input
               value={search}
               onChange={event => setSearch(event.target.value)}
-              placeholder="Pesquisar ou comecar uma nova conversa"
+              placeholder="Pesquisar ou começar uma nova conversa"
             />
           </div>
 
           <div className="wa-tabs">
-            <Filter size={15} />
             {statusOptions.map(option => (
               <button
                 key={option.value}
@@ -501,11 +555,19 @@ export default function MetaWhatsAppChatPage() {
                   <span>{formatPhone(selected.contact_phone)} | {selectedSender?.display_name || 'Numero oficial'}</span>
                 </div>
                 <div className="wa-chat-actions">
-                  <button type="button" className="icon-button" aria-label="Chamada">
-                    <Phone size={17} />
+                  <button type="button" className="add-list-button" aria-label="Adicionar a lista">
+                    <ListPlus size={17} />
+                    <span>Adicionar à lista</span>
+                    <ChevronDown size={14} />
                   </button>
                   <button type="button" className="icon-button" aria-label="Video">
                     <Video size={17} />
+                  </button>
+                  <button type="button" className="icon-button" aria-label="Chamada">
+                    <Phone size={17} />
+                  </button>
+                  <button type="button" className="icon-button" aria-label="Pesquisar na conversa">
+                    <Search size={17} />
                   </button>
                   <button type="button" className="icon-button" aria-label="Mais opcoes">
                     <MoreVertical size={17} />
@@ -549,11 +611,11 @@ export default function MetaWhatsAppChatPage() {
               </div>
 
               <form className="wa-composer" onSubmit={sendReply}>
+                <button type="button" className="icon-button" aria-label="Adicionar">
+                  <Plus size={22} />
+                </button>
                 <button type="button" className="icon-button" aria-label="Emoji">
                   <Smile size={20} />
-                </button>
-                <button type="button" className="icon-button" aria-label="Anexo">
-                  <Paperclip size={20} />
                 </button>
                 <textarea
                   value={reply}
@@ -564,7 +626,7 @@ export default function MetaWhatsAppChatPage() {
                   rows={1}
                 />
                 <button className="send-button" type="submit" disabled={!activeWindow || sending || !reply.trim()} aria-label="Enviar mensagem">
-                  {sending ? <Loader2 size={20} className="spin" /> : <Send size={20} />}
+                  {sending ? <Loader2 size={20} className="spin" /> : reply.trim() ? <Send size={20} /> : <Mic size={20} />}
                 </button>
               </form>
             </>
@@ -1297,6 +1359,407 @@ export default function MetaWhatsAppChatPage() {
           }
 
           .wa-composer .icon-button:first-child {
+            display: none;
+          }
+        }
+
+        /* WhatsApp Web style shell */
+        .wa-page {
+          position: relative;
+          height: calc(100vh - 76px);
+          min-height: 740px;
+          padding: 0;
+          background: #f0f2f5;
+          overflow: hidden;
+        }
+
+        .wa-page-header {
+          display: none;
+        }
+
+        .feedback {
+          position: absolute;
+          top: 12px;
+          left: 50%;
+          z-index: 5;
+          width: min(720px, calc(100% - 40px));
+          margin: 0;
+          transform: translateX(-50%);
+          box-shadow: 0 8px 24px rgba(17, 24, 39, 0.12);
+        }
+
+        .wa-shell {
+          grid-template-columns: 64px minmax(330px, 420px) minmax(0, 1fr);
+          height: 100%;
+          min-height: 0;
+          border: 0;
+          border-radius: 0;
+          box-shadow: none;
+          background: #f0f2f5;
+        }
+
+        .wa-rail {
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          align-items: center;
+          min-width: 0;
+          padding: 10px 0;
+          background: #f0f2f5;
+          border-right: 1px solid #d1d7db;
+        }
+
+        .wa-rail-top,
+        .wa-rail-bottom {
+          display: grid;
+          justify-items: center;
+          gap: 10px;
+        }
+
+        .rail-button {
+          position: relative;
+          width: 42px;
+          height: 42px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border: 0;
+          border-radius: 50%;
+          background: transparent;
+          color: #54656f;
+          cursor: pointer;
+        }
+
+        .rail-button:hover,
+        .rail-button.active {
+          background: #d9dbdf;
+          color: #111b21;
+        }
+
+        .rail-button.active::before {
+          content: '';
+          position: absolute;
+          left: -11px;
+          width: 4px;
+          height: 22px;
+          border-radius: 999px;
+          background: #00a884;
+        }
+
+        .wa-sidebar {
+          grid-template-rows: auto auto auto 1fr;
+          border-right-color: #d1d7db;
+        }
+
+        .wa-sidebar-header {
+          min-height: 74px;
+          padding: 16px;
+          background: #fff;
+          border-bottom: 1px solid #edf0f2;
+        }
+
+        .wa-account strong {
+          color: #111b21;
+          font-size: 22px;
+          font-weight: 800;
+        }
+
+        .wa-sidebar-actions,
+        .wa-chat-actions {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .wa-sidebar-actions .icon-button,
+        .wa-chat-actions .icon-button,
+        .wa-composer .icon-button {
+          border: 0;
+          border-radius: 50%;
+          background: transparent;
+        }
+
+        .wa-search {
+          min-height: 44px;
+          margin: 10px 16px;
+          border-radius: 22px;
+          background: #f0f2f5;
+        }
+
+        .wa-search input {
+          font-size: 15px;
+        }
+
+        .wa-tabs {
+          padding: 0 16px 12px;
+          gap: 8px;
+        }
+
+        .wa-tabs button {
+          min-height: 34px;
+          padding: 0 14px;
+          border-color: #d1d7db;
+          border-radius: 18px;
+          color: #54656f;
+          background: #fff;
+          font-size: 14px;
+          font-weight: 700;
+        }
+
+        .wa-tabs button.active {
+          border-color: #d9fdd3;
+          background: #d9fdd3;
+          color: #008069;
+        }
+
+        .wa-summary-row {
+          display: none;
+        }
+
+        .wa-list {
+          border-top: 0;
+          background: #fff;
+        }
+
+        .wa-row {
+          grid-template-columns: 56px minmax(0, 1fr) auto;
+          gap: 10px;
+          min-height: 72px;
+          padding: 10px 16px;
+          border-bottom-color: #edf0f2;
+        }
+
+        .wa-row:hover,
+        .wa-row.active {
+          background: #f0f2f5;
+        }
+
+        .wa-row-top strong {
+          color: #111b21;
+          font-size: 16px;
+          font-weight: 500;
+        }
+
+        .wa-row-preview,
+        .wa-row-meta,
+        .wa-row-top time {
+          color: #667781;
+          font-size: 13px;
+        }
+
+        .wa-row-meta {
+          gap: 7px;
+        }
+
+        .unread-badge {
+          width: 20px;
+          height: 20px;
+          background: #25d366;
+          font-size: 12px;
+        }
+
+        .lead-avatar {
+          width: 49px;
+          height: 49px;
+          background: #dfe5e7;
+          color: #41525d;
+          font-size: 15px;
+        }
+
+        .lead-avatar.sm {
+          width: 36px;
+          height: 36px;
+          font-size: 13px;
+        }
+
+        .lead-avatar.lg {
+          width: 92px;
+          height: 92px;
+        }
+
+        .wa-conversation {
+          grid-template-rows: auto 1fr auto;
+          background: #efeae2;
+        }
+
+        .wa-chat-header {
+          min-height: 64px;
+          padding: 8px 16px;
+          background: #fff;
+          border-bottom: 1px solid #d1d7db;
+        }
+
+        .wa-chat-title strong {
+          color: #111b21;
+          font-size: 16px;
+          font-weight: 500;
+        }
+
+        .wa-chat-title span {
+          color: #667781;
+          font-size: 13px;
+        }
+
+        .add-list-button {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          min-height: 40px;
+          padding: 0 15px;
+          border: 1px solid #d1d7db;
+          border-radius: 22px;
+          background: #fff;
+          color: #111b21;
+          cursor: pointer;
+          font-weight: 700;
+        }
+
+        .wa-window,
+        .wa-status-strip,
+        .wa-info {
+          display: none;
+        }
+
+        .wa-messages {
+          padding: 22px 64px 18px;
+          background-color: #efeae2;
+          background-image:
+            radial-gradient(circle at 24px 26px, rgba(84, 101, 111, 0.08) 0 1px, transparent 2px),
+            radial-gradient(circle at 130px 92px, rgba(84, 101, 111, 0.06) 0 1px, transparent 2px),
+            repeating-linear-gradient(35deg, rgba(255, 255, 255, 0) 0 46px, rgba(84, 101, 111, 0.035) 46px 47px);
+          background-size: 180px 160px, 240px 210px, 360px 360px;
+        }
+
+        .wa-bubble {
+          max-width: min(620px, 62%);
+          margin-bottom: 8px;
+          border-radius: 7.5px;
+          padding: 6px 8px 5px;
+          color: #111b21;
+          box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+        }
+
+        .wa-bubble.inbound {
+          background: #fff;
+        }
+
+        .wa-bubble.outbound {
+          background: #d9fdd3;
+        }
+
+        .wa-bubble-text {
+          font-size: 14.2px;
+          line-height: 1.38;
+        }
+
+        .wa-bubble-meta {
+          color: #667781;
+          font-size: 11px;
+          line-height: 1;
+        }
+
+        .wa-composer {
+          grid-template-columns: auto auto minmax(0, 1fr) auto;
+          align-items: center;
+          gap: 6px;
+          min-height: 62px;
+          padding: 8px 10px;
+          background: #f0f2f5;
+          border-top: 1px solid #d1d7db;
+        }
+
+        .wa-composer textarea {
+          min-height: 44px;
+          max-height: 120px;
+          border-radius: 22px;
+          padding: 12px 17px;
+          font-size: 15px;
+        }
+
+        .send-button {
+          width: 46px;
+          height: 46px;
+          background: transparent;
+          color: #54656f;
+        }
+
+        .send-button:not(:disabled) {
+          background: #00a884;
+          color: #fff;
+        }
+
+        .empty-chat {
+          color: #667781;
+          background: #f0f2f5;
+        }
+
+        @media (max-width: 1280px) {
+          .wa-shell {
+            grid-template-columns: 64px minmax(310px, 390px) minmax(0, 1fr);
+          }
+        }
+
+        @media (max-width: 980px) {
+          .add-list-button span {
+            display: none;
+          }
+        }
+
+        @media (max-width: 860px) {
+          .wa-page {
+            height: auto;
+            min-height: 100vh;
+          }
+
+          .wa-shell {
+            grid-template-columns: 56px minmax(0, 1fr);
+            height: auto;
+            min-height: 760px;
+          }
+
+          .wa-rail {
+            grid-row: 1;
+            min-height: 360px;
+          }
+
+          .wa-sidebar {
+            grid-column: 2;
+            max-height: 360px;
+            border-bottom: 1px solid #d1d7db;
+          }
+
+          .wa-conversation {
+            grid-column: 1 / -1;
+          }
+
+          .wa-chat-actions {
+            display: flex;
+          }
+
+          .add-list-button {
+            display: none;
+          }
+        }
+
+        @media (max-width: 560px) {
+          .wa-chat-actions .icon-button:nth-child(4) {
+            display: none;
+          }
+
+          .wa-messages {
+            padding: 16px 10px;
+          }
+
+          .wa-bubble {
+            max-width: 86%;
+          }
+
+          .wa-composer {
+            grid-template-columns: auto minmax(0, 1fr) auto;
+          }
+
+          .wa-composer .icon-button:nth-child(2) {
             display: none;
           }
         }
