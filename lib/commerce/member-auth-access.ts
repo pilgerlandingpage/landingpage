@@ -17,7 +17,7 @@ function isDuplicateUserError(error: unknown) {
 }
 
 function memberRedirectPath() {
-  return '/login?first_access=1&next=/membros'
+  return '/membros/entrar?first_access=1&next=/membros'
 }
 
 async function generateRecoveryLink(params: {

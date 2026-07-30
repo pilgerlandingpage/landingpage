@@ -17,7 +17,7 @@ export default async function MemberProductPage({ params }: PageContext) {
   const data = await loadMemberProduct(slug)
 
   if (!data.user) {
-    redirect(`/login?next=${encodedNext(slug)}`)
+    redirect(`/membros/entrar?next=${encodedNext(slug)}`)
   }
 
   if (!data.member || data.member.status !== 'active') {
@@ -47,7 +47,7 @@ export default async function MemberProductPage({ params }: PageContext) {
       <MemberAccessState
         title="Produto ainda não liberado"
         message="Esta conta não possui acesso ativo a este produto. Se você acabou de comprar, aguarde a confirmação do pagamento."
-        actionHref="/checkout/corretor-nota-8"
+        actionHref={`/checkout/${slug}`}
         actionLabel="Ver ofertas disponíveis"
         icon="cart"
       />

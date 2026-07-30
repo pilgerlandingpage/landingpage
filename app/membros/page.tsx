@@ -1,6 +1,16 @@
 import Link from 'next/link'
-import { BookOpen, CheckCircle2, LockKeyhole, Play, ShieldCheck, Sparkles, UserCheck } from 'lucide-react'
-import { loadMemberLibrary } from '@/lib/members/access'
+import {
+  BookOpen,
+  CheckCircle2,
+  LockKeyhole,
+  Play,
+  Search,
+  ShieldCheck,
+  ShoppingBag,
+  Sparkles,
+  UserRound,
+} from 'lucide-react'
+import { loadMemberLibrary, type MemberCatalogProduct } from '@/lib/members/access'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,152 +20,197 @@ function initials(name?: string | null, email?: string | null) {
   return parts.slice(0, 2).map((part) => part[0]?.toUpperCase()).join('') || 'MP'
 }
 
+function firstName(name?: string | null, email?: string | null) {
+  const source = String(name || email || '').trim()
+  return source.split(/\s+/).filter(Boolean)[0] || 'membro'
+}
+
 function productKindLabel(type?: string | null) {
-  if (type === 'ebook') return 'Livro online'
+  if (type === 'ebook') return 'Livro digital'
   if (type === 'course') return 'Curso'
   if (type === 'mentorship') return 'Mentoria'
   if (type === 'bundle') return 'Coleção'
   return 'Produto digital'
 }
 
+function formatPrice(product: MemberCatalogProduct) {
+  if (!product.offer) return 'Acesso digital'
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: product.offer.currency || 'BRL',
+  }).format(Number(product.offer.price_cents || 0) / 100)
+}
+
+function productHref(product: MemberCatalogProduct, signedIn: boolean) {
+  if (product.has_access) return `/membros/${product.slug}`
+  if (!signedIn) return `/membros/entrar?next=${encodeURIComponent(`/membros/${product.slug}`)}`
+  return product.offer?.checkout_path || `/checkout/${product.slug}`
+}
+
+function productActionLabel(product: MemberCatalogProduct, signedIn: boolean) {
+  if (product.has_access) return 'Continuar'
+  if (!signedIn) return 'Entrar para acessar'
+  return 'Comprar acesso'
+}
+
+function contentLabel(product: MemberCatalogProduct) {
+  if (!product.content_count) return 'Acesso digital'
+  return `${product.content_count} conteúdo${product.content_count === 1 ? '' : 's'}`
+}
+
 export default async function MembersPage() {
-  const { user, member, products } = await loadMemberLibrary()
-  const activeProducts = products
-  const firstProduct = activeProducts[0]
+  const { user, member, products, catalog } = await loadMemberLibrary()
   const memberName = member?.name || user?.user_metadata?.name || user?.email || 'Membro Pilger'
+  const featuredProduct = products[0] || catalog[0] || null
+  const signedIn = Boolean(user)
+  const loginHref = '/membros/entrar?next=/membros'
 
   return (
     <main className="members-shell">
       <header className="members-header">
-        <Link href="/" className="members-brand">
+        <Link href="/membros" className="members-brand">
           <BookOpen size={21} />
           <span>Pilger Play</span>
         </Link>
         <nav className="members-nav" aria-label="Área de membros">
-          <Link href="/checkout/corretor-nota-8">Produtos</Link>
-          <Link href="/login?next=/membros" className="members-login-link">
-            {user ? initials(memberName, user.email) : 'Entrar'}
-          </Link>
+          <Link href="#catalogo">Produtos</Link>
+          {signedIn ? (
+            <Link href="#catalogo" className="members-account-link" aria-label="Minha conta">
+              {initials(memberName, user?.email)}
+            </Link>
+          ) : (
+            <Link href={loginHref} className="members-login-link">
+              Entrar na minha conta
+            </Link>
+          )}
         </nav>
       </header>
 
-      <section className="members-hero">
-        <div className="members-hero-copy">
+      <section className="members-stage">
+        <div className="members-stage-copy">
           <span className="members-kicker">
             <Sparkles size={15} />
-            Área de membros Guilherme Pilger
+            Área de membros
           </span>
-          <h1>{user ? `Bem-vindo, ${String(memberName).split(' ')[0]}.` : 'Sua biblioteca comercial começa aqui.'}</h1>
+          <h1>{signedIn ? `Olá, ${firstName(memberName, user?.email)}.` : 'Pilger Play'}</h1>
           <p>
-            {user
-              ? activeProducts.length
-                ? 'Continue estudando seus conteúdos comprados e organize sua rotina de evolução comercial.'
-                : 'Seu login está ativo. Assim que uma compra aprovada for vinculada ao seu e-mail, os conteúdos aparecem aqui.'
-              : 'Entre com o e-mail usado na compra para acessar seus livros, cursos e materiais digitais em um ambiente simples, direto e premium.'}
+            {signedIn
+              ? `${products.length} produto${products.length === 1 ? '' : 's'} liberado${products.length === 1 ? '' : 's'} na sua biblioteca.`
+              : 'Sua biblioteca digital de livros, cursos e materiais comerciais do Guilherme Pilger.'}
           </p>
           <div className="members-actions">
-            <Link href={user ? '#biblioteca' : '/login?next=/membros'} className="members-primary">
-              {user ? 'Abrir biblioteca' : 'Entrar na área de membros'}
+            <Link href={signedIn ? '#catalogo' : loginHref} className="members-primary">
+              {signedIn ? 'Abrir biblioteca' : 'Entrar na minha conta'}
               <Play size={16} fill="currentColor" />
             </Link>
-            <Link href="/checkout/corretor-nota-8" className="members-secondary">
-              Ver produtos
+            <Link href="#catalogo" className="members-secondary">
+              Ver catálogo
             </Link>
           </div>
         </div>
 
-        <div className="members-feature">
-          <div className="members-feature-media">
-            {firstProduct?.cover_image_url || firstProduct?.thumbnail_url ? (
-              <img
-                src={firstProduct.cover_image_url || firstProduct.thumbnail_url || ''}
-                alt={firstProduct.title}
-              />
-            ) : (
-              <div className="members-cover-fallback">
+        {featuredProduct && (
+          <Link href={productHref(featuredProduct, signedIn)} className="members-feature">
+            <div className="members-feature-cover">
+              {featuredProduct.cover_image_url || featuredProduct.thumbnail_url ? (
+                <img
+                  src={featuredProduct.cover_image_url || featuredProduct.thumbnail_url || ''}
+                  alt={featuredProduct.title}
+                />
+              ) : (
                 <BookOpen size={42} />
-                <strong>Corretor Nota 8</strong>
-                <span>Biblioteca Pilger</span>
-              </div>
-            )}
+              )}
+            </div>
+            <div className="members-feature-copy">
+              <span>{featuredProduct.has_access ? 'Continuar assistindo' : 'Em destaque'}</span>
+              <strong>{featuredProduct.title}</strong>
+            </div>
+          </Link>
+        )}
+      </section>
+
+      <section id="catalogo" className="members-catalog">
+        <div className="members-section-head">
+          <div>
+            <span>Produtos</span>
+            <h2>Catálogo Pilger</h2>
           </div>
-          <div className="members-feature-meta">
-            <span>{activeProducts.length || 0} produto{activeProducts.length === 1 ? '' : 's'} liberado{activeProducts.length === 1 ? '' : 's'}</span>
-            <strong>{firstProduct?.title || 'Acesso digital seguro'}</strong>
+          <div className="members-filter-pill">
+            <Search size={16} />
+            Todos
           </div>
         </div>
+
+        {catalog.length ? (
+          <div className="members-product-grid">
+            {catalog.map((product) => {
+              const href = productHref(product, signedIn)
+              const locked = !product.has_access
+
+              return (
+                <article key={product.id} className={`members-product ${locked ? 'is-locked' : 'is-open'}`}>
+                  <Link href={href} className="members-product-media" aria-label={product.title}>
+                    {product.thumbnail_url || product.cover_image_url ? (
+                      <img
+                        src={product.thumbnail_url || product.cover_image_url || ''}
+                        alt={product.title}
+                      />
+                    ) : (
+                      <BookOpen size={38} />
+                    )}
+                    <span className="members-product-type">{productKindLabel(product.product_type)}</span>
+                    <span className="members-product-status">
+                      {product.has_access ? <CheckCircle2 size={14} /> : <LockKeyhole size={14} />}
+                      {product.has_access ? 'Liberado' : 'Bloqueado'}
+                    </span>
+                  </Link>
+
+                  <div className="members-product-copy">
+                    <h3>{product.title}</h3>
+                    <p>{product.subtitle || product.description || 'Produto digital Guilherme Pilger.'}</p>
+                    <div className="members-product-meta">
+                      <span>{contentLabel(product)}</span>
+                      <strong>{formatPrice(product)}</strong>
+                    </div>
+                    <Link href={href} className={product.has_access ? 'is-primary' : ''}>
+                      {productActionLabel(product, signedIn)}
+                      {product.has_access ? <Play size={14} fill="currentColor" /> : <LockKeyhole size={14} />}
+                    </Link>
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+        ) : (
+          <div className="members-empty">
+            <BookOpen size={34} />
+            <h3>Nenhum produto publicado</h3>
+            <p>Assim que um produto digital estiver ativo, ele aparece neste catálogo.</p>
+          </div>
+        )}
       </section>
 
       <section className="members-trust">
         <div>
           <ShieldCheck size={20} />
-          <span>Acesso liberado automaticamente após pagamento aprovado</span>
+          <span>Acesso seguro</span>
         </div>
         <div>
-          <UserCheck size={20} />
-          <span>Conta vinculada ao e-mail da compra</span>
+          <UserRound size={20} />
+          <span>Conta pelo e-mail da compra</span>
         </div>
         <div>
-          <CheckCircle2 size={20} />
-          <span>Produtos digitais sem frete, tamanho ou variação</span>
+          <ShoppingBag size={20} />
+          <span>Produtos digitais</span>
         </div>
-      </section>
-
-      <section id="biblioteca" className="members-library">
-        <div className="members-section-title">
-          <span>Minha biblioteca</span>
-          <h2>{user ? 'Conteúdos disponíveis' : 'Entre para ver seus produtos'}</h2>
-        </div>
-
-        {!user ? (
-          <div className="members-empty">
-            <LockKeyhole size={30} />
-            <h3>Acesso protegido</h3>
-            <p>Use o mesmo e-mail informado no checkout para abrir sua biblioteca.</p>
-            <Link href="/login?next=/membros">Entrar agora</Link>
-          </div>
-        ) : activeProducts.length ? (
-          <div className="members-rail">
-            {activeProducts.map((product) => (
-              <article key={product.id} className="members-product">
-                <div className="members-product-media">
-                  {product.thumbnail_url || product.cover_image_url ? (
-                    <img
-                      src={product.thumbnail_url || product.cover_image_url || ''}
-                      alt={product.title}
-                    />
-                  ) : (
-                    <BookOpen size={36} />
-                  )}
-                  <span>{productKindLabel(product.product_type)}</span>
-                </div>
-                <div className="members-product-copy">
-                  <h3>{product.title}</h3>
-                  <p>{product.subtitle || product.description || 'Conteúdo disponível na sua biblioteca.'}</p>
-                  <Link href={`/membros/${product.slug}`}>
-                    Continuar
-                    <Play size={14} fill="currentColor" />
-                  </Link>
-                </div>
-              </article>
-            ))}
-          </div>
-        ) : (
-          <div className="members-empty">
-            <BookOpen size={30} />
-            <h3>Nenhum produto liberado ainda</h3>
-            <p>Quando o pagamento for aprovado, a automação cria o acesso e esta biblioteca passa a mostrar seus conteúdos.</p>
-            <Link href="/checkout/corretor-nota-8">Conhecer o Corretor Nota 8</Link>
-          </div>
-        )}
       </section>
 
       <style>{`
         .members-shell {
           min-height: 100vh;
           background:
-            linear-gradient(180deg, rgba(0, 0, 0, 0.12), #020607 42%),
-            linear-gradient(120deg, #041417 0%, #020607 52%, #130b05 100%);
+            linear-gradient(180deg, rgba(0, 0, 0, 0.1), #020607 38%),
+            linear-gradient(120deg, #03100f 0%, #020607 52%, #180f08 100%);
           color: #fff;
           font-family: Inter, Arial, sans-serif;
         }
@@ -163,24 +218,30 @@ export default async function MembersPage() {
         .members-header {
           position: sticky;
           top: 0;
-          z-index: 5;
+          z-index: 10;
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 18px;
-          padding: 18px clamp(20px, 5vw, 72px);
-          background: rgba(2, 6, 7, 0.82);
-          border-bottom: 1px solid rgba(232, 176, 73, 0.18);
+          padding: 16px clamp(18px, 5vw, 70px);
+          border-bottom: 1px solid rgba(232, 176, 73, 0.16);
+          background: rgba(2, 6, 7, 0.88);
           backdrop-filter: blur(16px);
         }
 
         .members-brand,
         .members-nav,
-        .members-actions,
+        .members-login-link,
+        .members-account-link,
         .members-kicker,
+        .members-actions,
         .members-primary,
         .members-secondary,
-        .members-product-copy a {
+        .members-feature,
+        .members-filter-pill,
+        .members-product-copy a,
+        .members-product-status,
+        .members-trust div {
           display: inline-flex;
           align-items: center;
         }
@@ -196,8 +257,8 @@ export default async function MembersPage() {
 
         .members-nav {
           gap: 14px;
-          font-size: 0.82rem;
-          font-weight: 800;
+          font-size: 0.8rem;
+          font-weight: 900;
           text-transform: uppercase;
         }
 
@@ -207,216 +268,229 @@ export default async function MembersPage() {
         }
 
         .members-login-link {
-          min-width: 42px;
-          min-height: 42px;
+          min-height: 40px;
           justify-content: center;
           border: 1px solid rgba(232, 176, 73, 0.36);
           border-radius: 999px;
+          padding: 0 15px;
           color: #f3c45e !important;
           background: rgba(232, 176, 73, 0.1);
         }
 
-        .members-hero {
+        .members-account-link {
+          width: 42px;
+          height: 42px;
+          justify-content: center;
+          border: 1px solid rgba(232, 176, 73, 0.42);
+          border-radius: 999px;
+          color: #061014 !important;
+          background: #e8b049;
+        }
+
+        .members-stage {
+          position: relative;
           display: grid;
-          grid-template-columns: minmax(0, 1.06fr) minmax(280px, 0.72fr);
-          align-items: center;
-          gap: clamp(28px, 5vw, 72px);
-          min-height: 68vh;
-          padding: clamp(44px, 8vw, 104px) clamp(20px, 5vw, 72px) 42px;
+          grid-template-columns: minmax(0, 1fr) minmax(260px, 390px);
+          align-items: end;
+          gap: clamp(28px, 5vw, 68px);
+          min-height: 52vh;
+          padding: clamp(42px, 7vw, 82px) clamp(18px, 5vw, 70px) 46px;
           overflow: hidden;
         }
 
-        .members-hero-copy {
-          max-width: 720px;
+        .members-stage::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          background:
+            linear-gradient(90deg, rgba(2, 6, 7, 0.96) 0%, rgba(2, 6, 7, 0.78) 46%, rgba(2, 6, 7, 0.96) 100%),
+            url("/images/products/corretor-nota-8-hero-bg-optimized.jpg") center / cover no-repeat;
+          opacity: 0.72;
+        }
+
+        .members-stage-copy,
+        .members-feature {
+          position: relative;
+          z-index: 1;
+        }
+
+        .members-stage-copy {
+          max-width: 760px;
         }
 
         .members-kicker {
           gap: 8px;
           width: fit-content;
-          margin-bottom: 18px;
+          margin-bottom: 16px;
           padding: 7px 10px;
           border: 1px solid rgba(232, 176, 73, 0.5);
           border-radius: 8px;
           color: #f3c45e;
-          font-size: 0.76rem;
-          font-weight: 900;
+          font-size: 0.74rem;
+          font-weight: 950;
           text-transform: uppercase;
         }
 
-        .members-hero h1 {
-          max-width: 780px;
+        .members-stage h1 {
           margin: 0;
           font-family: Georgia, 'Times New Roman', serif;
-          font-size: clamp(2.45rem, 5vw, 5.4rem);
-          line-height: 0.94;
+          font-size: clamp(3rem, 6vw, 6.2rem);
+          line-height: 0.92;
           letter-spacing: 0;
         }
 
-        .members-hero p {
-          max-width: 640px;
-          margin: 22px 0 0;
-          color: rgba(255, 255, 255, 0.74);
-          font-size: clamp(1rem, 1.2vw, 1.14rem);
-          line-height: 1.7;
+        .members-stage p {
+          max-width: 610px;
+          margin: 18px 0 0;
+          color: rgba(255, 255, 255, 0.78);
+          font-size: clamp(1rem, 1.3vw, 1.18rem);
+          line-height: 1.68;
         }
 
         .members-actions {
           flex-wrap: wrap;
           gap: 12px;
-          margin-top: 28px;
+          margin-top: 26px;
         }
 
         .members-primary,
         .members-secondary,
-        .members-product-copy a,
-        .members-empty a {
+        .members-product-copy a {
           min-height: 44px;
           justify-content: center;
           gap: 9px;
           border-radius: 7px;
-          padding: 0 18px;
-          font-size: 0.82rem;
+          padding: 0 17px;
+          font-size: 0.8rem;
           font-weight: 950;
           text-decoration: none;
           text-transform: uppercase;
         }
 
         .members-primary,
-        .members-empty a {
+        .members-product-copy a.is-primary {
           color: #061014;
           background: #e8b049;
           box-shadow: 0 16px 34px rgba(232, 176, 73, 0.18);
         }
 
-        .members-secondary {
+        .members-secondary,
+        .members-product-copy a {
           color: #fff;
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          background: rgba(255, 255, 255, 0.04);
+          border: 1px solid rgba(255, 255, 255, 0.18);
+          background: rgba(255, 255, 255, 0.05);
         }
 
         .members-feature {
-          justify-self: center;
-          width: min(100%, 410px);
+          align-self: center;
+          gap: 14px;
+          width: min(100%, 390px);
+          padding: 12px;
+          border: 1px solid rgba(232, 176, 73, 0.24);
+          border-radius: 8px;
+          color: #fff;
+          text-decoration: none;
+          background: rgba(3, 13, 14, 0.72);
+          box-shadow: 0 28px 70px rgba(0, 0, 0, 0.42);
+          backdrop-filter: blur(18px);
         }
 
-        .members-feature-media {
+        .members-feature-cover {
+          width: 94px;
+          aspect-ratio: 3 / 4;
+          flex: 0 0 auto;
           display: grid;
           place-items: center;
-          aspect-ratio: 3 / 4.08;
-          border: 1px solid rgba(232, 176, 73, 0.34);
-          border-radius: 8px;
-          background: linear-gradient(145deg, rgba(232, 176, 73, 0.14), rgba(255, 255, 255, 0.02));
-          box-shadow: 0 30px 80px rgba(0, 0, 0, 0.46);
           overflow: hidden;
+          border: 1px solid rgba(232, 176, 73, 0.28);
+          border-radius: 7px;
+          color: #e8b049;
+          background: rgba(232, 176, 73, 0.08);
         }
 
-        .members-feature-media img {
+        .members-feature-cover img,
+        .members-product-media img {
           width: 100%;
           height: 100%;
           object-fit: cover;
         }
 
-        .members-cover-fallback {
-          display: grid;
-          place-items: center;
-          gap: 10px;
-          min-height: 100%;
-          width: 100%;
-          color: #f3c45e;
-          text-align: center;
-          background:
-            linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px),
-            linear-gradient(180deg, rgba(255,255,255,0.05) 1px, transparent 1px),
-            #071317;
-          background-size: 28px 28px;
-        }
-
-        .members-cover-fallback strong {
-          color: #fff;
-          font-family: Georgia, 'Times New Roman', serif;
-          font-size: 1.8rem;
-        }
-
-        .members-cover-fallback span {
-          color: rgba(255,255,255,0.68);
-          font-size: 0.82rem;
-          font-weight: 800;
-          text-transform: uppercase;
-        }
-
-        .members-feature-meta {
+        .members-feature-copy {
           display: grid;
           gap: 5px;
-          margin-top: 14px;
+          min-width: 0;
         }
 
-        .members-feature-meta span {
+        .members-feature-copy span,
+        .members-section-head span,
+        .members-product-meta span {
           color: #e8b049;
-          font-size: 0.74rem;
-          font-weight: 900;
+          font-size: 0.72rem;
+          font-weight: 950;
           text-transform: uppercase;
         }
 
-        .members-feature-meta strong {
+        .members-feature-copy strong {
+          overflow-wrap: anywhere;
           font-family: Georgia, 'Times New Roman', serif;
           font-size: 1.35rem;
+          line-height: 1.1;
         }
 
-        .members-trust {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 1px;
+        .members-catalog {
+          padding: 38px clamp(18px, 5vw, 70px) clamp(42px, 6vw, 78px);
           border-top: 1px solid rgba(232, 176, 73, 0.14);
-          border-bottom: 1px solid rgba(232, 176, 73, 0.14);
-          background: rgba(232, 176, 73, 0.18);
+          background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0));
         }
 
-        .members-trust div {
+        .members-section-head {
           display: flex;
-          align-items: center;
-          gap: 12px;
-          min-height: 86px;
-          padding: 18px clamp(20px, 4vw, 62px);
-          color: rgba(255, 255, 255, 0.82);
-          background: #03090b;
-          font-size: 0.92rem;
-          font-weight: 800;
+          align-items: end;
+          justify-content: space-between;
+          gap: 16px;
+          margin-bottom: 20px;
         }
 
-        .members-trust svg {
-          flex: 0 0 auto;
-          color: #e8b049;
-        }
-
-        .members-library {
-          padding: clamp(42px, 7vw, 86px) clamp(20px, 5vw, 72px) 86px;
-        }
-
-        .members-section-title span {
-          color: #e8b049;
-          font-size: 0.76rem;
-          font-weight: 900;
-          text-transform: uppercase;
-        }
-
-        .members-section-title h2 {
-          margin: 8px 0 24px;
+        .members-section-head h2 {
+          margin: 6px 0 0;
           font-family: Georgia, 'Times New Roman', serif;
-          font-size: clamp(1.8rem, 3vw, 3.1rem);
+          font-size: clamp(1.9rem, 3.4vw, 3.2rem);
+          line-height: 1;
           letter-spacing: 0;
         }
 
-        .members-rail {
+        .members-filter-pill {
+          gap: 8px;
+          min-height: 38px;
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          border-radius: 999px;
+          padding: 0 13px;
+          color: rgba(255, 255, 255, 0.72);
+          background: rgba(255, 255, 255, 0.04);
+          font-size: 0.78rem;
+          font-weight: 850;
+        }
+
+        .members-product-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(245px, 1fr));
           gap: 18px;
         }
 
         .members-product {
+          min-width: 0;
           overflow: hidden;
           border: 1px solid rgba(255, 255, 255, 0.12);
           border-radius: 8px;
           background: rgba(255, 255, 255, 0.045);
+          transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+        }
+
+        .members-product:hover {
+          transform: translateY(-3px);
+          border-color: rgba(232, 176, 73, 0.48);
+          background: rgba(255, 255, 255, 0.065);
         }
 
         .members-product-media {
@@ -424,61 +498,96 @@ export default async function MembersPage() {
           display: grid;
           place-items: center;
           aspect-ratio: 16 / 10;
-          color: #e8b049;
-          background: #071317;
           overflow: hidden;
+          color: #e8b049;
+          background:
+            linear-gradient(135deg, rgba(232, 176, 73, 0.12), rgba(15, 118, 110, 0.14)),
+            #071317;
         }
 
-        .members-product-media img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
+        .members-product.is-locked .members-product-media img {
+          filter: saturate(0.72) brightness(0.72);
         }
 
-        .members-product-media span {
+        .members-product-type,
+        .members-product-status {
           position: absolute;
-          left: 12px;
-          top: 12px;
-          padding: 6px 8px;
-          border-radius: 6px;
-          color: #061014;
-          background: #e8b049;
-          font-size: 0.68rem;
+          z-index: 1;
+          border-radius: 999px;
+          font-size: 0.66rem;
           font-weight: 950;
           text-transform: uppercase;
         }
 
+        .members-product-type {
+          left: 11px;
+          top: 11px;
+          padding: 6px 8px;
+          color: #061014;
+          background: #e8b049;
+        }
+
+        .members-product-status {
+          right: 11px;
+          bottom: 11px;
+          gap: 5px;
+          padding: 7px 9px;
+          color: #fff;
+          background: rgba(0, 0, 0, 0.68);
+          backdrop-filter: blur(10px);
+        }
+
+        .members-product.is-open .members-product-status {
+          color: #052314;
+          background: #79e0a6;
+        }
+
         .members-product-copy {
+          display: grid;
+          gap: 12px;
           padding: 16px;
         }
 
         .members-product-copy h3 {
           margin: 0;
+          overflow-wrap: anywhere;
           font-family: Georgia, 'Times New Roman', serif;
-          font-size: 1.28rem;
+          font-size: 1.3rem;
+          line-height: 1.1;
         }
 
         .members-product-copy p {
+          display: -webkit-box;
           min-height: 48px;
-          margin: 9px 0 15px;
+          margin: 0;
+          overflow: hidden;
           color: rgba(255, 255, 255, 0.68);
           font-size: 0.9rem;
           line-height: 1.55;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 2;
+        }
+
+        .members-product-meta {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+        }
+
+        .members-product-meta strong {
+          color: rgba(255, 255, 255, 0.9);
+          font-size: 0.9rem;
         }
 
         .members-product-copy a {
-          width: fit-content;
-          min-height: 38px;
-          color: #061014;
-          background: #e8b049;
+          width: 100%;
         }
 
         .members-empty {
           display: grid;
           justify-items: center;
           gap: 12px;
-          max-width: 620px;
-          margin: 18px auto 0;
           padding: 42px 20px;
           border: 1px solid rgba(255, 255, 255, 0.12);
           border-radius: 8px;
@@ -487,23 +596,39 @@ export default async function MembersPage() {
           background: rgba(255, 255, 255, 0.04);
         }
 
-        .members-empty h3 {
-          margin: 0;
-          color: #fff;
-          font-size: 1.35rem;
-        }
-
-        .members-empty p {
-          max-width: 460px;
-          margin: 0;
-          line-height: 1.65;
-        }
-
         .members-empty svg {
           color: #e8b049;
         }
 
-        @media (max-width: 760px) {
+        .members-empty h3,
+        .members-empty p {
+          margin: 0;
+        }
+
+        .members-trust {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 1px;
+          border-top: 1px solid rgba(232, 176, 73, 0.14);
+          background: rgba(232, 176, 73, 0.18);
+        }
+
+        .members-trust div {
+          gap: 11px;
+          min-height: 76px;
+          padding: 18px clamp(18px, 4vw, 58px);
+          color: rgba(255, 255, 255, 0.82);
+          background: #03090b;
+          font-size: 0.9rem;
+          font-weight: 850;
+        }
+
+        .members-trust svg {
+          flex: 0 0 auto;
+          color: #e8b049;
+        }
+
+        @media (max-width: 820px) {
           .members-header {
             padding: 14px 16px;
           }
@@ -520,37 +645,51 @@ export default async function MembersPage() {
             display: none;
           }
 
-          .members-hero {
-            grid-template-columns: 1fr;
-            min-height: auto;
-            padding: 34px 16px 30px;
+          .members-login-link {
+            max-width: 162px;
+            padding: 0 12px;
+            font-size: 0.72rem;
+            text-align: center;
           }
 
-          .members-hero h1 {
-            font-size: clamp(2.25rem, 12vw, 3.35rem);
+          .members-stage {
+            grid-template-columns: 1fr;
+            min-height: auto;
+            padding: 34px 16px 28px;
+          }
+
+          .members-stage h1 {
+            font-size: clamp(3rem, 16vw, 4.2rem);
           }
 
           .members-feature {
-            justify-self: stretch;
-            width: min(82vw, 310px);
-            margin: 0 auto;
+            width: 100%;
+          }
+
+          .members-catalog {
+            padding: 32px 16px 56px;
+          }
+
+          .members-section-head {
+            align-items: start;
+          }
+
+          .members-filter-pill {
+            display: none;
+          }
+
+          .members-actions {
+            display: grid;
+            grid-template-columns: 1fr;
           }
 
           .members-trust {
             grid-template-columns: 1fr;
           }
+        }
 
-          .members-trust div {
-            min-height: 68px;
-            padding: 16px;
-          }
-
-          .members-library {
-            padding: 38px 16px 64px;
-          }
-
-          .members-actions {
-            display: grid;
+        @media (max-width: 520px) {
+          .members-product-grid {
             grid-template-columns: 1fr;
           }
         }
