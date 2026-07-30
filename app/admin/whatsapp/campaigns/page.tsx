@@ -270,6 +270,12 @@ function getTemplateButtons(template?: MetaTemplate | null): TemplateButtonRecor
     return rawButtons.map(asRecord)
 }
 
+function getTemplateHeaderMediaUrl(template?: MetaTemplate | null) {
+    const metadata = asRecord(template?.metadata)
+    const panelHeaderMedia = asRecord(metadata.panel_header_media)
+    return textValue(panelHeaderMedia.url) || textValue(metadata.header_media_url)
+}
+
 function extractTemplateVariables(text: string) {
     const matches = Array.from(text.matchAll(/{{\s*(\d+)\s*}}/g))
     return Array.from(new Set(matches.map(match => Number(match[1])))).filter(Number.isFinite).sort((a, b) => a - b)
@@ -1132,6 +1138,7 @@ export default function CampaignsPage() {
     const selectedFooterText = textValue(selectedFooterComponent?.text)
     const selectedHeaderVariables = extractTemplateVariables(selectedHeaderText)
     const selectedBodyVariables = extractTemplateVariables(selectedBodyText)
+    const selectedTemplateHeaderMediaUrl = getTemplateHeaderMediaUrl(selectedMetaTemplate)
     const previewHeaderText = replaceTemplateVariables(selectedHeaderText, { 1: metaHeaderParameterValue }, 'header')
     const previewBodyText = replaceTemplateVariables(selectedBodyText, metaBodyParameterValues, 'exemplo')
     const parsedMetaRecipientDrafts = sendProvider === 'meta_whatsapp' && metaAudiencePersonalized ? parseMetaRecipientDrafts() : []
@@ -1145,6 +1152,18 @@ export default function CampaignsPage() {
         setNumbersInput(buildAudienceLinesFromContacts(selectedContactListContacts))
         setMetaAudiencePersonalized(true)
     }, [selectedContactListId, selectedContactListContacts, selectedBodyVariablesKey])
+
+    useEffect(() => {
+        if (!selectedMetaTemplate) {
+            setMetaHeaderMediaUrl('')
+            return
+        }
+        if (['IMAGE', 'VIDEO', 'DOCUMENT'].includes(selectedHeaderFormat)) {
+            setMetaHeaderMediaUrl(selectedTemplateHeaderMediaUrl || '')
+            return
+        }
+        setMetaHeaderMediaUrl('')
+    }, [selectedMetaTemplate, selectedHeaderFormat, selectedTemplateHeaderMediaUrl])
 
     if (loading) return <AdminLoadingState minHeight="400px" />
 
@@ -1420,16 +1439,27 @@ export default function CampaignsPage() {
                                                         Header {selectedHeaderFormat ? `(${selectedHeaderFormat})` : ''}
                                                     </label>
                                                     {['IMAGE', 'VIDEO', 'DOCUMENT'].includes(selectedHeaderFormat) ? (
-                                                        <input
-                                                            value={metaHeaderMediaUrl}
-                                                            onChange={e => setMetaHeaderMediaUrl(e.target.value)}
-                                                            placeholder="https://... arquivo publico aprovado no template"
-                                                            style={{
-                                                                width: '100%', padding: '10px 14px', borderRadius: '8px', fontSize: '0.9rem',
-                                                                background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)',
-                                                                color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box',
-                                                            }}
-                                                        />
+                                                        <div style={{ display: 'grid', gap: '8px' }}>
+                                                            <input
+                                                                value={metaHeaderMediaUrl}
+                                                                onChange={e => setMetaHeaderMediaUrl(e.target.value)}
+                                                                placeholder={selectedTemplateHeaderMediaUrl ? 'Midia padrao preenchida automaticamente' : 'Cole uma URL publica HTTPS para esta midia'}
+                                                                style={{
+                                                                    width: '100%', padding: '10px 14px', borderRadius: '8px', fontSize: '0.9rem',
+                                                                    background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)',
+                                                                    color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box',
+                                                                }}
+                                                            />
+                                                            {selectedTemplateHeaderMediaUrl ? (
+                                                                <div style={{ padding: '9px 10px', borderRadius: '8px', border: '1px solid rgba(34,197,94,0.2)', background: 'rgba(34,197,94,0.08)', color: 'var(--text-secondary)', fontSize: '0.78rem', lineHeight: 1.35 }}>
+                                                                    Midia padrao carregada do template. O usuario pode criar a campanha sem mexer nesse campo.
+                                                                </div>
+                                                            ) : (
+                                                                <div style={{ padding: '9px 10px', borderRadius: '8px', border: '1px solid rgba(245,158,11,0.2)', background: 'rgba(245,158,11,0.08)', color: 'var(--text-secondary)', fontSize: '0.78rem', lineHeight: 1.35 }}>
+                                                                    Este template nao tem midia salva no R2. Reenvie o template com upload de midia pelo painel ou informe uma URL publica.
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     ) : selectedHeaderVariables.length > 0 ? (
                                                         <input
                                                             value={metaHeaderParameterValue}

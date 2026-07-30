@@ -114,6 +114,7 @@ async function markTemplateManagedFromPanel(params: {
   components?: unknown[]
   templateId?: unknown
   result?: unknown
+  panelHeaderMedia?: unknown
 }) {
   const resolved = resolveMetaWhatsAppConfig(params.configMap)
   const name = normalizeMetaWhatsAppTemplateName(params.templateName)
@@ -130,6 +131,25 @@ async function markTemplateManagedFromPanel(params: {
     .eq('language', language)
     .maybeSingle()
 
+  const existingMetadata = asMetadata(existing?.metadata)
+  const panelHeaderMedia = asMetadata(params.panelHeaderMedia)
+  const panelHeaderMediaUrl = cleanText(panelHeaderMedia.url, 2000)
+  const panelHeaderMediaPatch = panelHeaderMediaUrl ? {
+    panel_header_media: {
+      url: panelHeaderMediaUrl,
+      r2Key: cleanText(panelHeaderMedia.r2Key || panelHeaderMedia.r2_key, 500),
+      handle: cleanText(panelHeaderMedia.handle, 5000),
+      fileName: cleanText(panelHeaderMedia.fileName || panelHeaderMedia.file_name, 255),
+      contentType: cleanText(panelHeaderMedia.contentType || panelHeaderMedia.content_type, 120),
+      headerFormat: cleanText(panelHeaderMedia.headerFormat || panelHeaderMedia.header_format, 30).toUpperCase(),
+      uploadedAt: cleanText(panelHeaderMedia.uploadedAt || panelHeaderMedia.uploaded_at, 80) || nowIso(),
+    },
+    header_media_url: panelHeaderMediaUrl,
+    header_media_r2_key: cleanText(panelHeaderMedia.r2Key || panelHeaderMedia.r2_key, 500),
+    header_media_type: cleanText(panelHeaderMedia.contentType || panelHeaderMedia.content_type, 120),
+    header_format: cleanText(panelHeaderMedia.headerFormat || panelHeaderMedia.header_format, 30).toUpperCase(),
+  } : {}
+
   await params.supabase
     .from('meta_whatsapp_templates')
     .upsert({
@@ -141,12 +161,13 @@ async function markTemplateManagedFromPanel(params: {
       status: cleanText((params.result as any)?.status, 60) || existing?.status || 'PENDING',
       components: safeArray(params.components),
       metadata: {
-        ...asMetadata(existing?.metadata),
+        ...existingMetadata,
         managed_from_panel: true,
         created_from_panel: true,
-        created_from_panel_at: asMetadata(existing?.metadata).created_from_panel_at || nowIso(),
+        created_from_panel_at: existingMetadata.created_from_panel_at || nowIso(),
         last_panel_mutation_at: nowIso(),
         panel_mutation_response: params.result || null,
+        ...panelHeaderMediaPatch,
       },
       updated_at: nowIso(),
     }, { onConflict: 'waba_id,name,language' })
@@ -235,6 +256,7 @@ export async function POST(request: NextRequest) {
         language: normalizedLanguage,
         category: body.category,
         components,
+        panelHeaderMedia: body.panelHeaderMedia,
         result,
       })
       return NextResponse.json({
@@ -262,6 +284,7 @@ export async function POST(request: NextRequest) {
         category: body.category,
         components,
         templateId: body.templateId || body.template_external_id,
+        panelHeaderMedia: body.panelHeaderMedia,
         result,
       })
       return NextResponse.json({

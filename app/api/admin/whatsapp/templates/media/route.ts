@@ -4,6 +4,7 @@ import {
   loadMetaWhatsAppConfigMap,
   uploadMetaWhatsAppTemplateHeaderMedia,
 } from '@/lib/meta/whatsapp-cloud'
+import { uploadFile } from '@/lib/r2'
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024
 const MAX_VIDEO_SIZE = 16 * 1024 * 1024
@@ -27,6 +28,10 @@ function cleanText(value: unknown, maxLength = 300) {
 
 function formatMegabytes(bytes: number) {
   return `${Math.round(bytes / 1024 / 1024)} MB`
+}
+
+function mediaFolderFor(headerFormat: string) {
+  return `meta-whatsapp/templates/${headerFormat.toLowerCase()}`
 }
 
 export async function POST(request: NextRequest) {
@@ -65,17 +70,28 @@ export async function POST(request: NextRequest) {
     const supabase = createAdminClient()
     const configMap = await loadMetaWhatsAppConfigMap(supabase)
     const fileBuffer = Buffer.from(await file.arrayBuffer())
-    const upload = await uploadMetaWhatsAppTemplateHeaderMedia({
-      fileName: file.name,
-      fileType: file.type,
-      fileBuffer,
-      config: configMap,
-    })
+    const [upload, publicMedia] = await Promise.all([
+      uploadMetaWhatsAppTemplateHeaderMedia({
+        fileName: file.name,
+        fileType: file.type,
+        fileBuffer,
+        config: configMap,
+      }),
+      uploadFile(fileBuffer, file.name, mediaFolderFor(headerFormat), file.type)
+        .catch(error => {
+          console.warn('[Meta Template Media POST] R2 upload failed', error)
+          return null
+        }),
+    ])
 
     return NextResponse.json({
       success: true,
-      message: 'Midia carregada na Meta.',
+      message: publicMedia
+        ? 'Midia carregada na Meta e salva no R2.'
+        : 'Midia carregada na Meta, mas nao foi possivel salvar a URL publica no R2.',
       handle: upload.handle,
+      publicUrl: publicMedia?.url || '',
+      r2Key: publicMedia?.key || '',
       file: {
         name: file.name,
         type: file.type,

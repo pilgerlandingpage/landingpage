@@ -32,6 +32,7 @@ interface MetaTemplateRow {
   status: string
   quality_score?: string | null
   components?: unknown[] | null
+  metadata?: unknown
   last_synced_at?: string | null
   updated_at?: string | null
 }
@@ -63,6 +64,8 @@ interface TemplateForm {
   headerText: string
   headerExample: string
   headerMediaHandle: string
+  headerMediaUrl: string
+  headerMediaR2Key: string
   bodyText: string
   bodyExamples: string
   footerText: string
@@ -93,6 +96,8 @@ const emptyForm: TemplateForm = {
   headerText: '',
   headerExample: '',
   headerMediaHandle: '',
+  headerMediaUrl: '',
+  headerMediaR2Key: '',
   bodyText: '',
   bodyExamples: '',
   footerText: '',
@@ -108,6 +113,17 @@ function asRecord(value: unknown): Record<string, unknown> {
 
 function textValue(value: unknown) {
   return typeof value === 'string' ? value : ''
+}
+
+function getPanelHeaderMedia(template: MetaTemplateRow | TemplateDraft) {
+  const metadata = 'metadata' in template ? asRecord(template.metadata) : {}
+  const media = asRecord(metadata.panel_header_media)
+  return {
+    url: textValue(media.url) || textValue(metadata.header_media_url),
+    r2Key: textValue(media.r2Key) || textValue(media.r2_key) || textValue(metadata.header_media_r2_key),
+    fileName: textValue(media.fileName) || textValue(media.file_name),
+    contentType: textValue(media.contentType) || textValue(media.content_type),
+  }
 }
 
 function normalizeTemplateName(value: string) {
@@ -158,6 +174,7 @@ function parseTemplateToForm(template: MetaTemplateRow | TemplateDraft): Templat
   const footer = components.find(component => textValue(component.type).toUpperCase() === 'FOOTER')
   const buttons = components.find(component => textValue(component.type).toUpperCase() === 'BUTTONS')
   const rawButtons = Array.isArray(buttons?.buttons) ? buttons?.buttons.map(asRecord) : []
+  const panelHeaderMedia = getPanelHeaderMedia(template)
 
   if ('form' in template && template.form) {
     return { ...emptyForm, ...template.form, name: template.name, language: template.language, category: template.category as TemplateForm['category'] }
@@ -171,6 +188,8 @@ function parseTemplateToForm(template: MetaTemplateRow | TemplateDraft): Templat
     headerFormat: (textValue(header?.format).toUpperCase() || 'NONE') as HeaderFormat,
     headerText: textValue(header?.text),
     headerMediaHandle: textValue(headerHandles[0]),
+    headerMediaUrl: panelHeaderMedia.url,
+    headerMediaR2Key: panelHeaderMedia.r2Key,
     bodyText: textValue(body?.text),
     footerText: textValue(footer?.text),
     buttons: rawButtons.map(button => ({
@@ -211,14 +230,18 @@ function HeaderMediaPreview({
   format,
   preview,
   handle,
+  publicUrl,
   compact = false,
 }: {
   format: HeaderFormat
   preview: MediaPreview | null
   handle?: string
+  publicUrl?: string
   compact?: boolean
 }) {
   const activePreview = preview?.format === format ? preview : null
+  const displayUrl = activePreview?.url || publicUrl || ''
+  const displayName = activePreview?.name || (publicUrl ? 'midia salva no R2' : '')
   const shellStyle: CSSProperties = {
     width: '100%',
     minHeight: compact ? 106 : 126,
@@ -233,23 +256,23 @@ function HeaderMediaPreview({
     marginBottom: compact ? 0 : 8,
   }
 
-  if (activePreview && format === 'IMAGE') {
+  if (displayUrl && format === 'IMAGE') {
     return (
       <div style={shellStyle}>
         <img
-          src={activePreview.url}
-          alt={`Previa de ${activePreview.name}`}
+          src={displayUrl}
+          alt={`Previa de ${displayName || headerMediaLabel(format)}`}
           style={{ width: '100%', height: '100%', maxHeight: compact ? 170 : 210, objectFit: 'contain', display: 'block' }}
         />
       </div>
     )
   }
 
-  if (activePreview && format === 'VIDEO') {
+  if (displayUrl && format === 'VIDEO') {
     return (
       <div style={shellStyle}>
         <video
-          src={activePreview.url}
+          src={displayUrl}
           controls
           muted
           style={{ width: '100%', maxHeight: compact ? 190 : 230, display: 'block', background: '#0f172a' }}
@@ -264,6 +287,15 @@ function HeaderMediaPreview({
         <FileText size={compact ? 24 : 30} />
         <span style={{ marginTop: 6, textAlign: 'center', fontSize: compact ? '0.78rem' : '0.84rem' }}>{activePreview.name}</span>
       </div>
+    )
+  }
+
+  if (publicUrl && format === 'DOCUMENT') {
+    return (
+      <a href={publicUrl} target="_blank" rel="noreferrer" style={{ ...shellStyle, padding: 12, boxSizing: 'border-box', alignContent: 'center', textDecoration: 'none' }}>
+        <FileText size={compact ? 24 : 30} />
+        <span style={{ marginTop: 6, textAlign: 'center', fontSize: compact ? '0.78rem' : '0.84rem', color: '#475569' }}>documento salvo no R2</span>
+      </a>
     )
   }
 
@@ -508,6 +540,7 @@ export default function MetaTemplatesPage() {
       const name = normalizeTemplateName(form.name)
       const components = buildComponents()
       if (!name) throw new Error('Nome do template obrigatorio.')
+      const hasHeaderMedia = ['IMAGE', 'VIDEO', 'DOCUMENT'].includes(form.headerFormat)
       await runAction({
         action: editingTemplate ? 'edit' : 'create',
         templateId: editingTemplate?.template_external_id,
@@ -516,6 +549,14 @@ export default function MetaTemplatesPage() {
         category: form.category,
         components,
         messageSendTtlSeconds: Number(form.messageSendTtlSeconds || 0) || undefined,
+        panelHeaderMedia: hasHeaderMedia && form.headerMediaUrl ? {
+          url: form.headerMediaUrl,
+          r2Key: form.headerMediaR2Key,
+          handle: form.headerMediaHandle,
+          fileName: mediaFileLabel,
+          contentType: mediaPreview?.type || '',
+          headerFormat: form.headerFormat,
+        } : undefined,
       }, editingTemplate ? 'Template atualizado.' : 'Template enviado para Meta.')
       resetBuilder()
     } catch (error) {
@@ -535,7 +576,7 @@ export default function MetaTemplatesPage() {
     if (!keepExistingHandle) clearMediaPreview()
     updateForm({
       headerFormat,
-      ...(keepExistingHandle ? {} : { headerMediaHandle: '' }),
+      ...(keepExistingHandle ? {} : { headerMediaHandle: '', headerMediaUrl: '', headerMediaR2Key: '' }),
     })
     setMediaFileLabel('')
   }
@@ -546,7 +587,7 @@ export default function MetaTemplatesPage() {
     setFeedback(null)
     setMediaFileLabel('')
     setLocalMediaPreview(file, form.headerFormat)
-    updateForm({ headerMediaHandle: '' })
+    updateForm({ headerMediaHandle: '', headerMediaUrl: '', headerMediaR2Key: '' })
     try {
       const formData = new FormData()
       formData.append('file', file)
@@ -559,11 +600,15 @@ export default function MetaTemplatesPage() {
       const payload = await response.json()
       if (!payload.success) throw new Error(payload.message || 'Erro ao carregar midia')
 
-      updateForm({ headerMediaHandle: payload.handle || '' })
+      updateForm({
+        headerMediaHandle: payload.handle || '',
+        headerMediaUrl: payload.publicUrl || '',
+        headerMediaR2Key: payload.r2Key || '',
+      })
       setMediaFileLabel(payload.file?.name || file.name)
       setFeedback({ type: 'success', text: payload.message || 'Midia carregada na Meta.' })
     } catch (error) {
-      updateForm({ headerMediaHandle: '' })
+      updateForm({ headerMediaHandle: '', headerMediaUrl: '', headerMediaR2Key: '' })
       setFeedback({ type: 'error', text: error instanceof Error ? error.message : 'Erro ao carregar midia' })
     } finally {
       setUploadingMedia(false)
@@ -706,11 +751,17 @@ export default function MetaTemplatesPage() {
                       {mediaFileLabel && <span style={successPillStyle}>{mediaFileLabel}</span>}
                     </div>
                     <input value={form.headerMediaHandle} onChange={event => updateForm({ headerMediaHandle: event.target.value })} placeholder="Handle gerado pela Meta" style={inputStyle} />
-                    {(mediaPreview || form.headerMediaHandle) && (
+                    {form.headerMediaUrl && (
+                      <div style={{ padding: '9px 10px', borderRadius: 8, background: 'rgba(34,197,94,0.09)', border: '1px solid rgba(34,197,94,0.22)', color: 'var(--text-secondary)', fontSize: '0.78rem', lineHeight: 1.35, wordBreak: 'break-all' }}>
+                        Midia padrao salva para campanhas: {form.headerMediaUrl}
+                      </div>
+                    )}
+                    {(mediaPreview || form.headerMediaHandle || form.headerMediaUrl) && (
                       <HeaderMediaPreview
                         format={form.headerFormat}
                         preview={mediaPreview}
                         handle={form.headerMediaHandle}
+                        publicUrl={form.headerMediaUrl}
                         compact
                       />
                     )}
@@ -821,6 +872,7 @@ export default function MetaTemplatesPage() {
                   format={form.headerFormat}
                   preview={mediaPreview}
                   handle={form.headerMediaHandle}
+                  publicUrl={form.headerMediaUrl}
                 />
               )}
               {form.headerFormat === 'TEXT' && form.headerText && (
