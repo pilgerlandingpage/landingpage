@@ -263,6 +263,7 @@ export async function POST(_request: Request, context: RouteContext) {
         pix_qr_code_base64: updatedPayment.pix_qr_code_base64,
         pix_ticket_url: updatedPayment.pix_ticket_url,
         expires_at: updatedPayment.expires_at,
+        three_ds_info: updatedPayment.raw_payload?.three_ds_info || null,
       },
       status: publicPaymentStatusPayload(updatedOrder, updatedPayment),
       event,

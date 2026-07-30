@@ -1,6 +1,6 @@
 'use client'
 
-import { FormEvent, useEffect, useMemo, useState } from 'react'
+import { FormEvent, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowLeft, BadgeCheck, Check, Copy, CreditCard, Loader2, LockKeyhole, QrCode, RefreshCw, ShieldCheck } from 'lucide-react'
@@ -41,10 +41,14 @@ type CheckoutPayload = {
     payment_method?: string
     installments?: number
     card_last_four?: string
-    pix_qr_code: string
-    pix_qr_code_base64: string
-    pix_ticket_url: string
-    expires_at: string
+    pix_qr_code?: string
+    pix_qr_code_base64?: string
+    pix_ticket_url?: string
+    expires_at?: string
+    three_ds_info?: {
+      external_resource_url?: string
+      creq?: string
+    } | null
   }
   subscription?: {
     id: string
@@ -71,6 +75,7 @@ type PaymentChoice = 'pix' | 'credit_card' | 'debit_card' | 'subscription_pix' |
 
 declare global {
   interface Window {
+    MP_DEVICE_SESSION_ID?: string
     MercadoPago?: new (publicKey: string, options?: Record<string, unknown>) => {
       createCardToken?: (input: Record<string, string>) => Promise<{ id?: string }>
       getPaymentMethods?: (input: { bin: string }) => Promise<Record<string, any>>
@@ -137,6 +142,34 @@ function loadMercadoPagoSdk() {
   })
 }
 
+function loadMercadoPagoSecurityScript() {
+  if (typeof window === 'undefined') return Promise.resolve('')
+  if (text(window.MP_DEVICE_SESSION_ID)) return Promise.resolve(text(window.MP_DEVICE_SESSION_ID))
+
+  return new Promise<string>((resolve) => {
+    const finish = () => {
+      window.setTimeout(() => resolve(text(window.MP_DEVICE_SESSION_ID)), 180)
+    }
+    const existing = window.document.querySelector<HTMLScriptElement>('script[data-mercado-pago-security="true"]')
+    if (existing) {
+      existing.addEventListener('load', finish, { once: true })
+      existing.addEventListener('error', () => resolve(''), { once: true })
+      finish()
+      return
+    }
+
+    const script = window.document.createElement('script')
+    script.src = 'https://www.mercadopago.com/v2/security.js'
+    script.async = true
+    script.dataset.mercadoPagoSecurity = 'true'
+    script.setAttribute('view', 'checkout')
+    script.setAttribute('output', 'MP_DEVICE_SESSION_ID')
+    script.onload = finish
+    script.onerror = () => resolve('')
+    window.document.head.appendChild(script)
+  })
+}
+
 function statusLabel(status?: string) {
   switch (status) {
     case 'approved':
@@ -191,6 +224,7 @@ export default function CheckoutClient({
   const [error, setError] = useState('')
   const [checkoutResult, setCheckoutResult] = useState<CheckoutPayload | null>(null)
   const [copied, setCopied] = useState(false)
+  const threeDSFrameRef = useRef<HTMLIFrameElement | null>(null)
 
   const selectedBumpRows = useMemo(
     () => bumps.filter((bump) => selectedBumps.includes(bump.id)),
@@ -201,6 +235,13 @@ export default function CheckoutClient({
   const coverImage = product.cover_image_url || product.thumbnail_url || '/images/products/corretor-nota-8-cover.webp'
   const lifecycleStatus = checkoutResult?.status?.lifecycle_status
   const paymentStatus = checkoutResult?.status?.payment_status || checkoutResult?.payment?.status || checkoutResult?.order?.status
+  const threeDSInfo = checkoutResult?.payment?.three_ds_info
+  const isThreeDSChallenge = Boolean(
+    threeDSInfo?.external_resource_url
+    && threeDSInfo?.creq
+    && checkoutResult?.payment?.status === 'pending'
+    && checkoutResult.payment.status_detail === 'pending_challenge'
+  )
   const isApprovedPayment = Boolean(
     checkoutResult && (
       approvedPaymentStatuses.has(String(paymentStatus || ''))
@@ -217,7 +258,9 @@ export default function CheckoutClient({
   const memberAreaUrl = checkoutResult?.status?.member_area_url || '/membros'
   const retryCheckoutUrl = checkoutResult?.status?.checkout_url || `/checkout/${checkoutSlug}`
   const statusText = checkoutResult?.status?.label || statusLabel(paymentStatus)
-  const statusMessage = checkoutResult?.status?.message
+  const statusMessage = isThreeDSChallenge
+    ? 'O banco solicitou uma verificacao de seguranca para aprovar o cartao. Conclua a etapa abaixo para liberarmos o acesso.'
+    : checkoutResult?.status?.message
   const tone = statusTone(paymentStatus)
   const offerMethods = useMemo(() => new Set((offer.payment_methods || ['pix']).map(String)), [offer.payment_methods])
   const subscriptionProduct = product.access_model === 'subscription' || offerMethods.has('subscription')
@@ -280,11 +323,13 @@ export default function CheckoutClient({
     const documentNumber = cleanDocument(buyerDocument)
     const bin = cardNumber.replace(/\D/g, '').slice(0, 8)
     let paymentMethodId = cardBrand(cardNumber)
+    let issuerId = ''
 
     if (mp.getPaymentMethods && bin.length >= 6) {
       const methods = await mp.getPaymentMethods({ bin }).catch(() => null)
       const result = Array.isArray(methods?.results) ? methods.results[0] : null
       paymentMethodId = text(result?.id, paymentMethodId)
+      issuerId = text(result?.issuer?.id || result?.issuer_id)
     }
 
     const token = await mp.createCardToken?.({
@@ -299,7 +344,7 @@ export default function CheckoutClient({
 
     if (!token?.id) throw new Error('Nao foi possivel tokenizar o cartao.')
     if (!paymentMethodId) throw new Error('Nao foi possivel identificar a bandeira do cartao.')
-    return { token: token.id, paymentMethodId }
+    return { token: token.id, paymentMethodId, issuerId }
   }
 
   const submitCheckout = async (event: FormEvent<HTMLFormElement>) => {
@@ -343,10 +388,12 @@ export default function CheckoutClient({
       const utm = Object.fromEntries(
         Array.from(searchParams.entries()).filter(([key]) => key.startsWith('utm_') || ['src', 'campaign'].includes(key))
       )
+      const deviceSessionId = await loadMercadoPagoSecurityScript().catch(() => text(window.MP_DEVICE_SESSION_ID))
 
       let endpoint = '/api/checkout/pix'
       const payloadBody: Record<string, any> = {
         checkout_slug: checkoutSlug,
+        device_session_id: deviceSessionId,
         selected_bump_ids: selectedBumps,
         customer: {
           name,
@@ -367,6 +414,7 @@ export default function CheckoutClient({
           token: cardToken.token,
           payment_method_id: cardToken.paymentMethodId,
           payment_type_id: paymentChoice,
+          issuer_id: cardToken.issuerId || undefined,
           installments: paymentChoice === 'credit_card' ? Number(installments) || 1 : 1,
         }
       }
@@ -447,6 +495,49 @@ export default function CheckoutClient({
       setCheckingStatus(false)
     }
   }
+
+  useEffect(() => {
+    loadMercadoPagoSecurityScript().catch(() => '')
+  }, [])
+
+  useEffect(() => {
+    if (!isThreeDSChallenge || !threeDSInfo?.external_resource_url || !threeDSInfo.creq) return
+    const iframe = threeDSFrameRef.current
+    const iframeDocument = iframe?.contentWindow?.document
+    if (!iframeDocument) return
+
+    iframeDocument.open()
+    iframeDocument.write('<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0;background:#fff;"></body></html>')
+    iframeDocument.close()
+
+    const form = iframeDocument.createElement('form')
+    form.method = 'POST'
+    form.action = threeDSInfo.external_resource_url
+    form.style.display = 'none'
+
+    const creq = iframeDocument.createElement('input')
+    creq.type = 'hidden'
+    creq.name = 'creq'
+    creq.value = threeDSInfo.creq
+    form.appendChild(creq)
+
+    iframeDocument.body.appendChild(form)
+    form.submit()
+  }, [isThreeDSChallenge, threeDSInfo?.external_resource_url, threeDSInfo?.creq])
+
+  useEffect(() => {
+    if (!isThreeDSChallenge) return
+    const onMessage = (event: MessageEvent) => {
+      const data = event.data
+      if (!data || typeof data !== 'object') return
+      const status = text((data as Record<string, unknown>).status || (data as Record<string, unknown>).type).toLowerCase()
+      if (!status.includes('complete') && !status.includes('success')) return
+      refreshPaymentStatus()
+      window.setTimeout(() => refreshPaymentStatus(), 2500)
+    }
+    window.addEventListener('message', onMessage)
+    return () => window.removeEventListener('message', onMessage)
+  }, [isThreeDSChallenge, checkoutResult?.order?.id])
 
   useEffect(() => {
     const orderId = checkoutResult?.order?.id
@@ -678,6 +769,20 @@ export default function CheckoutClient({
                     ? <>{statusMessage || 'Esse pagamento nao esta mais ativo. Voce pode tentar novamente pelo checkout.'}</>
                     : <>Valor: <strong>{checkoutResult.order?.total_display}</strong>. {statusMessage || 'Esta tela verifica automaticamente a aprovacao e libera o acesso assim que o Mercado Pago confirmar.'}</>}
               </p>
+
+              {isThreeDSChallenge && (
+                <div className="cn8-three-ds">
+                  <div>
+                    <strong>Confirme com o banco para aprovar o cartao</strong>
+                    <small>Essa verificacao ajuda o Mercado Pago a aprovar compras que poderiam ser recusadas por seguranca.</small>
+                  </div>
+                  <iframe ref={threeDSFrameRef} title="Verificacao segura do cartao" />
+                  <button type="button" onClick={refreshPaymentStatus} disabled={checkingStatus}>
+                    {checkingStatus ? <Loader2 size={16} className="cn8-spin" /> : <RefreshCw size={16} />}
+                    Ja confirmei
+                  </button>
+                </div>
+              )}
 
               {isApprovedPayment && (
                 <div className="cn8-access-card">
@@ -1029,6 +1134,53 @@ export default function CheckoutClient({
           border-radius: 8px;
           padding: 14px;
           background: rgba(231, 180, 82, 0.1);
+        }
+
+        .cn8-three-ds {
+          display: grid;
+          gap: 12px;
+          margin-top: 18px;
+          border: 1px solid rgba(96, 165, 250, 0.34);
+          border-radius: 8px;
+          padding: 14px;
+          background: rgba(37, 99, 235, 0.12);
+        }
+
+        .cn8-three-ds > div {
+          display: grid;
+          gap: 5px;
+        }
+
+        .cn8-three-ds strong {
+          color: #fff8ec;
+          font-size: 0.92rem;
+        }
+
+        .cn8-three-ds small {
+          color: rgba(248, 242, 232, 0.7);
+          line-height: 1.45;
+        }
+
+        .cn8-three-ds iframe {
+          width: 100%;
+          min-height: 430px;
+          border: 1px solid rgba(248, 242, 232, 0.18);
+          border-radius: 7px;
+          background: #fff;
+        }
+
+        .cn8-three-ds button {
+          min-height: 42px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          border: 1px solid rgba(96, 165, 250, 0.45);
+          border-radius: 7px;
+          background: rgba(37, 99, 235, 0.2);
+          color: #dbeafe;
+          font-weight: 900;
+          cursor: pointer;
         }
 
         .cn8-subscription-link strong,

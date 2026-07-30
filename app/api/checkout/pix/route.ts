@@ -25,6 +25,7 @@ type CheckoutPixBody = {
   checkout_slug?: string
   offer_slug?: string
   selected_bump_ids?: string[]
+  device_session_id?: string
   customer?: {
     name?: string
     email?: string
@@ -53,6 +54,31 @@ function selectedBumps(allBumps: CheckoutBumpRow[], selectedIds: unknown) {
 
 function sumCents(items: Array<{ price_cents: number }>) {
   return items.reduce((total, item) => total + Math.max(0, Number(item.price_cents) || 0), 0)
+}
+
+function mercadoPagoCheckoutItems(params: {
+  checkout: Awaited<ReturnType<typeof loadCheckoutOffer>>
+  selected: CheckoutBumpRow[]
+}) {
+  if (!params.checkout) return []
+  return [
+    {
+      id: params.checkout.product.id,
+      title: params.checkout.product.title,
+      description: params.checkout.product.subtitle || params.checkout.offer.description,
+      quantity: 1,
+      unitAmountCents: params.checkout.offer.price_cents,
+      pictureUrl: params.checkout.product.thumbnail_url || params.checkout.product.cover_image_url,
+    },
+    ...params.selected.map((bump) => ({
+      id: bump.id,
+      title: bump.title,
+      description: bump.description,
+      quantity: 1,
+      unitAmountCents: bump.price_cents,
+      pictureUrl: null,
+    })),
+  ]
 }
 
 function publicCheckoutUrl(request: NextRequest, path: string) {
@@ -236,7 +262,11 @@ export async function POST(request: NextRequest) {
           name: customerInput.name,
           email: customerInput.email,
           document: customerInput.document,
+          phone: customerInput.phone,
+          registrationDate: customer.created_at || customer.updated_at || null,
         },
+        deviceSessionId: text(body.device_session_id),
+        items: mercadoPagoCheckoutItems({ checkout, selected }),
         externalReference: order.id,
         notificationUrl: config.mercadoPagoWebhookUrl,
         metadata: {
@@ -245,6 +275,7 @@ export async function POST(request: NextRequest) {
           product_slug: checkout.product.slug,
           offer_slug: checkout.offer.slug,
           checkout_session_id: checkoutSessionId,
+          mercado_pago_device_session_id_present: Boolean(text(body.device_session_id)),
         },
       })
     } catch (error) {

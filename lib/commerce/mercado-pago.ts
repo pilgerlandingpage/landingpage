@@ -5,14 +5,27 @@ export type MercadoPagoPixInput = {
   idempotencyKey: string
   amountCents: number
   description: string
+  deviceSessionId?: string | null
   payer: {
     name: string
     email: string
     document?: string | null
+    phone?: string | null
+    registrationDate?: string | null
   }
+  items?: MercadoPagoAdditionalInfoItem[]
   externalReference: string
   notificationUrl?: string
   metadata?: Record<string, unknown>
+}
+
+export type MercadoPagoAdditionalInfoItem = {
+  id?: string | null
+  title: string
+  description?: string | null
+  quantity?: number | null
+  unitAmountCents: number
+  pictureUrl?: string | null
 }
 
 export type MercadoPagoCardPaymentInput = {
@@ -20,6 +33,7 @@ export type MercadoPagoCardPaymentInput = {
   idempotencyKey: string
   amountCents: number
   description: string
+  deviceSessionId?: string | null
   token: string
   paymentMethodId: string
   issuerId?: string | null
@@ -28,7 +42,10 @@ export type MercadoPagoCardPaymentInput = {
     name: string
     email: string
     document?: string | null
+    phone?: string | null
+    registrationDate?: string | null
   }
+  items?: MercadoPagoAdditionalInfoItem[]
   externalReference: string
   notificationUrl?: string
   statementDescriptor?: string | null
@@ -130,6 +147,67 @@ function mercadoPagoErrorMessage(status: number, payload: unknown, fallback: str
   return `Mercado Pago (${status}): ${record.message || record.error || fallback}.${cause}`.slice(0, 260)
 }
 
+function cleanText(value: unknown, maxLength = 300) {
+  return String(value || '').trim().slice(0, maxLength)
+}
+
+function phonePayload(value: unknown) {
+  const digits = String(value || '').replace(/\D/g, '')
+  const local = digits.startsWith('55') ? digits.slice(2) : digits
+  if (local.length < 10) return undefined
+  return {
+    area_code: local.slice(0, 2),
+    number: local.slice(2, 11),
+  }
+}
+
+function buildAdditionalInfo(input: {
+  payer: {
+    name: string
+    phone?: string | null
+    registrationDate?: string | null
+  }
+  items?: MercadoPagoAdditionalInfoItem[]
+}) {
+  const { firstName, lastName } = splitName(input.payer.name)
+  const phone = phonePayload(input.payer.phone)
+  const items = (input.items || [])
+    .filter(item => item.title && item.unitAmountCents > 0)
+    .slice(0, 20)
+    .map((item) => ({
+      id: cleanText(item.id, 80) || undefined,
+      title: cleanText(item.title, 120),
+      description: cleanText(item.description, 240) || undefined,
+      quantity: Math.max(1, Math.round(Number(item.quantity || 1))),
+      unit_price: Math.max(0, item.unitAmountCents) / 100,
+      picture_url: cleanText(item.pictureUrl, 500) || undefined,
+    }))
+
+  return {
+    ...(items.length ? { items } : {}),
+    payer: {
+      first_name: firstName,
+      last_name: lastName || undefined,
+      phone,
+      registration_date: cleanText(input.payer.registrationDate, 40) || undefined,
+    },
+  }
+}
+
+function mercadoPagoHeaders(input: {
+  accessToken: string
+  idempotencyKey: string
+  deviceSessionId?: string | null
+}) {
+  return {
+    accept: 'application/json',
+    'content-type': 'application/json',
+    Authorization: `Bearer ${input.accessToken}`,
+    'X-Idempotency-Key': input.idempotencyKey,
+    ...(cleanText(input.deviceSessionId, 120) ? { 'X-meli-session-id': cleanText(input.deviceSessionId, 120) } : {}),
+  }
+}
+
 export async function createMercadoPagoPixPayment(input: MercadoPagoPixInput) {
   const { firstName, lastName } = splitName(input.payer.name)
   const document = String(input.payer.document || '').replace(/\D/g, '')
@@ -149,6 +227,10 @@ export async function createMercadoPagoPixPayment(input: MercadoPagoPixInput) {
         : undefined,
     },
     external_reference: input.externalReference,
+    additional_info: buildAdditionalInfo({
+      payer: input.payer,
+      items: input.items,
+    }),
     metadata: input.metadata || {},
   }
 
@@ -156,12 +238,7 @@ export async function createMercadoPagoPixPayment(input: MercadoPagoPixInput) {
 
   const response = await fetch('https://api.mercadopago.com/v1/payments', {
     method: 'POST',
-    headers: {
-      accept: 'application/json',
-      'content-type': 'application/json',
-      Authorization: `Bearer ${input.accessToken}`,
-      'X-Idempotency-Key': input.idempotencyKey,
-    },
+    headers: mercadoPagoHeaders(input),
     body: JSON.stringify(body),
   })
 
@@ -185,6 +262,9 @@ export async function createMercadoPagoCardPayment(input: MercadoPagoCardPayment
     installments: Math.max(1, Math.round(input.installments || 1)),
     payment_method_id: input.paymentMethodId,
     issuer_id: input.issuerId || undefined,
+    capture: true,
+    binary_mode: false,
+    three_d_secure_mode: 'optional',
     statement_descriptor: input.statementDescriptor || undefined,
     payer: {
       email: input.payer.email,
@@ -198,6 +278,10 @@ export async function createMercadoPagoCardPayment(input: MercadoPagoCardPayment
         : undefined,
     },
     external_reference: input.externalReference,
+    additional_info: buildAdditionalInfo({
+      payer: input.payer,
+      items: input.items,
+    }),
     metadata: input.metadata || {},
   }
 
@@ -205,12 +289,7 @@ export async function createMercadoPagoCardPayment(input: MercadoPagoCardPayment
 
   const response = await fetch('https://api.mercadopago.com/v1/payments', {
     method: 'POST',
-    headers: {
-      accept: 'application/json',
-      'content-type': 'application/json',
-      Authorization: `Bearer ${input.accessToken}`,
-      'X-Idempotency-Key': input.idempotencyKey,
-    },
+    headers: mercadoPagoHeaders(input),
     body: JSON.stringify(body),
   })
 

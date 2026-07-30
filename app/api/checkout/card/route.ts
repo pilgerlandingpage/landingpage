@@ -16,6 +16,7 @@ type CheckoutCardBody = {
   checkout_slug?: string
   offer_slug?: string
   selected_bump_ids?: string[]
+  device_session_id?: string
   customer?: {
     name?: string
     email?: string
@@ -46,6 +47,27 @@ function positiveInt(value: unknown, fallback: number, min: number, max: number)
 
 function cardPaymentMethod(paymentTypeId: unknown): CheckoutPaymentMethod {
   return String(paymentTypeId || '').toLowerCase() === 'debit_card' ? 'debit_card' : 'credit_card'
+}
+
+function mercadoPagoCheckoutItems(prepared: Awaited<ReturnType<typeof prepareCheckoutOrder>>) {
+  return [
+    {
+      id: prepared.checkout.product.id,
+      title: prepared.checkout.product.title,
+      description: prepared.checkout.product.subtitle || prepared.checkout.offer.description,
+      quantity: 1,
+      unitAmountCents: prepared.checkout.offer.price_cents,
+      pictureUrl: prepared.checkout.product.thumbnail_url || prepared.checkout.product.cover_image_url,
+    },
+    ...prepared.selectedBumps.map((bump) => ({
+      id: bump.id,
+      title: bump.title,
+      description: bump.description,
+      quantity: 1,
+      unitAmountCents: bump.price_cents,
+      pictureUrl: null,
+    })),
+  ]
 }
 
 export async function POST(request: NextRequest) {
@@ -114,11 +136,15 @@ export async function POST(request: NextRequest) {
         paymentMethodId,
         issuerId: body.card?.issuer_id ? String(body.card.issuer_id) : null,
         installments,
+        deviceSessionId: text(body.device_session_id),
         payer: {
           name: customerInput.name,
           email: customerInput.email,
           document: customerInput.document,
+          phone: customerInput.phone,
+          registrationDate: prepared.customer.created_at || prepared.customer.updated_at || null,
         },
+        items: mercadoPagoCheckoutItems(prepared),
         externalReference: order.id,
         notificationUrl: config.mercadoPagoWebhookUrl,
         statementDescriptor: config.mercadoPagoStatementDescriptor,
@@ -128,6 +154,8 @@ export async function POST(request: NextRequest) {
           product_slug: checkout.product.slug,
           offer_slug: checkout.offer.slug,
           checkout_session_id: checkoutSessionId,
+          mercado_pago_device_session_id_present: Boolean(text(body.device_session_id)),
+          three_d_secure_mode: 'optional',
           payment_method: paymentMethod,
         },
       })
@@ -250,6 +278,7 @@ export async function POST(request: NextRequest) {
         payment_method: remotePaymentMethod,
         installments: payment.installments,
         card_last_four: text(mercadoPagoPayment.card?.last_four_digits),
+        three_ds_info: mercadoPagoPayment.three_ds_info || null,
       },
       status: publicPaymentStatusPayload(updatedOrder, payment),
       fulfillment,

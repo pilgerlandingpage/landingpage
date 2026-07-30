@@ -228,11 +228,46 @@ export function paymentLifecycleFromProviderStatus(status: unknown, statusDetail
 
   if (normalized === 'approved') return 'payment_approved'
   if (normalized === 'authorized' || normalized === 'in_process' || normalized === 'in_mediation') return 'payment_processing'
+  if (normalized === 'pending' && detail.includes('pending_challenge')) return 'payment_processing'
   if (normalized === 'rejected') return 'payment_rejected'
   if (normalized === 'refunded') return 'payment_refunded'
   if (normalized === 'charged_back') return 'chargeback'
   if (normalized === 'cancelled') return detail.includes('expired') ? 'payment_expired' : 'payment_cancelled'
   return 'waiting_payment'
+}
+
+function publicPaymentMessage(defaultMessage: string, payment?: Record<string, any> | null) {
+  const status = text(payment?.status).toLowerCase()
+  const detail = text(payment?.status_detail).toLowerCase()
+
+  if (status === 'pending' && detail.includes('pending_challenge')) {
+    return 'O banco solicitou uma verificacao 3DS. Conclua a etapa de seguranca para o Mercado Pago tentar aprovar o cartao.'
+  }
+  if (status !== 'rejected') return defaultMessage
+
+  if (detail.includes('insufficient_amount') || detail.includes('insufficient')) {
+    return 'O banco recusou por limite ou saldo insuficiente. Tente outro cartao, outra forma de pagamento ou Pix.'
+  }
+  if (detail.includes('call_for_authorize')) {
+    return 'O banco pediu autorizacao da compra. Autorize no app ou central do cartao e tente novamente.'
+  }
+  if (detail.includes('bad_filled_security_code')) {
+    return 'O codigo de seguranca parece incorreto. Confira o CVV e tente novamente.'
+  }
+  if (detail.includes('bad_filled_date')) {
+    return 'A validade do cartao parece incorreta. Confira mes e ano e tente novamente.'
+  }
+  if (detail.includes('bad_filled_other')) {
+    return 'Algum dado do cartao nao foi aceito. Confira numero, nome, validade e CPF antes de tentar novamente.'
+  }
+  if (detail.includes('duplicated_payment')) {
+    return 'O Mercado Pago identificou uma tentativa duplicada. Aguarde alguns minutos ou tente com Pix.'
+  }
+  if (detail.includes('high_risk') || detail.includes('3ds') || detail.includes('three')) {
+    return 'O Mercado Pago recusou por seguranca. Tente novamente com autenticacao do banco, use outro cartao ou gere Pix.'
+  }
+
+  return defaultMessage
 }
 
 export function paymentLifecycleFromOrder(order: Record<string, any> | null | undefined, payment?: Record<string, any> | null): PaymentLifecycleStatus {
@@ -259,7 +294,7 @@ export function publicPaymentStatusPayload(order: Record<string, any>, payment?:
   return {
     lifecycle_status: status,
     label: definition.label,
-    message: definition.publicMessage,
+    message: publicPaymentMessage(definition.publicMessage, payment),
     order_status: order.status,
     payment_status: payment?.status || null,
     next_action: definition.nextAction,
