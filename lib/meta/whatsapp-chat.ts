@@ -241,6 +241,203 @@ async function findLeadByPhone(supabase: SupabaseAdmin, phone: string) {
   return data?.[0] || null
 }
 
+function isPublicImageUrl(value: unknown) {
+  const text = cleanText(value, 1200)
+  return /^https?:\/\/.+\.(jpe?g|png|webp|gif)(\?|#|$)/i.test(text)
+    || /^https?:\/\/.+(profile|avatar|image|photo|pic|picture)/i.test(text)
+}
+
+function isHttpUrl(value: unknown) {
+  return /^https?:\/\//i.test(cleanText(value, 1200))
+}
+
+function extractCachedAvatarUrl(value: unknown, depth = 0): string | null {
+  if (depth > 4) return null
+  if (isPublicImageUrl(value)) return cleanText(value, 1200)
+
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const nested = extractCachedAvatarUrl(item, depth + 1)
+      if (nested) return nested
+    }
+    return null
+  }
+
+  const record = asRecord(value)
+  if (!Object.keys(record).length) return null
+
+  const priorityKeys = [
+    'imagePreview',
+    'profilePicUrl',
+    'profile_pic_url',
+    'profilePictureUrl',
+    'profile_picture_url',
+    'profileImageUrl',
+    'profile_image_url',
+    'avatarUrl',
+    'avatar_url',
+    'picture',
+    'photo',
+    'image',
+    'avatar',
+    'url',
+  ]
+
+  for (const key of priorityKeys) {
+    const candidate = record[key]
+    if (isHttpUrl(candidate)) return cleanText(candidate, 1200)
+  }
+
+  for (const key of priorityKeys) {
+    const nested = extractCachedAvatarUrl(record[key], depth + 1)
+    if (nested) return nested
+  }
+
+  for (const nested of Object.values(record)) {
+    const found = extractCachedAvatarUrl(nested, depth + 1)
+    if (found) return found
+  }
+
+  return null
+}
+
+function uniqueTextValues(values: unknown[]) {
+  return Array.from(new Set(values.map(value => cleanText(value, 120)).filter(Boolean)))
+}
+
+function contactLookupPhones(phone: unknown) {
+  const digits = normalizeMetaWhatsAppPhone(phone)
+  if (!digits) return []
+  const candidates = [digits]
+  if (digits.startsWith('55') && digits.length > 11) candidates.push(digits.slice(2))
+  if (!digits.startsWith('55') && digits.length >= 10) candidates.push(`55${digits}`)
+  return uniqueTextValues(candidates)
+}
+
+function contactLookupJids(phone: unknown) {
+  return contactLookupPhones(phone).flatMap(value => [`${value}@s.whatsapp.net`, `${value}@c.us`])
+}
+
+function mapContactAvatar(map: Map<string, string>, key: unknown, avatarUrl: string) {
+  const phones = contactLookupPhones(key)
+  phones.forEach(phone => map.set(phone, avatarUrl))
+}
+
+async function loadConnectyHubContactAvatarMap(
+  supabase: SupabaseAdmin,
+  phones: unknown[]
+) {
+  const phoneKeys = uniqueTextValues(phones.flatMap(phone => contactLookupPhones(phone)))
+  const jidKeys = uniqueTextValues(phones.flatMap(phone => contactLookupJids(phone)))
+  const avatarMap = new Map<string, string>()
+
+  async function loadContactRows(column: 'phone' | 'jid', values: string[]) {
+    if (!values.length) return []
+    const { data, error } = await supabase
+      .from('whatsapp_instance_contacts')
+      .select('phone,jid,raw,last_synced_at')
+      .in(column, values)
+      .order('last_synced_at', { ascending: false })
+      .limit(300)
+
+    if (error) {
+      console.warn('[Meta WhatsApp Chat] contact avatar lookup failed:', error.message)
+      return []
+    }
+    return data || []
+  }
+
+  async function loadChatRows(column: 'phone' | 'chat_id', values: string[]) {
+    if (!values.length) return []
+    const { data, error } = await supabase
+      .from('whatsapp_instance_chats')
+      .select('phone,chat_id,raw,last_synced_at')
+      .in(column, values)
+      .order('last_synced_at', { ascending: false })
+      .limit(300)
+
+    if (error) {
+      console.warn('[Meta WhatsApp Chat] chat avatar lookup failed:', error.message)
+      return []
+    }
+    return data || []
+  }
+
+  const contactRows = [
+    ...await loadContactRows('phone', phoneKeys),
+    ...await loadContactRows('jid', jidKeys),
+  ]
+
+  const chatRows = [
+    ...await loadChatRows('phone', phoneKeys),
+    ...await loadChatRows('chat_id', jidKeys),
+  ]
+
+  for (const row of contactRows) {
+    const raw = asRecord(row?.raw)
+    const avatarUrl = extractCachedAvatarUrl(raw) || extractCachedAvatarUrl(row)
+    if (!avatarUrl) continue
+
+    mapContactAvatar(avatarMap, row?.phone, avatarUrl)
+    mapContactAvatar(avatarMap, String(row?.jid || '').split('@')[0], avatarUrl)
+  }
+
+  for (const row of chatRows) {
+    const raw = asRecord(row?.raw)
+    const avatarUrl = extractCachedAvatarUrl(raw) || extractCachedAvatarUrl(row)
+    if (!avatarUrl) continue
+
+    mapContactAvatar(avatarMap, row?.phone, avatarUrl)
+    mapContactAvatar(avatarMap, String(row?.chat_id || '').split('@')[0], avatarUrl)
+  }
+
+  return avatarMap
+}
+
+function firstRelation(value: unknown) {
+  return Array.isArray(value) ? value[0] : value
+}
+
+function enrichConversationWithAvatar(conversation: any, avatarMap: Map<string, string>) {
+  const lead = firstRelation(conversation?.lead) as Record<string, unknown> | null
+  if (lead?.avatar_url) return conversation
+
+  const avatarUrl = contactLookupPhones(conversation?.contact_phone)
+    .map(phone => avatarMap.get(phone))
+    .find(Boolean)
+
+  if (!avatarUrl) return conversation
+
+  const enrichedLead = {
+    ...(lead || {}),
+    avatar_url: avatarUrl,
+    avatar_source: lead?.avatar_source || 'connectyhub_contact_cache',
+    avatar_updated_at: lead?.avatar_updated_at || null,
+  }
+
+  return {
+    ...conversation,
+    lead: Array.isArray(conversation?.lead) ? [enrichedLead] : enrichedLead,
+  }
+}
+
+async function enrichConversationsWithContactAvatars(supabase: SupabaseAdmin, conversations: any[]) {
+  if (!conversations.length) return conversations
+  const needsAvatar = conversations.filter(conversation => {
+    const lead = firstRelation(conversation?.lead) as Record<string, unknown> | null
+    return !lead?.avatar_url
+  })
+  if (!needsAvatar.length) return conversations
+
+  const avatarMap = await loadConnectyHubContactAvatarMap(
+    supabase,
+    needsAvatar.map(conversation => conversation.contact_phone)
+  )
+  if (!avatarMap.size) return conversations
+
+  return conversations.map(conversation => enrichConversationWithAvatar(conversation, avatarMap))
+}
+
 async function findConversation(
   supabase: SupabaseAdmin,
   senderId: string,
@@ -436,7 +633,9 @@ export async function listMetaWhatsAppConversations(
   const { data: conversations, error } = await query
   if (error) throw error
 
-  const summary = (conversations || []).reduce((acc: Record<string, number>, conversation: any) => {
+  const enrichedConversations = await enrichConversationsWithContactAvatars(supabase, conversations || [])
+
+  const summary = enrichedConversations.reduce((acc: Record<string, number>, conversation: any) => {
     acc.total += 1
     acc.unread += Number(conversation.unread_count || 0) > 0 ? 1 : 0
     acc.open += conversation.status === 'open' ? 1 : 0
@@ -447,7 +646,7 @@ export async function listMetaWhatsAppConversations(
   }, { total: 0, unread: 0, open: 0, pending: 0, closed: 0, windowActive: 0 })
 
   return {
-    conversations: conversations || [],
+    conversations: enrichedConversations,
     summary,
   }
 }
@@ -482,8 +681,10 @@ export async function getMetaWhatsAppConversationDetail(
   if (messagesResult.error) throw messagesResult.error
   if (!conversationResult.data) throw new Error('Conversa Meta WhatsApp nao encontrada.')
 
+  const [conversation] = await enrichConversationsWithContactAvatars(supabase, [conversationResult.data])
+
   return {
-    conversation: conversationResult.data,
+    conversation: conversation || conversationResult.data,
     messages: messagesResult.data || [],
   }
 }

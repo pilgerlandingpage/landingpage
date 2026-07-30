@@ -213,18 +213,60 @@ function LeadAvatar({ name, src, size = 'md' }: { name?: string | null; src?: st
   const showImage = Boolean(avatarUrl && avatarUrl !== failedUrl)
 
   return (
-    <span className={`lead-avatar ${size}`}>
-      {showImage ? (
-        <img
-          src={avatarUrl || ''}
-          alt={`Foto de ${name || 'lead'}`}
-          referrerPolicy="no-referrer"
-          onError={() => setFailedUrl(avatarUrl)}
-        />
-      ) : (
-        <span>{initials(name)}</span>
-      )}
-    </span>
+    <>
+      <span className={`lead-avatar ${size}`}>
+        {showImage ? (
+          <img
+            src={avatarUrl || ''}
+            alt={`Foto de ${name || 'lead'}`}
+            referrerPolicy="no-referrer"
+            onError={() => setFailedUrl(avatarUrl)}
+          />
+        ) : (
+          <span>{initials(name)}</span>
+        )}
+      </span>
+      <style jsx>{`
+        .lead-avatar {
+          width: 49px;
+          height: 49px;
+          min-width: 49px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          overflow: hidden;
+          background: #dfe5e7;
+          color: #41525d;
+          font-size: 15px;
+          font-weight: 600;
+          line-height: 1;
+          text-transform: uppercase;
+          flex: 0 0 auto;
+        }
+
+        .lead-avatar.sm {
+          width: 36px;
+          height: 36px;
+          min-width: 36px;
+          font-size: 13px;
+        }
+
+        .lead-avatar.lg {
+          width: 92px;
+          height: 92px;
+          min-width: 92px;
+          font-size: 26px;
+        }
+
+        .lead-avatar img {
+          width: 100%;
+          height: 100%;
+          display: block;
+          object-fit: cover;
+        }
+      `}</style>
+    </>
   )
 }
 
@@ -1389,7 +1431,7 @@ export default function MetaWhatsAppChatPage() {
         }
 
         .wa-shell {
-          grid-template-columns: 64px minmax(330px, 420px) minmax(0, 1fr);
+          grid-template-columns: 64px minmax(390px, 470px) minmax(0, 1fr);
           height: 100%;
           min-height: 0;
           border: 0;
@@ -1449,6 +1491,7 @@ export default function MetaWhatsAppChatPage() {
         .wa-sidebar {
           grid-template-rows: auto auto auto 1fr;
           border-right-color: #d1d7db;
+          background: #fff;
         }
 
         .wa-sidebar-header {
@@ -1493,6 +1536,13 @@ export default function MetaWhatsAppChatPage() {
         .wa-tabs {
           padding: 0 16px 12px;
           gap: 8px;
+          overflow-x: auto;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+
+        .wa-tabs::-webkit-scrollbar {
+          display: none;
         }
 
         .wa-tabs button {
@@ -1625,10 +1675,9 @@ export default function MetaWhatsAppChatPage() {
           padding: 22px 64px 18px;
           background-color: #efeae2;
           background-image:
-            radial-gradient(circle at 24px 26px, rgba(84, 101, 111, 0.08) 0 1px, transparent 2px),
-            radial-gradient(circle at 130px 92px, rgba(84, 101, 111, 0.06) 0 1px, transparent 2px),
-            repeating-linear-gradient(35deg, rgba(255, 255, 255, 0) 0 46px, rgba(84, 101, 111, 0.035) 46px 47px);
-          background-size: 180px 160px, 240px 210px, 360px 360px;
+            url("data:image/svg+xml,%3Csvg width='420' height='420' viewBox='0 0 420 420' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23d9d1c4' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round' opacity='.38'%3E%3Cpath d='M38 56h33v23H38zM55 79l-9 12M56 79l10 12M110 48c11 0 20 9 20 20s-9 20-20 20-20-9-20-20 9-20 20-20zM104 64h12M103 72h14M175 62l19-19 19 19-19 19zM250 45c20 9 25 31 5 48-21-17-16-39-5-48zM325 55c16 0 28 12 28 28h-56c0-16 12-28 28-28zM55 164c18 0 31 13 31 29s-13 29-31 29-31-13-31-29 13-29 31-29zM42 190h26M58 177v28M135 170h42v30h-42zM148 200l-12 16M164 200l12 16M235 158l22 18-22 18-22-18zM323 166h43v34h-43zM344 200l-15 19M346 200l15 19M82 295c0 13-11 24-24 24S34 308 34 295s11-24 24-24 24 11 24 24zM49 294h18M167 267l27 27-27 27-27-27zM254 276c15 0 27 12 27 27h-54c0-15 12-27 27-27zM335 278h37v28h-37zM348 306l-13 17M360 306l12 17%3C/path%3E%3C/g%3E%3C/svg%3E"),
+            linear-gradient(rgba(239, 234, 226, 0.92), rgba(239, 234, 226, 0.92));
+          background-size: 420px 420px, auto;
         }
 
         .wa-bubble {
@@ -1640,12 +1689,36 @@ export default function MetaWhatsAppChatPage() {
           box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
         }
 
+        .wa-bubble.inbound::before,
+        .wa-bubble.outbound::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          width: 0;
+          height: 0;
+          border-style: solid;
+        }
+
         .wa-bubble.inbound {
           background: #fff;
+          border-top-left-radius: 0;
+        }
+
+        .wa-bubble.inbound::before {
+          left: -8px;
+          border-width: 0 8px 8px 0;
+          border-color: transparent #fff transparent transparent;
         }
 
         .wa-bubble.outbound {
           background: #d9fdd3;
+          border-top-right-radius: 0;
+        }
+
+        .wa-bubble.outbound::before {
+          right: -8px;
+          border-width: 0 0 8px 8px;
+          border-color: transparent transparent transparent #d9fdd3;
         }
 
         .wa-bubble-text {
@@ -1662,17 +1735,17 @@ export default function MetaWhatsAppChatPage() {
         .wa-composer {
           grid-template-columns: auto auto minmax(0, 1fr) auto;
           align-items: center;
-          gap: 6px;
-          min-height: 62px;
-          padding: 8px 10px;
+          gap: 8px;
+          min-height: 64px;
+          padding: 9px 14px;
           background: #f0f2f5;
           border-top: 1px solid #d1d7db;
         }
 
         .wa-composer textarea {
-          min-height: 44px;
+          min-height: 46px;
           max-height: 120px;
-          border-radius: 22px;
+          border-radius: 24px;
           padding: 12px 17px;
           font-size: 15px;
         }
@@ -1696,7 +1769,7 @@ export default function MetaWhatsAppChatPage() {
 
         @media (max-width: 1280px) {
           .wa-shell {
-            grid-template-columns: 64px minmax(310px, 390px) minmax(0, 1fr);
+            grid-template-columns: 64px minmax(350px, 420px) minmax(0, 1fr);
           }
         }
 
