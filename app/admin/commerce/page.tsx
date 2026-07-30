@@ -78,6 +78,29 @@ type CommerceMessage = {
     error_message: string | null
 }
 
+type OfficialWhatsAppTemplate = {
+    template_key: string
+    name: string
+    event_type: string
+    body: string
+    variables: string[]
+    requires_opt_in: boolean
+    is_active: boolean
+    updated_at: string | null
+    meta: {
+        template_name: string
+        language: string
+        category: string
+        status: string
+        quality_score: string | null
+        has_draft: boolean
+        components: unknown[]
+        example_values: string[]
+        body_variables: string[]
+        last_synced_at: string | null
+    }
+}
+
 type AutomationConfig = {
     enabled: boolean
     checkout_abandoned_after_minutes: number
@@ -93,6 +116,7 @@ type CommercePayload = {
     funnel: FunnelItem[]
     orders: CommerceOrder[]
     messages: CommerceMessage[]
+    official_whatsapp_templates: OfficialWhatsAppTemplate[]
     automation: AutomationConfig
 }
 
@@ -249,6 +273,31 @@ function statusTone(status: string) {
     return 'neutral'
 }
 
+function templateReviewStatusLabel(status: string) {
+    const normalized = status.toUpperCase()
+    const labels: Record<string, string> = {
+        DRAFT: 'Rascunho',
+        READY: 'Pronto para revisar',
+        SYNCED: 'Sincronizado',
+        APPROVED: 'Aprovado',
+        PENDING: 'Em analise',
+        REJECTED: 'Rejeitado',
+        PAUSED: 'Pausado',
+        DISABLED: 'Desativado',
+        IN_APPEAL: 'Em recurso',
+        APPEAL_REQUESTED: 'Recurso solicitado',
+    }
+    return labels[normalized] || status
+}
+
+function templateReviewTone(status: string) {
+    const normalized = status.toUpperCase()
+    if (['APPROVED', 'SYNCED'].includes(normalized)) return 'success'
+    if (['DRAFT', 'READY', 'PENDING', 'IN_APPEAL', 'APPEAL_REQUESTED'].includes(normalized)) return 'warning'
+    if (['REJECTED', 'PAUSED', 'DISABLED'].includes(normalized)) return 'danger'
+    return 'neutral'
+}
+
 function channelIcon(channel: string) {
     return channel === 'whatsapp' ? <MessageCircle size={14} /> : <Mail size={14} />
 }
@@ -272,6 +321,7 @@ export default function CommerceAdminPage() {
     const [syncingPix, setSyncingPix] = useState(false)
     const [creatingInternalOrder, setCreatingInternalOrder] = useState(false)
     const [approvingInternalOrder, setApprovingInternalOrder] = useState(false)
+    const [preparingTemplates, setPreparingTemplates] = useState(false)
     const [error, setError] = useState('')
     const [notice, setNotice] = useState('')
 
@@ -339,6 +389,27 @@ export default function CommerceAdminPage() {
             setError(err?.message || 'Erro ao rodar automações.')
         } finally {
             setRunning(false)
+        }
+    }
+
+    const prepareMetaTemplates = async () => {
+        setPreparingTemplates(true)
+        setNotice('')
+        setError('')
+        try {
+            const response = await fetch('/api/admin/commerce', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'prepare_meta_whatsapp_templates' }),
+            })
+            const data = await response.json()
+            if (!response.ok || !data.success) throw new Error(data?.error || 'Erro ao preparar templates WhatsApp.')
+            setNotice(data.message || 'Templates WhatsApp preparados para revisao.')
+            await loadData()
+        } catch (err: any) {
+            setError(err?.message || 'Erro ao preparar templates WhatsApp.')
+        } finally {
+            setPreparingTemplates(false)
         }
     }
 
@@ -736,6 +807,55 @@ export default function CommerceAdminPage() {
                         </div>
                     </section>
 
+                    <section className="commerce-admin-panel commerce-admin-template-review">
+                        <div className="commerce-admin-panel-head">
+                            <div>
+                                <h2><MessageCircle size={18} /> Templates oficiais WhatsApp</h2>
+                                <p>Rascunhos Utility para acompanhar o pagamento pela API oficial da Meta.</p>
+                            </div>
+                            <div className="commerce-admin-actions">
+                                <button type="button" className="btn btn-primary" onClick={prepareMetaTemplates} disabled={preparingTemplates}>
+                                    {preparingTemplates ? <Loader2 className="spin" size={16} /> : <CheckCircle2 size={16} />}
+                                    Preparar rascunhos
+                                </button>
+                                <Link href="/admin/ads/meta-templates" className="btn btn-outline">
+                                    <ExternalLink size={15} />
+                                    Revisar na Meta
+                                </Link>
+                            </div>
+                        </div>
+                        <div className="commerce-admin-template-grid">
+                            {(payload.official_whatsapp_templates || []).map(template => (
+                                <article key={template.template_key} className="commerce-admin-template-card">
+                                    <header>
+                                        <div>
+                                            <strong>{template.name}</strong>
+                                            <small>{template.meta.template_name}</small>
+                                        </div>
+                                        <span className={`commerce-admin-badge is-${templateReviewTone(template.meta.status)}`}>
+                                            {templateReviewStatusLabel(template.meta.status)}
+                                        </span>
+                                    </header>
+                                    <p className="commerce-admin-template-body">{template.body}</p>
+                                    <div className="commerce-admin-template-meta">
+                                        <span>Evento <strong>{template.event_type}</strong></span>
+                                        <span>Categoria <strong>{template.meta.category}</strong></span>
+                                        <span>Idioma <strong>{template.meta.language}</strong></span>
+                                        <span>Opt-in <strong>{template.requires_opt_in ? 'Sim' : 'Nao'}</strong></span>
+                                    </div>
+                                    <div className="commerce-admin-template-vars" aria-label={`Variaveis do template ${template.name}`}>
+                                        {template.variables.map(variable => <span key={variable}>{variable}</span>)}
+                                    </div>
+                                </article>
+                            ))}
+                            {(payload.official_whatsapp_templates || []).length === 0 && (
+                                <div className="commerce-admin-empty is-small">
+                                    Nenhum template oficial preparado ainda.
+                                </div>
+                            )}
+                        </div>
+                    </section>
+
                     <section className="commerce-admin-panel">
                         <div className="commerce-admin-panel-head">
                             <div>
@@ -1128,6 +1248,106 @@ export default function CommerceAdminPage() {
                     font-size: 0.74rem;
                 }
 
+                .commerce-admin-template-review {
+                    margin-bottom: 16px;
+                }
+
+                .commerce-admin-template-grid {
+                    display: grid;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    gap: 10px;
+                    margin-top: 14px;
+                }
+
+                .commerce-admin-template-card {
+                    min-width: 0;
+                    display: grid;
+                    gap: 10px;
+                    padding: 12px;
+                    border: 1px solid rgba(148, 163, 184, 0.16);
+                    border-radius: 7px;
+                    background: rgba(255, 255, 255, 0.018);
+                }
+
+                .commerce-admin-template-card header {
+                    display: grid;
+                    grid-template-columns: minmax(0, 1fr) auto;
+                    align-items: start;
+                    gap: 10px;
+                }
+
+                .commerce-admin-template-card header div {
+                    min-width: 0;
+                    display: grid;
+                    gap: 3px;
+                }
+
+                .commerce-admin-template-card strong,
+                .commerce-admin-template-card small {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                .commerce-admin-template-card small,
+                .commerce-admin-template-meta span {
+                    color: var(--text-muted);
+                    font-size: 0.74rem;
+                }
+
+                .commerce-admin-template-body {
+                    min-height: 76px;
+                    margin: 0;
+                    color: var(--text-secondary);
+                    font-size: 0.82rem;
+                    line-height: 1.5;
+                }
+
+                .commerce-admin-template-meta {
+                    display: grid;
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                    gap: 7px;
+                }
+
+                .commerce-admin-template-meta span {
+                    min-width: 0;
+                    display: grid;
+                    gap: 2px;
+                }
+
+                .commerce-admin-template-meta strong {
+                    color: var(--text-primary);
+                    font-size: 0.76rem;
+                }
+
+                .commerce-admin-template-vars {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 6px;
+                    min-height: 26px;
+                    padding-top: 2px;
+                }
+
+                .commerce-admin-template-vars span {
+                    display: inline-flex;
+                    align-items: center;
+                    min-height: 22px;
+                    max-width: 100%;
+                    padding: 0 7px;
+                    border: 1px solid rgba(224, 176, 82, 0.18);
+                    border-radius: 999px;
+                    color: var(--gold);
+                    font-size: 0.7rem;
+                    font-weight: 800;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                .commerce-admin-template-grid .commerce-admin-empty {
+                    grid-column: 1 / -1;
+                }
+
                 .commerce-admin-table-wrap {
                     overflow-x: auto;
                     margin-top: 14px;
@@ -1285,6 +1505,10 @@ export default function CommerceAdminPage() {
                         grid-template-columns: repeat(2, minmax(0, 1fr));
                     }
 
+                    .commerce-admin-template-grid {
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                    }
+
                     .commerce-admin-activation {
                         grid-template-columns: minmax(0, 1fr) auto;
                     }
@@ -1309,6 +1533,7 @@ export default function CommerceAdminPage() {
 
                     .commerce-admin-kpis,
                     .commerce-admin-diagnostic-grid,
+                    .commerce-admin-template-grid,
                     .commerce-admin-activation,
                     .commerce-admin-activation-grid,
                     .commerce-admin-automation {

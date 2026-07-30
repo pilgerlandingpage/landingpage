@@ -3,6 +3,12 @@ import { requireAdminModules } from '@/lib/admin/require-admin'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { centsToMoney, loadCommerceConfig } from '@/lib/commerce/checkout'
 import { processCommerceAutomations } from '@/lib/commerce/automation'
+import {
+  OFFICIAL_COMMERCE_WHATSAPP_TEMPLATES,
+  OFFICIAL_COMMERCE_WHATSAPP_TEMPLATE_KEYS,
+  commerceOfficialWhatsAppMetaComponents,
+  upsertCommerceOfficialWhatsAppTemplates,
+} from '@/lib/commerce/official-whatsapp-templates'
 
 export const dynamic = 'force-dynamic'
 
@@ -32,6 +38,32 @@ function startOfTodayIso() {
   return date.toISOString()
 }
 
+function objectRecord(value: unknown): Record<string, any> {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value as Record<string, any>
+    : {}
+}
+
+function safeArray(value: unknown): any[] {
+  return Array.isArray(value) ? value : []
+}
+
+function safeJsonArray(value: unknown): any[] {
+  if (Array.isArray(value)) return value
+  if (typeof value !== 'string' || !value.trim()) return []
+  try {
+    const parsed = JSON.parse(value)
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+}
+
+function stringList(value: unknown, fallback: string[] = []) {
+  const values = safeArray(value).map(item => text(item)).filter(Boolean)
+  return values.length ? values : fallback
+}
+
 export async function GET() {
   try {
     const auth = await requireAdminModules(['commerce', 'products', 'maintenance'])
@@ -52,6 +84,9 @@ export async function GET() {
       educationLeadsCountRes,
       messagesCountRes,
       recentMessagesRes,
+      officialTemplatesRes,
+      metaDraftsRes,
+      metaTemplatesRes,
     ] = await Promise.all([
       supabase
         .from('commerce_orders')
@@ -87,6 +122,20 @@ export async function GET() {
         .eq('business_unit', 'education')
         .order('created_at', { ascending: false })
         .limit(50),
+      supabase
+        .from('message_templates')
+        .select('id, template_key, event_type, name, channel, body, variables, requires_opt_in, is_active, metadata, updated_at')
+        .eq('business_unit', 'education')
+        .eq('channel', 'whatsapp')
+        .in('template_key', OFFICIAL_COMMERCE_WHATSAPP_TEMPLATE_KEYS),
+      supabase
+        .from('app_config')
+        .select('value')
+        .eq('key', 'meta_whatsapp_template_drafts')
+        .maybeSingle(),
+      supabase
+        .from('meta_whatsapp_templates')
+        .select('name, language, category, status, quality_score, updated_at, last_synced_at'),
     ])
 
     const firstError =
@@ -96,7 +145,10 @@ export async function GET() {
       customersCountRes.error ||
       educationLeadsCountRes.error ||
       messagesCountRes.error ||
-      recentMessagesRes.error
+      recentMessagesRes.error ||
+      officialTemplatesRes.error ||
+      metaDraftsRes.error ||
+      metaTemplatesRes.error
     if (firstError) throw firstError
 
     const orders = ordersRes.data || []
@@ -139,6 +191,20 @@ export async function GET() {
     }
 
     const templatesById = new Map<string, any>((templatesRes.data || []).map((template: any) => [text(template.id), template]))
+    const officialTemplatesByKey = new Map<string, any>((officialTemplatesRes.data || []).map((template: any) => [text(template.template_key), template]))
+    const metaDrafts = safeJsonArray(metaDraftsRes.data?.value)
+    const metaDraftIds = new Set<string>()
+    for (const draft of metaDrafts) {
+      const record = objectRecord(draft)
+      const id = text(record.id)
+      const name = text(record.name)
+      if (id) metaDraftIds.add(id)
+      if (name) metaDraftIds.add(`name:${name}`)
+    }
+    const metaTemplateByName = new Map<string, any>((metaTemplatesRes.data || []).map((template: any) => [
+      `${text(template.name)}:${text(template.language, 'pt_BR')}`,
+      template,
+    ]))
     const paidRevenueCents = sumCents((paidOrdersRes.data || []) as Array<{ total_cents?: number | null }>)
     const todayRevenueCents = sumCents((todayPaidOrdersRes.data || []) as Array<{ total_cents?: number | null }>)
     const totalOrderCount = Number(totalOrders || 0)
@@ -204,6 +270,39 @@ export async function GET() {
           event_type: template.event_type || '',
         }
       }),
+      official_whatsapp_templates: OFFICIAL_COMMERCE_WHATSAPP_TEMPLATES.map((definition) => {
+        const template = officialTemplatesByKey.get(definition.templateKey) || {}
+        const metadata = objectRecord(template.metadata)
+        const meta = objectRecord(metadata.meta_whatsapp)
+        const templateName = text(meta.template_name, definition.meta.templateName)
+        const language = text(meta.template_language, definition.meta.language)
+        const remote = metaTemplateByName.get(`${templateName}:${language}`)
+        const hasDraft = metaDraftIds.has(`commerce_${definition.templateKey}`) || metaDraftIds.has(`name:${templateName}`)
+        const status = remote ? text(remote.status, 'SYNCED') : hasDraft ? 'DRAFT' : 'READY'
+
+        return {
+          template_key: definition.templateKey,
+          name: text(template.name, definition.name),
+          event_type: text(template.event_type, definition.eventType),
+          body: text(template.body, definition.internalBody),
+          variables: stringList(template.variables, definition.variables),
+          requires_opt_in: typeof template.requires_opt_in === 'boolean' ? template.requires_opt_in : definition.requiresOptIn,
+          is_active: typeof template.is_active === 'boolean' ? template.is_active : false,
+          updated_at: template.updated_at || null,
+          meta: {
+            template_name: templateName,
+            language,
+            category: text(meta.category, definition.meta.category),
+            status,
+            quality_score: remote?.quality_score || null,
+            has_draft: hasDraft,
+            components: safeArray(meta.draft_components).length ? safeArray(meta.draft_components) : commerceOfficialWhatsAppMetaComponents(definition),
+            example_values: stringList(meta.example_values, definition.meta.bodyExamples),
+            body_variables: stringList(meta.body_variables, definition.meta.bodyVariables),
+            last_synced_at: remote?.last_synced_at || remote?.updated_at || null,
+          },
+        }
+      }),
       automation: {
         enabled: config.automationEnabled,
         checkout_abandoned_after_minutes: config.checkoutAbandonedAfterMinutes,
@@ -230,11 +329,19 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json().catch(() => ({}))
     const action = text(body?.action)
+    const supabase = createSupabaseAdminClient()
+
+    if (action === 'prepare_meta_whatsapp_templates') {
+      const result = await upsertCommerceOfficialWhatsAppTemplates(supabase)
+      return NextResponse.json({
+        ...result,
+        message: `${result.templates_count} templates oficiais do WhatsApp preparados como rascunhos para revisao.`,
+      })
+    }
     if (action !== 'run_automations') {
       return NextResponse.json({ success: false, error: 'Ação inválida.' }, { status: 400 })
     }
 
-    const supabase = createSupabaseAdminClient()
     const result = await processCommerceAutomations(supabase, {
       limit: body?.limit,
       dryRun: body?.dry_run === true,
