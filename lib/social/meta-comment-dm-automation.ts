@@ -2319,6 +2319,29 @@ async function loadDeliveryById(supabase: SupabaseAdmin, deliveryId: string) {
   return (data || null) as DeliveryRow | null
 }
 
+async function loadCampaignById(supabase: SupabaseAdmin, campaignId: string) {
+  const id = cleanString(campaignId, 80)
+  if (!id) return null
+
+  const { data, error } = await supabase
+    .from('meta_comment_dm_campaigns')
+    .select('id, name, platform, media_external_id, post_permalink, trigger_intent, trigger_examples, reply_message, confidence_threshold, mode, status, max_replies_per_hour, raw, created_at, updated_at')
+    .eq('id', id)
+    .maybeSingle()
+
+  if (error) throw new Error(error.message)
+  return (data || null) as CampaignRow | null
+}
+
+async function resolveCurrentVoteDiscountFlow(supabase: SupabaseAdmin, delivery: DeliveryRow) {
+  const campaign = await loadCampaignById(supabase, delivery.campaign_id)
+  if (campaign) {
+    const currentFlow = getCampaignVoteDiscountFlow(campaign)
+    if (currentFlow.enabled) return currentFlow
+  }
+  return getDeliveryVoteDiscountFlow(delivery)
+}
+
 function extractPrivateReplyRecipientId(delivery: DeliveryRow) {
   const raw = (delivery.raw || {}) as Record<string, any>
   return cleanString(
@@ -2518,7 +2541,7 @@ export async function processInstagramDirectFlowPostback(event: WebhookMessageEv
   const delivery = await resolveVoteDiscountDelivery(supabase, event, parsed?.deliveryId || '')
   if (!delivery) return { success: true, processed: false, reason: 'no_recent_vote_discount_delivery' }
 
-  const flow = getDeliveryVoteDiscountFlow(delivery)
+  const flow = await resolveCurrentVoteDiscountFlow(supabase, delivery)
   const action = parsed?.action || textAction
   if (!action) return { success: true, processed: false, reason: 'not_comment_dm_flow_postback' }
   const responseMessage = action === COMMENT_DM_ACTION_ALREADY_VOTED
