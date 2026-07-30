@@ -266,6 +266,15 @@ export default function CheckoutClient({
     ? 'O banco solicitou uma verificacao de seguranca para aprovar o cartao. Conclua a etapa abaixo para liberarmos o acesso.'
     : checkoutResult?.status?.message
   const tone = statusTone(paymentStatus)
+  const resultTitle = isApprovedPayment
+    ? 'Pagamento aprovado'
+    : checkoutResult?.subscription
+      ? 'Assinatura criada'
+      : checkoutResult?.payment?.pix_qr_code
+        ? 'Pix gerado'
+        : isFinalPaymentFailure
+          ? 'Tentativa de pagamento registrada'
+          : 'Pagamento registrado'
   const offerMethods = useMemo(() => new Set((offer.payment_methods || ['pix']).map(String)), [offer.payment_methods])
   const subscriptionProduct = product.access_model === 'subscription' || offerMethods.has('subscription')
   const availablePaymentChoices = useMemo(() => {
@@ -765,7 +774,13 @@ export default function CheckoutClient({
                 <BadgeCheck size={16} />
                 {statusText}
               </span>
-              <h2>{isApprovedPayment ? 'Pagamento aprovado' : checkoutResult.subscription ? 'Assinatura criada' : checkoutResult.payment?.pix_qr_code ? 'Pix gerado' : 'Pagamento registrado'} para o pedido {checkoutResult.order?.order_number}</h2>
+              <h2>{resultTitle}</h2>
+              {checkoutResult.order?.order_number && (
+                <div className="cn8-order-code">
+                  <span>Codigo do pedido</span>
+                  <strong>{checkoutResult.order.order_number}</strong>
+                </div>
+              )}
               <p className="cn8-pix-subtitle">
                 {isApprovedPayment
                   ? <>Parabens. Seu acesso foi liberado e enviamos no WhatsApp o link para entrar na area de membros. Abrindo a biblioteca automaticamente...</>
@@ -1383,6 +1398,30 @@ export default function CheckoutClient({
         .cn8-status.danger {
           background: rgba(239, 68, 68, 0.14);
           color: #fecaca;
+        }
+
+        .cn8-order-code {
+          width: fit-content;
+          display: grid;
+          gap: 3px;
+          border: 1px solid rgba(248, 242, 232, 0.14);
+          border-radius: 8px;
+          background: rgba(255, 255, 255, 0.055);
+          padding: 10px 12px;
+        }
+
+        .cn8-order-code span {
+          color: rgba(248, 242, 232, 0.58);
+          font-size: 0.7rem;
+          font-weight: 900;
+          text-transform: uppercase;
+        }
+
+        .cn8-order-code strong {
+          color: #fff8ec;
+          font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+          font-size: 0.92rem;
+          overflow-wrap: anywhere;
         }
 
         .cn8-qr {
