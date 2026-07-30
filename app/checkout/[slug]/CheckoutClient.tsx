@@ -1069,8 +1069,25 @@ export default function CheckoutClient({
           background: rgba(255, 255, 255, 0.06);
           color: #fff8ec;
           padding: 0 13px;
-          font: inherit;
+          font-family: inherit;
+          font-size: 0.94rem;
+          font-weight: 500;
+          line-height: 1.35;
           outline: none;
+        }
+
+        .cn8-form input::placeholder,
+        .cn8-copy-box textarea::placeholder {
+          font-weight: 500;
+        }
+
+        .cn8-form input:-webkit-autofill,
+        .cn8-form input:-webkit-autofill:hover,
+        .cn8-form input:-webkit-autofill:focus {
+          border-color: rgba(231, 180, 82, 0.5);
+          -webkit-text-fill-color: #fff8ec;
+          box-shadow: 0 0 0 1000px rgba(17, 23, 21, 0.98) inset;
+          caret-color: #fff8ec;
         }
 
         .cn8-form input:focus,
