@@ -94,8 +94,12 @@ function cleanDocument(value: string) {
   return value.replace(/\D/g, '').slice(0, 14)
 }
 
-function cleanPhone(value: string) {
-  return value.replace(/\D/g, '').slice(0, 13)
+function normalizeBrazilPhone(value: string) {
+  const digits = value.replace(/\D/g, '')
+  if (!digits) return ''
+  if (digits.startsWith('55')) return digits.slice(0, 13)
+  if (digits.length >= 10 && digits.length <= 11) return `55${digits}`
+  return digits.slice(0, 15)
 }
 
 function text(value: unknown, fallback = '') {
@@ -305,7 +309,7 @@ export default function CheckoutClient({
 
   const validate = () => {
     const doc = cleanDocument(buyerDocument)
-    const phoneDigits = cleanPhone(phone)
+    const phoneDigits = normalizeBrazilPhone(phone)
     if (name.trim().length < 3) return 'Informe seu nome completo.'
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return 'Informe um e-mail válido.'
     if (phoneDigits.length < 12) return 'Informe seu WhatsApp com DDD.'
