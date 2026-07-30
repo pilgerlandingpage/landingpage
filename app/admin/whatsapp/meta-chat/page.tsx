@@ -1,17 +1,25 @@
 'use client'
 
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
 import {
-  CheckCircle2,
+  Check,
+  CheckCheck,
   Clock3,
+  Filter,
   Inbox,
   Loader2,
   MessageCircle,
   MessageSquareText,
+  MoreVertical,
+  Paperclip,
+  Phone,
   RefreshCw,
   Search,
   Send,
+  Smile,
   UserRound,
+  Video,
+  XCircle,
 } from 'lucide-react'
 import AdminLoadingState from '@/components/admin/AdminLoadingState'
 
@@ -42,6 +50,9 @@ type LeadSummary = {
   lead_classification?: string | null
   lead_purpose?: string | null
   lead_budget?: string | null
+  avatar_url?: string | null
+  avatar_source?: string | null
+  avatar_updated_at?: string | null
   created_at?: string | null
 }
 
@@ -155,6 +166,46 @@ function messageTime(message: MetaMessage) {
   return message.received_at || message.sent_at || message.created_at
 }
 
+function conversationLead(conversation?: MetaConversation | null) {
+  return asSingle(conversation?.lead)
+}
+
+function conversationName(conversation?: MetaConversation | null) {
+  const lead = conversationLead(conversation)
+  return lead?.name || conversation?.contact_name || formatPhone(conversation?.contact_phone)
+}
+
+function conversationAvatar(conversation?: MetaConversation | null) {
+  return conversationLead(conversation)?.avatar_url || null
+}
+
+function initials(value?: string | null) {
+  const parts = String(value || '').trim().split(/\s+/).filter(Boolean)
+  if (!parts.length) return 'GP'
+  return parts.slice(0, 2).map(part => part[0]?.toUpperCase()).join('')
+}
+
+function statusIcon(status: string) {
+  const selected = String(status || '').toLowerCase()
+  if (selected === 'read') return <CheckCheck size={15} className="read" />
+  if (selected === 'delivered') return <CheckCheck size={15} />
+  if (selected === 'sent') return <Check size={15} />
+  if (selected === 'failed') return <XCircle size={15} className="failed" />
+  return null
+}
+
+function LeadAvatar({ name, src, size = 'md' }: { name?: string | null; src?: string | null; size?: 'sm' | 'md' | 'lg' }) {
+  return (
+    <span className={`lead-avatar ${size}`}>
+      {src ? (
+        <img src={src} alt={`Foto de ${name || 'lead'}`} />
+      ) : (
+        <span>{initials(name)}</span>
+      )}
+    </span>
+  )
+}
+
 export default function MetaWhatsAppChatPage() {
   const [conversations, setConversations] = useState<MetaConversation[]>([])
   const [summary, setSummary] = useState<ChatPayload['summary']>({
@@ -175,6 +226,7 @@ export default function MetaWhatsAppChatPage() {
   const [loadingDetail, setLoadingDetail] = useState(false)
   const [sending, setSending] = useState(false)
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const messagesEndRef = useRef<HTMLDivElement | null>(null)
 
   const selectedSender = useMemo(() => asSingle(selected?.sender), [selected])
   const selectedCampaign = useMemo(() => asSingle(selected?.campaign), [selected])
@@ -231,18 +283,15 @@ export default function MetaWhatsAppChatPage() {
 
   useEffect(() => {
     loadConversations(false)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter])
 
   useEffect(() => {
     const timeout = window.setTimeout(() => loadConversations(true), 350)
     return () => window.clearTimeout(timeout)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search])
 
   useEffect(() => {
     loadDetail(selectedId)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedId])
 
   useEffect(() => {
@@ -251,8 +300,11 @@ export default function MetaWhatsAppChatPage() {
       if (selectedId) loadDetail(selectedId)
     }, 20000)
     return () => window.clearInterval(interval)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedId, statusFilter, search])
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ block: 'end' })
+  }, [messages, selectedId])
 
   const updateStatus = async (status: ConversationStatus) => {
     if (!selectedId) return
@@ -288,16 +340,17 @@ export default function MetaWhatsAppChatPage() {
     }
   }
 
-  const sendReply = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    if (!selectedId || sending) return
+  const sendReply = async (event?: FormEvent<HTMLFormElement>) => {
+    event?.preventDefault()
+    const text = reply.trim()
+    if (!selectedId || sending || !text) return
     setSending(true)
     setFeedback(null)
     try {
       const response = await fetch('/api/admin/whatsapp/meta-chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'reply', conversation_id: selectedId, text: reply }),
+        body: JSON.stringify({ action: 'reply', conversation_id: selectedId, text }),
       })
       const payload: ChatPayload = await response.json()
       if (!payload.success) throw new Error(payload.error || 'Erro ao enviar resposta.')
@@ -311,23 +364,29 @@ export default function MetaWhatsAppChatPage() {
     }
   }
 
+  const handleReplyKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key !== 'Enter' || event.shiftKey) return
+    event.preventDefault()
+    if (activeWindow && reply.trim() && !sending) void sendReply()
+  }
+
   if (loading && conversations.length === 0) {
     return <AdminLoadingState message="Carregando Chat Meta WhatsApp..." />
   }
 
   return (
-    <div className="meta-chat-page">
-      <header className="meta-chat-header">
+    <div className="wa-page">
+      <header className="wa-page-header">
         <div>
           <h1>
-            <MessageCircle size={28} />
+            <MessageCircle size={27} />
             Chat Meta WhatsApp
           </h1>
-          <p>Respostas recebidas nos numeros oficiais da Cloud API</p>
+          <p>Caixa de entrada oficial para respostas das campanhas via WhatsApp Cloud API.</p>
         </div>
         <button
           type="button"
-          className="ghost-button"
+          className="meta-button"
           onClick={() => {
             loadConversations(true)
             if (selectedId) loadDetail(selectedId)
@@ -344,231 +403,286 @@ export default function MetaWhatsAppChatPage() {
         </div>
       )}
 
-      <section className="summary-grid">
-        <div>
-          <Inbox size={18} />
-          <strong>{summary?.total || 0}</strong>
-          <span>Conversas</span>
-        </div>
-        <div>
-          <MessageSquareText size={18} />
-          <strong>{summary?.unread || 0}</strong>
-          <span>Nao lidas</span>
-        </div>
-        <div>
-          <Clock3 size={18} />
-          <strong>{summary?.windowActive || 0}</strong>
-          <span>Janela ativa</span>
-        </div>
-        <div>
-          <CheckCircle2 size={18} />
-          <strong>{summary?.closed || 0}</strong>
-          <span>Fechadas</span>
-        </div>
-      </section>
-
-      <div className="toolbar">
-        <div className="search-box">
-          <Search size={16} />
-          <input
-            value={search}
-            onChange={event => setSearch(event.target.value)}
-            placeholder="Buscar por nome, telefone ou mensagem"
-          />
-        </div>
-        <div className="status-tabs">
-          {statusOptions.map(option => (
-            <button
-              key={option.value}
-              type="button"
-              className={statusFilter === option.value ? 'active' : ''}
-              onClick={() => setStatusFilter(option.value)}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <main className="chat-shell">
-        <aside className="conversation-list">
-          {conversations.length === 0 ? (
-            <div className="empty-list">
-              <Inbox size={30} />
-              <span>Nenhuma conversa Meta encontrada.</span>
+      <main className="wa-shell">
+        <aside className="wa-sidebar">
+          <div className="wa-sidebar-header">
+            <div className="wa-account">
+              <span className="wa-account-icon"><MessageCircle size={20} /></span>
+              <div>
+                <strong>Atendimento oficial</strong>
+                <span>{summary?.total || 0} conversa(s) sincronizada(s)</span>
+              </div>
             </div>
-          ) : (
-            conversations.map(conversation => {
-              const sender = asSingle(conversation.sender)
-              const active = conversation.id === selectedId
-              return (
-                <button
-                  key={conversation.id}
-                  type="button"
-                  className={`conversation-row ${active ? 'active' : ''}`}
-                  onClick={() => setSelectedId(conversation.id)}
-                >
-                  <span className="conversation-avatar">
-                    <UserRound size={18} />
-                  </span>
-                  <span className="conversation-main">
-                    <span className="conversation-name">
-                      {conversation.contact_name || formatPhone(conversation.contact_phone)}
-                      {conversation.unread_count > 0 && <strong>{conversation.unread_count}</strong>}
+            <button type="button" className="icon-button" onClick={() => loadConversations(true)} aria-label="Atualizar conversas">
+              {loading ? <Loader2 size={17} className="spin" /> : <RefreshCw size={17} />}
+            </button>
+          </div>
+
+          <div className="wa-search">
+            <Search size={16} />
+            <input
+              value={search}
+              onChange={event => setSearch(event.target.value)}
+              placeholder="Pesquisar ou comecar uma nova conversa"
+            />
+          </div>
+
+          <div className="wa-tabs">
+            <Filter size={15} />
+            {statusOptions.map(option => (
+              <button
+                key={option.value}
+                type="button"
+                className={statusFilter === option.value ? 'active' : ''}
+                onClick={() => setStatusFilter(option.value)}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="wa-summary-row">
+            <span><Inbox size={14} /> {summary?.open || 0} abertas</span>
+            <span><MessageSquareText size={14} /> {summary?.unread || 0} nao lidas</span>
+            <span><Clock3 size={14} /> {summary?.windowActive || 0} janelas</span>
+          </div>
+
+          <div className="wa-list">
+            {conversations.length === 0 ? (
+              <div className="empty-list">
+                <Inbox size={30} />
+                <span>Nenhuma conversa Meta encontrada.</span>
+              </div>
+            ) : (
+              conversations.map(conversation => {
+                const sender = asSingle(conversation.sender)
+                const active = conversation.id === selectedId
+                const name = conversationName(conversation)
+                return (
+                  <button
+                    key={conversation.id}
+                    type="button"
+                    className={`wa-row ${active ? 'active' : ''}`}
+                    onClick={() => setSelectedId(conversation.id)}
+                  >
+                    <LeadAvatar name={name} src={conversationAvatar(conversation)} />
+                    <span className="wa-row-main">
+                      <span className="wa-row-top">
+                        <strong>{name}</strong>
+                        <time>{formatDate(conversation.last_message_at)}</time>
+                      </span>
+                      <span className="wa-row-preview">{shortText(conversation.last_message_preview, 88)}</span>
+                      <span className="wa-row-meta">
+                        {statusLabels[conversation.status] || conversation.status}
+                        <small>{sender?.display_name || 'Numero oficial'}</small>
+                      </span>
                     </span>
-                    <span className="conversation-preview">{shortText(conversation.last_message_preview, 72)}</span>
-                    <span className="conversation-meta">
-                      {statusLabels[conversation.status] || conversation.status}
-                      <small>{sender?.display_name || 'Numero oficial'}</small>
-                    </span>
-                  </span>
-                  <span className="conversation-time">{formatDate(conversation.last_message_at)}</span>
-                </button>
-              )
-            })
-          )}
+                    {conversation.unread_count > 0 && <span className="unread-badge">{conversation.unread_count}</span>}
+                  </button>
+                )
+              })
+            )}
+          </div>
         </aside>
 
-        <section className="message-panel">
+        <section className="wa-conversation">
           {!selected ? (
             <div className="empty-chat">
-              {loadingDetail ? <Loader2 size={28} className="spin" /> : <MessageCircle size={36} />}
-              <span>{loadingDetail ? 'Carregando conversa...' : 'Selecione uma conversa.'}</span>
+              {loadingDetail ? <Loader2 size={28} className="spin" /> : <MessageCircle size={38} />}
+              <strong>{loadingDetail ? 'Carregando conversa...' : 'Selecione uma conversa'}</strong>
+              <span>As respostas dos leads aparecerao aqui assim que chegarem pelo webhook da Meta.</span>
             </div>
           ) : (
             <>
-              <div className="message-header">
-                <div>
-                  <strong>{selected.contact_name || formatPhone(selected.contact_phone)}</strong>
-                  <span>{formatPhone(selected.contact_phone)}</span>
+              <div className="wa-chat-header">
+                <LeadAvatar name={conversationName(selected)} src={conversationAvatar(selected)} />
+                <div className="wa-chat-title">
+                  <strong>{conversationName(selected)}</strong>
+                  <span>{formatPhone(selected.contact_phone)} | {selectedSender?.display_name || 'Numero oficial'}</span>
                 </div>
-                <div className="message-actions">
-                  <button type="button" onClick={markRead}>Marcar lida</button>
-                  <button type="button" onClick={() => updateStatus('open')}>Aberta</button>
-                  <button type="button" onClick={() => updateStatus('pending')}>Pendente</button>
-                  <button type="button" onClick={() => updateStatus('closed')}>Fechada</button>
+                <div className="wa-chat-actions">
+                  <button type="button" className="icon-button" aria-label="Chamada">
+                    <Phone size={17} />
+                  </button>
+                  <button type="button" className="icon-button" aria-label="Video">
+                    <Video size={17} />
+                  </button>
+                  <button type="button" className="icon-button" aria-label="Mais opcoes">
+                    <MoreVertical size={17} />
+                  </button>
                 </div>
               </div>
 
-              <div className="window-strip">
-                <span className={activeWindow ? 'window-active' : 'window-expired'} />
+              <div className={`wa-window ${activeWindow ? 'active' : 'expired'}`}>
+                <span />
                 {activeWindow
-                  ? `Janela aberta ate ${formatDate(selected.customer_window_expires_at)}`
-                  : 'Janela expirada: reabra com template aprovado.'}
+                  ? `Janela de atendimento aberta ate ${formatDate(selected.customer_window_expires_at)}`
+                  : 'Janela expirada. Para falar novamente, use um template aprovado.'}
               </div>
 
-              <div className="messages">
+              <div className="wa-status-strip">
+                <button type="button" onClick={markRead}>Marcar lida</button>
+                <button type="button" className={selected.status === 'open' ? 'active' : ''} onClick={() => updateStatus('open')}>Aberta</button>
+                <button type="button" className={selected.status === 'pending' ? 'active' : ''} onClick={() => updateStatus('pending')}>Pendente</button>
+                <button type="button" className={selected.status === 'closed' ? 'active' : ''} onClick={() => updateStatus('closed')}>Fechada</button>
+              </div>
+
+              <div className="wa-messages">
                 {messages.length === 0 ? (
                   <div className="empty-chat compact">
                     <MessageSquareText size={30} />
-                    <span>Sem mensagens nesta conversa.</span>
+                    <strong>Sem mensagens nesta conversa.</strong>
                   </div>
                 ) : (
                   messages.map(message => (
-                    <div key={message.id} className={`message-bubble ${message.direction}`}>
-                      <div className="message-text">{message.text_body || `[${message.message_type}]`}</div>
-                      <div className="message-status">
-                        <span>{formatDate(messageTime(message))}</span>
-                        <span>{message.status}</span>
+                    <div key={message.id} className={`wa-bubble ${message.direction}`}>
+                      <div className="wa-bubble-text">{message.text_body || `[${message.message_type}]`}</div>
+                      <div className="wa-bubble-meta">
+                        <time>{formatDate(messageTime(message))}</time>
+                        {message.direction === 'outbound' && statusIcon(message.status)}
                         {message.error_message && <span className="message-error">{message.error_message}</span>}
                       </div>
                     </div>
                   ))
                 )}
+                <div ref={messagesEndRef} />
               </div>
 
-              <form className="reply-box" onSubmit={sendReply}>
+              <form className="wa-composer" onSubmit={sendReply}>
+                <button type="button" className="icon-button" aria-label="Emoji">
+                  <Smile size={20} />
+                </button>
+                <button type="button" className="icon-button" aria-label="Anexo">
+                  <Paperclip size={20} />
+                </button>
                 <textarea
                   value={reply}
                   onChange={event => setReply(event.target.value)}
-                  placeholder={activeWindow ? 'Digite a resposta para o lead' : 'Janela expirada'}
+                  onKeyDown={handleReplyKeyDown}
+                  placeholder={activeWindow ? 'Digite uma mensagem' : 'Janela expirada'}
                   disabled={!activeWindow || sending}
-                  rows={3}
+                  rows={1}
                 />
-                <button type="submit" disabled={!activeWindow || sending || !reply.trim()}>
-                  {sending ? <Loader2 size={18} className="spin" /> : <Send size={18} />}
-                  Enviar
+                <button className="send-button" type="submit" disabled={!activeWindow || sending || !reply.trim()} aria-label="Enviar mensagem">
+                  {sending ? <Loader2 size={20} className="spin" /> : <Send size={20} />}
                 </button>
               </form>
             </>
           )}
         </section>
 
-        <aside className="context-panel">
-          <h2>Contexto</h2>
-          <dl>
-            <dt>Numero oficial</dt>
-            <dd>{selectedSender?.display_name || '-'}</dd>
-            <dt>Qualidade</dt>
-            <dd>{selectedSender?.quality_rating || selectedSender?.meta_status || '-'}</dd>
-            <dt>Ultima campanha</dt>
-            <dd>{selectedCampaign?.name || '-'}</dd>
-            <dt>Template</dt>
-            <dd>{selectedCampaign?.template_name || '-'}</dd>
-            <dt>Lead</dt>
-            <dd>{selectedLead?.name || selected?.contact_name || '-'}</dd>
-            <dt>Email</dt>
-            <dd>{selectedLead?.email || '-'}</dd>
-            <dt>Etapa</dt>
-            <dd>{selectedLead?.funnel_stage || '-'}</dd>
-            <dt>Perfil</dt>
-            <dd>{selectedLead?.lead_classification || selectedLead?.lead_purpose || '-'}</dd>
-          </dl>
+        <aside className="wa-info">
+          {selected ? (
+            <>
+              <div className="wa-profile">
+                <LeadAvatar name={conversationName(selected)} src={conversationAvatar(selected)} size="lg" />
+                <strong>{conversationName(selected)}</strong>
+                <span>{formatPhone(selected.contact_phone)}</span>
+              </div>
+              <div className="info-card">
+                <h2>Dados do lead</h2>
+                <dl>
+                  <dt>Email</dt>
+                  <dd>{selectedLead?.email || '-'}</dd>
+                  <dt>Etapa</dt>
+                  <dd>{selectedLead?.funnel_stage || '-'}</dd>
+                  <dt>Perfil</dt>
+                  <dd>{selectedLead?.lead_classification || selectedLead?.lead_purpose || '-'}</dd>
+                  <dt>Orcamento</dt>
+                  <dd>{selectedLead?.lead_budget || '-'}</dd>
+                </dl>
+              </div>
+              <div className="info-card">
+                <h2>Origem</h2>
+                <dl>
+                  <dt>Ultima campanha</dt>
+                  <dd>{selectedCampaign?.name || '-'}</dd>
+                  <dt>Template</dt>
+                  <dd>{selectedCampaign?.template_name || '-'}</dd>
+                  <dt>Numero oficial</dt>
+                  <dd>{selectedSender?.display_name || '-'}</dd>
+                  <dt>Qualidade</dt>
+                  <dd>{selectedSender?.quality_rating || selectedSender?.meta_status || '-'}</dd>
+                </dl>
+              </div>
+            </>
+          ) : (
+            <div className="empty-info">
+              <UserRound size={30} />
+              <span>Selecione uma conversa para ver o lead.</span>
+            </div>
+          )}
         </aside>
       </main>
 
       <style jsx>{`
-        .meta-chat-page {
+        .wa-page {
           min-height: 100vh;
-          padding: 32px;
-          background: #fbfaf8;
+          padding: 26px;
+          background: #f5f6f6;
           color: #111827;
         }
 
-        .meta-chat-header {
+        .wa-page-header {
           display: flex;
           align-items: flex-start;
           justify-content: space-between;
           gap: 16px;
-          margin-bottom: 22px;
+          margin-bottom: 18px;
         }
 
-        .meta-chat-header h1 {
+        .wa-page-header h1 {
           display: flex;
           align-items: center;
           gap: 10px;
           margin: 0;
           font-family: Georgia, 'Times New Roman', serif;
-          font-size: 30px;
+          font-size: 27px;
           letter-spacing: 0;
         }
 
-        .meta-chat-header p {
-          margin: 6px 0 0;
-          color: #6b7280;
+        .wa-page-header h1 svg {
+          color: #0b8f61;
         }
 
-        .ghost-button,
-        .message-actions button,
-        .status-tabs button {
+        .wa-page-header p {
+          margin: 5px 0 0;
+          color: #667085;
+          font-size: 14px;
+        }
+
+        .meta-button,
+        .icon-button,
+        .wa-tabs button,
+        .wa-status-strip button {
           display: inline-flex;
           align-items: center;
           justify-content: center;
           gap: 8px;
-          min-height: 38px;
-          border: 1px solid #e5e7eb;
+          min-height: 36px;
+          border: 1px solid #d7dde3;
           border-radius: 8px;
           background: #fff;
-          color: #111827;
+          color: #1f2937;
           cursor: pointer;
-          padding: 0 14px;
           font-weight: 700;
+        }
+
+        .meta-button {
+          padding: 0 13px;
+        }
+
+        .icon-button {
+          width: 36px;
+          padding: 0;
+          color: #54656f;
         }
 
         .feedback {
           border-radius: 8px;
-          padding: 12px 14px;
-          margin-bottom: 16px;
+          padding: 11px 13px;
+          margin-bottom: 14px;
+          font-size: 14px;
           font-weight: 700;
         }
 
@@ -584,369 +698,537 @@ export default function MetaWhatsAppChatPage() {
           color: #b91c1c;
         }
 
-        .summary-grid {
+        .wa-shell {
           display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
-          gap: 12px;
-          margin-bottom: 16px;
-        }
-
-        .summary-grid div {
-          display: grid;
-          grid-template-columns: 24px 1fr;
-          gap: 2px 12px;
-          border: 1px solid #e5e7eb;
-          border-radius: 8px;
-          background: #fff;
-          padding: 16px;
-        }
-
-        .summary-grid svg {
-          grid-row: span 2;
-          color: #c0913d;
-        }
-
-        .summary-grid strong {
-          font-size: 22px;
-          line-height: 1;
-        }
-
-        .summary-grid span {
-          color: #6b7280;
-          font-size: 13px;
-        }
-
-        .toolbar {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 12px;
-          margin-bottom: 16px;
-        }
-
-        .search-box {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          min-width: 280px;
-          flex: 1;
-          border: 1px solid #e5e7eb;
-          border-radius: 8px;
-          background: #fff;
-          padding: 0 12px;
-        }
-
-        .search-box input {
-          width: 100%;
-          height: 40px;
-          border: 0;
-          outline: 0;
-          background: transparent;
-        }
-
-        .status-tabs {
-          display: flex;
-          gap: 8px;
-          flex-wrap: wrap;
-        }
-
-        .status-tabs button.active {
-          border-color: #c0913d;
-          color: #9a6a1d;
-          background: #fff7ed;
-        }
-
-        .chat-shell {
-          display: grid;
-          grid-template-columns: minmax(280px, 360px) minmax(420px, 1fr) minmax(240px, 300px);
-          min-height: 660px;
-          border: 1px solid #e5e7eb;
+          grid-template-columns: minmax(310px, 380px) minmax(470px, 1fr) minmax(260px, 320px);
+          height: calc(100vh - 116px);
+          min-height: 690px;
+          border: 1px solid #d7dde3;
           border-radius: 8px;
           overflow: hidden;
           background: #fff;
+          box-shadow: 0 8px 24px rgba(16, 24, 40, 0.06);
         }
 
-        .conversation-list,
-        .context-panel {
-          background: #f8fafc;
+        .wa-sidebar {
+          display: grid;
+          grid-template-rows: auto auto auto auto 1fr;
+          min-width: 0;
+          background: #fff;
+          border-right: 1px solid #d7dde3;
         }
 
-        .conversation-list {
-          border-right: 1px solid #e5e7eb;
+        .wa-sidebar-header,
+        .wa-chat-header {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          min-height: 64px;
+          padding: 10px 14px;
+          background: #f0f2f5;
+        }
+
+        .wa-sidebar-header {
+          justify-content: space-between;
+        }
+
+        .wa-account {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          min-width: 0;
+        }
+
+        .wa-account-icon {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          background: #d9fdd3;
+          color: #0b8f61;
+        }
+
+        .wa-account div,
+        .wa-chat-title {
+          min-width: 0;
+          display: grid;
+          gap: 2px;
+        }
+
+        .wa-account strong,
+        .wa-chat-title strong {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .wa-account span,
+        .wa-chat-title span {
+          color: #667085;
+          font-size: 12px;
+        }
+
+        .wa-search {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin: 10px 12px;
+          min-height: 40px;
+          padding: 0 12px;
+          border-radius: 8px;
+          background: #f0f2f5;
+          color: #667085;
+        }
+
+        .wa-search input {
+          width: 100%;
+          border: 0;
+          outline: 0;
+          background: transparent;
+          color: #111827;
+          font: inherit;
+          font-size: 14px;
+        }
+
+        .wa-tabs {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 0 12px 10px;
+          color: #667085;
+          overflow-x: auto;
+        }
+
+        .wa-tabs button {
+          flex: 0 0 auto;
+          min-height: 30px;
+          padding: 0 10px;
+          border-radius: 999px;
+          font-size: 12px;
+        }
+
+        .wa-tabs button.active {
+          border-color: #00a884;
+          background: #d9fdd3;
+          color: #0b8f61;
+        }
+
+        .wa-summary-row {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 6px;
+          padding: 0 12px 10px;
+          color: #667085;
+          font-size: 12px;
+        }
+
+        .wa-summary-row span {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          min-width: 0;
+          padding: 7px 8px;
+          border: 1px solid #e4e7ec;
+          border-radius: 8px;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
+
+        .wa-list {
           overflow: auto;
+          border-top: 1px solid #edf0f2;
         }
 
-        .conversation-row {
+        .wa-row {
+          position: relative;
           width: 100%;
           display: grid;
-          grid-template-columns: 38px 1fr auto;
+          grid-template-columns: 48px 1fr auto;
           gap: 10px;
+          align-items: center;
+          min-height: 74px;
           border: 0;
-          border-bottom: 1px solid #e5e7eb;
-          background: transparent;
-          padding: 14px;
+          border-bottom: 1px solid #edf0f2;
+          background: #fff;
+          padding: 10px 12px;
           text-align: left;
           cursor: pointer;
         }
 
-        .conversation-row.active {
-          background: #fff7ed;
+        .wa-row:hover,
+        .wa-row.active {
+          background: #f0f2f5;
         }
 
-        .conversation-avatar {
-          width: 38px;
-          height: 38px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 50%;
-          background: #e8f7ef;
-          color: #059669;
-        }
-
-        .conversation-main {
+        .wa-row-main {
           min-width: 0;
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
+          display: grid;
+          gap: 3px;
         }
 
-        .conversation-name {
+        .wa-row-top {
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 8px;
-          font-weight: 800;
         }
 
-        .conversation-name strong {
+        .wa-row-top strong {
+          min-width: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          font-size: 15px;
+        }
+
+        .wa-row-top time,
+        .wa-row-preview,
+        .wa-row-meta {
+          color: #667085;
+          font-size: 12px;
+        }
+
+        .wa-row-preview {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .wa-row-meta {
+          display: flex;
+          gap: 8px;
+          overflow: hidden;
+          white-space: nowrap;
+        }
+
+        .wa-row-meta small {
+          min-width: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          color: #98a2b3;
+        }
+
+        .unread-badge {
+          align-self: end;
+          justify-self: end;
           min-width: 20px;
           height: 20px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
           border-radius: 999px;
-          background: #22c55e;
+          background: #25d366;
           color: #fff;
           font-size: 12px;
+          font-weight: 800;
         }
 
-        .conversation-preview,
-        .conversation-meta,
-        .conversation-time {
-          color: #6b7280;
-          font-size: 12px;
-        }
-
-        .conversation-meta {
-          display: flex;
-          gap: 8px;
-          flex-wrap: wrap;
-        }
-
-        .conversation-meta small {
-          color: #9ca3af;
-        }
-
-        .message-panel {
-          display: grid;
-          grid-template-rows: auto auto 1fr auto;
-          min-width: 0;
-          background: #f4efe7;
-        }
-
-        .message-header {
-          display: flex;
+        .lead-avatar {
+          width: 44px;
+          height: 44px;
+          display: inline-flex;
           align-items: center;
-          justify-content: space-between;
-          gap: 12px;
-          padding: 16px;
-          border-bottom: 1px solid #e5e7eb;
-          background: #fff;
-        }
-
-        .message-header div:first-child {
-          display: flex;
-          flex-direction: column;
-          gap: 3px;
-        }
-
-        .message-header span {
-          color: #6b7280;
-          font-size: 13px;
-        }
-
-        .message-actions {
-          display: flex;
-          gap: 8px;
-          flex-wrap: wrap;
-          justify-content: flex-end;
-        }
-
-        .message-actions button {
-          min-height: 34px;
-          font-size: 12px;
-          padding: 0 10px;
-        }
-
-        .window-strip {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 9px 16px;
-          border-bottom: 1px solid #e5e7eb;
-          background: #fff;
-          color: #6b7280;
-          font-size: 13px;
-        }
-
-        .window-strip span {
-          width: 8px;
-          height: 8px;
+          justify-content: center;
           border-radius: 50%;
+          overflow: hidden;
+          background: #dfe5e7;
+          color: #41525d;
+          font-weight: 800;
           flex: 0 0 auto;
         }
 
-        .window-active {
-          background: #22c55e;
+        .lead-avatar.sm {
+          width: 34px;
+          height: 34px;
         }
 
-        .window-expired {
+        .lead-avatar.lg {
+          width: 92px;
+          height: 92px;
+          font-size: 26px;
+        }
+
+        .lead-avatar img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+
+        .wa-conversation {
+          display: grid;
+          grid-template-rows: auto auto auto 1fr auto;
+          min-width: 0;
+          background: #efeae2;
+        }
+
+        .wa-chat-header {
+          border-bottom: 1px solid #d7dde3;
+        }
+
+        .wa-chat-title {
+          flex: 1;
+        }
+
+        .wa-chat-actions {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .wa-window {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 14px;
+          border-bottom: 1px solid #e4e7ec;
+          background: #fff;
+          color: #667085;
+          font-size: 12px;
+        }
+
+        .wa-window span {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #25d366;
+        }
+
+        .wa-window.expired span {
           background: #f97316;
         }
 
-        .messages {
-          overflow: auto;
-          padding: 18px;
-        }
-
-        .message-bubble {
-          width: fit-content;
-          max-width: min(620px, 82%);
-          margin-bottom: 12px;
-          border-radius: 8px;
-          padding: 10px 12px;
-          box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
-        }
-
-        .message-bubble.inbound {
-          background: #fff;
-        }
-
-        .message-bubble.outbound {
-          margin-left: auto;
-          background: #dcfce7;
-        }
-
-        .message-bubble.system {
-          margin-inline: auto;
-          background: #e5e7eb;
-        }
-
-        .message-text {
-          white-space: pre-wrap;
-          line-height: 1.45;
-        }
-
-        .message-status {
+        .wa-status-strip {
           display: flex;
-          gap: 8px;
-          flex-wrap: wrap;
-          margin-top: 6px;
-          color: #6b7280;
+          align-items: center;
+          gap: 7px;
+          padding: 8px 14px;
+          background: rgba(255, 255, 255, 0.76);
+          border-bottom: 1px solid #e4e7ec;
+          overflow-x: auto;
+        }
+
+        .wa-status-strip button {
+          min-height: 30px;
+          padding: 0 10px;
+          font-size: 12px;
+          white-space: nowrap;
+        }
+
+        .wa-status-strip button.active {
+          border-color: #00a884;
+          color: #0b8f61;
+          background: #d9fdd3;
+        }
+
+        .wa-messages {
+          overflow: auto;
+          padding: 22px 44px;
+          background:
+            linear-gradient(180deg, rgba(239, 234, 226, 0.95), rgba(239, 234, 226, 0.95)),
+            repeating-linear-gradient(45deg, rgba(17, 24, 39, 0.035) 0 1px, transparent 1px 18px);
+        }
+
+        .wa-bubble {
+          position: relative;
+          width: fit-content;
+          max-width: min(680px, 82%);
+          margin-bottom: 10px;
+          border-radius: 8px;
+          padding: 8px 10px 6px;
+          box-shadow: 0 1px 1px rgba(16, 24, 40, 0.12);
+        }
+
+        .wa-bubble.inbound {
+          background: #fff;
+          border-top-left-radius: 2px;
+        }
+
+        .wa-bubble.outbound {
+          margin-left: auto;
+          background: #d9fdd3;
+          border-top-right-radius: 2px;
+        }
+
+        .wa-bubble.system {
+          margin-inline: auto;
+          background: #e6f2f2;
+          color: #54656f;
+        }
+
+        .wa-bubble-text {
+          white-space: pre-wrap;
+          overflow-wrap: anywhere;
+          line-height: 1.45;
+          font-size: 14px;
+        }
+
+        .wa-bubble-meta {
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          gap: 4px;
+          margin-top: 3px;
+          color: #667085;
           font-size: 11px;
         }
 
+        .wa-bubble-meta svg {
+          color: #667085;
+        }
+
+        .wa-bubble-meta svg.read {
+          color: #53bdeb;
+        }
+
+        .wa-bubble-meta svg.failed,
         .message-error {
           color: #dc2626;
         }
 
-        .reply-box {
-          display: grid;
-          grid-template-columns: 1fr auto;
-          gap: 10px;
-          padding: 14px;
-          border-top: 1px solid #e5e7eb;
-          background: #fff;
+        .message-error {
+          max-width: 280px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
 
-        .reply-box textarea {
+        .wa-composer {
+          display: grid;
+          grid-template-columns: auto auto minmax(0, 1fr) auto;
+          align-items: end;
+          gap: 8px;
+          padding: 10px 12px;
+          border-top: 1px solid #d7dde3;
+          background: #f0f2f5;
+        }
+
+        .wa-composer textarea {
+          min-height: 42px;
+          max-height: 128px;
           resize: none;
-          border: 1px solid #e5e7eb;
+          border: 0;
           border-radius: 8px;
-          padding: 12px;
+          background: #fff;
+          padding: 12px 14px;
+          color: #111827;
           font: inherit;
+          line-height: 1.4;
           outline: 0;
         }
 
-        .reply-box button {
+        .send-button {
+          width: 42px;
+          height: 42px;
+          border: 0;
+          border-radius: 50%;
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          gap: 8px;
-          min-width: 112px;
-          border: 0;
-          border-radius: 8px;
-          background: #c0913d;
+          background: #00a884;
           color: #fff;
-          font-weight: 800;
           cursor: pointer;
-          padding: 0 16px;
         }
 
-        .reply-box button:disabled {
+        .send-button:disabled,
+        .wa-composer textarea:disabled {
           opacity: 0.55;
           cursor: not-allowed;
         }
 
-        .context-panel {
-          border-left: 1px solid #e5e7eb;
-          padding: 18px;
+        .wa-info {
+          min-width: 0;
           overflow: auto;
+          background: #f0f2f5;
+          border-left: 1px solid #d7dde3;
+          padding: 16px;
         }
 
-        .context-panel h2 {
-          margin: 0 0 16px;
-          font-family: Georgia, 'Times New Roman', serif;
-          font-size: 20px;
-          letter-spacing: 0;
-        }
-
-        .context-panel dl {
-          margin: 0;
+        .wa-profile {
           display: grid;
-          gap: 12px;
+          justify-items: center;
+          gap: 8px;
+          padding: 18px 10px;
+          margin-bottom: 12px;
+          border-radius: 8px;
+          background: #fff;
+          text-align: center;
         }
 
-        .context-panel dt {
-          color: #6b7280;
-          font-size: 12px;
+        .wa-profile strong {
+          font-size: 18px;
+        }
+
+        .wa-profile span {
+          color: #667085;
+          font-size: 13px;
+        }
+
+        .info-card {
+          padding: 14px;
+          margin-bottom: 12px;
+          border-radius: 8px;
+          background: #fff;
+          border: 1px solid #e4e7ec;
+        }
+
+        .info-card h2 {
+          margin: 0 0 12px;
+          font-size: 15px;
+        }
+
+        .info-card dl {
+          display: grid;
+          gap: 10px;
+          margin: 0;
+        }
+
+        .info-card dt {
+          color: #667085;
+          font-size: 11px;
           font-weight: 800;
+          letter-spacing: 0.05em;
           text-transform: uppercase;
-          letter-spacing: 0.06em;
         }
 
-        .context-panel dd {
-          margin: -8px 0 0;
+        .info-card dd {
+          margin: -7px 0 0;
           overflow-wrap: anywhere;
+          color: #111827;
+          font-size: 13px;
           font-weight: 700;
         }
 
         .empty-list,
-        .empty-chat {
-          min-height: 260px;
+        .empty-chat,
+        .empty-info {
+          min-height: 240px;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          gap: 10px;
-          color: #9ca3af;
+          gap: 9px;
+          color: #667085;
           text-align: center;
           padding: 24px;
         }
 
+        .empty-chat {
+          min-height: 100%;
+        }
+
         .empty-chat.compact {
           min-height: 220px;
+        }
+
+        .empty-chat span,
+        .empty-info span {
+          max-width: 360px;
+          color: #667085;
+          font-size: 13px;
         }
 
         .spin {
@@ -959,44 +1241,63 @@ export default function MetaWhatsAppChatPage() {
           }
         }
 
-        @media (max-width: 1180px) {
-          .chat-shell {
-            grid-template-columns: minmax(260px, 340px) 1fr;
+        @media (max-width: 1280px) {
+          .wa-shell {
+            grid-template-columns: minmax(300px, 360px) minmax(420px, 1fr);
           }
 
-          .context-panel {
+          .wa-info {
             display: none;
           }
         }
 
-        @media (max-width: 820px) {
-          .meta-chat-page {
-            padding: 22px 14px;
+        @media (max-width: 860px) {
+          .wa-page {
+            padding: 18px 10px;
           }
 
-          .meta-chat-header,
-          .toolbar,
-          .message-header {
+          .wa-page-header {
             align-items: stretch;
             flex-direction: column;
           }
 
-          .summary-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-          }
-
-          .chat-shell {
+          .wa-shell {
             grid-template-columns: 1fr;
+            height: auto;
+            min-height: 720px;
           }
 
-          .conversation-list {
-            max-height: 320px;
+          .wa-sidebar {
+            max-height: 360px;
             border-right: 0;
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1px solid #d7dde3;
           }
 
-          .reply-box {
+          .wa-messages {
+            min-height: 430px;
+            padding: 16px;
+          }
+
+          .wa-chat-actions {
+            display: none;
+          }
+        }
+
+        @media (max-width: 560px) {
+          .wa-summary-row {
             grid-template-columns: 1fr;
+          }
+
+          .wa-status-strip {
+            padding-inline: 10px;
+          }
+
+          .wa-composer {
+            grid-template-columns: auto minmax(0, 1fr) auto;
+          }
+
+          .wa-composer .icon-button:first-child {
+            display: none;
           }
         }
       `}</style>

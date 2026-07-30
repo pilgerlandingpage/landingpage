@@ -232,7 +232,7 @@ async function findLeadByPhone(supabase: SupabaseAdmin, phone: string) {
   if (!phone) return null
   const { data, error } = await supabase
     .from('leads')
-    .select('id, name, email, phone, phone_e164, funnel_stage, lead_classification, lead_purpose, lead_budget, created_at, updated_at')
+    .select('id, name, email, phone, phone_e164, funnel_stage, lead_classification, lead_purpose, lead_budget, avatar_url, avatar_source, avatar_updated_at, created_at, updated_at')
     .or(`phone.eq.${phone},phone_e164.eq.${phone}`)
     .order('updated_at', { ascending: false })
     .limit(1)
@@ -422,7 +422,7 @@ export async function listMetaWhatsAppConversations(
       *,
       sender:meta_whatsapp_senders(display_name, phone_number, phone_number_id, meta_status, quality_rating),
       campaign:meta_whatsapp_campaigns(id, name, campaign_type, template_name),
-      lead:leads(id, name, email, phone, phone_e164, funnel_stage, lead_classification, lead_purpose)
+      lead:leads(id, name, email, phone, phone_e164, funnel_stage, lead_classification, lead_purpose, avatar_url, avatar_source, avatar_updated_at)
     `)
     .order('last_message_at', { ascending: false, nullsFirst: false })
     .limit(limit)
@@ -466,7 +466,7 @@ export async function getMetaWhatsAppConversationDetail(
         *,
         sender:meta_whatsapp_senders(display_name, phone_number, phone_number_id, meta_status, quality_rating),
         campaign:meta_whatsapp_campaigns(id, name, campaign_type, template_name),
-        lead:leads(id, name, email, phone, phone_e164, funnel_stage, lead_classification, lead_purpose, lead_budget, created_at)
+        lead:leads(id, name, email, phone, phone_e164, funnel_stage, lead_classification, lead_purpose, lead_budget, avatar_url, avatar_source, avatar_updated_at, created_at)
       `)
       .eq('id', selected)
       .maybeSingle(),

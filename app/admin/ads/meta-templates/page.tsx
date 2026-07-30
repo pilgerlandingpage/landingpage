@@ -5,21 +5,28 @@ import type { CSSProperties, ReactNode } from 'react'
 import Link from 'next/link'
 import {
   AlertTriangle,
+  BadgeCheck,
   CheckCircle2,
+  Clock3,
   Copy,
   Edit3,
   FileText,
+  Filter,
   ImageIcon,
+  Layers3,
   Link2,
   Loader2,
+  MessageSquareText,
   Plus,
   RefreshCw,
   Save,
+  Search,
   Send,
   Sparkles,
   Trash2,
   Upload,
   Video,
+  XCircle,
 } from 'lucide-react'
 import AdminLoadingState from '@/components/admin/AdminLoadingState'
 
@@ -404,6 +411,26 @@ function getButtonsComponent(components?: unknown[] | null) {
   return (components || []).map(asRecord).find(component => textValue(component.type).toUpperCase() === 'BUTTONS') || null
 }
 
+function getHeaderFormat(components?: unknown[] | null): HeaderFormat {
+  const header = (components || []).map(asRecord).find(component => textValue(component.type).toUpperCase() === 'HEADER')
+  return (textValue(header?.format).toUpperCase() || 'NONE') as HeaderFormat
+}
+
+function getTemplateButtonCount(components?: unknown[] | null) {
+  const buttons = getButtonsComponent(components)
+  return Array.isArray(buttons?.buttons) ? buttons.buttons.length : 0
+}
+
+function formatTemplateDate(value?: string | null) {
+  if (!value) return '-'
+  return new Date(value).toLocaleString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
 function parseTemplateToForm(template: MetaTemplateRow | TemplateDraft): TemplateForm {
   const components = Array.isArray(template.components) ? template.components.map(asRecord) : []
   const header = components.find(component => textValue(component.type).toUpperCase() === 'HEADER')
@@ -557,6 +584,7 @@ export default function MetaTemplatesPage() {
   const [syncing, setSyncing] = useState(false)
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [activeStatus, setActiveStatus] = useState<TemplateStatus>('all')
+  const [templateSearch, setTemplateSearch] = useState('')
   const [form, setForm] = useState<TemplateForm>(emptyForm)
   const [editingTemplate, setEditingTemplate] = useState<MetaTemplateRow | null>(null)
   const [editingDraftId, setEditingDraftId] = useState('')
@@ -573,10 +601,31 @@ export default function MetaTemplatesPage() {
   const approvalSummary = useMemo(() => getApprovalSummary(approvalChecks), [approvalChecks])
 
   const filteredTemplates = useMemo(() => {
+    const search = templateSearch.trim().toLowerCase()
     if (activeStatus === 'drafts') return []
-    if (activeStatus === 'all') return templates
-    return templates.filter(template => String(template.status || '').toUpperCase() === activeStatus.toUpperCase())
-  }, [templates, activeStatus])
+    const statusFiltered = activeStatus === 'all'
+      ? templates
+      : templates.filter(template => String(template.status || '').toUpperCase() === activeStatus.toUpperCase())
+    if (!search) return statusFiltered
+    return statusFiltered.filter(template => [
+      template.name,
+      template.language,
+      template.category,
+      template.status,
+      textValue(getBodyComponent(template.components)?.text),
+    ].some(value => String(value || '').toLowerCase().includes(search)))
+  }, [templates, activeStatus, templateSearch])
+
+  const filteredDrafts = useMemo(() => {
+    const search = templateSearch.trim().toLowerCase()
+    if (!search) return drafts
+    return drafts.filter(draft => [
+      draft.name,
+      draft.language,
+      draft.category,
+      textValue(getBodyComponent(draft.components)?.text),
+    ].some(value => String(value || '').toLowerCase().includes(search)))
+  }, [drafts, templateSearch])
 
   const groupedCounts = useMemo(() => ({
     all: templates.length,
@@ -585,6 +634,13 @@ export default function MetaTemplatesPage() {
     REJECTED: templates.filter(template => String(template.status).toUpperCase() === 'REJECTED').length,
     drafts: drafts.length,
   }), [templates, drafts])
+
+  const templateMetrics = useMemo(() => {
+    const withMedia = templates.filter(template => getHeaderFormat(template.components) !== 'NONE').length
+    const withButtons = templates.filter(template => getTemplateButtonCount(template.components) > 0).length
+    const rejected = templates.filter(template => String(template.status).toUpperCase() === 'REJECTED').length
+    return { withMedia, withButtons, rejected }
+  }, [templates])
 
   const loadTemplates = async () => {
     setLoading(true)
@@ -965,6 +1021,43 @@ export default function MetaTemplatesPage() {
         </div>
       )}
 
+      <section style={managerPanelStyle}>
+        <div style={managerToolbarStyle}>
+          <div style={managerTabsStyle}>
+            {([
+              ['all', `Todos ${groupedCounts.all}`],
+              ['APPROVED', `Aprovados ${groupedCounts.APPROVED}`],
+              ['PENDING', `Em analise ${groupedCounts.PENDING}`],
+              ['REJECTED', `Rejeitados ${groupedCounts.REJECTED}`],
+              ['drafts', `Rascunhos ${groupedCounts.drafts}`],
+            ] as Array<[TemplateStatus, string]>).map(([status, label]) => (
+              <button key={status} type="button" onClick={() => setActiveStatus(status)} style={managerTabStyle(activeStatus === status)}>
+                {label}
+              </button>
+            ))}
+          </div>
+          <div style={searchBoxStyle}>
+            <Search size={16} />
+            <input
+              value={templateSearch}
+              onChange={event => setTemplateSearch(event.target.value)}
+              placeholder="Pesquisar template, idioma, status ou texto"
+              style={searchInputStyle}
+            />
+          </div>
+        </div>
+
+        <div style={templateMetricGridStyle}>
+          <TemplateMetric icon={<FileText size={16} />} label="Templates" value={templates.length} />
+          <TemplateMetric icon={<BadgeCheck size={16} />} label="Aprovados" value={groupedCounts.APPROVED} tone="success" />
+          <TemplateMetric icon={<Clock3 size={16} />} label="Em analise" value={groupedCounts.PENDING} tone="warning" />
+          <TemplateMetric icon={<XCircle size={16} />} label="Rejeitados" value={templateMetrics.rejected} tone="danger" />
+          <TemplateMetric icon={<ImageIcon size={16} />} label="Com midia" value={templateMetrics.withMedia} />
+          <TemplateMetric icon={<MessageSquareText size={16} />} label="Com botoes" value={templateMetrics.withButtons} />
+          <TemplateMetric icon={<Layers3 size={16} />} label="Rascunhos" value={drafts.length} />
+        </div>
+      </section>
+
       <section style={panelStyle}>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap', marginBottom: 14 }}>
           <div>
@@ -1254,51 +1347,55 @@ export default function MetaTemplatesPage() {
       </div>
 
       <section style={panelStyle}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'center', marginBottom: 12, flexWrap: 'wrap' }}>
-          <h2 style={sectionTitleStyle}>Biblioteca Meta</h2>
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {([
-              ['all', `Todos (${groupedCounts.all})`],
-              ['APPROVED', `Aprovados (${groupedCounts.APPROVED})`],
-              ['PENDING', `Em analise (${groupedCounts.PENDING})`],
-              ['REJECTED', `Rejeitados (${groupedCounts.REJECTED})`],
-              ['drafts', `Rascunhos (${groupedCounts.drafts})`],
-            ] as Array<[TemplateStatus, string]>).map(([status, label]) => (
-              <button key={status} type="button" onClick={() => setActiveStatus(status)} style={tabButtonStyle(activeStatus === status)}>
-                {label}
-              </button>
-            ))}
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'flex-start', marginBottom: 12, flexWrap: 'wrap' }}>
+          <div>
+            <h2 style={sectionTitleStyle}>Biblioteca Meta</h2>
+            <p style={{ margin: '5px 0 0', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+              {activeStatus === 'drafts'
+                ? `${filteredDrafts.length} rascunho(s) encontrado(s).`
+                : `${filteredTemplates.length} template(s) encontrado(s).`}
+            </p>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)', fontSize: '0.78rem' }}>
+            <Filter size={15} />
+            {activeStatus === 'all' ? 'Todos os status' : activeStatus === 'drafts' ? 'Rascunhos locais' : activeStatus}
           </div>
         </div>
 
         {activeStatus === 'drafts' ? (
-          <div style={gridStyle}>
-            {drafts.map(draft => (
-              <TemplateCard
+          <div style={templateTableStyle}>
+            <TemplateTableHeader />
+            {filteredDrafts.map(draft => (
+              <TemplateTableRow
                 key={draft.id}
                 title={draft.name}
-                subtitle={`${draft.category} | ${draft.language}`}
+                category={draft.category}
+                language={draft.language}
                 status="RASCUNHO"
                 statusColorValue="#c9a96e"
                 components={draft.components}
+                updatedAt={draft.updated_at}
                 actions={<>
                   <button type="button" onClick={() => loadIntoBuilder(draft, 'draft')} style={ghostButtonStyle}><Edit3 size={14} /> Editar</button>
                   <button type="button" onClick={() => deleteDraft(draft)} style={dangerButtonStyle}><Trash2 size={14} /> Remover</button>
                 </>}
               />
             ))}
-            {!drafts.length && <EmptyState text="Nenhum rascunho salvo ainda." />}
+            {!filteredDrafts.length && <EmptyState text="Nenhum rascunho salvo ainda." />}
           </div>
         ) : (
-          <div style={gridStyle}>
+          <div style={templateTableStyle}>
+            <TemplateTableHeader />
             {filteredTemplates.map(template => (
-              <TemplateCard
+              <TemplateTableRow
                 key={template.id}
                 title={template.name}
-                subtitle={`${template.category} | ${template.language}`}
+                category={template.category}
+                language={template.language}
                 status={String(template.status || 'unknown').toUpperCase()}
                 statusColorValue={statusColor(template.status)}
                 components={template.components || []}
+                updatedAt={template.last_synced_at || template.updated_at}
                 actions={<>
                   <button type="button" onClick={() => loadIntoBuilder(template, 'duplicate')} style={ghostButtonStyle}><Copy size={14} /> Duplicar</button>
                   {template.template_external_id && (
@@ -1342,48 +1439,103 @@ function EmptyState({ text }: { text: string }) {
   )
 }
 
-function TemplateCard({
+function TemplateMetric({
+  icon,
+  label,
+  value,
+  tone = 'neutral',
+}: {
+  icon: ReactNode
+  label: string
+  value: number
+  tone?: 'neutral' | 'success' | 'warning' | 'danger'
+}) {
+  const toneColor = tone === 'success' ? '#22c55e' : tone === 'warning' ? '#f59e0b' : tone === 'danger' ? '#ef4444' : 'var(--gold)'
+  return (
+    <div style={templateMetricStyle}>
+      <span style={{ ...templateMetricIconStyle, color: toneColor }}>{icon}</span>
+      <strong style={{ color: 'var(--text-primary)', fontSize: '1.08rem', lineHeight: 1 }}>{value}</strong>
+      <span style={{ color: 'var(--text-muted)', fontSize: '0.74rem' }}>{label}</span>
+    </div>
+  )
+}
+
+function TemplateTableHeader() {
+  return (
+    <div style={{ ...templateRowGridStyle, ...templateTableHeaderStyle }}>
+      <span>Template</span>
+      <span>Status</span>
+      <span>Categoria</span>
+      <span>Header</span>
+      <span>Botoes</span>
+      <span>Atualizado</span>
+      <span>Acoes</span>
+    </div>
+  )
+}
+
+function headerFormatName(format: HeaderFormat) {
+  if (format === 'IMAGE') return 'Imagem'
+  if (format === 'VIDEO') return 'Video'
+  if (format === 'DOCUMENT') return 'Documento'
+  if (format === 'TEXT') return 'Texto'
+  return 'Sem header'
+}
+
+function TemplateTableRow({
   title,
-  subtitle,
+  category,
+  language,
   status,
   statusColorValue,
   components,
+  updatedAt,
   actions,
 }: {
   title: string
-  subtitle: string
+  category: string
+  language: string
   status: string
   statusColorValue: string
   components?: unknown[] | null
+  updatedAt?: string | null
   actions: ReactNode
 }) {
   const body = textValue(getBodyComponent(components)?.text)
-  const buttons = getButtonsComponent(components)
-  const buttonCount = Array.isArray(buttons?.buttons) ? buttons.buttons.length : 0
+  const buttonCount = getTemplateButtonCount(components)
+  const headerFormat = getHeaderFormat(components)
   return (
-    <article style={{ padding: 14, borderRadius: 12, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.035)', display: 'grid', gap: 10 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
-        <div>
-          <strong style={{ color: 'var(--text-primary)' }}>{title}</strong>
-          <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginTop: 3 }}>{subtitle}</div>
-        </div>
-        <span style={{ color: statusColorValue, fontSize: '0.72rem', fontWeight: 900 }}>{status}</span>
+    <article style={{ ...templateRowGridStyle, ...templateTableRowStyle }}>
+      <div style={{ minWidth: 0 }}>
+        <strong style={{ color: 'var(--text-primary)', fontSize: '0.88rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{title}</strong>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.76rem', lineHeight: 1.35, margin: '4px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {body ? body.slice(0, 160) : 'Sem corpo sincronizado.'}
+        </p>
       </div>
-      <p style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', lineHeight: 1.45, margin: 0, minHeight: 38 }}>
-        {body ? body.slice(0, 160) : 'Sem corpo sincronizado.'}
-      </p>
-      <div style={{ display: 'flex', gap: 8, color: 'var(--text-muted)', fontSize: '0.74rem' }}>
-        <span>{Array.isArray(components) ? components.length : 0} componente(s)</span>
-        <span>{buttonCount} botao(s)</span>
+      <span style={{ ...statusBadgeStyle, color: statusColorValue, borderColor: `${statusColorValue}55`, background: `${statusColorValue}14` }}>{status}</span>
+      <span style={templateCellStackStyle}>
+        <strong>{category}</strong>
+        <small>{language}</small>
+      </span>
+      <span style={templateCellStackStyle}>
+        <strong>{headerFormatName(headerFormat)}</strong>
+        <small>{Array.isArray(components) ? components.length : 0} componente(s)</small>
+      </span>
+      <span style={templateCellStackStyle}>
+        <strong>{buttonCount}</strong>
+        <small>{buttonCount === 1 ? 'botao' : 'botoes'}</small>
+      </span>
+      <span style={{ color: 'var(--text-secondary)', fontSize: '0.78rem' }}>{formatTemplateDate(updatedAt)}</span>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, flexWrap: 'wrap' }}>
+        {actions}
       </div>
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>{actions}</div>
     </article>
   )
 }
 
 const panelStyle: CSSProperties = {
   padding: 18,
-  borderRadius: 14,
+  borderRadius: 8,
   border: '1px solid var(--border)',
   background: 'var(--bg-secondary)',
 }
@@ -1428,6 +1580,140 @@ const ghostButtonStyle: CSSProperties = {
   fontSize: '0.8rem',
 }
 
+const managerPanelStyle: CSSProperties = {
+  padding: 0,
+  borderRadius: 8,
+  border: '1px solid var(--border)',
+  background: 'var(--bg-secondary)',
+  overflow: 'hidden',
+}
+
+const managerToolbarStyle: CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: 12,
+  padding: 12,
+  borderBottom: '1px solid var(--border)',
+  flexWrap: 'wrap',
+}
+
+const managerTabsStyle: CSSProperties = {
+  display: 'flex',
+  gap: 8,
+  flexWrap: 'wrap',
+}
+
+function managerTabStyle(active: boolean): CSSProperties {
+  return {
+    padding: '8px 10px',
+    borderRadius: 7,
+    border: `1px solid ${active ? 'var(--gold)' : 'var(--border)'}`,
+    background: active ? 'rgba(201,169,110,0.13)' : 'rgba(255,255,255,0.035)',
+    color: active ? 'var(--gold)' : 'var(--text-primary)',
+    cursor: 'pointer',
+    fontWeight: 800,
+    fontSize: '0.78rem',
+  }
+}
+
+const searchBoxStyle: CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 8,
+  flex: '1 1 320px',
+  maxWidth: 560,
+  minWidth: 260,
+  padding: '0 10px',
+  borderRadius: 7,
+  border: '1px solid var(--border)',
+  background: 'rgba(255,255,255,0.045)',
+  color: 'var(--text-muted)',
+}
+
+const searchInputStyle: CSSProperties = {
+  width: '100%',
+  height: 38,
+  border: 0,
+  outline: 'none',
+  background: 'transparent',
+  color: 'var(--text-primary)',
+  fontFamily: 'inherit',
+  fontSize: '0.82rem',
+}
+
+const templateMetricGridStyle: CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+}
+
+const templateMetricStyle: CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: '22px 1fr',
+  gap: '3px 8px',
+  alignItems: 'center',
+  padding: '13px 14px',
+  borderRight: '1px solid var(--border)',
+  borderBottom: '1px solid var(--border)',
+}
+
+const templateMetricIconStyle: CSSProperties = {
+  gridRow: 'span 2',
+  display: 'inline-flex',
+  alignItems: 'center',
+}
+
+const templateTableStyle: CSSProperties = {
+  borderRadius: 8,
+  border: '1px solid var(--border)',
+  background: 'rgba(255,255,255,0.025)',
+  overflowX: 'auto',
+}
+
+const templateRowGridStyle: CSSProperties = {
+  minWidth: 980,
+  display: 'grid',
+  gridTemplateColumns: 'minmax(260px, 1.8fr) 118px 120px 120px 86px 132px minmax(240px, 1fr)',
+  gap: 12,
+  alignItems: 'center',
+}
+
+const templateTableHeaderStyle: CSSProperties = {
+  padding: '10px 12px',
+  color: 'var(--text-muted)',
+  fontSize: '0.68rem',
+  fontWeight: 900,
+  letterSpacing: '0.05em',
+  textTransform: 'uppercase',
+  borderBottom: '1px solid var(--border)',
+  background: 'rgba(255,255,255,0.035)',
+}
+
+const templateTableRowStyle: CSSProperties = {
+  padding: 12,
+  borderBottom: '1px solid var(--border)',
+}
+
+const statusBadgeStyle: CSSProperties = {
+  justifySelf: 'start',
+  padding: '5px 8px',
+  borderRadius: 999,
+  border: '1px solid',
+  fontSize: '0.66rem',
+  fontWeight: 900,
+  lineHeight: 1,
+  textTransform: 'uppercase',
+  whiteSpace: 'nowrap',
+}
+
+const templateCellStackStyle: CSSProperties = {
+  display: 'grid',
+  gap: 2,
+  color: 'var(--text-secondary)',
+  fontSize: '0.76rem',
+  lineHeight: 1.25,
+}
+
 function actionButtonStyle(primary: boolean): CSSProperties {
   return {
     display: 'inline-flex',
@@ -1441,19 +1727,6 @@ function actionButtonStyle(primary: boolean): CSSProperties {
     cursor: 'pointer',
     fontWeight: 800,
     fontSize: '0.86rem',
-  }
-}
-
-function tabButtonStyle(active: boolean): CSSProperties {
-  return {
-    padding: '8px 10px',
-    borderRadius: 9,
-    border: `1px solid ${active ? 'var(--gold)' : 'var(--border)'}`,
-    background: active ? 'rgba(201,169,110,0.12)' : 'rgba(255,255,255,0.04)',
-    color: active ? 'var(--gold)' : 'var(--text-secondary)',
-    cursor: 'pointer',
-    fontWeight: 800,
-    fontSize: '0.78rem',
   }
 }
 
@@ -1480,10 +1753,4 @@ const successPillStyle: CSSProperties = {
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-}
-
-const gridStyle: CSSProperties = {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))',
-  gap: 12,
 }
