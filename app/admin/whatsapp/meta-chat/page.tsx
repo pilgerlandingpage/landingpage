@@ -1131,9 +1131,11 @@ export default function MetaWhatsAppChatPage() {
         .wa-messages {
           overflow: auto;
           padding: 22px 44px;
-          background:
-            linear-gradient(180deg, rgba(239, 234, 226, 0.95), rgba(239, 234, 226, 0.95)),
-            repeating-linear-gradient(45deg, rgba(17, 24, 39, 0.035) 0 1px, transparent 1px 18px);
+          background-color: #efeae2;
+          background-image: url("https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/8c98994518b575bfd8c949e91d20548b.jpg");
+          background-size: 420px auto;
+          background-position: top left;
+          background-repeat: repeat;
         }
 
         .wa-bubble {
@@ -1674,10 +1676,10 @@ export default function MetaWhatsAppChatPage() {
         .wa-messages {
           padding: 22px 64px 18px;
           background-color: #efeae2;
-          background-image:
-            url("data:image/svg+xml,%3Csvg width='420' height='420' viewBox='0 0 420 420' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23d9d1c4' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round' opacity='.38'%3E%3Cpath d='M38 56h33v23H38zM55 79l-9 12M56 79l10 12M110 48c11 0 20 9 20 20s-9 20-20 20-20-9-20-20 9-20 20-20zM104 64h12M103 72h14M175 62l19-19 19 19-19 19zM250 45c20 9 25 31 5 48-21-17-16-39-5-48zM325 55c16 0 28 12 28 28h-56c0-16 12-28 28-28zM55 164c18 0 31 13 31 29s-13 29-31 29-31-13-31-29 13-29 31-29zM42 190h26M58 177v28M135 170h42v30h-42zM148 200l-12 16M164 200l12 16M235 158l22 18-22 18-22-18zM323 166h43v34h-43zM344 200l-15 19M346 200l15 19M82 295c0 13-11 24-24 24S34 308 34 295s11-24 24-24 24 11 24 24zM49 294h18M167 267l27 27-27 27-27-27zM254 276c15 0 27 12 27 27h-54c0-15 12-27 27-27zM335 278h37v28h-37zM348 306l-13 17M360 306l12 17%3C/path%3E%3C/g%3E%3C/svg%3E"),
-            linear-gradient(rgba(239, 234, 226, 0.92), rgba(239, 234, 226, 0.92));
-          background-size: 420px 420px, auto;
+          background-image: url("https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/8c98994518b575bfd8c949e91d20548b.jpg");
+          background-size: 420px auto;
+          background-position: top left;
+          background-repeat: repeat;
         }
 
         .wa-bubble {
