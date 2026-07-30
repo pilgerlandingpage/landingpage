@@ -12,6 +12,7 @@ import {
     getMetaWhatsAppCampaignDetail,
     listMetaWhatsAppCampaigns,
     manageMetaWhatsAppCampaign,
+    retryFailedMetaWhatsAppCampaignRecipients,
 } from '@/lib/meta/whatsapp-campaigns'
 
 function getSupabase() {
@@ -49,6 +50,7 @@ export async function GET(request: NextRequest) {
         }
 
         const instanceId = request.nextUrl.searchParams.get('instance_id')
+
         if (!instanceId) {
             return NextResponse.json({ success: false, message: 'instance_id obrigatório' }, { status: 400 })
         }
@@ -172,6 +174,28 @@ export async function POST(request: NextRequest) {
                 success: true,
                 result,
                 message: `Campanha Meta ${result.status}.`,
+            })
+        }
+
+        if (action === 'meta_retry_failed') {
+            const campaignId = campaignData.campaignId || campaignData.campaign_id
+            const result = await retryFailedMetaWhatsAppCampaignRecipients({ campaignId })
+
+            if (result.queued > 0) {
+                await inngest.send({
+                    name: 'meta-whatsapp/campaign-created',
+                    data: {
+                        campaign_id: campaignId,
+                        reason: 'admin_meta_whatsapp_campaign_retry_failed',
+                        batch_size: Number(campaignData.batchSize || campaignData.batch_size || 25),
+                    },
+                })
+            }
+
+            return NextResponse.json({
+                success: true,
+                result,
+                message: result.message,
             })
         }
 

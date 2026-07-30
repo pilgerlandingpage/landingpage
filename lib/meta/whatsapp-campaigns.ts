@@ -759,6 +759,94 @@ export async function manageMetaWhatsAppCampaign(params: {
   return { status: nextStatus }
 }
 
+export async function retryFailedMetaWhatsAppCampaignRecipients(params: {
+  campaignId: string
+}, supabase = createAdminClient()) {
+  const campaignId = cleanText(params.campaignId, 80)
+  if (!campaignId) throw new Error('campaignId obrigatorio.')
+
+  const { data: campaign, error: campaignError } = await supabase
+    .from('meta_whatsapp_campaigns')
+    .select('id, status, metadata, total_queued, total_failed')
+    .eq('id', campaignId)
+    .maybeSingle()
+
+  if (campaignError) throw campaignError
+  if (!campaign) throw new Error('Campanha Meta nao encontrada.')
+
+  const currentStatus = String(campaign.status || '')
+  if (['queued', 'sending', 'scheduled', 'preparing'].includes(currentStatus)) {
+    throw new Error('A campanha ainda esta ativa. Aguarde finalizar ou pause antes de reenviar falhas.')
+  }
+  if (currentStatus === 'cancelled') {
+    throw new Error('Campanha cancelada nao pode ser reenviada.')
+  }
+
+  const { count: failedCount, error: countError } = await supabase
+    .from('meta_whatsapp_campaign_recipients')
+    .select('id', { count: 'exact', head: true })
+    .eq('campaign_id', campaignId)
+    .eq('status', 'failed')
+
+  if (countError) throw countError
+  const retryCount = failedCount || 0
+  if (retryCount <= 0) {
+    return {
+      status: currentStatus,
+      queued: 0,
+      message: 'Nenhum destinatario com falha para reenviar.',
+    }
+  }
+
+  const now = new Date().toISOString()
+  const { error: recipientsError } = await supabase
+    .from('meta_whatsapp_campaign_recipients')
+    .update({
+      status: 'queued',
+      sender_id: null,
+      provider_message_id: null,
+      error_code: null,
+      error_message: null,
+      scheduled_for: null,
+      sent_at: null,
+      delivered_at: null,
+      read_at: null,
+      failed_at: null,
+    })
+    .eq('campaign_id', campaignId)
+    .eq('status', 'failed')
+
+  if (recipientsError) throw recipientsError
+
+  const metadata = asMetadata(campaign.metadata)
+  const totalQueued = Number(campaign.total_queued || 0)
+  const totalFailed = Number(campaign.total_failed || 0)
+  const { error: updateError } = await supabase
+    .from('meta_whatsapp_campaigns')
+    .update({
+      status: 'queued',
+      total_queued: totalQueued + retryCount,
+      total_failed: Math.max(0, totalFailed - retryCount),
+      completed_at: null,
+      paused_at: null,
+      metadata: {
+        ...metadata,
+        retry_failed_count: Number(metadata.retry_failed_count || 0) + 1,
+        last_retry_failed_at: now,
+        last_retry_failed_recipients: retryCount,
+      },
+    })
+    .eq('id', campaignId)
+
+  if (updateError) throw updateError
+
+  return {
+    status: 'queued',
+    queued: retryCount,
+    message: `${retryCount} destinatario(s) com falha voltaram para a fila.`,
+  }
+}
+
 function bodyParametersFromTemplateParameters(value: unknown) {
   if (!value) return undefined
   if (Array.isArray(value)) {

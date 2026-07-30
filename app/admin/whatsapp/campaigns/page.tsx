@@ -489,6 +489,7 @@ export default function CampaignsPage() {
     const [expandedMetaCampaignId, setExpandedMetaCampaignId] = useState('')
     const [loadingMetaCampaignDetail, setLoadingMetaCampaignDetail] = useState('')
     const [metaCampaignDetails, setMetaCampaignDetails] = useState<Record<string, MetaCampaignDetail>>({})
+    const [retryingMetaCampaignId, setRetryingMetaCampaignId] = useState('')
     const [showCreateForm, setShowCreateForm] = useState(false)
     const [sending, setSending] = useState(false)
     const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
@@ -1194,6 +1195,42 @@ export default function CampaignsPage() {
             }
         } catch {
             setFeedback({ type: 'error', text: 'Erro ao atualizar campanha Meta' })
+        }
+    }
+
+    const retryFailedMetaCampaign = async (campaignId: string, failedCount: number) => {
+        if (failedCount <= 0) return
+        const confirmed = window.confirm(`Reenviar ${failedCount} destinatario(s) que falharam nesta campanha?`)
+        if (!confirmed) return
+
+        setRetryingMetaCampaignId(campaignId)
+        setFeedback(null)
+        try {
+            const res = await fetch('/api/admin/whatsapp/campaigns', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'meta_retry_failed',
+                    campaignId,
+                }),
+            })
+            const data = await res.json()
+            if (data.success) {
+                setFeedback({ type: 'success', text: data.message || 'Falhas reenfileiradas para reenvio.' })
+                setMetaCampaignDetails(prev => {
+                    const next = { ...prev }
+                    delete next[campaignId]
+                    return next
+                })
+                setExpandedMetaCampaignId('')
+                await loadMetaCampaigns()
+            } else {
+                setFeedback({ type: 'error', text: data.message || 'Erro ao reenviar falhas.' })
+            }
+        } catch {
+            setFeedback({ type: 'error', text: 'Erro ao reenviar falhas.' })
+        } finally {
+            setRetryingMetaCampaignId('')
         }
     }
 
@@ -2262,6 +2299,8 @@ export default function CampaignsPage() {
                     onRefresh={loadMetaCampaigns}
                     onToggleDetail={toggleMetaCampaignDetail}
                     onManage={manageMetaCampaign}
+                    retryingCampaignId={retryingMetaCampaignId}
+                    onRetryFailed={retryFailedMetaCampaign}
                 />
             )}
 
@@ -2438,6 +2477,8 @@ function MetaOfficialCampaignPanel({
     onRefresh,
     onToggleDetail,
     onManage,
+    retryingCampaignId,
+    onRetryFailed,
 }: {
     campaigns: MetaCampaign[]
     senders: MetaSender[]
@@ -2452,6 +2493,8 @@ function MetaOfficialCampaignPanel({
     onRefresh: () => void
     onToggleDetail: (campaignId: string) => void
     onManage: (campaignId: string, action: 'pause' | 'resume' | 'cancel') => void
+    retryingCampaignId: string
+    onRetryFailed: (campaignId: string, failedCount: number) => void
 }) {
     const metricItems = [
         { label: 'Campanhas', value: summary?.total || 0, icon: MessageSquare, color: 'var(--gold)' },
@@ -2617,6 +2660,8 @@ function MetaOfficialCampaignPanel({
                             loadingDetail={loadingDetailCampaignId === campaign.id}
                             onToggleDetail={onToggleDetail}
                             onManage={onManage}
+                            retrying={retryingCampaignId === campaign.id}
+                            onRetryFailed={onRetryFailed}
                         />
                     ))}
                 </div>
@@ -2892,6 +2937,8 @@ function MetaCampaignCard({
     loadingDetail,
     onToggleDetail,
     onManage,
+    retrying,
+    onRetryFailed,
 }: {
     campaign: MetaCampaign
     sender?: MetaSender
@@ -2900,6 +2947,8 @@ function MetaCampaignCard({
     loadingDetail: boolean
     onToggleDetail: (campaignId: string) => void
     onManage: (campaignId: string, action: 'pause' | 'resume' | 'cancel') => void
+    retrying: boolean
+    onRetryFailed: (campaignId: string, failedCount: number) => void
 }) {
     const progress = metaProgress(campaign)
     const statusColor = metaStatusColor(campaign.status)
@@ -2914,6 +2963,7 @@ function MetaCampaignCard({
     const deliveredTotal = detailCampaign.total_delivered || detailRecipients.filter(item => ['delivered', 'read'].includes(item.status)).length
     const readTotal = detailCampaign.total_read || detailRecipients.filter(item => item.status === 'read').length
     const failedTotal = detailCampaign.total_failed || detailRecipients.filter(item => item.status === 'failed').length
+    const canRetryFailed = failedTotal > 0 && !['queued', 'sending', 'scheduled', 'preparing', 'cancelled'].includes(detailCampaign.status || campaign.status)
     const shouldSkipCardToggle = (target: EventTarget | null) => (
         target instanceof HTMLElement
         && Boolean(target.closest('button, a, input, select, textarea'))
@@ -2992,6 +3042,25 @@ function MetaCampaignCard({
                     >
                         {loadingDetail ? <Loader2 size={14} className="spin" /> : expanded ? <ChevronUp size={14} /> : <Search size={14} />}
                     </button>
+                    {canRetryFailed && (
+                        <button
+                            type="button"
+                            onClick={() => onRetryFailed(campaign.id, failedTotal)}
+                            disabled={retrying}
+                            title="Reenviar falhas"
+                            style={{
+                                padding: '7px',
+                                borderRadius: '7px',
+                                background: 'rgba(245,158,11,0.1)',
+                                border: '1px solid rgba(245,158,11,0.22)',
+                                color: '#f59e0b',
+                                cursor: retrying ? 'not-allowed' : 'pointer',
+                                opacity: retrying ? 0.7 : 1,
+                            }}
+                        >
+                            {retrying ? <Loader2 size={14} className="spin" /> : <RefreshCw size={14} />}
+                        </button>
+                    )}
                     {canPause && (
                         <button
                             type="button"
@@ -3068,6 +3137,8 @@ function MetaCampaignCard({
                             deliveredTotal={deliveredTotal}
                             readTotal={readTotal}
                             failedTotal={failedTotal}
+                            retrying={retrying}
+                            onRetryFailed={onRetryFailed}
                         />
                     )}
                 </div>
@@ -3085,6 +3156,8 @@ function MetaCampaignDetailPanel({
     deliveredTotal,
     readTotal,
     failedTotal,
+    retrying,
+    onRetryFailed,
 }: {
     campaign: MetaCampaign
     recipients: MetaCampaignRecipient[]
@@ -3094,8 +3167,11 @@ function MetaCampaignDetailPanel({
     deliveredTotal: number
     readTotal: number
     failedTotal: number
+    retrying: boolean
+    onRetryFailed: (campaignId: string, failedCount: number) => void
 }) {
     const total = campaign.total_recipients || recipients.length
+    const canRetryFailed = failedTotal > 0 && !['queued', 'sending', 'scheduled', 'preparing', 'cancelled'].includes(campaign.status)
     const firstRecipient = recipients[0]
     const campaignMetadata = asRecord(campaign.metadata)
     const contactSegment = asRecord(campaignMetadata.contact_segment)
@@ -3148,9 +3224,35 @@ function MetaCampaignDetailPanel({
                     display: 'grid',
                     gap: '9px',
                 }}>
-                    <strong style={{ color: '#ef4444', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '7px' }}>
-                        <AlertCircle size={15} /> Diagnostico das falhas
-                    </strong>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
+                        <strong style={{ color: '#ef4444', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '7px' }}>
+                            <AlertCircle size={15} /> Diagnostico das falhas
+                        </strong>
+                        {canRetryFailed && (
+                            <button
+                                type="button"
+                                onClick={() => onRetryFailed(campaign.id, failedTotal)}
+                                disabled={retrying}
+                                style={{
+                                    padding: '7px 10px',
+                                    borderRadius: '8px',
+                                    background: 'rgba(245,158,11,0.12)',
+                                    border: '1px solid rgba(245,158,11,0.25)',
+                                    color: '#f59e0b',
+                                    cursor: retrying ? 'not-allowed' : 'pointer',
+                                    opacity: retrying ? 0.7 : 1,
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    fontSize: '0.72rem',
+                                    fontWeight: 900,
+                                }}
+                            >
+                                {retrying ? <Loader2 size={13} className="spin" /> : <RefreshCw size={13} />}
+                                Reenviar falhas
+                            </button>
+                        )}
+                    </div>
                     {errors.slice(0, 5).map(error => (
                         <div key={`${error.code}:${error.message}`} style={{ display: 'grid', gap: '3px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
