@@ -216,9 +216,21 @@ function unitIdentifiers(unit) {
   ].filter(Boolean).map(normalizeText)
 }
 
+function pageRedirectSlug(page) {
+  const content = asRecord(page.content)
+  const metadata = asRecord(page.metadata)
+  return text(
+    metadata.redirect_to_slug ||
+    metadata.redirectToSlug ||
+    content.redirect_to_slug ||
+    content.redirectToSlug
+  )
+}
+
 function buildLandingIndexes(landingPages) {
   const developmentPages = landingPages
     .filter(page => page.status === 'published')
+    .filter(page => !pageRedirectSlug(page))
     .filter(page => Object.keys(asRecord(asRecord(page.content).development)).length > 0)
     .map(page => {
       const content = asRecord(page.content)
@@ -281,6 +293,55 @@ function matchingPagesForKeys(keys, developmentPages) {
   return developmentPages.filter(page => [...keys].some(key => page.keys.has(key)))
 }
 
+function unitMatchFields(unit, property) {
+  const record = asRecord(unit)
+  const propertyId = normalizeText(property.id)
+  const propertySourceReference = normalizeText(property.source_reference)
+  const propertySourceSlug = normalizeText(property.source_slug)
+  const unitPropertyKeys = [
+    text(record.propertyId ?? record.property_id),
+    text(record.id),
+  ].map(normalizeText).filter(Boolean)
+  const unitReferenceKeys = [
+    text(record.sourceReference ?? record.source_reference),
+    text(record.id),
+  ].map(normalizeText).filter(Boolean)
+  const unitSourceSlug = normalizeText(record.sourceSlug ?? record.source_slug ?? record.slug)
+  const fields = new Set()
+
+  if (propertyId && unitPropertyKeys.includes(propertyId)) fields.add('property_id')
+  if (propertySourceReference && unitReferenceKeys.includes(propertySourceReference)) fields.add('source_reference')
+  if (propertySourceSlug && unitSourceSlug === propertySourceSlug) fields.add('source_slug')
+
+  return fields
+}
+
+function directPagesForProperty(property, developmentPages, nameKeys) {
+  const pages = []
+  for (const page of developmentPages) {
+    let hasMatch = false
+    for (const unit of page.units) {
+      const fields = unitMatchFields(unit, property)
+      if (!fields.size) continue
+
+      const sourceSlugOnlyMatch = fields.size === 1 && fields.has('source_slug')
+      const pageNameMatchesProperty = nameKeys.size > 0 && [...nameKeys].some(key => page.keys.has(key))
+      if (sourceSlugOnlyMatch && nameKeys.size > 0 && !pageNameMatchesProperty) continue
+
+      hasMatch = true
+      break
+    }
+
+    if (!hasMatch && page.property_id && normalizeText(page.property_id) === normalizeText(property.id)) {
+      hasMatch = true
+    }
+
+    if (hasMatch) pages.push(page)
+  }
+
+  return pages
+}
+
 function summarizeProperty(property, mode, pages, extra = {}) {
   return {
     mode,
@@ -298,6 +359,66 @@ function summarizeProperty(property, mode, pages, extra = {}) {
   }
 }
 
+function normalizedPropertyType(property) {
+  return normalizeKey(property.property_type)
+}
+
+function titleHasDevelopmentSignal(property) {
+  const title = normalizeKey(property.title)
+  return /\b(cond|condominio|ed|edificio|residencial|viva\s*park|vivapark)\b/.test(title)
+}
+
+function classifyMissingDevelopmentName(property) {
+  const type = normalizedPropertyType(property)
+
+  if (type.includes('galpao') || type.includes('deposito')) {
+    return {
+      bucket: 'no_development_expected',
+      reason: 'standalone_logistics_or_industrial_property',
+    }
+  }
+
+  if (type.includes('predio residencial')) {
+    return {
+      bucket: 'no_development_expected',
+      reason: 'standalone_residential_building_property',
+    }
+  }
+
+  if (
+    type.includes('apartamento') ||
+    type.includes('cobertura') ||
+    type.includes('condominio') ||
+    titleHasDevelopmentSignal(property)
+  ) {
+    return {
+      bucket: 'missing_development_name',
+      reason: 'property_type_expected_development_name',
+    }
+  }
+
+  return {
+    bucket: 'no_development_expected',
+    reason: 'standalone_property_without_development_signal',
+  }
+}
+
+function isWeakInferredDevelopmentName(property) {
+  const inferred = normalizeKey(property.inferred_development_name)
+  if (!inferred) return false
+  const city = normalizeKey(property.city)
+  const neighborhood = normalizeKey(property.neighborhood)
+  const title = normalizeKey(property.title)
+
+  if (isTitleInferredLocationCandidate(inferred)) return true
+  if (city && (inferred === city || inferred === `${city} sc` || inferred === `${city} santa catarina`)) return true
+  if (neighborhood && (inferred === neighborhood || inferred === `${neighborhood} ${city}`.trim())) return true
+  if (/^br\s?\d+/.test(inferred) || /\bbr\s?\d+\b/.test(title)) return true
+  if (/\bsc\b/.test(inferred) && !/\b(cond|condominio|ed|edificio|residencial|park|valley)\b/.test(inferred)) return true
+
+  return false
+}
+
 function auditProperties(activeProperties, developmentPages, byUnitIdentifier) {
   const buckets = {
     direct: [],
@@ -306,13 +427,14 @@ function auditProperties(activeProperties, developmentPages, byUnitIdentifier) {
     ambiguous: [],
     missing_landing_page: [],
     missing_development_name: [],
+    development_name_review: [],
+    weak_title_inference: [],
+    no_development_expected: [],
   }
 
   for (const property of activeProperties) {
-    const directPages = Array.from(new Set(
-      propertyIdentifiers(property)
-        .flatMap(identifier => byUnitIdentifier.get(identifier) || [])
-    ))
+    const nameKeys = propertyNameKeys(property)
+    const directPages = directPagesForProperty(property, developmentPages, nameKeys)
 
     if (directPages.length === 1) {
       buckets.direct.push(summarizeProperty(property, 'direct', directPages))
@@ -324,7 +446,7 @@ function auditProperties(activeProperties, developmentPages, byUnitIdentifier) {
       continue
     }
 
-    const keyMatches = matchingPagesForKeys(propertyNameKeys(property), developmentPages)
+    const keyMatches = matchingPagesForKeys(nameKeys, developmentPages)
     if (keyMatches.length === 1) {
       buckets[property.condominium_name ? 'name_match' : 'title_inference'].push(
         summarizeProperty(property, property.condominium_name ? 'name_match' : 'title_inference', keyMatches)
@@ -338,7 +460,24 @@ function auditProperties(activeProperties, developmentPages, byUnitIdentifier) {
     }
 
     if (!property.condominium_name && !property.inferred_development_name) {
-      buckets.missing_development_name.push(summarizeProperty(property, 'missing_development_name', []))
+      const classification = classifyMissingDevelopmentName(property)
+      buckets[classification.bucket].push(
+        summarizeProperty(property, classification.bucket, [], { reason: classification.reason })
+      )
+      continue
+    }
+
+    if (!property.condominium_name && isWeakInferredDevelopmentName(property)) {
+      const type = normalizedPropertyType(property)
+      if (type.includes('galpao') || type.includes('deposito')) {
+        buckets.no_development_expected.push(
+          summarizeProperty(property, 'no_development_expected', [], { reason: 'standalone_logistics_or_industrial_property_with_weak_inference' })
+        )
+      } else {
+        buckets.weak_title_inference.push(
+          summarizeProperty(property, 'weak_title_inference', [], { reason: 'weak_location_or_code_inference' })
+        )
+      }
       continue
     }
 
@@ -366,7 +505,10 @@ function buildMarkdown(report) {
     `- Imoveis com vinculo por nome do condominio: ${report.totals.name_match}`,
     `- Imoveis com vinculo inferido pelo titulo: ${report.totals.title_inference}`,
     `- Imoveis sem condominium_name privado: ${report.totals.missing_private_condominium_name}`,
-    `- Imoveis sem nome de empreendimento detectavel: ${report.totals.missing_development_name}`,
+    `- Imoveis sem empreendimento esperado: ${report.totals.no_development_expected}`,
+    `- Imoveis para revisar nome de empreendimento: ${report.totals.development_name_review}`,
+    `- Imoveis com inferencia fraca para revisar: ${report.totals.weak_title_inference}`,
+    `- Imoveis com cadastro de empreendimento pendente: ${report.totals.missing_development_name}`,
     `- Imoveis com nome mas sem landing correspondente: ${report.totals.missing_landing_page}`,
     `- Imoveis ambiguos: ${report.totals.ambiguous}`,
     `- Landings de empreendimento sem unidades declaradas: ${report.totals.development_pages_without_units}`,
@@ -376,7 +518,10 @@ function buildMarkdown(report) {
   ]
 
   for (const [label, items] of [
-    ['Sem nome detectavel', report.samples.missing_development_name],
+    ['Nao se aplica: sem empreendimento esperado', report.samples.no_development_expected],
+    ['Revisar nome de empreendimento', report.samples.development_name_review],
+    ['Inferencia fraca para revisar', report.samples.weak_title_inference],
+    ['Cadastro de empreendimento pendente', report.samples.missing_development_name],
     ['Sem landing correspondente', report.samples.missing_landing_page],
     ['Ambiguos', report.samples.ambiguous],
   ]) {
@@ -433,12 +578,18 @@ async function main() {
       title_inference: buckets.title_inference.length,
       missing_private_condominium_name: activeProperties.filter(property => !property.condominium_name).length,
       missing_development_name: buckets.missing_development_name.length,
+      development_name_review: buckets.development_name_review.length,
+      weak_title_inference: buckets.weak_title_inference.length,
+      no_development_expected: buckets.no_development_expected.length,
       missing_landing_page: buckets.missing_landing_page.length,
       ambiguous: buckets.ambiguous.length,
       development_pages_without_units: pagesWithoutUnits.length,
     },
     samples: {
       missing_development_name: topSamples(buckets.missing_development_name),
+      development_name_review: topSamples(buckets.development_name_review),
+      weak_title_inference: topSamples(buckets.weak_title_inference),
+      no_development_expected: topSamples(buckets.no_development_expected),
       missing_landing_page: topSamples(buckets.missing_landing_page),
       ambiguous: topSamples(buckets.ambiguous),
       title_inference: topSamples(buckets.title_inference),

@@ -1,6 +1,6 @@
 'use client'
 
-import { FormEvent, useMemo, useState } from 'react'
+import { FormEvent, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowLeft, BadgeCheck, Check, Copy, CreditCard, Loader2, LockKeyhole, QrCode, RefreshCw, ShieldCheck } from 'lucide-react'
@@ -9,6 +9,19 @@ import type { CheckoutBumpRow, CheckoutOfferRow, CheckoutProductRow } from '@/li
 type CheckoutPayload = {
   success: boolean
   message?: string
+  status?: {
+    lifecycle_status?: string
+    label?: string
+    message?: string
+    order_status?: string
+    payment_status?: string | null
+    next_action?: string
+    terminal?: boolean
+    can_retry_payment?: boolean
+    checkout_url?: string
+    member_area_url?: string
+  }
+  fulfillment?: Record<string, any> | null
   order?: {
     id: string
     order_number: string
@@ -25,10 +38,22 @@ type CheckoutPayload = {
     provider_payment_id: string
     status: string
     status_detail: string
+    payment_method?: string
+    installments?: number
+    card_last_four?: string
     pix_qr_code: string
     pix_qr_code_base64: string
     pix_ticket_url: string
     expires_at: string
+  }
+  subscription?: {
+    id: string
+    provider_subscription_id?: string
+    status: string
+    payment_method: string
+    frequency: number
+    frequency_type: string
+    init_point?: string
   }
 }
 
@@ -37,6 +62,20 @@ type CheckoutClientProps = {
   product: CheckoutProductRow
   offer: CheckoutOfferRow
   bumps: CheckoutBumpRow[]
+  mercadoPagoPublicKey: string
+  cardPaymentsEnabled: boolean
+  subscriptionPaymentsEnabled: boolean
+}
+
+type PaymentChoice = 'pix' | 'credit_card' | 'debit_card' | 'subscription_pix' | 'subscription_card'
+
+declare global {
+  interface Window {
+    MercadoPago?: new (publicKey: string, options?: Record<string, unknown>) => {
+      createCardToken?: (input: Record<string, string>) => Promise<{ id?: string }>
+      getPaymentMethods?: (input: { bin: string }) => Promise<Record<string, any>>
+    }
+  }
 }
 
 function formatCents(cents: number) {
@@ -52,6 +91,50 @@ function cleanDocument(value: string) {
 
 function cleanPhone(value: string) {
   return value.replace(/\D/g, '').slice(0, 13)
+}
+
+function text(value: unknown, fallback = '') {
+  return typeof value === 'string' && value.trim() ? value.trim() : fallback
+}
+
+function cardBrand(value: string) {
+  const number = value.replace(/\D/g, '')
+  if (/^4/.test(number)) return 'visa'
+  if (/^(5[1-5]|2[2-7])/.test(number)) return 'master'
+  if (/^3[47]/.test(number)) return 'amex'
+  if (/^(4011|4312|4389|4514|4576|5041|5066|5067|509|6277|6362|6363|650|6516|6550)/.test(number)) return 'elo'
+  if (/^(606282|3841)/.test(number)) return 'hipercard'
+  return ''
+}
+
+function expirationParts(value: string) {
+  const [month = '', year = ''] = value.replace(/\s/g, '').split('/')
+  return {
+    month: month.padStart(2, '0').slice(0, 2),
+    year: year.length === 2 ? `20${year}` : year.slice(0, 4),
+  }
+}
+
+function loadMercadoPagoSdk() {
+  if (typeof window === 'undefined') return Promise.reject(new Error('Browser indisponivel.'))
+  if (window.MercadoPago) return Promise.resolve()
+
+  return new Promise<void>((resolve, reject) => {
+    const existing = window.document.querySelector<HTMLScriptElement>('script[data-mercado-pago-sdk="true"]')
+    if (existing) {
+      existing.addEventListener('load', () => resolve(), { once: true })
+      existing.addEventListener('error', () => reject(new Error('Falha ao carregar Mercado Pago.')), { once: true })
+      return
+    }
+
+    const script = window.document.createElement('script')
+    script.src = 'https://sdk.mercadopago.com/js/v2'
+    script.async = true
+    script.dataset.mercadoPagoSdk = 'true'
+    script.onload = () => resolve()
+    script.onerror = () => reject(new Error('Falha ao carregar Mercado Pago.'))
+    window.document.head.appendChild(script)
+  })
 }
 
 function statusLabel(status?: string) {
@@ -72,17 +155,36 @@ function statusLabel(status?: string) {
 
 function statusTone(status?: string) {
   if (status === 'approved' || status === 'paid') return 'success'
-  if (status === 'rejected' || status === 'cancelled' || status === 'expired') return 'danger'
+  if (status === 'rejected' || status === 'cancelled' || status === 'expired' || status === 'refunded' || status === 'charged_back') return 'danger'
   return 'warning'
 }
 
-export default function CheckoutClient({ checkoutSlug, product, offer, bumps }: CheckoutClientProps) {
+const approvedPaymentStatuses = new Set(['approved', 'paid'])
+const approvedLifecycleStatuses = new Set(['payment_approved', 'access_granted'])
+const finalPaymentFailures = new Set(['rejected', 'cancelled', 'expired', 'refunded', 'charged_back'])
+const finalLifecycleFailures = new Set(['payment_rejected', 'payment_cancelled', 'payment_expired', 'payment_refunded', 'chargeback'])
+
+export default function CheckoutClient({
+  checkoutSlug,
+  product,
+  offer,
+  bumps,
+  mercadoPagoPublicKey,
+  cardPaymentsEnabled,
+  subscriptionPaymentsEnabled,
+}: CheckoutClientProps) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
   const [buyerDocument, setBuyerDocument] = useState('')
   const [whatsappOptIn, setWhatsappOptIn] = useState(true)
   const [termsAccepted, setTermsAccepted] = useState(false)
+  const [paymentChoice, setPaymentChoice] = useState<PaymentChoice>('pix')
+  const [cardholderName, setCardholderName] = useState('')
+  const [cardNumber, setCardNumber] = useState('')
+  const [cardExpiration, setCardExpiration] = useState('')
+  const [cardSecurityCode, setCardSecurityCode] = useState('')
+  const [installments, setInstallments] = useState('1')
   const [selectedBumps, setSelectedBumps] = useState<string[]>([])
   const [submitting, setSubmitting] = useState(false)
   const [checkingStatus, setCheckingStatus] = useState(false)
@@ -97,8 +199,58 @@ export default function CheckoutClient({ checkoutSlug, product, offer, bumps }: 
   const bumpTotal = selectedBumpRows.reduce((total, bump) => total + bump.price_cents, 0)
   const total = offer.price_cents + bumpTotal
   const coverImage = product.cover_image_url || product.thumbnail_url || '/images/products/corretor-nota-8-cover.webp'
-  const paymentStatus = checkoutResult?.payment?.status || checkoutResult?.order?.status
+  const lifecycleStatus = checkoutResult?.status?.lifecycle_status
+  const paymentStatus = checkoutResult?.status?.payment_status || checkoutResult?.payment?.status || checkoutResult?.order?.status
+  const isApprovedPayment = Boolean(
+    checkoutResult && (
+      approvedPaymentStatuses.has(String(paymentStatus || ''))
+      || approvedLifecycleStatuses.has(String(lifecycleStatus || ''))
+      || checkoutResult.order?.status === 'paid'
+    )
+  )
+  const isFinalPaymentFailure = Boolean(
+    checkoutResult && (
+      finalPaymentFailures.has(String(paymentStatus || ''))
+      || finalLifecycleFailures.has(String(lifecycleStatus || ''))
+    )
+  )
+  const memberAreaUrl = checkoutResult?.status?.member_area_url || '/membros'
+  const retryCheckoutUrl = checkoutResult?.status?.checkout_url || `/checkout/${checkoutSlug}`
+  const statusText = checkoutResult?.status?.label || statusLabel(paymentStatus)
+  const statusMessage = checkoutResult?.status?.message
   const tone = statusTone(paymentStatus)
+  const offerMethods = useMemo(() => new Set((offer.payment_methods || ['pix']).map(String)), [offer.payment_methods])
+  const subscriptionProduct = product.access_model === 'subscription' || offerMethods.has('subscription')
+  const availablePaymentChoices = useMemo(() => {
+    const choices: Array<{ id: PaymentChoice; title: string; detail: string }> = []
+    if (offerMethods.has('pix') || offerMethods.has('all')) {
+      choices.push({ id: 'pix', title: 'Pix', detail: 'Aprovacao rapida' })
+    }
+    if (cardPaymentsEnabled && (offerMethods.has('credit_card') || offerMethods.has('card') || offerMethods.has('all'))) {
+      choices.push({ id: 'credit_card', title: 'Credito', detail: offer.max_installments > 1 ? `Ate ${offer.max_installments}x` : 'A vista' })
+    }
+    if (cardPaymentsEnabled && (offerMethods.has('debit_card') || offerMethods.has('card') || offerMethods.has('all'))) {
+      choices.push({ id: 'debit_card', title: 'Debito', detail: 'Pagamento imediato' })
+    }
+    if (subscriptionPaymentsEnabled && subscriptionProduct) {
+      choices.push({ id: 'subscription_card', title: 'Assinatura cartao', detail: 'Cobranca recorrente' })
+      choices.push({ id: 'subscription_pix', title: 'Assinatura Pix', detail: 'Ativacao pelo Mercado Pago' })
+    }
+    return choices.length ? choices : [{ id: 'pix' as PaymentChoice, title: 'Pix', detail: 'Aprovacao rapida' }]
+  }, [cardPaymentsEnabled, offer.max_installments, offerMethods, subscriptionPaymentsEnabled, subscriptionProduct])
+  const requiresCard = paymentChoice === 'credit_card' || paymentChoice === 'debit_card' || paymentChoice === 'subscription_card'
+  const submitLabel = paymentChoice === 'pix'
+    ? 'Gerar Pix agora'
+    : paymentChoice === 'subscription_pix'
+      ? 'Ativar assinatura Pix'
+      : paymentChoice === 'subscription_card'
+        ? 'Assinar com cartao'
+        : paymentChoice === 'debit_card'
+          ? 'Pagar no debito'
+          : 'Pagar no credito'
+  const submittingLabel = paymentChoice === 'pix'
+    ? 'Gerando Pix...'
+    : 'Processando...'
 
   const toggleBump = (bumpId: string) => {
     setSelectedBumps((current) =>
@@ -119,6 +271,37 @@ export default function CheckoutClient({ checkoutSlug, product, offer, bumps }: 
     return ''
   }
 
+  const createCardToken = async () => {
+    await loadMercadoPagoSdk()
+    if (!window.MercadoPago) throw new Error('Mercado Pago indisponivel.')
+
+    const mp = new window.MercadoPago(mercadoPagoPublicKey, { locale: 'pt-BR' })
+    const { month, year } = expirationParts(cardExpiration)
+    const documentNumber = cleanDocument(buyerDocument)
+    const bin = cardNumber.replace(/\D/g, '').slice(0, 8)
+    let paymentMethodId = cardBrand(cardNumber)
+
+    if (mp.getPaymentMethods && bin.length >= 6) {
+      const methods = await mp.getPaymentMethods({ bin }).catch(() => null)
+      const result = Array.isArray(methods?.results) ? methods.results[0] : null
+      paymentMethodId = text(result?.id, paymentMethodId)
+    }
+
+    const token = await mp.createCardToken?.({
+      cardNumber: cardNumber.replace(/\D/g, ''),
+      cardholderName: cardholderName.trim(),
+      cardExpirationMonth: month,
+      cardExpirationYear: year,
+      securityCode: cardSecurityCode.replace(/\D/g, ''),
+      identificationType: documentNumber.length === 14 ? 'CNPJ' : 'CPF',
+      identificationNumber: documentNumber,
+    })
+
+    if (!token?.id) throw new Error('Nao foi possivel tokenizar o cartao.')
+    if (!paymentMethodId) throw new Error('Nao foi possivel identificar a bandeira do cartao.')
+    return { token: token.id, paymentMethodId }
+  }
+
   const submitCheckout = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setError('')
@@ -130,6 +313,30 @@ export default function CheckoutClient({ checkoutSlug, product, offer, bumps }: 
       return
     }
 
+    if (requiresCard) {
+      const exp = expirationParts(cardExpiration)
+      if (!mercadoPagoPublicKey) {
+        setError('Mercado Pago Public Key nao configurada para cartao.')
+        return
+      }
+      if (cardholderName.trim().length < 3) {
+        setError('Informe o nome impresso no cartao.')
+        return
+      }
+      if (cardNumber.replace(/\D/g, '').length < 13) {
+        setError('Informe um numero de cartao valido.')
+        return
+      }
+      if (!exp.month || !exp.year) {
+        setError('Informe a validade do cartao no formato MM/AA.')
+        return
+      }
+      if (cardSecurityCode.replace(/\D/g, '').length < 3) {
+        setError('Informe o codigo de seguranca do cartao.')
+        return
+      }
+    }
+
     setSubmitting(true)
     try {
       const searchParams = new URLSearchParams(window.location.search)
@@ -137,23 +344,46 @@ export default function CheckoutClient({ checkoutSlug, product, offer, bumps }: 
         Array.from(searchParams.entries()).filter(([key]) => key.startsWith('utm_') || ['src', 'campaign'].includes(key))
       )
 
-      const response = await fetch('/api/checkout/pix', {
+      let endpoint = '/api/checkout/pix'
+      const payloadBody: Record<string, any> = {
+        checkout_slug: checkoutSlug,
+        selected_bump_ids: selectedBumps,
+        customer: {
+          name,
+          email,
+          phone,
+          document: buyerDocument,
+          whatsapp_opt_in: whatsappOptIn,
+          email_opt_in: true,
+        },
+        utm,
+        source: 'checkout_page',
+      }
+
+      if (paymentChoice === 'credit_card' || paymentChoice === 'debit_card') {
+        const cardToken = await createCardToken()
+        endpoint = '/api/checkout/card'
+        payloadBody.card = {
+          token: cardToken.token,
+          payment_method_id: cardToken.paymentMethodId,
+          payment_type_id: paymentChoice,
+          installments: paymentChoice === 'credit_card' ? Number(installments) || 1 : 1,
+        }
+      }
+
+      if (paymentChoice === 'subscription_card' || paymentChoice === 'subscription_pix') {
+        endpoint = '/api/checkout/subscription'
+        const cardToken = paymentChoice === 'subscription_card' ? await createCardToken() : null
+        payloadBody.subscription = {
+          payment_method: paymentChoice === 'subscription_card' ? 'credit_card' : 'pix',
+          card_token: cardToken?.token,
+        }
+      }
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          checkout_slug: checkoutSlug,
-          selected_bump_ids: selectedBumps,
-          customer: {
-            name,
-            email,
-            phone,
-            document: buyerDocument,
-            whatsapp_opt_in: whatsappOptIn,
-            email_opt_in: true,
-          },
-          utm,
-          source: 'checkout_page',
-        }),
+        body: JSON.stringify(payloadBody),
       })
 
       const payload = await response.json().catch(() => ({ success: false, message: 'Resposta inválida do checkout.' }))
@@ -164,10 +394,10 @@ export default function CheckoutClient({ checkoutSlug, product, offer, bumps }: 
 
       setCheckoutResult(payload)
       window.setTimeout(() => {
-        window.document.getElementById('pix')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        window.document.getElementById('payment-result')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
       }, 80)
-    } catch {
-      setError('Falha de conexão ao gerar o Pix. Tente novamente.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Falha de conexao ao iniciar o pagamento. Tente novamente.')
     } finally {
       setSubmitting(false)
     }
@@ -191,7 +421,10 @@ export default function CheckoutClient({ checkoutSlug, product, offer, bumps }: 
     setCheckingStatus(true)
     setError('')
     try {
-      const response = await fetch(`/api/checkout/orders/${orderId}`, { cache: 'no-store' })
+      const response = await fetch(`/api/checkout/orders/${orderId}/refresh-status`, {
+        method: 'POST',
+        cache: 'no-store',
+      })
       const payload = await response.json()
       if (!response.ok || !payload.success) {
         setError(payload.message || 'Não foi possível verificar o pagamento agora.')
@@ -204,6 +437,9 @@ export default function CheckoutClient({ checkoutSlug, product, offer, bumps }: 
           ...payload.order,
         },
         payment: payload.payment || current?.payment,
+        subscription: payload.subscription || current?.subscription,
+        status: payload.status || current?.status,
+        fulfillment: payload.fulfillment || current?.fulfillment,
       }) as CheckoutPayload)
     } catch {
       setError('Falha ao verificar pagamento. Tente novamente em instantes.')
@@ -211,6 +447,46 @@ export default function CheckoutClient({ checkoutSlug, product, offer, bumps }: 
       setCheckingStatus(false)
     }
   }
+
+  useEffect(() => {
+    const orderId = checkoutResult?.order?.id
+    if (!orderId || isApprovedPayment || isFinalPaymentFailure) return
+
+    const interval = window.setInterval(async () => {
+      try {
+        const response = await fetch(`/api/checkout/orders/${orderId}/refresh-status`, {
+          method: 'POST',
+          cache: 'no-store',
+        })
+        const payload = await response.json().catch(() => null)
+        if (!response.ok || !payload?.success) return
+
+        setCheckoutResult((current) => ({
+          ...(current || { success: true }),
+          order: {
+            ...(current?.order || {}),
+            ...payload.order,
+          },
+          payment: payload.payment || current?.payment,
+          subscription: payload.subscription || current?.subscription,
+          status: payload.status || current?.status,
+          fulfillment: payload.fulfillment || current?.fulfillment,
+        }) as CheckoutPayload)
+      } catch {
+        // A verificacao manual segue disponivel se a consulta automatica falhar.
+      }
+    }, 8000)
+
+    return () => window.clearInterval(interval)
+  }, [checkoutResult?.order?.id, isApprovedPayment, isFinalPaymentFailure])
+
+  useEffect(() => {
+    if (!isApprovedPayment) return
+    const timeout = window.setTimeout(() => {
+      window.location.assign(memberAreaUrl)
+    }, 2800)
+    return () => window.clearTimeout(timeout)
+  }, [isApprovedPayment, memberAreaUrl])
 
   return (
     <main className="cn8-checkout">
@@ -237,7 +513,7 @@ export default function CheckoutClient({ checkoutSlug, product, offer, bumps }: 
             <p>{product.subtitle || product.description}</p>
             <div className="cn8-product-points">
               <span><Check size={15} /> Acesso digital</span>
-              <span><Check size={15} /> Pagamento via Pix</span>
+              <span><Check size={15} /> Pix, cartao ou assinatura</span>
               <span><Check size={15} /> Liberação após aprovação</span>
             </div>
           </div>
@@ -269,6 +545,59 @@ export default function CheckoutClient({ checkoutSlug, product, offer, bumps }: 
                   CPF ou CNPJ
                   <input value={buyerDocument} onChange={(event) => setBuyerDocument(event.target.value)} placeholder="Somente números" inputMode="numeric" />
                 </label>
+
+                <div className="cn8-payment-methods" aria-label="Meios de pagamento">
+                  <span className="cn8-mini-title">Pagamento</span>
+                  <div>
+                    {availablePaymentChoices.map((choice) => (
+                      <button
+                        key={choice.id}
+                        type="button"
+                        className={paymentChoice === choice.id ? 'active' : ''}
+                        onClick={() => setPaymentChoice(choice.id)}
+                      >
+                        {choice.id === 'pix' || choice.id === 'subscription_pix' ? <QrCode size={17} /> : <CreditCard size={17} />}
+                        <span>
+                          <strong>{choice.title}</strong>
+                          <small>{choice.detail}</small>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {requiresCard && (
+                  <div className="cn8-card-fields">
+                    <label>
+                      Nome no cartao
+                      <input value={cardholderName} onChange={(event) => setCardholderName(event.target.value)} placeholder="Como esta impresso" autoComplete="cc-name" />
+                    </label>
+                    <label>
+                      Numero do cartao
+                      <input value={cardNumber} onChange={(event) => setCardNumber(event.target.value)} placeholder="0000 0000 0000 0000" autoComplete="cc-number" inputMode="numeric" />
+                    </label>
+                    <label>
+                      Validade
+                      <input value={cardExpiration} onChange={(event) => setCardExpiration(event.target.value)} placeholder="MM/AA" autoComplete="cc-exp" inputMode="numeric" />
+                    </label>
+                    <label>
+                      CVV
+                      <input value={cardSecurityCode} onChange={(event) => setCardSecurityCode(event.target.value)} placeholder="123" autoComplete="cc-csc" inputMode="numeric" />
+                    </label>
+                    {paymentChoice === 'credit_card' && offer.max_installments > 1 && (
+                      <label className="cn8-card-installments">
+                        Parcelas
+                        <select value={installments} onChange={(event) => setInstallments(event.target.value)}>
+                          {Array.from({ length: Math.max(1, offer.max_installments) }, (_, index) => index + 1).map((count) => (
+                            <option key={count} value={count}>
+                              {count}x de {formatCents(Math.ceil(total / count))}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    )}
+                  </div>
+                )}
 
                 {bumps.length > 0 && (
                   <div className="cn8-bumps" aria-label="Order bumps disponíveis">
@@ -325,8 +654,8 @@ export default function CheckoutClient({ checkoutSlug, product, offer, bumps }: 
                 {error && <p className="cn8-error">{error}</p>}
 
                 <button className="cn8-submit" type="submit" disabled={submitting}>
-                  {submitting ? <Loader2 size={18} className="cn8-spin" /> : <QrCode size={18} />}
-                  <span>{submitting ? 'Gerando Pix...' : 'Gerar Pix agora'}</span>
+                  {submitting ? <Loader2 size={18} className="cn8-spin" /> : paymentChoice === 'pix' || paymentChoice === 'subscription_pix' ? <QrCode size={18} /> : <CreditCard size={18} />}
+                  <span>{submitting ? submittingLabel : submitLabel}</span>
                 </button>
 
                 <div className="cn8-safety">
@@ -336,23 +665,50 @@ export default function CheckoutClient({ checkoutSlug, product, offer, bumps }: 
               </form>
             </>
           ) : (
-            <section id="pix" className="cn8-pix-panel" aria-live="polite">
+            <section id="payment-result" className="cn8-pix-panel" aria-live="polite">
               <span className={`cn8-status ${tone}`}>
                 <BadgeCheck size={16} />
-                {statusLabel(paymentStatus)}
+                {statusText}
               </span>
-              <h2>Pix gerado para o pedido {checkoutResult.order?.order_number}</h2>
+              <h2>{isApprovedPayment ? 'Pagamento aprovado' : checkoutResult.subscription ? 'Assinatura criada' : checkoutResult.payment?.pix_qr_code ? 'Pix gerado' : 'Pagamento registrado'} para o pedido {checkoutResult.order?.order_number}</h2>
               <p className="cn8-pix-subtitle">
-                Valor: <strong>{checkoutResult.order?.total_display}</strong>. Após o pagamento, a confirmação será registrada no sistema.
+                {isApprovedPayment
+                  ? <>Parabens. Seu acesso foi liberado e enviamos no WhatsApp o link para entrar na area de membros. Abrindo a biblioteca automaticamente...</>
+                  : isFinalPaymentFailure
+                    ? <>{statusMessage || 'Esse pagamento nao esta mais ativo. Voce pode tentar novamente pelo checkout.'}</>
+                    : <>Valor: <strong>{checkoutResult.order?.total_display}</strong>. {statusMessage || 'Esta tela verifica automaticamente a aprovacao e libera o acesso assim que o Mercado Pago confirmar.'}</>}
               </p>
 
-              {checkoutResult.payment?.pix_qr_code_base64 && (
+              {isApprovedPayment && (
+                <div className="cn8-access-card">
+                  <strong>Acesso liberado na area de membros</strong>
+                  <a href={memberAreaUrl}>Entrar agora</a>
+                </div>
+              )}
+
+              {isFinalPaymentFailure && (
+                <div className="cn8-access-card">
+                  <strong>Quer tentar novamente?</strong>
+                  <a href={retryCheckoutUrl}>Gerar novo pagamento</a>
+                </div>
+              )}
+
+              {!isApprovedPayment && !isFinalPaymentFailure && checkoutResult.subscription?.init_point && checkoutResult.payment?.status !== 'approved' && (
+                <div className="cn8-subscription-link">
+                  <strong>Finalize a ativacao recorrente no Mercado Pago.</strong>
+                  <a href={checkoutResult.subscription.init_point} target="_blank" rel="noreferrer">
+                    Abrir ativacao da assinatura
+                  </a>
+                </div>
+              )}
+
+              {!isApprovedPayment && !isFinalPaymentFailure && checkoutResult.payment?.pix_qr_code_base64 && (
                 <div className="cn8-qr">
                   <img src={`data:image/png;base64,${checkoutResult.payment.pix_qr_code_base64}`} alt="QR Code Pix" />
                 </div>
               )}
 
-              {checkoutResult.payment?.pix_qr_code && (
+              {!isApprovedPayment && !isFinalPaymentFailure && checkoutResult.payment?.pix_qr_code && (
                 <div className="cn8-copy-box">
                   <textarea readOnly value={checkoutResult.payment.pix_qr_code} aria-label="Código Pix copia e cola" />
                   <button type="button" onClick={copyPix}>
@@ -363,13 +719,20 @@ export default function CheckoutClient({ checkoutSlug, product, offer, bumps }: 
               )}
 
               <div className="cn8-pix-actions">
-                <button type="button" onClick={refreshPaymentStatus} disabled={checkingStatus}>
-                  {checkingStatus ? <Loader2 size={16} className="cn8-spin" /> : <RefreshCw size={16} />}
-                  Verificar pagamento
-                </button>
-                {checkoutResult.payment?.pix_ticket_url && (
+                {!isApprovedPayment && !isFinalPaymentFailure && (
+                  <button type="button" onClick={refreshPaymentStatus} disabled={checkingStatus}>
+                    {checkingStatus ? <Loader2 size={16} className="cn8-spin" /> : <RefreshCw size={16} />}
+                    Verificar pagamento
+                  </button>
+                )}
+                {!isApprovedPayment && !isFinalPaymentFailure && checkoutResult.payment?.pix_ticket_url && (
                   <a href={checkoutResult.payment.pix_ticket_url} target="_blank" rel="noreferrer">
                     Abrir no Mercado Pago
+                  </a>
+                )}
+                {isApprovedPayment && (
+                  <a href={memberAreaUrl}>
+                    Abrir area de membros
                   </a>
                 )}
               </div>
@@ -573,6 +936,7 @@ export default function CheckoutClient({ checkoutSlug, product, offer, bumps }: 
         }
 
         .cn8-form input,
+        .cn8-form select,
         .cn8-copy-box textarea {
           width: 100%;
           min-height: 46px;
@@ -586,9 +950,104 @@ export default function CheckoutClient({ checkoutSlug, product, offer, bumps }: 
         }
 
         .cn8-form input:focus,
+        .cn8-form select:focus,
         .cn8-copy-box textarea:focus {
           border-color: rgba(231, 180, 82, 0.72);
           box-shadow: 0 0 0 3px rgba(231, 180, 82, 0.12);
+        }
+
+        .cn8-payment-methods,
+        .cn8-card-fields {
+          display: grid;
+          gap: 10px;
+        }
+
+        .cn8-payment-methods > div {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 9px;
+        }
+
+        .cn8-payment-methods button {
+          min-height: 58px;
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          border: 1px solid rgba(248, 242, 232, 0.16);
+          border-radius: 8px;
+          background: rgba(255, 255, 255, 0.05);
+          color: #fff8ec;
+          padding: 10px;
+          text-align: left;
+          cursor: pointer;
+        }
+
+        .cn8-payment-methods button.active {
+          border-color: rgba(231, 180, 82, 0.72);
+          background: rgba(231, 180, 82, 0.12);
+        }
+
+        .cn8-payment-methods button svg {
+          flex: 0 0 auto;
+          color: #e7b452;
+        }
+
+        .cn8-payment-methods button span {
+          min-width: 0;
+          display: grid;
+          gap: 2px;
+        }
+
+        .cn8-payment-methods button strong {
+          font-size: 0.82rem;
+        }
+
+        .cn8-payment-methods button small {
+          color: rgba(248, 242, 232, 0.58);
+          font-size: 0.72rem;
+        }
+
+        .cn8-card-fields {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          border: 1px solid rgba(248, 242, 232, 0.12);
+          border-radius: 8px;
+          padding: 12px;
+          background: rgba(255, 255, 255, 0.035);
+        }
+
+        .cn8-card-fields label:nth-child(1),
+        .cn8-card-fields label:nth-child(2),
+        .cn8-card-installments {
+          grid-column: 1 / -1;
+        }
+
+        .cn8-subscription-link,
+        .cn8-access-card {
+          display: grid;
+          gap: 10px;
+          border: 1px solid rgba(231, 180, 82, 0.28);
+          border-radius: 8px;
+          padding: 14px;
+          background: rgba(231, 180, 82, 0.1);
+        }
+
+        .cn8-subscription-link strong,
+        .cn8-access-card strong {
+          color: #fff8ec;
+          font-size: 0.9rem;
+        }
+
+        .cn8-subscription-link a,
+        .cn8-access-card a {
+          min-height: 44px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 6px;
+          background: #eab957;
+          color: #071013;
+          text-decoration: none;
+          font-weight: 950;
         }
 
         .cn8-bumps {
@@ -879,6 +1338,11 @@ export default function CheckoutClient({ checkoutSlug, product, offer, bumps }: 
 
           .cn8-checkout-panel {
             padding: 17px;
+          }
+
+          .cn8-payment-methods > div,
+          .cn8-card-fields {
+            grid-template-columns: 1fr;
           }
 
           .cn8-panel-head h2,

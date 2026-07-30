@@ -46,7 +46,7 @@ function kindLabel(type: string) {
     lesson: 'Aula',
     video: 'Vídeo',
     pdf: 'PDF',
-    ebook: 'E-book',
+    ebook: 'Livro online',
     bonus: 'Bônus',
     external_link: 'Link',
   }

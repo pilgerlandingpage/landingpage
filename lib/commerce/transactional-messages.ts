@@ -1,5 +1,10 @@
 import { sendWhatsAppMessage } from '@/lib/connectyhub/whatsapp'
 import { sendBrevoEmail } from '@/lib/email/brevo'
+import {
+  loadMetaWhatsAppConfigMap,
+  resolveMetaWhatsAppConfig,
+  sendMetaWhatsAppTemplateMessage,
+} from '@/lib/meta/whatsapp-cloud'
 import { centsToMoney, loadCommerceConfig, normalizeBrazilPhone } from './checkout'
 
 type SupabaseAdminLike = {
@@ -16,6 +21,7 @@ type CommerceMessageParams = {
   educationLeadId?: string | null
   variables: Record<string, string | number | null | undefined>
   sendNow?: boolean
+  dedupe?: boolean
 }
 
 function text(value: unknown, fallback = '') {
@@ -50,7 +56,7 @@ function htmlFromText(body: string) {
 
 function providerMessageId(response: unknown) {
   const data = objectRecord(response)
-  return text(data.messageId || data.message_id || data.id || data.uuid || data?.data?.id)
+  return text(data.providerMessageId || data.messageId || data.message_id || data.id || data.uuid || data?.data?.id)
 }
 
 function formatDateTimePtBr(value: unknown) {
@@ -64,6 +70,115 @@ function formatDateTimePtBr(value: unknown) {
   }).format(date)
 }
 
+function renderValue(value: unknown, variables: Record<string, string | number | null | undefined>): unknown {
+  if (typeof value === 'string') {
+    return value.replace(/\{\{?\s*([a-zA-Z0-9_]+)\s*\}?\}/g, (match, key) => {
+      const selected = variables[key]
+      return selected === null || selected === undefined ? match : String(selected)
+    })
+  }
+
+  if (Array.isArray(value)) return value.map(item => renderValue(item, variables))
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, item]) => [key, renderValue(item, variables)])
+    )
+  }
+
+  return value
+}
+
+function metaTemplateComponents(metadata: Record<string, any>, variables: Record<string, string | number | null | undefined>) {
+  const meta = objectRecord(metadata.meta_whatsapp || metadata.metaWhatsApp)
+
+  if (Array.isArray(meta.components)) {
+    return renderValue(meta.components, variables) as unknown[]
+  }
+
+  const bodyVariables = Array.isArray(meta.body_variables)
+    ? meta.body_variables
+    : Array.isArray(meta.bodyVariables)
+      ? meta.bodyVariables
+      : []
+
+  if (!bodyVariables.length) return undefined
+
+  return [{
+    type: 'body',
+    parameters: bodyVariables.map((key: unknown) => ({
+      type: 'text',
+      text: String(variables[String(key)] ?? ''),
+    })),
+  }]
+}
+
+async function assertDefaultMetaSenderReady(supabase: SupabaseAdminLike, phoneNumberId: string) {
+  const { data, error } = await supabase
+    .from('meta_whatsapp_senders')
+    .select('display_name, phone_number, meta_status, local_status')
+    .eq('phone_number_id', phoneNumberId)
+    .maybeSingle()
+
+  if (error) throw error
+
+  const metaStatus = text(data?.meta_status).toUpperCase()
+  if (!data || data.local_status !== 'active' || metaStatus !== 'CONNECTED') {
+    const label = data?.display_name || data?.phone_number || phoneNumberId || 'numero Meta'
+    throw new Error(`Numero Meta ${label} nao esta CONNECTED para envio oficial. Status atual: ${data?.meta_status || 'nao sincronizado'}.`)
+  }
+}
+
+async function sendOfficialWhatsAppTemplate(params: {
+  supabase: SupabaseAdminLike
+  template: Record<string, any>
+  recipient: string
+  variables: Record<string, string | number | null | undefined>
+}) {
+  const metadata = objectRecord(params.template.metadata)
+  const meta = objectRecord(metadata.meta_whatsapp || metadata.metaWhatsApp)
+  const templateName = text(
+    meta.template_name ||
+    meta.templateName ||
+    metadata.meta_whatsapp_template_name ||
+    metadata.metaTemplateName
+  )
+
+  if (!templateName) {
+    throw new Error(`Template Meta oficial nao configurado para ${text(params.template.template_key, 'template interno')}.`)
+  }
+
+  const configMap = await loadMetaWhatsAppConfigMap(params.supabase as any)
+  const resolved = resolveMetaWhatsAppConfig(configMap)
+  if (!resolved.enabled) throw new Error('Meta WhatsApp Oficial esta inativo.')
+  if (resolved.missing.length) throw new Error(`Meta WhatsApp Oficial incompleto: ${resolved.missing.join(', ')}.`)
+  if (!resolved.defaultPhoneNumberId) throw new Error('Phone Number ID padrao da Meta ausente.')
+
+  const language = text(meta.language || meta.template_language || meta.templateLanguage || metadata.meta_whatsapp_template_language, resolved.defaultLanguage)
+  const { data: officialTemplate, error: officialTemplateError } = await params.supabase
+    .from('meta_whatsapp_templates')
+    .select('status')
+    .eq('waba_id', resolved.wabaId)
+    .eq('name', templateName)
+    .eq('language', language)
+    .maybeSingle()
+
+  if (officialTemplateError) throw officialTemplateError
+  if (String(officialTemplate?.status || '').toUpperCase() !== 'APPROVED') {
+    throw new Error(`Template Meta ${templateName}/${language} nao esta aprovado ou sincronizado.`)
+  }
+
+  await assertDefaultMetaSenderReady(params.supabase, resolved.defaultPhoneNumberId)
+
+  return sendMetaWhatsAppTemplateMessage({
+    to: params.recipient,
+    templateName,
+    language,
+    phoneNumberId: resolved.defaultPhoneNumberId,
+    components: metaTemplateComponents(metadata, params.variables),
+    config: configMap,
+  })
+}
+
 export async function dispatchCommerceMessage(params: CommerceMessageParams) {
   const {
     supabase,
@@ -75,6 +190,7 @@ export async function dispatchCommerceMessage(params: CommerceMessageParams) {
     educationLeadId,
     variables,
     sendNow = true,
+    dedupe = true,
   } = params
 
   const { data: template, error: templateError } = await supabase
@@ -90,7 +206,7 @@ export async function dispatchCommerceMessage(params: CommerceMessageParams) {
   if (!template) return { skipped: true, reason: 'template_not_found' }
 
   const orderId = text(order?.id)
-  if (orderId) {
+  if (dedupe && orderId) {
     const { data: existing, error: existingError } = await supabase
       .from('message_dispatches')
       .select('id, status')
@@ -106,6 +222,7 @@ export async function dispatchCommerceMessage(params: CommerceMessageParams) {
 
   const config = await loadCommerceConfig()
   const metadata = objectRecord(template.metadata)
+  const whatsappProvider = config.whatsappOutboundProvider === 'meta_whatsapp' ? 'meta_whatsapp' : 'connectyhub'
   const body = renderTemplate(template.body, variables)
   const subject = renderTemplate(text(template.subject, 'Atualização da sua compra'), variables)
   const recipient = channel === 'whatsapp'
@@ -129,13 +246,13 @@ export async function dispatchCommerceMessage(params: CommerceMessageParams) {
     order_id: orderId || null,
     payment_id: payment?.id || null,
     recipient: recipient || 'missing-recipient',
-    provider: channel === 'whatsapp' ? 'connectyhub' : 'brevo',
+    provider: channel === 'whatsapp' ? whatsappProvider : 'brevo',
     scheduled_for: new Date().toISOString(),
     payload: {
       subject,
       body,
       variables,
-      provider: metadata.provider || (channel === 'whatsapp' ? 'connectyhub' : 'brevo'),
+      provider: metadata.provider || (channel === 'whatsapp' ? whatsappProvider : 'brevo'),
     },
     metadata: {
       template_key: templateKey,
@@ -174,7 +291,9 @@ export async function dispatchCommerceMessage(params: CommerceMessageParams) {
 
   try {
     const providerResponse = channel === 'whatsapp'
-      ? await sendWhatsAppMessage({ phone: recipient, message: body })
+      ? whatsappProvider === 'meta_whatsapp'
+        ? await sendOfficialWhatsAppTemplate({ supabase, template, recipient, variables })
+        : await sendWhatsAppMessage({ phone: recipient, message: body })
       : await sendBrevoEmail({
           to: [{ email: recipient, name: text(customer.name) || undefined }],
           subject,

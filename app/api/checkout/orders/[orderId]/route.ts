@@ -3,6 +3,11 @@ import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { loadCommerceConfig, centsToMoney } from '@/lib/commerce/checkout'
 import { fulfillApprovedOrder, mapPaymentStatusToOrderStatus } from '@/lib/commerce/fulfillment'
 import {
+  emitPaymentStatusEvent,
+  paymentLifecycleFromProviderStatus,
+  publicPaymentStatusPayload,
+} from '@/lib/commerce/payment-status'
+import {
   extractMercadoPagoPixData,
   getMercadoPagoPayment,
   getMercadoPagoPaymentMethod,
@@ -32,7 +37,7 @@ export async function GET(_request: Request, context: RouteContext) {
     const supabase = createSupabaseAdminClient()
     const { data: order, error: orderError } = await supabase
       .from('commerce_orders')
-      .select('id, order_number, status, total_cents, currency, pix_expires_at, paid_at, updated_at')
+      .select('id, order_number, status, total_cents, currency, pix_expires_at, paid_at, updated_at, metadata')
       .eq('id', orderId)
       .maybeSingle()
 
@@ -69,7 +74,7 @@ export async function GET(_request: Request, context: RouteContext) {
             .update({
               status: remoteStatus,
               status_detail: text(remotePayment.status_detail),
-              payment_method: getMercadoPagoPaymentMethod(remotePayment.payment_method_id),
+              payment_method: getMercadoPagoPaymentMethod(remotePayment.payment_method_id, remotePayment.payment_type_id),
               amount_cents: mercadoPagoAmountToCents(remotePayment.transaction_amount) || payment.amount_cents,
               pix_qr_code: pix.qrCode || payment.pix_qr_code,
               pix_qr_code_base64: pix.qrCodeBase64 || payment.pix_qr_code_base64,
@@ -92,7 +97,7 @@ export async function GET(_request: Request, context: RouteContext) {
               updated_at: new Date().toISOString(),
             })
             .eq('id', order.id)
-            .select('id, order_number, status, total_cents, currency, pix_expires_at, paid_at, updated_at')
+            .select('id, order_number, status, total_cents, currency, pix_expires_at, paid_at, updated_at, metadata')
             .single()
 
           if (updatedOrder) currentOrder = updatedOrder
@@ -105,13 +110,35 @@ export async function GET(_request: Request, context: RouteContext) {
               source: 'checkout_status_refresh',
               remotePayment,
             })
+            await emitPaymentStatusEvent({
+              supabase,
+              orderId: order.id,
+              paymentId: updatedPayment?.id || payment.id,
+              status: 'access_granted',
+              source: 'checkout_status_refresh',
+              remotePayment,
+              sendNotifications: false,
+            }).catch((error) => {
+              console.warn('[Checkout Status] access status event failed:', error instanceof Error ? error.message : error)
+            })
 
             const { data: refreshedOrder } = await supabase
               .from('commerce_orders')
-              .select('id, order_number, status, total_cents, currency, pix_expires_at, paid_at, updated_at')
+              .select('id, order_number, status, total_cents, currency, pix_expires_at, paid_at, updated_at, metadata')
               .eq('id', order.id)
               .maybeSingle()
             if (refreshedOrder) currentOrder = refreshedOrder
+          } else {
+            await emitPaymentStatusEvent({
+              supabase,
+              orderId: order.id,
+              paymentId: updatedPayment?.id || payment.id,
+              status: paymentLifecycleFromProviderStatus(remoteStatus, remotePayment.status_detail),
+              source: 'checkout_status_refresh',
+              remotePayment,
+            }).catch((error) => {
+              console.warn('[Checkout Status] payment status event failed:', error instanceof Error ? error.message : error)
+            })
           }
         }
       } catch (error) {
@@ -140,6 +167,7 @@ export async function GET(_request: Request, context: RouteContext) {
         pix_ticket_url: currentPayment.pix_ticket_url,
         expires_at: currentPayment.expires_at,
       } : null,
+      status: publicPaymentStatusPayload(currentOrder, currentPayment),
     })
   } catch (error) {
     console.error('[Checkout Status] failed:', error)

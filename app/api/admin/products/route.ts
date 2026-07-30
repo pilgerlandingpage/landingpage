@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase/server'
+import { requireAdminModules } from '@/lib/admin/require-admin'
 
 export const dynamic = 'force-dynamic'
 
@@ -165,7 +165,10 @@ function bumpPayload(body: any) {
 
 export async function GET() {
     try {
-        const supabase = createAdminClient()
+        const auth = await requireAdminModules(['products', 'commerce', 'maintenance'])
+        if (!auth.ok) return auth.response
+
+        const supabase = auth.admin
         const [
             productsRes,
             offersRes,
@@ -197,7 +200,10 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
     try {
-        const supabase = createAdminClient()
+        const auth = await requireAdminModules(['products', 'commerce', 'maintenance'])
+        if (!auth.ok) return auth.response
+
+        const supabase = auth.admin
         const body = await request.json()
         const resource = text(body?.resource, 'product')
 
@@ -253,7 +259,10 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
     try {
-        const supabase = createAdminClient()
+        const auth = await requireAdminModules(['products', 'commerce', 'maintenance'])
+        if (!auth.ok) return auth.response
+
+        const supabase = auth.admin
         const body = await request.json()
         const id = text(body?.id)
         const resource = text(body?.resource, 'product')

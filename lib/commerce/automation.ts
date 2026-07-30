@@ -1,4 +1,5 @@
 import { centsToMoney, loadCommerceConfig } from './checkout'
+import { emitPaymentStatusEvent, type PaymentLifecycleStatus } from './payment-status'
 import { commerceMessageVariables, dispatchCommerceMessage } from './transactional-messages'
 
 type SupabaseAdminLike = {
@@ -117,6 +118,13 @@ function templatesFor(action: AutomationAction) {
   }
 
   return templates[action]
+}
+
+function lifecycleStatusForAction(action: AutomationAction): PaymentLifecycleStatus | null {
+  if (action === 'checkout_payment_pending') return 'payment_pending'
+  if (action === 'checkout_pix_expiring') return 'payment_expiring'
+  if (action === 'checkout_pix_expired') return 'payment_expired'
+  return null
 }
 
 async function getCandidateOrders(
@@ -384,7 +392,23 @@ async function processAction(params: {
         continue
       }
 
-      const dispatches = await dispatchTemplates({ supabase, action, bundle, config })
+      const lifecycleStatus = lifecycleStatusForAction(action)
+      const dispatches: AutomationDispatchResult[] = lifecycleStatus
+        ? await emitPaymentStatusEvent({
+            supabase,
+            orderId: bundle.order.id,
+            paymentId: bundle.payment?.id || null,
+            status: lifecycleStatus,
+            source,
+            metadata: {
+              automation_action: action,
+            },
+          }).then((event: any) => (event.dispatches || []).map((dispatch: any) => ({
+            channel: dispatch.channel === 'email' ? 'email' : 'whatsapp',
+            templateKey: String(dispatch.templateKey || ''),
+            result: dispatch.result,
+          })))
+        : await dispatchTemplates({ supabase, action, bundle, config })
       await updateOrderState(supabase, bundle, action, source)
       await insertAuditLog(supabase, bundle, action, dispatches).catch(() => {})
 

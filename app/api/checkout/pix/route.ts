@@ -18,7 +18,8 @@ import {
   mercadoPagoAmountToCents,
   normalizeMercadoPagoPaymentStatus,
 } from '@/lib/commerce/mercado-pago'
-import { commerceMessageVariables, dispatchCommerceMessage } from '@/lib/commerce/transactional-messages'
+import { emitPaymentStatusEvent, publicPaymentStatusPayload } from '@/lib/commerce/payment-status'
+import { fulfillApprovedOrder } from '@/lib/commerce/fulfillment'
 
 type CheckoutPixBody = {
   checkout_slug?: string
@@ -279,7 +280,7 @@ export async function POST(request: NextRequest) {
         provider_order_id: mercadoPagoPayment.order?.id ? String(mercadoPagoPayment.order.id) : null,
         status: paymentStatus,
         status_detail: text(mercadoPagoPayment.status_detail),
-        payment_method: getMercadoPagoPaymentMethod(mercadoPagoPayment.payment_method_id),
+        payment_method: getMercadoPagoPaymentMethod(mercadoPagoPayment.payment_method_id, mercadoPagoPayment.payment_type_id),
         installments: Number.isFinite(Number(mercadoPagoPayment.installments)) ? Number(mercadoPagoPayment.installments) : null,
         amount_cents: mercadoPagoAmountToCents(mercadoPagoPayment.transaction_amount) || totalCents,
         currency: checkout.offer.currency,
@@ -316,47 +317,58 @@ export async function POST(request: NextRequest) {
         .eq('id', lead.id),
     ])
 
-    await dispatchCommerceMessage({
+    if (paymentStatus === 'approved') {
+      await fulfillApprovedOrder({
+        supabase,
+        orderId: order.id,
+        paymentId: payment.id,
+        source: 'checkout_pix_immediate_approval',
+        remotePayment: mercadoPagoPayment,
+      }).catch((error) => {
+        console.warn('[Checkout Pix] immediate fulfillment failed:', error instanceof Error ? error.message : error)
+      })
+    }
+
+    await emitPaymentStatusEvent({
       supabase,
-      templateKey: 'checkout_pix_generated',
-      channel: 'whatsapp',
-      customer,
-      order: {
-        ...order,
-        status: paymentStatus === 'approved' ? 'paid' : 'pending_payment',
-        total_cents: totalCents,
+      orderId: order.id,
+      paymentId: payment.id,
+      status: paymentStatus === 'approved' ? 'access_granted' : 'pix_generated',
+      source: 'checkout_pix',
+      channels: ['whatsapp'],
+      sendNotifications: paymentStatus !== 'approved',
+      metadata: {
+        checkout_session_id: checkoutSessionId,
+        checkout_url: checkoutUrl,
       },
-      payment,
-      educationLeadId: lead.id,
-      variables: commerceMessageVariables({
-        customer,
-        productName: checkout.product.title,
-        order: {
-          ...order,
-          total_cents: totalCents,
-        },
-        payment: {
-          ...payment,
-          pix_qr_code: pix.qrCode,
-        },
-        checkoutUrl,
-      }),
     }).catch((error) => {
-      console.warn('[Checkout Pix] transactional WhatsApp failed:', error instanceof Error ? error.message : error)
+      console.warn('[Checkout Pix] payment status event failed:', error instanceof Error ? error.message : error)
     })
+
+    const { data: refreshedOrder } = await supabase
+      .from('commerce_orders')
+      .select('*')
+      .eq('id', order.id)
+      .maybeSingle()
+    const responseOrder = refreshedOrder || {
+      ...order,
+      status: paymentStatus === 'approved' ? 'paid' : 'pending_payment',
+      pix_expires_at: pixExpiresAt,
+      paid_at: paymentStatus === 'approved' ? (mercadoPagoPayment.date_approved || new Date().toISOString()) : null,
+    }
 
     return NextResponse.json({
       success: true,
       order: {
         id: order.id,
         order_number: order.order_number,
-        status: paymentStatus === 'approved' ? 'paid' : 'pending_payment',
+        status: responseOrder.status,
         subtotal_cents: subtotalCents,
         bump_total_cents: bumpTotalCents,
         discount_cents: discountCents,
         total_cents: totalCents,
         total_display: centsToMoney(totalCents),
-        pix_expires_at: pixExpiresAt,
+        pix_expires_at: responseOrder.pix_expires_at || pixExpiresAt,
       },
       payment: {
         id: payment.id,
@@ -373,6 +385,7 @@ export async function POST(request: NextRequest) {
         name: customerInput.name,
         email: customerInput.email,
       },
+      status: publicPaymentStatusPayload(responseOrder, payment),
     })
   } catch (error) {
     console.error('[Checkout Pix] failed:', error)

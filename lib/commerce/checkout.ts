@@ -22,12 +22,17 @@ export type CommerceConfig = {
   mercadoPagoStatementDescriptor: string
   memberAreaUrl: string
   supportWhatsapp: string
+  cardPaymentsEnabled: boolean
+  subscriptionPaymentsEnabled: boolean
+  subscriptionDefaultFrequency: number
+  subscriptionDefaultFrequencyType: 'days' | 'weeks' | 'months' | 'years'
   automationEnabled: boolean
   checkoutAbandonedAfterMinutes: number
   pixPendingAfterMinutes: number
   pixExpiringBeforeMinutes: number
   checkoutLostAfterHours: number
   whatsappNotificationsEnabled: boolean
+  whatsappOutboundProvider: 'connectyhub' | 'meta_whatsapp'
   emailNotificationsEnabled: boolean
 }
 
@@ -42,6 +47,8 @@ export type CheckoutOfferRow = {
   currency: string
   checkout_path: string | null
   metadata: Record<string, unknown>
+  payment_methods: string[]
+  max_installments: number
 }
 
 export type CheckoutProductRow = {
@@ -53,6 +60,7 @@ export type CheckoutProductRow = {
   cover_image_url: string | null
   thumbnail_url: string | null
   sales_content: Record<string, unknown>
+  access_model: string
 }
 
 export type CheckoutBumpRow = {
@@ -78,12 +86,17 @@ const COMMERCE_CONFIG_KEYS = [
   'mercado_pago_statement_descriptor',
   'commerce_member_area_url',
   'commerce_support_whatsapp',
+  'commerce_card_payments_enabled',
+  'commerce_subscription_payments_enabled',
+  'commerce_subscription_default_frequency',
+  'commerce_subscription_default_frequency_type',
   'commerce_automation_enabled',
   'commerce_checkout_abandoned_after_minutes',
   'commerce_pix_pending_after_minutes',
   'commerce_pix_expiring_before_minutes',
   'commerce_checkout_lost_after_hours',
   'commerce_whatsapp_notifications_enabled',
+  'commerce_whatsapp_outbound_provider',
   'commerce_email_notifications_enabled',
 ]
 
@@ -124,6 +137,11 @@ export function parsePositiveInt(value: unknown, fallback: number, min: number, 
   return Math.min(max, Math.max(min, parsed))
 }
 
+function billingFrequencyType(value: unknown): CommerceConfig['subscriptionDefaultFrequencyType'] {
+  const normalized = String(value || '').trim()
+  return normalized === 'days' || normalized === 'weeks' || normalized === 'years' ? normalized : 'months'
+}
+
 export async function loadCommerceConfig(): Promise<CommerceConfig> {
   const supabase = createSupabaseAdminClient()
   const { data, error } = await supabase
@@ -157,12 +175,19 @@ export async function loadCommerceConfig(): Promise<CommerceConfig> {
     mercadoPagoStatementDescriptor: value('mercado_pago_statement_descriptor', 'MERCADO_PAGO_STATEMENT_DESCRIPTOR', 'PILGER'),
     memberAreaUrl: value('commerce_member_area_url', 'COMMERCE_MEMBER_AREA_URL', 'https://guilhermepilger.ai/membros'),
     supportWhatsapp: normalizeBrazilPhone(value('commerce_support_whatsapp', 'COMMERCE_SUPPORT_WHATSAPP')),
+    cardPaymentsEnabled: value('commerce_card_payments_enabled', 'COMMERCE_CARD_PAYMENTS_ENABLED', 'true') !== 'false',
+    subscriptionPaymentsEnabled: value('commerce_subscription_payments_enabled', 'COMMERCE_SUBSCRIPTION_PAYMENTS_ENABLED', 'true') !== 'false',
+    subscriptionDefaultFrequency: parsePositiveInt(value('commerce_subscription_default_frequency', 'COMMERCE_SUBSCRIPTION_DEFAULT_FREQUENCY', '1'), 1, 1, 365),
+    subscriptionDefaultFrequencyType: billingFrequencyType(value('commerce_subscription_default_frequency_type', 'COMMERCE_SUBSCRIPTION_DEFAULT_FREQUENCY_TYPE', 'months')),
     automationEnabled: value('commerce_automation_enabled', 'COMMERCE_AUTOMATION_ENABLED', 'true') !== 'false',
     checkoutAbandonedAfterMinutes: parsePositiveInt(value('commerce_checkout_abandoned_after_minutes', 'COMMERCE_CHECKOUT_ABANDONED_AFTER_MINUTES', '30'), 30, 5, 10080),
     pixPendingAfterMinutes: parsePositiveInt(value('commerce_pix_pending_after_minutes', 'COMMERCE_PIX_PENDING_AFTER_MINUTES', '10'), 10, 3, 1440),
     pixExpiringBeforeMinutes: parsePositiveInt(value('commerce_pix_expiring_before_minutes', 'COMMERCE_PIX_EXPIRING_BEFORE_MINUTES', '15'), 15, 3, 1440),
     checkoutLostAfterHours: parsePositiveInt(value('commerce_checkout_lost_after_hours', 'COMMERCE_CHECKOUT_LOST_AFTER_HOURS', '24'), 24, 1, 720),
     whatsappNotificationsEnabled: value('commerce_whatsapp_notifications_enabled', 'COMMERCE_WHATSAPP_NOTIFICATIONS_ENABLED', 'true') !== 'false',
+    whatsappOutboundProvider: value('commerce_whatsapp_outbound_provider', 'COMMERCE_WHATSAPP_OUTBOUND_PROVIDER', 'connectyhub') === 'meta_whatsapp'
+      ? 'meta_whatsapp'
+      : 'connectyhub',
     emailNotificationsEnabled: value('commerce_email_notifications_enabled', 'COMMERCE_EMAIL_NOTIFICATIONS_ENABLED', 'true') !== 'false',
   }
 }
@@ -184,7 +209,7 @@ export async function loadCheckoutOffer(slug: string) {
   const [productRes, bumpsRes] = await Promise.all([
     supabase
       .from('commerce_products')
-      .select('id, slug, title, subtitle, description, cover_image_url, thumbnail_url, sales_content')
+      .select('id, slug, title, subtitle, description, cover_image_url, thumbnail_url, sales_content, access_model')
       .eq('id', offer.product_id)
       .eq('status', 'active')
       .maybeSingle(),

@@ -89,6 +89,7 @@ type ProductDraft = {
     subtitle: string
     description: string
     product_type: string
+    access_model: string
     status: ProductStatus
     cover_image_url: string
 }
@@ -103,6 +104,7 @@ type OfferDraft = {
     checkout_path: string
     landing_page_id: string
     max_installments: string
+    payment_methods: string[]
 }
 
 type ContentDraft = {
@@ -135,6 +137,7 @@ const EMPTY_PRODUCT: ProductDraft = {
     subtitle: '',
     description: '',
     product_type: 'course',
+    access_model: 'lifetime',
     status: 'draft',
     cover_image_url: '',
 }
@@ -148,6 +151,7 @@ const EMPTY_OFFER: OfferDraft = {
     checkout_path: '',
     landing_page_id: '',
     max_installments: '1',
+    payment_methods: ['pix'],
 }
 
 const EMPTY_CONTENT: ContentDraft = {
@@ -204,6 +208,7 @@ function productDraftFrom(product: Product): ProductDraft {
         subtitle: product.subtitle || '',
         description: product.description || '',
         product_type: product.product_type || 'course',
+        access_model: product.access_model || 'lifetime',
         status: product.status || 'draft',
         cover_image_url: product.cover_image_url || '',
     }
@@ -220,6 +225,7 @@ function offerDraftFrom(offer: Offer): OfferDraft {
         checkout_path: offer.checkout_path || '',
         landing_page_id: offer.landing_page_id || '',
         max_installments: String(offer.max_installments || 1),
+        payment_methods: Array.isArray(offer.payment_methods) && offer.payment_methods.length ? offer.payment_methods : ['pix'],
     }
 }
 
@@ -339,6 +345,18 @@ export default function ProductsAdminPage() {
             [field]: value,
             slug: field === 'title' && !prev.slug ? slugify(value) : prev.slug,
         }))
+    }
+
+    const toggleOfferPaymentMethod = (method: string) => {
+        setOfferDraft(prev => {
+            const current = new Set(prev.payment_methods || [])
+            if (current.has(method)) current.delete(method)
+            else current.add(method)
+            return {
+                ...prev,
+                payment_methods: current.size ? Array.from(current) : ['pix'],
+            }
+        })
     }
 
     const saveProduct = async () => {
@@ -554,6 +572,14 @@ export default function ProductsAdminPage() {
                                 </select>
                             </label>
                             <label>
+                                <span>Acesso</span>
+                                <select value={productDraft.access_model} onChange={event => updateProduct('access_model', event.target.value)}>
+                                    <option value="lifetime">Vitalicio</option>
+                                    <option value="limited_time">Tempo limitado</option>
+                                    <option value="subscription">Assinatura</option>
+                                </select>
+                            </label>
+                            <label>
                                 <span>Status</span>
                                 <select value={productDraft.status} onChange={event => updateProduct('status', event.target.value as ProductStatus)}>
                                     <option value="draft">Rascunho</option>
@@ -621,6 +647,25 @@ export default function ProductsAdminPage() {
                                     <span>Parcelas</span>
                                     <input value={offerDraft.max_installments} onChange={event => setOfferDraft(prev => ({ ...prev, max_installments: event.target.value }))} disabled={!selectedProductId} />
                                 </label>
+                                <div className="products-admin-wide products-admin-methods">
+                                    <span>Meios de pagamento</span>
+                                    {[
+                                        { key: 'pix', label: 'Pix avulso' },
+                                        { key: 'credit_card', label: 'Credito' },
+                                        { key: 'debit_card', label: 'Debito' },
+                                        { key: 'subscription', label: 'Assinatura' },
+                                    ].map(method => (
+                                        <label key={method.key}>
+                                            <input
+                                                type="checkbox"
+                                                checked={(offerDraft.payment_methods || []).includes(method.key)}
+                                                onChange={() => toggleOfferPaymentMethod(method.key)}
+                                                disabled={!selectedProductId}
+                                            />
+                                            {method.label}
+                                        </label>
+                                    ))}
+                                </div>
                                 <label className="products-admin-wide">
                                     <span>Slug da oferta</span>
                                     <input value={offerDraft.slug} onChange={event => setOfferDraft(prev => ({ ...prev, slug: slugify(event.target.value) }))} disabled={!selectedProductId} />
@@ -1018,6 +1063,36 @@ export default function ProductsAdminPage() {
 
                 .products-admin-wide {
                     grid-column: 1 / -1;
+                }
+
+                .products-admin-methods {
+                    display: grid;
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                    gap: 8px;
+                }
+
+                .products-admin-methods > span {
+                    grid-column: 1 / -1;
+                    color: var(--text-secondary);
+                    font-size: 0.78rem;
+                    font-weight: 700;
+                }
+
+                .products-admin-methods label {
+                    min-height: 38px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    border: 1px solid var(--border);
+                    border-radius: 7px;
+                    padding: 0 10px;
+                    color: var(--text-secondary);
+                    font-size: 0.8rem;
+                }
+
+                .products-admin-methods input {
+                    width: 16px;
+                    height: 16px;
                 }
 
                 .products-admin-split {

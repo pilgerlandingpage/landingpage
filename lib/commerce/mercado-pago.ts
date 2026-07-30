@@ -15,6 +15,43 @@ export type MercadoPagoPixInput = {
   metadata?: Record<string, unknown>
 }
 
+export type MercadoPagoCardPaymentInput = {
+  accessToken: string
+  idempotencyKey: string
+  amountCents: number
+  description: string
+  token: string
+  paymentMethodId: string
+  issuerId?: string | null
+  installments: number
+  payer: {
+    name: string
+    email: string
+    document?: string | null
+  }
+  externalReference: string
+  notificationUrl?: string
+  statementDescriptor?: string | null
+  metadata?: Record<string, unknown>
+}
+
+export type MercadoPagoPreapprovalInput = {
+  accessToken: string
+  idempotencyKey: string
+  reason: string
+  payerEmail: string
+  externalReference: string
+  amountCents: number
+  currency: string
+  frequency: number
+  frequencyType: 'days' | 'weeks' | 'months' | 'years'
+  status: 'pending' | 'authorized'
+  cardTokenId?: string | null
+  backUrl?: string | null
+  notificationUrl?: string | null
+  metadata?: Record<string, unknown>
+}
+
 export type MercadoPagoPaymentPayload = Record<string, any>
 
 export type MercadoPagoCredentialKind = 'missing' | 'test' | 'production' | 'unknown'
@@ -72,9 +109,14 @@ export function extractMercadoPagoPixData(payment: MercadoPagoPaymentPayload) {
   }
 }
 
-export function getMercadoPagoPaymentMethod(value: unknown) {
+export function getMercadoPagoPaymentMethod(value: unknown, paymentType?: unknown) {
   const method = String(value || '').toLowerCase()
+  const type = String(paymentType || '').toLowerCase()
   if (method === 'pix') return 'pix'
+  if (type === 'debit_card') return 'debit_card'
+  if (type === 'credit_card') return 'credit_card'
+  if (type === 'account_money') return 'account_money'
+  if (method.includes('deb') || method.includes('debit')) return 'debit_card'
   if (method.includes('visa') || method.includes('master') || method.includes('amex') || method.includes('elo')) return 'credit_card'
   if (method === 'bolbradesco' || method === 'boleto') return 'boleto'
   return 'unknown'
@@ -133,8 +175,133 @@ export async function createMercadoPagoPixPayment(input: MercadoPagoPixInput) {
   return payload as MercadoPagoPaymentPayload
 }
 
+export async function createMercadoPagoCardPayment(input: MercadoPagoCardPaymentInput) {
+  const { firstName, lastName } = splitName(input.payer.name)
+  const document = String(input.payer.document || '').replace(/\D/g, '')
+  const body: Record<string, unknown> = {
+    transaction_amount: input.amountCents / 100,
+    token: input.token,
+    description: input.description.slice(0, 255),
+    installments: Math.max(1, Math.round(input.installments || 1)),
+    payment_method_id: input.paymentMethodId,
+    issuer_id: input.issuerId || undefined,
+    statement_descriptor: input.statementDescriptor || undefined,
+    payer: {
+      email: input.payer.email,
+      first_name: firstName,
+      last_name: lastName,
+      identification: document
+        ? {
+            type: document.length === 14 ? 'CNPJ' : 'CPF',
+            number: document,
+          }
+        : undefined,
+    },
+    external_reference: input.externalReference,
+    metadata: input.metadata || {},
+  }
+
+  if (input.notificationUrl) body.notification_url = input.notificationUrl
+
+  const response = await fetch('https://api.mercadopago.com/v1/payments', {
+    method: 'POST',
+    headers: {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      Authorization: `Bearer ${input.accessToken}`,
+      'X-Idempotency-Key': input.idempotencyKey,
+    },
+    body: JSON.stringify(body),
+  })
+
+  const text = await response.text()
+  const payload = text ? JSON.parse(text) : {}
+
+  if (!response.ok) {
+    throw new Error(mercadoPagoErrorMessage(response.status, payload, response.statusText))
+  }
+
+  return payload as MercadoPagoPaymentPayload
+}
+
+export async function createMercadoPagoPreapproval(input: MercadoPagoPreapprovalInput) {
+  const body: Record<string, unknown> = {
+    reason: input.reason.slice(0, 255),
+    external_reference: input.externalReference,
+    payer_email: input.payerEmail,
+    status: input.status,
+    auto_recurring: {
+      frequency: input.frequency,
+      frequency_type: input.frequencyType,
+      transaction_amount: input.amountCents / 100,
+      currency_id: input.currency || 'BRL',
+    },
+    metadata: input.metadata || {},
+  }
+
+  if (input.cardTokenId) body.card_token_id = input.cardTokenId
+  if (input.backUrl) body.back_url = input.backUrl
+  if (input.notificationUrl) body.notification_url = input.notificationUrl
+
+  const response = await fetch('https://api.mercadopago.com/preapproval', {
+    method: 'POST',
+    headers: {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      Authorization: `Bearer ${input.accessToken}`,
+      'X-Idempotency-Key': input.idempotencyKey,
+    },
+    body: JSON.stringify(body),
+  })
+
+  const text = await response.text()
+  const payload = text ? JSON.parse(text) : {}
+
+  if (!response.ok) {
+    throw new Error(mercadoPagoErrorMessage(response.status, payload, response.statusText))
+  }
+
+  return payload as MercadoPagoPaymentPayload
+}
+
 export async function getMercadoPagoPayment(accessToken: string, paymentId: string) {
   const response = await fetch(`https://api.mercadopago.com/v1/payments/${encodeURIComponent(paymentId)}`, {
+    headers: {
+      accept: 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    },
+  })
+
+  const text = await response.text()
+  const payload = text ? JSON.parse(text) : {}
+
+  if (!response.ok) {
+    throw new Error(mercadoPagoErrorMessage(response.status, payload, response.statusText))
+  }
+
+  return payload as MercadoPagoPaymentPayload
+}
+
+export async function getMercadoPagoPreapproval(accessToken: string, preapprovalId: string) {
+  const response = await fetch(`https://api.mercadopago.com/preapproval/${encodeURIComponent(preapprovalId)}`, {
+    headers: {
+      accept: 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    },
+  })
+
+  const text = await response.text()
+  const payload = text ? JSON.parse(text) : {}
+
+  if (!response.ok) {
+    throw new Error(mercadoPagoErrorMessage(response.status, payload, response.statusText))
+  }
+
+  return payload as MercadoPagoPaymentPayload
+}
+
+export async function getMercadoPagoChargeback(accessToken: string, chargebackId: string) {
+  const response = await fetch(`https://api.mercadopago.com/v1/chargebacks/${encodeURIComponent(chargebackId)}`, {
     headers: {
       accept: 'application/json',
       Authorization: `Bearer ${accessToken}`,

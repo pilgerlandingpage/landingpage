@@ -11,7 +11,7 @@ function initials(name?: string | null, email?: string | null) {
 }
 
 function productKindLabel(type?: string | null) {
-  if (type === 'ebook') return 'Livro digital'
+  if (type === 'ebook') return 'Livro online'
   if (type === 'course') return 'Curso'
   if (type === 'mentorship') return 'Mentoria'
   if (type === 'bundle') return 'Coleção'

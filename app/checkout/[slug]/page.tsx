@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import CheckoutClient from './CheckoutClient'
-import { centsToMoney, loadCheckoutOffer } from '@/lib/commerce/checkout'
+import { centsToMoney, loadCheckoutOffer, loadCommerceConfig } from '@/lib/commerce/checkout'
 
 export const revalidate = 120
 
@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: PageContext): Promise<Metadat
 
   return {
     title: `Checkout ${checkout.product.title} | Guilherme Pilger`,
-    description: `Finalize a compra de ${checkout.product.title} por ${centsToMoney(checkout.offer.price_cents)} via Pix.`,
+    description: `Finalize a compra de ${checkout.product.title} por ${centsToMoney(checkout.offer.price_cents)} via checkout seguro.`,
     robots: {
       index: false,
       follow: false,
@@ -38,6 +38,7 @@ export default async function CheckoutPage({ params }: PageContext) {
   const checkout = await loadCheckoutOffer(slug)
 
   if (!checkout) notFound()
+  const config = await loadCommerceConfig()
 
   return (
     <CheckoutClient
@@ -45,6 +46,9 @@ export default async function CheckoutPage({ params }: PageContext) {
       product={checkout.product}
       offer={checkout.offer}
       bumps={checkout.bumps}
+      mercadoPagoPublicKey={config.mercadoPagoPublicKey}
+      cardPaymentsEnabled={config.cardPaymentsEnabled}
+      subscriptionPaymentsEnabled={config.subscriptionPaymentsEnabled}
     />
   )
 }
