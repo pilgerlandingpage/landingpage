@@ -51,6 +51,7 @@ import { cleanPublicPropertyText, compactPublicPropertyText } from '@/lib/proper
 import { extractPropertyIdFromSeoSlug } from '@/lib/properties/seo-url'
 import { propertyDetailsPath, propertyDetailsSegment } from '@/lib/properties/responsive-destination'
 import { getPropertyPrimaryQualityLabel } from '@/lib/properties/intelligence'
+import { PUBLIC_PRICE_CONSULTATION_THRESHOLD, formatCompactPublicPropertyPrice, formatPublicPropertyPrice, isPublicPriceVisible, maskPublicPriceText } from '@/lib/properties/public-policy'
 import { GLOBAL_PROPERTY_BROKER_NAME, GLOBAL_PROPERTY_WHATSAPP_PHONE, getResponsibleBrokerForProperty } from '@/lib/properties/responsible-broker'
 import { fetchPropertyPriceHistory, type PropertyPriceHistoryRow } from '@/lib/properties/price-history'
 import {
@@ -67,7 +68,7 @@ export function generateStaticParams() {
 }
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-const PROPERTY_MAP_MODAL_MIN_PRICE = 4000000
+const PROPERTY_MAP_MODAL_MIN_PRICE = PUBLIC_PRICE_CONSULTATION_THRESHOLD
 const PROPERTY_MAP_MODAL_SELECT = [
     'id',
     'source_slug',
@@ -543,6 +544,22 @@ function developmentUnitMatchScore(unit: PropertyDevelopmentUnitContext, propert
     return score
 }
 
+function developmentUnitMatchFields(unit: PropertyDevelopmentUnitContext, property: any) {
+    const propertySourceReference = normalizeSourceSlugKey(property?.source_reference)
+    const propertyId = normalizeSourceSlugKey(property?.id)
+    const propertySourceSlug = normalizeSourceSlugKey(property?.source_slug)
+    const unitReferenceKeys = [unit.sourceReference, unit.id].map(normalizeSourceSlugKey).filter(Boolean)
+    const unitPropertyKeys = [unit.propertyId, unit.id].map(normalizeSourceSlugKey).filter(Boolean)
+    const unitSourceSlug = normalizeSourceSlugKey(unit.sourceSlug)
+    const fields = new Set<string>()
+
+    if (propertyId && unitPropertyKeys.includes(propertyId)) fields.add('property_id')
+    if (propertySourceReference && unitReferenceKeys.includes(propertySourceReference)) fields.add('source_reference')
+    if (propertySourceSlug && unitSourceSlug === propertySourceSlug) fields.add('source_slug')
+
+    return fields
+}
+
 function developmentPageNameKeys(page: any, content: Record<string, any>, development: Record<string, any>) {
     const metadata = asSafeRecord(page?.metadata)
     const keys = new Set<string>()
@@ -608,6 +625,16 @@ function developmentFallbackForPage(page: any, content: Record<string, any>) {
         return PROPERTY_BRAVA_CONCETTO_FALLBACK_DEVELOPMENT
     }
     return null
+}
+
+function propertyDevelopmentRedirectSlug(page: any, content: Record<string, any>) {
+    const metadata = asSafeRecord(page?.metadata)
+    return asSafeText(
+        metadata.redirect_to_slug ??
+        metadata.redirectToSlug ??
+        content.redirect_to_slug ??
+        content.redirectToSlug
+    )
 }
 
 function pickBestDevelopmentUnit(candidates: PropertyDevelopmentUnitContext[], property: any) {
@@ -854,6 +881,8 @@ async function getPropertyDevelopmentContext(supabase: any, property: any): Prom
 
     for (const page of data || []) {
         const content = asSafeRecord(page.content)
+        if (propertyDevelopmentRedirectSlug(page, content)) continue
+
         const contentDevelopment = asSafeRecord(content.development)
         const fallbackDevelopment = developmentFallbackForPage(page, content)
         const hasDevelopmentContent = Boolean(fallbackDevelopment || Object.keys(contentDevelopment).length)
@@ -866,9 +895,15 @@ async function getPropertyDevelopmentContext(supabase: any, property: any): Prom
         const units = Array.isArray(rawUnits)
             ? rawUnits.map(normalizeDevelopmentUnitContext).filter((unit): unit is PropertyDevelopmentUnitContext => Boolean(unit))
             : []
-        const matchedUnit = pickDevelopmentUnit(units, property)
+        const rawMatchedUnit = pickDevelopmentUnit(units, property)
+        const pageNameMatchesProperty = developmentPageMatchesProperty(page, content, development, propertyNameKeys)
+        const rawMatchFields = rawMatchedUnit ? developmentUnitMatchFields(rawMatchedUnit, property) : new Set<string>()
+        const sourceSlugOnlyMatch = rawMatchFields.size === 1 && rawMatchFields.has('source_slug')
+        const matchedUnit = sourceSlugOnlyMatch && propertyNameKeys.size > 0 && !pageNameMatchesProperty
+            ? null
+            : rawMatchedUnit
         const matchedUnitScore = matchedUnit ? developmentUnitMatchScore(matchedUnit, property) : 0
-        const inferredUnit = !matchedUnit && hasDevelopmentContent && developmentPageMatchesProperty(page, content, development, propertyNameKeys)
+        const inferredUnit = !matchedUnit && hasDevelopmentContent && pageNameMatchesProperty
             ? propertyDevelopmentFallbackUnit(property)
             : null
         const relatedUnit = matchedUnit || inferredUnit
@@ -920,7 +955,7 @@ async function getPropertyDevelopmentContext(supabase: any, property: any): Prom
         slug: asSafeText(development.pageSlug ?? development.page_slug ?? page.slug),
         name,
         locationName: asSafeText(development.locationName ?? development.location_name, locationLabelFromProperty(property)),
-        priceRange: asSafeText(development.priceRange ?? development.price_range, relatedUnit.price),
+        priceRange: maskPublicPriceText(asSafeText(development.priceRange ?? development.price_range, relatedUnit.price)),
         availableUnitsCount,
         areaRange: asSafeText(development.areaRange ?? development.area_range, relatedUnit.area),
         suitesRange: asSafeText(development.suitesRange ?? development.suites_range, relatedUnit.suites),
@@ -1237,9 +1272,13 @@ function buildPropertyDescriptionParagraphs(
 }
 
 function formatMoney(value?: number | null, fallback = 'Sob consulta') {
-    return value
-        ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(value)
-        : fallback
+    return formatPublicPropertyPrice(value, fallback)
+}
+
+function formatFeeMoney(value?: number | string | null, fallback = 'Sob consulta') {
+    const amount = numericValue(value)
+    if (!amount) return fallback
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(amount)
 }
 
 function formatCompactMoney(value?: number | string | null, fallback = 'Sob consulta') {
@@ -1254,7 +1293,11 @@ function formatCompactMoney(value?: number | string | null, fallback = 'Sob cons
         return `R$ ${(amount / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} mil`
     }
 
-    return formatMoney(amount)
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(amount)
+}
+
+function formatPublicCompactMoney(value?: number | string | null, fallback = 'Sob consulta') {
+    return formatCompactPublicPropertyPrice(value, fallback)
 }
 
 function marketScalePosition(minValue: number, maxValue: number, targetValue: number, fallback = 50) {
@@ -2118,11 +2161,14 @@ export default async function PropertyDetailPage({
         '--market-position': `${marketHistory.position}%`,
         '--market-median-position': `${marketMedianPosition}%`,
     } as CSSProperties
-    const marketScaleMedianLabel = marketScalePriceLabel(marketHistory.medianM2, 'Mediana')
-    const marketScaleCurrentLabel = marketScalePriceLabel(marketHistory.currentPriceM2, 'Sob consulta')
-    const marketPriceLabel = formatCompactMoney(property.price)
+    const hasPublicPrice = isPublicPriceVisible(property.price)
+    const marketScaleMedianLabel = hasPublicPrice ? marketScalePriceLabel(marketHistory.medianM2, 'Mediana') : 'Sem amostra'
+    const marketScaleCurrentLabel = hasPublicPrice ? marketScalePriceLabel(marketHistory.currentPriceM2, 'Sob consulta') : 'Sob consulta'
+    const marketPriceLabel = formatPublicCompactMoney(property.price)
     const marketPriceM2Label = marketHistory.currentPriceM2 ? `${formatCompactMoney(Math.round(marketHistory.currentPriceM2))}/m²` : 'Sob consulta'
     const marketMedianM2Label = marketHistory.medianM2 ? `${formatCompactMoney(Math.round(marketHistory.medianM2))}/m²` : 'Sem amostra'
+    const displayMarketPriceM2Label = hasPublicPrice ? marketPriceM2Label : 'Sob consulta'
+    const displayMarketMedianM2Label = hasPublicPrice ? marketMedianM2Label : 'Sem amostra'
     const marketPosition = marketHistory.comparableCount
         ? marketHistory.marketPosition
         : {
@@ -2142,6 +2188,9 @@ export default async function PropertyDetailPage({
     const marketSummaryText = marketHistory.comparableCount
         ? `Este imóvel está anunciado por ${marketPriceLabel}, equivalente a ${marketPriceM2Label}. Entre os imóveis semelhantes analisados, ${marketPosition.summary}`
         : 'Ainda não há imóveis semelhantes suficientes para uma leitura simples deste anúncio.'
+    const displayMarketSummaryText = hasPublicPrice
+        ? marketSummaryText
+        : marketSummaryText.replace(marketPriceM2Label, displayMarketPriceM2Label)
     const marketPreferredAreaRange = marketHistory.currentArea
         ? `${Math.round(marketHistory.currentArea * 0.7).toLocaleString('pt-BR')} a ${Math.round(marketHistory.currentArea * 1.3).toLocaleString('pt-BR')} m² preferenciais`
         : 'Área sob consulta'
@@ -2169,7 +2218,7 @@ export default async function PropertyDetailPage({
                         <h3>Como este imóvel está posicionado no mercado?</h3>
                     </div>
                 </div>
-                <p>{marketSummaryText}</p>
+                <p>{displayMarketSummaryText}</p>
             </article>
 
             <div className="plp-market-core-metrics" aria-label="Números principais do comparativo de mercado">
@@ -2184,7 +2233,7 @@ export default async function PropertyDetailPage({
                             É o preço anunciado dividido pela área usada no anúncio.
                         </MarketTooltip>
                     </span>
-                    <strong>{marketPriceM2Label}</strong>
+                    <strong>{displayMarketPriceM2Label}</strong>
                 </article>
                 <article>
                     <span>
@@ -2193,7 +2242,7 @@ export default async function PropertyDetailPage({
                             Usamos a mediana dos imóveis comparáveis para reduzir distorções de anúncios muito altos ou muito baixos.
                         </MarketTooltip>
                     </span>
-                    <strong>{marketMedianM2Label}</strong>
+                    <strong>{displayMarketMedianM2Label}</strong>
                 </article>
             </div>
 
@@ -2272,7 +2321,7 @@ export default async function PropertyDetailPage({
                         </div>
                         <div>
                             <dt>Preço atual</dt>
-                            <dd>{formatCompactMoney(simplePriceHistory.currentPrice)}</dd>
+                            <dd>{formatPublicCompactMoney(simplePriceHistory.currentPrice)}</dd>
                         </div>
                         <div>
                             <dt>Variação desde a publicação</dt>
@@ -2283,17 +2332,17 @@ export default async function PropertyDetailPage({
                         <div className="plp-market-price-timeline" aria-label="Linha do tempo de preço">
                             <span>
                                 <small>Preço inicial</small>
-                                <strong>{formatCompactMoney(simplePriceHistory.initialPrice)}</strong>
+                                <strong>{formatPublicCompactMoney(simplePriceHistory.initialPrice)}</strong>
                             </span>
                             {simplePriceHistory.timeline.map((event, index) => (
                                 <span key={`${event.date}-${index}`}>
                                     <small>{event.date}</small>
-                                    <strong>{formatCompactMoney(event.nextPrice)}</strong>
+                                    <strong>{formatPublicCompactMoney(event.nextPrice)}</strong>
                                 </span>
                             ))}
                             <span>
                                 <small>Preço atual</small>
-                                <strong>{formatCompactMoney(simplePriceHistory.currentPrice)}</strong>
+                                <strong>{formatPublicCompactMoney(simplePriceHistory.currentPrice)}</strong>
                             </span>
                         </div>
                     ) : (
@@ -2407,7 +2456,7 @@ export default async function PropertyDetailPage({
             numberOfRooms: property.bedrooms || property.suites || undefined,
             offers: {
                 '@type': 'Offer',
-                price: property.price || undefined,
+                price: isPublicPriceVisible(property.price) ? property.price : undefined,
                 priceCurrency: 'BRL',
                 availability: 'https://schema.org/InStock',
                 url: propertyUrl,
@@ -2920,7 +2969,7 @@ export default async function PropertyDetailPage({
                                             <div className="plp-development-context-unit-copy">
                                                 <small>Unidade relacionada</small>
                                                 <strong>{developmentContext.unit.title}</strong>
-                                                <span>{developmentContext.unit.area} | {developmentContext.unit.suites} | {developmentContext.unit.price}</span>
+                                                <span>{developmentContext.unit.area} | {developmentContext.unit.suites} | {maskPublicPriceText(developmentContext.unit.price)}</span>
                                             </div>
                                             <div className="plp-development-context-actions">
                                                 <Link href={developmentHref || '/busca'} className="plp-development-primary-link">
@@ -2986,8 +3035,8 @@ export default async function PropertyDetailPage({
 
                             {(property.condo_fee || property.iptu) && (
                                 <div className="plp-price-extras">
-                                    {property.condo_fee && <small>Condomínio: {formatMoney(Number(property.condo_fee))}</small>}
-                                    {property.iptu && <small>IPTU: {formatMoney(Number(property.iptu))}</small>}
+                                    {property.condo_fee && <small>Condomínio: {formatFeeMoney(property.condo_fee)}</small>}
+                                    {property.iptu && <small>IPTU: {formatFeeMoney(property.iptu)}</small>}
                                 </div>
                             )}
 

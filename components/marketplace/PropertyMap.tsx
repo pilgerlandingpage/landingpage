@@ -12,6 +12,7 @@ import { LEAFLET_OSM_ATTRIBUTION, LEAFLET_OSM_TILE_URL } from '@/lib/maps/leafle
 import type { MapRegionArea } from '@/lib/locations/map-regions'
 import { NEARBY_BENEFIT_LAYERS as MAP_AMENITY_LAYERS, getNearbyBenefitConfig, type NearbyBenefitLayer } from '@/lib/locations/nearby-benefits'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
+import { formatCompactPublicPropertyPrice, formatPublicPropertyPrice } from '@/lib/properties/public-policy'
 import { getVisitorId, trackEvent } from '@/lib/tracking/client'
 
 delete (L.Icon.Default.prototype as any)._getIconUrl
@@ -307,29 +308,11 @@ function getPropertyLatLng(property: Property): [number, number] | null {
 }
 
 function formatFullPrice(price: number | null | undefined) {
-    if (!price) return 'Consulte'
-
-    return new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-        maximumFractionDigits: 0,
-    }).format(price)
+    return formatPublicPropertyPrice(price)
 }
 
 function formatMapPrice(price: number | null | undefined) {
-    const value = Number(price || 0)
-    if (!value) return 'Consulte'
-
-    if (value >= 1000000) {
-        const millions = value / 1000000
-        const label = millions >= 10
-            ? Math.round(millions).toLocaleString('pt-BR')
-            : millions.toLocaleString('pt-BR', { maximumFractionDigits: 1 })
-        return `R$ ${label} mi`
-    }
-
-    if (value >= 1000) return `R$ ${Math.round(value / 1000).toLocaleString('pt-BR')} mil`
-    return `R$ ${Math.round(value).toLocaleString('pt-BR')}`
+    return formatCompactPublicPropertyPrice(price)
 }
 
 function normalizeSearchText(value: unknown) {

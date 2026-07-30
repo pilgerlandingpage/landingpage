@@ -15,6 +15,7 @@ import type { MapDrawArea, MapSearchFilters } from './PropertyMap'
 import { replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
 import { findMapRegionForSearchParams } from '@/lib/locations/map-regions'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
+import { formatPublicPropertyPrice } from '@/lib/properties/public-policy'
 import { getVisitorId, trackEvent } from '@/lib/tracking/client'
 
 const MAX_RENDERED_CARDS = 60
@@ -318,14 +319,7 @@ function mergeUniqueIds(...lists: string[][]) {
 }
 
 function formatMemoryPrice(price?: number | string | null) {
-    const value = Number(price || 0)
-    if (!Number.isFinite(value) || value <= 0) return 'Sob consulta'
-
-    return new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-        maximumFractionDigits: 0,
-    }).format(value)
+    return formatPublicPropertyPrice(price)
 }
 
 function memoryPropertyTitle(property: any) {

@@ -14,6 +14,7 @@ import { pickPublicBlogSummary, type BlogPost } from '@/lib/blog/types'
 import { blogViewLabel, formatBlogViewCount, getBlogPostViewCount } from '@/lib/blog/views'
 import { JsonLd, articleJsonLd, breadcrumbJsonLd, faqPageJsonLd, organizationJsonLd, webPageJsonLd, DEFAULT_OG_IMAGE, isNewsLikeContent } from '@/lib/seo/json-ld'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
+import { formatPublicPropertyPrice } from '@/lib/properties/public-policy'
 
 export const revalidate = 300
 
@@ -104,12 +105,7 @@ function formatDate(value?: string | null) {
 }
 
 function formatPrice(value?: number | null) {
-    if (!value) return 'Sob consulta'
-    return new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-        maximumFractionDigits: 0,
-    }).format(value)
+    return formatPublicPropertyPrice(value)
 }
 
 function propertyHref(property: BlogPropertyRecommendation) {

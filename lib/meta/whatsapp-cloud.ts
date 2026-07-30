@@ -66,6 +66,13 @@ export interface MetaWhatsAppTemplateMutationInput {
   messageSendTtlSeconds?: number
 }
 
+export interface UploadMetaWhatsAppTemplateMediaInput {
+  fileName: string
+  fileType: string
+  fileBuffer: Buffer
+  config?: ConfigMap
+}
+
 export interface SendTemplateMessageInput {
   to: string
   templateName: string
@@ -73,6 +80,14 @@ export interface SendTemplateMessageInput {
   phoneNumberId?: string
   components?: unknown[]
   config?: ConfigMap
+}
+
+export interface SendTextMessageInput {
+  to: string
+  text: string
+  phoneNumberId?: string
+  config?: ConfigMap
+  previewUrl?: boolean
 }
 
 export interface MetaWhatsAppConnectionTest {
@@ -100,6 +115,12 @@ class MetaWhatsAppApiError extends Error {
 
 function cleanText(value: unknown, maxLength = 300) {
   return String(value || '').trim().slice(0, maxLength)
+}
+
+function asMetadata(value: unknown): Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : {}
 }
 
 function firstText(...values: unknown[]) {
@@ -405,6 +426,63 @@ export async function deleteMetaWhatsAppTemplate(input: MetaWhatsAppTemplateMuta
   })
 }
 
+export async function uploadMetaWhatsAppTemplateHeaderMedia(input: UploadMetaWhatsAppTemplateMediaInput) {
+  const resolved = resolveMetaWhatsAppConfig(input.config || {})
+  if (!resolved.accessToken) throw new Error('System User Access Token ausente.')
+  if (!resolved.appId) throw new Error('Meta App ID ausente.')
+
+  const fileName = cleanText(input.fileName, 255)
+  const fileType = cleanText(input.fileType, 120)
+  if (!fileName) throw new Error('Nome da midia obrigatorio.')
+  if (!fileType) throw new Error('Tipo da midia obrigatorio.')
+  if (!input.fileBuffer.byteLength) throw new Error('Arquivo de midia vazio.')
+
+  const session = await graphRequest<{ id?: string }>(resolved, `/${resolved.appId}/uploads`, {
+    method: 'POST',
+    params: {
+      file_name: fileName,
+      file_length: String(input.fileBuffer.byteLength),
+      file_type: fileType,
+    },
+  })
+
+  const sessionId = cleanText(session.id, 5000)
+  if (!sessionId) throw new Error('A Meta nao retornou a sessao de upload da midia.')
+
+  const response = await fetch(`https://graph.facebook.com/${resolved.apiVersion}/${sessionId}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `OAuth ${resolved.accessToken}`,
+      'Content-Type': fileType,
+      file_offset: '0',
+    },
+    body: input.fileBuffer as unknown as BodyInit,
+    cache: 'no-store',
+  })
+
+  const text = await response.text()
+  let payload: any = {}
+  try {
+    payload = text ? JSON.parse(text) : {}
+  } catch {
+    payload = { message: text }
+  }
+
+  if (!response.ok || payload?.error) {
+    const message = cleanText(payload?.error?.message || payload?.message || response.statusText || 'Erro ao carregar midia na Meta', 500)
+    throw new MetaWhatsAppApiError(message, response.status, payload)
+  }
+
+  const handle = cleanText(payload?.h, 5000)
+  if (!handle) throw new Error('A Meta nao retornou o handle da midia.')
+
+  return {
+    handle,
+    uploadSessionId: sessionId,
+    raw: payload,
+  }
+}
+
 export async function sendMetaWhatsAppTemplateMessage(input: SendTemplateMessageInput) {
   const resolved = resolveMetaWhatsAppConfig(input.config || {})
   const phoneNumberId = cleanText(input.phoneNumberId || resolved.defaultPhoneNumberId, 80)
@@ -425,6 +503,37 @@ export async function sendMetaWhatsAppTemplateMessage(input: SendTemplateMessage
         name: cleanText(input.templateName, 120),
         language: { code: normalizeLanguage(input.language || resolved.defaultLanguage) },
         ...(input.components?.length ? { components: input.components } : {}),
+      },
+    },
+  })
+
+  return {
+    providerMessageId: payload.messages?.[0]?.id || '',
+    raw: payload,
+  }
+}
+
+export async function sendMetaWhatsAppTextMessage(input: SendTextMessageInput) {
+  const resolved = resolveMetaWhatsAppConfig(input.config || {})
+  const phoneNumberId = cleanText(input.phoneNumberId || resolved.defaultPhoneNumberId, 80)
+  const to = normalizeMetaWhatsAppPhone(input.to)
+  const text = cleanText(input.text, 4096)
+
+  if (!resolved.accessToken) throw new Error('System User Access Token ausente.')
+  if (!phoneNumberId) throw new Error('Phone Number ID ausente.')
+  if (!to) throw new Error('Destinatario WhatsApp ausente.')
+  if (!text) throw new Error('Mensagem vazia.')
+
+  const payload = await graphRequest<{ messages?: Array<{ id?: string }> }>(resolved, `/${phoneNumberId}/messages`, {
+    method: 'POST',
+    body: {
+      messaging_product: 'whatsapp',
+      recipient_type: 'individual',
+      to,
+      type: 'text',
+      text: {
+        body: text,
+        preview_url: Boolean(input.previewUrl),
       },
     },
   })
@@ -467,17 +576,43 @@ export async function syncMetaWhatsAppAssets(config: ConfigMap = {}, supabase = 
   }
 
   if (templates.length) {
+    const { data: existingTemplates, error: existingTemplatesError } = await supabase
+      .from('meta_whatsapp_templates')
+      .select('waba_id, name, language, metadata')
+      .eq('waba_id', resolved.wabaId)
+
+    if (existingTemplatesError) throw existingTemplatesError
+
+    const existingMetadataByTemplate = new Map<string, Record<string, unknown>>()
+    for (const row of existingTemplates || []) {
+      existingMetadataByTemplate.set(
+        `${row.waba_id}:${row.name}:${row.language}`,
+        asMetadata(row.metadata)
+      )
+    }
+
     const templateRows = templates.map(template => ({
-      waba_id: resolved.wabaId,
-      template_external_id: template.id || null,
-      name: template.name,
-      language: template.language || resolved.defaultLanguage,
-      category: template.category || 'UNKNOWN',
-      status: template.status || 'unknown',
-      quality_score: typeof template.quality_score === 'string' ? template.quality_score : null,
-      components: Array.isArray(template.components) ? template.components : [],
-      last_synced_at: new Date().toISOString(),
-      metadata: template as unknown as Record<string, unknown>,
+      ...(() => {
+        const language = template.language || resolved.defaultLanguage
+        const existingMetadata = existingMetadataByTemplate.get(`${resolved.wabaId}:${template.name}:${language}`) || {}
+        return {
+          waba_id: resolved.wabaId,
+          template_external_id: template.id || null,
+          name: template.name,
+          language,
+          category: template.category || 'UNKNOWN',
+          status: template.status || 'unknown',
+          quality_score: typeof template.quality_score === 'string' ? template.quality_score : null,
+          components: Array.isArray(template.components) ? template.components : [],
+          last_synced_at: new Date().toISOString(),
+          metadata: {
+            ...existingMetadata,
+            ...(template as unknown as Record<string, unknown>),
+            managed_from_panel: Boolean(existingMetadata.managed_from_panel || existingMetadata.created_from_panel),
+            created_from_panel: Boolean(existingMetadata.created_from_panel),
+          },
+        }
+      })()
     }))
 
     const { error } = await supabase

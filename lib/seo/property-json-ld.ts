@@ -1,5 +1,6 @@
 import { absoluteUrl, DEFAULT_OG_IMAGE, SITE_URL } from '@/lib/seo/json-ld'
 import { cleanPropertyText, compactPropertyText } from '@/lib/properties/text'
+import { isPublicPriceVisible } from '@/lib/properties/public-policy'
 
 type PropertyForStructuredData = Record<string, any>
 
@@ -117,7 +118,7 @@ export function realEstateListingJsonLd(params: {
     },
     offers: {
       '@type': 'Offer',
-      price: property.price || undefined,
+      price: isPublicPriceVisible(property.price) ? property.price : undefined,
       priceCurrency: 'BRL',
       availability: property.status === 'sold'
         ? 'https://schema.org/SoldOut'

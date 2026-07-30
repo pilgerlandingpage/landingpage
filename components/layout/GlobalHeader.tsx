@@ -262,6 +262,15 @@ function MobileDevelopmentGroup({ group, onClose }: { group: DevelopmentMenuGrou
     )
 }
 
+function isResidentialHomeMenuLink(link: MenuLink) {
+    const text = `${link.label} ${link.href}`
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+
+    return !/terreno|lote|galp|comercial|deposito|predio/.test(text)
+}
+
 export default function GlobalHeader() {
     const pathname = usePathname()
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -271,6 +280,16 @@ export default function GlobalHeader() {
     const [developmentGroups, setDevelopmentGroups] = useState<DevelopmentMenuGroup[]>([])
     const searchRef = useRef<HTMLLIElement>(null)
     const hasDevelopmentGroups = developmentGroups.some(group => group.developments.length > 0)
+    const isHomePage = pathname === '/'
+    const activeSaleSections = isHomePage
+        ? saleSections.map(section => ({ ...section, links: section.links.filter(isResidentialHomeMenuLink) })).filter(section => section.links.length > 0)
+        : saleSections
+    const activeHouseSections = isHomePage
+        ? houseSections
+            .map(section => ({ ...section, links: section.links.filter(isResidentialHomeMenuLink) }))
+            .filter(section => section.links.length > 0 && !/terreno|lote/i.test(section.title || ''))
+        : houseSections
+    const activeRentLinks = isHomePage ? rentLinks.filter(isResidentialHomeMenuLink) : rentLinks
 
     const closeMobileMenu = () => {
         setMobileMenuOpen(false)
@@ -406,9 +425,9 @@ export default function GlobalHeader() {
                             <span className="gh-menu-label">VENDAS ▾</span>
                             <div className="gh-mega">
                                 <div className="gh-mega-grid">
-                                    <div>{saleSections.map(section => <DesktopSection key={section.title} section={section} />)}</div>
+                                    <div>{activeSaleSections.map(section => <DesktopSection key={section.title} section={section} />)}</div>
                                     <div>{apartmentSections.map(section => <DesktopSection key={section.title} section={section} />)}</div>
-                                    <div>{houseSections.map(section => <DesktopSection key={section.title} section={section} />)}</div>
+                                    <div>{activeHouseSections.map(section => <DesktopSection key={section.title} section={section} />)}</div>
                                     <div>{locationSections.map((section, index) => <DesktopSection key={index} section={section} />)}</div>
                                 </div>
                             </div>
@@ -417,7 +436,7 @@ export default function GlobalHeader() {
                         <li className="gh-menu-item">
                             <span className="gh-menu-label">ALUGUEL ▾</span>
                             <div className="gh-dropdown gh-dropdown-narrow">
-                                {rentLinks.map(link => (
+                                {activeRentLinks.map(link => (
                                     <Link key={link.href} href={link.href} className={link.accent ? 'gh-accent' : undefined}>
                                         › {replaceItajaiWithPraiaBrava(link.label)}
                                         {link.count && <span className="gh-count">{link.count}</span>}
@@ -536,7 +555,7 @@ export default function GlobalHeader() {
                             </button>
                             {openAccordion === 'vendas' && (
                                 <div className="gh-mobile-sub">
-                                    {[...saleSections[0].links, ...apartmentSections[0].links.slice(5), ...houseSections[0].links.slice(4), ...locationSections[1].links].map(link => (
+                                    {[...(activeSaleSections[0]?.links || []), ...apartmentSections[0].links.slice(5), ...(activeHouseSections[0]?.links.slice(4) || []), ...locationSections[1].links].map(link => (
                                         <MobileLink key={`${link.label}-${link.href}`} link={link} onClose={closeMobileMenu} />
                                     ))}
                                     <Link href="/busca" className="gh-accent" onClick={closeMobileMenu}>Busca avançada</Link>
@@ -561,7 +580,7 @@ export default function GlobalHeader() {
                             </button>
                             {openAccordion === 'aluguel' && (
                                 <div className="gh-mobile-sub">
-                                    {rentLinks.map(link => <MobileLink key={link.href} link={link} onClose={closeMobileMenu} />)}
+                                    {activeRentLinks.map(link => <MobileLink key={link.href} link={link} onClose={closeMobileMenu} />)}
                                 </div>
                             )}
 

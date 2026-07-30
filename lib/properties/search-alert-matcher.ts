@@ -7,6 +7,7 @@ import {
     type LeadActivityEventRow,
 } from '@/lib/tracking/lead-activity'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
+import { formatPublicPropertyPrice } from '@/lib/properties/public-policy'
 
 type JsonRecord = Record<string, unknown>
 type SearchParamRecord = Record<string, string | string[]>
@@ -418,7 +419,7 @@ function pushChannels(alert: SavedSearchAlert) {
 function propertyPriceText(property: SearchAlertProperty) {
     const price = asNumber(property.price)
     if (!price) return null
-    return price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })
+    return formatPublicPropertyPrice(price)
 }
 
 function propertyLocationText(property: SearchAlertProperty) {

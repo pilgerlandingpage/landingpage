@@ -7,6 +7,7 @@ import L from 'leaflet'
 import { Map as MapIcon, Navigation, Satellite, Sparkles } from 'lucide-react'
 import { LEAFLET_OSM_ATTRIBUTION, LEAFLET_OSM_TILE_URL } from '@/lib/maps/leaflet-style'
 import { buildPropertyFeedCopy } from '@/lib/properties/feed-copy'
+import { formatPublicPropertyPrice } from '@/lib/properties/public-policy'
 import { trackEvent } from '@/lib/tracking/client'
 
 export type PropertyFeedMapView = 'luxury' | 'map' | 'satellite' | 'street'
@@ -243,12 +244,7 @@ function loadGoogleMapsScript(apiKey: string) {
 }
 
 function formatPrice(price?: number | null) {
-    if (!price) return 'Sob consulta'
-    return new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-        maximumFractionDigits: 0,
-    }).format(price)
+    return formatPublicPropertyPrice(price)
 }
 
 function locationLabel(property: PropertyFeedMapProperty) {

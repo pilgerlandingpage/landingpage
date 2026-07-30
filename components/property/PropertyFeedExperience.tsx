@@ -28,6 +28,7 @@ import WhatsAppCaptureLink from '@/components/common/WhatsAppCaptureLink'
 import { propertyDetailsPath, shouldOpenPropertyDetailsOnDesktop } from '@/lib/properties/responsive-destination'
 import { trackEvent } from '@/lib/tracking/client'
 import { buildPropertyFeedCopy } from '@/lib/properties/feed-copy'
+import { formatPublicPropertyPrice } from '@/lib/properties/public-policy'
 
 export type PropertyFeedItem = {
     id: string
@@ -106,12 +107,7 @@ const PropertyGalleryModal = dynamic(() => import('@/components/property/Propert
 })
 
 function formatPrice(price?: number | null) {
-    if (!price) return 'Sob consulta'
-    return new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-        maximumFractionDigits: 0,
-    }).format(price)
+    return formatPublicPropertyPrice(price)
 }
 
 function compactPrice(price?: number | null) {

@@ -26,6 +26,7 @@ import type { MapDrawArea, MapFixedView, MapSearchFilters } from './PropertyMap'
 import { searchLocationName } from '@/lib/locations/display'
 import { findMapRegionByText } from '@/lib/locations/map-regions'
 import { appendNaturalSearchParams } from '@/lib/properties/natural-search'
+import { PUBLIC_PRICE_CONSULTATION_THRESHOLD } from '@/lib/properties/public-policy'
 import { trackEvent } from '@/lib/tracking/client'
 
 type MapPreviewProperty = Parameters<NonNullable<ComponentProps<typeof MapPropertyPreviewCard>['onPropertySelect']>>[0]
@@ -92,7 +93,7 @@ type FeatureFilter = {
     matches: (property: Property) => boolean
 }
 
-const MINIMUM_FIRST_CONTACT_PRICE = 4000000
+const MINIMUM_FIRST_CONTACT_PRICE = PUBLIC_PRICE_CONSULTATION_THRESHOLD
 const HOME_MAP_PREVIEW_LIMIT = 8
 const GUIDED_SEARCH_STORAGE_KEY = 'pilger_guided_search_seen_v1'
 const OFFICE_SEARCH_PARAM_VALUE = '1'
@@ -144,7 +145,6 @@ const TYPE_STEPS: StepOption[] = [
     { value: 'Apartamento', label: 'Apartamento', shortLabel: 'Apto' },
     { value: 'Casa', label: 'Casa', shortLabel: 'Casa' },
     { value: 'Cobertura', label: 'Cobertura', shortLabel: 'Cob.' },
-    { value: 'Comercial', label: 'Comercial', shortLabel: 'Com.' },
 ]
 
 const PRICE_PRESETS = [

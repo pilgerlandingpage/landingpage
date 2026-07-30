@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
+import { maskPublicPriceText } from '@/lib/properties/public-policy'
 
 export const dynamic = 'force-dynamic'
 
@@ -119,7 +120,10 @@ function normalizeDevelopment(page: Record<string, any>): PublicDevelopment | nu
         slug,
         name,
         locationName: asText(development.locationName ?? development.location_name, isBravaConcetto ? 'Praia Brava, Itajai - SC' : 'Litoral catarinense'),
-        priceRange: asText(development.priceRange ?? development.price_range, isBravaConcetto ? 'R$ 8.600.000 a R$ 21.000.000' : 'Consultar valores'),
+        priceRange: maskPublicPriceText(
+            asText(development.priceRange ?? development.price_range, isBravaConcetto ? 'R$ 8.600.000 a R$ 21.000.000' : 'Consultar valores'),
+            'Consultar valores'
+        ),
         availableUnitsCount: asNumber(development.availableUnitsCount ?? development.available_units_count ?? content.available_units_count) ?? (isBravaConcetto ? 3 : null),
         heroImage: isBravaConcetto
             ? asText(development.heroImage ?? development.hero_image, '/images/brava-concetto/1_CL_BC_FACHADA_DIURNA_R01.jpg')
