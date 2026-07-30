@@ -4,14 +4,17 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import {
   Bot,
   CheckCircle2,
+  Clock,
   ExternalLink,
   Film,
   Instagram,
+  MousePointerClick,
   Plus,
   Play,
   MessageSquareText,
   RefreshCw,
   Share2,
+  ShoppingCart,
   Sparkles,
   Target,
   Trash2,
@@ -112,6 +115,7 @@ type CommentDmDelivery = {
   error: string | null
   processed_at: string | null
   sent_at: string | null
+  raw?: Record<string, unknown> | null
   updated_at: string
 }
 
@@ -152,6 +156,19 @@ type CampaignForm = {
   trigger_examples: string
   reply_message: string
   button_url: string
+  flow_type: 'simple_link' | 'vote_discount'
+  initial_button_voted_label: string
+  initial_button_vote_label: string
+  voted_message: string
+  discount_button_title: string
+  discount_button_url: string
+  vote_message: string
+  vote_button_title: string
+  vote_url: string
+  followup_enabled: boolean
+  followup_delay_minutes: number
+  followup_message: string
+  followup_button_title: string
   confidence_threshold: number
   mode: 'manual' | 'auto'
   status: 'draft' | 'active' | 'paused' | 'archived'
@@ -180,24 +197,33 @@ const platformLabel = {
   facebook: 'Facebook',
 }
 
-const defaultToolButtonUrl = 'https://guilhermepilger.ai/eventos/perfil-corretor-ideal-ao-vivo/perfil-corretor-ideal'
-
 const emptyCampaignForm: CampaignForm = {
   id: '',
   platform: 'instagram',
-  name: 'Perfil do Corretor Ideal',
+  name: 'Votacao + livro com desconto',
   media_external_id: '',
   post_permalink: '',
-  trigger_intent: 'A pessoa esta pedindo acesso ao Perfil do Corretor Ideal, ferramenta de diagnostico/autoavaliacao para corretores, ou demonstrando querer receber a ferramenta mencionada no video.',
-  trigger_examples: 'perfil do corretor ideal\ncorretor ideal\ncorretor nota 8\nnota 8\nnota oito\nquero a ferramenta\nquero fazer a analise\nme manda o link',
+  trigger_intent: 'A pessoa comentou no video demonstrando interesse no livro com desconto ou na campanha de votacao.',
+  trigger_examples: 'quero o livro\nlivro com desconto\nja votei\nvou votar\nquero votar\nmanda o desconto\npilger',
   reply_message: `{saudacao}, {nome}.
 
-Que bom que voc\u00ea pediu o Perfil do Corretor Ideal.
+Vou liberar um desconto especial no livro para quem apoiar a votacao.
 
-Liberei seu acesso gratuito agora. Clique no bot\u00e3o abaixo para abrir a ferramenta e fazer sua an\u00e1lise.
-
-Depois me conta o que apareceu no seu resultado.`,
-  button_url: defaultToolButtonUrl,
+Escolha uma opcao abaixo para eu te mandar o proximo passo.`,
+  button_url: '',
+  flow_type: 'vote_discount',
+  initial_button_voted_label: 'Ja votei',
+  initial_button_vote_label: 'Vou votar',
+  voted_message: 'Perfeito. Como agradecimento, liberei o desconto especial do livro. Clique abaixo para garantir o seu.',
+  discount_button_title: 'Comprar livro',
+  discount_button_url: '',
+  vote_message: 'Perfeito. Clique no botao abaixo para abrir a votacao. Depois volte aqui quando terminar.',
+  vote_button_title: 'Votar agora',
+  vote_url: '',
+  followup_enabled: true,
+  followup_delay_minutes: 3,
+  followup_message: 'Como agradecimento por participar, liberei o desconto especial do livro. Clique abaixo para comprar.',
+  followup_button_title: 'Comprar livro',
   confidence_threshold: 72,
   mode: 'manual',
   status: 'draft',
@@ -229,6 +255,47 @@ function campaignButtonUrl(campaign: CommentDmCampaign | null | undefined) {
   const raw = (campaign?.raw || {}) as Record<string, unknown>
   return extractFirstHttpUrl(String(raw.button_url || raw.link_button_url || raw.cta_url || ''))
     || extractFirstHttpUrl(campaign?.reply_message)
+}
+
+function rawRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {}
+}
+
+function rawString(value: unknown, fallback = '') {
+  return String(value || fallback)
+}
+
+function rawNumber(value: unknown, fallback: number) {
+  const parsed = Number(value ?? fallback)
+  return Number.isFinite(parsed) ? parsed : fallback
+}
+
+function rawBoolean(value: unknown, fallback = false) {
+  if (typeof value === 'boolean') return value
+  const text = String(value || '').toLowerCase()
+  if (['true', '1', 'sim', 'yes', 'on'].includes(text)) return true
+  if (['false', '0', 'nao', 'no', 'off'].includes(text)) return false
+  return fallback
+}
+
+function campaignVoteDiscountFlow(campaign: CommentDmCampaign | null | undefined) {
+  const raw = rawRecord(campaign?.raw)
+  return rawRecord(raw.comment_dm_flow)
+}
+
+function campaignFlowType(campaign: CommentDmCampaign | null | undefined): CampaignForm['flow_type'] {
+  const raw = rawRecord(campaign?.raw)
+  const flow = campaignVoteDiscountFlow(campaign)
+  return rawString(raw.flow_type || flow.type) === 'vote_discount' && rawBoolean(flow.enabled, false)
+    ? 'vote_discount'
+    : 'simple_link'
+}
+
+function campaignFlowSummary(campaign: CommentDmCampaign) {
+  if (campaignFlowType(campaign) !== 'vote_discount') return 'Botao simples'
+  const flow = campaignVoteDiscountFlow(campaign)
+  const delay = rawNumber(flow.followup_delay_minutes, 3)
+  return `Votacao + livro | follow-up ${delay} min`
 }
 
 function isAutomationPublicReply(comment: CommentRow) {
@@ -457,7 +524,8 @@ export default function MetaInboxPage() {
       })
       const payload = await response.json()
       if (!response.ok || !payload.success) throw new Error(payload.error || 'Erro ao processar Directs.')
-      setCommentDmMessage(`${payload.matched || 0} comentario(s) compativeis, ${payload.sent || 0} enviado(s), ${payload.pending || 0} pendente(s).`)
+      const followups = payload.followups?.processed ? ` | ${payload.followups.sent || 0} follow-up(s)` : ''
+      setCommentDmMessage(`${payload.matched || 0} comentario(s) compativeis, ${payload.sent || 0} enviado(s), ${payload.pending || 0} pendente(s).${followups}`)
       await Promise.all([loadSuggestions(), loadCommentDmAutomation()])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao processar comentarios para Direct.')
@@ -473,6 +541,8 @@ export default function MetaInboxPage() {
   }
 
   const editCommentDmCampaign = (campaign: CommentDmCampaign) => {
+    const flow = campaignVoteDiscountFlow(campaign)
+    const flowType = campaignFlowType(campaign)
     setCampaignForm({
       id: campaign.id,
       platform: campaign.platform,
@@ -483,6 +553,19 @@ export default function MetaInboxPage() {
       trigger_examples: (campaign.trigger_examples || []).join('\n'),
       reply_message: campaign.reply_message,
       button_url: campaignButtonUrl(campaign),
+      flow_type: flowType,
+      initial_button_voted_label: rawString(flow.already_voted_label, emptyCampaignForm.initial_button_voted_label),
+      initial_button_vote_label: rawString(flow.will_vote_label, emptyCampaignForm.initial_button_vote_label),
+      voted_message: rawString(flow.already_voted_message, emptyCampaignForm.voted_message),
+      discount_button_title: rawString(flow.already_voted_button_title, emptyCampaignForm.discount_button_title),
+      discount_button_url: extractFirstHttpUrl(rawString(flow.discount_url, '')),
+      vote_message: rawString(flow.vote_message, emptyCampaignForm.vote_message),
+      vote_button_title: rawString(flow.vote_button_title, emptyCampaignForm.vote_button_title),
+      vote_url: extractFirstHttpUrl(rawString(flow.vote_url, '')),
+      followup_enabled: rawBoolean(flow.followup_enabled, emptyCampaignForm.followup_enabled),
+      followup_delay_minutes: rawNumber(flow.followup_delay_minutes, emptyCampaignForm.followup_delay_minutes),
+      followup_message: rawString(flow.followup_message, emptyCampaignForm.followup_message),
+      followup_button_title: rawString(flow.followup_button_title, emptyCampaignForm.followup_button_title),
       confidence_threshold: campaign.confidence_threshold,
       mode: campaign.mode,
       status: campaign.status,
@@ -513,6 +596,19 @@ export default function MetaInboxPage() {
       trigger_examples: prev.trigger_examples || emptyCampaignForm.trigger_examples,
       reply_message: prev.reply_message || emptyCampaignForm.reply_message,
       button_url: prev.button_url || emptyCampaignForm.button_url,
+      flow_type: prev.flow_type || emptyCampaignForm.flow_type,
+      initial_button_voted_label: prev.initial_button_voted_label || emptyCampaignForm.initial_button_voted_label,
+      initial_button_vote_label: prev.initial_button_vote_label || emptyCampaignForm.initial_button_vote_label,
+      voted_message: prev.voted_message || emptyCampaignForm.voted_message,
+      discount_button_title: prev.discount_button_title || emptyCampaignForm.discount_button_title,
+      discount_button_url: prev.discount_button_url || emptyCampaignForm.discount_button_url,
+      vote_message: prev.vote_message || emptyCampaignForm.vote_message,
+      vote_button_title: prev.vote_button_title || emptyCampaignForm.vote_button_title,
+      vote_url: prev.vote_url || emptyCampaignForm.vote_url,
+      followup_enabled: prev.followup_enabled,
+      followup_delay_minutes: prev.followup_delay_minutes || emptyCampaignForm.followup_delay_minutes,
+      followup_message: prev.followup_message || emptyCampaignForm.followup_message,
+      followup_button_title: prev.followup_button_title || emptyCampaignForm.followup_button_title,
       platform: media.platform,
       media_external_id: media.external_id,
       post_permalink: media.permalink || '',
@@ -1406,16 +1502,162 @@ export default function MetaInboxPage() {
             </label>
 
             <label>
-              Link do botao
-              <input
-                value={campaignForm.button_url}
-                onChange={event => setCampaignForm({ ...campaignForm, button_url: event.target.value })}
-                placeholder="https://..."
-              />
-              <small className="meta-comment-dm-helper">
-                Este campo vira o botao da mensagem. Deixe o texto sem link para o Direct ficar limpo.
-              </small>
+              Fluxo do Direct
+              <select
+                value={campaignForm.flow_type}
+                onChange={event => setCampaignForm({ ...campaignForm, flow_type: event.target.value as CampaignForm['flow_type'] })}
+              >
+                <option value="vote_discount">Votacao + livro</option>
+                <option value="simple_link">Mensagem com botao simples</option>
+              </select>
             </label>
+
+            {campaignForm.flow_type === 'simple_link' ? (
+              <label>
+                Link do botao
+                <input
+                  value={campaignForm.button_url}
+                  onChange={event => setCampaignForm({ ...campaignForm, button_url: event.target.value })}
+                  placeholder="https://..."
+                />
+                <small className="meta-comment-dm-helper">
+                  Este campo vira o botao da mensagem. Deixe o texto sem link para o Direct ficar limpo.
+                </small>
+              </label>
+            ) : (
+              <div className="meta-comment-dm-flow-box">
+                <div className="meta-comment-dm-flow-title">
+                  <MousePointerClick size={16} />
+                  <strong>Botoes iniciais</strong>
+                </div>
+                <div className="meta-comment-dm-two even">
+                  <label>
+                    Botao 1
+                    <input
+                      value={campaignForm.initial_button_voted_label}
+                      maxLength={20}
+                      onChange={event => setCampaignForm({ ...campaignForm, initial_button_voted_label: event.target.value })}
+                    />
+                  </label>
+                  <label>
+                    Botao 2
+                    <input
+                      value={campaignForm.initial_button_vote_label}
+                      maxLength={20}
+                      onChange={event => setCampaignForm({ ...campaignForm, initial_button_vote_label: event.target.value })}
+                    />
+                  </label>
+                </div>
+
+                <div className="meta-comment-dm-flow-title">
+                  <ShoppingCart size={16} />
+                  <strong>Se clicar em Ja votei</strong>
+                </div>
+                <label>
+                  Mensagem do desconto
+                  <textarea
+                    rows={3}
+                    value={campaignForm.voted_message}
+                    onChange={event => setCampaignForm({ ...campaignForm, voted_message: event.target.value })}
+                  />
+                </label>
+                <div className="meta-comment-dm-two">
+                  <label>
+                    Link do livro
+                    <input
+                      value={campaignForm.discount_button_url}
+                      onChange={event => setCampaignForm({ ...campaignForm, discount_button_url: event.target.value })}
+                      placeholder="https://..."
+                    />
+                  </label>
+                  <label>
+                    Botao
+                    <input
+                      value={campaignForm.discount_button_title}
+                      maxLength={20}
+                      onChange={event => setCampaignForm({ ...campaignForm, discount_button_title: event.target.value })}
+                    />
+                  </label>
+                </div>
+
+                <div className="meta-comment-dm-flow-title">
+                  <ExternalLink size={16} />
+                  <strong>Se clicar em Vou votar</strong>
+                </div>
+                <label>
+                  Mensagem de votacao
+                  <textarea
+                    rows={3}
+                    value={campaignForm.vote_message}
+                    onChange={event => setCampaignForm({ ...campaignForm, vote_message: event.target.value })}
+                  />
+                </label>
+                <div className="meta-comment-dm-two">
+                  <label>
+                    Link da votacao
+                    <input
+                      value={campaignForm.vote_url}
+                      onChange={event => setCampaignForm({ ...campaignForm, vote_url: event.target.value })}
+                      placeholder="https://..."
+                    />
+                  </label>
+                  <label>
+                    Botao
+                    <input
+                      value={campaignForm.vote_button_title}
+                      maxLength={20}
+                      onChange={event => setCampaignForm({ ...campaignForm, vote_button_title: event.target.value })}
+                    />
+                  </label>
+                </div>
+
+                <div className="meta-comment-dm-flow-title with-control">
+                  <span>
+                    <Clock size={16} />
+                    <strong>Follow-up automatico</strong>
+                  </span>
+                  <label className="meta-comment-dm-check">
+                    <input
+                      type="checkbox"
+                      checked={campaignForm.followup_enabled}
+                      onChange={event => setCampaignForm({ ...campaignForm, followup_enabled: event.target.checked })}
+                    />
+                    Ativo
+                  </label>
+                </div>
+                <div className="meta-comment-dm-two">
+                  <label>
+                    Mensagem depois do atraso
+                    <textarea
+                      rows={3}
+                      value={campaignForm.followup_message}
+                      onChange={event => setCampaignForm({ ...campaignForm, followup_message: event.target.value })}
+                    />
+                  </label>
+                  <label>
+                    Minutos
+                    <input
+                      type="number"
+                      min={1}
+                      max={1440}
+                      value={campaignForm.followup_delay_minutes}
+                      onChange={event => setCampaignForm({ ...campaignForm, followup_delay_minutes: Number(event.target.value || 3) })}
+                    />
+                  </label>
+                </div>
+                <label>
+                  Texto do botao do follow-up
+                  <input
+                    value={campaignForm.followup_button_title}
+                    maxLength={20}
+                    onChange={event => setCampaignForm({ ...campaignForm, followup_button_title: event.target.value })}
+                  />
+                  <small className="meta-comment-dm-helper">
+                    O follow-up usa o mesmo link do livro cadastrado acima.
+                  </small>
+                </label>
+              </div>
+            )}
 
             <div className="meta-comment-dm-two">
               <label>
@@ -1544,6 +1786,7 @@ export default function MetaInboxPage() {
                   <button type="button" className="edit" onClick={() => editCommentDmCampaign(campaign)}>
                     <strong>{campaign.name}</strong>
                     <span>{platformLabel[campaign.platform]} | {campaign.status} | {campaign.mode} | {campaign.confidence_threshold}%</span>
+                    <small>{campaignFlowSummary(campaign)}</small>
                     <small>{campaign.media_external_id ? `Midia ${campaign.media_external_id}` : 'Todas as midias (igual automacao global)'}</small>
                     <em>Editar campanha</em>
                   </button>
@@ -2819,6 +3062,52 @@ export default function MetaInboxPage() {
           display: grid;
           grid-template-columns: 1fr 120px;
           gap: 10px;
+        }
+        .meta-comment-dm-two.even {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .meta-comment-dm-flow-box {
+          display: grid;
+          gap: 10px;
+          border: 1px solid rgba(201, 169, 110, .24);
+          border-radius: 8px;
+          background: rgba(201, 169, 110, .06);
+          padding: 10px;
+        }
+        .meta-comment-dm-flow-title {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          color: var(--text-primary);
+          font-size: .76rem;
+          font-weight: 900;
+        }
+        .meta-comment-dm-flow-title svg {
+          color: var(--gold);
+        }
+        .meta-comment-dm-flow-title.with-control {
+          display: flex;
+          justify-content: space-between;
+          gap: 10px;
+        }
+        .meta-comment-dm-flow-title.with-control > span,
+        .meta-comment-dm-flow-title .meta-comment-dm-check {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .meta-comment-dm-flow-title .meta-comment-dm-check {
+          color: var(--text-muted);
+          font-size: .68rem;
+          letter-spacing: 0;
+          text-transform: none;
+          cursor: pointer;
+        }
+        .meta-comment-dm-flow-title .meta-comment-dm-check input {
+          width: 16px;
+          height: 16px;
+          padding: 0;
+          accent-color: var(--gold);
         }
         .meta-comment-dm-actions,
         .meta-comment-dm-toolbar {

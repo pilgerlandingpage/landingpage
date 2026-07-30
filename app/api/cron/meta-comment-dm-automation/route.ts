@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { syncMetaSocialInbox } from '@/lib/social/meta-inbox'
 import {
+  processDueCommentDmFlowFollowups,
   processRecentInstagramCommentsForDm,
   recordCommentDmCronResult,
 } from '@/lib/social/meta-comment-dm-automation'
@@ -39,7 +40,10 @@ export async function GET(request: NextRequest) {
       source: 'vercel_cron',
       requireCronEnabled: true,
     })
-    const result = { ...automation, sync: syncResult, sync_warning: syncWarning }
+    const followups = request.nextUrl.searchParams.get('dry_run') === 'true'
+      ? { success: true, skipped: true, reason: 'dry_run' }
+      : await processDueCommentDmFlowFollowups(30)
+    const result = { ...automation, followups, sync: syncResult, sync_warning: syncWarning }
     await recordCommentDmCronResult(result)
     return NextResponse.json(result)
   } catch (error) {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import {
+  processDueCommentDmFlowFollowups,
   processInstagramCommentForDmAutomation,
   processRecentInstagramCommentsForDm,
 } from '@/lib/social/meta-comment-dm-automation'
@@ -43,7 +44,8 @@ export async function POST(request: NextRequest) {
       dryRun,
       source: 'admin_process_recent',
     })
-    return NextResponse.json(result)
+    const followups = dryRun ? { success: true, skipped: true, reason: 'dry_run' } : await processDueCommentDmFlowFollowups(30)
+    return NextResponse.json({ ...result, followups })
   } catch (error) {
     console.error('Error processing comment DM automation:', error)
     return NextResponse.json(
