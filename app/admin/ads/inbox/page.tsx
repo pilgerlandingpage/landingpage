@@ -214,7 +214,7 @@ Escolha uma opcao abaixo para eu te mandar o proximo passo.`,
   flow_type: 'vote_discount',
   initial_button_voted_label: 'Ja votei',
   initial_button_vote_label: 'Vou votar',
-  voted_message: 'Perfeito. Como agradecimento, liberei o desconto especial do livro. Clique abaixo para garantir o seu.',
+  voted_message: 'Obrigado por apoiar a votação.\n\nComo agradecimento, liberei 30% de desconto para você garantir o livro Corretor Nota 8.\n\nClique no botão abaixo e aproveite essa condição especial.',
   discount_button_title: 'Comprar livro',
   discount_button_url: '',
   vote_message: 'Perfeito. Clique no botao abaixo para abrir a votacao. Depois volte aqui quando terminar.',
@@ -222,7 +222,7 @@ Escolha uma opcao abaixo para eu te mandar o proximo passo.`,
   vote_url: '',
   followup_enabled: true,
   followup_delay_minutes: 3,
-  followup_message: 'Como agradecimento por participar, liberei o desconto especial do livro. Clique abaixo para comprar.',
+  followup_message: 'Obrigado por apoiar a votação.\n\nComo agradecimento, liberei 30% de desconto para você garantir o livro Corretor Nota 8.\n\nClique no botão abaixo e aproveite essa condição especial.',
   followup_button_title: 'Comprar livro',
   confidence_threshold: 72,
   mode: 'manual',
@@ -296,6 +296,39 @@ function campaignFlowSummary(campaign: CommentDmCampaign) {
   const flow = campaignVoteDiscountFlow(campaign)
   const delay = rawNumber(flow.followup_delay_minutes, 3)
   return `Votacao + livro | follow-up ${delay} min`
+}
+
+function campaignToForm(campaign: CommentDmCampaign): CampaignForm {
+  const flow = campaignVoteDiscountFlow(campaign)
+  const flowType = campaignFlowType(campaign)
+  return {
+    id: campaign.id,
+    platform: campaign.platform,
+    name: campaign.name,
+    media_external_id: campaign.media_external_id || '',
+    post_permalink: campaign.post_permalink || '',
+    trigger_intent: campaign.trigger_intent,
+    trigger_examples: (campaign.trigger_examples || []).join('\n'),
+    reply_message: campaign.reply_message,
+    button_url: campaignButtonUrl(campaign),
+    flow_type: flowType,
+    initial_button_voted_label: rawString(flow.already_voted_label, emptyCampaignForm.initial_button_voted_label),
+    initial_button_vote_label: rawString(flow.will_vote_label, emptyCampaignForm.initial_button_vote_label),
+    voted_message: rawString(flow.already_voted_message, emptyCampaignForm.voted_message),
+    discount_button_title: rawString(flow.already_voted_button_title, emptyCampaignForm.discount_button_title),
+    discount_button_url: extractFirstHttpUrl(rawString(flow.discount_url, '')),
+    vote_message: rawString(flow.vote_message, emptyCampaignForm.vote_message),
+    vote_button_title: rawString(flow.vote_button_title, emptyCampaignForm.vote_button_title),
+    vote_url: extractFirstHttpUrl(rawString(flow.vote_url, '')),
+    followup_enabled: rawBoolean(flow.followup_enabled, emptyCampaignForm.followup_enabled),
+    followup_delay_minutes: rawNumber(flow.followup_delay_minutes, emptyCampaignForm.followup_delay_minutes),
+    followup_message: rawString(flow.followup_message, emptyCampaignForm.followup_message),
+    followup_button_title: rawString(flow.followup_button_title, emptyCampaignForm.followup_button_title),
+    confidence_threshold: campaign.confidence_threshold,
+    mode: campaign.mode,
+    status: campaign.status,
+    max_replies_per_hour: campaign.max_replies_per_hour,
+  }
 }
 
 function isAutomationPublicReply(comment: CommentRow) {
@@ -499,7 +532,7 @@ export default function MetaInboxPage() {
       })
       const payload = await response.json()
       if (!response.ok || !payload.success) throw new Error(payload.error || 'Erro ao salvar campanha.')
-      setCampaignForm({
+      setCampaignForm(payload.campaign ? campaignToForm(payload.campaign) : {
         ...campaignForm,
         id: payload.campaign?.id || '',
       })
@@ -541,36 +574,7 @@ export default function MetaInboxPage() {
   }
 
   const editCommentDmCampaign = (campaign: CommentDmCampaign) => {
-    const flow = campaignVoteDiscountFlow(campaign)
-    const flowType = campaignFlowType(campaign)
-    setCampaignForm({
-      id: campaign.id,
-      platform: campaign.platform,
-      name: campaign.name,
-      media_external_id: campaign.media_external_id || '',
-      post_permalink: campaign.post_permalink || '',
-      trigger_intent: campaign.trigger_intent,
-      trigger_examples: (campaign.trigger_examples || []).join('\n'),
-      reply_message: campaign.reply_message,
-      button_url: campaignButtonUrl(campaign),
-      flow_type: flowType,
-      initial_button_voted_label: rawString(flow.already_voted_label, emptyCampaignForm.initial_button_voted_label),
-      initial_button_vote_label: rawString(flow.will_vote_label, emptyCampaignForm.initial_button_vote_label),
-      voted_message: rawString(flow.already_voted_message, emptyCampaignForm.voted_message),
-      discount_button_title: rawString(flow.already_voted_button_title, emptyCampaignForm.discount_button_title),
-      discount_button_url: extractFirstHttpUrl(rawString(flow.discount_url, '')),
-      vote_message: rawString(flow.vote_message, emptyCampaignForm.vote_message),
-      vote_button_title: rawString(flow.vote_button_title, emptyCampaignForm.vote_button_title),
-      vote_url: extractFirstHttpUrl(rawString(flow.vote_url, '')),
-      followup_enabled: rawBoolean(flow.followup_enabled, emptyCampaignForm.followup_enabled),
-      followup_delay_minutes: rawNumber(flow.followup_delay_minutes, emptyCampaignForm.followup_delay_minutes),
-      followup_message: rawString(flow.followup_message, emptyCampaignForm.followup_message),
-      followup_button_title: rawString(flow.followup_button_title, emptyCampaignForm.followup_button_title),
-      confidence_threshold: campaign.confidence_threshold,
-      mode: campaign.mode,
-      status: campaign.status,
-      max_replies_per_hour: campaign.max_replies_per_hour,
-    })
+    setCampaignForm(campaignToForm(campaign))
   }
 
   const startNewCommentDmCampaign = () => {

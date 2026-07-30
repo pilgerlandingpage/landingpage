@@ -239,7 +239,7 @@ const DEFAULT_VOTE_DISCOUNT_FLOW: VoteDiscountFlow = {
   enabled: false,
   already_voted_label: 'Ja votei',
   will_vote_label: 'Vou votar',
-  already_voted_message: 'Perfeito. Como agradecimento, liberei o desconto especial do livro. Clique abaixo para garantir o seu.',
+  already_voted_message: 'Obrigado por apoiar a votação.\n\nComo agradecimento, liberei 30% de desconto para você garantir o livro Corretor Nota 8.\n\nClique no botão abaixo e aproveite essa condição especial.',
   already_voted_button_title: 'Comprar livro',
   discount_url: '',
   vote_message: 'Perfeito. Clique no botao abaixo para abrir a votacao. Depois volte aqui quando terminar.',
@@ -247,7 +247,7 @@ const DEFAULT_VOTE_DISCOUNT_FLOW: VoteDiscountFlow = {
   vote_url: '',
   followup_enabled: true,
   followup_delay_minutes: 3,
-  followup_message: 'Como agradecimento por participar, liberei o desconto especial do livro. Clique abaixo para comprar.',
+  followup_message: 'Obrigado por apoiar a votação.\n\nComo agradecimento, liberei 30% de desconto para você garantir o livro Corretor Nota 8.\n\nClique no botão abaixo e aproveite essa condição especial.',
   followup_button_title: 'Comprar livro',
 }
 
