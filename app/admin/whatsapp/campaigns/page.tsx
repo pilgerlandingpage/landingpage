@@ -79,6 +79,7 @@ interface MetaCampaign {
     total_read: number
     total_failed: number
     total_skipped: number
+    metadata?: unknown
 }
 
 interface MetaCampaignRecipient {
@@ -233,6 +234,29 @@ interface MetaContactListContact {
     tags?: string[] | null
     template_variables?: Record<string, unknown> | null
     metadata?: unknown
+}
+
+interface MetaContactSegmentOption {
+    value: string
+    count: number
+}
+
+interface MetaContactListSegments {
+    cities: MetaContactSegmentOption[]
+    tags: MetaContactSegmentOption[]
+    stats: {
+        total: number
+        with_name: number
+        with_city: number
+        with_tags: number
+        with_variables: number
+    }
+}
+
+interface MetaContactSegmentFilters {
+    city: string
+    tag: string
+    search: string
 }
 
 const MSG_TYPES = [
@@ -450,9 +474,15 @@ export default function CampaignsPage() {
     const [metaContactLists, setMetaContactLists] = useState<MetaContactList[]>([])
     const [selectedContactListId, setSelectedContactListId] = useState('')
     const [selectedContactListContacts, setSelectedContactListContacts] = useState<MetaContactListContact[]>([])
+    const [contactListSegments, setContactListSegments] = useState<MetaContactListSegments | null>(null)
+    const [contactListAudienceCounts, setContactListAudienceCounts] = useState({ all: 0, filtered: 0 })
+    const [contactSegmentCity, setContactSegmentCity] = useState('')
+    const [contactSegmentTag, setContactSegmentTag] = useState('')
+    const [contactSegmentSearch, setContactSegmentSearch] = useState('')
     const [contactListName, setContactListName] = useState('')
     const [savingContactList, setSavingContactList] = useState(false)
     const [loadingContactLists, setLoadingContactLists] = useState(false)
+    const [loadingContactListAudience, setLoadingContactListAudience] = useState(false)
     const [metaSummary, setMetaSummary] = useState<MetaCampaignSummary | null>(null)
     const [metaAnalytics, setMetaAnalytics] = useState<MetaCampaignAnalytics | null>(null)
     const [metaStatusFilter, setMetaStatusFilter] = useState('')
@@ -740,11 +770,29 @@ export default function CampaignsPage() {
             .join('\n')
     }
 
-    const loadSavedContactListIntoAudience = async (listId: string) => {
+    const resetContactSegmentFilters = () => {
+        setContactSegmentCity('')
+        setContactSegmentTag('')
+        setContactSegmentSearch('')
+    }
+
+    const loadSavedContactListIntoAudience = async (
+        listId: string,
+        options: Partial<MetaContactSegmentFilters> & { resetFilters?: boolean; silent?: boolean } = {}
+    ) => {
         if (!listId) return
 
+        const city = options.resetFilters ? '' : options.city ?? contactSegmentCity
+        const tag = options.resetFilters ? '' : options.tag ?? contactSegmentTag
+        const search = options.resetFilters ? '' : options.search ?? contactSegmentSearch
+        const params = new URLSearchParams({ list_id: listId })
+        if (city.trim()) params.set('city', city.trim())
+        if (tag.trim()) params.set('tag', tag.trim())
+        if (search.trim()) params.set('search', search.trim())
+
+        setLoadingContactListAudience(true)
         try {
-            const res = await fetch(`/api/admin/whatsapp/contact-lists?list_id=${encodeURIComponent(listId)}`)
+            const res = await fetch(`/api/admin/whatsapp/contact-lists?${params.toString()}`)
             const data = await res.json()
             if (!data.success) {
                 setFeedback({ type: 'error', text: data.message || 'Erro ao carregar lista salva.' })
@@ -754,11 +802,35 @@ export default function CampaignsPage() {
             const contacts = data.contacts || []
             setSelectedContactListId(listId)
             setSelectedContactListContacts(contacts)
+            setContactListSegments(data.segments || null)
+            setContactListAudienceCounts({
+                all: Number(data.allContactsCount || contacts.length),
+                filtered: Number(data.filteredContactsCount || contacts.length),
+            })
+            if (options.resetFilters) {
+                resetContactSegmentFilters()
+            } else {
+                setContactSegmentCity(city)
+                setContactSegmentTag(tag)
+                setContactSegmentSearch(search)
+            }
             setNumbersInput(buildAudienceLinesFromContacts(contacts))
             setMetaAudiencePersonalized(true)
-            setFeedback({ type: 'success', text: `Lista "${data.list?.name || 'salva'}" carregada com ${contacts.length} contato(s).` })
+            if (!options.silent) {
+                const activeFilters = [
+                    city.trim() ? `cidade: ${city.trim()}` : '',
+                    tag.trim() ? `tag: ${tag.trim()}` : '',
+                    search.trim() ? `busca: ${search.trim()}` : '',
+                ].filter(Boolean).join(', ')
+                setFeedback({
+                    type: 'success',
+                    text: `Lista "${data.list?.name || 'salva'}" carregada com ${contacts.length} contato(s)${activeFilters ? ` no segmento (${activeFilters})` : ''}.`,
+                })
+            }
         } catch {
             setFeedback({ type: 'error', text: 'Erro ao carregar lista salva.' })
+        } finally {
+            setLoadingContactListAudience(false)
         }
     }
 
@@ -793,17 +865,9 @@ export default function CampaignsPage() {
             }
 
             const list = data.list as MetaContactList
-            const contacts = (data.contacts || []) as MetaContactListContact[]
             setMetaContactLists(prev => [list, ...prev.filter(item => item.id !== list.id)])
-            setSelectedContactListId(list.id)
-            setSelectedContactListContacts(contacts)
-            setNumbersInput(buildAudienceLinesFromContacts(contacts))
-            setMetaAudiencePersonalized(true)
             setContactListName('')
-
-            if (list.valid_contacts > contacts.length) {
-                await loadSavedContactListIntoAudience(list.id)
-            }
+            await loadSavedContactListIntoAudience(list.id, { resetFilters: true, silent: true })
 
             const summary = data.summary || {}
             setFeedback({
@@ -820,6 +884,9 @@ export default function CampaignsPage() {
     const clearSavedContactListSelection = () => {
         setSelectedContactListId('')
         setSelectedContactListContacts([])
+        setContactListSegments(null)
+        setContactListAudienceCounts({ all: 0, filtered: 0 })
+        resetContactSegmentFilters()
     }
 
     const resetMetaTemplateBuilder = () => {
@@ -1040,6 +1107,13 @@ export default function CampaignsPage() {
                         templateLanguage: metaTemplateLanguage.trim() || 'pt_BR',
                         templateParameters,
                         contactListId: selectedContactListId || undefined,
+                        contactSegment: selectedContactListId ? {
+                            city: contactSegmentCity.trim() || null,
+                            tag: contactSegmentTag.trim() || null,
+                            search: contactSegmentSearch.trim() || null,
+                            filteredContacts: selectedContactListContacts.length,
+                            totalContacts: contactListAudienceCounts.all || selectedContactListContacts.length,
+                        } : undefined,
                         confirmOptIn,
                         optInSource: 'site_lead_authorized',
                         campaignType: metaCampaignType,
@@ -1722,7 +1796,7 @@ export default function CampaignsPage() {
                                                     clearSavedContactListSelection()
                                                     return
                                                 }
-                                                void loadSavedContactListIntoAudience(listId)
+                                                void loadSavedContactListIntoAudience(listId, { resetFilters: true })
                                             }}
                                             style={{
                                                 width: '100%',
@@ -1820,6 +1894,174 @@ export default function CampaignsPage() {
                                     </div>
                                 </div>
 
+                                {selectedContactList && (
+                                    <div style={{
+                                        display: 'grid',
+                                        gap: '12px',
+                                        padding: '12px',
+                                        borderRadius: '12px',
+                                        border: '1px solid rgba(59,130,246,0.18)',
+                                        background: 'rgba(59,130,246,0.06)',
+                                    }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                                            <div>
+                                                <strong style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>Segmentar lista</strong>
+                                                <p style={{ margin: '4px 0 0', color: 'var(--text-muted)', fontSize: '0.76rem', lineHeight: 1.4 }}>
+                                                    Filtre a lista por cidade, tag ou busca antes de enviar. O campo de numeros e atualizado automaticamente.
+                                                </p>
+                                            </div>
+                                            <span style={{
+                                                padding: '6px 10px',
+                                                borderRadius: '999px',
+                                                background: 'rgba(255,255,255,0.08)',
+                                                border: '1px solid var(--border)',
+                                                color: 'var(--text-secondary)',
+                                                fontSize: '0.76rem',
+                                                fontWeight: 700,
+                                            }}>
+                                                {contactListAudienceCounts.filtered || selectedContactListContacts.length} de {contactListAudienceCounts.all || selectedContactList.valid_contacts} selecionados
+                                            </span>
+                                        </div>
+
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px', alignItems: 'end' }}>
+                                            <div>
+                                                <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
+                                                    Cidade
+                                                </label>
+                                                <select
+                                                    value={contactSegmentCity}
+                                                    onChange={event => setContactSegmentCity(event.target.value)}
+                                                    disabled={loadingContactListAudience || !(contactListSegments?.cities.length)}
+                                                    style={{
+                                                        width: '100%',
+                                                        padding: '9px 12px',
+                                                        borderRadius: '8px',
+                                                        fontSize: '0.84rem',
+                                                        background: 'rgba(255,255,255,0.06)',
+                                                        border: '1px solid var(--border)',
+                                                        color: 'var(--text-primary)',
+                                                        outline: 'none',
+                                                        boxSizing: 'border-box',
+                                                    }}
+                                                >
+                                                    <option value="">Todas as cidades</option>
+                                                    {(contactListSegments?.cities || []).map(city => (
+                                                        <option key={city.value} value={city.value}>
+                                                            {city.value} ({city.count})
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
+                                                    Tag
+                                                </label>
+                                                <select
+                                                    value={contactSegmentTag}
+                                                    onChange={event => setContactSegmentTag(event.target.value)}
+                                                    disabled={loadingContactListAudience || !(contactListSegments?.tags.length)}
+                                                    style={{
+                                                        width: '100%',
+                                                        padding: '9px 12px',
+                                                        borderRadius: '8px',
+                                                        fontSize: '0.84rem',
+                                                        background: 'rgba(255,255,255,0.06)',
+                                                        border: '1px solid var(--border)',
+                                                        color: 'var(--text-primary)',
+                                                        outline: 'none',
+                                                        boxSizing: 'border-box',
+                                                    }}
+                                                >
+                                                    <option value="">Todas as tags</option>
+                                                    {(contactListSegments?.tags || []).map(tag => (
+                                                        <option key={tag.value} value={tag.value}>
+                                                            {tag.value} ({tag.count})
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
+                                                    Busca
+                                                </label>
+                                                <input
+                                                    value={contactSegmentSearch}
+                                                    onChange={event => setContactSegmentSearch(event.target.value)}
+                                                    placeholder="Nome, telefone, email, cidade ou tag"
+                                                    disabled={loadingContactListAudience}
+                                                    style={{
+                                                        width: '100%',
+                                                        padding: '9px 12px',
+                                                        borderRadius: '8px',
+                                                        fontSize: '0.84rem',
+                                                        background: 'rgba(255,255,255,0.06)',
+                                                        border: '1px solid var(--border)',
+                                                        color: 'var(--text-primary)',
+                                                        outline: 'none',
+                                                        boxSizing: 'border-box',
+                                                    }}
+                                                />
+                                            </div>
+
+                                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => void loadSavedContactListIntoAudience(selectedContactListId, {
+                                                        city: contactSegmentCity,
+                                                        tag: contactSegmentTag,
+                                                        search: contactSegmentSearch,
+                                                    })}
+                                                    disabled={loadingContactListAudience}
+                                                    style={{
+                                                        padding: '9px 11px',
+                                                        borderRadius: '8px',
+                                                        border: '1px solid var(--gold)',
+                                                        background: 'rgba(201,169,110,0.12)',
+                                                        color: 'var(--gold)',
+                                                        cursor: loadingContactListAudience ? 'not-allowed' : 'pointer',
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: '6px',
+                                                        fontSize: '0.78rem',
+                                                        fontWeight: 700,
+                                                    }}
+                                                >
+                                                    {loadingContactListAudience ? <Loader2 size={14} className="spin" /> : <Search size={14} />}
+                                                    Aplicar
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => void loadSavedContactListIntoAudience(selectedContactListId, { resetFilters: true })}
+                                                    disabled={loadingContactListAudience}
+                                                    style={{
+                                                        padding: '9px 11px',
+                                                        borderRadius: '8px',
+                                                        border: '1px solid var(--border)',
+                                                        background: 'rgba(255,255,255,0.04)',
+                                                        color: 'var(--text-secondary)',
+                                                        cursor: loadingContactListAudience ? 'not-allowed' : 'pointer',
+                                                        fontSize: '0.78rem',
+                                                        fontWeight: 700,
+                                                    }}
+                                                >
+                                                    Limpar
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {contactListSegments && (
+                                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', color: 'var(--text-muted)', fontSize: '0.74rem' }}>
+                                                <span>{contactListSegments.stats.with_name} com nome</span>
+                                                <span>{contactListSegments.stats.with_city} com cidade</span>
+                                                <span>{contactListSegments.stats.with_tags} com tags</span>
+                                                <span>{contactListSegments.stats.with_variables} com variaveis</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
                                 <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.74rem', lineHeight: 1.45 }}>
                                     O modelo baixado pelo painel e CSV e pode ser enviado aqui. Se o Excel gerar um arquivo .xls antigo, salve novamente como .xlsx antes de subir.
                                 </p>
@@ -1835,7 +2077,8 @@ export default function CampaignsPage() {
                                         lineHeight: 1.45,
                                     }}>
                                         <strong style={{ color: 'var(--text-primary)' }}>{selectedContactList.name}</strong>
-                                        {' '}carregada com {selectedContactListContacts.length || selectedContactList.valid_contacts} contato(s).
+                                        {' '}carregada com {selectedContactListContacts.length} contato(s).
+                                        {contactListAudienceCounts.all && contactListAudienceCounts.all !== selectedContactListContacts.length ? ` Total da lista: ${contactListAudienceCounts.all}.` : ''}
                                         {selectedContactList.source_file_name ? ` Origem: ${selectedContactList.source_file_name}.` : ''}
                                         {selectedContactList.duplicate_contacts || selectedContactList.invalid_contacts ? (
                                             <> Ignorados: {selectedContactList.duplicate_contacts} duplicado(s), {selectedContactList.invalid_contacts} invalido(s).</>
@@ -2854,6 +3097,22 @@ function MetaCampaignDetailPanel({
 }) {
     const total = campaign.total_recipients || recipients.length
     const firstRecipient = recipients[0]
+    const campaignMetadata = asRecord(campaign.metadata)
+    const contactSegment = asRecord(campaignMetadata.contact_segment)
+    const segmentCity = textValue(contactSegment.city)
+    const segmentTag = textValue(contactSegment.tag)
+    const segmentSearch = textValue(contactSegment.search)
+    const segmentFilteredContacts = Number(contactSegment.filteredContacts || contactSegment.filtered_contacts || 0)
+    const segmentTotalContacts = Number(contactSegment.totalContacts || contactSegment.total_contacts || 0)
+    const segmentDescription = [
+        textValue(campaignMetadata.contact_list_name) ? `Lista: ${textValue(campaignMetadata.contact_list_name)}` : '',
+        segmentCity ? `Cidade: ${segmentCity}` : '',
+        segmentTag ? `Tag: ${segmentTag}` : '',
+        segmentSearch ? `Busca: ${segmentSearch}` : '',
+        segmentFilteredContacts || segmentTotalContacts
+            ? `Selecionados: ${segmentFilteredContacts || total} de ${segmentTotalContacts || total}`
+            : '',
+    ].filter(Boolean).join(' | ')
 
     return (
         <div style={{ display: 'grid', gap: '12px' }}>
@@ -2926,6 +3185,9 @@ function MetaCampaignDetailPanel({
                     <MetaDetailLine label="Criada" value={formatMetaDate(campaign.created_at)} />
                     <MetaDetailLine label="Iniciada" value={formatMetaDate(campaign.started_at)} />
                     <MetaDetailLine label="Finalizada" value={formatMetaDate(campaign.completed_at)} />
+                    {segmentDescription && (
+                        <MetaDetailLine label="Lista/segmento" value={segmentDescription} />
+                    )}
                     {Boolean(firstRecipient?.template_parameters) && (
                         <MetaDetailLine label="Variaveis" value={jsonPreview(firstRecipient.template_parameters)} />
                     )}

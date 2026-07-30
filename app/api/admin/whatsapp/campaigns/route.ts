@@ -21,6 +21,12 @@ function getSupabase() {
     )
 }
 
+function asMetadataRecord(value: unknown) {
+    return typeof value === 'object' && value !== null && !Array.isArray(value)
+        ? value as Record<string, unknown>
+        : {}
+}
+
 // GET — Listar campanhas de uma instância
 export async function GET(request: NextRequest) {
     try {
@@ -109,6 +115,7 @@ export async function POST(request: NextRequest) {
                 audienceSource: contactListId ? 'saved_contact_list' : campaignData.audienceSource || campaignData.audience_source || 'custom_paste',
                 metadata: {
                     ...contactListMetadata,
+                    contact_segment: asMetadataRecord(campaignData.contactSegment || campaignData.contact_segment),
                     created_from: 'admin_whatsapp_campaigns',
                     legacy_instance_id_ignored: instanceId || null,
                 },

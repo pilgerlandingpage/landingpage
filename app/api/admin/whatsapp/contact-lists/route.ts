@@ -16,10 +16,126 @@ function fallbackListName(fileName: string) {
     .slice(0, 160)
 }
 
+type ContactRow = {
+  id?: string
+  list_id?: string
+  phone_e164?: string | null
+  name?: string | null
+  email?: string | null
+  city?: string | null
+  tags?: unknown
+  template_variables?: unknown
+  metadata?: unknown
+  created_at?: string | null
+}
+
+function normalizeSearchText(value: unknown) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+}
+
+function asStringArray(value: unknown) {
+  if (Array.isArray(value)) {
+    return value.map(item => cleanText(item, 120)).filter(Boolean)
+  }
+
+  if (typeof value === 'string') {
+    return value.split(/[;,|]+/).map(item => cleanText(item, 120)).filter(Boolean)
+  }
+
+  return []
+}
+
+function asVariableRecord(value: unknown) {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : {}
+}
+
+function contactSearchIndex(contact: ContactRow) {
+  const variables = Object.values(asVariableRecord(contact.template_variables))
+  return normalizeSearchText([
+    contact.phone_e164,
+    contact.name,
+    contact.email,
+    contact.city,
+    ...asStringArray(contact.tags),
+    ...variables,
+  ].join(' '))
+}
+
+function contactMatchesFilters(contact: ContactRow, filters: { city: string; tag: string; search: string }) {
+  const city = normalizeSearchText(filters.city)
+  const tag = normalizeSearchText(filters.tag)
+  const search = normalizeSearchText(filters.search)
+
+  if (city && !normalizeSearchText(contact.city).includes(city)) return false
+  if (tag && !asStringArray(contact.tags).some(item => normalizeSearchText(item) === tag)) return false
+  if (search && !contactSearchIndex(contact).includes(search)) return false
+
+  return true
+}
+
+function addCount(map: Map<string, number>, value: string) {
+  const key = cleanText(value, 120)
+  if (!key) return
+  map.set(key, (map.get(key) || 0) + 1)
+}
+
+function toCountList(map: Map<string, number>, limit = 80) {
+  return Array.from(map.entries())
+    .map(([value, count]) => ({ value, count }))
+    .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value))
+    .slice(0, limit)
+}
+
+function buildContactListSegments(contacts: ContactRow[]) {
+  const cities = new Map<string, number>()
+  const tags = new Map<string, number>()
+  let withName = 0
+  let withCity = 0
+  let withTags = 0
+  let withVariables = 0
+
+  contacts.forEach(contact => {
+    if (cleanText(contact.name, 160)) withName += 1
+    if (cleanText(contact.city, 160)) {
+      withCity += 1
+      addCount(cities, String(contact.city))
+    }
+
+    const contactTags = asStringArray(contact.tags)
+    if (contactTags.length) withTags += 1
+    contactTags.forEach(tag => addCount(tags, tag))
+
+    if (Object.keys(asVariableRecord(contact.template_variables)).length) withVariables += 1
+  })
+
+  return {
+    cities: toCountList(cities),
+    tags: toCountList(tags),
+    stats: {
+      total: contacts.length,
+      with_name: withName,
+      with_city: withCity,
+      with_tags: withTags,
+      with_variables: withVariables,
+    },
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     const supabase = createAdminClient()
     const listId = cleanText(request.nextUrl.searchParams.get('list_id'), 80)
+    const filters = {
+      city: cleanText(request.nextUrl.searchParams.get('city'), 120),
+      tag: cleanText(request.nextUrl.searchParams.get('tag'), 120),
+      search: cleanText(request.nextUrl.searchParams.get('search'), 160),
+    }
 
     if (listId) {
       const [{ data: list, error: listError }, { data: contacts, error: contactsError }] = await Promise.all([
@@ -40,7 +156,18 @@ export async function GET(request: NextRequest) {
       if (contactsError) throw contactsError
       if (!list) return NextResponse.json({ success: false, message: 'Lista nao encontrada.' }, { status: 404 })
 
-      return NextResponse.json({ success: true, list, contacts: contacts || [] })
+      const allContacts = (contacts || []) as ContactRow[]
+      const filteredContacts = allContacts.filter(contact => contactMatchesFilters(contact, filters))
+
+      return NextResponse.json({
+        success: true,
+        list,
+        contacts: filteredContacts,
+        allContactsCount: allContacts.length,
+        filteredContactsCount: filteredContacts.length,
+        filters,
+        segments: buildContactListSegments(allContacts),
+      })
     }
 
     const { data: lists, error } = await supabase
