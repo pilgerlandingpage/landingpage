@@ -123,10 +123,7 @@ type MetaSendResult = {
 }
 
 type MetaMessagePayload =
-  | {
-      text: string
-      quick_replies?: MetaQuickReply[]
-    }
+  | { text: string }
   | {
       attachment: {
         type: 'template'
@@ -139,14 +136,8 @@ type MetaMessagePayload =
     }
 
 type MetaMessageSendPlan = {
-  kind: 'quick_replies' | 'button_template' | 'text'
+  kind: 'button_template' | 'text'
   message: MetaMessagePayload
-}
-
-type MetaQuickReply = {
-  content_type: 'text'
-  title: string
-  payload: string
 }
 
 type MetaMessageButton =
@@ -493,18 +484,6 @@ function fallbackTextForButtons(message: string, buttons: MetaMessageButton[]) {
   return cleanString(`${cleanString(message, 1500)}\n\n${lines.join('\n')}`, 1800)
 }
 
-function quickRepliesForPostbackButtons(buttons: MetaMessageButton[]): MetaQuickReply[] {
-  return buttons
-    .filter((button): button is Extract<MetaMessageButton, { type: 'postback' }> => button.type === 'postback')
-    .map(button => ({
-      content_type: 'text' as const,
-      title: cleanButtonTitle(button.title, ''),
-      payload: cleanButtonPayload(button.payload),
-    }))
-    .filter(button => Boolean(button.title && button.payload))
-    .slice(0, 13)
-}
-
 function textWithPostbackFallbackHint(message: string, buttons: MetaMessageButton[], max = 640) {
   const labels = buttons
     .filter(button => button.type === 'postback')
@@ -605,25 +584,14 @@ function buildMetaMessageSendPlans(
 
     if (process.env.META_COMMENT_DM_LINK_BUTTONS_ENABLED === 'false') return [fallback]
 
-    const quickReplies = quickRepliesForPostbackButtons(explicitButtons)
-    const postbackOnly = quickReplies.length === explicitButtons.length
+    const postbackOnly = explicitButtons.every(button => button.type === 'postback')
     const buttonText = postbackOnly
       ? textWithPostbackFallbackHint(message, explicitButtons, 640)
       : cleanString(message, 640)
     if (!buttonText) return [fallback]
 
-    const plans: MetaMessageSendPlan[] = []
-    if (postbackOnly && quickReplies.length > 0) {
-      plans.push({
-        kind: 'quick_replies',
-        message: {
-          text: buttonText,
-          quick_replies: quickReplies,
-        },
-      })
-    }
-
-    plans.push({
+    return [
+      {
         kind: 'button_template',
         message: {
           attachment: {
@@ -635,9 +603,9 @@ function buildMetaMessageSendPlans(
             },
           },
         },
-      })
-    plans.push(fallback)
-    return plans
+      },
+      fallback,
+    ]
   }
 
   const urlFromButtonField = extractFirstHttpUrl(cleanString(buttonUrl, 1600))
@@ -2599,6 +2567,18 @@ export async function processInstagramDirectFlowPostback(event: WebhookMessageEv
   const supabase = createAdminClient()
   const delivery = await resolveVoteDiscountDelivery(supabase, event, parsed?.deliveryId || '')
   if (!delivery) return { success: true, processed: false, reason: 'no_recent_vote_discount_delivery' }
+  const flowState = isRecord((delivery.raw as Record<string, unknown> | null | undefined)?.comment_dm_flow_state)
+    ? (delivery.raw as Record<string, any>).comment_dm_flow_state
+    : {}
+  const processedInboundIds = Array.isArray(flowState.processed_inbound_message_ids)
+    ? flowState.processed_inbound_message_ids.map((item: unknown) => cleanString(item, 1000)).filter(Boolean)
+    : []
+  if (
+    cleanString(flowState.last_inbound_message_id, 1000) === event.external_id
+    || processedInboundIds.includes(event.external_id)
+  ) {
+    return { success: true, processed: false, reason: 'inbound_already_processed', delivery_id: delivery.id }
+  }
 
   const flow = await resolveCurrentVoteDiscountFlow(supabase, delivery)
   const action = parsed?.action || textAction
@@ -2632,6 +2612,7 @@ export async function processInstagramDirectFlowPostback(event: WebhookMessageEv
       last_inbound_message_id: event.external_id,
       last_outbound_message_id: sent.external_id || null,
       followup_id: followup?.id || null,
+      processed_inbound_message_ids: [...new Set([...processedInboundIds, event.external_id])].slice(-20),
       discount_released_at: action === COMMENT_DM_ACTION_ALREADY_VOTED ? nowIso() : undefined,
     }),
   ])
@@ -2644,6 +2625,90 @@ export async function processInstagramDirectFlowPostback(event: WebhookMessageEv
     outbound_message_id: sent.external_id || null,
     followup_id: followup?.id || null,
     followup_due_at: followup?.due_at || null,
+  }
+}
+
+function rawPathString(value: unknown, path: string[]) {
+  let current: unknown = value
+  for (const key of path) {
+    if (!isRecord(current)) return ''
+    current = current[key]
+  }
+  return cleanString(current, 1000)
+}
+
+function syncedMessageToWebhookEvent(row: Record<string, any>): WebhookMessageEvent | null {
+  const externalId = cleanString(row.external_id, 1000)
+  const senderId = cleanString(row.sender_id, 160)
+  const recipientId = cleanString(row.recipient_id, 160)
+  if (!externalId || !senderId || !recipientId) return null
+
+  const raw = isRecord(row.raw) ? row.raw : {}
+  const postbackPayload = cleanString(
+    rawPathString(raw, ['postback', 'payload'])
+    || rawPathString(raw, ['quick_reply', 'payload']),
+    1000,
+  )
+  const postbackTitle = cleanString(
+    rawPathString(raw, ['postback', 'title'])
+    || rawPathString(raw, ['quick_reply', 'title']),
+    1000,
+  )
+  const text = nullableString(row.message || postbackTitle, 4000)
+
+  if (!parseCommentDmPostbackPayload(postbackPayload) && !inferCommentDmFlowActionFromText(text)) return null
+
+  return {
+    platform: 'instagram',
+    thread_id: cleanString(row.thread_id, 120) || null,
+    thread_external_id: cleanString(row.thread_external_id, 240) || `ig_dm_${recipientId}_${senderId}`,
+    external_id: externalId,
+    sender_id: senderId,
+    recipient_id: recipientId,
+    text,
+    postback_payload: nullableString(postbackPayload, 1000),
+    postback_title: nullableString(postbackTitle, 1000),
+    attachment_type: nullableString(row.attachment_type, 120),
+    attachment_url: nullableString(row.attachment_url, 1600),
+    sent_at: nullableString(row.sent_at, 120),
+    raw,
+    duplicate: false,
+  }
+}
+
+export async function processRecentInstagramDirectFlowMessages(params: {
+  limit?: number
+  sinceMinutes?: number
+} = {}) {
+  const supabase = createAdminClient()
+  const safeLimit = Math.min(Math.max(Math.trunc(params.limit || 30), 1), 100)
+  const sinceMinutes = Math.min(Math.max(Math.trunc(params.sinceMinutes || 180), 5), 24 * 60)
+  const since = new Date(Date.now() - sinceMinutes * 60 * 1000).toISOString()
+
+  const { data, error } = await supabase
+    .from('meta_social_messages')
+    .select('id, thread_id, external_id, sender_id, recipient_id, message, attachment_type, attachment_url, sent_at, raw, created_at')
+    .eq('platform', 'instagram')
+    .eq('direction', 'inbound')
+    .gte('created_at', since)
+    .order('created_at', { ascending: false })
+    .limit(safeLimit)
+
+  if (error) throw new Error(error.message)
+
+  const results = []
+  for (const row of ([...(data || [])] as Array<Record<string, any>>).reverse()) {
+    const event = syncedMessageToWebhookEvent(row)
+    if (!event) continue
+    results.push(await processInstagramDirectFlowPostback(event))
+  }
+
+  return {
+    success: true,
+    scanned: (data || []).length,
+    candidates: results.length,
+    processed: results.filter((item: any) => item?.processed).length,
+    results,
   }
 }
 

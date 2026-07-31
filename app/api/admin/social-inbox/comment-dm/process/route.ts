@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { syncMetaSocialInbox } from '@/lib/social/meta-inbox'
 import {
   processDueCommentDmFlowFollowups,
   processInstagramCommentForDmAutomation,
+  processRecentInstagramDirectFlowMessages,
   processRecentInstagramCommentsForDm,
 } from '@/lib/social/meta-comment-dm-automation'
 
@@ -44,8 +46,27 @@ export async function POST(request: NextRequest) {
       dryRun,
       source: 'admin_process_recent',
     })
+    let messageSync: unknown = dryRun ? { success: true, skipped: true, reason: 'dry_run' } : null
+    let messageSyncWarning: string | null = null
+    if (!dryRun) {
+      try {
+        messageSync = await syncMetaSocialInbox({
+          platform: 'instagram',
+          scope: 'messages',
+          mediaLimit: 1,
+          commentsPerMedia: 1,
+          conversationLimit: 20,
+        })
+      } catch (syncError) {
+        messageSyncWarning = syncError instanceof Error ? syncError.message : 'Falha ao sincronizar Directs Instagram.'
+      }
+    }
+
+    const directMessages = dryRun
+      ? { success: true, skipped: true, reason: 'dry_run' }
+      : await processRecentInstagramDirectFlowMessages({ limit: 40, sinceMinutes: 10 })
     const followups = dryRun ? { success: true, skipped: true, reason: 'dry_run' } : await processDueCommentDmFlowFollowups(30)
-    return NextResponse.json({ ...result, followups })
+    return NextResponse.json({ ...result, message_sync: messageSync, message_sync_warning: messageSyncWarning, direct_messages: directMessages, followups })
   } catch (error) {
     console.error('Error processing comment DM automation:', error)
     return NextResponse.json(
