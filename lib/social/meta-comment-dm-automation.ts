@@ -123,7 +123,10 @@ type MetaSendResult = {
 }
 
 type MetaMessagePayload =
-  | { text: string }
+  | {
+      text: string
+      quick_replies?: MetaQuickReply[]
+    }
   | {
       attachment: {
         type: 'template'
@@ -136,8 +139,14 @@ type MetaMessagePayload =
     }
 
 type MetaMessageSendPlan = {
-  kind: 'button_template' | 'text'
+  kind: 'quick_replies' | 'button_template' | 'text'
   message: MetaMessagePayload
+}
+
+type MetaQuickReply = {
+  content_type: 'text'
+  title: string
+  payload: string
 }
 
 type MetaMessageButton =
@@ -484,6 +493,32 @@ function fallbackTextForButtons(message: string, buttons: MetaMessageButton[]) {
   return cleanString(`${cleanString(message, 1500)}\n\n${lines.join('\n')}`, 1800)
 }
 
+function quickRepliesForPostbackButtons(buttons: MetaMessageButton[]): MetaQuickReply[] {
+  return buttons
+    .filter((button): button is Extract<MetaMessageButton, { type: 'postback' }> => button.type === 'postback')
+    .map(button => ({
+      content_type: 'text' as const,
+      title: cleanButtonTitle(button.title, ''),
+      payload: cleanButtonPayload(button.payload),
+    }))
+    .filter(button => Boolean(button.title && button.payload))
+    .slice(0, 13)
+}
+
+function textWithPostbackFallbackHint(message: string, buttons: MetaMessageButton[], max = 640) {
+  const labels = buttons
+    .filter(button => button.type === 'postback')
+    .map(button => cleanButtonTitle(button.title, ''))
+    .filter(Boolean)
+    .slice(0, 3)
+  if (labels.length === 0) return cleanString(message, max)
+
+  const hint = `Se os botoes nao responderem, digite: ${labels.join(' ou ')}.`
+  const separator = '\n\n'
+  const base = cleanString(message, Math.max(0, max - hint.length - separator.length))
+  return cleanString(`${base}${base ? separator : ''}${hint}`, max)
+}
+
 function buttonTitleForUrl(url: string) {
   const normalized = url.toLowerCase()
   if (normalized.includes('awards.atrincarealestate.com.br')) return 'Votar agora'
@@ -570,10 +605,25 @@ function buildMetaMessageSendPlans(
 
     if (process.env.META_COMMENT_DM_LINK_BUTTONS_ENABLED === 'false') return [fallback]
 
-    const buttonText = cleanString(message, 640)
+    const quickReplies = quickRepliesForPostbackButtons(explicitButtons)
+    const postbackOnly = quickReplies.length === explicitButtons.length
+    const buttonText = postbackOnly
+      ? textWithPostbackFallbackHint(message, explicitButtons, 640)
+      : cleanString(message, 640)
     if (!buttonText) return [fallback]
-    return [
-      {
+
+    const plans: MetaMessageSendPlan[] = []
+    if (postbackOnly && quickReplies.length > 0) {
+      plans.push({
+        kind: 'quick_replies',
+        message: {
+          text: buttonText,
+          quick_replies: quickReplies,
+        },
+      })
+    }
+
+    plans.push({
         kind: 'button_template',
         message: {
           attachment: {
@@ -585,9 +635,9 @@ function buildMetaMessageSendPlans(
             },
           },
         },
-      },
-      fallback,
-    ]
+      })
+    plans.push(fallback)
+    return plans
   }
 
   const urlFromButtonField = extractFirstHttpUrl(cleanString(buttonUrl, 1600))
