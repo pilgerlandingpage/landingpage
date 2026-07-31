@@ -3,8 +3,8 @@ import { PROFILE_ASSESSMENT_VOTE_URL } from '@/lib/whatsapp/profile-assessment-g
 import VotarGuilhermeClient from './VotarGuilhermeClient'
 
 export const metadata: Metadata = {
-  title: 'Vote no Guilherme Pilger | Real Estate Awards',
-  description: 'Passo a passo para votar em Guilherme Pilger no Real Estate Awards.',
+  title: 'Acesso à votação | Guilherme Pilger',
+  description: 'Abra a votação oficial, volte após concluir e continue para o agradecimento.',
   robots: {
     index: false,
     follow: true,
