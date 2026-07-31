@@ -318,6 +318,76 @@ function inferCommentDmFlowActionFromText(value: unknown): CommentDmFlowAction |
   return null
 }
 
+type CommentDmFlowActionInference = {
+  action: CommentDmFlowAction
+  source: 'regex' | 'gemini'
+  confidence: number | null
+} | null
+
+function shouldAskGeminiForCommentDmFlowAction(value: unknown) {
+  const normalized = normalizeText(value)
+  if (!normalized || normalized.length > 280) return false
+  return /(vot|livro|desconto|compr|link|sim|quero|manda|envia|ja|vou|fiz|feito)/.test(normalized)
+}
+
+function parseCommentDmFlowActionFromGemini(raw: string): CommentDmFlowActionInference {
+  try {
+    const parsed = JSON.parse(cleanJson(raw))
+    const action = cleanString(parsed.action, 40).toUpperCase()
+    const confidence = clampNumber(parsed.confidence, 0, 0, 100)
+    if (confidence < 70) return null
+    if (action === 'JA_VOTEI') {
+      return { action: COMMENT_DM_ACTION_ALREADY_VOTED, source: 'gemini', confidence }
+    }
+    if (action === 'VOU_VOTAR') {
+      return { action: COMMENT_DM_ACTION_WILL_VOTE, source: 'gemini', confidence }
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
+async function inferCommentDmFlowAction(value: unknown): Promise<CommentDmFlowActionInference> {
+  const regexAction = inferCommentDmFlowActionFromText(value)
+  if (regexAction) return { action: regexAction, source: 'regex', confidence: 100 }
+  if (!shouldAskGeminiForCommentDmFlowAction(value)) return null
+
+  const hasGemini = await getGeminiApiKey().catch(() => null)
+  if (!hasGemini) return null
+
+  try {
+    const raw = await chatWithGemini({
+      systemPrompt: [
+        'Voce classifica respostas de Direct do Instagram para uma automacao de votacao e livro.',
+        'Retorne somente JSON valido, sem markdown.',
+        'Use action JA_VOTEI quando a pessoa diz que ja votou ou pede o desconto/livro depois de votar.',
+        'Use action VOU_VOTAR quando a pessoa quer votar, pede o link da votacao ou indica que vai votar agora.',
+        'Use action NONE quando nao estiver claro.',
+      ].join('\n'),
+      history: [],
+      userMessage: JSON.stringify({
+        output_schema: {
+          action: 'JA_VOTEI | VOU_VOTAR | NONE',
+          confidence: '0 a 100',
+          reason: 'curto',
+        },
+        examples: {
+          JA_VOTEI: ['ja votei', 'votei', 'acabei de votar', 'manda o desconto', 'quero comprar o livro com desconto'],
+          VOU_VOTAR: ['vou votar', 'vou fazer agora', 'manda o link da votacao', 'onde voto', 'quero votar'],
+          NONE: ['ok', 'obrigado', 'nao entendi', 'bom dia'],
+        },
+        response_text: cleanString(value, 400),
+      }),
+      temperature: 0,
+      maxTokens: 180,
+    })
+    return parseCommentDmFlowActionFromGemini(raw)
+  } catch {
+    return null
+  }
+}
+
 function getCommentDmBatchSendDelayMs() {
   return clampNumber(process.env.META_COMMENT_DM_BATCH_SEND_DELAY_MS, 1200, 0, 5000)
 }
@@ -1881,24 +1951,10 @@ async function sendDelivery(
   replyOverride?: string,
 ) {
   if (delivery.send_status === 'sent') return delivery
-  const voteDiscountFlow = getDeliveryVoteDiscountFlow(delivery)
-  const initialCommentAction = voteDiscountFlow.enabled
-    ? inferCommentDmFlowActionFromText(delivery.comment_text)
-    : null
-  const reply = cleanString(
-    initialCommentAction === COMMENT_DM_ACTION_ALREADY_VOTED
-      ? voteDiscountFlow.already_voted_message
-      : initialCommentAction === COMMENT_DM_ACTION_WILL_VOTE
-        ? voteDiscountFlow.vote_message
-        : replyOverride || delivery.reply_message,
-    1800,
-  )
+  const reply = cleanString(replyOverride || delivery.reply_message, 1800)
   const buttonUrl = getDeliveryButtonUrl(delivery)
-  const buttons = initialCommentAction === COMMENT_DM_ACTION_ALREADY_VOTED
-    ? buildUrlButton(voteDiscountFlow.already_voted_button_title, voteDiscountFlow.discount_url)
-    : initialCommentAction === COMMENT_DM_ACTION_WILL_VOTE
-      ? buildUrlButton(voteDiscountFlow.vote_button_title, voteDiscountFlow.vote_url)
-      : buildInitialVoteDiscountButtons(voteDiscountFlow, delivery.id)
+  const voteDiscountFlow = getDeliveryVoteDiscountFlow(delivery)
+  const buttons = buildInitialVoteDiscountButtons(voteDiscountFlow, delivery.id)
   if (!reply) throw new Error('Entrega sem mensagem para Private Reply.')
 
   try {
@@ -1911,7 +1967,6 @@ async function sendDelivery(
     })
     const sentDelivery = await updateDeliveryAfterSend(supabase, { ...delivery, reply_message: reply }, result)
     const publicReplyMessage = buildPublicCommentReply(sentDelivery)
-    let finalDelivery = sentDelivery
 
     try {
       const publicReply = await sendPublicCommentReplyForDelivery({
@@ -1919,7 +1974,7 @@ async function sendDelivery(
         message: publicReplyMessage,
         supabase,
       })
-      finalDelivery = await updateDeliveryPublicCommentReplyRawSafe(supabase, sentDelivery, {
+      return await updateDeliveryPublicCommentReplyRawSafe(supabase, sentDelivery, {
         success: true,
         message: publicReplyMessage,
         external_id: publicReply.external_id || null,
@@ -1929,20 +1984,13 @@ async function sendDelivery(
       })
     } catch (publicReplyError) {
       const publicReplyErrorMessage = publicReplyError instanceof Error ? publicReplyError.message : String(publicReplyError)
-      finalDelivery = await updateDeliveryPublicCommentReplyRawSafe(supabase, sentDelivery, {
+      return await updateDeliveryPublicCommentReplyRawSafe(supabase, sentDelivery, {
         success: false,
         message: publicReplyMessage,
         error: publicReplyErrorMessage.slice(0, 900),
         attempted_at: nowIso(),
       })
     }
-
-    if (initialCommentAction) {
-      await applyInitialCommentVoteDiscountAction(supabase, finalDelivery, result, initialCommentAction, voteDiscountFlow)
-      return await loadDeliveryById(supabase, finalDelivery.id) || finalDelivery
-    }
-
-    return finalDelivery
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     if (isMetaAlreadyRepliedError(message)) {
@@ -1973,77 +2021,6 @@ async function sendDelivery(
       })
     }
     return await updateDeliveryError(supabase, delivery, message)
-  }
-}
-
-async function getInstagramAutomationSenderId(supabase: SupabaseAdmin) {
-  const configs = await readAppConfig(supabase)
-  return cleanString(
-    configs.raw.meta_instagram_account_id
-    || configs.raw.instagram_business_account_id
-    || process.env.META_INSTAGRAM_ACCOUNT_ID
-    || process.env.INSTAGRAM_BUSINESS_ACCOUNT_ID
-    || configs.facebookPageId,
-    160,
-  )
-}
-
-async function applyInitialCommentVoteDiscountAction(
-  supabase: SupabaseAdmin,
-  delivery: DeliveryRow,
-  result: MetaSendResult,
-  action: CommentDmFlowAction,
-  flow: VoteDiscountFlow,
-) {
-  if (delivery.platform !== 'instagram') return null
-  const recipientId = extractPrivateReplyRecipientId(delivery) || cleanString(result.recipient_id, 160) || cleanString(delivery.author_id, 160)
-  if (!recipientId) return null
-
-  const senderId = await getInstagramAutomationSenderId(supabase)
-  const eventExternalId = `comment_action_${delivery.id}_${action}`
-  const syntheticEvent: WebhookMessageEvent = {
-    platform: 'instagram',
-    thread_id: null,
-    thread_external_id: `ig_dm_${senderId || 'pilger'}_${recipientId}`,
-    external_id: eventExternalId,
-    sender_id: recipientId,
-    recipient_id: senderId,
-    text: nullableString(delivery.comment_text, 4000),
-    postback_payload: buildCommentDmPostbackPayload(action, delivery.id),
-    postback_title: action === COMMENT_DM_ACTION_ALREADY_VOTED ? flow.already_voted_label : flow.will_vote_label,
-    attachment_type: null,
-    attachment_url: null,
-    sent_at: nowIso(),
-    raw: {
-      source: 'initial_comment_vote_discount_action',
-      comment_external_id: delivery.comment_external_id,
-    },
-    duplicate: false,
-  }
-
-  const followup = action === COMMENT_DM_ACTION_WILL_VOTE
-    ? await enqueueVoteDiscountFollowup(supabase, { delivery, event: syntheticEvent, flow })
-    : null
-
-  if (action === COMMENT_DM_ACTION_ALREADY_VOTED) {
-    await cancelPendingVoteDiscountFollowups(supabase, delivery.id)
-  }
-
-  await updateDeliveryFlowRaw(supabase, delivery, {
-    initial_comment_action: action,
-    initial_comment_processed_at: nowIso(),
-    last_action: action,
-    last_inbound_message_id: eventExternalId,
-    last_outbound_message_id: result.external_id || null,
-    followup_id: followup?.id || null,
-    processed_inbound_message_ids: [eventExternalId],
-    discount_released_at: action === COMMENT_DM_ACTION_ALREADY_VOTED ? nowIso() : undefined,
-  })
-
-  return {
-    action,
-    followup_id: followup?.id || null,
-    followup_due_at: followup?.due_at || null,
   }
 }
 
@@ -2654,8 +2631,8 @@ export async function processInstagramDirectFlowPostback(event: WebhookMessageEv
   if (event.duplicate) return { success: true, processed: false, reason: 'duplicate_message' }
 
   const parsed = parseCommentDmPostbackPayload(event.postback_payload)
-  const textAction = parsed ? null : inferCommentDmFlowActionFromText(event.text)
-  if (!parsed && !textAction) return { success: true, processed: false, reason: 'not_comment_dm_flow_postback' }
+  const textAction = parsed ? null : await inferCommentDmFlowAction(event.text)
+  if (!parsed && !textAction?.action) return { success: true, processed: false, reason: 'not_comment_dm_flow_postback' }
 
   const supabase = createAdminClient()
   const delivery = await resolveVoteDiscountDelivery(supabase, event, parsed?.deliveryId || '')
@@ -2674,15 +2651,9 @@ export async function processInstagramDirectFlowPostback(event: WebhookMessageEv
   }
 
   const flow = await resolveCurrentVoteDiscountFlow(supabase, delivery)
-  const action = parsed?.action || textAction
+  const action = parsed?.action || textAction?.action
   if (!action) return { success: true, processed: false, reason: 'not_comment_dm_flow_postback' }
-  const eventSource = rawPathString(event.raw, ['source'])
-  if (
-    eventSource !== 'initial_comment_vote_discount_action'
-    && cleanString(flowState.initial_comment_action, 80) === action
-  ) {
-    return { success: true, processed: false, reason: 'action_already_started_from_comment', delivery_id: delivery.id, action }
-  }
+  const actionSource = parsed ? 'postback' : (textAction?.source || 'text')
   const responseMessage = action === COMMENT_DM_ACTION_ALREADY_VOTED
     ? flow.already_voted_message
     : flow.vote_message
@@ -2709,6 +2680,8 @@ export async function processInstagramDirectFlowPostback(event: WebhookMessageEv
     recordInstagramDirectOutbound(supabase, event, responseMessage, sent, 'instagram_comment_dm_flow_postback'),
     updateDeliveryFlowRaw(supabase, delivery, {
       last_action: action,
+      last_action_source: actionSource,
+      last_action_confidence: textAction?.confidence ?? null,
       last_inbound_message_id: event.external_id,
       last_outbound_message_id: sent.external_id || null,
       followup_id: followup?.id || null,
@@ -2721,6 +2694,7 @@ export async function processInstagramDirectFlowPostback(event: WebhookMessageEv
     success: true,
     processed: true,
     action,
+    action_source: actionSource,
     delivery_id: delivery.id,
     outbound_message_id: sent.external_id || null,
     followup_id: followup?.id || null,
@@ -2756,7 +2730,13 @@ function syncedMessageToWebhookEvent(row: Record<string, any>): WebhookMessageEv
   )
   const text = nullableString(row.message || postbackTitle, 4000)
 
-  if (!parseCommentDmPostbackPayload(postbackPayload) && !inferCommentDmFlowActionFromText(text)) return null
+  if (
+    !parseCommentDmPostbackPayload(postbackPayload)
+    && !inferCommentDmFlowActionFromText(text)
+    && !shouldAskGeminiForCommentDmFlowAction(text)
+  ) {
+    return null
+  }
 
   return {
     platform: 'instagram',
