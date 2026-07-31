@@ -233,6 +233,8 @@ const COMMENT_DM_POSTBACK_PREFIX = 'COMMENT_DM_FLOW'
 const COMMENT_DM_ACTION_ALREADY_VOTED: CommentDmFlowAction = 'JA_VOTEI'
 const COMMENT_DM_ACTION_WILL_VOTE: CommentDmFlowAction = 'VOU_VOTAR'
 const COMMENT_DM_FLOW_FOLLOWUP_ACTION = 'vote_discount_followup'
+const COMMENT_DM_DISCOUNT_PAGE_PATH = '/corretor-nota-8/desconto'
+const COMMENT_DM_VOTE_PAGE_PATH = '/votar-guilherme'
 
 const DEFAULT_VOTE_DISCOUNT_FLOW: VoteDiscountFlow = {
   type: 'vote_discount',
@@ -823,18 +825,31 @@ function getDeliveryVoteDiscountFlow(delivery: DeliveryRow): VoteDiscountFlow {
 
 function buildInitialVoteDiscountButtons(flow: VoteDiscountFlow, deliveryId?: string | null): MetaMessageButton[] {
   if (!flow.enabled) return []
+  const discountUrl = buildCommentDmLandingUrl(COMMENT_DM_DISCOUNT_PAGE_PATH, deliveryId, 'ja_votei')
+  const voteUrl = buildCommentDmLandingUrl(COMMENT_DM_VOTE_PAGE_PATH, deliveryId, 'vou_votar')
   return [
     {
-      type: 'postback',
+      type: 'web_url',
       title: flow.already_voted_label,
-      payload: buildCommentDmPostbackPayload(COMMENT_DM_ACTION_ALREADY_VOTED, deliveryId),
+      url: discountUrl,
     },
     {
-      type: 'postback',
+      type: 'web_url',
       title: flow.will_vote_label,
-      payload: buildCommentDmPostbackPayload(COMMENT_DM_ACTION_WILL_VOTE, deliveryId),
+      url: voteUrl,
     },
   ]
+}
+
+function buildCommentDmLandingUrl(path: string, deliveryId: string | null | undefined, action: string) {
+  const url = new URL(path, getPublicAppUrl())
+  url.searchParams.set('utm_source', 'instagram')
+  url.searchParams.set('utm_medium', 'direct')
+  url.searchParams.set('utm_campaign', 'votacao_livro')
+  url.searchParams.set('acao', action)
+  const id = cleanString(deliveryId, 80)
+  if (id) url.searchParams.set('delivery', id)
+  return url.toString()
 }
 
 function buildUrlButton(title: string, url: string): MetaMessageButton[] {
