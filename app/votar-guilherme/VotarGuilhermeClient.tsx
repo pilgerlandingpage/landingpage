@@ -78,7 +78,7 @@ type VotarGuilhermeClientProps = {
 const heroCopy: Record<VoteJourneyState, { badge: string; title: string; text: string; statusTitle: string; statusText: string }> = {
   initial: {
     badge: 'ACESSO À VOTAÇÃO OFICIAL',
-    title: 'Ajude o Guilherme com o seu voto.',
+    title: 'Influenciador do ano a trinca',
     text: 'A votação acontece no ambiente oficial do prêmio. Abra a página, confira Guilherme Pilger na categoria Influenciador do Ano e, quando concluir, volte aqui para continuar.',
     statusTitle: 'Primeira ação',
     statusText: 'Abra o site externo da premiação para registrar o seu voto.',
