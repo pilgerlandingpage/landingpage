@@ -87,11 +87,32 @@ export default function VotarGuilhermeClient({ voteUrl }: VotarGuilhermeClientPr
         </a>
       </section>
 
-      <style jsx>{`
+      <style jsx global>{`
+        html,
+        body {
+          background: #020707 !important;
+        }
+
+        body {
+          margin: 0;
+        }
+
+        .vote-page,
+        .vote-page * {
+          box-sizing: border-box;
+        }
+
         .vote-page {
           min-height: 100vh;
           color: #fff;
           background: #020707;
+          overflow-x: hidden;
+        }
+
+        .vote-hero,
+        .vote-steps,
+        .vote-final {
+          background-color: #020707;
         }
 
         .vote-hero {
@@ -140,14 +161,14 @@ export default function VotarGuilhermeClient({ voteUrl }: VotarGuilhermeClientPr
           text-transform: uppercase;
         }
 
-        h1,
-        h2 {
+        .vote-page h1,
+        .vote-page h2 {
           margin: 0;
           font-family: Georgia, 'Times New Roman', serif;
           letter-spacing: 0;
         }
 
-        h1 {
+        .vote-page h1 {
           max-width: 690px;
           font-size: 5.2rem;
           line-height: 0.94;
@@ -179,8 +200,11 @@ export default function VotarGuilhermeClient({ voteUrl }: VotarGuilhermeClientPr
           padding: 0 18px;
           font-size: 0.78rem;
           font-weight: 950;
+          line-height: 1.18;
           text-decoration: none;
+          text-align: center;
           text-transform: uppercase;
+          white-space: normal;
         }
 
         .vote-primary,
@@ -277,27 +301,132 @@ export default function VotarGuilhermeClient({ voteUrl }: VotarGuilhermeClientPr
         }
 
         @media (max-width: 900px) {
+          .vote-hero {
+            min-height: auto;
+            background:
+              linear-gradient(180deg, rgba(2, 7, 7, 0.98) 0%, rgba(2, 7, 7, 0.9) 58%, rgba(2, 7, 7, 0.82) 100%),
+              url("/images/products/corretor-nota-8-hero-bg-optimized.jpg") center / cover no-repeat;
+          }
+
           .vote-hero-inner {
             grid-template-columns: 1fr;
             gap: 30px;
+            width: min(calc(100% - 28px), 640px);
+            min-height: auto;
+            padding: 42px 0 34px;
           }
 
-          h1 {
+          .vote-copy {
+            max-width: 100%;
+          }
+
+          .vote-page h1 {
             font-size: 3.25rem;
+            line-height: 0.98;
+          }
+
+          .vote-copy p {
+            font-size: 0.98rem;
+            line-height: 1.62;
+          }
+
+          .vote-actions {
+            display: grid;
+            grid-template-columns: 1fr;
+            width: 100%;
+            max-width: 420px;
+            margin-top: 22px;
+          }
+
+          .vote-primary,
+          .vote-secondary {
+            width: 100%;
+            min-height: 48px;
+            padding: 0 14px;
+            font-size: 0.74rem;
           }
 
           .vote-media {
+            justify-self: start;
+            width: min(100%, 330px);
             max-width: 360px;
+          }
+
+          .vote-steps {
+            width: min(calc(100% - 28px), 640px);
+            padding: 38px 0;
+          }
+
+          .vote-section-heading h2 {
+            font-size: 2rem;
+            line-height: 1.05;
           }
 
           .vote-step-grid {
             grid-template-columns: 1fr;
           }
 
+          .vote-step {
+            min-height: auto;
+            padding: 18px;
+          }
+
           .vote-final {
+            display: flex;
             flex-direction: column;
-            align-items: stretch;
+            align-items: center;
+            gap: 14px;
+            padding: 22px 14px 26px;
             text-align: center;
+          }
+
+          .vote-final p {
+            max-width: 340px;
+          }
+
+          .vote-final a {
+            width: 100%;
+            max-width: 360px;
+            min-height: 48px;
+            padding: 0 14px;
+            font-size: 0.74rem;
+          }
+        }
+
+        @media (max-width: 520px) {
+          .vote-hero-inner,
+          .vote-steps {
+            width: calc(100% - 24px);
+          }
+
+          .vote-hero-inner {
+            padding-top: 32px;
+          }
+
+          .vote-page h1 {
+            font-size: 2.62rem;
+          }
+
+          .vote-copy p {
+            margin-top: 16px;
+            font-size: 0.94rem;
+          }
+
+          .vote-kicker {
+            max-width: 100%;
+            font-size: 0.66rem;
+          }
+
+          .vote-media {
+            width: min(100%, 292px);
+          }
+
+          .vote-section-heading h2 {
+            font-size: 1.76rem;
+          }
+
+          .vote-step h3 {
+            font-size: 1rem;
           }
         }
       `}</style>

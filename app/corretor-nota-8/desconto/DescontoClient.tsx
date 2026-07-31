@@ -79,11 +79,32 @@ export default function DescontoClient() {
         </Link>
       </section>
 
-      <style jsx>{`
+      <style jsx global>{`
+        html,
+        body {
+          background: #020707 !important;
+        }
+
+        body {
+          margin: 0;
+        }
+
+        .discount-page,
+        .discount-page * {
+          box-sizing: border-box;
+        }
+
         .discount-page {
           min-height: 100vh;
           color: #fff;
           background: #020707;
+          overflow-x: hidden;
+        }
+
+        .discount-hero,
+        .discount-details,
+        .checkout-band {
+          background-color: #020707;
         }
 
         .discount-hero {
@@ -132,14 +153,14 @@ export default function DescontoClient() {
           text-transform: uppercase;
         }
 
-        h1,
-        h2 {
+        .discount-page h1,
+        .discount-page h2 {
           margin: 0;
           font-family: Georgia, 'Times New Roman', serif;
           letter-spacing: 0;
         }
 
-        h1 {
+        .discount-page h1 {
           max-width: 760px;
           font-size: 5rem;
           line-height: 0.94;
@@ -192,8 +213,11 @@ export default function DescontoClient() {
           padding: 0 18px;
           font-size: 0.78rem;
           font-weight: 950;
+          line-height: 1.18;
           text-decoration: none;
+          text-align: center;
           text-transform: uppercase;
+          white-space: normal;
         }
 
         .discount-primary,
@@ -287,17 +311,53 @@ export default function DescontoClient() {
         }
 
         @media (max-width: 900px) {
+          .discount-hero {
+            min-height: auto;
+            background:
+              linear-gradient(180deg, rgba(2, 7, 7, 0.98) 0%, rgba(2, 7, 7, 0.9) 58%, rgba(2, 7, 7, 0.82) 100%),
+              url("/images/products/corretor-nota-8-hero-bg-optimized.jpg") center / cover no-repeat;
+          }
+
           .discount-hero-inner {
             grid-template-columns: 1fr;
             gap: 32px;
+            width: min(calc(100% - 28px), 640px);
+            min-height: auto;
+            padding: 42px 0 34px;
           }
 
-          h1 {
+          .discount-copy {
+            max-width: 100%;
+          }
+
+          .discount-page h1 {
             font-size: 3.05rem;
+            line-height: 0.98;
+          }
+
+          .discount-copy > p {
+            font-size: 0.98rem;
+            line-height: 1.62;
           }
 
           .price-row strong {
             font-size: 2.35rem;
+          }
+
+          .discount-actions {
+            display: grid;
+            grid-template-columns: 1fr;
+            width: 100%;
+            max-width: 430px;
+            margin-top: 22px;
+          }
+
+          .discount-primary,
+          .discount-secondary {
+            width: 100%;
+            min-height: 48px;
+            padding: 0 14px;
+            font-size: 0.74rem;
           }
 
           .book-cover {
@@ -305,14 +365,90 @@ export default function DescontoClient() {
             width: min(100%, 260px);
           }
 
+          .discount-details {
+            width: min(calc(100% - 28px), 640px);
+            padding: 38px 0;
+          }
+
+          .details-heading h2 {
+            font-size: 2rem;
+            line-height: 1.05;
+          }
+
           .included-list {
             grid-template-columns: 1fr;
           }
 
+          .included-item {
+            min-height: auto;
+            padding: 18px;
+          }
+
           .checkout-band {
+            display: flex;
             flex-direction: column;
-            align-items: stretch;
+            align-items: center;
+            gap: 14px;
+            padding: 22px 14px 26px;
             text-align: center;
+          }
+
+          .checkout-band p {
+            max-width: 340px;
+          }
+
+          .checkout-band a {
+            width: 100%;
+            max-width: 360px;
+            min-height: 48px;
+            padding: 0 14px;
+            font-size: 0.74rem;
+          }
+        }
+
+        @media (max-width: 520px) {
+          .discount-hero-inner,
+          .discount-details {
+            width: calc(100% - 24px);
+          }
+
+          .discount-hero-inner {
+            padding-top: 32px;
+          }
+
+          .discount-page h1 {
+            font-size: 2.5rem;
+          }
+
+          .discount-copy > p {
+            margin-top: 16px;
+            font-size: 0.94rem;
+          }
+
+          .discount-kicker {
+            max-width: 100%;
+            font-size: 0.66rem;
+          }
+
+          .price-row {
+            gap: 10px;
+            margin-top: 22px;
+          }
+
+          .price-row span {
+            width: 100%;
+          }
+
+          .price-row strong {
+            font-size: 2.12rem;
+          }
+
+          .book-cover {
+            width: min(100%, 228px);
+          }
+
+          .details-heading h2 {
+            font-size: 1.76rem;
           }
         }
       `}</style>
