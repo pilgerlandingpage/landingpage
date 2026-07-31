@@ -2489,15 +2489,24 @@ async function enqueueVoteDiscountFollowup(supabase: SupabaseAdmin, params: {
 
   const dueAt = new Date(Date.now() + params.flow.followup_delay_minutes * 60 * 1000).toISOString()
   const buttons = buildUrlButton(params.flow.followup_button_title, params.flow.discount_url)
-  const idempotencyKey = `${params.delivery.id}:${COMMENT_DM_FLOW_FOLLOWUP_ACTION}`
-  const { data: existing, error: existingError } = await supabase
+  const { data: existingPending, error: existingError } = await supabase
     .from('meta_comment_dm_flow_followups')
     .select('id, campaign_id, delivery_id, platform, recipient_id, sender_id, action, status, due_at, attempts, message, buttons, idempotency_key, error, raw, sent_at, created_at, updated_at')
-    .eq('idempotency_key', idempotencyKey)
+    .eq('delivery_id', params.delivery.id)
+    .eq('action', COMMENT_DM_FLOW_FOLLOWUP_ACTION)
+    .eq('status', 'pending')
+    .order('due_at', { ascending: false })
+    .limit(1)
     .maybeSingle()
 
   if (existingError) throw new Error(existingError.message)
-  if (existing) return existing as FlowFollowupRow
+  if (existingPending) return existingPending as FlowFollowupRow
+
+  const idempotencyKey = [
+    params.delivery.id,
+    COMMENT_DM_FLOW_FOLLOWUP_ACTION,
+    cleanString(params.event.external_id, 240) || Date.now(),
+  ].join(':')
 
   const { data, error } = await supabase
     .from('meta_comment_dm_flow_followups')
