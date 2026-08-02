@@ -48,6 +48,7 @@ type NavItem = { href: string; icon: any; label: string; section: string; subIte
 type UserSector = { id?: string; name?: string; color?: string; icon?: string }
 
 const META_CAMPAIGNS_PATH = '/admin/whatsapp/campaigns'
+const META_CHAT_PATH = '/admin/whatsapp/meta-chat'
 const META_TEMPLATES_PATH = '/admin/ads/meta-templates'
 
 const MODULE_NAV: Record<string, NavItem> = {
@@ -137,6 +138,7 @@ const MODULE_NAV: Record<string, NavItem> = {
         subItems: [
             { href: '/admin/ads', label: 'Meta Ads' },
             { href: META_CAMPAIGNS_PATH, label: 'Campanhas Meta WhatsApp' },
+            { href: META_CHAT_PATH, label: 'Chat Meta WhatsApp' },
             { href: META_TEMPLATES_PATH, label: 'Templates Meta' },
             { href: '/admin/ads/google', label: 'Google Ads' },
             { href: '/admin/ads/analytics', label: 'Google Analytics' },
@@ -228,8 +230,8 @@ export default function AdminSidebar() {
     }
 
     const isParentHrefActive = (href: string) => {
-        if (href === '/admin/ads') return pathname === href || pathname.startsWith(`${href}/`) || pathname === META_CAMPAIGNS_PATH
-        if (href === '/admin/whatsapp') return pathname === href || (pathname.startsWith(`${href}/`) && pathname !== META_CAMPAIGNS_PATH)
+        if (href === '/admin/ads') return pathname === href || pathname.startsWith(`${href}/`) || pathname === META_CAMPAIGNS_PATH || pathname === META_CHAT_PATH
+        if (href === '/admin/whatsapp') return pathname === href || (pathname.startsWith(`${href}/`) && pathname !== META_CAMPAIGNS_PATH && pathname !== META_CHAT_PATH)
         return isHrefActive(href)
     }
 
@@ -266,10 +268,10 @@ export default function AdminSidebar() {
     }, [])
 
     useEffect(() => {
-        if (pathname.startsWith('/admin/ads') || pathname === META_CAMPAIGNS_PATH) {
+        if (pathname.startsWith('/admin/ads') || pathname === META_CAMPAIGNS_PATH || pathname === META_CHAT_PATH) {
             setExpandedMenus(prev => ({ ...prev, '/admin/ads': true }))
         }
-        if (pathname.startsWith('/admin/whatsapp') && pathname !== META_CAMPAIGNS_PATH) {
+        if (pathname.startsWith('/admin/whatsapp') && pathname !== META_CAMPAIGNS_PATH && pathname !== META_CHAT_PATH) {
             setExpandedMenus(prev => ({ ...prev, '/admin/whatsapp': true }))
         }
         if (pathname.startsWith('/admin/finance')) {
