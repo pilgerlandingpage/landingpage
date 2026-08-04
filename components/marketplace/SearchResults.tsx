@@ -22,6 +22,7 @@ const FAVORITES_KEY = 'pilger_property_favorites'
 const HISTORY_KEY = 'pilger_property_history'
 const MAX_MEMORY_PROPERTIES = 10
 const OFFICE_SEARCH_PARAM_VALUE = '1'
+const DEVELOPMENT_SEARCH_CATEGORY_VALUE = 'empreendimentos'
 const MAP_PROPERTY_PARAM = 'mapProperty'
 const DRAW_AREA_PARAM = 'drawArea'
 const MAP_BOUNDS_PARAM = 'mapBounds'
@@ -54,6 +55,11 @@ type SearchDevelopmentResult = {
     propertyIds?: string[]
     sourceReferences?: string[]
     sourceSlugs?: string[]
+}
+
+function isDevelopmentSearchCategory(value: string | null) {
+    const normalized = String(value || '').trim().toLowerCase()
+    return ['empreendimento', DEVELOPMENT_SEARCH_CATEGORY_VALUE, 'development', 'developments'].includes(normalized)
 }
 
 const OFFICE_LOCATION_MARKER = {
@@ -245,8 +251,8 @@ function getFilterLabel(key: string, value: string) {
         'frente-mar': 'Frente mar',
         'vista-mar': 'Vista mar',
         'quadra-mar': 'Quadra mar',
-        lancamento: 'Lancamento',
-        'em-construcao': 'Em construcao',
+        lancamento: 'Lançamento',
+        'em-construcao': 'Em construção',
         pronto: 'Pronto',
         mobiliado: 'Mobiliado',
     }
@@ -261,6 +267,9 @@ function getFilterLabel(key: string, value: string) {
 
     const labels: Record<string, string> = {
         q: `Busca: ${replaceItajaiWithPraiaBrava(value)}`,
+        category: isDevelopmentSearchCategory(value) ? 'Empreendimentos' : value.replace(/-/g, ' '),
+        resultType: isDevelopmentSearchCategory(value) ? 'Empreendimentos' : value.replace(/-/g, ' '),
+        view: isDevelopmentSearchCategory(value) ? 'Empreendimentos' : value.replace(/-/g, ' '),
         city: cityLabels[value] || replaceItajaiWithPraiaBrava(value),
         type: value,
         price: `Valor: ${priceLabels[value] || value.replace('-', ' até ')}`,
@@ -367,9 +376,12 @@ export default function SearchResults({ properties, lpMap, developmentResults = 
     const router = useRouter()
     const searchParams = useSearchParams()
     const searchKey = searchParams.toString()
+    const isDevelopmentOnlySearch = isDevelopmentSearchCategory(
+        searchParams.get('category') || searchParams.get('resultType') || searchParams.get('view')
+    )
     const propertiesWithCoords = useMemo(
-        () => properties.filter(property => Boolean(getLatLng(property))),
-        [properties]
+        () => isDevelopmentOnlySearch ? [] : properties.filter(property => Boolean(getLatLng(property))),
+        [isDevelopmentOnlySearch, properties]
     )
     const mapSelectionKey = useMemo(() => {
         const params = new URLSearchParams(searchKey)
@@ -553,16 +565,17 @@ export default function SearchResults({ properties, lpMap, developmentResults = 
     }, [searchKey])
 
     const visibleProperties = useMemo(() => {
+        if (isDevelopmentOnlySearch) return []
         return filterPropertiesByDrawArea(filterPropertiesByBounds(properties, mapBounds), selectedDrawArea)
-    }, [properties, mapBounds, selectedDrawArea])
+    }, [isDevelopmentOnlySearch, properties, mapBounds, selectedDrawArea])
 
     const visibleMapProperties = useMemo(() => {
-        if (shouldShowOfficeOnMap) return []
+        if (shouldShowOfficeOnMap || isDevelopmentOnlySearch) return []
         return filterPropertiesByDrawArea(filterPropertiesByBounds(propertiesWithCoords, mapBounds), selectedDrawArea)
-    }, [mapBounds, propertiesWithCoords, selectedDrawArea, shouldShowOfficeOnMap])
+    }, [isDevelopmentOnlySearch, mapBounds, propertiesWithCoords, selectedDrawArea, shouldShowOfficeOnMap])
 
     const selectedMapProperty = useMemo(() => {
-        if (!selectedMapPropertyId || shouldShowOfficeOnMap) return null
+        if (!selectedMapPropertyId || shouldShowOfficeOnMap || isDevelopmentOnlySearch) return null
         const overrideProperty = selectedMapPropertyOverride?.key === mapSelectionKey
             && selectedMapPropertyOverride.property
             && String(selectedMapPropertyOverride.property.id) === String(selectedMapPropertyId)
@@ -573,7 +586,7 @@ export default function SearchResults({ properties, lpMap, developmentResults = 
             || visibleMapProperties.find(item => String(item.id) === String(selectedMapPropertyId))
             || overrideProperty
             || null
-    }, [mapSelectionKey, propertiesWithCoords, selectedMapPropertyId, selectedMapPropertyOverride, shouldShowOfficeOnMap, visibleMapProperties])
+    }, [isDevelopmentOnlySearch, mapSelectionKey, propertiesWithCoords, selectedMapPropertyId, selectedMapPropertyOverride, shouldShowOfficeOnMap, visibleMapProperties])
     const mapPreviewAnchorProperty = useMemo(() => {
         const anchor = mapPreviewAnchorOverride?.key === mapSelectionKey ? mapPreviewAnchorOverride : null
         if (!anchor?.id) return selectedMapProperty
@@ -592,13 +605,14 @@ export default function SearchResults({ properties, lpMap, developmentResults = 
         const previewProperties = hasSelectedProperty ? visibleMapProperties : [selectedMapProperty, ...visibleMapProperties]
         return orderPropertiesBySmoothGeoPath(previewProperties, mapPreviewAnchorProperty || selectedMapProperty)
     }, [mapPreviewAnchorProperty, selectedMapProperty, visibleMapProperties])
-    const visibleCount = visibleProperties.length
-    const totalCount = properties.length
+    const developmentCount = developmentResults.length
+    const visibleCount = isDevelopmentOnlySearch ? developmentCount : visibleProperties.length
+    const totalCount = isDevelopmentOnlySearch ? developmentCount : properties.length
     const brokerResultName = String(brokerSearchName || '').trim()
     const isBrokerSearch = brokerResultName.length > 0
     const renderedProperties = visibleProperties.slice(0, MAX_RENDERED_CARDS)
     const hiddenVisibleCount = Math.max(0, visibleCount - renderedProperties.length)
-    const isSpatiallyFiltered = Boolean(selectedDrawArea || (mapBounds && visibleCount < totalCount))
+    const isSpatiallyFiltered = !isDevelopmentOnlySearch && Boolean(selectedDrawArea || (mapBounds && visibleCount < totalCount))
     const searchAlertTitle = useMemo(
         () => buildSearchAlertTitle(activeFilters, selectedRegionArea?.label, Boolean(selectedDrawArea)),
         [activeFilters, selectedDrawArea, selectedRegionArea]
@@ -607,7 +621,9 @@ export default function SearchResults({ properties, lpMap, developmentResults = 
         () => visibleProperties.slice(0, 18).map(property => String(property.id || '')).filter(Boolean),
         [visibleProperties]
     )
-    const baseCountLabel = selectedDrawArea
+    const baseCountLabel = isDevelopmentOnlySearch
+        ? (totalCount === 1 ? 'empreendimento encontrado' : 'empreendimentos encontrados')
+        : selectedDrawArea
         ? 'imóveis na área desenhada'
         : mapBounds && visibleCount < totalCount
             ? 'imóveis nesta área'
@@ -616,7 +632,14 @@ export default function SearchResults({ properties, lpMap, developmentResults = 
     const resultTitle = isBrokerSearch ? 'Mais imóveis deste corretor' : 'Imóveis selecionados'
     const resultSubtitle = isBrokerSearch ? `Curadoria de ${brokerResultName}` : ''
 
-    const hasDevelopmentResults = developmentResults.length > 0
+    const developmentSubtitle = searchParams.get('tag') === 'pronto'
+        ? 'Empreendimentos prontos para morar.'
+        : searchParams.get('tag') === 'lancamento' || searchParams.get('tag') === 'em-construcao'
+            ? 'Empreendimentos em lançamento e construção.'
+            : 'Curadoria de empreendimentos.'
+    const displayResultTitle = isDevelopmentOnlySearch ? 'Empreendimentos selecionados' : resultTitle
+    const displayResultSubtitle = isDevelopmentOnlySearch ? developmentSubtitle : resultSubtitle
+    const hasDevelopmentResults = developmentCount > 0
 
     const handleDevelopmentClick = useCallback((development: SearchDevelopmentResult, index: number) => {
         void trackEvent('search_results_development_clicked', {
@@ -1505,9 +1528,9 @@ export default function SearchResults({ properties, lpMap, developmentResults = 
                     </div>
                     <div className="result-main-row">
                         <div>
-                            <h1 className="result-title">{resultTitle}</h1>
-                            {resultSubtitle && (
-                                <p className="result-subtitle">{resultSubtitle}</p>
+                            <h1 className="result-title">{displayResultTitle}</h1>
+                            {displayResultSubtitle && (
+                                <p className="result-subtitle">{displayResultSubtitle}</p>
                             )}
                             <p className="result-count">
                                 <strong>{isSpatiallyFiltered ? visibleCount : totalCount}</strong> {countLabel}
@@ -1655,7 +1678,7 @@ export default function SearchResults({ properties, lpMap, developmentResults = 
                     </section>
                 )}
 
-                {(memoryItems.length > 0 || memoryLoading) && (
+                {!isDevelopmentOnlySearch && (memoryItems.length > 0 || memoryLoading) && (
                     <section className="search-memory-panel" aria-label="Imóveis salvos e vistos recentemente">
                         <div className="search-memory-head">
                             <div className="search-memory-title">

@@ -50,12 +50,12 @@ function busca(params: Record<string, string | number>) {
 const developmentMenuOptions: DevelopmentMenuOption[] = [
     {
         label: 'Lançamentos',
-        href: busca({ tag: 'lancamento' }),
+        href: busca({ category: 'empreendimentos', tag: 'lancamento' }),
         description: 'Ver empreendimentos em lançamento na busca.',
     },
     {
         label: 'Prontos',
-        href: busca({ tag: 'pronto' }),
+        href: busca({ category: 'empreendimentos', tag: 'pronto' }),
         description: 'Ver empreendimentos prontos para morar na busca.',
     },
 ]
