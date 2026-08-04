@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { recordGeminiUsage } from '@/lib/ai/gemini-costs'
+import { buildGeminiGenerationConfig } from '@/lib/ai/gemini-controls'
 import {
     buildCentralContextPrompt,
     getAgentCentralContext,
@@ -128,10 +129,10 @@ export async function chatWithGemini({
                     ...history,
                     { role: 'user', parts: [{ text: userMessage }] },
                 ],
-                generationConfig: {
+                generationConfig: buildGeminiGenerationConfig(modelName, {
                     temperature,
                     maxOutputTokens: maxTokens,
-                },
+                }),
             }),
         }
     )
@@ -209,7 +210,7 @@ export async function extractLeadData(
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 contents: [{ role: 'user', parts: [{ text: extractionPrompt }] }],
-                generationConfig: { temperature: 0.1, maxOutputTokens: 512 },
+                generationConfig: buildGeminiGenerationConfig(modelName, { temperature: 0.1, maxOutputTokens: 512 }),
             }),
         }
     )

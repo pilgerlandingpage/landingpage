@@ -1,14 +1,15 @@
 import { NextResponse } from 'next/server'
-import { getHomepageGoogleReviews } from '@/lib/google-reviews'
+import { getCachedHomepageGoogleReviews, GOOGLE_REVIEWS_REVALIDATE_SECONDS } from '@/lib/google-reviews'
 import { createAdminClient, createSupabaseAbortSignal, summarizeSupabaseError } from '@/lib/supabase/server'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = GOOGLE_REVIEWS_REVALIDATE_SECONDS
 
 export async function GET() {
     const configMap: Record<string, string> = {}
+    let supabase: ReturnType<typeof createAdminClient> | undefined
 
     try {
-        const supabase = createAdminClient()
+        supabase = createAdminClient()
         const { data, error } = await supabase
             .from('app_config')
             .select('key, value')
@@ -27,6 +28,13 @@ export async function GET() {
         console.warn('[Public Google Reviews] config unavailable:', summarizeSupabaseError(error))
     }
 
-    const reviews = await getHomepageGoogleReviews(configMap)
-    return NextResponse.json({ data: reviews })
+    const reviews = await getCachedHomepageGoogleReviews(configMap, supabase)
+    return NextResponse.json(
+        { data: reviews },
+        {
+            headers: {
+                'Cache-Control': `public, max-age=600, s-maxage=${GOOGLE_REVIEWS_REVALIDATE_SECONDS}, stale-while-revalidate=86400`,
+            },
+        }
+    )
 }

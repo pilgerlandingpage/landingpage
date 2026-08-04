@@ -9,6 +9,7 @@ import OpenAI from 'openai'
 import { buildMetricsAnalysisPrompt } from './prompts'
 import type { AIAnalysisResponse, MetricsSnapshot, AdCampaign } from './types'
 import { getAdsProvider, getAdsGeminiModel, getAdsOpenAIModel, getOpenAIApiKey } from '../ai/config'
+import { buildGeminiGenerationConfig } from '../ai/gemini-controls'
 import { recordGeminiUsage } from '../ai/gemini-costs'
 import { buildAgentContextBrief, getAgentEcosystemContext, recordEcosystemEvent } from '../intelligence/ecosystem'
 
@@ -132,10 +133,11 @@ export async function analyzeCampaignMetrics(campaign: {
             const result = await model.generateContent({
                 contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
                 systemInstruction: { role: 'model', parts: [{ text: systemInstruction }] },
-                generationConfig: {
+                generationConfig: buildGeminiGenerationConfig(modelName, {
                     responseMimeType: 'application/json',
-                    temperature: 0.3, // Baixa temperatura para decisões consistentes
-                }
+                    temperature: 0.3,
+                    maxOutputTokens: 700,
+                }) as any
             })
 
             await recordGeminiUsage({
@@ -310,7 +312,10 @@ export async function generateDailyReport(campaignsSummary: string): Promise<str
             const result = await model.generateContent({
                 contents: [{ role: 'user', parts: [{ text: userMessage }] }],
                 systemInstruction: { role: 'model', parts: [{ text: dailyReportPrompt }] },
-                generationConfig: { temperature: 0.5 }
+                generationConfig: buildGeminiGenerationConfig(modelName, {
+                    temperature: 0.5,
+                    maxOutputTokens: 900,
+                }) as any
             })
 
             await recordGeminiUsage({

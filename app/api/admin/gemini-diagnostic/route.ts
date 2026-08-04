@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { listAvailableModels, getGeminiModel, getGeminiApiKey } from '@/lib/gemini'
+import { buildGeminiGenerationConfig } from '@/lib/ai/gemini-controls'
 
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta'
 
@@ -35,7 +36,7 @@ export async function GET() {
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 contents: [{ role: 'user', parts: [{ text: 'Responda apenas: OK' }] }],
-                                generationConfig: { temperature: 0, maxOutputTokens: 5 },
+                                generationConfig: buildGeminiGenerationConfig(modelId, { temperature: 0, maxOutputTokens: 5 }),
                             }),
                         }
                     )

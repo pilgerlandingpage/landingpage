@@ -4,6 +4,7 @@ import { testEditorialImageProvider } from '@/lib/media/editorial-image-provider
 import { testGoogleAnalyticsConnection } from '@/lib/analytics/google'
 import { GOOGLE_ADS_API_VERSION } from '@/lib/ads/google'
 import { syncMetaWhatsAppAssets, testMetaWhatsAppConnection } from '@/lib/meta/whatsapp-cloud'
+import { buildGeminiGenerationConfig } from '@/lib/ai/gemini-controls'
 
 function parseJsonText(text: string) {
     if (!text) return {}
@@ -212,7 +213,7 @@ export async function POST(request: NextRequest) {
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             contents: [{ role: 'user', parts: [{ text: 'Responda apenas: OK' }] }],
-                            generationConfig: { temperature: 0, maxOutputTokens: 10 },
+                            generationConfig: buildGeminiGenerationConfig(model, { temperature: 0, maxOutputTokens: 10 }),
                         }),
                     }
                 )

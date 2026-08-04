@@ -20,7 +20,7 @@ import { normalizeLocationName } from '@/lib/locations/display'
 import { isPropertyFrontSea, isPropertyLaunch } from '@/lib/properties/intelligence'
 import { extractPropertyIdFromSeoSlug } from '@/lib/properties/seo-url'
 import { attachBlogPostViewCounts, getBlogPostViewCounts } from '@/lib/blog/views'
-import { getHomepageGoogleReviews } from '@/lib/google-reviews'
+import { getCachedHomepageGoogleReviews } from '@/lib/google-reviews'
 import { JsonLd, organizationJsonLd, websiteJsonLd, webPageJsonLd, DEFAULT_OG_IMAGE, isNewsLikeContent } from '@/lib/seo/json-ld'
 
 export const metadata: Metadata = {
@@ -416,7 +416,7 @@ export default async function MarketplaceHome() {
   const rawHomeBlogPosts = homeBaseData.blogPosts
   const [homeBlogViewCounts, googleReviews] = await Promise.all([
     getHomeBlogViewCounts(supabase, rawHomeBlogPosts),
-    getHomepageGoogleReviews(configMap),
+    getCachedHomepageGoogleReviews(configMap, supabase),
   ])
   const homeBlogPostsWithViews = attachBlogPostViewCounts(rawHomeBlogPosts, homeBlogViewCounts)
   const homeBlogPosts = mixHomeEditorialPosts(

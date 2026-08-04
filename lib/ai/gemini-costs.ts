@@ -4,7 +4,8 @@ import { createClient } from '@supabase/supabase-js'
 const GEMINI_USAGE_PREFIX = '_aiusage_gemini_'
 const GEMINI_BILLING_CACHE_PREFIX = '_aiusage_gemini_billing_'
 const DEFAULT_USD_TO_BRL = 5
-const OFFICIAL_BILLING_CACHE_MINUTES = 10
+const OFFICIAL_BILLING_CACHE_MINUTES = 60
+const DEFAULT_BILLING_MAXIMUM_BYTES_BILLED = '1073741824'
 
 export type GeminiUsageMetadata = {
     promptTokenCount?: number
@@ -204,6 +205,23 @@ function base64Url(input: Buffer | string) {
         .replace(/\//g, '_')
 }
 
+function normalizePemPrivateKey(value: unknown) {
+    const key = String(value || '').replace(/\\n/g, '\n').trim()
+    if (!key || key.includes('\n')) return key
+
+    const begin = '-----BEGIN PRIVATE KEY-----'
+    const end = '-----END PRIVATE KEY-----'
+    if (!key.includes(begin) || !key.includes(end)) return key
+
+    const body = key
+        .replace(begin, '')
+        .replace(end, '')
+        .replace(/\s+/g, '')
+    const lines = body.match(/.{1,64}/g) || []
+
+    return [begin, ...lines, end].join('\n')
+}
+
 export function normalizeGeminiUsageMetadata(raw: any): GeminiUsageMetadata {
     const usage = raw || {}
     return {
@@ -401,7 +419,7 @@ function readServiceAccount(configMap: Record<string, string>) {
             const parsed = JSON.parse(rawJson)
             return {
                 clientEmail: String(parsed.client_email || '').trim(),
-                privateKey: String(parsed.private_key || '').replace(/\\n/g, '\n'),
+                privateKey: normalizePemPrivateKey(parsed.private_key),
             }
         } catch {
             throw new Error('JSON da service account do Billing/BigQuery invalido.')
@@ -410,7 +428,7 @@ function readServiceAccount(configMap: Record<string, string>) {
 
     return {
         clientEmail: String(configMap.gemini_billing_client_email || process.env.GEMINI_BILLING_CLIENT_EMAIL || '').trim(),
-        privateKey: String(configMap.gemini_billing_private_key || process.env.GEMINI_BILLING_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
+        privateKey: normalizePemPrivateKey(configMap.gemini_billing_private_key || process.env.GEMINI_BILLING_PRIVATE_KEY),
     }
 }
 
@@ -544,6 +562,7 @@ async function runGeminiBillingQuery(config: GeminiBillingConfig, month: string)
             useLegacySql: false,
             parameterMode: 'NAMED',
             queryParameters,
+            maximumBytesBilled: process.env.GEMINI_BILLING_MAXIMUM_BYTES_BILLED || DEFAULT_BILLING_MAXIMUM_BYTES_BILLED,
             timeoutMs: 12000,
         }),
     })
@@ -693,6 +712,7 @@ export async function loadGeminiOfficialBillingSummary(options: {
         summary.billing_project_id = config.billingProjectId
         summary.gemini_project_id = config.geminiProjectId || null
         summary.table = `${config.billingProjectId}.${config.dataset}.${config.table}`
+        await setCachedOfficialBilling(admin, month, summary)
         return summary
     }
 }

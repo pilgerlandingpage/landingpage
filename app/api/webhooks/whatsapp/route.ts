@@ -19,6 +19,7 @@ import {
 } from '@/lib/whatsapp/profile-assessment-delivery'
 import { appendLeadConversationLog, ensureWhatsAppLead, isGenericWhatsAppLeadName, syncWhatsAppLeadSnapshot } from '@/lib/whatsapp/lead-sync'
 import { generateChatResponse } from '@/lib/ai/generation'
+import { buildGeminiGenerationConfig } from '@/lib/ai/gemini-controls'
 import { recordGeminiUsage } from '@/lib/ai/gemini-costs'
 import { trackEventInteractionFromWhatsApp } from '@/lib/events/interaction-tracking'
 import { resolveSystemNotificationWhatsappInstance } from '@/lib/notifications/sector-recipients'
@@ -1529,6 +1530,10 @@ async function analyzeFinanceReceiptWithGemini(params: {
                     { text: prompt },
                 ],
             }],
+            generationConfig: buildGeminiGenerationConfig(model || 'gemini-2.5-flash', {
+                temperature: 0.1,
+                maxOutputTokens: 512,
+            }),
         }),
     })
 

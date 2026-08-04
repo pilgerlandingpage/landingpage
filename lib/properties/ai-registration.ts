@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/server'
+import { buildGeminiGenerationConfig } from '@/lib/ai/gemini-controls'
 import { recordGeminiUsage } from '@/lib/ai/gemini-costs'
 import { buildAgentContextBrief, getAgentEcosystemContext, recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
 
@@ -205,11 +206,11 @@ async function generateWithGemini(configs: ConfigMap, prompt: string, media: Med
                     { text: prompt },
                 ],
             }],
-            generationConfig: {
+            generationConfig: buildGeminiGenerationConfig(model, {
                 temperature: 0.35,
                 maxOutputTokens: 3000,
                 responseMimeType: 'application/json',
-            },
+            }),
         }),
     })
 

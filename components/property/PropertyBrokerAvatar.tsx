@@ -18,13 +18,21 @@ function initialsFor(name: string) {
         .toUpperCase() || 'GP'
 }
 
+function fallbackImageFor(name: string) {
+    return /guilherme\s+pilger/i.test(name)
+        ? '/images/eventos/guilherme-pilger-avatar.png'
+        : ''
+}
+
 export default function PropertyBrokerAvatar({
     image,
     name,
     lookupSlug,
 }: PropertyBrokerAvatarProps) {
     const [fetchedImage, setFetchedImage] = useState('')
-    const resolvedImage = fetchedImage || image || ''
+    const [failedSources, setFailedSources] = useState<string[]>([])
+    const fallbackImage = fallbackImageFor(name)
+    const resolvedImage = [fetchedImage, image || '', fallbackImage].find(src => src && !failedSources.includes(src)) || ''
 
     useEffect(() => {
         const slug = typeof lookupSlug === 'string' ? lookupSlug.trim() : ''
@@ -58,7 +66,17 @@ export default function PropertyBrokerAvatar({
     }, [lookupSlug])
 
     if (resolvedImage) {
-        return <img src={resolvedImage} alt={name} />
+        return (
+            <img
+                src={resolvedImage}
+                alt={name}
+                onError={() => {
+                    setFailedSources(previous => previous.includes(resolvedImage)
+                        ? previous
+                        : [...previous, resolvedImage])
+                }}
+            />
+        )
     }
 
     return (

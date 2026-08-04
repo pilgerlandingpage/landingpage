@@ -13,6 +13,8 @@ import { buildAgentContextBrief, getAgentEcosystemContext } from '@/lib/intellig
 import { BLOG_AUTHOR_NAME } from './author'
 import { pickPublicBlogSummary, slugifyBlog } from './types'
 import { buildEditorialVisualPlan } from '@/lib/media/editorial-visual-plan'
+import { buildGeminiGenerationConfig } from '@/lib/ai/gemini-controls'
+import { recordGeminiUsage } from '@/lib/ai/gemini-costs'
 
 type SupabaseAdmin = ReturnType<typeof createAdminClient>
 
@@ -347,6 +349,8 @@ async function generateEditorialJsonText(options: {
     systemInstruction: string
     userPrompt: string
     temperature: number
+    feature?: string
+    maxOutputTokens?: number
 }) {
     const providers = await getEditorialProviderOrder()
     let lastError: unknown = null
@@ -378,7 +382,16 @@ async function generateEditorialJsonText(options: {
             const result = await model.generateContent({
                 contents: [{ role: 'user', parts: [{ text: options.userPrompt }] }],
                 systemInstruction: { role: 'model', parts: [{ text: options.systemInstruction }] },
-                generationConfig: { responseMimeType: 'application/json', temperature: options.temperature },
+                generationConfig: buildGeminiGenerationConfig(modelName, {
+                    responseMimeType: 'application/json',
+                    temperature: options.temperature,
+                    maxOutputTokens: options.maxOutputTokens || 4096,
+                }) as any,
+            })
+            await recordGeminiUsage({
+                model: modelName,
+                feature: options.feature || 'editorial_agent_json',
+                usageMetadata: (result.response as any).usageMetadata || (result as any).response?.usageMetadata,
             })
             return result.response.text()
         } catch (error: any) {
@@ -418,6 +431,8 @@ async function polishPortugueseCopyIfNeeded(draft: BlogAgentDraft): Promise<Blog
             systemInstruction: instruction,
             userPrompt: JSON.stringify(payload, null, 2),
             temperature: 0.1,
+            feature: 'editorial_portuguese_polish',
+            maxOutputTokens: 4096,
         })
         return mergePolishedDraft(draft, JSON.parse(cleanJsonText(text)))
     } catch (error: any) {
@@ -831,6 +846,8 @@ async function callBlogAgent(prompt: string, context: any, topic?: string): Prom
         systemInstruction: prompt,
         userPrompt,
         temperature: 0.35,
+        feature: 'editorial_article_draft',
+        maxOutputTokens: 4096,
     })
 
     const parsed = JSON.parse(cleanJsonText(text))

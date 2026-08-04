@@ -38,23 +38,17 @@ export type HomepageGoogleReviews = {
 }
 
 const GOOGLE_PLACE_DETAILS_URL = 'https://places.googleapis.com/v1/places'
-const GOOGLE_PLACE_PHOTO_MEDIA_BASE_URL = 'https://places.googleapis.com/v1'
-const GOOGLE_REVIEWS_REVALIDATE_SECONDS = 60 * 60 * 6
+export const GOOGLE_REVIEWS_REVALIDATE_SECONDS = 60 * 60 * 6
 const GOOGLE_REVIEWS_TIMEOUT_MS = 4500
 const REVIEW_TEXT_LIMIT = 360
 const DEFAULT_PILGER_GOOGLE_PLACE_ID = 'ChIJ7Y5_0DW32JQRatagLzFhcJc'
-const GOOGLE_PLACE_PHOTO_LIMIT = 10
+const GOOGLE_REVIEWS_CACHE_PREFIX = '_cache_homepage_google_reviews_'
+const GOOGLE_REVIEWS_CACHE_VERSION = 2
 
 const GOOGLE_PLACE_DETAILS_FIELDS = [
-  'displayName',
-  'formattedAddress',
-  'shortFormattedAddress',
   'googleMapsUri',
   'googleMapsLinks.placeUri',
-  'googleMapsLinks.reviewsUri',
   'googleMapsLinks.writeAReviewUri',
-  'location',
-  'photos',
   'rating',
   'userRatingCount',
   'reviews.authorAttribution',
@@ -89,33 +83,12 @@ type GoogleReviewPayload = {
   }
 }
 
-type GooglePlacePhotoPayload = {
-  name?: string
-  widthPx?: number
-  heightPx?: number
-  googleMapsUri?: string
-  authorAttributions?: Array<{
-    displayName?: string
-    uri?: string
-    photoUri?: string
-  }>
-}
-
 type GooglePlacePayload = {
-  displayName?: GoogleLocalizedText
-  formattedAddress?: string
-  shortFormattedAddress?: string
   googleMapsUri?: string
   googleMapsLinks?: {
     placeUri?: string
-    reviewsUri?: string
     writeAReviewUri?: string
   }
-  location?: {
-    latitude?: number
-    longitude?: number
-  }
-  photos?: GooglePlacePhotoPayload[]
   rating?: number
   userRatingCount?: number
   reviews?: GoogleReviewPayload[]
@@ -152,16 +125,6 @@ function numberOrZero(value: unknown) {
   return Number.isFinite(number) && number > 0 ? number : 0
 }
 
-function positiveNumber(value: unknown) {
-  const number = Number(value)
-  return Number.isFinite(number) && number > 0 ? number : undefined
-}
-
-function finiteNumber(value: unknown) {
-  const number = Number(value)
-  return Number.isFinite(number) ? number : undefined
-}
-
 function resolveApiKey() {
   return cleanString(
     process.env.GOOGLE_PLACES_API_KEY
@@ -178,59 +141,6 @@ function googleApiHeaders(): HeadersInit {
   )
 
   return referer ? { Referer: `${referer.replace(/\/+$/, '')}/` } : {}
-}
-
-async function resolveGooglePlacePhotoUri(photoName: string, apiKey: string) {
-  const safeName = cleanString(photoName)
-  if (!safeName || !apiKey) return ''
-
-  const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), GOOGLE_REVIEWS_TIMEOUT_MS)
-
-  try {
-    const url = new URL(`${GOOGLE_PLACE_PHOTO_MEDIA_BASE_URL}/${safeName}/media`)
-    url.searchParams.set('maxWidthPx', '900')
-    url.searchParams.set('maxHeightPx', '700')
-    url.searchParams.set('skipHttpRedirect', 'true')
-    url.searchParams.set('key', apiKey)
-
-    const response = await fetch(url.toString(), {
-      signal: controller.signal,
-      headers: googleApiHeaders(),
-      next: { revalidate: GOOGLE_REVIEWS_REVALIDATE_SECONDS },
-    })
-
-    if (!response.ok) return ''
-
-    const payload = await response.json() as { photoUri?: string }
-    return cleanString(payload.photoUri)
-  } catch {
-    return ''
-  } finally {
-    clearTimeout(timeout)
-  }
-}
-
-async function normalizePlacePhoto(
-  photo: GooglePlacePhotoPayload,
-  index: number,
-  apiKey: string
-): Promise<HomepageGooglePlacePhoto | null> {
-  const name = cleanString(photo.name)
-  if (!name) return null
-
-  const imageUri = await resolveGooglePlacePhotoUri(name, apiKey)
-  if (!imageUri) return null
-
-  return {
-    id: name || `google-place-photo-${index}`,
-    name,
-    imageUri,
-    googleMapsUri: cleanString(photo.googleMapsUri) || undefined,
-    authorName: cleanString(photo.authorAttributions?.[0]?.displayName) || undefined,
-    widthPx: positiveNumber(photo.widthPx),
-    heightPx: positiveNumber(photo.heightPx),
-  }
 }
 
 function resolveReviewUrl(
@@ -273,15 +183,89 @@ function normalizeReview(review: GoogleReviewPayload, index: number): HomepageGo
   }
 }
 
+function getGoogleReviewsSettings(configMap: Record<string, string>) {
+  return {
+    enabled: cleanString(configMap.homepage_google_reviews_enabled || 'true') !== 'false',
+    placeId: normalizePlaceId(
+      configMap.homepage_google_reviews_place_id
+      || process.env.GOOGLE_MAPS_PLACE_ID
+      || process.env.NEXT_PUBLIC_GOOGLE_MAPS_PLACE_ID
+      || DEFAULT_PILGER_GOOGLE_PLACE_ID
+    ),
+    apiKey: resolveApiKey(),
+  }
+}
+
+function googleReviewsCacheKey(placeId: string) {
+  return `${GOOGLE_REVIEWS_CACHE_PREFIX}${placeId.replace(/[^A-Za-z0-9_-]/g, '_')}`
+}
+
+type SupabaseConfigStore = {
+  from: (table: string) => any
+}
+
+async function readCachedGoogleReviews(admin: SupabaseConfigStore | undefined, placeId: string) {
+  if (!admin) return { hit: false as const }
+
+  try {
+    const { data } = await admin
+      .from('app_config')
+      .select('value, updated_at')
+      .eq('key', googleReviewsCacheKey(placeId))
+      .maybeSingle()
+
+    if (!data?.value || !data?.updated_at) return { hit: false as const }
+
+    const ageMs = Date.now() - new Date(data.updated_at).getTime()
+    if (ageMs > GOOGLE_REVIEWS_REVALIDATE_SECONDS * 1000) return { hit: false as const }
+
+    const parsed = JSON.parse(String(data.value))
+    if (parsed?.version !== GOOGLE_REVIEWS_CACHE_VERSION || parsed?.placeId !== placeId) {
+      return { hit: false as const }
+    }
+
+    return { hit: true as const, data: (parsed.data || null) as HomepageGoogleReviews | null }
+  } catch {
+    return { hit: false as const }
+  }
+}
+
+async function writeCachedGoogleReviews(admin: SupabaseConfigStore | undefined, placeId: string, data: HomepageGoogleReviews | null) {
+  if (!admin) return
+
+  try {
+    await admin.from('app_config').upsert({
+      key: googleReviewsCacheKey(placeId),
+      value: JSON.stringify({
+        version: GOOGLE_REVIEWS_CACHE_VERSION,
+        placeId,
+        cachedAt: new Date().toISOString(),
+        data,
+      }),
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'key' })
+  } catch {
+    // Reviews are decorative; cache write failures should not break public pages.
+  }
+}
+
+export async function getCachedHomepageGoogleReviews(
+  configMap: Record<string, string>,
+  admin?: SupabaseConfigStore
+): Promise<HomepageGoogleReviews | null> {
+  const { enabled, placeId, apiKey } = getGoogleReviewsSettings(configMap)
+  if (!enabled || !placeId || !apiKey) return null
+
+  const cached = await readCachedGoogleReviews(admin, placeId)
+  if (cached.hit) return cached.data
+
+  const reviews = await getHomepageGoogleReviews(configMap)
+  await writeCachedGoogleReviews(admin, placeId, reviews)
+  return reviews
+}
+
 export async function getHomepageGoogleReviews(configMap: Record<string, string>): Promise<HomepageGoogleReviews | null> {
-  const enabled = cleanString(configMap.homepage_google_reviews_enabled || 'true') !== 'false'
-  const placeId = normalizePlaceId(
-    configMap.homepage_google_reviews_place_id
-    || process.env.GOOGLE_MAPS_PLACE_ID
-    || process.env.NEXT_PUBLIC_GOOGLE_MAPS_PLACE_ID
-    || DEFAULT_PILGER_GOOGLE_PLACE_ID
-  )
-  const apiKey = resolveApiKey()
+  const { enabled, placeId, apiKey } = getGoogleReviewsSettings(configMap)
 
   if (!enabled || !placeId || !apiKey) return null
 
@@ -316,14 +300,7 @@ export async function getHomepageGoogleReviews(configMap: Record<string, string>
       .filter((review): review is HomepageGoogleReview => Boolean(review))
       .slice(0, 5)
 
-    const photos = (await Promise.all(
-      (payload.photos || [])
-        .slice(0, GOOGLE_PLACE_PHOTO_LIMIT)
-        .map((photo, index) => normalizePlacePhoto(photo, index, apiKey))
-    )).filter((photo): photo is HomepageGooglePlacePhoto => Boolean(photo))
-
-    const formattedAddress = cleanString(payload.formattedAddress)
-    if (!reviews.length && !photos.length && !formattedAddress) return null
+    if (!reviews.length) return null
 
     const googleMapsUri = cleanString(
       configMap.homepage_google_maps_url
@@ -332,16 +309,12 @@ export async function getHomepageGoogleReviews(configMap: Record<string, string>
     ) || undefined
 
     return {
-      placeName: readLocalizedText(payload.displayName) || 'Guilherme Pilger',
-      formattedAddress: formattedAddress || undefined,
-      shortFormattedAddress: cleanString(payload.shortFormattedAddress) || undefined,
-      latitude: finiteNumber(payload.location?.latitude),
-      longitude: finiteNumber(payload.location?.longitude),
+      placeName: 'Guilherme Pilger',
       rating: numberOrZero(payload.rating),
       userRatingCount: Math.trunc(numberOrZero(payload.userRatingCount)),
       googleMapsUri,
       reviewUrl: resolveReviewUrl(configMap, placeId, payload.googleMapsLinks?.writeAReviewUri, googleMapsUri),
-      photos,
+      photos: [],
       reviews,
     }
   } catch (error) {

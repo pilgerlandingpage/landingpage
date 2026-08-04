@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { getGeminiApiKey, getAIConfig } from './config'
 import { recordGeminiUsage } from './gemini-costs'
+import { buildGeminiGenerationConfig } from './gemini-controls'
 
 export async function generateGeminiChat(history: { role: string; content: string }[], message: string, systemPrompt: string, modelOverride?: string) {
   const apiKey = await getGeminiApiKey()
@@ -13,7 +14,11 @@ export async function generateGeminiChat(history: { role: string; content: strin
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({
       model: modelName,
-      systemInstruction: systemPrompt
+      systemInstruction: systemPrompt,
+      generationConfig: buildGeminiGenerationConfig(modelName, {
+        temperature: 0.7,
+        maxOutputTokens: 900,
+      }) as any,
     })
 
     const chat = model.startChat({

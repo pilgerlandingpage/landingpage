@@ -8,6 +8,8 @@ import {
 import { createAdminClient } from '@/lib/supabase/server'
 import { buildAgentContextBrief, getAgentEcosystemContext, recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
 import { saveAgentCentralSnapshot } from '@/lib/intelligence/agent-runtime'
+import { buildGeminiGenerationConfig } from '@/lib/ai/gemini-controls'
+import { recordGeminiUsage } from '@/lib/ai/gemini-costs'
 import OpenAI from 'openai'
 
 type ResearchDepth = 'leve' | 'media' | 'profunda'
@@ -247,7 +249,10 @@ async function callGeminiSearch(topic: string, prompt: string, depth: ResearchDe
         }],
         systemInstruction: { role: 'model', parts: [{ text: prompt }] },
         tools: [{ google_search: {} }],
-        generationConfig: { temperature: 0.25 },
+        generationConfig: buildGeminiGenerationConfig(model, {
+            temperature: 0.25,
+            maxOutputTokens: depth === 'profunda' ? 2200 : 1400,
+        }),
     }
 
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
@@ -260,6 +265,13 @@ async function callGeminiSearch(topic: string, prompt: string, depth: ResearchDe
     if (!response.ok) {
         throw new Error(json?.error?.message || `Gemini Search falhou (${response.status}).`)
     }
+
+    await recordGeminiUsage({
+        model,
+        feature: 'research_gemini_search',
+        usageMetadata: json?.usageMetadata,
+        metadata: { depth, topic },
+    })
 
     const markdown = json?.candidates?.[0]?.content?.parts
         ?.map((part: any) => part?.text || '')

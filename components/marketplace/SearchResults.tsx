@@ -57,10 +57,10 @@ type SearchDevelopmentResult = {
 }
 
 const OFFICE_LOCATION_MARKER = {
-    latLng: [-26.95665680834595, -48.62979654548911] as [number, number],
+    latLng: [-26.9567429, -48.629818] as [number, number],
     title: 'Imobiliária Guilherme Pilger',
     subtitle: 'Praia Brava',
-    address: 'Av. Carlos Drummond de Andrade, 33 - Loja 01 - Praia Brava, Itajaí - SC, 88306-800',
+    address: 'Av. Carlos Drummond de Andrade, 33 - Loja 01 - Praia Brava - SC, 88306-800',
 }
 
 function toCoordinate(value: number | string | null | undefined) {

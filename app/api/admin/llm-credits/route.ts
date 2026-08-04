@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getAIConfig, getOpenAIApiKey, getGeminiApiKey } from '@/lib/ai/config'
+import { buildGeminiGenerationConfig } from '@/lib/ai/gemini-controls'
 
 type ProviderStatus = 'ok' | 'no_credits' | 'invalid_key' | 'missing_key' | 'error'
 
@@ -37,7 +38,7 @@ async function testGeminiModel(apiKey: string, model: string) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             contents: [{ role: 'user', parts: [{ text: 'Responda apenas OK' }] }],
-            generationConfig: { temperature: 0, maxOutputTokens: 5 },
+            generationConfig: buildGeminiGenerationConfig(model, { temperature: 0, maxOutputTokens: 5 }),
         }),
     })
 

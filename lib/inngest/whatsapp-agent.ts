@@ -24,6 +24,7 @@ import {
 } from '../whatsapp/lead-sync'
 import { getPublicAppUrl } from '../app-url'
 import { buildTrackedWhatsAppLink } from '../tracking/whatsapp-links'
+import { buildGeminiGenerationConfig } from '../ai/gemini-controls'
 import { recordGeminiUsage } from '../ai/gemini-costs'
 import { generateChatResponse } from '../ai/generation'
 import { DEFAULT_WHATSAPP_GLOBAL_SYSTEM_PROMPT, WHATSAPP_GLOBAL_RUNTIME_GUARDRAILS } from '../whatsapp/agent-global-prompt'
@@ -2745,7 +2746,11 @@ async function transcribeWithGemini(audioUrl: string, apiKey: string, model: str
                     { inlineData: { mimeType: 'audio/ogg', data: base64Audio } },
                     { text: 'Transcreva este áudio em português brasileiro. Retorne APENAS o texto transcrito, sem explicações.' }
                 ]
-            }]
+            }],
+            generationConfig: buildGeminiGenerationConfig(model || 'gemini-2.5-flash', {
+                temperature: 0,
+                maxOutputTokens: 512,
+            }),
         })
     })
     if (!res.ok) {
@@ -3184,7 +3189,11 @@ Se não for possível analisar com confiança, diga isso claramente.`
                     { inlineData: { mimeType, data: mediaBuffer.toString('base64') } },
                     { text: prompt }
                 ]
-            }]
+            }],
+            generationConfig: buildGeminiGenerationConfig(model || 'gemini-2.5-flash', {
+                temperature: 0.2,
+                maxOutputTokens: 700,
+            }),
         })
     })
     if (!res.ok) {
@@ -4492,16 +4501,10 @@ NUNCA inclua pensamentos internos, raciocínio ou análise na resposta. Responda
             responseText = data.choices?.[0]?.message?.content || ''
         } else {
             const model = configs['gemini_model'] || 'gemini-2.5-flash'
-            // Gemini 2.5+ models have built-in "thinking" that can leak internal
-            // reasoning into the response. Disable it via thinkingBudget: 0.
-            const isThinkingModel = /gemini-2\.5|gemini-3/i.test(model)
-            const generationConfig: Record<string, any> = {
+            const generationConfig = buildGeminiGenerationConfig(model, {
                 temperature: 0.8,
                 maxOutputTokens: 600,
-            }
-            if (isThinkingModel) {
-                generationConfig.thinkingConfig = { thinkingBudget: 0 }
-            }
+            })
             const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -7509,6 +7512,10 @@ export const shadowAgentResponse = inngest.createFunction(
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             systemInstruction: { parts: [{ text: user.shadow_agent_prompt }] },
+                            generationConfig: buildGeminiGenerationConfig('gemini-2.5-flash', {
+                                temperature: 0.7,
+                                maxOutputTokens: 400,
+                            }),
                             contents: updatedMessages.map((m: any) => ({
                                 role: m.role === 'assistant' ? 'model' : 'user',
                                 parts: [{ text: m.content }]

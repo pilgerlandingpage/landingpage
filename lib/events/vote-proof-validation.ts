@@ -1,4 +1,5 @@
 import { getAIConfig, getActiveAIProvider, getGeminiApiKey, getOpenAIApiKey } from '@/lib/ai/config'
+import { buildGeminiGenerationConfig } from '@/lib/ai/gemini-controls'
 import { recordGeminiUsage } from '@/lib/ai/gemini-costs'
 
 export type VoteProofDecision = 'approved' | 'rejected' | 'review'
@@ -173,10 +174,11 @@ async function analyzeWithGemini(buffer: Buffer, mimeType: string, mediaKind: Vo
                     { text: buildVoteProofPrompt(mediaKind) },
                 ],
             }],
-            generationConfig: {
+            generationConfig: buildGeminiGenerationConfig(model, {
                 temperature: 0,
                 responseMimeType: 'application/json',
-            },
+                maxOutputTokens: 512,
+            }),
         }),
     })
 
