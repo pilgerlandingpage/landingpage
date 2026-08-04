@@ -38,6 +38,7 @@ import PropertyMobileMapPreview from '@/components/property/PropertyMobileMapPre
 import PropertyMobileDetailSheet from '@/components/property/PropertyMobileDetailSheet'
 import PropertyBrokerAvatar from '@/components/property/PropertyBrokerAvatar'
 import PropertyNearbyBenefits from '@/components/property/PropertyNearbyBenefits'
+import PropertySidebarLeadForm from '@/components/property/PropertySidebarLeadForm'
 import PropertyVideoEmbed, { hasPropertyVideo } from '@/components/property/PropertyVideoEmbed'
 import MobileNav from '@/components/marketplace/MobileNav'
 import MobileMapSearchModal from '@/components/marketplace/MobileMapSearchModal'
@@ -2998,13 +2999,7 @@ export default async function PropertyDetailPage({
                         <div className="plp-side-card plp-lead-card">
                             <h3><MessageCircle size={18} /> Mais informações sobre este imóvel</h3>
                             <p>Envie seus dados para receber disponibilidade, condições e atendimento direto pelo WhatsApp.</p>
-                            <div className="plp-form-preview" aria-hidden="true">
-                                <span className="plp-form-message">Olá, tenho interesse no imóvel {propertyUrl}</span>
-                                <span>Nome completo *</span>
-                                <span>Telefone *</span>
-                                <span>Email *</span>
-                            </div>
-                            <WhatsAppCaptureLink
+                            <PropertySidebarLeadForm
                                 phone={contactPhone}
                                 message={`Olá, tenho interesse no imóvel ${propertyUrl}`}
                                 slug="imovel"
@@ -3017,10 +3012,7 @@ export default async function PropertyDetailPage({
                                     cta_context: 'sidebar_lead_card',
                                     cta_label: 'Enviar interesse',
                                 }}
-                                className="plp-dark-button"
-                            >
-                                Enviar interesse
-                            </WhatsAppCaptureLink>
+                            />
                         </div>
 
                         <div className="plp-side-card plp-broker-card">
