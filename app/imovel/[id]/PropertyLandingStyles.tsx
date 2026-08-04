@@ -3197,32 +3197,46 @@ export default function PropertyLandingStyles() {
                     }
 
                     .plp-market-advisor-cta {
-                        padding: 0 14px 14px;
+                        gap: 12px;
+                        padding: 11px;
+                        border-color: rgba(184,148,95,.18);
+                        background:
+                            linear-gradient(135deg, rgba(255,255,255,.98), rgba(249,245,236,.94)),
+                            radial-gradient(circle at 100% 0%, rgba(184,148,95,.12), transparent 38%);
+                        box-shadow: 0 14px 28px rgba(31,25,16,.1);
                     }
 
                     .plp-market-advisor-profile {
-                        grid-template-columns: 86px minmax(0, 1fr);
-                        gap: 12px;
+                        grid-template-columns: 82px minmax(0, 1fr);
+                        gap: 11px;
                     }
 
                     .plp-market-advisor-avatar {
-                        height: 96px;
-                        min-height: 96px;
-                        border-radius: 0 0 var(--plp-radius) var(--plp-radius);
+                        height: 92px;
+                        min-height: 92px;
+                        border-radius: 14px;
+                        background: #eee7dc;
                     }
 
                     .plp-market-advisor-avatar img,
                     .plp-market-advisor-avatar .plp-broker-avatar {
-                        min-height: 96px;
+                        min-height: 92px;
                     }
 
                     .plp-market-advisor-profile h3 {
-                        font-size: 17px;
+                        color: #15191d;
+                        font-family: Inter, system-ui, sans-serif;
+                        font-size: 14px;
+                        font-weight: 640;
+                        line-height: 1.2;
                     }
 
                     .plp-market-advisor-profile p {
-                        font-size: 12px;
-                        line-height: 1.38;
+                        margin-top: 6px;
+                        color: #56606a;
+                        font-size: 11.5px;
+                        font-weight: 440;
+                        line-height: 1.34;
                     }
 
                     .plp-market-advisor-actions {
@@ -3232,7 +3246,16 @@ export default function PropertyLandingStyles() {
                     }
 
                     .plp-market-advisor-button {
-                        min-height: 46px;
+                        min-height: 42px;
+                        border-radius: 12px;
+                        font-size: 12px;
+                        font-weight: 720;
+                    }
+
+                    .plp-market-advisor-button--secondary {
+                        border-color: rgba(35,31,26,.16);
+                        background: rgba(255,255,255,.72);
+                        color: #15191d;
                     }
                 }
 
