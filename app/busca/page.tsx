@@ -147,6 +147,8 @@ type SearchDevelopmentResult = {
     priceRange: string
     availableUnitsCount: number | null
     heroImage: string
+    latitude: number | null
+    longitude: number | null
     stage: 'launch' | 'ready'
     stageLabel: string
     propertyIds: string[]
@@ -246,10 +248,48 @@ function asText(value: unknown, fallback = '') {
 function asOptionalNumber(value: unknown) {
     if (typeof value === 'number' && Number.isFinite(value)) return value
     if (typeof value === 'string') {
-        const parsed = Number(value)
+        const parsed = Number(value.replace(',', '.'))
         if (Number.isFinite(parsed)) return parsed
     }
     return null
+}
+
+function toValidLatLng(latitude: unknown, longitude: unknown): [number, number] | null {
+    const lat = asOptionalNumber(latitude)
+    const lng = asOptionalNumber(longitude)
+
+    if (
+        lat !== null &&
+        lng !== null &&
+        lat >= -90 &&
+        lat <= 90 &&
+        lng >= -180 &&
+        lng <= 180
+    ) {
+        return [lat, lng]
+    }
+
+    if (
+        lat !== null &&
+        lng !== null &&
+        lng >= -90 &&
+        lng <= 90 &&
+        lat >= -180 &&
+        lat <= 180
+    ) {
+        return [lng, lat]
+    }
+
+    return null
+}
+
+function developmentContentLatLng(content: Record<string, any>, development: Record<string, any>): [number, number] | null {
+    const location = asRecord(development.location ?? development.address ?? content.location)
+    const coordinates = asRecord(development.coordinates ?? development.coords ?? development.geo ?? content.coordinates ?? content.coords)
+
+    return toValidLatLng(development.latitude ?? development.lat ?? content.latitude ?? content.lat, development.longitude ?? development.lng ?? content.longitude ?? content.lng)
+        || toValidLatLng(location.latitude ?? location.lat, location.longitude ?? location.lng)
+        || toValidLatLng(coordinates.latitude ?? coordinates.lat, coordinates.longitude ?? coordinates.lng)
 }
 
 function safePublicSearchTerm(value: string | undefined) {
@@ -435,6 +475,7 @@ function normalizeSearchDevelopment(page: Record<string, any>, rawTerm: string, 
 
     const units = asArray(development.units)
     const stage = resolveDevelopmentStage(page, content, development)
+    const latLng = developmentContentLatLng(content, development)
 
     return {
         slug,
@@ -443,6 +484,8 @@ function normalizeSearchDevelopment(page: Record<string, any>, rawTerm: string, 
         priceRange: asText(development.priceRange ?? development.price_range, 'Consultar valores'),
         availableUnitsCount: asOptionalNumber(development.availableUnitsCount ?? development.available_units_count ?? content.available_units_count) ?? (units.length || null),
         heroImage: asText(development.heroImage ?? development.hero_image ?? content.custom_hero_image, firstImageFromGallery(content)),
+        latitude: latLng?.[0] ?? null,
+        longitude: latLng?.[1] ?? null,
         stage,
         stageLabel: DEVELOPMENT_STAGE_META[stage].label,
         ...collectDevelopmentUnitReferences(units),
@@ -463,6 +506,72 @@ function safeInValues(values: string[]) {
         .map(value => String(value || '').trim())
         .filter(value => /^[a-zA-Z0-9_-]+$/.test(value))
         .slice(0, SEARCH_EXPANSION_IN_FILTER_LIMIT)
+}
+
+function averageCoordinates(rows: Array<Record<string, any>>): [number, number] | null {
+    const points = rows
+        .map(row => toValidLatLng(row.latitude, row.longitude))
+        .filter((point): point is [number, number] => Boolean(point))
+
+    if (points.length === 0) return null
+
+    const totals = points.reduce((acc, [lat, lng]) => {
+        acc.lat += lat
+        acc.lng += lng
+        return acc
+    }, { lat: 0, lng: 0 })
+
+    return [totals.lat / points.length, totals.lng / points.length]
+}
+
+async function hydrateDevelopmentCoordinates(supabase: any, developments: SearchDevelopmentResult[]) {
+    const missing = developments.filter(development => development.latitude === null || development.longitude === null)
+    if (missing.length === 0) return developments
+
+    const propertyIds = safeInValues(missing.flatMap(development => development.propertyIds))
+    const sourceReferences = safeInValues(missing.flatMap(development => development.sourceReferences))
+    const sourceSlugs = safeInValues(missing.flatMap(development => development.sourceSlugs))
+
+    if (propertyIds.length === 0 && sourceReferences.length === 0 && sourceSlugs.length === 0) return developments
+
+    const filters = [
+        propertyIds.length ? `id.in.(${propertyIds.join(',')})` : '',
+        sourceReferences.length ? `source_reference.in.(${sourceReferences.join(',')})` : '',
+        sourceSlugs.length ? `source_slug.in.(${sourceSlugs.join(',')})` : '',
+    ].filter(Boolean)
+
+    if (filters.length === 0) return developments
+
+    const { data, error } = await supabase
+        .from('properties')
+        .select('id, source_reference, source_slug, latitude, longitude')
+        .or(filters.join(','))
+        .limit(1000)
+
+    if (error) {
+        console.warn('[Busca] Development coordinates unavailable:', error.message)
+        return developments
+    }
+
+    const rows = ((data || []) as Array<Record<string, any>>)
+
+    return developments.map(development => {
+        if (development.latitude !== null && development.longitude !== null) return development
+
+        const propertyIdSet = new Set(development.propertyIds.map(String))
+        const referenceSet = new Set(development.sourceReferences.map(String))
+        const slugSet = new Set(development.sourceSlugs.map(String))
+        const relatedRows = rows.filter(row => (
+            propertyIdSet.has(String(row.id || '')) ||
+            referenceSet.has(String(row.source_reference || '')) ||
+            slugSet.has(String(row.source_slug || ''))
+        ))
+        const latLng = averageCoordinates(relatedRows)
+
+        return latLng
+            ? { ...development, latitude: latLng[0], longitude: latLng[1] }
+            : development
+    })
 }
 
 async function resolveDevelopmentSearch(supabase: any, rawTerm: string | undefined, options: DevelopmentSearchOptions = {}) {
@@ -500,12 +609,12 @@ async function resolveDevelopmentSearch(supabase: any, rawTerm: string | undefin
 
     const stageSet = new Set(options.stages || [])
     const includeWithoutTerm = includeAll && !hasSearchableTerm
-    const developmentResults = ((pagesResult.data || []) as Array<Record<string, any>>)
+    const developmentResults = await hydrateDevelopmentCoordinates(supabase, ((pagesResult.data || []) as Array<Record<string, any>>)
         .map(page => normalizeSearchDevelopment(page, term, includeWithoutTerm))
         .filter((item): item is SearchDevelopmentResult => Boolean(item))
         .filter(item => stageSet.size === 0 || stageSet.has(item.stage))
         .sort((a, b) => b.matchScore - a.matchScore || (b.availableUnitsCount || 0) - (a.availableUnitsCount || 0) || a.name.localeCompare(b.name, 'pt-BR'))
-        .slice(0, DEVELOPMENT_RESULT_LIMIT)
+        .slice(0, DEVELOPMENT_RESULT_LIMIT))
 
     const developmentExpansion = mergeSearchExpansion(...developmentResults.map(result => ({
         propertyIds: result.propertyIds,

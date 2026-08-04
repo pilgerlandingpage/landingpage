@@ -50,6 +50,8 @@ type SearchDevelopmentResult = {
     priceRange: string
     availableUnitsCount: number | null
     heroImage: string
+    latitude?: number | null
+    longitude?: number | null
     stage: 'launch' | 'ready'
     stageLabel: string
     propertyIds?: string[]
@@ -358,6 +360,36 @@ function developmentUnitLabel(development: SearchDevelopmentResult) {
     return count === 1 ? '1 unidade ativa' : `${count} unidades ativas`
 }
 
+function developmentMapProperty(development: SearchDevelopmentResult) {
+    return {
+        id: `development:${development.slug}`,
+        source_slug: development.slug,
+        slug: development.slug,
+        title: development.name,
+        city: null,
+        state: 'SC',
+        price: null,
+        bedrooms: null,
+        bathrooms: null,
+        suites: null,
+        parking_spaces: null,
+        area_m2: null,
+        featured_image: development.heroImage || null,
+        images: development.heroImage ? [development.heroImage] : [],
+        video_url: null,
+        property_type: 'Empreendimento',
+        exclusive: false,
+        latitude: development.latitude ?? null,
+        longitude: development.longitude ?? null,
+        neighborhood: development.locationName,
+        purpose: null,
+        source_status: development.stageLabel,
+        description: development.priceRange || developmentUnitLabel(development),
+        amenities: [],
+        __developmentSlug: development.slug,
+    }
+}
+
 interface MapBounds {
     north: number
     south: number
@@ -404,7 +436,7 @@ export default function SearchResults({ properties, lpMap, developmentResults = 
     const refinePanelRef = useRef<HTMLDivElement>(null)
     const isOfficeSelectedInRefine = refineOfficeSelection.key === searchKey && refineOfficeSelection.selected
     const shouldShowOfficeOnMap = isOfficeSearch || isOfficeSelectedInRefine
-    const mapViewKey = `${searchKey}:${shouldShowOfficeOnMap ? 'office' : 'properties'}`
+    const mapViewKey = `${searchKey}:${shouldShowOfficeOnMap ? 'office' : isDevelopmentOnlySearch ? 'developments' : 'properties'}`
     const urlMapBounds = useMemo(() => parseMapBoundsParam(searchParams.get(MAP_BOUNDS_PARAM)), [searchKey, searchParams])
     const mapBounds = urlMapBounds
     const selectedMapPropertyId = selectedMapPropertyOverride?.key === mapSelectionKey
@@ -569,10 +601,20 @@ export default function SearchResults({ properties, lpMap, developmentResults = 
         return filterPropertiesByDrawArea(filterPropertiesByBounds(properties, mapBounds), selectedDrawArea)
     }, [isDevelopmentOnlySearch, properties, mapBounds, selectedDrawArea])
 
+    const developmentMapProperties = useMemo(() => {
+        if (!isDevelopmentOnlySearch) return []
+        return developmentResults
+            .map(developmentMapProperty)
+            .filter(property => Boolean(getLatLng(property)))
+    }, [developmentResults, isDevelopmentOnlySearch])
+
     const visibleMapProperties = useMemo(() => {
-        if (shouldShowOfficeOnMap || isDevelopmentOnlySearch) return []
+        if (shouldShowOfficeOnMap) return []
+        if (isDevelopmentOnlySearch) {
+            return filterPropertiesByDrawArea(filterPropertiesByBounds(developmentMapProperties, mapBounds), selectedDrawArea)
+        }
         return filterPropertiesByDrawArea(filterPropertiesByBounds(propertiesWithCoords, mapBounds), selectedDrawArea)
-    }, [isDevelopmentOnlySearch, mapBounds, propertiesWithCoords, selectedDrawArea, shouldShowOfficeOnMap])
+    }, [developmentMapProperties, isDevelopmentOnlySearch, mapBounds, propertiesWithCoords, selectedDrawArea, shouldShowOfficeOnMap])
 
     const selectedMapProperty = useMemo(() => {
         if (!selectedMapPropertyId || shouldShowOfficeOnMap || isDevelopmentOnlySearch) return null
@@ -789,6 +831,21 @@ export default function SearchResults({ properties, lpMap, developmentResults = 
             selected_region: selectedRegionArea?.id || null,
         })
     }, [activeFilters, mapSelectionKey, selectedRegionArea, totalCount, visibleCount])
+
+    const handleDevelopmentMapSelect = useCallback((property: any) => {
+        const slug = String(property?.__developmentSlug || property?.source_slug || property?.slug || '').replace(/^\/+/, '')
+        if (!slug) return
+
+        void trackEvent('search_results_development_map_pin_clicked', {
+            slug,
+            name: property?.title || null,
+            active_filters: activeFilters,
+            visible_count: visibleCount,
+            total_count: totalCount,
+        })
+
+        router.push(`/${slug}`)
+    }, [activeFilters, router, totalCount, visibleCount])
 
     const handleMapPropertyPreviewClose = useCallback(() => {
         const property = selectedMapProperty
@@ -1490,17 +1547,17 @@ export default function SearchResults({ properties, lpMap, developmentResults = 
             `}</style>
 
             <SearchViews
-                previewOpen={Boolean(selectedMapProperty)}
+                previewOpen={!isDevelopmentOnlySearch && Boolean(selectedMapProperty)}
                 map={
                     <div className="search-map-interactive-layer">
                         <MapSearch
                             properties={visibleMapProperties}
-                            hoveredPropertyId={hoveredPropertyId || selectedMapPropertyId}
-                            selectedPropertyId={selectedMapPropertyId}
+                            hoveredPropertyId={isDevelopmentOnlySearch ? null : hoveredPropertyId || selectedMapPropertyId}
+                            selectedPropertyId={isDevelopmentOnlySearch ? null : selectedMapPropertyId}
                             drawArea={selectedDrawArea}
                             regionArea={selectedRegionArea}
                             onMarkerHover={handleMarkerHover}
-                            onPropertySelect={handleMapPropertySelect}
+                            onPropertySelect={isDevelopmentOnlySearch ? handleDevelopmentMapSelect : handleMapPropertySelect}
                             onDrawAreaChange={handleDrawAreaChange}
                             onSearchFiltersApply={handleMapSearchFiltersApply}
                             refitKey={mapViewKey}
