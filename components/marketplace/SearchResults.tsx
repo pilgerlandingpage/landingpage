@@ -13,7 +13,7 @@ import SearchAlertsPanel from './SearchAlertsPanel'
 import HomeSearchBar, { type HomeSearchValues } from './HomeSearchBar'
 import type { MapDrawArea, MapSearchFilters } from './PropertyMap'
 import { replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
-import { findMapRegionForSearchParams } from '@/lib/locations/map-regions'
+import { findMapRegionByText, findMapRegionForSearchParams } from '@/lib/locations/map-regions'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 import { getVisitorId, trackEvent } from '@/lib/tracking/client'
 
@@ -360,7 +360,26 @@ function developmentUnitLabel(development: SearchDevelopmentResult) {
     return count === 1 ? '1 unidade ativa' : `${count} unidades ativas`
 }
 
+function regionCenter(area: MapDrawArea): [number, number] | null {
+    if (!area.length) return null
+
+    const totals = area.reduce((acc, [lat, lng]) => {
+        acc.lat += lat
+        acc.lng += lng
+        return acc
+    }, { lat: 0, lng: 0 })
+
+    return [totals.lat / area.length, totals.lng / area.length]
+}
+
+function developmentFallbackLatLng(development: SearchDevelopmentResult): [number, number] | null {
+    const region = findMapRegionByText(`${development.locationName} ${development.name}`)
+    return region ? regionCenter(region.area) : null
+}
+
 function developmentMapProperty(development: SearchDevelopmentResult) {
+    const latLng = getLatLng(development) || developmentFallbackLatLng(development)
+
     return {
         id: `development:${development.slug}`,
         source_slug: development.slug,
@@ -379,8 +398,8 @@ function developmentMapProperty(development: SearchDevelopmentResult) {
         video_url: null,
         property_type: 'Empreendimento',
         exclusive: false,
-        latitude: development.latitude ?? null,
-        longitude: development.longitude ?? null,
+        latitude: latLng?.[0] ?? null,
+        longitude: latLng?.[1] ?? null,
         neighborhood: development.locationName,
         purpose: null,
         source_status: development.stageLabel,
