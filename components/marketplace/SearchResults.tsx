@@ -26,6 +26,12 @@ const DEVELOPMENT_SEARCH_CATEGORY_VALUE = 'empreendimentos'
 const MAP_PROPERTY_PARAM = 'mapProperty'
 const DRAW_AREA_PARAM = 'drawArea'
 const MAP_BOUNDS_PARAM = 'mapBounds'
+const SEARCH_MAP_SERVICE_AREA_BOUNDS = {
+    north: -25.0,
+    south: -30.5,
+    east: -47.0,
+    west: -54.5,
+}
 const MAP_FILTER_PARAM_KEYS = [
     'offer',
     'type',
@@ -377,8 +383,21 @@ function developmentFallbackLatLng(development: SearchDevelopmentResult): [numbe
     return region ? regionCenter(region.area) : null
 }
 
+function isInsideSearchMapServiceArea(latLng: [number, number]) {
+    const [lat, lng] = latLng
+
+    return (
+        lat >= SEARCH_MAP_SERVICE_AREA_BOUNDS.south &&
+        lat <= SEARCH_MAP_SERVICE_AREA_BOUNDS.north &&
+        lng >= SEARCH_MAP_SERVICE_AREA_BOUNDS.west &&
+        lng <= SEARCH_MAP_SERVICE_AREA_BOUNDS.east
+    )
+}
+
 function developmentMapProperty(development: SearchDevelopmentResult) {
-    const latLng = getLatLng(development) || developmentFallbackLatLng(development)
+    const ownLatLng = getLatLng(development)
+    const latLng = (ownLatLng && isInsideSearchMapServiceArea(ownLatLng) ? ownLatLng : null)
+        || developmentFallbackLatLng(development)
 
     return {
         id: `development:${development.slug}`,
