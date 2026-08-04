@@ -7314,6 +7314,10 @@ h6 {
                     height: 100%;
                     display: flex;
                     align-items: center;
+                    background: transparent;
+                    border: 0;
+                    border-bottom: 2px solid transparent;
+                    font-family: inherit;
                     font-size: 0.75rem;
                     font-weight: 760;
                     letter-spacing: 0.08em;
@@ -7322,9 +7326,9 @@ h6 {
                     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
                     white-space: nowrap;
                     text-decoration: none;
-                    border-bottom: 2px solid transparent;
                     margin-bottom: -1px;
                 }
+                .gh-menu-item.is-open > .gh-menu-label,
                 .gh-menu-item:hover > .gh-menu-label,
                 .gh-menu-item > .gh-menu-label:hover {
                     color: #b8942f;
@@ -7355,6 +7359,7 @@ h6 {
                     transition: opacity 0.2s, visibility 0.2s, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
                     z-index: 300;
                 }
+                .gh-menu-item.is-open > .gh-dropdown,
                 .gh-menu-item:hover > .gh-dropdown {
                     opacity: 1;
                     visibility: visible;
@@ -7380,15 +7385,16 @@ h6 {
 
                 .gh-developments-dropdown {
                     left: 50%;
-                    width: min(980px, calc(100vw - 48px));
-                    max-height: calc(100vh - 120px);
-                    overflow-y: auto;
+                    width: min(460px, calc(100vw - 48px));
+                    max-height: none;
+                    overflow-y: visible;
                     padding: 10px;
                     display: grid;
-                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
                     gap: 8px;
                     transform: translateX(-50%) translateY(4px);
                 }
+                .gh-menu-item.is-open > .gh-developments-dropdown,
                 .gh-menu-item:hover > .gh-developments-dropdown {
                     transform: translateX(-50%) translateY(0);
                 }
@@ -7425,6 +7431,19 @@ h6 {
                     font-size: 0.68rem;
                     line-height: 1.25;
                     white-space: nowrap;
+                }
+                .gh-development-option {
+                    min-height: 86px;
+                    align-content: center;
+                    border-color: rgba(184, 148, 47, 0.16);
+                    background: linear-gradient(135deg, #fff 0%, #fbf8f1 100%);
+                }
+                .gh-development-option strong {
+                    font-size: 0.82rem;
+                    letter-spacing: 0.05em;
+                }
+                .gh-development-option span {
+                    white-space: normal;
                 }
                 .gh-development-overview {
                     grid-column: 1 / -1;
