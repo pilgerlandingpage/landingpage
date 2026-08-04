@@ -4778,6 +4778,81 @@ export default function PropertyLandingStyles() {
                     background: #fbfbfa;
                 }
 
+                .plp-sidebar-lead-form {
+                    display: grid;
+                    gap: 8px;
+                    margin-top: 14px;
+                }
+
+                .plp-sidebar-lead-form input,
+                .plp-sidebar-lead-form textarea {
+                    width: 100%;
+                    border: 1px solid var(--plp-line);
+                    border-radius: var(--plp-radius);
+                    background: #fbfbfa;
+                    color: var(--plp-ink);
+                    font: inherit;
+                    font-size: 12px;
+                    outline: none;
+                    transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+                }
+
+                .plp-sidebar-lead-form input {
+                    min-height: 38px;
+                    padding: 0 11px;
+                }
+
+                .plp-sidebar-lead-form textarea {
+                    min-height: 78px;
+                    padding: 10px 11px;
+                    line-height: 1.36;
+                    resize: vertical;
+                    overflow-wrap: anywhere;
+                }
+
+                .plp-sidebar-lead-form input::placeholder,
+                .plp-sidebar-lead-form textarea::placeholder {
+                    color: #8b949b;
+                }
+
+                .plp-sidebar-lead-form input:focus,
+                .plp-sidebar-lead-form textarea:focus {
+                    border-color: rgba(189, 149, 81, 0.62);
+                    background: #fff;
+                    box-shadow: 0 0 0 3px rgba(189, 149, 81, 0.12);
+                }
+
+                .plp-sidebar-lead-form .plp-dark-button {
+                    border: 0;
+                    cursor: pointer;
+                    font: inherit;
+                }
+
+                .plp-sidebar-lead-form .plp-dark-button:disabled {
+                    opacity: 0.58;
+                    cursor: not-allowed;
+                    transform: none;
+                    box-shadow: none;
+                }
+
+                .plp-sidebar-lead-privacy,
+                .plp-sidebar-lead-feedback {
+                    margin: 0;
+                    color: var(--plp-muted);
+                    font-size: 9px;
+                    line-height: 1.35;
+                }
+
+                .plp-sidebar-lead-feedback.is-error {
+                    color: #a23b2a;
+                    font-weight: 700;
+                }
+
+                .plp-sidebar-lead-feedback.is-success {
+                    color: #0a7f63;
+                    font-weight: 700;
+                }
+
                 .plp-dark-button {
                     width: 100%;
                     background: #c8a862;
@@ -7032,6 +7107,31 @@ export default function PropertyLandingStyles() {
                     padding: 8px 9px;
                     line-height: 1.35;
                     overflow-wrap: anywhere;
+                }
+
+                .plp-sidebar-lead-form {
+                    gap: 6px;
+                    margin-top: 10px;
+                }
+
+                .plp-sidebar-lead-form input {
+                    min-height: 32px;
+                    padding: 0 9px;
+                    border-radius: 3px;
+                    font-size: 11px;
+                }
+
+                .plp-sidebar-lead-form textarea {
+                    min-height: 64px;
+                    padding: 8px 9px;
+                    border-radius: 3px;
+                    font-size: 11px;
+                    line-height: 1.35;
+                }
+
+                .plp-sidebar-lead-privacy,
+                .plp-sidebar-lead-feedback {
+                    font-size: 8px;
                 }
 
                 .plp-broker-card {
