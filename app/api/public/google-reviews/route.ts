@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getCachedHomepageGoogleReviews, GOOGLE_REVIEWS_REVALIDATE_SECONDS } from '@/lib/google-reviews'
 import { createAdminClient, createSupabaseAbortSignal, summarizeSupabaseError } from '@/lib/supabase/server'
 
-export const revalidate = GOOGLE_REVIEWS_REVALIDATE_SECONDS
+export const revalidate = 21600
 
 export async function GET() {
     const configMap: Record<string, string> = {}
