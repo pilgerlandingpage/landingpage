@@ -357,9 +357,12 @@ function cleanButtonTitle(value: unknown, fallback: string) {
 
 function getCommentDmFlowFromRaw(rawInput: unknown): CommentDmFlow | null {
   const raw = rawInput && typeof rawInput === 'object' ? rawInput as Record<string, any> : {}
-  const source = raw.comment_dm_flow && typeof raw.comment_dm_flow === 'object'
+  const nestedSource = raw.comment_dm_flow && typeof raw.comment_dm_flow === 'object'
     ? raw.comment_dm_flow as Record<string, any>
     : null
+  const directFlowType = normalizeText(raw.type || raw.flow_type || raw.direct_offer || raw.flow || raw.campaign_flow)
+  const directIsVoteDiscount = directFlowType.includes('vote discount') || directFlowType.includes('votacao livro')
+  const source = nestedSource || (directIsVoteDiscount ? raw : null)
   const flowType = normalizeText(source?.type || raw.flow_type || raw.direct_offer || raw.flow || raw.campaign_flow)
   const isVoteDiscount = flowType.includes('vote discount') || flowType.includes('votacao livro')
   if (!source && !isVoteDiscount) return null
