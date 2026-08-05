@@ -122,22 +122,49 @@ type MetaSendResult = {
   raw?: unknown
 }
 
+type MetaQuickReply = {
+  content_type: 'text'
+  title: string
+  payload: string
+}
+
+type MetaUrlButton = {
+  type: 'web_url'
+  url: string
+  title: string
+}
+
 type MetaMessagePayload =
-  | { text: string }
+  | { text: string; quick_replies?: MetaQuickReply[] }
   | {
       attachment: {
         type: 'template'
         payload: {
           template_type: 'button'
           text: string
-          buttons: Array<{ type: 'web_url'; url: string; title: string }>
+          buttons: MetaUrlButton[]
         }
       }
     }
 
 type MetaMessageSendPlan = {
-  kind: 'button_template' | 'text'
+  kind: 'button_template' | 'quick_replies' | 'text'
   message: MetaMessagePayload
+}
+
+type CommentDmFlow = {
+  type: 'vote_discount'
+  voteUrl: string
+  discountUrl: string
+  voteMessage: string
+  alreadyVotedMessage: string
+  followupMessage: string
+  willVoteLabel: string
+  alreadyVotedLabel: string
+  voteButtonTitle: string
+  alreadyVotedButtonTitle: string
+  followupButtonTitle: string
+  followupDelayMinutes: number
 }
 
 type WebhookCommentEvent = {
@@ -324,7 +351,140 @@ function extractFirstHttpUrl(value: string) {
   }
 }
 
-function buttonTitleForUrl(url: string) {
+function cleanButtonTitle(value: unknown, fallback: string) {
+  return cleanString(repairKnownPortugueseArtifacts(cleanString(value, 40)), 20) || cleanString(fallback, 20)
+}
+
+function getCommentDmFlowFromRaw(rawInput: unknown): CommentDmFlow | null {
+  const raw = rawInput && typeof rawInput === 'object' ? rawInput as Record<string, any> : {}
+  const source = raw.comment_dm_flow && typeof raw.comment_dm_flow === 'object'
+    ? raw.comment_dm_flow as Record<string, any>
+    : null
+  const flowType = normalizeText(source?.type || raw.flow_type || raw.direct_offer || raw.flow || raw.campaign_flow)
+  const isVoteDiscount = flowType.includes('vote discount') || flowType.includes('votacao livro')
+  if (!source && !isVoteDiscount) return null
+  if (source?.enabled === false) return null
+  if (!isVoteDiscount && normalizeText(source?.type) !== 'vote discount') return null
+
+  const voteUrl = extractFirstHttpUrl(firstString(source?.vote_url, raw.vote_url))
+  const discountUrl = extractFirstHttpUrl(firstString(source?.discount_url, raw.discount_url))
+  if (!voteUrl || !discountUrl) return null
+
+  const defaultDiscountMessage = [
+    'Obrigado por apoiar a votacao.',
+    '',
+    'Como agradecimento, liberei 30% de desconto para voce garantir o livro Corretor Nota 8.',
+    '',
+    'Clique no botao abaixo e aproveite essa condicao especial.',
+  ].join('\n')
+
+  return {
+    type: 'vote_discount',
+    voteUrl,
+    discountUrl,
+    voteMessage: cleanString(source?.vote_message, 1200)
+      || 'Perfeito. Clique no botao abaixo para abrir a votacao. Depois volte aqui quando terminar.',
+    alreadyVotedMessage: cleanString(source?.already_voted_message, 1200)
+      || cleanString(source?.followup_message, 1200)
+      || defaultDiscountMessage,
+    followupMessage: cleanString(source?.followup_message, 1200)
+      || cleanString(source?.already_voted_message, 1200)
+      || defaultDiscountMessage,
+    willVoteLabel: cleanButtonTitle(source?.will_vote_label, 'Vou votar'),
+    alreadyVotedLabel: cleanButtonTitle(source?.already_voted_label, 'Ja votei'),
+    voteButtonTitle: cleanButtonTitle(source?.vote_button_title, 'Votar agora'),
+    alreadyVotedButtonTitle: cleanButtonTitle(source?.already_voted_button_title, 'Comprar livro'),
+    followupButtonTitle: cleanButtonTitle(source?.followup_button_title, 'Comprar livro'),
+    followupDelayMinutes: clampNumber(source?.followup_delay_minutes, 3, 0, 1440),
+  }
+}
+
+function getCampaignCommentDmFlow(campaign: CampaignRow) {
+  return getCommentDmFlowFromRaw(campaign.raw)
+}
+
+function getDeliveryCommentDmFlow(delivery: DeliveryRow) {
+  const raw = (delivery.raw || {}) as Record<string, any>
+  return getCommentDmFlowFromRaw(raw.comment_dm_flow || raw.campaign_snapshot?.comment_dm_flow || raw)
+}
+
+function serializeCommentDmFlow(flow: CommentDmFlow) {
+  return {
+    type: flow.type,
+    enabled: true,
+    vote_url: flow.voteUrl,
+    discount_url: flow.discountUrl,
+    vote_message: flow.voteMessage,
+    will_vote_label: flow.willVoteLabel,
+    followup_message: flow.followupMessage,
+    vote_button_title: flow.voteButtonTitle,
+    already_voted_label: flow.alreadyVotedLabel,
+    already_voted_message: flow.alreadyVotedMessage,
+    followup_button_title: flow.followupButtonTitle,
+    followup_delay_minutes: flow.followupDelayMinutes,
+    already_voted_button_title: flow.alreadyVotedButtonTitle,
+  }
+}
+
+function buildCommentDmFlowPayload(campaignId: string, action: 'already_voted' | 'will_vote') {
+  return `comment_dm_flow:${cleanString(campaignId, 80)}:${action}`
+}
+
+function buildCommentDmFlowQuickReplies(campaignId: string, flow: CommentDmFlow): MetaQuickReply[] {
+  return [
+    {
+      content_type: 'text',
+      title: flow.alreadyVotedLabel,
+      payload: buildCommentDmFlowPayload(campaignId, 'already_voted'),
+    },
+    {
+      content_type: 'text',
+      title: flow.willVoteLabel,
+      payload: buildCommentDmFlowPayload(campaignId, 'will_vote'),
+    },
+  ]
+}
+
+function buildCommentDmFlowUrlButtons(flow: CommentDmFlow): MetaUrlButton[] {
+  return [
+    {
+      type: 'web_url',
+      title: flow.alreadyVotedLabel,
+      url: flow.discountUrl,
+    },
+    {
+      type: 'web_url',
+      title: flow.willVoteLabel,
+      url: flow.voteUrl,
+    },
+  ]
+}
+
+function textFallbackForQuickReplies(message: string, quickReplies: MetaQuickReply[]) {
+  const options = quickReplies
+    .map(reply => cleanString(reply.title, 40))
+    .filter(Boolean)
+    .join(' ou ')
+  if (!options) return message
+  return cleanString(`${cleanString(message, 1600)}\n\nResponda aqui com: ${options}.`, 1800)
+}
+
+function textFallbackForUrlButtons(message: string, buttons: MetaUrlButton[]) {
+  const links = buttons
+    .map(button => {
+      const title = cleanButtonTitle(button.title, '')
+      const url = extractFirstHttpUrl(button.url)
+      return title && url ? `${title}: ${url}` : ''
+    })
+    .filter(Boolean)
+    .join('\n')
+  if (!links || extractFirstHttpUrl(message)) return message
+  return cleanString(`${cleanString(message, 1500)}\n\n${links}`, 1800)
+}
+
+function buttonTitleForUrl(url: string, overrideTitle?: string) {
+  const override = cleanButtonTitle(overrideTitle, '')
+  if (override) return override
   const normalized = url.toLowerCase()
   if (normalized.includes('awards.atrincarealestate.com.br')) return 'Votar agora'
   if (normalized.includes('perfil-corretor-ideal')) return 'Abrir ferramenta'
@@ -393,21 +553,81 @@ function textFallbackForButtonUrl(message: string, url: string) {
   return cleanString(`${cleanString(message, 1600)}\n\n${url}`, 1800)
 }
 
-function buildMetaMessageSendPlans(message: string, buttonUrl?: string): MetaMessageSendPlan[] {
+function buildMetaMessageSendPlans(message: string, buttonUrl?: string, options: {
+  quickReplies?: MetaQuickReply[]
+  buttons?: MetaUrlButton[]
+  buttonTitle?: string
+} = {}): MetaMessageSendPlan[] {
   const urlFromButtonField = extractFirstHttpUrl(cleanString(buttonUrl, 1600))
   const urlFromMessage = extractFirstHttpUrl(message)
   const url = urlFromButtonField || urlFromMessage
+  const buttons = (options.buttons || [])
+    .map(button => ({
+      type: 'web_url' as const,
+      title: cleanButtonTitle(button.title, ''),
+      url: extractFirstHttpUrl(button.url),
+    }))
+    .filter(button => button.title && button.url)
+    .slice(0, 3)
+  const quickReplies = (options.quickReplies || [])
+    .map(reply => ({
+      content_type: 'text' as const,
+      title: cleanButtonTitle(reply.title, ''),
+      payload: cleanString(reply.payload, 1000),
+    }))
+    .filter(reply => reply.title && reply.payload)
+    .slice(0, 13)
   const fallback: MetaMessageSendPlan = {
     kind: 'text',
-    message: { text: textFallbackForButtonUrl(message, urlFromButtonField) },
+    message: {
+      text: buttons.length
+        ? textFallbackForUrlButtons(message, buttons)
+        : quickReplies.length
+        ? textFallbackForQuickReplies(message, quickReplies)
+        : textFallbackForButtonUrl(message, urlFromButtonField),
+    },
   }
 
   if (process.env.META_COMMENT_DM_LINK_BUTTONS_ENABLED === 'false') return [fallback]
 
+  if (buttons.length > 0) {
+    const buttonText = cleanString(message, 640)
+    if (!buttonText) return [fallback]
+    return [
+      {
+        kind: 'button_template',
+        message: {
+          attachment: {
+            type: 'template',
+            payload: {
+              template_type: 'button',
+              text: buttonText,
+              buttons,
+            },
+          },
+        },
+      },
+      fallback,
+    ]
+  }
+
+  if (quickReplies.length > 0) {
+    return [
+      {
+        kind: 'quick_replies',
+        message: {
+          text: cleanString(message, 1800),
+          quick_replies: quickReplies,
+        },
+      },
+      fallback,
+    ]
+  }
+
   if (!url) return [fallback]
 
   const buttonText = cleanString(textWithoutUrlForButton(message, url), 640)
-  const title = cleanString(buttonTitleForUrl(url), 20)
+  const title = cleanString(buttonTitleForUrl(url, options.buttonTitle), 20)
   if (!buttonText || !title) return [fallback]
 
   return [
@@ -700,6 +920,9 @@ async function sendInstagramDirectMessageToRecipient(params: {
   recipientId: string
   message: string
   buttonUrl?: string
+  buttonTitle?: string
+  quickReplies?: MetaQuickReply[]
+  buttons?: MetaUrlButton[]
   supabase?: SupabaseAdmin
 }) {
   const supabase = params.supabase || createAdminClient()
@@ -739,7 +962,11 @@ async function sendInstagramDirectMessageToRecipient(params: {
 
   let lastError = ''
   const attemptErrors: string[] = []
-  const sendPlans = buildMetaMessageSendPlans(message, params.buttonUrl)
+  const sendPlans = buildMetaMessageSendPlans(message, params.buttonUrl, {
+    buttonTitle: params.buttonTitle,
+    quickReplies: params.quickReplies,
+    buttons: params.buttons,
+  })
   for (const attempt of attempts) {
     for (const plan of sendPlans) {
       try {
@@ -772,6 +999,9 @@ export async function sendInstagramPrivateReply(params: {
   commentExternalId: string
   message: string
   buttonUrl?: string
+  buttonTitle?: string
+  quickReplies?: MetaQuickReply[]
+  buttons?: MetaUrlButton[]
   supabase?: SupabaseAdmin
 }) {
   const supabase = params.supabase || createAdminClient()
@@ -821,7 +1051,11 @@ export async function sendInstagramPrivateReply(params: {
 
   let lastError = ''
   const attemptErrors: string[] = []
-  const sendPlans = buildMetaMessageSendPlans(reply, params.buttonUrl)
+  const sendPlans = buildMetaMessageSendPlans(reply, params.buttonUrl, {
+    buttonTitle: params.buttonTitle,
+    quickReplies: params.quickReplies,
+    buttons: params.buttons,
+  })
   for (const attempt of attempts) {
     for (const plan of sendPlans) {
       try {
@@ -888,6 +1122,9 @@ async function sendFacebookPrivateReply(params: {
   commentExternalId: string
   message: string
   buttonUrl?: string
+  buttonTitle?: string
+  quickReplies?: MetaQuickReply[]
+  buttons?: MetaUrlButton[]
   supabase?: SupabaseAdmin
 }) {
   const supabase = params.supabase || createAdminClient()
@@ -915,7 +1152,11 @@ async function sendFacebookPrivateReply(params: {
 
   let lastError = ''
   const attemptErrors: string[] = []
-  const sendPlans = buildMetaMessageSendPlans(reply, params.buttonUrl)
+  const sendPlans = buildMetaMessageSendPlans(reply, params.buttonUrl, {
+    buttonTitle: params.buttonTitle,
+    quickReplies: params.quickReplies,
+    buttons: params.buttons,
+  })
   for (const attempt of attempts) {
     for (const plan of sendPlans) {
       try {
@@ -989,6 +1230,9 @@ async function sendPrivateReplyForDelivery(params: {
   delivery: DeliveryRow
   message: string
   buttonUrl?: string
+  buttonTitle?: string
+  quickReplies?: MetaQuickReply[]
+  buttons?: MetaUrlButton[]
   supabase: SupabaseAdmin
 }) {
   if (params.delivery.platform === 'facebook') {
@@ -996,6 +1240,9 @@ async function sendPrivateReplyForDelivery(params: {
       commentExternalId: params.delivery.comment_external_id,
       message: params.message,
       buttonUrl: params.buttonUrl,
+      buttonTitle: params.buttonTitle,
+      quickReplies: params.quickReplies,
+      buttons: params.buttons,
       supabase: params.supabase,
     })
   }
@@ -1004,6 +1251,9 @@ async function sendPrivateReplyForDelivery(params: {
     commentExternalId: params.delivery.comment_external_id,
     message: params.message,
     buttonUrl: params.buttonUrl,
+    buttonTitle: params.buttonTitle,
+    quickReplies: params.quickReplies,
+    buttons: params.buttons,
     supabase: params.supabase,
   })
 }
@@ -1393,6 +1643,8 @@ async function saveDelivery(
   const buttonUrl = getCampaignButtonUrl(campaign)
   const requiresVoteProof = campaignRequiresVoteProof(campaign)
   const campaignRaw = (campaign.raw || {}) as Record<string, unknown>
+  const commentDmFlow = getCampaignCommentDmFlow(campaign)
+  const commentDmFlowRaw = commentDmFlow ? serializeCommentDmFlow(commentDmFlow) : null
   const directOffer = cleanString(
     campaignRaw.direct_offer || campaignRaw.flow || (requiresVoteProof ? 'vote_proof_gate' : 'profile_assessment_direct_access'),
     120,
@@ -1428,6 +1680,7 @@ async function saveDelivery(
         button_url: buttonUrl || null,
         direct_offer: directOffer,
         requires_vote_proof: requiresVoteProof,
+        comment_dm_flow: commentDmFlowRaw,
         campaign_snapshot: {
           id: campaign.id,
           name: campaign.name,
@@ -1437,6 +1690,7 @@ async function saveDelivery(
           button_url: buttonUrl || null,
           direct_offer: directOffer,
           requires_vote_proof: requiresVoteProof,
+          comment_dm_flow: commentDmFlowRaw,
         },
       },
       updated_at: now,
@@ -1590,6 +1844,8 @@ async function sendDelivery(
   if (delivery.send_status === 'sent') return delivery
   const reply = cleanString(replyOverride || delivery.reply_message, 1800)
   const buttonUrl = getDeliveryButtonUrl(delivery)
+  const commentDmFlow = getDeliveryCommentDmFlow(delivery)
+  const buttons = commentDmFlow ? buildCommentDmFlowUrlButtons(commentDmFlow) : undefined
   if (!reply) throw new Error('Entrega sem mensagem para Private Reply.')
 
   try {
@@ -1597,6 +1853,7 @@ async function sendDelivery(
       delivery,
       message: reply,
       buttonUrl,
+      buttons,
       supabase,
     })
     const sentDelivery = await updateDeliveryAfterSend(supabase, { ...delivery, reply_message: reply }, result)
@@ -1827,6 +2084,19 @@ export async function saveCommentDmCampaign(input: Record<string, unknown>) {
   if (!replyMessage) throw new Error('Informe a mensagem de Direct.')
   if (buttonUrlInput && !buttonUrl) throw new Error('Informe um link valido para o botao ou deixe o campo vazio.')
 
+  let existingRaw: Record<string, unknown> = {}
+  if (id) {
+    const { data: existing, error: existingError } = await supabase
+      .from('meta_comment_dm_campaigns')
+      .select('raw')
+      .eq('id', id)
+      .maybeSingle()
+    if (existingError) throw new Error(existingError.message)
+    existingRaw = existing?.raw && typeof existing.raw === 'object'
+      ? existing.raw as Record<string, unknown>
+      : {}
+  }
+
   const row = {
     name,
     platform: normalizePlatform(input.platform) || 'instagram',
@@ -1840,10 +2110,14 @@ export async function saveCommentDmCampaign(input: Record<string, unknown>) {
     status: normalizeStatus(input.status),
     max_replies_per_hour: clampNumber(input.max_replies_per_hour, 60, 1, 1000),
     raw: {
+      ...existingRaw,
       created_from: 'admin_social_inbox',
       button_url: buttonUrl || null,
-      direct_offer: 'profile_assessment_direct_access',
-      requires_vote_proof: false,
+      direct_offer: cleanString(existingRaw.direct_offer || existingRaw.flow || existingRaw.campaign_flow, 120)
+        || 'profile_assessment_direct_access',
+      requires_vote_proof: typeof existingRaw.requires_vote_proof === 'boolean'
+        ? existingRaw.requires_vote_proof
+        : false,
     },
     updated_at: nowIso(),
   }
@@ -2044,14 +2318,18 @@ async function recordInstagramDirectOutbound(supabase: SupabaseAdmin, event: Web
   external_id?: string
   channel?: string
   raw?: unknown
-}) {
+}, options: {
+  source?: string
+  metadata?: Record<string, unknown>
+} = {}) {
   const now = nowIso()
+  const source = cleanString(options.source, 120) || 'instagram_vote_proof_automation'
   await supabase
     .from('meta_social_messages')
     .upsert({
       thread_id: event.thread_id,
       platform: 'instagram',
-      external_id: result.external_id || `outbound_vote_proof_${event.external_id}_${Date.now()}`,
+      external_id: result.external_id || `outbound_${source}_${event.external_id}_${Date.now()}`,
       sender_id: event.recipient_id,
       recipient_id: event.sender_id,
       direction: 'outbound',
@@ -2059,7 +2337,8 @@ async function recordInstagramDirectOutbound(supabase: SupabaseAdmin, event: Web
       sent_at: now,
       raw: {
         channel: result.channel || null,
-        source: 'instagram_vote_proof_automation',
+        source,
+        ...(options.metadata || {}),
         result: result.raw || result,
       },
       updated_at: now,
@@ -2077,6 +2356,184 @@ async function updateDeliveryVoteProofRaw(supabase: SupabaseAdmin, delivery: Del
       updated_at: nowIso(),
     })
     .eq('id', delivery.id)
+}
+
+async function updateDeliveryCommentDmFlowRaw(supabase: SupabaseAdmin, delivery: DeliveryRow, payload: Record<string, unknown>) {
+  const raw = (delivery.raw || {}) as Record<string, any>
+  const history = Array.isArray(raw.comment_dm_flow_history) ? raw.comment_dm_flow_history : []
+  await supabase
+    .from('meta_comment_dm_deliveries')
+    .update({
+      raw: {
+        ...raw,
+        comment_dm_flow_last: payload,
+        comment_dm_flow_history: [...history.slice(-9), payload],
+      },
+      updated_at: nowIso(),
+    })
+    .eq('id', delivery.id)
+}
+
+function getInstagramQuickReplyPayload(event: WebhookMessageEvent) {
+  const raw = (event.raw || {}) as Record<string, any>
+  return cleanString(
+    raw?.messaging?.message?.quick_reply?.payload
+    || raw?.message?.quick_reply?.payload
+    || raw?.quick_reply?.payload,
+    1000,
+  )
+}
+
+function getCommentDmFlowCampaignIdFromPayload(payload: string) {
+  const match = payload.match(/^comment_dm_flow:([^:]+):(already_voted|will_vote)$/)
+  return match?.[1] || ''
+}
+
+function detectCommentDmFlowAction(event: WebhookMessageEvent): {
+  action: 'already_voted' | 'will_vote'
+  campaignId?: string
+  source: 'quick_reply' | 'text'
+} | null {
+  const payload = getInstagramQuickReplyPayload(event)
+  const normalizedPayload = normalizeText(payload)
+  if (normalizedPayload.includes('comment dm flow') && normalizedPayload.includes('already voted')) {
+    return { action: 'already_voted', campaignId: getCommentDmFlowCampaignIdFromPayload(payload), source: 'quick_reply' }
+  }
+  if (normalizedPayload.includes('comment dm flow') && normalizedPayload.includes('will vote')) {
+    return { action: 'will_vote', campaignId: getCommentDmFlowCampaignIdFromPayload(payload), source: 'quick_reply' }
+  }
+
+  const normalizedText = normalizeText(event.text)
+  if (!normalizedText) return null
+  if (
+    normalizedText.includes('vou votar')
+    || normalizedText.includes('quero votar')
+    || normalizedText.includes('votar agora')
+    || normalizedText.includes('ainda nao votei')
+    || normalizedText.includes('nao votei')
+  ) {
+    return { action: 'will_vote', source: 'text' }
+  }
+  if (
+    normalizedText.includes('ja votei')
+    || normalizedText === 'votei'
+    || normalizedText.includes('eu votei')
+    || normalizedText.includes('voto feito')
+  ) {
+    return { action: 'already_voted', source: 'text' }
+  }
+
+  return null
+}
+
+async function loadCommentDmFlowForCampaign(supabase: SupabaseAdmin, campaignId: string) {
+  const selected = cleanString(campaignId, 80)
+  if (!selected) return null
+  const { data, error } = await supabase
+    .from('meta_comment_dm_campaigns')
+    .select('raw')
+    .eq('id', selected)
+    .maybeSingle()
+
+  if (error) throw new Error(error.message)
+  return getCommentDmFlowFromRaw(data?.raw)
+}
+
+async function findRecentCommentDmFlowDelivery(supabase: SupabaseAdmin, senderId: string, campaignId?: string) {
+  const safeSenderId = cleanString(senderId, 160)
+  if (!safeSenderId) return null
+
+  const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+  let query = supabase
+    .from('meta_comment_dm_deliveries')
+    .select('id, campaign_id, comment_id, platform, comment_external_id, media_external_id, author_id, author_name, comment_text, ai_matches, ai_confidence, ai_reason, normalized_intent, reply_message, decision, send_status, private_reply_external_id, private_reply_channel, error, processed_at, sent_at, raw, created_at, updated_at')
+    .eq('platform', 'instagram')
+    .eq('send_status', 'sent')
+    .gte('sent_at', since)
+    .order('sent_at', { ascending: false, nullsFirst: false })
+    .limit(200)
+
+  if (campaignId) query = query.eq('campaign_id', campaignId)
+
+  const { data, error } = await query
+  if (error) throw new Error(error.message)
+
+  for (const delivery of ((data || []) as DeliveryRow[])) {
+    const recipientId = extractPrivateReplyRecipientId(delivery)
+    if (delivery.author_id !== safeSenderId && recipientId !== safeSenderId) continue
+
+    const deliveryFlow = getDeliveryCommentDmFlow(delivery)
+    if (deliveryFlow) return { delivery, flow: deliveryFlow }
+
+    const campaignFlow = await loadCommentDmFlowForCampaign(supabase, delivery.campaign_id)
+    if (campaignFlow) return { delivery, flow: campaignFlow }
+  }
+
+  return null
+}
+
+export async function processInstagramDirectCommentDmFlow(event: WebhookMessageEvent) {
+  if (event.platform !== 'instagram') return { success: true, processed: false, reason: 'not_instagram' }
+  if (event.duplicate) return { success: true, processed: false, reason: 'duplicate_message' }
+
+  const choice = detectCommentDmFlowAction(event)
+  if (!choice) return { success: true, processed: false, reason: 'not_comment_dm_flow_reply' }
+
+  const supabase = createAdminClient()
+  const found = await findRecentCommentDmFlowDelivery(supabase, event.sender_id, choice.campaignId)
+  if (!found) return { success: true, processed: false, reason: 'no_recent_comment_dm_flow_delivery' }
+
+  const { delivery, flow } = found
+  const isAlreadyVoted = choice.action === 'already_voted'
+  const responseMessage = cleanString(repairKnownPortugueseArtifacts(
+    isAlreadyVoted ? flow.alreadyVotedMessage : flow.voteMessage
+  ), 1800)
+  const buttonUrl = isAlreadyVoted ? flow.discountUrl : flow.voteUrl
+  const buttonTitle = isAlreadyVoted ? flow.alreadyVotedButtonTitle : flow.voteButtonTitle
+
+  const sent = await sendInstagramDirectMessageToRecipient({
+    recipientId: event.sender_id,
+    message: responseMessage,
+    buttonUrl,
+    buttonTitle,
+    supabase,
+  })
+
+  const flowPayload = {
+    inbound_message_id: event.external_id,
+    inbound_text: event.text,
+    quick_reply_payload: getInstagramQuickReplyPayload(event) || null,
+    choice: choice.action,
+    source: choice.source,
+    response_message: responseMessage,
+    button_url: buttonUrl,
+    button_title: buttonTitle,
+    outbound_message_id: sent.external_id || null,
+    outbound_channel: sent.channel || null,
+    processed_at: nowIso(),
+  }
+
+  await Promise.all([
+    recordInstagramDirectOutbound(supabase, event, responseMessage, sent, {
+      source: isAlreadyVoted ? 'instagram_comment_dm_flow_already_voted' : 'instagram_comment_dm_flow_will_vote',
+      metadata: {
+        comment_dm_campaign_id: delivery.campaign_id,
+        comment_dm_delivery_id: delivery.id,
+        choice: choice.action,
+        button_url: buttonUrl,
+      },
+    }),
+    updateDeliveryCommentDmFlowRaw(supabase, delivery, flowPayload),
+  ])
+
+  return {
+    success: true,
+    processed: true,
+    action: choice.action,
+    delivery_id: delivery.id,
+    outbound_message_id: sent.external_id || null,
+    sent: true,
+  }
 }
 
 export function extractMetaWebhookMessageEvents(payload: any): Omit<WebhookMessageEvent, 'thread_id' | 'duplicate'>[] {

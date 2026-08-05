@@ -6,6 +6,7 @@ import {
   ingestMetaWebhookMessages,
   ingestMetaWebhookComments,
   processInstagramCommentForDmAutomation,
+  processInstagramDirectCommentDmFlow,
   processInstagramDirectVoteProof,
   shouldAutoprocessWebhook,
 } from '@/lib/social/meta-comment-dm-automation'
@@ -374,7 +375,11 @@ export async function POST(request: NextRequest) {
             }))
           }
           for (const message of messages.filter(item => item.platform === 'instagram').slice(0, 8)) {
-            automation.push(await processInstagramDirectVoteProof(message))
+            const commentDmFlow = await processInstagramDirectCommentDmFlow(message)
+            automation.push(commentDmFlow)
+            if (!(commentDmFlow as any)?.processed) {
+              automation.push(await processInstagramDirectVoteProof(message))
+            }
           }
         }
       } catch (automationError) {
