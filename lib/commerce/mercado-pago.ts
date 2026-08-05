@@ -63,6 +63,13 @@ export function mercadoPagoAmountToCents(value: unknown) {
   return Math.round(amount * 100)
 }
 
+export function mercadoPagoIdToString(value: unknown) {
+  if (typeof value === 'string' && value.trim()) return value.trim()
+  if (typeof value === 'number' && Number.isFinite(value)) return String(value)
+  if (typeof value === 'bigint') return value.toString()
+  return ''
+}
+
 export function extractMercadoPagoPixData(payment: MercadoPagoPaymentPayload) {
   const transactionData = payment?.point_of_interaction?.transaction_data || {}
   return {

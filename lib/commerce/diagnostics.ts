@@ -14,6 +14,7 @@ import {
   getMercadoPagoCurrentUser,
   getMercadoPagoPayment,
   getMercadoPagoPaymentMethod,
+  mercadoPagoIdToString,
   mercadoPagoAmountToCents,
   normalizeMercadoPagoPaymentStatus,
 } from './mercado-pago'
@@ -602,7 +603,7 @@ export async function createSandboxDiagnosticPix(
 
   const pix = extractMercadoPagoPixData(remotePayment)
   const paymentStatus = normalizeMercadoPagoPaymentStatus(remotePayment.status)
-  const providerPaymentId = text(remotePayment.id)
+  const providerPaymentId = mercadoPagoIdToString(remotePayment.id)
 
   const { data: payment, error: paymentError } = await supabase
     .from('commerce_payments')

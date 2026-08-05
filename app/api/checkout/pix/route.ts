@@ -15,9 +15,11 @@ import {
   createMercadoPagoPixPayment,
   extractMercadoPagoPixData,
   getMercadoPagoPaymentMethod,
+  mercadoPagoIdToString,
   mercadoPagoAmountToCents,
   normalizeMercadoPagoPaymentStatus,
 } from '@/lib/commerce/mercado-pago'
+import { fulfillApprovedOrder } from '@/lib/commerce/fulfillment'
 import { commerceMessageVariables, dispatchCommerceMessage } from '@/lib/commerce/transactional-messages'
 
 type CheckoutPixBody = {
@@ -267,7 +269,7 @@ export async function POST(request: NextRequest) {
 
     const pix = extractMercadoPagoPixData(mercadoPagoPayment)
     const paymentStatus = normalizeMercadoPagoPaymentStatus(mercadoPagoPayment.status)
-    const providerPaymentId = String(mercadoPagoPayment.id || '')
+    const providerPaymentId = mercadoPagoIdToString(mercadoPagoPayment.id)
 
     const { data: payment, error: paymentError } = await supabase
       .from('commerce_payments')
@@ -316,34 +318,45 @@ export async function POST(request: NextRequest) {
         .eq('id', lead.id),
     ])
 
-    await dispatchCommerceMessage({
-      supabase,
-      templateKey: 'checkout_pix_generated',
-      channel: 'whatsapp',
-      customer,
-      order: {
-        ...order,
-        status: paymentStatus === 'approved' ? 'paid' : 'pending_payment',
-        total_cents: totalCents,
-      },
-      payment,
-      educationLeadId: lead.id,
-      variables: commerceMessageVariables({
+    let fulfillment = null
+    if (paymentStatus === 'approved') {
+      fulfillment = await fulfillApprovedOrder({
+        supabase,
+        orderId: order.id,
+        paymentId: payment.id,
+        source: 'checkout_pix_immediate_approval',
+        remotePayment: mercadoPagoPayment,
+      })
+    } else {
+      await dispatchCommerceMessage({
+        supabase,
+        templateKey: 'checkout_pix_generated',
+        channel: 'whatsapp',
         customer,
-        productName: checkout.product.title,
         order: {
           ...order,
+          status: 'pending_payment',
           total_cents: totalCents,
         },
-        payment: {
-          ...payment,
-          pix_qr_code: pix.qrCode,
-        },
-        checkoutUrl,
-      }),
-    }).catch((error) => {
-      console.warn('[Checkout Pix] transactional WhatsApp failed:', error instanceof Error ? error.message : error)
-    })
+        payment,
+        educationLeadId: lead.id,
+        variables: commerceMessageVariables({
+          customer,
+          productName: checkout.product.title,
+          order: {
+            ...order,
+            total_cents: totalCents,
+          },
+          payment: {
+            ...payment,
+            pix_qr_code: pix.qrCode,
+          },
+          checkoutUrl,
+        }),
+      }).catch((error) => {
+        console.warn('[Checkout Pix] transactional WhatsApp failed:', error instanceof Error ? error.message : error)
+      })
+    }
 
     return NextResponse.json({
       success: true,
@@ -373,6 +386,7 @@ export async function POST(request: NextRequest) {
         name: customerInput.name,
         email: customerInput.email,
       },
+      fulfillment,
     })
   } catch (error) {
     console.error('[Checkout Pix] failed:', error)

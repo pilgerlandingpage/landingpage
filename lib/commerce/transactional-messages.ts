@@ -1,3 +1,4 @@
+import { createHash } from 'crypto'
 import { sendWhatsAppMessage } from '@/lib/connectyhub/whatsapp'
 import { sendBrevoEmail } from '@/lib/email/brevo'
 import { centsToMoney, loadCommerceConfig, normalizeBrazilPhone } from './checkout'
@@ -53,6 +54,31 @@ function providerMessageId(response: unknown) {
   return text(data.messageId || data.message_id || data.id || data.uuid || data?.data?.id)
 }
 
+function stableMessageDispatchId(orderId: string, templateId: string, channel: string) {
+  const hash = createHash('sha256')
+    .update(`${orderId}:${templateId}:${channel}`)
+    .digest('hex')
+  const variant = ((Number.parseInt(hash.slice(16, 18), 16) & 0x3f) | 0x80)
+    .toString(16)
+    .padStart(2, '0')
+
+  return [
+    hash.slice(0, 8),
+    hash.slice(8, 12),
+    `5${hash.slice(13, 16)}`,
+    `${variant}${hash.slice(18, 20)}`,
+    hash.slice(20, 32),
+  ].join('-')
+}
+
+function isDuplicateKeyError(error: any) {
+  return error?.code === '23505'
+}
+
+function isAlreadyHandledStatus(value: unknown) {
+  return ['queued', 'sending', 'sent', 'delivered', 'read', 'skipped'].includes(String(value || ''))
+}
+
 function formatDateTimePtBr(value: unknown) {
   const date = value ? new Date(String(value)) : null
   if (!date || Number.isNaN(date.getTime())) return ''
@@ -90,18 +116,23 @@ export async function dispatchCommerceMessage(params: CommerceMessageParams) {
   if (!template) return { skipped: true, reason: 'template_not_found' }
 
   const orderId = text(order?.id)
+  const dispatchId = orderId ? stableMessageDispatchId(orderId, text(template.id), channel) : ''
+  let retryDispatch: Record<string, any> | null = null
   if (orderId) {
     const { data: existing, error: existingError } = await supabase
       .from('message_dispatches')
-      .select('id, status')
+      .select('*')
       .eq('order_id', orderId)
       .eq('template_id', template.id)
       .eq('channel', channel)
-      .in('status', ['queued', 'sending', 'sent', 'delivered', 'read', 'skipped'])
+      .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle()
     if (existingError) throw existingError
-    if (existing) return { skipped: true, reason: 'already_dispatched', dispatch: existing }
+    if (existing && isAlreadyHandledStatus(existing.status)) {
+      return { skipped: true, reason: 'already_dispatched', dispatch: existing }
+    }
+    if (existing) retryDispatch = existing
   }
 
   const config = await loadCommerceConfig()
@@ -153,21 +184,81 @@ export async function dispatchCommerceMessage(params: CommerceMessageParams) {
     const { data, error } = await supabase
       .from('message_dispatches')
       .insert([{
+        ...(dispatchId ? { id: dispatchId } : {}),
         ...baseDispatch,
         status: 'skipped',
         error_message: reason,
       }])
       .select()
       .single()
+    if (isDuplicateKeyError(error) && dispatchId) {
+      const { data: existing, error: existingError } = await supabase
+        .from('message_dispatches')
+        .select('*')
+        .eq('id', dispatchId)
+        .maybeSingle()
+      if (existingError) throw existingError
+      if (existing) return { skipped: true, reason: 'already_dispatched', dispatch: existing }
+    }
     if (error) throw error
     return { skipped: true, reason, dispatch: data }
   }
 
-  const { data: dispatch, error: dispatchError } = await supabase
-    .from('message_dispatches')
-    .insert([{ ...baseDispatch, status: sendNow ? 'sending' : 'queued' }])
-    .select()
-    .single()
+  const dispatchPayload = {
+    ...(dispatchId ? { id: dispatchId } : {}),
+    ...baseDispatch,
+    status: sendNow ? 'sending' : 'queued',
+    error_message: null,
+  }
+
+  const dispatchResult = retryDispatch
+    ? await supabase
+        .from('message_dispatches')
+        .update({
+          ...dispatchPayload,
+          id: retryDispatch.id,
+          provider_message_id: null,
+          sent_at: null,
+        })
+        .eq('id', retryDispatch.id)
+        .select()
+        .single()
+    : await supabase
+        .from('message_dispatches')
+        .insert([dispatchPayload])
+        .select()
+        .single()
+
+  let dispatch = dispatchResult.data
+  let dispatchError = dispatchResult.error
+
+  if (isDuplicateKeyError(dispatchError) && dispatchId) {
+    const { data: existing, error: existingError } = await supabase
+      .from('message_dispatches')
+      .select('*')
+      .eq('id', dispatchId)
+      .maybeSingle()
+    if (existingError) throw existingError
+    if (existing && isAlreadyHandledStatus(existing.status)) {
+      return { skipped: true, reason: 'already_dispatched', dispatch: existing }
+    }
+    if (existing) {
+      const { data: updated, error: updateError } = await supabase
+        .from('message_dispatches')
+        .update({
+          ...dispatchPayload,
+          id: existing.id,
+          provider_message_id: null,
+          sent_at: null,
+        })
+        .eq('id', existing.id)
+        .select()
+        .single()
+      if (updateError) throw updateError
+      dispatch = updated
+      dispatchError = null
+    }
+  }
 
   if (dispatchError) throw dispatchError
   if (!sendNow) return { queued: true, dispatch }

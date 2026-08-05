@@ -3,11 +3,11 @@ import { createHmac, timingSafeEqual } from 'crypto'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { loadCommerceConfig } from '@/lib/commerce/checkout'
 import { fulfillApprovedOrder, mapPaymentStatusToOrderStatus } from '@/lib/commerce/fulfillment'
-import { commerceMessageVariables, dispatchCommerceMessage } from '@/lib/commerce/transactional-messages'
 import {
   extractMercadoPagoPixData,
   getMercadoPagoPayment,
   getMercadoPagoPaymentMethod,
+  mercadoPagoIdToString,
   mercadoPagoAmountToCents,
   normalizeMercadoPagoPaymentStatus,
 } from '@/lib/commerce/mercado-pago'
@@ -136,7 +136,7 @@ async function findOrderForPayment(supabase: ReturnType<typeof createSupabaseAdm
     if (data) return data
   }
 
-  const providerPaymentId = text(remotePayment.id)
+  const providerPaymentId = mercadoPagoIdToString(remotePayment.id)
   if (providerPaymentId) {
     const { data: payment, error } = await supabase
       .from('commerce_payments')
@@ -165,7 +165,7 @@ async function upsertPaymentFromRemote(params: {
   remotePayment: Record<string, any>
 }) {
   const { supabase, order, remotePayment } = params
-  const providerPaymentId = text(remotePayment.id)
+  const providerPaymentId = mercadoPagoIdToString(remotePayment.id)
   const pix = extractMercadoPagoPixData(remotePayment)
   const status = normalizeMercadoPagoPaymentStatus(remotePayment.status)
   const paidAt = status === 'approved' ? (remotePayment.date_approved || new Date().toISOString()) : null
@@ -217,46 +217,6 @@ async function upsertPaymentFromRemote(params: {
 
   if (error) throw error
   return data
-}
-
-async function dispatchPendingPaymentMessage(params: {
-  supabase: ReturnType<typeof createSupabaseAdminClient>
-  order: Record<string, any>
-  payment: Record<string, any>
-}) {
-  const { supabase, order, payment } = params
-  if (!order.customer_id) return null
-
-  const [customerRes, itemsRes] = await Promise.all([
-    supabase.from('commerce_customers').select('*').eq('id', order.customer_id).maybeSingle(),
-    supabase.from('commerce_order_items').select('title_snapshot').eq('order_id', order.id),
-  ])
-
-  if (customerRes.error) throw customerRes.error
-  if (itemsRes.error) throw itemsRes.error
-  if (!customerRes.data) return null
-
-  const productName = (itemsRes.data || [])
-    .map((item: any) => text(item.title_snapshot))
-    .filter(Boolean)
-    .join(' + ') || 'Produto digital Guilherme Pilger'
-
-  return dispatchCommerceMessage({
-    supabase,
-    templateKey: 'checkout_payment_pending',
-    channel: 'whatsapp',
-    customer: customerRes.data,
-    order,
-    payment,
-    educationLeadId: order.education_lead_id,
-    variables: commerceMessageVariables({
-      customer: customerRes.data,
-      productName,
-      order,
-      payment,
-      checkoutUrl: text(order.metadata?.checkout_url),
-    }),
-  })
 }
 
 export async function POST(request: NextRequest) {
@@ -366,10 +326,6 @@ export async function POST(request: NextRequest) {
         paymentId: payment.id,
         source: 'mercado_pago_webhook',
         remotePayment,
-      })
-    } else if (['pending', 'authorized', 'in_process'].includes(paymentStatus)) {
-      await dispatchPendingPaymentMessage({ supabase, order, payment }).catch((error) => {
-        console.warn('[Mercado Pago Webhook] pending message failed:', error instanceof Error ? error.message : error)
       })
     }
 
