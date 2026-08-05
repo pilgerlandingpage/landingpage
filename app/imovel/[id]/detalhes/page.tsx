@@ -1827,7 +1827,12 @@ async function getRelatedPropertyCandidates(supabase: any, property: any) {
 
 type PropertyDetailPageProps = {
     params: Promise<{ id: string }>
-    canonicalize?: boolean
+    searchParams?: Promise<{ canonicalize?: string | string[] }>
+}
+
+function shouldCanonicalize(value?: string | string[]) {
+    const normalized = Array.isArray(value) ? value[0] : value
+    return normalized !== 'false'
 }
 
 function PropertyLookupUnavailablePage({ identifier }: { identifier: string }) {
@@ -1961,10 +1966,12 @@ function PropertyLookupUnavailablePage({ identifier }: { identifier: string }) {
 
 export default async function PropertyDetailPage({
     params,
-    canonicalize = true,
+    searchParams,
 }: PropertyDetailPageProps) {
     const supabase = createAdminClient()
     const { id } = await params
+    const resolvedSearchParams = searchParams ? await searchParams : undefined
+    const canonicalize = shouldCanonicalize(resolvedSearchParams?.canonicalize)
 
     let property = null
     try {

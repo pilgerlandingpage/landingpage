@@ -22,11 +22,16 @@ export const corretorNota8Offer = {
     productName: 'Corretor Nota 8',
     author: 'Guilherme Pilger',
     format: 'Livro digital',
-    priceInCents: 9700,
-    priceDisplay: 'R$ 97,00',
-    shortPriceDisplay: 'R$ 97',
-    primaryCtaLabel: 'Quero garantir meu exemplar',
-    mobileCtaLabel: 'Comprar agora',
+    originalPriceInCents: 9700,
+    originalPriceDisplay: 'R$ 97,00',
+    discountPercent: 30,
+    discountLabel: 'Seu desconto de 30%',
+    discountDescription: 'De R$ 97,00 por R$ 67,90',
+    priceInCents: 6790,
+    priceDisplay: 'R$ 67,90',
+    shortPriceDisplay: 'R$ 67,90',
+    primaryCtaLabel: 'QUERO ACESSAR POR R$ 67,90',
+    mobileCtaLabel: 'QUERO ACESSAR',
     checkoutUrl: CORRETOR_NOTA_8_CHECKOUT_URL,
 }
 
@@ -39,15 +44,15 @@ export const corretorNota8ProfileAssessmentOffer = {
 }
 
 export const corretorNota8Content = {
-    badge: 'Livro digital',
-    subtitle: 'Posicionamento, método e disciplina para corretores que querem atuar melhor no alto padrão',
+    badge: 'Seu desconto de 30% está ativo',
+    subtitle: 'Livro de campo para avaliar 25 competências e transformar prioridades em plano de execução.',
     description:
-        'Um livro de campo para o corretor que quer sair do improviso, organizar sua rotina comercial e construir uma presença mais clara diante de clientes exigentes.',
+        'O Corretor Nota 8 é um livro digital de campo que combina trajetória, método, diagnóstico de 25 competências e um plano de execução de 30 dias para corretores do mercado imobiliário de alto padrão.',
     coverImage: '/images/products/corretor-nota-8-cover.webp',
     trustItems: [
-        'Formato digital',
-        'Criado para o mercado imobiliário',
-        'Foco em posicionamento e método',
+        '25 competências',
+        '5 dimensões',
+        'Plano de 30 dias',
     ],
     problems: [
         {
@@ -86,70 +91,86 @@ export const corretorNota8Content = {
     dimensions: [
         {
             title: 'Direção',
-            description: 'Escolha de mercado, clareza de jogo e foco no tipo de corretor que você quer se tornar.',
+            description:
+                'Metas claras, autorresponsabilidade e controle financeiro para saber aonde você quer chegar e medir o que está construindo.',
         },
         {
             title: 'Execução',
-            description: 'Rotina, processos simples e capacidade de fazer o trabalho importante acontecer.',
+            description:
+                'Foco em vendas, proatividade, disciplina, rotina, captação e velocidade contra a procrastinação.',
         },
         {
             title: 'Autoridade',
-            description: 'Repertório, comunicação e sinais que fazem o cliente confiar antes da proposta.',
+            description:
+                'Posicionamento, imagem, comunicação, conhecimento de mercado, produção de conteúdo e inovação.',
         },
         {
-            title: 'Relacionamento',
-            description: 'Leitura de pessoas, networking e continuidade depois do primeiro contato.',
+            title: 'Relacionamento e conversão',
+            description:
+                'Escuta ativa, leitura de pessoas, atendimento estratégico, negociação e fechamento.',
         },
         {
-            title: 'Longevidade',
-            description: 'Reputação, energia e disciplina para permanecer relevante no mercado.',
+            title: 'Caráter, energia e longevidade',
+            description:
+                'Presença, resiliência, controle emocional, segurança, ética e consistência no relacionamento com clientes e equipe.',
         },
     ] satisfies ProductTextItem[],
     included: [
         {
             title: 'Livro digital Corretor Nota 8',
             description:
-                'Conteúdo estruturado para profissionais do mercado imobiliário que querem atuar com mais método no alto padrão.',
+                'Uma trajetória real transformada em princípios sobre posicionamento, presença, conteúdo, conhecimento, rotina, atendimento e mercado imobiliário de alto padrão.',
         },
         {
-            title: 'Raciocínio de autoavaliação',
+            title: 'Diagnóstico com 25 competências',
             description:
-                'Um jeito prático de observar onde sua rotina comercial está abaixo do potencial e o que precisa ser ajustado.',
+                'Uma avaliação de zero a dez com espaço para registrar evidências, identificar pontos fracos e definir a próxima ação.',
         },
         {
-            title: 'Princípios de posicionamento e relacionamento',
+            title: 'Plano de execução de 30 dias',
             description:
-                'Ideias para fortalecer autoridade, postura consultiva e constância nas relações comerciais.',
+                'Uma estrutura para escolher três prioridades, definir comportamentos, frequência, indicadores e acompanhar a evolução.',
+        },
+        {
+            title: 'Leitor digital protegido na área de membros',
+            description:
+                'Continue de onde parou e mantenha suas respostas do diagnóstico e do plano salvas no dispositivo.',
         },
     ] satisfies ProductTextItem[],
     authorBio:
-        'Guilherme Pilger atua no mercado imobiliário de alto padrão e organiza neste livro princípios de posicionamento, método comercial, relacionamento e disciplina para corretores que querem evoluir com mais critério.',
-    authorQuote: 'O corretor que organiza método, postura e disciplina passa a vender com mais clareza.',
+        'Guilherme Pilger é corretor de imóveis, empreendedor e produtor de conteúdo especializado no mercado imobiliário de alto padrão. Seu trabalho combina vendas, posicionamento, produção de conteúdo, presença de marca, educação de mercado e construção de experiências para compradores e investidores.',
+    authorQuote: 'Nota 8 não é perfeição. É consistência.',
     testimonials: [] as ProductTestimonial[],
     stats: [] as ProductStat[],
     faq: [
         {
-            title: 'Para quem é o Corretor Nota 8?',
+            title: 'O que é o Corretor Nota 8?',
             description:
-                'Para corretores, gestores e profissionais do mercado imobiliário que querem atuar com mais posicionamento, método, autoridade, relacionamento e disciplina.',
+                'É um livro digital de campo que combina trajetória, princípios comerciais, diagnóstico de competências e um plano de execução de 30 dias.',
+        },
+        {
+            title: 'Como funciona o Diagnóstico Nota 8?',
+            description:
+                'Você avalia 25 competências de zero a dez, registra evidências, identifica os pontos abaixo de 8 e escolhe até três prioridades.',
         },
         {
             title: 'O produto é físico ou digital?',
-            description: 'O formato confirmado para esta oferta é livro digital.',
+            description: 'O Corretor Nota 8 é um produto digital. Nenhum livro físico será enviado.',
         },
         {
-            title: 'Quanto custa?',
-            description: 'O preço oficial confirmado é R$ 97,00.',
-        },
-        {
-            title: 'O livro promete resultado financeiro?',
+            title: 'O livro garante aumento de vendas?',
             description:
-                'Não. A proposta é organizar critérios, postura e rotina comercial. Resultado depende da execução, do mercado e da realidade de cada profissional.',
+                'Não. O conteúdo oferece critérios, reflexões e ações para organizar a atuação profissional. Os resultados dependem da aplicação, da experiência e da realidade de cada corretor.',
         },
         {
-            title: 'O conteúdo serve para quem está começando?',
+            title: 'Como receberei o acesso?',
             description:
-                'Sim, desde que a pessoa queira construir base profissional. Também faz sentido para corretores experientes que precisam refinar método e posicionamento.',
+                'O acesso será enviado após a confirmação do pagamento, conforme o processo utilizado pela plataforma.',
+        },
+        {
+            title: 'O desconto já está aplicado?',
+            description:
+                'Sim. O valor original de R$ 97,00 está reduzido para R$ 67,90 nesta condição especial.',
         },
     ] satisfies ProductTextItem[],
 }
