@@ -2824,11 +2824,10 @@ export default function PropertyLandingStyles() {
                 .plp-market-model-grid {
                     display: grid;
                     grid-template-columns:
-                        minmax(158px, .82fr)
-                        minmax(280px, 1.18fr)
-                        minmax(158px, .8fr)
-                        minmax(128px, .58fr)
-                        minmax(250px, 1.05fr);
+                        minmax(170px, .92fr)
+                        minmax(320px, 1.45fr)
+                        minmax(170px, .9fr)
+                        minmax(140px, .68fr);
                     gap: 12px;
                     align-items: stretch;
                     min-width: 0;
@@ -2940,85 +2939,6 @@ export default function PropertyLandingStyles() {
                 .plp-market-model-difference--high strong,
                 .plp-market-model-difference--high small {
                     color: #8f6930;
-                }
-
-                .plp-market-model-chart {
-                    align-content: start;
-                }
-
-                .plp-market-model-chart h4 {
-                    color: #1f2428;
-                    font-weight: 640;
-                    text-align: center;
-                }
-
-                .plp-market-chart-frame {
-                    display: grid;
-                    grid-template-columns: 32px minmax(0, 1fr);
-                    gap: 6px;
-                    align-items: center;
-                    min-width: 0;
-                    min-height: 74px;
-                    padding: 6px 8px;
-                    border: 1px solid rgba(35,31,26,.07);
-                    border-radius: var(--plp-radius);
-                    background: rgba(255,255,255,.56);
-                }
-
-                .plp-market-chart-frame span {
-                    color: rgba(31,36,40,.56);
-                    font-size: 9px;
-                    font-weight: 850;
-                    line-height: 1;
-                }
-
-                .plp-market-chart-frame span:first-child {
-                    align-self: start;
-                    padding-top: 4px;
-                }
-
-                .plp-market-chart-frame span:last-child {
-                    grid-column: 1;
-                    align-self: end;
-                    padding-bottom: 4px;
-                }
-
-                .plp-market-chart-frame svg {
-                    grid-column: 2;
-                    grid-row: 1 / span 2;
-                    width: 100%;
-                    height: 70px;
-                    overflow: visible;
-                }
-
-                .plp-market-chart-frame path {
-                    fill: rgba(184,148,95,.14);
-                    stroke: none;
-                }
-
-                .plp-market-chart-frame polyline {
-                    fill: none;
-                    stroke: var(--plp-gold);
-                    stroke-linecap: round;
-                    stroke-linejoin: round;
-                    stroke-width: 3.2;
-                }
-
-                .plp-market-chart-frame circle {
-                    fill: #fff;
-                    stroke: var(--plp-gold-dark);
-                    stroke-width: 2.4;
-                }
-
-                .plp-market-chart-axis {
-                    display: grid;
-                    grid-template-columns: repeat(3, minmax(0, 1fr));
-                    gap: 6px;
-                    color: rgba(31,36,40,.58);
-                    font-size: 10px;
-                    font-weight: 850;
-                    line-height: 1.2;
-                    text-align: center;
                 }
 
                 .plp-market-advisor-cta {
@@ -3144,10 +3064,6 @@ export default function PropertyLandingStyles() {
                         grid-template-columns: repeat(2, minmax(0, 1fr));
                     }
 
-                    .plp-market-model-chart {
-                        grid-column: 1 / -1;
-                    }
-
                     .plp-market-advisor-cta {
                         grid-template-columns: 1fr;
                         gap: 14px;
@@ -3190,10 +3106,6 @@ export default function PropertyLandingStyles() {
 
                     .plp-market-model-grid small {
                         font-size: 13px;
-                    }
-
-                    .plp-market-chart-frame svg {
-                        height: 64px;
                     }
 
                     .plp-market-advisor-cta {

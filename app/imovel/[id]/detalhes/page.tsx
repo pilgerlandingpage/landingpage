@@ -1776,17 +1776,6 @@ function formatSignedCompactMoney(value: number | null) {
     return `${prefix}${formatCompactMoney(Math.abs(value))}`
 }
 
-function formatMarketShortDate(value?: string | null, fallback = 'Atual') {
-    if (!value) return fallback
-    const date = new Date(value)
-    if (Number.isNaN(date.getTime())) return fallback
-
-    return new Intl.DateTimeFormat('pt-BR', {
-        month: 'short',
-        year: '2-digit',
-    }).format(date).replace('.', '')
-}
-
 function buildSimplePriceHistory(property: any, events: PropertyPriceHistoryRow[]) {
     const currentPrice = numericValue(property.price)
     const publishedAt = propertyPublishedAt(property)
@@ -1820,57 +1809,6 @@ function buildSimplePriceHistory(property: any, events: PropertyPriceHistoryRow[
             previousPrice: numericValue(event.previous_price),
             nextPrice: numericValue(event.new_price),
         })),
-    }
-}
-
-function buildMarketSparkline(history: ReturnType<typeof buildSimplePriceHistory>) {
-    const basePrice = history.initialPrice || history.currentPrice
-    const points = [
-        { label: formatMarketShortDate(history.publishedAt), value: basePrice },
-        ...history.timeline.map(event => ({ label: event.date, value: event.nextPrice })),
-    ].filter(point => Number.isFinite(point.value) && point.value > 0)
-
-    const currentLabel = formatMarketShortDate(history.updatedAt)
-    const lastPoint = points[points.length - 1]
-    if (!lastPoint || lastPoint.value !== history.currentPrice || lastPoint.label !== currentLabel) {
-        points.push({ label: currentLabel, value: history.currentPrice })
-    }
-
-    if (points.length === 1) {
-        points.push({ label: currentLabel, value: points[0].value })
-    }
-
-    const values = points.map(point => point.value)
-    const rawMin = Math.min(...values)
-    const rawMax = Math.max(...values)
-    const padding = rawMax === rawMin ? rawMax * 0.04 : (rawMax - rawMin) * 0.12
-    const min = Math.max(0, rawMin - padding)
-    const max = rawMax + padding
-    const spread = max - min || 1
-    const xStart = 16
-    const xEnd = 284
-    const yTop = 18
-    const yBottom = 78
-    const coordinates = points.map((point, index) => {
-        const ratio = points.length === 1 ? 0 : index / (points.length - 1)
-        const x = xStart + ratio * (xEnd - xStart)
-        const y = yBottom - ((point.value - min) / spread) * (yBottom - yTop)
-        return { ...point, x, y }
-    })
-    const polyline = coordinates.map(point => `${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(' ')
-    const area = coordinates.length
-        ? `M${coordinates[0].x.toFixed(1)},${yBottom} L${polyline} L${coordinates[coordinates.length - 1].x.toFixed(1)},${yBottom} Z`
-        : ''
-
-    return {
-        points: coordinates,
-        polyline,
-        area,
-        minLabel: formatCompactMoney(Math.round(rawMin)),
-        maxLabel: formatCompactMoney(Math.round(rawMax)),
-        firstLabel: points[0]?.label || '',
-        middleLabel: points[Math.floor(points.length / 2)]?.label || '',
-        lastLabel: points[points.length - 1]?.label || '',
     }
 }
 
@@ -2260,7 +2198,6 @@ export default async function PropertyDetailPage({
         : marketHistory.deltaToMedian > 15
         ? 'high'
         : 'neutral'
-    const marketSparkline = buildMarketSparkline(simplePriceHistory)
     const marketComparableText = marketHistory.comparableCount
         ? `${marketHistory.comparableCount.toLocaleString('pt-BR')} imóveis semelhantes`
         : 'Comparáveis em curadoria'
@@ -2335,25 +2272,6 @@ export default async function PropertyDetailPage({
                         <small>{formatSignedCompactMoney(marketDifferenceMoney)}</small>
                     </article>
 
-                    <article className="plp-market-model-chart">
-                        <h4>Histórico de preço deste anúncio</h4>
-                        <div className="plp-market-chart-frame" aria-label="Histórico visual de preço do anúncio">
-                            <span>{marketSparkline.maxLabel}</span>
-                            <svg viewBox="0 0 300 96" role="img" aria-label="Linha de histórico de preço">
-                                <path d={marketSparkline.area} />
-                                <polyline points={marketSparkline.polyline} />
-                                {marketSparkline.points.map((point, index) => (
-                                    <circle key={`${point.label}-${index}`} cx={point.x} cy={point.y} r="3.6" />
-                                ))}
-                            </svg>
-                            <span>{marketSparkline.minLabel}</span>
-                        </div>
-                        <div className="plp-market-chart-axis">
-                            <span>{marketSparkline.firstLabel}</span>
-                            <span>{marketSparkline.middleLabel}</span>
-                            <span>{marketSparkline.lastLabel}</span>
-                        </div>
-                    </article>
                 </div>
             </article>
 
