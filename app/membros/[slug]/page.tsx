@@ -15,12 +15,13 @@ function encodedNext(slug: string) {
 export default async function MemberProductPage({ params }: PageContext) {
   const { slug } = await params
   const data = await loadMemberProduct(slug)
+  const adminPreview = Boolean(data.adminPreview && data.adminUser?.is_active)
 
   if (!data.user) {
-    redirect(`/login?next=${encodedNext(slug)}`)
+    redirect(`/membros/entrar?next=${encodedNext(slug)}`)
   }
 
-  if (!data.member || data.member.status !== 'active') {
+  if (!data.entitlement && !adminPreview && (!data.member || data.member.status !== 'active')) {
     return (
       <MemberAccessState
         title="Conta de membro não encontrada"
@@ -47,7 +48,7 @@ export default async function MemberProductPage({ params }: PageContext) {
       <MemberAccessState
         title="Produto ainda não liberado"
         message="Esta conta não possui acesso ativo a este produto. Se você acabou de comprar, aguarde a confirmação do pagamento."
-        actionHref="/checkout/corretor-nota-8"
+        actionHref={`/checkout/${slug}`}
         actionLabel="Ver ofertas disponíveis"
         icon="cart"
       />
@@ -59,7 +60,9 @@ export default async function MemberProductPage({ params }: PageContext) {
       product={data.product}
       contents={data.contents}
       progress={data.progress}
-      memberName={data.member.name || data.user.email || 'Membro Pilger'}
+      memberName={data.member?.name || data.adminUser?.name || data.user.email || 'Membro Pilger'}
+      canTrackProgress={Boolean(data.member?.id)}
+      adminPreview={adminPreview}
     />
   )
 }

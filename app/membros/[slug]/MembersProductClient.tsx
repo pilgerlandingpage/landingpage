@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import {
   ArrowLeft,
@@ -16,12 +16,15 @@ import {
   Play,
 } from 'lucide-react'
 import type { MemberContent, MemberProduct, MemberProgress } from '@/lib/members/access'
+import MemberLogoutButton from '../MemberLogoutButton'
 
 type MembersProductClientProps = {
   product: MemberProduct
   contents: MemberContent[]
   progress: MemberProgress[]
   memberName: string
+  canTrackProgress?: boolean
+  adminPreview?: boolean
 }
 
 type ProgressStatus = 'not_started' | 'in_progress' | 'completed'
@@ -46,15 +49,20 @@ function kindLabel(type: string) {
     lesson: 'Aula',
     video: 'Vídeo',
     pdf: 'PDF',
-    ebook: 'E-book',
+    ebook: 'Livro online',
     bonus: 'Bônus',
     external_link: 'Link',
+    digital_download: 'Ferramenta',
   }
   return labels[type] || 'Conteúdo'
 }
 
 function isVideoUrl(url: string) {
   return /\.(mp4|webm|ogg)(\?|#|$)/i.test(url)
+}
+
+function isInternalUrl(url: string) {
+  return url.startsWith('/')
 }
 
 function isPdfUrl(url: string) {
@@ -86,13 +94,30 @@ function firstPlayable(contents: MemberContent[]) {
   return contents.find((item) => item.content_type !== 'module') || contents[0] || null
 }
 
+function protectedBookAssetUrl(product: MemberProduct, content?: MemberContent | null) {
+  if (product.slug === 'corretor-nota-8' && content?.content_type === 'ebook') {
+    return `/membros/${product.slug}/livro`
+  }
+  return ''
+}
+
 export default function MembersProductClient({
   product,
   contents,
   progress,
   memberName,
+  canTrackProgress = true,
+  adminPreview = false,
 }: MembersProductClientProps) {
-  const [selectedId, setSelectedId] = useState(firstPlayable(contents)?.id || '')
+  const isBookOnlyProduct = product.slug === 'corretor-nota-8'
+  const productContents = useMemo(() => {
+    if (!isBookOnlyProduct) return contents
+
+    const bookContent = contents.find((item) => item.content_type === 'ebook')
+    return bookContent ? [bookContent] : contents.filter((item) => item.content_type !== 'module').slice(0, 1)
+  }, [contents, isBookOnlyProduct])
+  const [selectedId, setSelectedId] = useState(firstPlayable(productContents)?.id || '')
+  const contentRef = useRef<HTMLElement | null>(null)
   const [progressMap, setProgressMap] = useState(() => {
     const map = new Map<string, MemberProgress>()
     progress.forEach((item) => map.set(item.product_content_id, item))
@@ -102,15 +127,15 @@ export default function MembersProductClient({
   const [error, setError] = useState('')
 
   const modules = useMemo(() => {
-    const moduleRows = contents.filter((item) => item.content_type === 'module')
-    const orphanLessons = contents.filter((item) => item.content_type !== 'module' && !item.parent_id)
+    const moduleRows = productContents.filter((item) => item.content_type === 'module')
+    const orphanLessons = productContents.filter((item) => item.content_type !== 'module' && !item.parent_id)
 
     if (!moduleRows.length) {
       return [{
         id: 'default',
         title: 'Conteúdos',
         description: product.subtitle || product.description,
-        items: contents.filter((item) => item.content_type !== 'module'),
+        items: productContents.filter((item) => item.content_type !== 'module'),
       }]
     }
 
@@ -119,7 +144,7 @@ export default function MembersProductClient({
         id: module.id,
         title: module.title,
         description: module.description,
-        items: contents.filter((item) => item.parent_id === module.id && item.content_type !== 'module'),
+        items: productContents.filter((item) => item.parent_id === module.id && item.content_type !== 'module'),
       })),
       ...(orphanLessons.length ? [{
         id: 'extras',
@@ -128,16 +153,18 @@ export default function MembersProductClient({
         items: orphanLessons,
       }] : []),
     ]
-  }, [contents, product.description, product.subtitle])
+  }, [productContents, product.description, product.subtitle])
 
-  const playable = contents.filter((item) => item.content_type !== 'module')
-  const selected = contents.find((item) => item.id === selectedId) || firstPlayable(contents)
+  const playable = productContents.filter((item) => item.content_type !== 'module')
+  const selected = productContents.find((item) => item.id === selectedId) || firstPlayable(productContents)
   const selectedIndex = selected ? playable.findIndex((item) => item.id === selected.id) : -1
   const nextContent = selectedIndex >= 0 ? playable[selectedIndex + 1] : null
   const completedCount = playable.filter((item) => progressStatus(progressMap.get(item.id)) === 'completed').length
   const overallProgress = playable.length ? Math.round((completedCount / playable.length) * 100) : 0
 
   async function saveProgress(content: MemberContent, status: ProgressStatus) {
+    if (!canTrackProgress) return
+
     setSavingId(content.id)
     setError('')
     try {
@@ -166,11 +193,25 @@ export default function MembersProductClient({
   }
 
   const selectedProgress = selected ? progressStatus(progressMap.get(selected.id)) : 'not_started'
-  const assetUrl = selected?.asset_url || ''
+  const assetUrl = selected?.asset_url || protectedBookAssetUrl(product, selected)
   const iframeUrl = assetUrl ? embedUrl(assetUrl) : ''
+  const isBookViewer = Boolean(assetUrl && selected?.content_type === 'ebook')
+  const isProfileAssessment = product.slug === 'perfil-corretor-ideal'
+  const opensInsidePlatform = Boolean(assetUrl && isInternalUrl(assetUrl))
+
+  function selectContent(contentId: string) {
+    setSelectedId(contentId)
+
+    if (typeof window !== 'undefined' && window.matchMedia('(max-width: 980px)').matches) {
+      window.setTimeout(() => {
+        contentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 40)
+    }
+  }
 
   return (
-    <main className="member-player">
+    <main className={`member-player ${isBookOnlyProduct ? 'is-book-only' : ''}`}>
+      {!isBookOnlyProduct && (
       <aside className="member-sidebar">
         <Link href="/membros" className="member-back">
           <ArrowLeft size={16} />
@@ -194,11 +235,15 @@ export default function MembersProductClient({
 
         <div className="member-progress-box">
           <div>
-            <span>Seu progresso</span>
-            <strong>{overallProgress}%</strong>
+            <span>{adminPreview ? 'Modo admin' : 'Seu progresso'}</span>
+            <strong>{adminPreview ? 'Preview' : `${overallProgress}%`}</strong>
           </div>
-          <progress value={overallProgress} max={100} />
-          <small>{completedCount} de {playable.length} conteúdo{playable.length === 1 ? '' : 's'} concluído{playable.length === 1 ? '' : 's'}</small>
+          {!adminPreview && <progress value={overallProgress} max={100} />}
+          <small>
+            {adminPreview
+              ? 'Acesso de revisão liberado para admin ativo.'
+              : `${completedCount} de ${playable.length} conteúdo${playable.length === 1 ? '' : 's'} concluído${playable.length === 1 ? '' : 's'}`}
+          </small>
         </div>
 
         <nav className="member-lessons" aria-label="Conteúdos do produto">
@@ -218,7 +263,7 @@ export default function MembersProductClient({
                       key={item.id}
                       type="button"
                       className={active ? 'is-active' : ''}
-                      onClick={() => setSelectedId(item.id)}
+                      onClick={() => selectContent(item.id)}
                     >
                       <span className={`member-status-dot is-${status}`}>
                         {status === 'completed' ? <CheckCircle2 size={14} /> : <Play size={12} fill="currentColor" />}
@@ -236,15 +281,24 @@ export default function MembersProductClient({
           ))}
         </nav>
       </aside>
+      )}
 
-      <section className="member-content">
+      <section className="member-content" ref={contentRef}>
+        <div className="member-topbar">
+          <Link href="/membros" className="member-mobile-back">
+            <ArrowLeft size={16} />
+            Biblioteca
+          </Link>
+          <MemberLogoutButton />
+        </div>
+
         <header className="member-content-header">
           <div>
             <span>Olá, {memberName.split(' ')[0] || 'membro'}</span>
             <h2>{selected?.title || 'Conteúdo em preparação'}</h2>
             {selected?.description && <p>{selected.description}</p>}
           </div>
-          {selected && (
+          {selected && !isBookOnlyProduct && (
             <div className={`member-pill is-${selectedProgress}`}>
               {selectedProgress === 'completed' ? 'Concluído' : selectedProgress === 'in_progress' ? 'Em andamento' : 'Não iniciado'}
             </div>
@@ -255,21 +309,25 @@ export default function MembersProductClient({
 
         {selected ? (
           <>
-            <div className="member-viewer">
+            <div className={`member-viewer ${isBookViewer ? 'is-book' : ''}`}>
               {assetUrl && iframeUrl ? (
                 <iframe src={iframeUrl} title={selected.title} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen />
               ) : assetUrl && (selected.content_type === 'video' || isVideoUrl(assetUrl)) ? (
                 <video controls src={assetUrl} />
               ) : assetUrl && (selected.content_type === 'pdf' || selected.content_type === 'ebook' || isPdfUrl(assetUrl)) ? (
-                <iframe src={assetUrl} title={selected.title} />
+                <iframe src={assetUrl} title={selected.title} allow="fullscreen" allowFullScreen />
               ) : assetUrl && selected.content_type === 'external_link' ? (
-                <div className="member-link-view">
+                <div className={`member-link-view ${isProfileAssessment ? 'is-assessment' : ''}`}>
                   <LinkIcon size={42} />
-                  <h3>Material externo</h3>
-                  <p>Abra o material em uma nova aba para estudar com mais conforto.</p>
-                  <a href={assetUrl} target="_blank" rel="noreferrer">
-                    Abrir material
-                    <ExternalLink size={16} />
+                  <h3>{isProfileAssessment ? 'Perfil do Corretor Ideal' : 'Material externo'}</h3>
+                  <p>
+                    {isProfileAssessment
+                      ? 'Diagnóstico gratuito com 36 perguntas para mapear sua postura comercial.'
+                      : 'Abra o material em uma nova aba para estudar com mais conforto.'}
+                  </p>
+                  <a href={assetUrl} target={opensInsidePlatform ? undefined : '_blank'} rel={opensInsidePlatform ? undefined : 'noreferrer'}>
+                    {isProfileAssessment ? 'Abrir diagnóstico' : 'Abrir material'}
+                    {opensInsidePlatform ? <ChevronRight size={16} /> : <ExternalLink size={16} />}
                   </a>
                 </div>
               ) : (
@@ -291,31 +349,37 @@ export default function MembersProductClient({
               </article>
             )}
 
+            {!isBookOnlyProduct && (
             <footer className="member-actions">
-              <button
-                type="button"
-                onClick={() => saveProgress(selected, 'in_progress')}
-                disabled={savingId === selected.id || selectedProgress === 'completed'}
-              >
-                {savingId === selected.id ? <Loader2 className="animate-spin" size={16} /> : <Clock3 size={16} />}
-                Marcar em andamento
-              </button>
-              <button
-                type="button"
-                className="is-primary"
-                onClick={() => saveProgress(selected, 'completed')}
-                disabled={savingId === selected.id}
-              >
-                {savingId === selected.id ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle2 size={16} />}
-                Concluir conteúdo
-              </button>
+              {canTrackProgress && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => saveProgress(selected, 'in_progress')}
+                    disabled={savingId === selected.id || selectedProgress === 'completed'}
+                  >
+                    {savingId === selected.id ? <Loader2 className="animate-spin" size={16} /> : <Clock3 size={16} />}
+                    Marcar em andamento
+                  </button>
+                  <button
+                    type="button"
+                    className="is-primary"
+                    onClick={() => saveProgress(selected, 'completed')}
+                    disabled={savingId === selected.id}
+                  >
+                    {savingId === selected.id ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle2 size={16} />}
+                    Concluir conteúdo
+                  </button>
+                </>
+              )}
               {nextContent && (
-                <button type="button" onClick={() => setSelectedId(nextContent.id)}>
+                <button type="button" onClick={() => selectContent(nextContent.id)}>
                   Próximo
                   <ChevronRight size={16} />
                 </button>
               )}
             </footer>
+            )}
           </>
         ) : (
           <div className="member-empty-player">
@@ -336,6 +400,43 @@ export default function MembersProductClient({
           font-family: Inter, Arial, sans-serif;
         }
 
+        .member-player.is-book-only {
+          grid-template-columns: 1fr;
+        }
+
+        .member-player.is-book-only .member-content {
+          width: 100%;
+          max-width: 1120px;
+          margin: 0 auto;
+        }
+
+        .member-player.is-book-only .member-content-header {
+          margin-bottom: 14px;
+        }
+
+        .member-player.is-book-only .member-content-header h2 {
+          max-width: 680px;
+          font-size: clamp(1.45rem, 3.2vw, 2.45rem);
+          line-height: 1.06;
+          font-weight: 650;
+        }
+
+        .member-player.is-book-only .member-content-header p {
+          max-width: 640px;
+          margin-top: 8px;
+          color: rgba(255, 255, 255, 0.68);
+          font-size: 0.9rem;
+          line-height: 1.45;
+        }
+
+        .member-player.is-book-only .member-mobile-back {
+          display: inline-flex;
+        }
+
+        .member-player.is-book-only .member-topbar {
+          display: flex;
+        }
+
         .member-sidebar {
           position: sticky;
           top: 0;
@@ -347,6 +448,7 @@ export default function MembersProductClient({
         }
 
         .member-back,
+        .member-mobile-back,
         .member-actions button,
         .member-link-view a {
           display: inline-flex;
@@ -362,6 +464,24 @@ export default function MembersProductClient({
           font-size: 0.82rem;
           font-weight: 800;
           text-transform: uppercase;
+        }
+
+        .member-mobile-back {
+          display: none;
+          width: fit-content;
+          min-height: 34px;
+          color: rgba(255, 255, 255, 0.72);
+          font-size: 0.8rem;
+          font-weight: 850;
+          text-transform: uppercase;
+        }
+
+        .member-topbar {
+          display: none;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          margin-bottom: 14px;
         }
 
         .member-product-card {
@@ -542,6 +662,7 @@ export default function MembersProductClient({
 
         .member-content {
           min-width: 0;
+          scroll-margin-top: 12px;
           padding: clamp(22px, 4vw, 46px);
         }
 
@@ -601,6 +722,10 @@ export default function MembersProductClient({
           background: #050b0d;
         }
 
+        .member-viewer.is-book {
+          min-height: min(78vh, 860px);
+        }
+
         .member-viewer iframe,
         .member-viewer video {
           width: 100%;
@@ -608,6 +733,10 @@ export default function MembersProductClient({
           display: block;
           border: 0;
           background: #000;
+        }
+
+        .member-viewer.is-book iframe {
+          height: min(78vh, 860px);
         }
 
         .member-text-view,
@@ -653,6 +782,14 @@ export default function MembersProductClient({
           text-transform: uppercase;
         }
 
+        .member-link-view.is-assessment {
+          position: relative;
+          overflow: hidden;
+          background:
+            linear-gradient(135deg, rgba(232, 176, 73, 0.13), transparent 38%),
+            #050b0d;
+        }
+
         .member-body {
           max-width: 880px;
           margin: 24px 0 0;
@@ -696,26 +833,129 @@ export default function MembersProductClient({
             grid-template-columns: 1fr;
           }
 
+          .member-content {
+            order: 1;
+          }
+
           .member-sidebar {
+            order: 2;
             position: static;
             height: auto;
             border-right: 0;
-            border-bottom: 1px solid rgba(232, 176, 73, 0.16);
+            border-top: 1px solid rgba(232, 176, 73, 0.16);
+          }
+
+          .member-back {
+            display: none;
+          }
+
+          .member-mobile-back {
+            display: inline-flex;
+          }
+
+          .member-topbar {
+            display: flex;
           }
         }
 
         @media (max-width: 640px) {
-          .member-sidebar,
+          .member-sidebar {
+            padding: 14px;
+          }
+
           .member-content {
-            padding: 16px;
+            padding: 14px;
+          }
+
+          .member-mobile-back {
+            margin-bottom: 0;
+          }
+
+          .member-topbar {
+            margin-bottom: 10px;
+          }
+
+          .member-product-card {
+            grid-template-columns: 64px minmax(0, 1fr);
+            gap: 12px;
+            margin: 0 0 14px;
+          }
+
+          .member-product-card h1 {
+            font-size: 1rem;
+            line-height: 1.05;
+          }
+
+          .member-product-card p {
+            font-size: 0.74rem;
+            line-height: 1.35;
+          }
+
+          .member-progress-box {
+            padding: 12px;
+          }
+
+          .member-lessons {
+            gap: 16px;
+            margin-top: 16px;
+          }
+
+          .member-lessons section > p {
+            display: -webkit-box;
+            margin: 6px 0 8px;
+            overflow: hidden;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            font-size: 0.75rem;
+            line-height: 1.45;
+          }
+
+          .member-lessons button {
+            grid-template-columns: 26px minmax(0, 1fr) 18px;
+            min-height: 52px;
+            padding: 8px 9px;
+            border-radius: 7px;
+          }
+
+          .member-status-dot {
+            width: 26px;
+            height: 26px;
+          }
+
+          .member-lessons strong {
+            display: -webkit-box;
+            white-space: normal;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            font-size: 0.82rem;
+            line-height: 1.15;
+          }
+
+          .member-lessons small {
+            white-space: nowrap;
           }
 
           .member-content-header {
             display: grid;
+            gap: 10px;
+            margin-bottom: 14px;
           }
 
           .member-content-header h2 {
-            font-size: clamp(2rem, 13vw, 3rem);
+            font-size: clamp(1.72rem, 10.5vw, 2.55rem);
+            line-height: 1;
+          }
+
+          .member-content-header p {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            line-height: 1.55;
+          }
+
+          .member-pill {
+            width: 100%;
+            justify-content: center;
+            text-align: center;
           }
 
           .member-viewer,
@@ -726,6 +966,18 @@ export default function MembersProductClient({
           .member-empty-player {
             min-height: 420px;
             height: auto;
+          }
+
+          .member-viewer.is-book,
+          .member-viewer.is-book iframe {
+            min-height: min(70vh, 620px);
+            height: min(70vh, 620px);
+          }
+
+          .member-body {
+            margin-top: 18px;
+            font-size: 0.95rem;
+            line-height: 1.55;
           }
 
           .member-actions {
