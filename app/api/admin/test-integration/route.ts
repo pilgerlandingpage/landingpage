@@ -47,6 +47,51 @@ function metaApiErrorMessage(payload: any, fallback: string) {
     return String(payload?.error?.message || payload?.error_message || fallback || 'Erro Meta.')
 }
 
+const GEMINI_TEST_FALLBACK_MODELS = [
+    'gemini-3.5-flash-lite',
+    'gemini-3.5-flash',
+    'gemini-3.6-flash',
+    'gemini-3.1-flash-lite',
+    'gemini-2.5-flash',
+    'gemini-2.5-flash-lite',
+]
+
+function normalizeGeminiModelName(model: unknown) {
+    return String(model || '').trim().replace(/^models\//, '')
+}
+
+async function testGeminiGenerateContent(apiKey: string, model: string) {
+    const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ role: 'user', parts: [{ text: 'Responda apenas: OK' }] }],
+                generationConfig: { temperature: 0, maxOutputTokens: 10 },
+            }),
+        }
+    )
+    const payload = await res.json().catch(() => ({}))
+    return { ok: res.ok, status: res.status, model, payload }
+}
+
+async function listGeminiGenerateContentModels(apiKey: string) {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}&pageSize=200`)
+    const payload = await res.json().catch(() => ({}))
+    if (!res.ok) return { ok: false, status: res.status, models: [] as string[], message: payload?.error?.message || res.statusText }
+    const models = Array.isArray(payload?.models) ? payload.models : []
+    return {
+        ok: true,
+        status: res.status,
+        models: models
+            .filter((model: any) => Array.isArray(model?.supportedGenerationMethods) && model.supportedGenerationMethods.includes('generateContent'))
+            .map((model: any) => normalizeGeminiModelName(model?.name))
+            .filter(Boolean),
+        message: '',
+    }
+}
+
 async function getMetaSocialDiagnostics(config: Record<string, string>, accessToken: string) {
     const details: string[] = []
 
@@ -196,7 +241,7 @@ export async function POST(request: NextRequest) {
 
             case 'gemini': {
                 const apiKey = config.gemini_api_key || process.env.GEMINI_API_KEY
-                const model = config.gemini_model || 'gemini-2.5-flash'
+                const model = normalizeGeminiModelName(config.gemini_model || 'gemini-2.5-flash')
 
                 if (!apiKey) {
                     return NextResponse.json({
@@ -205,29 +250,49 @@ export async function POST(request: NextRequest) {
                     })
                 }
 
-                const res = await fetch(
-                    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-                    {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{ role: 'user', parts: [{ text: 'Responda apenas: OK' }] }],
-                            generationConfig: { temperature: 0, maxOutputTokens: 10 },
-                        }),
-                    }
-                )
+                const candidates = Array.from(new Set([model, ...GEMINI_TEST_FALLBACK_MODELS].filter(Boolean)))
+                let lastTest: Awaited<ReturnType<typeof testGeminiGenerateContent>> | null = null
 
-                if (!res.ok) {
-                    const text = await res.text()
+                for (const candidate of candidates) {
+                    lastTest = await testGeminiGenerateContent(apiKey, candidate)
+                    if (lastTest.ok) {
+                        return NextResponse.json({
+                            success: true,
+                            message: candidate === model
+                                ? `API Gemini funcionando! Modelo: ${candidate}`
+                                : `API Gemini funcionando com ${candidate}. Troque Modelo Gemini global de ${model} para ${candidate}.`,
+                        })
+                    }
+                }
+
+                const errorMessage = String(lastTest?.payload?.error?.message || '')
+                const errorStatus = String(lastTest?.payload?.error?.status || '')
+                const lastStatus = lastTest?.status || 0
+                if (lastStatus === 401 || lastStatus === 403 || /api key|auth|credential|permission/i.test(`${errorStatus} ${errorMessage}`)) {
                     return NextResponse.json({
                         success: false,
-                        message: `Erro ${res.status}: ${text.slice(0, 100)}`,
+                        message: `Gemini nao autenticou a chave (${lastStatus}). Confira se e uma API key do Google AI Studio e se foi salva no campo Google Gemini API Key.`,
+                    })
+                }
+
+                if (lastStatus === 404 || /not found|no longer|not supported/i.test(errorMessage)) {
+                    const listed = await listGeminiGenerateContentModels(apiKey)
+                    if (listed.ok && listed.models.length) {
+                        const suggested = listed.models.find((item: string) => GEMINI_TEST_FALLBACK_MODELS.includes(item)) || listed.models[0]
+                        return NextResponse.json({
+                            success: false,
+                            message: `Modelo ${model} nao disponivel para esta chave. Sugestao: use ${suggested}.`,
+                        })
+                    }
+                    return NextResponse.json({
+                        success: false,
+                        message: `Modelo ${model} nao disponivel e nao foi possivel listar modelos: ${listed.message || errorMessage || `erro ${lastStatus}`}`,
                     })
                 }
 
                 return NextResponse.json({
-                    success: true,
-                    message: `API Gemini funcionando! Modelo: ${model}`,
+                    success: false,
+                    message: `Erro Gemini ${lastTest?.status || ''}: ${errorMessage || 'falha ao testar conexao'}`.slice(0, 220),
                 })
             }
 

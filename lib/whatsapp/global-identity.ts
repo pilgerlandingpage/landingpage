@@ -122,14 +122,39 @@ const FINANCE_WORDS = [
     'nota fiscal',
     'cupom',
     'pagamento',
+    'pagamentos',
+    'pagar',
+    'paguei',
+    'conta',
+    'contas',
+    'vencimento',
+    'vencimentos',
+    'vencendo',
+    'boleto',
+    'boletos',
+    'cartao',
+    'cartao de credito',
+    'cartão',
+    'fatura',
+    'faturas',
     'despesa',
+    'gasto',
     'lancamento',
+    'lancar',
+    'lançar',
+    'lanca',
+    'lança',
+    'parcelas',
+    'parcela',
     'abastec',
     'combustivel',
     'gasolina',
     'etanol',
     'diesel',
     'posto',
+    'aluguel',
+    'alugueis',
+    'locacao',
     'cpf',
     'cnpj',
     'pf',
@@ -219,12 +244,34 @@ function includesAny(text: string, words: string[]) {
 const TRAFFIC_MONITOR_QUERY_RE = /\b(quais?|quantas?|listar|liste|mostra|mostre|rodando|veiculando|ativas?|ativos?|hoje|agora)\b|\bcomo\s+est(?:a|ao)\b|\bno\s+ar\b|\bem\s+andamento\b/
 const TRAFFIC_EXECUTION_ACTION_RE = /\b(subir|suba|rodar|rode|promover|promova|impulsionar|impulsione|lancar|lance|criar|crie|novo|nova|analisar|analise|revisar|revise|melhorar|melhore|ajustar|ajuste)\b/
 const TRAFFIC_CREATIVE_OBJECT_RE = /\b(criativo|imagem|video|carrossel)\b/
+const FINANCE_STRONG_RE = /\b(financeiro|comprovante|recibo|nota fiscal|cupom|pagamento|pagamentos|pagar|paguei|contas? a pagar|vencimentos?|boleto|boletos|cart[aã]o|fatura|despesa|gasto|abastec|combustivel|gasolina|etanol|diesel|posto|parcelas?)\b/
+const FINANCE_CREATE_RE = /\b(lan[cç]a|lan[cç]ar|lance|cadastra|cadastrar|cadastre|registra|registrar|registre|inclui|incluir|inclua|cria|criar|crie)\b/
+
+const FINANCE_CATEGORY_RE = /\b(categorias?|subcategorias?|plano de contas|classificacao financeira)\b/
 
 export function detectWhatsAppGlobalCommandIntent(text: unknown, hasMedia = false): WhatsAppGlobalCommandIntent {
     const normalized = String(text || '')
         .toLowerCase()
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
+    const financeWords = FINANCE_WORDS.filter(word => !['conta', 'contas', 'lancamento', 'lancar', 'lanca', 'cpf', 'cnpj', 'pf', 'pj'].includes(word))
+    const financeDomain = includesAny(normalized, financeWords) || FINANCE_STRONG_RE.test(normalized)
+    const financeRequest = financeDomain
+        || (hasMedia && /\b(comprovante|recibo|nota fiscal|cupom|pagamento|boleto|cartao|fatura|abastec|posto|despesa)\b/.test(normalized))
+        || (FINANCE_CREATE_RE.test(normalized) && (
+            /\b(valor|reais|r\$|parcela|parcelas|pf|pj|cnpj|cpf)\b/.test(normalized)
+            || FINANCE_CATEGORY_RE.test(normalized)
+        ))
+
+    if (financeRequest) {
+        return {
+            commandType: 'finance_request',
+            targetAgent: 'finance-ops-agent',
+            requiredPermission: 'finance',
+            label: 'Financeiro',
+        }
+    }
+
     const trafficDomain = includesAny(normalized, TRAFFIC_WORDS) || normalized.includes('vitor')
     const trafficMonitoringQuery = includesAny(normalized, TRAFFIC_MONITOR_WORDS) || TRAFFIC_MONITOR_QUERY_RE.test(normalized)
     const trafficExecutionRequest = TRAFFIC_EXECUTION_ACTION_RE.test(normalized)
@@ -261,15 +308,6 @@ export function detectWhatsAppGlobalCommandIntent(text: unknown, hasMedia = fals
             targetAgent: 'ads-analyst',
             requiredPermission: 'ads',
             label: 'Trafego pago',
-        }
-    }
-
-    if (includesAny(normalized, FINANCE_WORDS)) {
-        return {
-            commandType: 'finance_request',
-            targetAgent: 'finance-ops-agent',
-            requiredPermission: 'finance',
-            label: 'Financeiro',
         }
     }
 
@@ -335,6 +373,8 @@ export function isWhatsAppGlobalOperatorMessage(text: unknown, hasMedia = false)
     if (intent.commandType.startsWith('paid_traffic')) {
         return trafficAction || (hasMedia && trafficTarget)
     }
+
+    if (intent.commandType === 'finance_request') return true
 
     return trafficAction && trafficTarget
 }
@@ -812,7 +852,8 @@ export function buildWhatsAppGlobalInternalSystemPrompt(
         '- Nunca trate esta pessoa como lead comercial.',
         '- Nunca qualifique interesse de morar/investir para numeros cadastrados.',
         '- Nunca ofereca imoveis como se a pessoa fosse cliente final, a menos que ela peca apoio operacional sobre estoque.',
-        '- Respeite permissoes: master_all pode tudo; ads aciona Vitor; dashboard pede relatorios; properties consulta estoque; crm/leads/agenda apoiam operacao comercial.',
+        '- Respeite permissoes: master_all pode tudo; finance permite consultar e registrar financeiro; ads aciona Vitor; dashboard pede relatorios; properties consulta estoque; crm/leads/agenda apoiam operacao comercial.',
+        '- Quando a demanda for financeira, aja como assistente financeira: entenda linguagem natural, consulte o financeiro, prepare lancamentos, pergunte somente o dado que falta e nao trate como pedido de lead.',
         '- Se o usuario cadastrado pedir algo sem permissao, responda que reconheceu o perfil, mas precisa de liberacao de um master.',
         '- Responda curto, natural e profissional para WhatsApp.',
         '- Se a pessoa pedir uma acao que ainda depende de ferramenta, diga o que voce entendeu e peca o dado minimo para encaminhar ou registrar.',
@@ -854,10 +895,11 @@ export async function recordWhatsAppGlobalCommand(params: {
     identity: WhatsAppGlobalIdentity
     text?: string | null
     hasMedia?: boolean
+    intentOverride?: WhatsAppGlobalCommandIntent | null
     payload?: Record<string, any>
 }) {
     const { supabase, instance, phone, identity, text, hasMedia, payload } = params
-    const intent = detectWhatsAppGlobalCommandIntent(text || '', Boolean(hasMedia))
+    const intent = params.intentOverride || detectWhatsAppGlobalCommandIntent(text || '', Boolean(hasMedia))
     const allowed = hasPermission(identity, intent.requiredPermission)
     const normalizedPhone = normalizeGlobalPhone(phone)
     const message = {

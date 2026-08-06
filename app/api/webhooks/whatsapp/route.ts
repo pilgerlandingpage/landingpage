@@ -28,14 +28,16 @@ import { saveHistoryWebhookMessages } from '@/lib/whatsapp/attendance-monitor'
 import { normalizeWhatsAppConnectionStatus } from '@/lib/whatsapp/connection-status'
 import { processVitorPaidTrafficCommand } from '@/lib/ads/vitor-traffic-manager'
 import { processPilgerEditorialCommand } from '@/lib/whatsapp/pilger-editorial-agent'
-import { processPilgerFinanceCommand } from '@/lib/whatsapp/pilger-finance-agent'
+import {
+    buildGlobalInternalPartnerReply,
+    processPilgerFinanceCommand,
+    resolveGlobalFinanceContext,
+} from '@/lib/whatsapp/pilger-finance-agent'
 import { processPilgerPropertyCommand } from '@/lib/whatsapp/pilger-property-agent'
 import { processPilgerReportCommand } from '@/lib/whatsapp/pilger-report-agent'
 import {
     buildWhatsAppGlobalAcknowledgement,
     buildWhatsAppGlobalConversationHistory,
-    buildWhatsAppGlobalInternalFallback,
-    buildWhatsAppGlobalInternalSystemPrompt,
     detectWhatsAppGlobalCommandIntent,
     getOrCreateWhatsAppGlobalSession,
     isWhatsAppGlobalInstance,
@@ -3538,6 +3540,27 @@ async function syncConnectionWebhookStatus(params: {
 // Sem processamento pesado. Retorno imediato.
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
+async function updateCommandStatusSafe(
+    supabase: ReturnType<typeof getSupabase>,
+    commandId: string | null | undefined,
+    status: string,
+    result: Record<string, unknown>,
+) {
+    if (!commandId) return
+    try {
+        await supabase
+            .from('whatsapp_global_commands')
+            .update({
+                status,
+                result,
+                updated_at: new Date().toISOString(),
+            })
+            .eq('id', commandId)
+    } catch (error) {
+        console.warn('[Webhook] Failed to update WhatsApp Global command status:', error)
+    }
+}
+
 export async function POST(request: NextRequest) {
     try {
         const contentLength = Number(request.headers.get('content-length') || 0)
@@ -4197,14 +4220,46 @@ export async function POST(request: NextRequest) {
                 registeredWhatsappIdentity = globalIdentity
                 const isGlobalEntrypoint = isWhatsAppGlobalInstance(instance)
                 const globalMessageText = storedMessageContent || messageText || ''
-                const globalIntent = detectWhatsAppGlobalCommandIntent(globalMessageText, hasGlobalMedia)
+                let globalIntent = detectWhatsAppGlobalCommandIntent(globalMessageText, hasGlobalMedia)
+                let globalFinanceContext: Awaited<ReturnType<typeof resolveGlobalFinanceContext>> | null = null
+                let globalInternalConfigs: Record<string, string> | null = null
+                const loadGlobalInternalConfigs = async () => {
+                    if (!globalInternalConfigs) {
+                        globalInternalConfigs = await loadAIConfigs(supabase, instance?.id).catch(() => ({} as Record<string, string>))
+                    }
+                    return globalInternalConfigs
+                }
+
+                if (globalIdentity.type !== 'lead' && isGlobalEntrypoint && globalIntent.commandType !== 'identity_check') {
+                    const sessionForContext = await getOrCreateWhatsAppGlobalSession({
+                        supabase,
+                        phone: finalPhone,
+                        identity: globalIdentity,
+                    })
+                    globalFinanceContext = await resolveGlobalFinanceContext({
+                        text: globalMessageText,
+                        hasMedia: hasGlobalMedia,
+                        media: auditMedia,
+                        session: sessionForContext,
+                        identityLabel: globalIdentity.label,
+                        configs: await loadGlobalInternalConfigs(),
+                    })
+                    if (globalFinanceContext.isFinance) {
+                        globalIntent = {
+                            commandType: 'finance_request',
+                            targetAgent: 'finance-ops-agent',
+                            requiredPermission: 'finance',
+                            label: 'Financeiro',
+                        }
+                    }
+                }
+
                 registeredWhatsappIntent = globalIntent
                 const isActionableGlobalIntent = !['general', 'media_received'].includes(globalIntent.commandType)
                 const isRecognizedOperatorMessage = globalIdentity.type !== 'lead' &&
                     isWhatsAppGlobalOperatorMessage(globalMessageText, hasGlobalMedia)
 
                 const canHandleProfileAssessmentGate = globalIdentity.type === 'lead'
-                    || (!isRecognizedOperatorMessage && !isActionableGlobalIntent)
 
                 if (isGlobalEntrypoint && canHandleProfileAssessmentGate) {
                     const profileAssessmentGate = await maybeHandleProfileAssessmentToolGate({
@@ -4299,32 +4354,18 @@ export async function POST(request: NextRequest) {
                         phone: finalPhone,
                         identity: globalIdentity,
                     })
-
-                    let replyText = ''
-                    try {
-                        const configs = await loadAIConfigs(supabase, instance?.id)
-                        if (configs['whatsapp_global_agent_enabled'] === 'false') {
-                            await saveAudit({ action: 'whatsapp_global_agent_disabled' })
-                            return NextResponse.json({ success: true, action: 'whatsapp_global_agent_disabled' })
-                        }
-                        const provider = configs['ai_provider'] === 'openai' ? 'openai' : 'gemini'
-                        replyText = await generateChatResponse(
-                            buildWhatsAppGlobalConversationHistory(session),
-                            inputForGlobalAgent,
-                            buildWhatsAppGlobalInternalSystemPrompt(globalIdentity, {
-                                configuredPrompt: configs['whatsapp_global_system_prompt'] || null,
-                            }),
-                            {
-                                provider,
-                                geminiModel: configs['gemini_model'] || undefined,
-                                openaiModel: configs['openai_model'] || undefined,
-                            }
-                        )
-                    } catch (error) {
-                        console.warn('[Webhook] WhatsApp Global internal AI failed, using fallback:', error)
+                    const configs = await loadGlobalInternalConfigs()
+                    if (configs['whatsapp_global_agent_enabled'] === 'false') {
+                        await saveAudit({ action: 'whatsapp_global_agent_disabled' })
+                        return NextResponse.json({ success: true, action: 'whatsapp_global_agent_disabled' })
                     }
-
-                    const outgoingText = sanitizeConciergeReply(replyText) || buildWhatsAppGlobalInternalFallback(globalIdentity)
+                    const outgoingText = await buildGlobalInternalPartnerReply({
+                        identityLabel: globalIdentity.label,
+                        messageText: inputForGlobalAgent,
+                        requestedArea: globalIntent.label,
+                        history: buildWhatsAppGlobalConversationHistory(session),
+                        configs,
+                    })
 
                     await getOrCreateWhatsAppGlobalSession({
                         supabase,
@@ -4373,6 +4414,7 @@ export async function POST(request: NextRequest) {
                             identity_source: globalIdentity.source,
                             permissions: globalIdentity.permissions,
                             command_type: globalIntent.commandType,
+                            finance_context: globalFinanceContext,
                             has_media: hasGlobalMedia,
                             instance_id: instance.id || null,
                             instance_name: instance.instance_name || null,
@@ -4385,7 +4427,7 @@ export async function POST(request: NextRequest) {
                     await saveAudit({ action: 'whatsapp_global_internal_identity_handled' })
                     return NextResponse.json({
                         success: true,
-                        action: 'whatsapp_global_internal_identity_handled',
+                        action: 'whatsapp_global_internal_partner_replied',
                         identity_type: globalIdentity.type,
                         command_type: globalIntent.commandType,
                         replied: Boolean(instance.instance_token && outgoingText),
@@ -4400,11 +4442,13 @@ export async function POST(request: NextRequest) {
                         identity: globalIdentity,
                         text: globalMessageText,
                         hasMedia: hasGlobalMedia,
+                        intentOverride: globalIntent,
                         payload: {
                             message_type: messageType || null,
                             message_id: messageId || null,
                             sender_name: senderName || null,
                             media: auditMedia,
+                            finance_context: globalFinanceContext,
                             entrypoint: isGlobalEntrypoint
                                 ? 'whatsapp_global'
                                 : 'recognized_operator_message',
@@ -4412,6 +4456,66 @@ export async function POST(request: NextRequest) {
                             source_instance_name: instance.instance_name || null,
                         },
                     })
+
+                    const isEnabledInternalGlobalCommand = ['finance_request', 'identity_check'].includes(commandResult.intent.commandType)
+                    if (!isEnabledInternalGlobalCommand) {
+                        const session = await getOrCreateWhatsAppGlobalSession({
+                            supabase,
+                            phone: finalPhone,
+                            identity: globalIdentity,
+                        })
+                        const configs = await loadGlobalInternalConfigs()
+                        const outgoingText = await buildGlobalInternalPartnerReply({
+                            identityLabel: globalIdentity.label,
+                            messageText: globalMessageText,
+                            requestedArea: commandResult.intent.label,
+                            history: buildWhatsAppGlobalConversationHistory(session),
+                            configs,
+                        })
+                        await updateCommandStatusSafe(supabase, commandResult.command?.id, 'cancelled', {
+                            stage: 'global_internal_sector_disabled',
+                            disabled_except: ['finance_request', 'identity_check'],
+                            intent: commandResult.intent,
+                            cancelled_at: new Date().toISOString(),
+                        })
+                        await getOrCreateWhatsAppGlobalSession({
+                            supabase,
+                            phone: finalPhone,
+                            identity: globalIdentity,
+                            message: {
+                                role: 'user',
+                                content: globalMessageText || 'Mensagem interna sem texto.',
+                                has_media: hasGlobalMedia,
+                                command_type: commandResult.intent.commandType,
+                                timestamp: new Date().toISOString(),
+                            },
+                        })
+                        if (instance.instance_token && outgoingText) {
+                            await sendWhatsAppMessage({
+                                phone: finalPhone,
+                                message: outgoingText,
+                                instanceToken: instance.instance_token,
+                            })
+                            await getOrCreateWhatsAppGlobalSession({
+                                supabase,
+                                phone: finalPhone,
+                                identity: globalIdentity,
+                                message: {
+                                    role: 'assistant',
+                                    content: outgoingText,
+                                    timestamp: new Date().toISOString(),
+                                },
+                            })
+                        }
+                        await saveAudit({ action: 'whatsapp_global_internal_sector_disabled' })
+                        return NextResponse.json({
+                            success: true,
+                            action: 'whatsapp_global_internal_sector_disabled',
+                            identity_type: globalIdentity.type,
+                            command_type: commandResult.intent.commandType,
+                            allowed: false,
+                        })
+                    }
 
                     const pilgerRoute = resolvePilgerAgentRoute({
                         identity: globalIdentity,

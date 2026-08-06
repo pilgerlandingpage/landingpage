@@ -29,8 +29,6 @@ import { generateChatResponse } from '../ai/generation'
 import { DEFAULT_WHATSAPP_GLOBAL_SYSTEM_PROMPT, WHATSAPP_GLOBAL_RUNTIME_GUARDRAILS } from '../whatsapp/agent-global-prompt'
 import {
     buildWhatsAppGlobalConversationHistory,
-    buildWhatsAppGlobalInternalFallback,
-    buildWhatsAppGlobalInternalSystemPrompt,
     detectWhatsAppGlobalCommandIntent,
     getOrCreateWhatsAppGlobalSession,
     isWhatsAppGlobalInstance,
@@ -49,17 +47,19 @@ import {
     sendProfileAssessmentVoteRequest,
 } from '../whatsapp/profile-assessment-delivery'
 import {
-    buildPilgerAgentResultMessage,
     buildPilgerAgentRouterAcknowledgement,
     recordPilgerAgentRoute,
     resolvePilgerAgentRoute,
 } from '../whatsapp/pilger-agent-router'
-import { processPilgerEditorialCommand } from '../whatsapp/pilger-editorial-agent'
+import {
+    buildGlobalInternalPartnerReply,
+    processPilgerFinanceCommand,
+    resolveGlobalFinanceContext,
+} from '../whatsapp/pilger-finance-agent'
 import { normalizeWhatsAppInstanceConfig } from '../whatsapp/instance-config'
 import { buildAgentContextBrief, getAgentEcosystemContext, recordAgentConversationEcosystemEvent } from '../intelligence/ecosystem'
 import { resolveSystemNotificationWhatsappInstance } from '../notifications/sector-recipients'
 import { propertyDetailsPath } from '../properties/responsive-destination'
-import { processVitorPaidTrafficCommand } from '../ads/vitor-traffic-manager'
 
 function getSupabase() {
     return createClient(
@@ -110,21 +110,22 @@ async function discardOwnPendingQueueMessage(params: {
     })
 }
 
-function sanitizeGlobalInternalReply(reply: unknown): string {
-    return String(reply || '')
-        .replace(/<thought>[\s\S]*?<\/thought>/gi, '')
-        .replace(/\[thought\][\s\S]*?\[\/thought\]/gi, '')
-        .replace(/Thought:[^\n]*\n?/gi, '')
-        .trim()
-}
-
 function buildGlobalInternalMediaText(params: {
     inputText: string
     isAudio: boolean
     isMediaMessage: boolean
     mediaType?: string | null
+    mediaAnalysis?: string | null
 }) {
-    const text = String(params.inputText || '').trim()
+    const text = String(params.inputText || '')
+        .replace(/\n\n\[AN[^\]]+\][\s\S]*$/i, '')
+        .replace(/\n\n\[M[^\]]*DIA RECEBIDA\][\s\S]*$/i, '')
+        .trim()
+    const analysis = String(params.mediaAnalysis || '').trim()
+    if (!params.isAudio && (params.isMediaMessage || analysis)) {
+        const base = text || `[Midia recebida: ${params.mediaType || 'midia'}]`
+        return [base, analysis ? `[Analise da midia]\n${analysis}` : ''].filter(Boolean).join('\n\n')
+    }
     if (!text) return ''
     const label = params.isAudio
         ? 'Audio transcrito'
@@ -6139,8 +6140,28 @@ export const processWhatsAppMessage = inngest.createFunction(
                     isAudio,
                     isMediaMessage,
                     mediaType,
+                    mediaAnalysis: !isAudio && mediaAnalysis?.text ? String(mediaAnalysis.text) : null,
                 }) || inputText
-                const directIntent = detectWhatsAppGlobalCommandIntent(internalInput, hasMedia)
+                let directIntent = detectWhatsAppGlobalCommandIntent(internalInput, hasMedia)
+                const financeContext = directIntent.commandType === 'identity_check'
+                    ? null
+                    : await resolveGlobalFinanceContext({
+                        text: internalInput,
+                        hasMedia,
+                        media: Array.isArray(globalMedia) ? globalMedia : [],
+                        mediaAnalysis: !isAudio && mediaAnalysis?.text ? String(mediaAnalysis.text) : null,
+                        session: conversation,
+                        identityLabel: identity.label,
+                        configs,
+                    })
+                if (financeContext?.isFinance) {
+                    directIntent = {
+                        commandType: 'finance_request',
+                        targetAgent: 'finance-ops-agent',
+                        requiredPermission: 'finance',
+                        label: 'Financeiro',
+                    }
+                }
                 const trafficContext = hasMedia && shouldApplyTrafficContextForGlobalMedia({
                     history: sessionHistory,
                     inputText: internalInput,
@@ -6170,112 +6191,106 @@ export const processWhatsAppMessage = inngest.createFunction(
                             sender_name: senderName || null,
                             entrypoint: 'whatsapp_global_async_media',
                             media: Array.isArray(globalMedia) ? globalMedia : [],
+                            finance_context: financeContext,
                             media_analysis: !isAudio && mediaAnalysis?.text
                                 ? String(mediaAnalysis.text).slice(0, 2400)
                                 : null,
                         },
+                        intentOverride: intent,
                     })
 
-                    const pilgerRoute = resolvePilgerAgentRoute({
-                        identity,
-                        intent: commandResult.intent,
-                        allowed: commandResult.allowed,
-                    })
-
-                    await recordPilgerAgentRoute({
-                        supabase,
-                        route: pilgerRoute,
-                        identity,
-                        command: commandResult.command,
-                        instance,
-                        text: intentText,
-                        hasMedia,
-                        payload: {
-                            entrypoint: 'whatsapp_global_async_media',
-                            message_type: isAudio ? 'audio' : (mediaType || messageType || null),
-                            message_id: messageId || null,
-                        },
-                    }).catch(error => {
-                        console.warn('[WhatsApp Agent] Global internal async route record failed:', error?.message || error)
-                    })
-
-                    if (
-                        commandResult.allowed
-                        && commandResult.command?.id
-                        && pilgerRoute.executionMode === 'sync_executor'
-                        && pilgerRoute.targetAgentId === 'ads-analyst'
-                    ) {
-                        const vitorResult = await processVitorPaidTrafficCommand({
-                            supabase,
-                            command: {
-                                ...commandResult.command,
-                                command_text: intentText,
-                                payload: {
-                                    ...(commandResult.command?.payload || {}),
-                                    media: Array.isArray(globalMedia) ? globalMedia : [],
-                                    media_analysis: !isAudio && mediaAnalysis?.text
-                                        ? String(mediaAnalysis.text).slice(0, 2400)
-                                        : null,
-                                },
-                            },
-                            instance,
-                            instanceToken,
-                            sendResponse: false,
+                    if (!['finance_request', 'identity_check'].includes(commandResult.intent.commandType)) {
+                        outgoingText = await buildGlobalInternalPartnerReply({
+                            identityLabel: identity.label,
+                            messageText: intentText,
+                            requestedArea: commandResult.intent.label,
+                            history: sessionHistory,
+                            configs,
                         })
-                        outgoingText = buildPilgerAgentResultMessage({
-                            identity,
-                            route: pilgerRoute,
-                            agentReply: vitorResult.responseText,
-                        })
-                    } else if (
-                        commandResult.allowed
-                        && commandResult.command?.id
-                        && pilgerRoute.executionMode === 'sync_executor'
-                        && ['blog-intelligence', 'news-intelligence'].includes(pilgerRoute.targetAgentId)
-                    ) {
-                        const editorialResult = await processPilgerEditorialCommand({
-                            supabase,
-                            command: {
-                                ...commandResult.command,
-                                command_text: intentText,
-                                target_agent: pilgerRoute.targetAgentId,
-                                required_permission: pilgerRoute.requiredPermission,
-                            },
-                            instance,
-                            instanceToken,
-                            origin: getPublicAppUrl(),
-                            sendResponse: false,
-                        })
-                        outgoingText = editorialResult.responseText || buildPilgerAgentRouterAcknowledgement({
-                            identity,
-                            route: pilgerRoute,
-                        })
+                        if (commandResult.command?.id) {
+                            await supabase
+                                .from('whatsapp_global_commands')
+                                .update({
+                                    status: 'cancelled',
+                                    result: {
+                                        stage: 'global_internal_sector_disabled',
+                                        disabled_except: ['finance_request', 'identity_check'],
+                                        intent: commandResult.intent,
+                                        cancelled_at: new Date().toISOString(),
+                                    },
+                                    updated_at: new Date().toISOString(),
+                                })
+                                .eq('id', commandResult.command.id)
+                        }
                     } else {
-                        outgoingText = buildPilgerAgentRouterAcknowledgement({
+                        const pilgerRoute = resolvePilgerAgentRoute({
                             identity,
-                            route: pilgerRoute,
+                            intent: commandResult.intent,
+                            allowed: commandResult.allowed,
                         })
+
+                        await recordPilgerAgentRoute({
+                            supabase,
+                            route: pilgerRoute,
+                            identity,
+                            command: commandResult.command,
+                            instance,
+                            text: intentText,
+                            hasMedia,
+                            payload: {
+                                entrypoint: 'whatsapp_global_async_media',
+                                message_type: isAudio ? 'audio' : (mediaType || messageType || null),
+                                message_id: messageId || null,
+                            },
+                        }).catch(error => {
+                            console.warn('[WhatsApp Agent] Global internal async route record failed:', error?.message || error)
+                        })
+
+                        if (
+                            commandResult.allowed
+                            && commandResult.command?.id
+                            && pilgerRoute.executionMode === 'sync_executor'
+                            && pilgerRoute.targetAgentId === 'finance-ops-agent'
+                        ) {
+                            const financeResult = await processPilgerFinanceCommand({
+                                supabase,
+                                command: {
+                                    ...commandResult.command,
+                                    command_text: intentText,
+                                    target_agent: pilgerRoute.targetAgentId,
+                                    required_permission: pilgerRoute.requiredPermission,
+                                    payload: {
+                                        ...(commandResult.command?.payload || {}),
+                                        media: Array.isArray(globalMedia) ? globalMedia : [],
+                                        finance_context: financeContext,
+                                        media_analysis: !isAudio && mediaAnalysis?.text
+                                            ? String(mediaAnalysis.text).slice(0, 2400)
+                                            : null,
+                                    },
+                                },
+                                instance,
+                                instanceToken,
+                                sendResponse: false,
+                            })
+                            outgoingText = financeResult.responseText || buildPilgerAgentRouterAcknowledgement({
+                                identity,
+                                route: pilgerRoute,
+                            })
+                        } else {
+                            outgoingText = buildPilgerAgentRouterAcknowledgement({
+                                identity,
+                                route: pilgerRoute,
+                            })
+                        }
                     }
                 } else {
-                    let replyText = ''
-                    try {
-                        const provider = configs['ai_provider'] === 'openai' ? 'openai' : 'gemini'
-                        replyText = await generateChatResponse(
-                            sessionHistory,
-                            internalInput,
-                            buildWhatsAppGlobalInternalSystemPrompt(identity, {
-                                configuredPrompt: configs['whatsapp_global_system_prompt'] || null,
-                            }),
-                            {
-                                provider,
-                                geminiModel: configs['gemini_model'] || undefined,
-                                openaiModel: configs['openai_model'] || undefined,
-                            }
-                        )
-                    } catch (error) {
-                        console.warn('[WhatsApp Agent] Global internal async AI failed:', error)
-                    }
-                    outgoingText = sanitizeGlobalInternalReply(replyText) || buildWhatsAppGlobalInternalFallback(identity)
+                    outgoingText = await buildGlobalInternalPartnerReply({
+                        identityLabel: identity.label,
+                        messageText: internalInput,
+                        requestedArea: intent.label,
+                        history: sessionHistory,
+                        configs,
+                    })
 
                     await getOrCreateWhatsAppGlobalSession({
                         supabase,
