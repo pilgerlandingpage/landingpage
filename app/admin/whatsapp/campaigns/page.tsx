@@ -3,11 +3,11 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import {
-    Send, Loader2, AlertCircle, CheckCircle2, Clock, Users,
+    Send, Loader2, AlertCircle, CheckCircle2, Users,
     Plus, Trash2, Pause, Play, FileText, Image, Mic, Video,
-    Tag, RefreshCw, MessageSquare, Calendar, ChevronDown, ChevronUp,
+    Tag, RefreshCw, MessageSquare, ChevronUp,
     Smartphone, Search, BarChart3, TrendingUp, Eye, Inbox, Activity,
-    XCircle
+    XCircle, Upload, Download
 } from 'lucide-react'
 import {
     Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart,
@@ -56,6 +56,7 @@ interface MetaTemplate {
     status: string
     quality_score?: string | null
     components?: unknown[] | null
+    metadata?: unknown
     last_synced_at?: string | null
 }
 
@@ -78,6 +79,7 @@ interface MetaCampaign {
     total_read: number
     total_failed: number
     total_skipped: number
+    metadata?: unknown
 }
 
 interface MetaCampaignRecipient {
@@ -207,6 +209,56 @@ interface MetaRecipientDraft {
     missingVariables?: string[]
 }
 
+interface MetaContactList {
+    id: string
+    name: string
+    description?: string | null
+    source_file_name?: string | null
+    source_sheet_name?: string | null
+    status: string
+    total_contacts: number
+    valid_contacts: number
+    duplicate_contacts: number
+    invalid_contacts: number
+    created_at: string
+    updated_at: string
+}
+
+interface MetaContactListContact {
+    id?: string
+    list_id?: string
+    phone_e164: string
+    name?: string | null
+    email?: string | null
+    city?: string | null
+    tags?: string[] | null
+    template_variables?: Record<string, unknown> | null
+    metadata?: unknown
+}
+
+interface MetaContactSegmentOption {
+    value: string
+    count: number
+}
+
+interface MetaContactListSegments {
+    cities: MetaContactSegmentOption[]
+    tags: MetaContactSegmentOption[]
+    stats: {
+        total: number
+        with_name: number
+        with_city: number
+        with_tags: number
+        with_variables: number
+    }
+}
+
+interface MetaContactSegmentFilters {
+    city: string
+    tag: string
+    search: string
+}
+
 const MSG_TYPES = [
     { value: 'text', label: '📝 Texto', icon: FileText },
     { value: 'image', label: '🖼️ Imagem + Texto', icon: Image },
@@ -242,6 +294,12 @@ function getTemplateButtons(template?: MetaTemplate | null): TemplateButtonRecor
     return rawButtons.map(asRecord)
 }
 
+function getTemplateHeaderMediaUrl(template?: MetaTemplate | null) {
+    const metadata = asRecord(template?.metadata)
+    const panelHeaderMedia = asRecord(metadata.panel_header_media)
+    return textValue(panelHeaderMedia.url) || textValue(metadata.header_media_url)
+}
+
 function extractTemplateVariables(text: string) {
     const matches = Array.from(text.matchAll(/{{\s*(\d+)\s*}}/g))
     return Array.from(new Set(matches.map(match => Number(match[1])))).filter(Number.isFinite).sort((a, b) => a - b)
@@ -260,11 +318,113 @@ function buttonNeedsCouponCode(button: TemplateButtonRecord) {
     return type === 'COPY_CODE' || type === 'COUPON_CODE'
 }
 
+function countDelimiter(line: string, delimiter: string) {
+    let count = 0
+    let quoted = false
+
+    for (let index = 0; index < line.length; index += 1) {
+        const char = line[index]
+        if (char === '"') {
+            quoted = !quoted
+            continue
+        }
+        if (!quoted && char === delimiter) count += 1
+    }
+
+    return count
+}
+
+function detectAudienceDelimiter(line: string) {
+    return ['\t', ';', '|', ',']
+        .map(delimiter => ({ delimiter, count: countDelimiter(line, delimiter) }))
+        .sort((a, b) => b.count - a.count)[0]?.delimiter || ','
+}
+
 function splitAudienceRow(line: string) {
-    if (line.includes('\t')) return line.split('\t')
-    if (line.includes(';')) return line.split(';')
-    if (line.includes('|')) return line.split('|')
-    return line.split(',')
+    const delimiter = detectAudienceDelimiter(line)
+    const columns: string[] = []
+    let current = ''
+    let quoted = false
+
+    for (let index = 0; index < line.length; index += 1) {
+        const char = line[index]
+        const next = line[index + 1]
+
+        if (char === '"' && quoted && next === '"') {
+            current += '"'
+            index += 1
+            continue
+        }
+
+        if (char === '"') {
+            quoted = !quoted
+            continue
+        }
+
+        if (!quoted && char === delimiter) {
+            columns.push(current.trim())
+            current = ''
+            continue
+        }
+
+        current += char
+    }
+
+    columns.push(current.trim())
+    return columns
+}
+
+function normalizeAudienceHeader(value: string) {
+    return value
+        .trim()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9{}]+/g, '')
+}
+
+function findHeaderIndex(headers: string[], candidates: string[]) {
+    const normalizedCandidates = new Set(candidates.map(normalizeAudienceHeader))
+    return headers.findIndex(header => normalizedCandidates.has(header))
+}
+
+function rowLooksLikeAudienceHeader(row: string[]) {
+    const headers = row.map(normalizeAudienceHeader)
+    return headers.some(header =>
+        ['telefone', 'phone', 'whatsapp', 'celular', 'numero', 'numerodetelefone', 'nome', 'name', 'lead', 'cliente'].includes(header)
+        || /^var\d+$/.test(header)
+        || /^variavel\d+$/.test(header)
+        || /^\{\{\d+\}\}$/.test(header)
+    )
+}
+
+function guessPhoneColumn(rows: string[][]) {
+    const columnScores = new Map<number, number>()
+
+    rows.slice(0, 20).forEach(row => {
+        row.forEach((cell, index) => {
+            const digits = cell.replace(/\D/g, '')
+            if (digits.length >= 10) columnScores.set(index, (columnScores.get(index) || 0) + 1)
+        })
+    })
+
+    return Array.from(columnScores.entries()).sort((a, b) => b[1] - a[1])[0]?.[0] ?? 0
+}
+
+function escapeAudienceCell(value: string) {
+    const cleaned = value.replace(/\r?\n/g, ' ').trim()
+    if (/[;,"\t]/.test(cleaned)) return `"${cleaned.replace(/"/g, '""')}"`
+    return cleaned
+}
+
+function variableHeaderCandidates(variable: number) {
+    const number = String(variable)
+    const candidates = [`var${number}`, `variavel${number}`, `{{${number}}}`, `valor${number}`]
+
+    if (variable === 2) candidates.push('imovel', 'empreendimento', 'interesse', 'produto', 'oportunidade')
+    if (variable === 3) candidates.push('link', 'url', 'site', 'pagina')
+
+    return candidates
 }
 
 function buildHeaderParameter(format: string, value: string) {
@@ -311,12 +471,25 @@ export default function CampaignsPage() {
     const [metaCampaigns, setMetaCampaigns] = useState<MetaCampaign[]>([])
     const [metaSenders, setMetaSenders] = useState<MetaSender[]>([])
     const [metaTemplates, setMetaTemplates] = useState<MetaTemplate[]>([])
+    const [metaContactLists, setMetaContactLists] = useState<MetaContactList[]>([])
+    const [selectedContactListId, setSelectedContactListId] = useState('')
+    const [selectedContactListContacts, setSelectedContactListContacts] = useState<MetaContactListContact[]>([])
+    const [contactListSegments, setContactListSegments] = useState<MetaContactListSegments | null>(null)
+    const [contactListAudienceCounts, setContactListAudienceCounts] = useState({ all: 0, filtered: 0 })
+    const [contactSegmentCity, setContactSegmentCity] = useState('')
+    const [contactSegmentTag, setContactSegmentTag] = useState('')
+    const [contactSegmentSearch, setContactSegmentSearch] = useState('')
+    const [contactListName, setContactListName] = useState('')
+    const [savingContactList, setSavingContactList] = useState(false)
+    const [loadingContactLists, setLoadingContactLists] = useState(false)
+    const [loadingContactListAudience, setLoadingContactListAudience] = useState(false)
     const [metaSummary, setMetaSummary] = useState<MetaCampaignSummary | null>(null)
     const [metaAnalytics, setMetaAnalytics] = useState<MetaCampaignAnalytics | null>(null)
     const [metaStatusFilter, setMetaStatusFilter] = useState('')
     const [expandedMetaCampaignId, setExpandedMetaCampaignId] = useState('')
     const [loadingMetaCampaignDetail, setLoadingMetaCampaignDetail] = useState('')
     const [metaCampaignDetails, setMetaCampaignDetails] = useState<Record<string, MetaCampaignDetail>>({})
+    const [retryingMetaCampaignId, setRetryingMetaCampaignId] = useState('')
     const [showCreateForm, setShowCreateForm] = useState(false)
     const [sending, setSending] = useState(false)
     const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
@@ -399,6 +572,43 @@ export default function CampaignsPage() {
         }
     }
 
+    const syncMetaTemplatesForCampaigns = async () => {
+        setFeedback(null)
+        try {
+            const res = await fetch('/api/admin/whatsapp/templates', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'sync' }),
+            })
+            const data = await res.json()
+
+            if (!data.success) {
+                setFeedback({ type: 'error', text: data.message || 'Erro ao sincronizar templates Meta.' })
+                return
+            }
+
+            await loadMetaCampaigns()
+            setFeedback({ type: 'success', text: data.message || 'Templates Meta sincronizados.' })
+        } catch {
+            setFeedback({ type: 'error', text: 'Erro ao sincronizar templates Meta.' })
+        }
+    }
+
+    const loadMetaContactLists = async () => {
+        setLoadingContactLists(true)
+        try {
+            const res = await fetch('/api/admin/whatsapp/contact-lists')
+            const data = await res.json()
+            if (data.success) {
+                setMetaContactLists(data.lists || [])
+            }
+        } catch {
+            setFeedback({ type: 'error', text: 'Erro ao carregar listas salvas Meta' })
+        } finally {
+            setLoadingContactLists(false)
+        }
+    }
+
     const toggleMetaCampaignDetail = async (campaignId: string) => {
         if (expandedMetaCampaignId === campaignId) {
             setExpandedMetaCampaignId('')
@@ -432,7 +642,10 @@ export default function CampaignsPage() {
     }
 
     useEffect(() => {
-        if (sendProvider === 'meta_whatsapp') loadMetaCampaigns()
+        if (sendProvider === 'meta_whatsapp') {
+            loadMetaCampaigns()
+            loadMetaContactLists()
+        }
     }, [sendProvider, metaStatusFilter])
 
     const parseNumbers = (): string[] => {
@@ -440,6 +653,241 @@ export default function CampaignsPage() {
             .split(/[\n,;]+/)
             .map(n => n.replace(/\D/g, '').trim())
             .filter(n => n.length >= 10)
+    }
+
+    const downloadAudienceTemplate = () => {
+        const variables = selectedBodyVariables.length > 0 ? selectedBodyVariables : [1, 2, 3]
+        const headers = ['telefone', 'nome', ...variables.map(variable => `var${variable}`)]
+        const sampleValues = ['554788271085', 'Maria', ...variables.map((variable, index) => {
+            if (variable === 1) return 'Maria'
+            if (variable === 2) return 'Apartamento frente mar'
+            if (variable === 3) return 'https://guilhermepilger.ai/imovel'
+            return `valor ${index + 1}`
+        })]
+        const csv = [
+            headers.map(escapeAudienceCell).join(';'),
+            sampleValues.map(escapeAudienceCell).join(';'),
+        ].join('\n')
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+        const url = URL.createObjectURL(blob)
+        const anchor = document.createElement('a')
+
+        anchor.href = url
+        anchor.download = 'modelo-contatos-meta-whatsapp.csv'
+        anchor.click()
+        URL.revokeObjectURL(url)
+    }
+
+    const importAudienceFile = async (file?: File) => {
+        if (!file) return
+
+        try {
+            const text = await file.text()
+            const rows = text
+                .split(/\r?\n/)
+                .map(line => splitAudienceRow(line))
+                .filter(row => row.some(column => column.trim()))
+
+            if (!rows.length) {
+                setFeedback({ type: 'error', text: 'A lista importada esta vazia.' })
+                return
+            }
+
+            const hasHeader = rowLooksLikeAudienceHeader(rows[0])
+            const headers = hasHeader ? rows[0].map(normalizeAudienceHeader) : []
+            const dataRows = hasHeader ? rows.slice(1) : rows
+            const phoneIndex = hasHeader
+                ? findHeaderIndex(headers, ['telefone', 'phone', 'whatsapp', 'celular', 'numero', 'numero de telefone', 'numero do telefone'])
+                : guessPhoneColumn(dataRows)
+            const nameIndex = hasHeader
+                ? findHeaderIndex(headers, ['nome', 'name', 'lead', 'cliente', 'contato'])
+                : (phoneIndex === 0 ? 1 : 0)
+            const shouldPersonalize = sendProvider === 'meta_whatsapp' && (metaAudiencePersonalized || selectedBodyVariables.length > 0)
+            const seenPhones = new Set<string>()
+            const importedLines: string[] = []
+
+            if (phoneIndex < 0) {
+                setFeedback({ type: 'error', text: 'Nao encontrei uma coluna de telefone na lista.' })
+                return
+            }
+
+            dataRows.forEach(row => {
+                const phone = (row[phoneIndex] || '').replace(/\D/g, '').slice(0, 20)
+                if (phone.length < 10 || seenPhones.has(phone)) return
+
+                seenPhones.add(phone)
+
+                if (!shouldPersonalize) {
+                    importedLines.push(phone)
+                    return
+                }
+
+                const name = nameIndex >= 0 && nameIndex !== phoneIndex ? (row[nameIndex] || '').trim() : ''
+                const usedColumns = new Set([phoneIndex, nameIndex].filter(index => index >= 0))
+                const freeColumns = row.map((_, index) => index).filter(index => !usedColumns.has(index))
+                const variableValues = selectedBodyVariables.map((variable, variableIndex) => {
+                    const headerIndex = hasHeader ? findHeaderIndex(headers, variableHeaderCandidates(variable)) : -1
+                    const fallbackIndex = freeColumns[variableIndex]
+                    const value = headerIndex >= 0
+                        ? row[headerIndex]
+                        : fallbackIndex !== undefined ? row[fallbackIndex] : ''
+                    const cleaned = (value || '').trim()
+                    if (cleaned) return cleaned
+                    if (variable === 1 && name) return name
+                    return ''
+                })
+
+                importedLines.push([phone, name, ...variableValues].map(escapeAudienceCell).join('; '))
+            })
+
+            if (!importedLines.length) {
+                setFeedback({ type: 'error', text: 'Nenhum telefone valido foi encontrado na lista.' })
+                return
+            }
+
+            setNumbersInput(prev => [prev.trim(), importedLines.join('\n')].filter(Boolean).join('\n'))
+            if (shouldPersonalize) setMetaAudiencePersonalized(true)
+            setFeedback({ type: 'success', text: `${importedLines.length} contato(s) importado(s) para a campanha.` })
+        } catch {
+            setFeedback({ type: 'error', text: 'Nao consegui ler este arquivo. Use CSV ou TXT aqui, ou use Listas salvas para subir XLSX.' })
+        }
+    }
+
+    const buildAudienceLinesFromContacts = (contacts: MetaContactListContact[]) => {
+        return contacts
+            .map(contact => {
+                const templateVariables = asRecord(contact.template_variables)
+                const name = textValue(contact.name) || ''
+                const variableValues = selectedBodyVariables.map(variable => {
+                    const key = String(variable)
+                    const value = textValue(templateVariables[key])
+                    if (value) return value
+                    if (variable === 1) return name
+                    return ''
+                })
+
+                return [contact.phone_e164, name, ...variableValues].map(escapeAudienceCell).join('; ')
+            })
+            .join('\n')
+    }
+
+    const resetContactSegmentFilters = () => {
+        setContactSegmentCity('')
+        setContactSegmentTag('')
+        setContactSegmentSearch('')
+    }
+
+    const loadSavedContactListIntoAudience = async (
+        listId: string,
+        options: Partial<MetaContactSegmentFilters> & { resetFilters?: boolean; silent?: boolean } = {}
+    ) => {
+        if (!listId) return
+
+        const city = options.resetFilters ? '' : options.city ?? contactSegmentCity
+        const tag = options.resetFilters ? '' : options.tag ?? contactSegmentTag
+        const search = options.resetFilters ? '' : options.search ?? contactSegmentSearch
+        const params = new URLSearchParams({ list_id: listId })
+        if (city.trim()) params.set('city', city.trim())
+        if (tag.trim()) params.set('tag', tag.trim())
+        if (search.trim()) params.set('search', search.trim())
+
+        setLoadingContactListAudience(true)
+        try {
+            const res = await fetch(`/api/admin/whatsapp/contact-lists?${params.toString()}`)
+            const data = await res.json()
+            if (!data.success) {
+                setFeedback({ type: 'error', text: data.message || 'Erro ao carregar lista salva.' })
+                return
+            }
+
+            const contacts = data.contacts || []
+            setSelectedContactListId(listId)
+            setSelectedContactListContacts(contacts)
+            setContactListSegments(data.segments || null)
+            setContactListAudienceCounts({
+                all: Number(data.allContactsCount || contacts.length),
+                filtered: Number(data.filteredContactsCount || contacts.length),
+            })
+            if (options.resetFilters) {
+                resetContactSegmentFilters()
+            } else {
+                setContactSegmentCity(city)
+                setContactSegmentTag(tag)
+                setContactSegmentSearch(search)
+            }
+            setNumbersInput(buildAudienceLinesFromContacts(contacts))
+            setMetaAudiencePersonalized(true)
+            if (!options.silent) {
+                const activeFilters = [
+                    city.trim() ? `cidade: ${city.trim()}` : '',
+                    tag.trim() ? `tag: ${tag.trim()}` : '',
+                    search.trim() ? `busca: ${search.trim()}` : '',
+                ].filter(Boolean).join(', ')
+                setFeedback({
+                    type: 'success',
+                    text: `Lista "${data.list?.name || 'salva'}" carregada com ${contacts.length} contato(s)${activeFilters ? ` no segmento (${activeFilters})` : ''}.`,
+                })
+            }
+        } catch {
+            setFeedback({ type: 'error', text: 'Erro ao carregar lista salva.' })
+        } finally {
+            setLoadingContactListAudience(false)
+        }
+    }
+
+    const uploadSavedContactList = async (file?: File) => {
+        if (!file) return
+
+        const lowerFileName = file.name.toLowerCase()
+        if (lowerFileName.endsWith('.xls') && !lowerFileName.endsWith('.xlsx')) {
+            setFeedback({
+                type: 'error',
+                text: 'Arquivo .xls antigo nao e aceito. Abra no Excel e salve como .xlsx, ou use o modelo CSV baixado pelo painel.',
+            })
+            return
+        }
+
+        setSavingContactList(true)
+        setFeedback(null)
+        try {
+            const form = new FormData()
+            form.append('file', file)
+            form.append('name', contactListName)
+
+            const res = await fetch('/api/admin/whatsapp/contact-lists', {
+                method: 'POST',
+                body: form,
+            })
+            const data = await res.json()
+
+            if (!data.success) {
+                setFeedback({ type: 'error', text: data.message || 'Erro ao salvar lista.' })
+                return
+            }
+
+            const list = data.list as MetaContactList
+            setMetaContactLists(prev => [list, ...prev.filter(item => item.id !== list.id)])
+            setContactListName('')
+            await loadSavedContactListIntoAudience(list.id, { resetFilters: true, silent: true })
+
+            const summary = data.summary || {}
+            setFeedback({
+                type: 'success',
+                text: `${data.message} Duplicados ignorados: ${summary.duplicateContacts || 0}. Invalidos: ${summary.invalidContacts || 0}.`,
+            })
+        } catch {
+            setFeedback({ type: 'error', text: 'Nao consegui salvar essa lista. Use XLSX, CSV ou TXT com coluna de telefone.' })
+        } finally {
+            setSavingContactList(false)
+        }
+    }
+
+    const clearSavedContactListSelection = () => {
+        setSelectedContactListId('')
+        setSelectedContactListContacts([])
+        setContactListSegments(null)
+        setContactListAudienceCounts({ all: 0, filtered: 0 })
+        resetContactSegmentFilters()
     }
 
     const resetMetaTemplateBuilder = () => {
@@ -659,6 +1107,14 @@ export default function CampaignsPage() {
                         templateName: metaTemplateName.trim(),
                         templateLanguage: metaTemplateLanguage.trim() || 'pt_BR',
                         templateParameters,
+                        contactListId: selectedContactListId || undefined,
+                        contactSegment: selectedContactListId ? {
+                            city: contactSegmentCity.trim() || null,
+                            tag: contactSegmentTag.trim() || null,
+                            search: contactSegmentSearch.trim() || null,
+                            filteredContacts: selectedContactListContacts.length,
+                            totalContacts: contactListAudienceCounts.all || selectedContactListContacts.length,
+                        } : undefined,
                         confirmOptIn,
                         optInSource: 'site_lead_authorized',
                         campaignType: metaCampaignType,
@@ -683,6 +1139,7 @@ export default function CampaignsPage() {
                 setFeedback({ type: 'success', text: `✅ ${data.message}` })
                 setShowCreateForm(false)
                 setNumbersInput('')
+                clearSavedContactListSelection()
                 setMsgText('')
                 setMediaUrl('')
                 resetMetaTemplateBuilder()
@@ -741,9 +1198,46 @@ export default function CampaignsPage() {
         }
     }
 
+    const retryFailedMetaCampaign = async (campaignId: string, failedCount: number) => {
+        if (failedCount <= 0) return
+        const confirmed = window.confirm(`Reenviar ${failedCount} destinatario(s) que falharam nesta campanha?`)
+        if (!confirmed) return
+
+        setRetryingMetaCampaignId(campaignId)
+        setFeedback(null)
+        try {
+            const res = await fetch('/api/admin/whatsapp/campaigns', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'meta_retry_failed',
+                    campaignId,
+                }),
+            })
+            const data = await res.json()
+            if (data.success) {
+                setFeedback({ type: 'success', text: data.message || 'Falhas reenfileiradas para reenvio.' })
+                setMetaCampaignDetails(prev => {
+                    const next = { ...prev }
+                    delete next[campaignId]
+                    return next
+                })
+                setExpandedMetaCampaignId('')
+                await loadMetaCampaigns()
+            } else {
+                setFeedback({ type: 'error', text: data.message || 'Erro ao reenviar falhas.' })
+            }
+        } catch {
+            setFeedback({ type: 'error', text: 'Erro ao reenviar falhas.' })
+        } finally {
+            setRetryingMetaCampaignId('')
+        }
+    }
+
     const currentInstance = instances.find(i => i.id === selectedInstance)
     const approvedMetaTemplates = metaTemplates.filter(template => String(template.status || '').toUpperCase() === 'APPROVED')
     const activeMetaSenders = metaSenders.filter(sender => sender.local_status === 'active')
+    const selectedContactList = metaContactLists.find(list => list.id === selectedContactListId) || null
     const selectedMetaTemplate = approvedMetaTemplates.find(template => template.name === metaTemplateName && template.language === metaTemplateLanguage) || null
     const selectedHeaderComponent = findTemplateComponent(selectedMetaTemplate, 'HEADER')
     const selectedBodyComponent = findTemplateComponent(selectedMetaTemplate, 'BODY')
@@ -755,12 +1249,32 @@ export default function CampaignsPage() {
     const selectedFooterText = textValue(selectedFooterComponent?.text)
     const selectedHeaderVariables = extractTemplateVariables(selectedHeaderText)
     const selectedBodyVariables = extractTemplateVariables(selectedBodyText)
+    const selectedTemplateHeaderMediaUrl = getTemplateHeaderMediaUrl(selectedMetaTemplate)
     const previewHeaderText = replaceTemplateVariables(selectedHeaderText, { 1: metaHeaderParameterValue }, 'header')
     const previewBodyText = replaceTemplateVariables(selectedBodyText, metaBodyParameterValues, 'exemplo')
     const parsedMetaRecipientDrafts = sendProvider === 'meta_whatsapp' && metaAudiencePersonalized ? parseMetaRecipientDrafts() : []
     const parsedNumbers = sendProvider === 'meta_whatsapp' && metaAudiencePersonalized
         ? parsedMetaRecipientDrafts.map(recipient => recipient.phone)
         : parseNumbers()
+    const selectedBodyVariablesKey = selectedBodyVariables.join(',')
+
+    useEffect(() => {
+        if (!selectedContactListId || selectedContactListContacts.length === 0) return
+        setNumbersInput(buildAudienceLinesFromContacts(selectedContactListContacts))
+        setMetaAudiencePersonalized(true)
+    }, [selectedContactListId, selectedContactListContacts, selectedBodyVariablesKey])
+
+    useEffect(() => {
+        if (!selectedMetaTemplate) {
+            setMetaHeaderMediaUrl('')
+            return
+        }
+        if (['IMAGE', 'VIDEO', 'DOCUMENT'].includes(selectedHeaderFormat)) {
+            setMetaHeaderMediaUrl(selectedTemplateHeaderMediaUrl || '')
+            return
+        }
+        setMetaHeaderMediaUrl('')
+    }, [selectedMetaTemplate, selectedHeaderFormat, selectedTemplateHeaderMediaUrl])
 
     if (loading) return <AdminLoadingState minHeight="400px" />
 
@@ -925,13 +1439,38 @@ export default function CampaignsPage() {
                                                 ))}
                                             </select>
                                         ) : (
-                                            <input value={metaTemplateName} onChange={e => setMetaTemplateName(e.target.value)}
-                                                placeholder="ex: blog_news_update"
-                                                style={{
-                                                    width: '100%', padding: '10px 14px', borderRadius: '8px', fontSize: '0.9rem',
-                                                    background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)',
-                                                    color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box',
-                                                }} />
+                                            <div style={{
+                                                padding: '10px 12px',
+                                                borderRadius: '8px',
+                                                border: '1px solid rgba(201,169,110,0.28)',
+                                                background: 'rgba(201,169,110,0.08)',
+                                                color: 'var(--text-secondary)',
+                                                fontSize: '0.82rem',
+                                                lineHeight: 1.45,
+                                            }}>
+                                                Nenhum template aprovado criado pelo painel foi encontrado. Crie um novo em Templates Meta e sincronize apos aprovacao.
+                                                <button
+                                                    type="button"
+                                                    onClick={syncMetaTemplatesForCampaigns}
+                                                    disabled={loadingMetaCampaigns}
+                                                    style={{
+                                                        marginTop: '8px',
+                                                        padding: '8px 10px',
+                                                        borderRadius: '8px',
+                                                        border: '1px solid rgba(201,169,110,0.45)',
+                                                        background: 'rgba(201,169,110,0.12)',
+                                                        color: 'var(--gold)',
+                                                        cursor: loadingMetaCampaigns ? 'not-allowed' : 'pointer',
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: '6px',
+                                                        fontSize: '0.78rem',
+                                                        fontWeight: 700,
+                                                    }}
+                                                >
+                                                    <RefreshCw size={14} className={loadingMetaCampaigns ? 'spin' : ''} /> Sincronizar templates
+                                                </button>
+                                            </div>
                                         )}
                                     </div>
                                     <div>
@@ -1011,16 +1550,27 @@ export default function CampaignsPage() {
                                                         Header {selectedHeaderFormat ? `(${selectedHeaderFormat})` : ''}
                                                     </label>
                                                     {['IMAGE', 'VIDEO', 'DOCUMENT'].includes(selectedHeaderFormat) ? (
-                                                        <input
-                                                            value={metaHeaderMediaUrl}
-                                                            onChange={e => setMetaHeaderMediaUrl(e.target.value)}
-                                                            placeholder="https://... arquivo publico aprovado no template"
-                                                            style={{
-                                                                width: '100%', padding: '10px 14px', borderRadius: '8px', fontSize: '0.9rem',
-                                                                background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)',
-                                                                color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box',
-                                                            }}
-                                                        />
+                                                        <div style={{ display: 'grid', gap: '8px' }}>
+                                                            <input
+                                                                value={metaHeaderMediaUrl}
+                                                                onChange={e => setMetaHeaderMediaUrl(e.target.value)}
+                                                                placeholder={selectedTemplateHeaderMediaUrl ? 'Midia padrao preenchida automaticamente' : 'Cole uma URL publica HTTPS para esta midia'}
+                                                                style={{
+                                                                    width: '100%', padding: '10px 14px', borderRadius: '8px', fontSize: '0.9rem',
+                                                                    background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)',
+                                                                    color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box',
+                                                                }}
+                                                            />
+                                                            {selectedTemplateHeaderMediaUrl ? (
+                                                                <div style={{ padding: '9px 10px', borderRadius: '8px', border: '1px solid rgba(34,197,94,0.2)', background: 'rgba(34,197,94,0.08)', color: 'var(--text-secondary)', fontSize: '0.78rem', lineHeight: 1.35 }}>
+                                                                    Midia padrao carregada do template. O usuario pode criar a campanha sem mexer nesse campo.
+                                                                </div>
+                                                            ) : (
+                                                                <div style={{ padding: '9px 10px', borderRadius: '8px', border: '1px solid rgba(245,158,11,0.2)', background: 'rgba(245,158,11,0.08)', color: 'var(--text-secondary)', fontSize: '0.78rem', lineHeight: 1.35 }}>
+                                                                    Este template nao tem midia salva no R2. Reenvie o template com upload de midia pelo painel ou informe uma URL publica.
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     ) : selectedHeaderVariables.length > 0 ? (
                                                         <input
                                                             value={metaHeaderParameterValue}
@@ -1230,13 +1780,394 @@ export default function CampaignsPage() {
                         </>
                         )}
 
+                        {sendProvider === 'meta_whatsapp' && (
+                            <div style={{
+                                display: 'grid',
+                                gap: '14px',
+                                padding: '14px',
+                                borderRadius: '12px',
+                                border: '1px solid var(--border)',
+                                background: 'rgba(255,255,255,0.03)',
+                            }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                    <div>
+                                        <h3 style={{ margin: 0, fontSize: '0.98rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <Users size={17} style={{ color: 'var(--gold)' }} /> Listas salvas de contatos
+                                        </h3>
+                                        <p style={{ margin: '4px 0 0', color: 'var(--text-muted)', fontSize: '0.78rem', lineHeight: 1.45 }}>
+                                            Salve listas XLSX, CSV ou TXT com nome, telefone e variaveis para reutilizar em campanhas futuras.
+                                        </p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={loadMetaContactLists}
+                                        disabled={loadingContactLists}
+                                        style={{
+                                            padding: '8px 10px',
+                                            borderRadius: '8px',
+                                            border: '1px solid var(--border)',
+                                            background: 'rgba(255,255,255,0.04)',
+                                            color: 'var(--text-secondary)',
+                                            cursor: loadingContactLists ? 'not-allowed' : 'pointer',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '6px',
+                                            fontSize: '0.78rem',
+                                            fontWeight: 700,
+                                        }}
+                                    >
+                                        <RefreshCw size={14} className={loadingContactLists ? 'spin' : ''} /> Atualizar listas
+                                    </button>
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+                                    <div>
+                                        <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
+                                            Usar lista existente
+                                        </label>
+                                        <select
+                                            value={selectedContactListId}
+                                            onChange={event => {
+                                                const listId = event.target.value
+                                                if (!listId) {
+                                                    clearSavedContactListSelection()
+                                                    return
+                                                }
+                                                void loadSavedContactListIntoAudience(listId, { resetFilters: true })
+                                            }}
+                                            style={{
+                                                width: '100%',
+                                                padding: '10px 14px',
+                                                borderRadius: '8px',
+                                                fontSize: '0.9rem',
+                                                background: 'rgba(255,255,255,0.06)',
+                                                border: '1px solid var(--border)',
+                                                color: 'var(--text-primary)',
+                                                outline: 'none',
+                                                boxSizing: 'border-box',
+                                            }}
+                                        >
+                                            <option value="">Selecione uma lista salva</option>
+                                            {metaContactLists.map(list => (
+                                                <option key={list.id} value={list.id}>
+                                                    {list.name} ({list.valid_contacts} contatos)
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
+                                            Nome da nova lista
+                                        </label>
+                                        <input
+                                            value={contactListName}
+                                            onChange={event => setContactListName(event.target.value)}
+                                            placeholder="Ex: Midhaus Selecao 250 Leads"
+                                            style={{
+                                                width: '100%',
+                                                padding: '10px 14px',
+                                                borderRadius: '8px',
+                                                fontSize: '0.9rem',
+                                                background: 'rgba(255,255,255,0.06)',
+                                                border: '1px solid var(--border)',
+                                                color: 'var(--text-primary)',
+                                                outline: 'none',
+                                                boxSizing: 'border-box',
+                                            }}
+                                        />
+                                    </div>
+
+                                    <div style={{ display: 'flex', alignItems: 'end', gap: '8px', flexWrap: 'wrap' }}>
+                                        <label
+                                            style={{
+                                                padding: '10px 12px',
+                                                borderRadius: '8px',
+                                                border: '1px solid var(--gold)',
+                                                background: 'rgba(201,169,110,0.12)',
+                                                color: 'var(--gold)',
+                                                cursor: savingContactList ? 'not-allowed' : 'pointer',
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                gap: '6px',
+                                                fontSize: '0.82rem',
+                                                fontWeight: 700,
+                                                minHeight: '42px',
+                                            }}
+                                        >
+                                            {savingContactList ? <Loader2 size={14} className="spin" /> : <Upload size={14} />}
+                                            Salvar CSV/XLSX
+                                            <input
+                                                type="file"
+                                                accept=".xlsx,.csv,.txt,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,text/plain"
+                                                disabled={savingContactList}
+                                                onChange={event => {
+                                                    const selectedFile = event.currentTarget.files?.[0]
+                                                    event.currentTarget.value = ''
+                                                    void uploadSavedContactList(selectedFile)
+                                                }}
+                                                style={{ display: 'none' }}
+                                            />
+                                        </label>
+                                        {selectedContactListId && (
+                                            <button
+                                                type="button"
+                                                onClick={clearSavedContactListSelection}
+                                                style={{
+                                                    padding: '10px 12px',
+                                                    borderRadius: '8px',
+                                                    border: '1px solid var(--border)',
+                                                    background: 'rgba(255,255,255,0.04)',
+                                                    color: 'var(--text-secondary)',
+                                                    cursor: 'pointer',
+                                                    fontSize: '0.82rem',
+                                                    fontWeight: 700,
+                                                    minHeight: '42px',
+                                                }}
+                                            >
+                                                Desvincular
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {selectedContactList && (
+                                    <div style={{
+                                        display: 'grid',
+                                        gap: '12px',
+                                        padding: '12px',
+                                        borderRadius: '12px',
+                                        border: '1px solid rgba(59,130,246,0.18)',
+                                        background: 'rgba(59,130,246,0.06)',
+                                    }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                                            <div>
+                                                <strong style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>Segmentar lista</strong>
+                                                <p style={{ margin: '4px 0 0', color: 'var(--text-muted)', fontSize: '0.76rem', lineHeight: 1.4 }}>
+                                                    Filtre a lista por cidade, tag ou busca antes de enviar. O campo de numeros e atualizado automaticamente.
+                                                </p>
+                                            </div>
+                                            <span style={{
+                                                padding: '6px 10px',
+                                                borderRadius: '999px',
+                                                background: 'rgba(255,255,255,0.08)',
+                                                border: '1px solid var(--border)',
+                                                color: 'var(--text-secondary)',
+                                                fontSize: '0.76rem',
+                                                fontWeight: 700,
+                                            }}>
+                                                {contactListAudienceCounts.filtered || selectedContactListContacts.length} de {contactListAudienceCounts.all || selectedContactList.valid_contacts} selecionados
+                                            </span>
+                                        </div>
+
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px', alignItems: 'end' }}>
+                                            <div>
+                                                <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
+                                                    Cidade
+                                                </label>
+                                                <select
+                                                    value={contactSegmentCity}
+                                                    onChange={event => setContactSegmentCity(event.target.value)}
+                                                    disabled={loadingContactListAudience || !(contactListSegments?.cities.length)}
+                                                    style={{
+                                                        width: '100%',
+                                                        padding: '9px 12px',
+                                                        borderRadius: '8px',
+                                                        fontSize: '0.84rem',
+                                                        background: 'rgba(255,255,255,0.06)',
+                                                        border: '1px solid var(--border)',
+                                                        color: 'var(--text-primary)',
+                                                        outline: 'none',
+                                                        boxSizing: 'border-box',
+                                                    }}
+                                                >
+                                                    <option value="">Todas as cidades</option>
+                                                    {(contactListSegments?.cities || []).map(city => (
+                                                        <option key={city.value} value={city.value}>
+                                                            {city.value} ({city.count})
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
+                                                    Tag
+                                                </label>
+                                                <select
+                                                    value={contactSegmentTag}
+                                                    onChange={event => setContactSegmentTag(event.target.value)}
+                                                    disabled={loadingContactListAudience || !(contactListSegments?.tags.length)}
+                                                    style={{
+                                                        width: '100%',
+                                                        padding: '9px 12px',
+                                                        borderRadius: '8px',
+                                                        fontSize: '0.84rem',
+                                                        background: 'rgba(255,255,255,0.06)',
+                                                        border: '1px solid var(--border)',
+                                                        color: 'var(--text-primary)',
+                                                        outline: 'none',
+                                                        boxSizing: 'border-box',
+                                                    }}
+                                                >
+                                                    <option value="">Todas as tags</option>
+                                                    {(contactListSegments?.tags || []).map(tag => (
+                                                        <option key={tag.value} value={tag.value}>
+                                                            {tag.value} ({tag.count})
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
+                                                    Busca
+                                                </label>
+                                                <input
+                                                    value={contactSegmentSearch}
+                                                    onChange={event => setContactSegmentSearch(event.target.value)}
+                                                    placeholder="Nome, telefone, email, cidade ou tag"
+                                                    disabled={loadingContactListAudience}
+                                                    style={{
+                                                        width: '100%',
+                                                        padding: '9px 12px',
+                                                        borderRadius: '8px',
+                                                        fontSize: '0.84rem',
+                                                        background: 'rgba(255,255,255,0.06)',
+                                                        border: '1px solid var(--border)',
+                                                        color: 'var(--text-primary)',
+                                                        outline: 'none',
+                                                        boxSizing: 'border-box',
+                                                    }}
+                                                />
+                                            </div>
+
+                                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => void loadSavedContactListIntoAudience(selectedContactListId, {
+                                                        city: contactSegmentCity,
+                                                        tag: contactSegmentTag,
+                                                        search: contactSegmentSearch,
+                                                    })}
+                                                    disabled={loadingContactListAudience}
+                                                    style={{
+                                                        padding: '9px 11px',
+                                                        borderRadius: '8px',
+                                                        border: '1px solid var(--gold)',
+                                                        background: 'rgba(201,169,110,0.12)',
+                                                        color: 'var(--gold)',
+                                                        cursor: loadingContactListAudience ? 'not-allowed' : 'pointer',
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: '6px',
+                                                        fontSize: '0.78rem',
+                                                        fontWeight: 700,
+                                                    }}
+                                                >
+                                                    {loadingContactListAudience ? <Loader2 size={14} className="spin" /> : <Search size={14} />}
+                                                    Aplicar
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => void loadSavedContactListIntoAudience(selectedContactListId, { resetFilters: true })}
+                                                    disabled={loadingContactListAudience}
+                                                    style={{
+                                                        padding: '9px 11px',
+                                                        borderRadius: '8px',
+                                                        border: '1px solid var(--border)',
+                                                        background: 'rgba(255,255,255,0.04)',
+                                                        color: 'var(--text-secondary)',
+                                                        cursor: loadingContactListAudience ? 'not-allowed' : 'pointer',
+                                                        fontSize: '0.78rem',
+                                                        fontWeight: 700,
+                                                    }}
+                                                >
+                                                    Limpar
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {contactListSegments && (
+                                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', color: 'var(--text-muted)', fontSize: '0.74rem' }}>
+                                                <span>{contactListSegments.stats.with_name} com nome</span>
+                                                <span>{contactListSegments.stats.with_city} com cidade</span>
+                                                <span>{contactListSegments.stats.with_tags} com tags</span>
+                                                <span>{contactListSegments.stats.with_variables} com variaveis</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.74rem', lineHeight: 1.45 }}>
+                                    O modelo baixado pelo painel e CSV e pode ser enviado aqui. Se o Excel gerar um arquivo .xls antigo, salve novamente como .xlsx antes de subir.
+                                </p>
+
+                                {selectedContactList && (
+                                    <div style={{
+                                        padding: '10px 12px',
+                                        borderRadius: '10px',
+                                        border: '1px solid rgba(34,197,94,0.22)',
+                                        background: 'rgba(34,197,94,0.08)',
+                                        color: 'var(--text-secondary)',
+                                        fontSize: '0.8rem',
+                                        lineHeight: 1.45,
+                                    }}>
+                                        <strong style={{ color: 'var(--text-primary)' }}>{selectedContactList.name}</strong>
+                                        {' '}carregada com {selectedContactListContacts.length} contato(s).
+                                        {contactListAudienceCounts.all && contactListAudienceCounts.all !== selectedContactListContacts.length ? ` Total da lista: ${contactListAudienceCounts.all}.` : ''}
+                                        {selectedContactList.source_file_name ? ` Origem: ${selectedContactList.source_file_name}.` : ''}
+                                        {selectedContactList.duplicate_contacts || selectedContactList.invalid_contacts ? (
+                                            <> Ignorados: {selectedContactList.duplicate_contacts} duplicado(s), {selectedContactList.invalid_contacts} invalido(s).</>
+                                        ) : null}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
                         {/* Numbers */}
                         <div>
-                            <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
-                                {sendProvider === 'meta_whatsapp' && metaAudiencePersonalized
-                                    ? 'Lista personalizada'
-                                    : 'Números (um por linha, ou separados por vírgula)'}
-                            </label>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '6px' }}>
+                                <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block' }}>
+                                    {sendProvider === 'meta_whatsapp' && metaAudiencePersonalized
+                                        ? 'Lista personalizada'
+                                        : 'Numeros (um por linha, ou separados por virgula)'}
+                                </label>
+                                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                    <button
+                                        type="button"
+                                        onClick={downloadAudienceTemplate}
+                                        style={{
+                                            padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--border)',
+                                            background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)',
+                                            cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                            fontSize: '0.78rem', fontWeight: 700,
+                                        }}
+                                    >
+                                        <Download size={14} /> Baixar modelo CSV
+                                    </button>
+                                    <label
+                                        style={{
+                                            padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--gold)',
+                                            background: 'rgba(201,169,110,0.12)', color: 'var(--gold)',
+                                            cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                            fontSize: '0.78rem', fontWeight: 700,
+                                        }}
+                                    >
+                                        <Upload size={14} /> Importar CSV/TXT rapido
+                                        <input
+                                            type="file"
+                                            accept=".csv,.txt,text/csv,text/plain"
+                                            onChange={event => {
+                                                const selectedFile = event.currentTarget.files?.[0]
+                                                event.currentTarget.value = ''
+                                                void importAudienceFile(selectedFile)
+                                            }}
+                                            style={{ display: 'none' }}
+                                        />
+                                    </label>
+                                </div>
+                            </div>
                             <textarea value={numbersInput} onChange={e => setNumbersInput(e.target.value)}
                                 placeholder={sendProvider === 'meta_whatsapp' && metaAudiencePersonalized
                                     ? "5547999999999; Maria; Maria; Apartamento frente mar; https://guilhermepilger.ai/imovel\n5547888888888; Joao; Joao; Cobertura vista mar; https://guilhermepilger.ai/imovel-2"
@@ -1256,7 +2187,7 @@ export default function CampaignsPage() {
                             </div>
                             {sendProvider === 'meta_whatsapp' && metaAudiencePersonalized && (
                                 <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '6px', lineHeight: 1.45 }}>
-                                    Formato: telefone; nome; valor para {'{{1}}'}; valor para {'{{2}}'}; valor para {'{{3}}'}.
+                                    Formato: telefone; nome{selectedBodyVariables.map(variable => `; valor para {{${variable}}}`).join('') || '; valor para {{1}}'}.
                                     {parsedMetaRecipientDrafts.some(recipient => (recipient.missingVariables || []).length > 0) && (
                                         <span style={{ color: '#ef4444', display: 'block', marginTop: '4px' }}>
                                             Existem linhas com variaveis obrigatorias vazias.
@@ -1368,6 +2299,8 @@ export default function CampaignsPage() {
                     onRefresh={loadMetaCampaigns}
                     onToggleDetail={toggleMetaCampaignDetail}
                     onManage={manageMetaCampaign}
+                    retryingCampaignId={retryingMetaCampaignId}
+                    onRetryFailed={retryFailedMetaCampaign}
                 />
             )}
 
@@ -1544,6 +2477,8 @@ function MetaOfficialCampaignPanel({
     onRefresh,
     onToggleDetail,
     onManage,
+    retryingCampaignId,
+    onRetryFailed,
 }: {
     campaigns: MetaCampaign[]
     senders: MetaSender[]
@@ -1558,7 +2493,21 @@ function MetaOfficialCampaignPanel({
     onRefresh: () => void
     onToggleDetail: (campaignId: string) => void
     onManage: (campaignId: string, action: 'pause' | 'resume' | 'cancel') => void
+    retryingCampaignId: string
+    onRetryFailed: (campaignId: string, failedCount: number) => void
 }) {
+    const [searchTerm, setSearchTerm] = useState('')
+    const normalizedSearch = searchTerm.trim().toLowerCase()
+    const statusCounts = summary?.byStatus || {}
+    const statusOptions = [
+        { value: '', label: 'Todas', count: summary?.total || campaigns.length },
+        { value: 'queued', label: 'Fila', count: statusCounts.queued || 0 },
+        { value: 'sending', label: 'Enviando', count: statusCounts.sending || 0 },
+        { value: 'completed', label: 'Concluidas', count: statusCounts.completed || 0 },
+        { value: 'failed', label: 'Falhas', count: statusCounts.failed || 0 },
+        { value: 'paused', label: 'Pausadas', count: statusCounts.paused || 0 },
+        { value: 'scheduled', label: 'Agendadas', count: statusCounts.scheduled || 0 },
+    ]
     const metricItems = [
         { label: 'Campanhas', value: summary?.total || 0, icon: MessageSquare, color: 'var(--gold)' },
         { label: 'Destinatarios', value: summary?.recipients || 0, icon: Users, color: '#38bdf8' },
@@ -1567,167 +2516,756 @@ function MetaOfficialCampaignPanel({
         { label: 'Lidas', value: summary?.read || 0, icon: Eye, color: '#0ea5e9' },
         { label: 'Falhas', value: summary?.failed || 0, icon: AlertCircle, color: '#ef4444' },
     ]
+    const rateItems = [
+        { label: 'Taxa aceite', value: percentLabel(analytics?.rates?.acceptedRate ?? metricRate(summary?.sent || 0, summary?.recipients || 0)), color: '#38bdf8' },
+        { label: 'Entrega', value: percentLabel(analytics?.rates?.deliveryRate ?? metricRate(summary?.delivered || 0, summary?.sent || summary?.recipients || 0)), color: '#22c55e' },
+        { label: 'Leitura', value: percentLabel(analytics?.rates?.readRate ?? metricRate(summary?.read || 0, summary?.delivered || summary?.sent || summary?.recipients || 0)), color: '#0ea5e9' },
+        { label: 'Falha', value: percentLabel(analytics?.rates?.failureRate ?? metricRate(summary?.failed || 0, summary?.recipients || 0)), color: '#ef4444' },
+    ]
+    const filteredCampaigns = campaigns.filter(campaign => {
+        if (!normalizedSearch) return true
+        const sender = senders.find(item => item.id === campaign.default_sender_id)
+        return [
+            campaign.name,
+            campaign.status,
+            campaign.template_name,
+            campaign.template_language,
+            campaign.campaign_type,
+            sender?.display_name,
+            sender?.phone_number,
+        ].some(value => String(value || '').toLowerCase().includes(normalizedSearch))
+    })
+    const selectedCampaign = (
+        filteredCampaigns.find(item => item.id === expandedCampaignId)
+        || campaigns.find(item => item.id === expandedCampaignId)
+        || filteredCampaigns[0]
+        || null
+    )
+    const selectedSender = selectedCampaign
+        ? senders.find(item => item.id === selectedCampaign.default_sender_id)
+        : undefined
+    const selectedDetail = selectedCampaign ? campaignDetails[selectedCampaign.id] : undefined
+    const selectedCampaignId = selectedCampaign?.id || ''
+    const selectCampaign = (campaignId: string) => {
+        if (expandedCampaignId === campaignId) return
+        onToggleDetail(campaignId)
+    }
 
     return (
         <div style={{ display: 'grid', gap: '14px' }}>
             <div style={{
-                padding: '18px 20px',
                 borderRadius: '12px',
                 background: 'var(--bg-secondary)',
                 border: '1px solid var(--border)',
-                display: 'grid',
-                gap: '14px',
+                overflow: 'hidden',
             }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-                    <div>
-                        <h2 style={{ fontSize: '1.05rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-                            <MessageSquare size={18} style={{ color: 'var(--gold)' }} /> Campanhas Meta WhatsApp
-                        </h2>
-                        <p style={{ margin: '5px 0 0', color: 'var(--text-muted)', fontSize: '0.78rem' }}>
-                            Fila oficial do WhatsApp com templates aprovados, opt-in, status de entrega e varios numeros Meta.
-                        </p>
-                    </div>
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                        <select
-                            value={statusFilter}
-                            onChange={e => onStatusFilterChange(e.target.value)}
-                            style={{
-                                padding: '8px 10px',
-                                borderRadius: '8px',
-                                border: '1px solid var(--border)',
-                                background: 'rgba(255,255,255,0.06)',
-                                color: 'var(--text-primary)',
-                                fontSize: '0.82rem',
-                            }}
-                        >
-                            <option value="">Todos os status</option>
-                            <option value="scheduled">Agendadas</option>
-                            <option value="queued">Na fila</option>
-                            <option value="sending">Enviando</option>
-                            <option value="paused">Pausadas</option>
-                            <option value="completed">Concluidas</option>
-                            <option value="failed">Falhas</option>
-                            <option value="cancelled">Canceladas</option>
-                        </select>
-                        <button
-                            type="button"
-                            onClick={onRefresh}
-                            disabled={loading}
-                            style={{
-                                padding: '8px 12px',
-                                borderRadius: '8px',
-                                border: '1px solid var(--border)',
-                                background: 'rgba(255,255,255,0.04)',
-                                color: 'var(--text-secondary)',
-                                cursor: loading ? 'not-allowed' : 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '6px',
-                            }}
-                        >
-                            <RefreshCw size={14} className={loading ? 'spin' : ''} />
-                            Atualizar
-                        </button>
-                    </div>
+                <div style={{
+                    padding: '12px 14px 10px',
+                    borderBottom: '1px solid var(--border)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    flexWrap: 'wrap',
+                }}>
+                    {statusOptions.map(option => {
+                        const active = statusFilter === option.value
+                        return (
+                            <button
+                                key={option.value || 'all'}
+                                type="button"
+                                onClick={() => onStatusFilterChange(option.value)}
+                                style={{
+                                    minHeight: '34px',
+                                    padding: '7px 11px',
+                                    borderRadius: '8px',
+                                    border: active ? '1px solid rgba(176,138,67,0.36)' : '1px solid var(--border)',
+                                    background: active ? 'rgba(176,138,67,0.13)' : 'rgba(255,255,255,0.04)',
+                                    color: active ? 'var(--gold)' : 'var(--text-primary)',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '7px',
+                                    fontSize: '0.78rem',
+                                    fontWeight: 800,
+                                }}
+                            >
+                                {option.label}
+                                <span style={{
+                                    minWidth: '20px',
+                                    height: '20px',
+                                    borderRadius: '999px',
+                                    background: active ? 'rgba(176,138,67,0.18)' : 'rgba(148,163,184,0.14)',
+                                    color: active ? 'var(--gold)' : 'var(--text-muted)',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    padding: '0 6px',
+                                    fontSize: '0.68rem',
+                                    lineHeight: 1,
+                                }}>
+                                    {Number(option.count || 0).toLocaleString('pt-BR')}
+                                </span>
+                            </button>
+                        )
+                    })}
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '10px' }}>
+                <div style={{
+                    padding: '10px 14px',
+                    borderBottom: '1px solid var(--border)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    flexWrap: 'wrap',
+                }}>
+                    <label style={{
+                        flex: '1 1 260px',
+                        minHeight: '38px',
+                        borderRadius: '8px',
+                        border: '1px solid var(--border)',
+                        background: 'rgba(255,255,255,0.04)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '0 10px',
+                        color: 'var(--text-muted)',
+                    }}>
+                        <Search size={15} />
+                        <input
+                            value={searchTerm}
+                            onChange={event => setSearchTerm(event.target.value)}
+                            placeholder="Pesquisar campanha, template, numero ou status"
+                            style={{
+                                border: 0,
+                                outline: 'none',
+                                background: 'transparent',
+                                color: 'var(--text-primary)',
+                                width: '100%',
+                                fontSize: '0.82rem',
+                            }}
+                        />
+                    </label>
+                    <select
+                        value={statusFilter}
+                        onChange={e => onStatusFilterChange(e.target.value)}
+                        style={{
+                            minHeight: '38px',
+                            padding: '8px 10px',
+                            borderRadius: '8px',
+                            border: '1px solid var(--border)',
+                            background: 'rgba(255,255,255,0.06)',
+                            color: 'var(--text-primary)',
+                            fontSize: '0.82rem',
+                        }}
+                    >
+                        <option value="">Todos os status</option>
+                        <option value="scheduled">Agendadas</option>
+                        <option value="queued">Na fila</option>
+                        <option value="sending">Enviando</option>
+                        <option value="paused">Pausadas</option>
+                        <option value="completed">Concluidas</option>
+                        <option value="failed">Falhas</option>
+                        <option value="cancelled">Canceladas</option>
+                    </select>
+                    <button
+                        type="button"
+                        onClick={onRefresh}
+                        disabled={loading}
+                        style={{
+                            minHeight: '38px',
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            border: '1px solid var(--border)',
+                            background: 'rgba(255,255,255,0.04)',
+                            color: 'var(--text-secondary)',
+                            cursor: loading ? 'not-allowed' : 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            fontWeight: 800,
+                        }}
+                    >
+                        <RefreshCw size={14} className={loading ? 'spin' : ''} />
+                        Atualizar
+                    </button>
+                </div>
+
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(6, minmax(118px, 1fr))',
+                    borderBottom: '1px solid var(--border)',
+                    overflowX: 'auto',
+                }}>
                     {metricItems.map(item => {
                         const Icon = item.icon
                         return (
                             <div key={item.label} style={{
+                                minWidth: '118px',
                                 padding: '12px',
-                                borderRadius: '10px',
-                                border: '1px solid var(--border)',
-                                background: 'rgba(255,255,255,0.03)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '10px',
+                                borderRight: '1px solid var(--border)',
+                                background: 'rgba(255,255,255,0.02)',
+                                display: 'grid',
+                                gap: '6px',
                             }}>
-                                <Icon size={17} style={{ color: item.color }} />
-                                <div>
-                                    <div style={{ fontSize: '1rem', color: 'var(--text-primary)', fontWeight: 800 }}>
-                                        {Number(item.value || 0).toLocaleString('pt-BR')}
-                                    </div>
-                                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{item.label}</div>
-                                </div>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', fontSize: '0.66rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                                    <Icon size={13} style={{ color: item.color }} />
+                                    {item.label}
+                                </span>
+                                <strong style={{ color: 'var(--text-primary)', fontSize: '0.92rem' }}>
+                                    {Number(item.value || 0).toLocaleString('pt-BR')}
+                                </strong>
                             </div>
                         )
                     })}
                 </div>
 
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(4, minmax(120px, 1fr))',
+                    borderBottom: '1px solid var(--border)',
+                    overflowX: 'auto',
+                }}>
+                    {rateItems.map(item => (
+                        <div key={item.label} style={{
+                            minWidth: '120px',
+                            padding: '10px 12px',
+                            borderRight: '1px solid var(--border)',
+                            display: 'grid',
+                            gap: '3px',
+                        }}>
+                            <strong style={{ color: item.color, fontSize: '0.9rem' }}>{item.value}</strong>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>{item.label}</span>
+                        </div>
+                    ))}
+                </div>
+
+                <div style={{
+                    padding: '10px 14px',
+                    borderBottom: '1px solid var(--border)',
+                    display: 'flex',
+                    gap: '8px',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                }}>
+                    <strong style={{ color: 'var(--text-primary)', fontSize: '0.78rem', marginRight: '4px' }}>Numeros oficiais</strong>
+                    {senders.length === 0 ? (
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.76rem' }}>
+                            Nenhum numero Meta sincronizado.
+                        </span>
+                    ) : (
+                        senders.map(sender => (
+                            <span key={sender.id} style={{
+                                padding: '6px 9px',
+                                borderRadius: '999px',
+                                border: '1px solid var(--border)',
+                                color: sender.local_status === 'active' ? '#22c55e' : 'var(--text-muted)',
+                                background: sender.local_status === 'active' ? 'rgba(34,197,94,0.08)' : 'rgba(255,255,255,0.03)',
+                                fontSize: '0.72rem',
+                                fontWeight: 800,
+                            }}>
+                                {sender.display_name || sender.phone_number} | {sender.daily_sent_count}/{sender.daily_limit}
+                            </span>
+                        ))
+                    )}
+                </div>
+
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'minmax(0, 1fr) minmax(360px, 430px)',
+                    minHeight: '470px',
+                }}>
+                    <div style={{
+                        minWidth: 0,
+                        borderRight: '1px solid var(--border)',
+                        overflowX: 'auto',
+                    }}>
+                        <div style={{
+                            minWidth: '880px',
+                            display: 'grid',
+                            gridTemplateColumns: '92px minmax(250px, 1.35fr) 125px 105px 105px 105px 105px 118px',
+                            gap: '0',
+                            padding: '9px 12px',
+                            borderBottom: '1px solid var(--border)',
+                            color: 'var(--text-muted)',
+                            fontSize: '0.66rem',
+                            fontWeight: 900,
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.04em',
+                            background: 'rgba(255,255,255,0.025)',
+                        }}>
+                            <span>Status</span>
+                            <span>Campanha</span>
+                            <span>Destinatarios</span>
+                            <span>Aceitas</span>
+                            <span>Entregues</span>
+                            <span>Lidas</span>
+                            <span>Falhas</span>
+                            <span>Acoes</span>
+                        </div>
+
+                        {loading ? (
+                            <div style={{ minWidth: '880px', padding: '34px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                                <Loader2 size={18} className="spin" /> Carregando campanhas Meta...
+                            </div>
+                        ) : campaigns.length === 0 ? (
+                            <div style={{ minWidth: '880px', textAlign: 'center', padding: '46px', color: 'var(--text-muted)' }}>
+                                <Send size={32} style={{ opacity: 0.3, marginBottom: '8px' }} />
+                                <p style={{ margin: 0 }}>Nenhuma campanha oficial de WhatsApp encontrada.</p>
+                            </div>
+                        ) : filteredCampaigns.length === 0 ? (
+                            <div style={{ minWidth: '880px', textAlign: 'center', padding: '38px', color: 'var(--text-muted)' }}>
+                                Nenhuma campanha encontrada para a busca atual.
+                            </div>
+                        ) : (
+                            <div style={{ minWidth: '880px' }}>
+                                {filteredCampaigns.map(campaign => (
+                                    <MetaCampaignTableRow
+                                        key={campaign.id}
+                                        campaign={campaign}
+                                        sender={senders.find(item => item.id === campaign.default_sender_id)}
+                                        selected={campaign.id === selectedCampaignId}
+                                        loadingDetail={loadingDetailCampaignId === campaign.id}
+                                        retrying={retryingCampaignId === campaign.id}
+                                        onSelect={selectCampaign}
+                                        onManage={onManage}
+                                        onRetryFailed={onRetryFailed}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    <MetaSelectedCampaignAside
+                        campaign={selectedCampaign}
+                        sender={selectedSender}
+                        detail={selectedDetail}
+                        loadingDetail={Boolean(selectedCampaign && loadingDetailCampaignId === selectedCampaign.id)}
+                        retrying={Boolean(selectedCampaign && retryingCampaignId === selectedCampaign.id)}
+                        onSelect={selectCampaign}
+                        onManage={onManage}
+                        onRetryFailed={onRetryFailed}
+                    />
+                </div>
+            </div>
+
+            <div style={{
+                borderRadius: '12px',
+                background: 'var(--bg-secondary)',
+                border: '1px solid var(--border)',
+                padding: '14px',
+            }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', marginBottom: '12px', flexWrap: 'wrap' }}>
+                    <div>
+                        <strong style={{ color: 'var(--text-primary)', fontSize: '0.92rem' }}>Relatorios e diagnosticos</strong>
+                        <p style={{ margin: '4px 0 0', color: 'var(--text-muted)', fontSize: '0.74rem' }}>
+                            Indicadores de saude, funil e principais erros das campanhas oficiais.
+                        </p>
+                    </div>
+                </div>
                 <MetaCampaignDashboard
                     summary={summary}
                     analytics={analytics}
                     campaigns={campaigns}
                 />
             </div>
+        </div>
+    )
+}
 
-            <div style={{
-                padding: '14px 18px',
-                borderRadius: '12px',
-                background: 'var(--bg-secondary)',
-                border: '1px solid var(--border)',
+function MetaCampaignTableRow({
+    campaign,
+    sender,
+    selected,
+    loadingDetail,
+    retrying,
+    onSelect,
+    onManage,
+    onRetryFailed,
+}: {
+    campaign: MetaCampaign
+    sender?: MetaSender
+    selected: boolean
+    loadingDetail: boolean
+    retrying: boolean
+    onSelect: (campaignId: string) => void
+    onManage: (campaignId: string, action: 'pause' | 'resume' | 'cancel') => void
+    onRetryFailed: (campaignId: string, failedCount: number) => void
+}) {
+    const progress = metaProgress(campaign)
+    const statusColor = metaStatusColor(campaign.status)
+    const finalStatus = ['completed', 'cancelled', 'failed'].includes(campaign.status)
+    const canPause = ['scheduled', 'queued', 'sending', 'preparing'].includes(campaign.status)
+    const canResume = campaign.status === 'paused'
+    const canRetryFailed = campaign.total_failed > 0 && !['queued', 'sending', 'scheduled', 'preparing', 'cancelled'].includes(campaign.status)
+
+    return (
+        <div
+            role="button"
+            tabIndex={0}
+            onClick={() => onSelect(campaign.id)}
+            onKeyDown={event => {
+                if (!['Enter', ' '].includes(event.key)) return
+                event.preventDefault()
+                onSelect(campaign.id)
+            }}
+            style={{
                 display: 'grid',
-                gap: '8px',
+                gridTemplateColumns: '92px minmax(250px, 1.35fr) 125px 105px 105px 105px 105px 118px',
+                gap: '0',
+                alignItems: 'center',
+                padding: '10px 12px',
+                borderBottom: '1px solid var(--border)',
+                background: selected ? 'rgba(176,138,67,0.08)' : 'transparent',
+                cursor: 'pointer',
+                outline: 'none',
+            }}
+        >
+            <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '7px',
+                color: statusColor,
+                fontSize: '0.72rem',
+                fontWeight: 900,
             }}>
-                <strong style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>Numeros oficiais sincronizados</strong>
-                {senders.length === 0 ? (
-                    <span style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>
-                        Nenhum numero Meta sincronizado ainda. Use Testar Conexao na Sala de Manutencao para sincronizar.
+                <span style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    background: statusColor,
+                    boxShadow: campaign.status === 'sending' ? '0 0 8px rgba(245,158,11,0.5)' : 'none',
+                }} />
+                {metaStatusLabel(campaign.status)}
+            </span>
+
+            <div style={{ minWidth: 0, display: 'grid', gap: '4px' }}>
+                <strong style={{
+                    color: 'var(--text-primary)',
+                    fontSize: '0.78rem',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                }}>
+                    {campaign.name || 'Campanha Meta'}
+                </strong>
+                <span style={{
+                    color: 'var(--text-muted)',
+                    fontSize: '0.7rem',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                }}>
+                    {campaign.template_name || '-'} ({campaign.template_language || 'pt_BR'})
+                    {sender ? ` | ${sender.display_name || sender.phone_number}` : ''}
+                </span>
+                <div style={{ height: '5px', borderRadius: '999px', background: 'rgba(148,163,184,0.16)', overflow: 'hidden' }}>
+                    <div style={{
+                        width: `${progress}%`,
+                        height: '100%',
+                        borderRadius: '999px',
+                        background: campaign.total_failed > 0 ? '#ef4444' : '#22c55e',
+                    }} />
+                </div>
+            </div>
+
+            <MetaTableNumber value={campaign.total_recipients} sub={`${progress}%`} />
+            <MetaTableNumber value={campaign.total_sent} />
+            <MetaTableNumber value={campaign.total_delivered} />
+            <MetaTableNumber value={campaign.total_read} />
+            <MetaTableNumber value={campaign.total_failed} color={campaign.total_failed > 0 ? '#ef4444' : 'var(--text-primary)'} />
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <button
+                    type="button"
+                    onClick={event => {
+                        event.stopPropagation()
+                        onSelect(campaign.id)
+                    }}
+                    title="Abrir detalhes"
+                    style={{ padding: '7px', borderRadius: '7px', border: '1px solid var(--border)', background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                >
+                    {loadingDetail ? <Loader2 size={14} className="spin" /> : <Search size={14} />}
+                </button>
+                {canRetryFailed && (
+                    <button
+                        type="button"
+                        onClick={event => {
+                            event.stopPropagation()
+                            onRetryFailed(campaign.id, campaign.total_failed)
+                        }}
+                        disabled={retrying}
+                        title="Reenviar falhas"
+                        style={{ padding: '7px', borderRadius: '7px', border: '1px solid rgba(245,158,11,0.22)', background: 'rgba(245,158,11,0.1)', color: '#f59e0b', cursor: retrying ? 'not-allowed' : 'pointer', opacity: retrying ? 0.7 : 1 }}
+                    >
+                        {retrying ? <Loader2 size={14} className="spin" /> : <RefreshCw size={14} />}
+                    </button>
+                )}
+                {canPause && (
+                    <button
+                        type="button"
+                        onClick={event => {
+                            event.stopPropagation()
+                            onManage(campaign.id, 'pause')
+                        }}
+                        title="Pausar"
+                        style={{ padding: '7px', borderRadius: '7px', border: '1px solid rgba(245,158,11,0.2)', background: 'rgba(245,158,11,0.1)', color: '#f59e0b', cursor: 'pointer' }}
+                    >
+                        <Pause size={14} />
+                    </button>
+                )}
+                {canResume && (
+                    <button
+                        type="button"
+                        onClick={event => {
+                            event.stopPropagation()
+                            onManage(campaign.id, 'resume')
+                        }}
+                        title="Retomar"
+                        style={{ padding: '7px', borderRadius: '7px', border: '1px solid rgba(34,197,94,0.2)', background: 'rgba(34,197,94,0.1)', color: '#22c55e', cursor: 'pointer' }}
+                    >
+                        <Play size={14} />
+                    </button>
+                )}
+                {!finalStatus && (
+                    <button
+                        type="button"
+                        onClick={event => {
+                            event.stopPropagation()
+                            onManage(campaign.id, 'cancel')
+                        }}
+                        title="Cancelar"
+                        style={{ padding: '7px', borderRadius: '7px', border: '1px solid rgba(239,68,68,0.16)', background: 'rgba(239,68,68,0.08)', color: '#ef4444', cursor: 'pointer' }}
+                    >
+                        <Trash2 size={14} />
+                    </button>
+                )}
+            </div>
+        </div>
+    )
+}
+
+function MetaTableNumber({
+    value,
+    sub,
+    color = 'var(--text-primary)',
+}: {
+    value: number
+    sub?: string
+    color?: string
+}) {
+    return (
+        <span style={{ display: 'grid', gap: '2px', color, fontSize: '0.78rem', fontWeight: 800 }}>
+            {Number(value || 0).toLocaleString('pt-BR')}
+            {sub && <small style={{ color: 'var(--text-muted)', fontSize: '0.66rem', fontWeight: 600 }}>{sub}</small>}
+        </span>
+    )
+}
+
+function MetaSelectedCampaignAside({
+    campaign,
+    sender,
+    detail,
+    loadingDetail,
+    retrying,
+    onSelect,
+    onManage,
+    onRetryFailed,
+}: {
+    campaign: MetaCampaign | null
+    sender?: MetaSender
+    detail?: MetaCampaignDetail
+    loadingDetail: boolean
+    retrying: boolean
+    onSelect: (campaignId: string) => void
+    onManage: (campaignId: string, action: 'pause' | 'resume' | 'cancel') => void
+    onRetryFailed: (campaignId: string, failedCount: number) => void
+}) {
+    if (!campaign) {
+        return (
+            <aside style={{ padding: '22px', color: 'var(--text-muted)', display: 'grid', placeItems: 'center', textAlign: 'center' }}>
+                <div>
+                    <MessageSquare size={28} style={{ opacity: 0.35, marginBottom: '8px' }} />
+                    <p style={{ margin: 0, fontSize: '0.8rem' }}>Selecione uma campanha para ver os detalhes.</p>
+                </div>
+            </aside>
+        )
+    }
+
+    const detailCampaign = detail?.campaign || campaign
+    const recipients = detail?.recipients || []
+    const events = detail?.events || []
+    const errors = campaignErrorGroups(recipients, events)
+    const acceptedTotal = detailCampaign.total_sent || recipients.filter(item => ['sent', 'delivered', 'read'].includes(item.status)).length
+    const deliveredTotal = detailCampaign.total_delivered || recipients.filter(item => ['delivered', 'read'].includes(item.status)).length
+    const readTotal = detailCampaign.total_read || recipients.filter(item => item.status === 'read').length
+    const failedTotal = detailCampaign.total_failed || recipients.filter(item => item.status === 'failed').length
+    const progress = metaProgress(detailCampaign)
+    const statusColor = metaStatusColor(detailCampaign.status)
+    const finalStatus = ['completed', 'cancelled', 'failed'].includes(detailCampaign.status)
+    const canPause = ['scheduled', 'queued', 'sending', 'preparing'].includes(detailCampaign.status)
+    const canResume = detailCampaign.status === 'paused'
+    const canRetryFailed = failedTotal > 0 && !['queued', 'sending', 'scheduled', 'preparing', 'cancelled'].includes(detailCampaign.status)
+
+    return (
+        <aside style={{
+            minWidth: 0,
+            background: 'rgba(255,255,255,0.02)',
+            display: 'grid',
+            gridTemplateRows: 'auto 1fr',
+        }}>
+            <div style={{ padding: '18px 18px 14px', borderBottom: '1px solid var(--border)', display: 'grid', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                    <span style={{
+                        width: '42px',
+                        height: '42px',
+                        borderRadius: '50%',
+                        background: 'rgba(176,138,67,0.14)',
+                        color: 'var(--gold)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 900,
+                        flexShrink: 0,
+                    }}>
+                        {(campaign.name || 'M').slice(0, 1).toUpperCase()}
                     </span>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                        <strong style={{ color: 'var(--text-primary)', fontSize: '0.92rem', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {campaign.name || 'Campanha Meta'}
+                        </strong>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem', display: 'block', marginTop: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {campaign.template_name || '-'} | {sender?.display_name || sender?.phone_number || 'Pool automatico'}
+                        </span>
+                    </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <span style={{
+                        color: statusColor,
+                        background: 'rgba(255,255,255,0.04)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '999px',
+                        padding: '4px 9px',
+                        fontSize: '0.7rem',
+                        fontWeight: 900,
+                    }}>
+                        {metaStatusLabel(detailCampaign.status)}
+                    </span>
+                    <button
+                        type="button"
+                        onClick={() => onSelect(campaign.id)}
+                        disabled={loadingDetail}
+                        style={{
+                            padding: '7px 10px',
+                            borderRadius: '8px',
+                            border: '1px solid var(--border)',
+                            background: 'rgba(255,255,255,0.04)',
+                            color: 'var(--text-secondary)',
+                            cursor: loadingDetail ? 'not-allowed' : 'pointer',
+                            display: 'inline-flex',
+                            gap: '6px',
+                            alignItems: 'center',
+                            fontSize: '0.72rem',
+                            fontWeight: 800,
+                        }}
+                    >
+                        {loadingDetail ? <Loader2 size={13} className="spin" /> : <Search size={13} />}
+                        Detalhes
+                    </button>
+                    {canRetryFailed && (
+                        <button
+                            type="button"
+                            onClick={() => onRetryFailed(campaign.id, failedTotal)}
+                            disabled={retrying}
+                            style={{
+                                padding: '7px 10px',
+                                borderRadius: '8px',
+                                border: '1px solid rgba(245,158,11,0.22)',
+                                background: 'rgba(245,158,11,0.1)',
+                                color: '#f59e0b',
+                                cursor: retrying ? 'not-allowed' : 'pointer',
+                                display: 'inline-flex',
+                                gap: '6px',
+                                alignItems: 'center',
+                                fontSize: '0.72rem',
+                                fontWeight: 800,
+                            }}
+                        >
+                            {retrying ? <Loader2 size={13} className="spin" /> : <RefreshCw size={13} />}
+                            Reenviar
+                        </button>
+                    )}
+                    {canPause && (
+                        <button type="button" onClick={() => onManage(campaign.id, 'pause')} title="Pausar" style={{ padding: '7px', borderRadius: '8px', border: '1px solid rgba(245,158,11,0.2)', background: 'rgba(245,158,11,0.1)', color: '#f59e0b', cursor: 'pointer' }}>
+                            <Pause size={14} />
+                        </button>
+                    )}
+                    {canResume && (
+                        <button type="button" onClick={() => onManage(campaign.id, 'resume')} title="Retomar" style={{ padding: '7px', borderRadius: '8px', border: '1px solid rgba(34,197,94,0.2)', background: 'rgba(34,197,94,0.1)', color: '#22c55e', cursor: 'pointer' }}>
+                            <Play size={14} />
+                        </button>
+                    )}
+                    {!finalStatus && (
+                        <button type="button" onClick={() => onManage(campaign.id, 'cancel')} title="Cancelar" style={{ padding: '7px', borderRadius: '8px', border: '1px solid rgba(239,68,68,0.16)', background: 'rgba(239,68,68,0.08)', color: '#ef4444', cursor: 'pointer' }}>
+                            <Trash2 size={14} />
+                        </button>
+                    )}
+                </div>
+
+                <div style={{ display: 'grid', gap: '6px' }}>
+                    <div style={{ height: '7px', borderRadius: '999px', background: 'rgba(148,163,184,0.16)', overflow: 'hidden' }}>
+                        <div style={{
+                            width: `${progress}%`,
+                            height: '100%',
+                            borderRadius: '999px',
+                            background: failedTotal > 0 ? '#ef4444' : '#22c55e',
+                        }} />
+                    </div>
+                    <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>
+                        {progress}% | Total {detailCampaign.total_recipients || 0} | Falhas {failedTotal}
+                    </span>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '8px' }}>
+                    {[
+                        { label: 'Aceitas', value: acceptedTotal, color: '#38bdf8' },
+                        { label: 'Entregues', value: deliveredTotal, color: '#22c55e' },
+                        { label: 'Lidas', value: readTotal, color: '#0ea5e9' },
+                        { label: 'Falhas', value: failedTotal, color: failedTotal > 0 ? '#ef4444' : 'var(--text-primary)' },
+                    ].map(item => (
+                        <div key={item.label} style={{ border: '1px solid var(--border)', borderRadius: '8px', padding: '9px', display: 'grid', gap: '2px', background: 'rgba(255,255,255,0.025)' }}>
+                            <strong style={{ color: item.color, fontSize: '0.88rem' }}>{Number(item.value || 0).toLocaleString('pt-BR')}</strong>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.68rem' }}>{item.label}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <div style={{ minHeight: 0, overflowY: 'auto', padding: '14px' }}>
+                {loadingDetail && !detail ? (
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '7px' }}>
+                        <Loader2 size={14} className="spin" /> Carregando detalhes...
+                    </div>
+                ) : detail ? (
+                    <MetaCampaignDetailPanel
+                        campaign={detailCampaign}
+                        recipients={recipients}
+                        events={events}
+                        errors={errors}
+                        acceptedTotal={acceptedTotal}
+                        deliveredTotal={deliveredTotal}
+                        readTotal={readTotal}
+                        failedTotal={failedTotal}
+                        retrying={retrying}
+                        onRetryFailed={onRetryFailed}
+                    />
                 ) : (
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                        {senders.map(sender => (
-                            <span key={sender.id} style={{
-                                padding: '7px 9px',
-                                borderRadius: '999px',
-                                border: '1px solid var(--border)',
-                                color: sender.local_status === 'active' ? '#22c55e' : 'var(--text-muted)',
-                                background: sender.local_status === 'active' ? 'rgba(34,197,94,0.08)' : 'rgba(255,255,255,0.03)',
-                                fontSize: '0.74rem',
-                                fontWeight: 700,
-                            }}>
-                                {sender.display_name || sender.phone_number} | {sender.daily_sent_count}/{sender.daily_limit}
-                            </span>
-                        ))}
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.76rem', lineHeight: 1.45 }}>
+                        Clique em Detalhes para carregar destinatarios, eventos da Meta e diagnostico de falhas desta campanha.
                     </div>
                 )}
             </div>
-
-            {loading ? (
-                <div style={{ textAlign: 'center', padding: '34px', color: 'var(--text-muted)' }}>
-                    <Loader2 size={20} className="spin" /> Carregando campanhas Meta...
-                </div>
-            ) : campaigns.length === 0 ? (
-                <div style={{
-                    textAlign: 'center',
-                    padding: '34px',
-                    borderRadius: '12px',
-                    background: 'var(--bg-secondary)',
-                    border: '1px solid var(--border)',
-                    color: 'var(--text-muted)',
-                }}>
-                    <Send size={32} style={{ opacity: 0.3, marginBottom: '8px' }} />
-                    <p style={{ margin: 0 }}>Nenhuma campanha oficial de WhatsApp encontrada.</p>
-                </div>
-            ) : (
-                <div style={{ display: 'grid', gap: '10px' }}>
-                    {campaigns.map(campaign => (
-                        <MetaCampaignCard
-                            key={campaign.id}
-                            campaign={campaign}
-                            sender={senders.find(item => item.id === campaign.default_sender_id)}
-                            detail={campaignDetails[campaign.id]}
-                            expanded={expandedCampaignId === campaign.id}
-                            loadingDetail={loadingDetailCampaignId === campaign.id}
-                            onToggleDetail={onToggleDetail}
-                            onManage={onManage}
-                        />
-                    ))}
-                </div>
-            )}
-        </div>
+        </aside>
     )
 }
 
@@ -1990,198 +3528,6 @@ function MetaMiniRanking({
     )
 }
 
-function MetaCampaignCard({
-    campaign,
-    sender,
-    detail,
-    expanded,
-    loadingDetail,
-    onToggleDetail,
-    onManage,
-}: {
-    campaign: MetaCampaign
-    sender?: MetaSender
-    detail?: MetaCampaignDetail
-    expanded: boolean
-    loadingDetail: boolean
-    onToggleDetail: (campaignId: string) => void
-    onManage: (campaignId: string, action: 'pause' | 'resume' | 'cancel') => void
-}) {
-    const progress = metaProgress(campaign)
-    const statusColor = metaStatusColor(campaign.status)
-    const finalStatus = ['completed', 'cancelled', 'failed'].includes(campaign.status)
-    const canPause = ['scheduled', 'queued', 'sending', 'preparing'].includes(campaign.status)
-    const canResume = campaign.status === 'paused'
-    const detailCampaign = detail?.campaign || campaign
-    const detailRecipients = detail?.recipients || []
-    const detailEvents = detail?.events || []
-    const detailErrors = campaignErrorGroups(detailRecipients, detailEvents)
-    const acceptedTotal = detailCampaign.total_sent || detailRecipients.filter(item => ['sent', 'delivered', 'read'].includes(item.status)).length
-    const deliveredTotal = detailCampaign.total_delivered || detailRecipients.filter(item => ['delivered', 'read'].includes(item.status)).length
-    const readTotal = detailCampaign.total_read || detailRecipients.filter(item => item.status === 'read').length
-    const failedTotal = detailCampaign.total_failed || detailRecipients.filter(item => item.status === 'failed').length
-    const shouldSkipCardToggle = (target: EventTarget | null) => (
-        target instanceof HTMLElement
-        && Boolean(target.closest('button, a, input, select, textarea'))
-    )
-
-    return (
-        <div
-            role="button"
-            tabIndex={0}
-            aria-expanded={expanded}
-            onClick={event => {
-                if (shouldSkipCardToggle(event.target)) return
-                onToggleDetail(campaign.id)
-            }}
-            onKeyDown={event => {
-                if (!['Enter', ' '].includes(event.key)) return
-                if (shouldSkipCardToggle(event.target)) return
-                event.preventDefault()
-                onToggleDetail(campaign.id)
-            }}
-            style={{
-                padding: '16px 18px',
-                borderRadius: '12px',
-                background: 'var(--bg-secondary)',
-                border: '1px solid var(--border)',
-                display: 'grid',
-                gap: '12px',
-                cursor: 'pointer',
-                outline: 'none',
-            }}
-        >
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-                <div style={{ minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                        <span style={{
-                            width: '9px',
-                            height: '9px',
-                            borderRadius: '50%',
-                            background: statusColor,
-                            boxShadow: campaign.status === 'sending' ? '0 0 8px rgba(245,158,11,0.5)' : 'none',
-                        }} />
-                        <strong style={{ color: 'var(--text-primary)', fontSize: '0.92rem' }}>
-                            {campaign.name || 'Campanha Meta'}
-                        </strong>
-                        <span style={{
-                            color: statusColor,
-                            background: 'rgba(255,255,255,0.04)',
-                            border: '1px solid var(--border)',
-                            borderRadius: '999px',
-                            padding: '3px 8px',
-                            fontSize: '0.68rem',
-                            fontWeight: 900,
-                        }}>
-                            {metaStatusLabel(campaign.status)}
-                        </span>
-                    </div>
-                    <div style={{ marginTop: '5px', color: 'var(--text-muted)', fontSize: '0.76rem', lineHeight: 1.45 }}>
-                        Template: {campaign.template_name || '-'} ({campaign.template_language || 'pt_BR'})
-                        {' | '}
-                        Tipo: {campaign.campaign_type}
-                        {sender ? ` | Numero: ${sender.display_name || sender.phone_number}` : ''}
-                    </div>
-                    <div style={{ marginTop: '3px', color: 'var(--text-muted)', fontSize: '0.74rem', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                        <Clock size={13} />
-                        Criada em {formatMetaDate(campaign.created_at)}
-                        {campaign.scheduled_for ? ` | agendada para ${formatMetaDate(campaign.scheduled_for)}` : ''}
-                    </div>
-                </div>
-
-                <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
-                    <button
-                        type="button"
-                        onClick={() => onToggleDetail(campaign.id)}
-                        title="Detalhes"
-                        style={{ padding: '7px', borderRadius: '7px', background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border)', color: 'var(--text-secondary)', cursor: 'pointer' }}
-                    >
-                        {loadingDetail ? <Loader2 size={14} className="spin" /> : expanded ? <ChevronUp size={14} /> : <Search size={14} />}
-                    </button>
-                    {canPause && (
-                        <button
-                            type="button"
-                            onClick={() => onManage(campaign.id, 'pause')}
-                            title="Pausar"
-                            style={{ padding: '7px', borderRadius: '7px', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', color: '#f59e0b', cursor: 'pointer' }}
-                        >
-                            <Pause size={14} />
-                        </button>
-                    )}
-                    {canResume && (
-                        <button
-                            type="button"
-                            onClick={() => onManage(campaign.id, 'resume')}
-                            title="Retomar"
-                            style={{ padding: '7px', borderRadius: '7px', background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)', color: '#22c55e', cursor: 'pointer' }}
-                        >
-                            <Play size={14} />
-                        </button>
-                    )}
-                    {!finalStatus && (
-                        <button
-                            type="button"
-                            onClick={() => onManage(campaign.id, 'cancel')}
-                            title="Cancelar"
-                            style={{ padding: '7px', borderRadius: '7px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', color: '#ef4444', cursor: 'pointer' }}
-                        >
-                            <Trash2 size={14} />
-                        </button>
-                    )}
-                </div>
-            </div>
-
-            <div style={{ display: 'grid', gap: '7px' }}>
-                <div style={{ height: '7px', borderRadius: '999px', background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
-                    <div style={{
-                        width: `${progress}%`,
-                        height: '100%',
-                        background: campaign.status === 'completed' ? '#22c55e' : 'var(--gold)',
-                        borderRadius: '999px',
-                        transition: 'width 0.3s',
-                    }} />
-                </div>
-                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', color: 'var(--text-muted)', fontSize: '0.74rem' }}>
-                    <span>{progress}%</span>
-                    <span>Total {campaign.total_recipients || 0}</span>
-                    <span>Fila {campaign.total_queued || 0}</span>
-                    <span>Aceitas Meta {campaign.total_sent || 0}</span>
-                    <span>Entregues {campaign.total_delivered || 0}</span>
-                    <span>Lidas {campaign.total_read || 0}</span>
-                    <span>Falhas {campaign.total_failed || 0}</span>
-                    <span>Bloqueadas/opt-out {campaign.total_skipped || 0}</span>
-                </div>
-            </div>
-
-            {expanded && (
-                <div style={{
-                    display: 'grid',
-                    gap: '12px',
-                    paddingTop: '12px',
-                    borderTop: '1px solid var(--border)',
-                }}>
-                    {loadingDetail && !detail ? (
-                        <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '7px' }}>
-                            <Loader2 size={14} className="spin" /> Carregando detalhes...
-                        </div>
-                    ) : (
-                        <MetaCampaignDetailPanel
-                            campaign={detailCampaign}
-                            recipients={detailRecipients}
-                            events={detailEvents}
-                            errors={detailErrors}
-                            acceptedTotal={acceptedTotal}
-                            deliveredTotal={deliveredTotal}
-                            readTotal={readTotal}
-                            failedTotal={failedTotal}
-                        />
-                    )}
-                </div>
-            )}
-        </div>
-    )
-}
-
 function MetaCampaignDetailPanel({
     campaign,
     recipients,
@@ -2191,6 +3537,8 @@ function MetaCampaignDetailPanel({
     deliveredTotal,
     readTotal,
     failedTotal,
+    retrying,
+    onRetryFailed,
 }: {
     campaign: MetaCampaign
     recipients: MetaCampaignRecipient[]
@@ -2200,9 +3548,28 @@ function MetaCampaignDetailPanel({
     deliveredTotal: number
     readTotal: number
     failedTotal: number
+    retrying: boolean
+    onRetryFailed: (campaignId: string, failedCount: number) => void
 }) {
     const total = campaign.total_recipients || recipients.length
+    const canRetryFailed = failedTotal > 0 && !['queued', 'sending', 'scheduled', 'preparing', 'cancelled'].includes(campaign.status)
     const firstRecipient = recipients[0]
+    const campaignMetadata = asRecord(campaign.metadata)
+    const contactSegment = asRecord(campaignMetadata.contact_segment)
+    const segmentCity = textValue(contactSegment.city)
+    const segmentTag = textValue(contactSegment.tag)
+    const segmentSearch = textValue(contactSegment.search)
+    const segmentFilteredContacts = Number(contactSegment.filteredContacts || contactSegment.filtered_contacts || 0)
+    const segmentTotalContacts = Number(contactSegment.totalContacts || contactSegment.total_contacts || 0)
+    const segmentDescription = [
+        textValue(campaignMetadata.contact_list_name) ? `Lista: ${textValue(campaignMetadata.contact_list_name)}` : '',
+        segmentCity ? `Cidade: ${segmentCity}` : '',
+        segmentTag ? `Tag: ${segmentTag}` : '',
+        segmentSearch ? `Busca: ${segmentSearch}` : '',
+        segmentFilteredContacts || segmentTotalContacts
+            ? `Selecionados: ${segmentFilteredContacts || total} de ${segmentTotalContacts || total}`
+            : '',
+    ].filter(Boolean).join(' | ')
 
     return (
         <div style={{ display: 'grid', gap: '12px' }}>
@@ -2238,9 +3605,35 @@ function MetaCampaignDetailPanel({
                     display: 'grid',
                     gap: '9px',
                 }}>
-                    <strong style={{ color: '#ef4444', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '7px' }}>
-                        <AlertCircle size={15} /> Diagnostico das falhas
-                    </strong>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
+                        <strong style={{ color: '#ef4444', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '7px' }}>
+                            <AlertCircle size={15} /> Diagnostico das falhas
+                        </strong>
+                        {canRetryFailed && (
+                            <button
+                                type="button"
+                                onClick={() => onRetryFailed(campaign.id, failedTotal)}
+                                disabled={retrying}
+                                style={{
+                                    padding: '7px 10px',
+                                    borderRadius: '8px',
+                                    background: 'rgba(245,158,11,0.12)',
+                                    border: '1px solid rgba(245,158,11,0.25)',
+                                    color: '#f59e0b',
+                                    cursor: retrying ? 'not-allowed' : 'pointer',
+                                    opacity: retrying ? 0.7 : 1,
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    fontSize: '0.72rem',
+                                    fontWeight: 900,
+                                }}
+                            >
+                                {retrying ? <Loader2 size={13} className="spin" /> : <RefreshCw size={13} />}
+                                Reenviar falhas
+                            </button>
+                        )}
+                    </div>
                     {errors.slice(0, 5).map(error => (
                         <div key={`${error.code}:${error.message}`} style={{ display: 'grid', gap: '3px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
@@ -2275,6 +3668,9 @@ function MetaCampaignDetailPanel({
                     <MetaDetailLine label="Criada" value={formatMetaDate(campaign.created_at)} />
                     <MetaDetailLine label="Iniciada" value={formatMetaDate(campaign.started_at)} />
                     <MetaDetailLine label="Finalizada" value={formatMetaDate(campaign.completed_at)} />
+                    {segmentDescription && (
+                        <MetaDetailLine label="Lista/segmento" value={segmentDescription} />
+                    )}
                     {Boolean(firstRecipient?.template_parameters) && (
                         <MetaDetailLine label="Variaveis" value={jsonPreview(firstRecipient.template_parameters)} />
                     )}

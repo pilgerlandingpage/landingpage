@@ -12,6 +12,7 @@ import {
     getMetaWhatsAppCampaignDetail,
     listMetaWhatsAppCampaigns,
     manageMetaWhatsAppCampaign,
+    retryFailedMetaWhatsAppCampaignRecipients,
 } from '@/lib/meta/whatsapp-campaigns'
 
 function getSupabase() {
@@ -19,6 +20,12 @@ function getSupabase() {
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
+}
+
+function asMetadataRecord(value: unknown) {
+    return typeof value === 'object' && value !== null && !Array.isArray(value)
+        ? value as Record<string, unknown>
+        : {}
 }
 
 // GET — Listar campanhas de uma instância
@@ -43,6 +50,7 @@ export async function GET(request: NextRequest) {
         }
 
         const instanceId = request.nextUrl.searchParams.get('instance_id')
+
         if (!instanceId) {
             return NextResponse.json({ success: false, message: 'instance_id obrigatório' }, { status: 400 })
         }
@@ -74,6 +82,25 @@ export async function POST(request: NextRequest) {
         const { action, instanceId, ...campaignData } = body
 
         if (action === 'meta_whatsapp' || action === 'meta_template') {
+            let contactListMetadata: Record<string, unknown> = {}
+            const contactListId = String(campaignData.contactListId || campaignData.contact_list_id || '').trim()
+            if (contactListId) {
+                const { data: contactList } = await supabase
+                    .from('meta_whatsapp_contact_lists')
+                    .select('id, name, valid_contacts, source_file_name')
+                    .eq('id', contactListId)
+                    .maybeSingle()
+
+                if (contactList) {
+                    contactListMetadata = {
+                        contact_list_id: contactList.id,
+                        contact_list_name: contactList.name,
+                        contact_list_valid_contacts: contactList.valid_contacts,
+                        contact_list_source_file_name: contactList.source_file_name,
+                    }
+                }
+            }
+
             const result = await createMetaWhatsAppCampaign({
                 name: campaignData.name || campaignData.folder || `Campanha Meta ${new Date().toLocaleDateString('pt-BR')}`,
                 campaignType: campaignData.campaignType || campaignData.campaign_type || 'marketing',
@@ -87,8 +114,10 @@ export async function POST(request: NextRequest) {
                 senderRoutingMode: campaignData.senderRoutingMode || campaignData.sender_routing_mode || 'weighted_pool',
                 defaultSenderId: campaignData.defaultSenderId || campaignData.default_sender_id || null,
                 templateParameters: campaignData.templateParameters || campaignData.template_parameters || {},
-                audienceSource: campaignData.audienceSource || campaignData.audience_source || 'custom_paste',
+                audienceSource: contactListId ? 'saved_contact_list' : campaignData.audienceSource || campaignData.audience_source || 'custom_paste',
                 metadata: {
+                    ...contactListMetadata,
+                    contact_segment: asMetadataRecord(campaignData.contactSegment || campaignData.contact_segment),
                     created_from: 'admin_whatsapp_campaigns',
                     legacy_instance_id_ignored: instanceId || null,
                 },
@@ -145,6 +174,28 @@ export async function POST(request: NextRequest) {
                 success: true,
                 result,
                 message: `Campanha Meta ${result.status}.`,
+            })
+        }
+
+        if (action === 'meta_retry_failed') {
+            const campaignId = campaignData.campaignId || campaignData.campaign_id
+            const result = await retryFailedMetaWhatsAppCampaignRecipients({ campaignId })
+
+            if (result.queued > 0) {
+                await inngest.send({
+                    name: 'meta-whatsapp/campaign-created',
+                    data: {
+                        campaign_id: campaignId,
+                        reason: 'admin_meta_whatsapp_campaign_retry_failed',
+                        batch_size: Number(campaignData.batchSize || campaignData.batch_size || 25),
+                    },
+                })
+            }
+
+            return NextResponse.json({
+                success: true,
+                result,
+                message: result.message,
             })
         }
 
