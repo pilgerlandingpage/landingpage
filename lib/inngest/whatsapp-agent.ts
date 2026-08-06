@@ -1187,7 +1187,9 @@ export async function loadAIConfigs(supabase: ReturnType<typeof getSupabase>, in
             'whatsapp_detect_property_capture_enabled', 'whatsapp_detect_location_enabled',
             'whatsapp_detect_opt_out_enabled', 'whatsapp_analyze_links_enabled',
             'whatsapp_quoted_reply_context_enabled', 'whatsapp_lead_file_storage_enabled',
-            'whatsapp_agent_enabled', 'whatsapp_split_messages',
+            'whatsapp_agent_enabled', 'whatsapp_global_agent_enabled',
+            'whatsapp_rescue_agent_enabled', 'whatsapp_followup_agent_enabled',
+            'whatsapp_split_messages',
             'whatsapp_adaptive_rapport_enabled', 'whatsapp_adaptive_rapport_mode',
             'whatsapp_debounce_seconds',
             'whatsapp_smart_timing_enabled', 'whatsapp_timing_text_seconds', 'whatsapp_timing_text_burst_seconds',
@@ -4672,6 +4674,21 @@ export const processWhatsAppMessage = inngest.createFunction(
         }
 
         // ── Step 2: Find or create conversation ──
+        if (isWhatsAppGlobalInstance(instance) && configs['whatsapp_global_agent_enabled'] === 'false') {
+            console.log(`[WhatsApp Agent] Global agent disabled, skipping`)
+            await discardOwnPendingQueueMessage({
+                supabase,
+                queuedMessageKey,
+                reason: 'global_agent_disabled',
+                instanceName,
+                messageType,
+                fromPhone: cleanPhone,
+                senderName,
+                messageId,
+            })
+            return { action: 'skipped', reason: 'global_agent_disabled' }
+        }
+
         const conversation = await step.run('find-or-create-conversation', async () => {
             if (isGlobalInternalProcessing) {
                 const session = await getOrCreateWhatsAppGlobalSession({

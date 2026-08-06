@@ -92,6 +92,9 @@ export type AgentOfficeItem = {
     llmPolicy: string
     editHref?: string
     brokerId?: string
+    enabledKey?: string
+    enabledValue?: string
+    isEnabled?: boolean
     behaviorControls?: AgentOfficeBehaviorControl[]
     runtimeFacts?: AgentOfficeRuntimeFact[]
     behaviorActions?: AgentOfficeBehaviorAction[]
@@ -168,6 +171,27 @@ const HOUR_OPTIONS = Array.from({ length: 24 }, (_, hour) => {
     const value = String(hour).padStart(2, '0')
     return { label: `${value}h`, value }
 })
+
+const ACTIVE_PAUSED_OPTIONS = [
+    { label: 'Ativo', value: 'true' },
+    { label: 'Pausado', value: 'false' },
+]
+
+function activePausedControl(
+    key: string,
+    label = 'Agente ativo',
+    fallback = 'true',
+    help?: string
+): Omit<AgentOfficeBehaviorControl, 'value'> {
+    return {
+        key,
+        label,
+        type: 'select',
+        fallback,
+        options: ACTIVE_PAUSED_OPTIONS,
+        help,
+    }
+}
 
 function buildWeeklyScheduleControls(
     prefix: 'blog_agent' | 'news_agent',
@@ -566,6 +590,9 @@ const OFFICE_PROMPT_AGENTS: AgentOfficeDefinition[] = [
         tools: ['Gemini multimodal', 'R2', 'cadastro de imoveis'],
         autonomy: 'Gera o cadastro em analise; publicacao continua com aprovacao humana.',
         editHref: '/admin/properties',
+        behaviorControls: [
+            activePausedControl('property_register_agent_enabled', 'IA de cadastro'),
+        ],
     },
     {
         id: 'whatsapp-lead-extraction',
@@ -578,6 +605,9 @@ const OFFICE_PROMPT_AGENTS: AgentOfficeDefinition[] = [
         tools: ['WhatsApp', 'CRM', 'funil'],
         autonomy: 'Classifica e organiza dados para o Kanban; nao envia mensagens sozinho por este prompt.',
         editHref: '/admin/whatsapp/agent-config',
+        behaviorControls: [
+            activePausedControl('whatsapp_agent_enabled', 'Agente ativo'),
+        ],
     },
     {
         id: 'whatsapp-attendance-coach',
@@ -660,6 +690,9 @@ const OFFICE_PROMPT_AGENTS: AgentOfficeDefinition[] = [
         tools: ['WhatsApp Global', 'CRM', 'usuarios', 'proprietarios', 'catalogo', 'agenda', 'midias'],
         autonomy: 'Atua como portaria inteligente: atende leads comuns, reconhece usuarios autorizados e roteia pedidos internos para o agente responsavel.',
         editHref: '/admin/whatsapp/agent-config',
+        behaviorControls: [
+            activePausedControl('whatsapp_global_agent_enabled', 'Agente ativo'),
+        ],
     },
     {
         id: 'whatsapp-rescue-agent',
@@ -673,6 +706,7 @@ const OFFICE_PROMPT_AGENTS: AgentOfficeDefinition[] = [
         autonomy: 'A automacao decide quando acionar; Nara usa IA, Central de Inteligencia e template aprovado para escrever o texto final.',
         editHref: '/admin/whatsapp/agent-config',
         behaviorControls: [
+            activePausedControl('whatsapp_rescue_agent_enabled', 'Agente ativo'),
             {
                 key: 'whatsapp_rescue_message_template',
                 label: 'Template base de resgate',
@@ -694,6 +728,7 @@ const OFFICE_PROMPT_AGENTS: AgentOfficeDefinition[] = [
         autonomy: 'A agenda decide quando acionar; Caio usa IA, Central de Inteligencia, historico do lead e template aprovado para escrever cada tentativa.',
         editHref: '/admin/whatsapp/agent-config',
         behaviorControls: [
+            activePausedControl('whatsapp_followup_agent_enabled', 'Agente ativo'),
             {
                 key: 'whatsapp_followup_message_template',
                 label: 'Template base de follow-up',
@@ -741,6 +776,9 @@ const OFFICE_PROMPT_AGENTS: AgentOfficeDefinition[] = [
         autonomy: 'Gera diagnosticos e sugestoes; alteracoes de campanha devem passar por aprovacao.',
         editHref: '/admin/ads',
         behaviorControls: [
+            activePausedControl('ads_ai_analysis_enabled', 'Analise IA de Ads'),
+            activePausedControl('vitor_ai_enabled', 'Vitor IA'),
+            activePausedControl('paid_report_agent_enabled', 'Relatorio pago'),
             {
                 key: 'ads_sync_interval_minutes',
                 label: 'Intervalo da sincronizacao Ads',
@@ -778,6 +816,9 @@ const OFFICE_PROMPT_AGENTS: AgentOfficeDefinition[] = [
         tools: ['WhatsApp Global', 'financeiro', 'comprovantes', 'CPF/CNPJ', 'pendencias'],
         autonomy: 'Pode classificar pedidos e pedir dados faltantes; lancamentos finais continuam dependentes de permissao e conferencia humana.',
         editHref: '/admin/finance',
+        behaviorControls: [
+            activePausedControl('finance_ops_agent_enabled', 'Analise IA financeira'),
+        ],
     },
     {
         id: 'social-attendance-agent',
@@ -824,6 +865,9 @@ const OFFICE_PROMPT_AGENTS: AgentOfficeDefinition[] = [
                 ],
                 help: 'Trava sensivel: quando desligada, as respostas ficam para aprovacao humana.',
             },
+            activePausedControl('meta_comment_dm_automation_enabled', 'DM por comentario'),
+            activePausedControl('meta_comment_dm_cron_enabled', 'Cron de DM'),
+            activePausedControl('meta_comment_dm_webhook_autoprocess', 'DM no webhook'),
         ],
         runtimeFacts: configs => [
             { label: 'Modo atual', value: configs.meta_social_agent_autopilot === 'true' ? 'Autopiloto ligado' : 'Aprovacao humana', tone: configs.meta_social_agent_autopilot === 'true' ? 'warning' : 'success' },
@@ -1018,6 +1062,9 @@ const OFFICE_PROMPT_AGENTS: AgentOfficeDefinition[] = [
         tools: ['Central de Criativos', 'estoque de imoveis', 'relatorios organicos', 'relatorios pagos'],
         autonomy: 'Gera rascunhos e briefing; aprovacao humana decide publicacao ou campanha.',
         editHref: '/admin/ads/creatives',
+        behaviorControls: [
+            activePausedControl('marketing_creative_ai_enabled', 'IA de criativos'),
+        ],
     },
     {
         id: 'content-publisher-agent',
@@ -1480,6 +1527,7 @@ const OFFICE_PROMPT_AGENTS: AgentOfficeDefinition[] = [
         autonomy: 'Publica relatorios configurados e registra historico.',
         editHref: '/admin/maintenance',
         behaviorControls: [
+            activePausedControl('pilger_daily_report_enabled', 'Relatorio diario'),
             {
                 key: 'pilger_daily_days',
                 label: 'Dias do relatorio',
@@ -1520,6 +1568,7 @@ const OFFICE_PROMPT_AGENTS: AgentOfficeDefinition[] = [
         autonomy: 'Gera diretrizes; execucao vira tarefa/aprovacao.',
         editHref: '/admin/maintenance',
         behaviorControls: [
+            activePausedControl('pilger_weekly_report_enabled', 'Diretriz semanal'),
             {
                 key: 'pilger_weekly_days',
                 label: 'Dias da diretriz',
@@ -1559,6 +1608,30 @@ const OFFICE_PROMPT_AGENTS: AgentOfficeDefinition[] = [
         tools: ['ERP', 'WhatsApp executivo', 'relatorios'],
         autonomy: 'Recomenda decisoes e pode acionar fluxos aprovados.',
         editHref: '/admin/maintenance',
+        behaviorControls: [
+            activePausedControl('ecosystem_intelligence_enabled', 'Inteligencia central'),
+            activePausedControl('lead_executive_briefs_ai_enabled', 'Briefs de leads'),
+            activePausedControl('crm_action_recommendations_ai_enabled', 'Recomendacoes CRM'),
+            activePausedControl('property_search_alerts_ai_enabled', 'Alertas de busca'),
+            {
+                key: 'ecosystem_intelligence_interval_hours',
+                label: 'Intervalo da Central',
+                type: 'number',
+                fallback: '6',
+                min: 1,
+                max: 168,
+                step: 1,
+            },
+            {
+                key: 'ecosystem_intelligence_snapshot_days',
+                label: 'Janela de leitura',
+                type: 'number',
+                fallback: '30',
+                min: 7,
+                max: 180,
+                step: 1,
+            },
+        ],
     },
     {
         id: 'market-radar',
@@ -1900,6 +1973,51 @@ function getConfig(configs: ConfigMap, key: string | undefined, fallback = '') {
     return configs[key] || fallback
 }
 
+function isBooleanBehaviorControl(control: Pick<AgentOfficeBehaviorControl, 'key' | 'type' | 'options'>) {
+    if (control.type !== 'select') return false
+    const values = new Set((control.options || []).map(option => option.value))
+    return values.has('true') && values.has('false')
+}
+
+function findAgentEnabledControl(agent: {
+    enabledKey?: string
+    behaviorControls?: Array<Pick<AgentOfficeBehaviorControl, 'key' | 'type' | 'options'>>
+}) {
+    if (agent.enabledKey) return agent.enabledKey
+
+    return agent.behaviorControls?.find(control => {
+        if (!isBooleanBehaviorControl(control)) return false
+        return /(^|_)(agent_)?enabled$/.test(control.key)
+            || control.key.endsWith('_enabled')
+            || control.key.endsWith('_ai_enabled')
+    })?.key
+}
+
+function applyEnabledStateToAgent<T extends Pick<AgentOfficeItem, 'promptValue' | 'source' | 'status' | 'tone'> & {
+    enabledKey?: string
+    enabledValue?: string
+    isEnabled?: boolean
+}>(agent: T, enabledKey?: string, enabledValue?: string): T {
+    const isEnabled = enabledKey ? enabledValue !== 'false' : true
+    if (isEnabled) {
+        return {
+            ...agent,
+            enabledKey,
+            enabledValue,
+            isEnabled,
+        }
+    }
+
+    return {
+        ...agent,
+        enabledKey,
+        enabledValue,
+        isEnabled,
+        status: 'Pausado',
+        tone: 'warning',
+    }
+}
+
 function resolveGlobalModel(configs: ConfigMap) {
     const provider = configs.ai_provider || 'gemini'
     if (provider === 'openai') return configs.openai_model || 'gpt-4o-mini'
@@ -2042,7 +2160,13 @@ function normalizeBrokerAgent(
     }
 }
 
-function normalizeGlobalWhatsAppAgent(broker: any, globalProvider: string, globalModel: string, instance?: any): AgentOfficeItem {
+function normalizeGlobalWhatsAppAgent(
+    broker: any,
+    globalProvider: string,
+    globalModel: string,
+    instance: any,
+    configs: ConfigMap
+): AgentOfficeItem {
     const base = normalizeBrokerAgent(broker, globalProvider, globalModel, instance)
     const connected = instance?.status === 'connected'
     const active = broker?.is_active !== false
@@ -2054,7 +2178,14 @@ function normalizeGlobalWhatsAppAgent(broker: any, globalProvider: string, globa
             ? 'desconectada'
             : 'cadastrada'
 
-    return {
+    const behaviorControls: AgentOfficeBehaviorControl[] = [
+        {
+            ...activePausedControl('whatsapp_global_agent_enabled', 'Agente ativo'),
+            value: getConfig(configs, 'whatsapp_global_agent_enabled', 'true'),
+        },
+    ]
+
+    return applyEnabledStateToAgent({
         ...base,
         id: 'whatsapp-global-agent',
         name: 'WhatsApp Global',
@@ -2090,8 +2221,9 @@ function normalizeGlobalWhatsAppAgent(broker: any, globalProvider: string, globa
                 tone: 'info',
             },
         ],
+        behaviorControls,
         centralContract: resolveAgentCentralProfile('whatsapp-global-agent'),
-    }
+    }, 'whatsapp_global_agent_enabled', behaviorControls[0].value)
 }
 
 async function loadAgentOfficeBrokers(supabase: ReturnType<typeof createAdminClient>): Promise<AgentOfficeBrokerRow[]> {
@@ -2253,7 +2385,7 @@ export async function getAgentOfficeSnapshot(): Promise<AgentOfficeSnapshot> {
     const globalBroker = findGlobalWhatsAppBroker(brokers || [], globalInstances)
     const globalInstance = findLinkedInstanceForBroker(globalBroker, instances || []) || pickGlobalWhatsAppInstance(globalInstances)
     const globalAgent = globalBroker
-        ? normalizeGlobalWhatsAppAgent(globalBroker, globalProvider, globalModel, globalInstance)
+        ? normalizeGlobalWhatsAppAgent(globalBroker, globalProvider, globalModel, globalInstance, configs)
         : null
     const promptAgentDefinitions = globalAgent
         ? OFFICE_PROMPT_AGENTS.filter(agent => agent.id !== 'whatsapp-global-agent')
@@ -2276,6 +2408,18 @@ export async function getAgentOfficeSnapshot(): Promise<AgentOfficeSnapshot> {
             ? `${agent.detail} Instancia global ${globalStatusLabel}${globalPhone ? ` - ${globalPhone}` : ''}.`
             : agent.detail
         const promptValue = applyAgentIdentity(agent, persona, getConfig(configs, agent.promptKey, agent.fallback))
+        const behaviorControls = agent.behaviorControls?.map(control => ({
+            ...control,
+            value: getConfig(configs, control.key, control.fallback),
+        }))
+        const enabledKey = findAgentEnabledControl({
+            enabledKey: agent.enabledKey,
+            behaviorControls,
+        })
+        const enabledControl = behaviorControls?.find(control => control.key === enabledKey)
+        const enabledValue = enabledKey
+            ? getConfig(configs, enabledKey, enabledControl?.fallback || 'true')
+            : undefined
         const runtimeFacts = [
             ...(agent.runtimeFacts?.(configs) || []),
             ...(isGlobalAgent ? [
@@ -2296,7 +2440,7 @@ export async function getAgentOfficeSnapshot(): Promise<AgentOfficeSnapshot> {
                 },
             ] : []),
         ]
-        return {
+        return applyEnabledStateToAgent({
             ...agent,
             personaName: persona.personaName,
             avatarInitials: getInitials(persona.personaName),
@@ -2311,10 +2455,7 @@ export async function getAgentOfficeSnapshot(): Promise<AgentOfficeSnapshot> {
             status: status || (promptValue.trim() ? 'Configurado' : 'Sem prompt'),
             tone: status === 'Conectado' ? 'success' : (promptValue.trim() ? 'success' : 'warning'),
             llmPolicy,
-            behaviorControls: agent.behaviorControls?.map(control => ({
-                ...control,
-                value: getConfig(configs, control.key, control.fallback),
-            })),
+            behaviorControls,
             runtimeFacts: runtimeFacts.length ? runtimeFacts : undefined,
             behaviorActions: agent.behaviorActions,
             centralContract: resolveAgentCentralProfile(agent.id),
@@ -2330,7 +2471,7 @@ export async function getAgentOfficeSnapshot(): Promise<AgentOfficeSnapshot> {
             pushTemplates: agent.id === 'email-orchestrator'
                 ? getConfig(configs, 'editorial_distribution_push_templates', getDefaultPushEditorialTemplatesJson())
                 : undefined,
-        }
+        }, enabledKey, enabledValue)
     })
 
     const globalBrokerId = String(globalBroker?.id || '')

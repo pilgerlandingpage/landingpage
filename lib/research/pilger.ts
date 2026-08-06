@@ -1,4 +1,5 @@
 import { RESEARCH_PILGER_SYSTEM_PROMPT } from '@/lib/ai/prompts'
+import { getAiAutomationGate } from '@/lib/ai/automation-control'
 import {
     getActiveAIProvider,
     getAIConfig,
@@ -136,6 +137,16 @@ async function saveResearchTopicBank(topics: ResearchTopicBankItem[]) {
 }
 
 export async function runScheduledResearchTopics(options: { limit?: number; slot?: string } = {}) {
+    const supabase = createAdminClient()
+    const aiGate = await getAiAutomationGate({
+        supabase,
+        agentId: 'research-pilger',
+        enabledKey: 'research_pilger_enabled',
+    })
+    if (!aiGate.allowed) {
+        return { skipped: true, reason: aiGate.reason, ran: 0, failed: 0, ai_gate: aiGate }
+    }
+
     const enabled = (await getAIConfig('research_pilger_enabled')) !== 'false'
     const scheduleEnabled = (await getAIConfig('research_pilger_schedule_enabled')) !== 'false'
     if (!enabled || !scheduleEnabled) {
@@ -309,6 +320,13 @@ export async function createResearchReport(input: ResearchReportInput) {
     if (!topic) throw new Error('Tema da pesquisa e obrigatorio.')
 
     const supabase = createAdminClient()
+    const aiGate = await getAiAutomationGate({
+        supabase,
+        agentId: 'research-pilger',
+        enabledKey: 'research_pilger_enabled',
+    })
+    if (!aiGate.allowed) throw new Error(aiGate.reason)
+
     const depth = input.depth || ((await getAIConfig('research_pilger_depth')) as ResearchDepth) || 'media'
     const promptKey = input.promptKey || 'research_pilger_system_prompt'
     const prompt = (await getAIConfig(promptKey)) || input.promptFallback || RESEARCH_PILGER_SYSTEM_PROMPT

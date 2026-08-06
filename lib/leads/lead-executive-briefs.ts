@@ -1,4 +1,5 @@
 import { phoneCandidates } from '@/lib/whatsapp/lead-sync'
+import { getAiAutomationGate } from '@/lib/ai/automation-control'
 import type { AdminActorContext } from '@/lib/events/admin-auth'
 
 export const LEAD_EXECUTIVE_BRIEF_VERSION = 'lead-executive-brief-v1'
@@ -793,8 +794,15 @@ export async function processLeadExecutiveBriefs(
     const errors: string[] = []
     const wantsAiNarrative = options.aiNarrative === true
     const aiLimit = Math.min(Math.max(Number(options.aiLimit || 40), 0), 250)
+    const aiGate = wantsAiNarrative
+        ? await getAiAutomationGate({
+            supabase,
+            agentId: 'lead-executive-briefs',
+            enabledKey: 'lead_executive_briefs_ai_enabled',
+        })
+        : null
     const aiProvider = wantsAiNarrative
-        ? await hasNarrativeProvider()
+        ? (aiGate?.allowed ? await hasNarrativeProvider() : { available: false, provider: 'gemini' as const, model: null, reason: aiGate?.reason || 'ai_narrative_disabled' })
         : { available: false, provider: 'gemini' as const, model: null, reason: 'ai_narrative_disabled' }
     let aiNarrativesRequested = 0
     let aiNarrativesGenerated = 0

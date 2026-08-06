@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { saveAppConfig } from '@/lib/admin/app-config'
+import { getAiAutomationGate } from '@/lib/ai/automation-control'
 import { runScheduledResearchTopics } from '@/lib/research/pilger'
 import { createAdminClient } from '@/lib/supabase/server'
 
@@ -60,9 +61,14 @@ export async function GET(request: NextRequest) {
     const { data } = await supabase
       .from('app_config')
       .select('key, value')
-      .in('key', ['research_pilger_schedule_enabled', 'research_pilger_run_times', 'research_pilger_weekdays'])
+      .in('key', ['research_pilger_enabled', 'research_pilger_schedule_enabled', 'research_pilger_run_times', 'research_pilger_weekdays'])
 
     const config = Object.fromEntries((data || []).map((row: any) => [row.key, String(row.value || '')]))
+    const aiGate = await getAiAutomationGate({
+      supabase,
+      agentId: 'research-pilger',
+      enabledKey: 'research_pilger_enabled',
+    })
     const targetHours = (config.research_pilger_run_times || '09,15')
       .split(',')
       .map((hour: string) => hour.trim().padStart(2, '0'))
@@ -72,9 +78,9 @@ export async function GET(request: NextRequest) {
       .map((day: string) => day.trim())
       .filter(Boolean)
     const now = getCurrentTimeSP()
-    const enabled = config.research_pilger_schedule_enabled !== 'false'
-    const shouldRun = force || (enabled && targetHours.includes(now.hour) && targetDays.includes(now.dayKey))
-    const reason = !enabled ? 'schedule_disabled' : shouldRun ? 'ready' : 'schedule_not_matched'
+    const enabled = aiGate.enabled && config.research_pilger_schedule_enabled !== 'false'
+    const shouldRun = aiGate.allowed && (force || (enabled && targetHours.includes(now.hour) && targetDays.includes(now.dayKey)))
+    const reason = !aiGate.allowed ? aiGate.reason : !enabled ? 'schedule_disabled' : shouldRun ? 'ready' : 'schedule_not_matched'
 
     await saveCronState(supabase, {
       research_pilger_cron_last_checked_at: checkedAt,
@@ -92,6 +98,7 @@ export async function GET(request: NextRequest) {
         success: true,
         skipped: true,
         reason,
+        ai_gate: aiGate,
         schedule: { enabled, now, targetDays, targetHours },
       })
     }
@@ -105,6 +112,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       skipped: false,
+      ai_gate: aiGate,
       schedule: { enabled, now, targetDays, targetHours },
       result,
     })

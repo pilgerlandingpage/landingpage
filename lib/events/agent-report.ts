@@ -1,4 +1,5 @@
 import { generateChatResponse } from '@/lib/ai/generation'
+import { getAiAutomationGate } from '@/lib/ai/automation-control'
 import { buildAgentContextBrief, getAgentEcosystemContext, recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
 import { DEFAULT_EVENT_AGENT_SYSTEM_PROMPT } from './agent-prompt'
 
@@ -402,6 +403,15 @@ export async function buildEventAgentReport(supabase: any, params: { eventId?: s
 
 export async function generateEventAgentAiSummary(supabase: any, report: EventAgentReport) {
     const configs = await loadAppConfigs(supabase)
+    const aiGate = await getAiAutomationGate({
+        supabase,
+        agentId: 'event-agent',
+        enabledKey: 'event_agent_ai_report_enabled',
+    })
+    if (!aiGate.allowed) {
+        throw new Error(aiGate.reason)
+    }
+
     if (configs.event_agent_ai_report_enabled === 'false') {
         throw new Error('Relatorio IA do Agente de Eventos esta desativado no comportamento operacional.')
     }

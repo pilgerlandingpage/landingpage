@@ -8,6 +8,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import OpenAI from 'openai'
 import { buildMetricsAnalysisPrompt } from './prompts'
 import type { AIAnalysisResponse, MetricsSnapshot, AdCampaign } from './types'
+import { getAiAutomationGate } from '../ai/automation-control'
 import { getAdsProvider, getAdsGeminiModel, getAdsOpenAIModel, getOpenAIApiKey } from '../ai/config'
 import { recordGeminiUsage } from '../ai/gemini-costs'
 import { buildAgentContextBrief, getAgentEcosystemContext, recordEcosystemEvent } from '../intelligence/ecosystem'
@@ -56,6 +57,20 @@ export async function analyzeCampaignMetrics(campaign: {
     start_date: string
     daily_budget?: number
 }, metrics: MetricsSnapshot): Promise<AIAnalysisResponse> {
+    const supabase = getSupabase()
+    const aiGate = await getAiAutomationGate({
+        supabase,
+        agentId: 'ads-analyst',
+        enabledKey: 'ads_ai_analysis_enabled',
+    })
+    if (!aiGate.allowed) {
+        return {
+            action: 'NONE',
+            alert_message: `Analise automatica pausada: ${aiGate.reason}`,
+            urgency: 'low',
+        }
+    }
+
     const provider = await getAdsProvider()
 
     // Calcular dias decorridos
@@ -92,7 +107,6 @@ export async function analyzeCampaignMetrics(campaign: {
             video_p100: metrics.video_p100
         }
     })
-    const supabase = getSupabase()
     const ecosystemBrief = await getAgentEcosystemContext({ supabase, agent: 'traffic', days: 30, limit: 80 })
         .then(context => buildAgentContextBrief(context))
         .catch((error: any) => {
@@ -270,9 +284,18 @@ export function detectCreativeFatigue(metrics: MetricsSnapshot): {
 // --- Gerar Relatório Diário com IA ---
 
 export async function generateDailyReport(campaignsSummary: string): Promise<string> {
+    const supabase = getSupabase()
+    const aiGate = await getAiAutomationGate({
+        supabase,
+        agentId: 'pilger-daily-report',
+        enabledKey: 'pilger_daily_report_enabled',
+    })
+    if (!aiGate.allowed) {
+        return `Relatorio automatico pausado: ${aiGate.reason}`
+    }
+
     const provider = await getAdsProvider()
     const dailyReportPrompt = await getRequiredPromptFromConfig('pilger_daily_system_prompt')
-    const supabase = getSupabase()
     const ecosystemBrief = await getAgentEcosystemContext({ supabase, agent: 'traffic', days: 30, limit: 100 })
         .then(context => buildAgentContextBrief(context))
         .catch((error: any) => {

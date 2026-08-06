@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { markAgentCompleted, markAgentFailed, markAgentStarted, saveAppConfig } from '@/lib/admin/app-config'
+import { getAiAutomationGate } from '@/lib/ai/automation-control'
 import { processLeadExecutiveBriefs } from '@/lib/leads/lead-executive-briefs'
 import { createAdminClient } from '@/lib/supabase/server'
 
@@ -26,6 +27,23 @@ export async function GET(request: NextRequest) {
     })
 
     try {
+        const aiGate = await getAiAutomationGate({
+            supabase,
+            agentId: 'lead-executive-briefs',
+            enabledKey: 'lead_executive_briefs_ai_enabled',
+        })
+        if (!aiGate.allowed) {
+            await saveCronState(supabase, {
+                lead_executive_briefs_cron_last_reason: aiGate.reason,
+            })
+            return NextResponse.json({
+                success: true,
+                skipped: true,
+                reason: aiGate.reason,
+                ai_gate: aiGate,
+            })
+        }
+
         await markAgentStarted(supabase, 'lead_executive_briefs')
 
         const result = await processLeadExecutiveBriefs(supabase, {

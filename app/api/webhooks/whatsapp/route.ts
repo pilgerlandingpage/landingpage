@@ -18,6 +18,7 @@ import {
     sendProfileAssessmentVoteRequest,
 } from '@/lib/whatsapp/profile-assessment-delivery'
 import { appendLeadConversationLog, ensureWhatsAppLead, isGenericWhatsAppLeadName, syncWhatsAppLeadSnapshot } from '@/lib/whatsapp/lead-sync'
+import { getAiAutomationGate } from '@/lib/ai/automation-control'
 import { generateChatResponse } from '@/lib/ai/generation'
 import { recordGeminiUsage } from '@/lib/ai/gemini-costs'
 import { trackEventInteractionFromWhatsApp } from '@/lib/events/interaction-tracking'
@@ -1611,6 +1612,13 @@ async function analyzeFinanceReceiptMedia(params: {
     const mimeType = String(docEntry?.mimetype || docEntry?.mime || 'application/octet-stream').trim() || 'application/octet-stream'
     if (!url || !canAnalyzeFinanceReceiptMime(mimeType)) return null
 
+    const aiGate = await getAiAutomationGate({
+        agentId: 'finance-ops-agent',
+        enabledKey: 'finance_ops_agent_enabled',
+        supabase,
+    })
+    if (!aiGate.allowed) return null
+
     const mediaBuffer = await fetchFinanceReceiptBuffer(url)
     if (!mediaBuffer) return null
 
@@ -2711,6 +2719,9 @@ async function tryFastTextBrokerResponse(params: {
     const debounceSeconds = Math.max(1, parseInt(configs['whatsapp_debounce_seconds'] || '15', 10) || 15)
     if (!bypassTimingGuards && debounceSeconds > 5) return { handled: false, reason: 'debounce_above_fast_threshold' }
     if (configs['whatsapp_agent_enabled'] === 'false') return { handled: false, reason: 'agent_disabled' }
+    if (isWhatsAppGlobalInstance(instance) && configs['whatsapp_global_agent_enabled'] === 'false') {
+        return { handled: false, reason: 'global_agent_disabled' }
+    }
     if (configs['whatsapp_ai_schedule_enabled'] === 'true') return { handled: false, reason: 'schedule_requires_inngest' }
 
     const { data: broker } = await supabase
@@ -4292,6 +4303,10 @@ export async function POST(request: NextRequest) {
                     let replyText = ''
                     try {
                         const configs = await loadAIConfigs(supabase, instance?.id)
+                        if (configs['whatsapp_global_agent_enabled'] === 'false') {
+                            await saveAudit({ action: 'whatsapp_global_agent_disabled' })
+                            return NextResponse.json({ success: true, action: 'whatsapp_global_agent_disabled' })
+                        }
                         const provider = configs['ai_provider'] === 'openai' ? 'openai' : 'gemini'
                         replyText = await generateChatResponse(
                             buildWhatsAppGlobalConversationHistory(session),

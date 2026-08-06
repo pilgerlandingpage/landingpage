@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/server'
+import { getAiAutomationGate } from '@/lib/ai/automation-control'
 import { recordGeminiUsage } from '@/lib/ai/gemini-costs'
 import { buildAgentContextBrief, getAgentEcosystemContext, recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
 
@@ -282,6 +283,22 @@ async function generateWithOpenAI(configs: ConfigMap, prompt: string, media: Med
 
 export async function generatePropertyAiDraft(request: PropertyAiDraftRequest) {
     const supabase = createAdminClient()
+    const aiGate = await getAiAutomationGate({
+        supabase,
+        agentId: 'property-register',
+        enabledKey: 'property_register_agent_enabled',
+    })
+    if (!aiGate.allowed) {
+        const fallback = fallbackDraftFromContext(request.context || 'Cadastro de imovel aguardando IA')
+        return {
+            ...fallback,
+            ai_notes: [
+                ...(fallback.ai_notes || []),
+                `Geracao IA pausada: ${aiGate.reason}.`,
+            ],
+        }
+    }
+
     const configs = await getConfigMap()
     const provider = String(configs.ai_provider || 'gemini').toLowerCase()
 

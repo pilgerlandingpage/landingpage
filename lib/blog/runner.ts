@@ -1,4 +1,5 @@
 import { markAgentCompleted, markAgentFailed, markAgentStarted } from '@/lib/admin/app-config'
+import { getAiAutomationGate } from '@/lib/ai/automation-control'
 import { getAgentEcosystemContext, recordEcosystemEvent, saveEcosystemSnapshot } from '@/lib/intelligence/ecosystem'
 import { createAdminClient } from '@/lib/supabase/server'
 import { registerEditorialVisualPlanUsage } from '@/lib/media/editorial-image-curator'
@@ -16,6 +17,23 @@ type RunBlogAgentOptions = {
 export async function runBlogAgentDraft(options: RunBlogAgentOptions = {}) {
   const supabase = createAdminClient()
   const source = options.source || 'blog_agent'
+  const aiGate = await getAiAutomationGate({
+    supabase,
+    agentId: 'blog-intelligence',
+    enabledKey: 'blog_agent_enabled',
+  })
+
+  if (!aiGate.allowed) {
+    return {
+      skipped: true,
+      reason: aiGate.reason,
+      source,
+      post: null,
+      intelligence: null,
+      notification: null,
+      ai_gate: aiGate,
+    }
+  }
 
   await markAgentStarted(supabase, 'blog_agent')
 

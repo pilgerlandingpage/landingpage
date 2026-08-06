@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { saveAppConfig } from '@/lib/admin/app-config'
+import { getAiAutomationGate } from '@/lib/ai/automation-control'
 import { getPublicAppUrl } from '@/lib/app-url'
 import { createAdminClient } from '@/lib/supabase/server'
 
@@ -89,6 +90,11 @@ export async function GET(request: NextRequest) {
       ])
 
     const config = Object.fromEntries((data || []).map((row: any) => [row.key, String(row.value || '')]))
+    const aiGate = await getAiAutomationGate({
+      supabase,
+      agentId: 'benchmark-editorial',
+      enabledKey: 'benchmark_editorial_enabled',
+    })
     const targetHours = (config.benchmark_editorial_run_times || '09,15')
       .split(',')
       .map((hour: string) => hour.trim().padStart(2, '0'))
@@ -98,7 +104,7 @@ export async function GET(request: NextRequest) {
       .map((day: string) => day.trim())
       .filter(Boolean)
     const now = getCurrentTimeSP()
-    const enabled = config.benchmark_editorial_enabled !== 'false'
+    const enabled = aiGate.enabled
     const scheduleEnabled = config.benchmark_editorial_schedule_enabled !== 'false'
     const parsedDailyLimit = Number.parseInt(config.benchmark_editorial_daily_limit || '6', 10)
     const dailyLimit = Number.isFinite(parsedDailyLimit) ? Math.max(0, parsedDailyLimit) : 6
@@ -107,8 +113,10 @@ export async function GET(request: NextRequest) {
       .length
     const limitReached = dailyLimit > 0 && todayRuns >= dailyLimit
     const scheduleMatched = enabled && scheduleEnabled && targetHours.includes(now.hour) && targetDays.includes(now.dayKey)
-    const shouldRun = force || (scheduleMatched && !limitReached)
-    const reason = force
+    const shouldRun = aiGate.allowed && (force || (scheduleMatched && !limitReached))
+    const reason = !aiGate.allowed
+      ? aiGate.reason
+      : force
       ? 'forced'
       : !enabled
         ? 'benchmark_disabled'
@@ -138,6 +146,7 @@ export async function GET(request: NextRequest) {
         success: true,
         skipped: true,
         reason,
+        ai_gate: aiGate,
         schedule: { enabled, scheduleEnabled, now, targetDays, targetHours, dailyLimit, todayRuns },
       })
     }
@@ -162,6 +171,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       skipped: false,
+      ai_gate: aiGate,
       schedule: { enabled, scheduleEnabled, now, targetDays, targetHours, dailyLimit, todayRuns },
       result,
     })

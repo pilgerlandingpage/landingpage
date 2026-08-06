@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { markAgentCompleted, markAgentFailed, markAgentStarted, saveAppConfig } from '@/lib/admin/app-config'
+import { getAiAutomationGate } from '@/lib/ai/automation-control'
 import {
     processPropertySearchAlerts,
     SEARCH_ALERT_PROPERTY_MATCH_FIELDS,
@@ -79,6 +80,23 @@ export async function GET(request: NextRequest) {
     })
 
     try {
+        const aiGate = await getAiAutomationGate({
+            agentId: 'property-search-alerts',
+            enabledKey: 'property_search_alerts_ai_enabled',
+            supabase,
+        })
+        if (!aiGate.allowed) {
+            await saveCronState(supabase, {
+                property_search_alerts_cron_last_reason: aiGate.reason,
+            })
+            return NextResponse.json({
+                success: true,
+                skipped: true,
+                reason: aiGate.reason,
+                ai_gate: aiGate,
+            })
+        }
+
         await markAgentStarted(supabase, AGENT_PREFIX)
 
         const lastRunAt = force ? '' : validIsoDate(await readConfigValue(supabase, `${AGENT_PREFIX}_last_run_at`))

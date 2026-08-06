@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { markAgentCompleted, markAgentFailed, markAgentStarted, saveAppConfig } from '@/lib/admin/app-config'
+import { getAiAutomationGate } from '@/lib/ai/automation-control'
 import { processCrmActionRecommendations } from '@/lib/leads/crm-action-recommendations'
 import { createAdminClient } from '@/lib/supabase/server'
 
@@ -26,6 +27,23 @@ export async function GET(request: NextRequest) {
     })
 
     try {
+        const aiGate = await getAiAutomationGate({
+            supabase,
+            agentId: 'crm-action-recommendations',
+            enabledKey: 'crm_action_recommendations_ai_enabled',
+        })
+        if (!aiGate.allowed) {
+            await saveCronState(supabase, {
+                crm_action_recommendations_cron_last_reason: aiGate.reason,
+            })
+            return NextResponse.json({
+                success: true,
+                skipped: true,
+                reason: aiGate.reason,
+                ai_gate: aiGate,
+            })
+        }
+
         await markAgentStarted(supabase, 'crm_action_recommendations')
 
         const result = await processCrmActionRecommendations(supabase, {

@@ -26,12 +26,23 @@ async function loadCandidateContext(supabase: any, candidateId: string) {
     }
 }
 
+async function isCandidateAgentEnabled(supabase: any) {
+    const { data } = await supabase
+        .from('app_config')
+        .select('value')
+        .eq('key', 'broker_candidate_agent_enabled')
+        .maybeSingle()
+
+    return data?.value !== 'false'
+}
+
 export const brokerCandidateCreated = inngest.createFunction(
     { id: 'broker-candidate-created', name: 'Agente de Recrutamento - novo candidato' },
     { event: 'broker-candidate/created' },
     async ({ event, step }) => {
         const supabase = getSupabase()
         const { candidate_id, reason } = event.data
+        if (!await isCandidateAgentEnabled(supabase)) return { skipped: true, reason: 'broker_candidate_agent_disabled' }
 
         const context = await step.run('load-broker-candidate', async () => {
             return loadCandidateContext(supabase, candidate_id)
@@ -83,6 +94,7 @@ export const brokerCandidateProcessMessageQueue = inngest.createFunction(
     { event: 'broker-candidate/process-message-queue' },
     async ({ step }) => {
         const supabase = getSupabase()
+        if (!await isCandidateAgentEnabled(supabase)) return { skipped: true, reason: 'broker_candidate_agent_disabled' }
         const results = await step.run('send-due-broker-candidate-messages', async () => {
             return processDueCandidateMessages(supabase, 25)
         })
@@ -95,6 +107,7 @@ export const brokerCandidateMessageQueueCron = inngest.createFunction(
     { cron: '*/5 * * * *' },
     async ({ step }) => {
         const supabase = getSupabase()
+        if (!await isCandidateAgentEnabled(supabase)) return { skipped: true, reason: 'broker_candidate_agent_disabled' }
         const results = await step.run('send-due-broker-candidate-messages-cron', async () => {
             return processDueCandidateMessages(supabase, 30)
         })
