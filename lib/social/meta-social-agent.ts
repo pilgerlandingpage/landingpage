@@ -1,4 +1,5 @@
 import { chatWithGemini } from '@/lib/gemini'
+import { getAiAutomationGate } from '@/lib/ai/automation-control'
 import { buildAgentContextBrief, getAgentEcosystemContext, recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
 import { saveAgentCentralSnapshot } from '@/lib/intelligence/agent-runtime'
 import { createAdminClient } from '@/lib/supabase/server'
@@ -219,6 +220,22 @@ export async function analyzeMetaSocialInbox({
   limit?: number
   force?: boolean
 } = {}) {
+  const supabase = createAdminClient()
+  const aiGate = await getAiAutomationGate({
+    supabase,
+    agentId: 'social-attendance-agent',
+    enabledKey: 'meta_social_agent_enabled',
+  })
+  if (!aiGate.allowed) {
+    return {
+      success: true,
+      skipped: true,
+      reason: aiGate.reason,
+      analyzed: 0,
+      suggestions: [],
+    }
+  }
+
   const items = await loadInboxItems(limit, force)
   if (items.length === 0) {
     return {
@@ -232,7 +249,6 @@ export async function analyzeMetaSocialInbox({
   let ecosystemContext: Record<string, unknown> | null = null
   let centralSnapshotContext: any = null
   try {
-    const supabase = createAdminClient()
     const context = await getAgentEcosystemContext({ supabase, agent: 'social', days: 30, limit: 80 })
     centralSnapshotContext = context
     ecosystemContext = {

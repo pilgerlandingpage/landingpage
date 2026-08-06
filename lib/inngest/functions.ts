@@ -785,6 +785,7 @@ export const sendWhatsAppRescue = inngest.createFunction(
             .select('key, value')
             .in('key', [
                 'whatsapp_rescue_enabled',
+                'whatsapp_rescue_agent_enabled',
                 'whatsapp_rescue_delay_minutes',
                 'whatsapp_rescue_max_attempts',
                 'whatsapp_rescue_system_prompt',
@@ -796,6 +797,7 @@ export const sendWhatsAppRescue = inngest.createFunction(
         )
 
         const rescueEnabled = rescueConfigMap.get('whatsapp_rescue_enabled') !== 'false'
+            && rescueConfigMap.get('whatsapp_rescue_agent_enabled') !== 'false'
         if (!rescueEnabled) return { skipped: true, reason: 'whatsapp rescue disabled by admin' }
 
         const configuredDelay = Number(rescueConfigMap.get('whatsapp_rescue_delay_minutes') || '')
@@ -1004,7 +1006,9 @@ export const runWhatsAppFollowupFlow = inngest.createFunction(
             .select('key, value')
             .in('key', [
                 'whatsapp_rescue_enabled',
+                'whatsapp_rescue_agent_enabled',
                 'whatsapp_followup_enabled',
+                'whatsapp_followup_agent_enabled',
                 'whatsapp_followup_schedule_json',
                 'whatsapp_followup_system_prompt',
                 'whatsapp_followup_message_template',
@@ -1014,7 +1018,9 @@ export const runWhatsAppFollowupFlow = inngest.createFunction(
 
         const cfg = new Map<string, string>((cfgRows || []).map((r: { key: string; value: string }) => [r.key, r.value]))
         const rescueEnabled = cfg.get('whatsapp_rescue_enabled') !== 'false'
+            && cfg.get('whatsapp_rescue_agent_enabled') !== 'false'
         const followupEnabled = cfg.get('whatsapp_followup_enabled') !== 'false'
+            && cfg.get('whatsapp_followup_agent_enabled') !== 'false'
         if (!rescueEnabled || !followupEnabled) return { skipped: true, reason: 'followup disabled by admin' }
 
         const schedule = buildFollowupOffsetsFromConfig(cfg.get('whatsapp_followup_schedule_json'))

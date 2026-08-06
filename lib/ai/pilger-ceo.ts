@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { generateChatResponse } from '../ai/generation'
+import { getAiAutomationGate } from './automation-control'
 import { getMarketRadarTrends } from '../market-radar/trends'
 import {
   generateMarketRadarInsight,
@@ -101,6 +102,15 @@ Critérios para a nota:
 
 export async function generateDailyPilgerReport() {
   const supabase = getSupabase()
+  const aiGate = await getAiAutomationGate({
+    supabase,
+    agentId: 'pilger-daily-report',
+    enabledKey: 'pilger_daily_report_enabled',
+  })
+  if (!aiGate.allowed) {
+    return { type: 'daily', success: true, skipped: true, reason: aiGate.reason, ai_gate: aiGate }
+  }
+
   const today = new Date().toISOString().split('T')[0]
 
   // 1. Coletar KPIs das campanhas (dia de hoje) do banco primeiro
@@ -399,6 +409,14 @@ export async function collectMarketRadarData(timeSlot?: string) {
 
 export async function generateWeeklyPilgerReport() {
   const supabase = getSupabase()
+  const aiGate = await getAiAutomationGate({
+    supabase,
+    agentId: 'pilger-weekly-report',
+    enabledKey: 'pilger_weekly_report_enabled',
+  })
+  if (!aiGate.allowed) {
+    return { type: 'weekly', success: true, skipped: true, reason: aiGate.reason, ai_gate: aiGate }
+  }
 
   const today = new Date()
   const lastWeek = new Date()

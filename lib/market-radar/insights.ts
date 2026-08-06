@@ -1,4 +1,5 @@
 import { generateChatResponse } from '@/lib/ai/generation'
+import { AI_TOKEN_AUTOMATION_PAUSE_KEY } from '@/lib/ai/automation-control'
 import { buildAgentContextBrief, getAgentEcosystemContext, recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
 
 type SupabaseClient = any
@@ -102,6 +103,7 @@ async function getConfigMap(supabase: SupabaseClient, keys: string[]) {
 
 export async function getRadarInsightRuntimeConfig(supabase: SupabaseClient): Promise<RadarInsightRuntimeConfig> {
   const configs = await getConfigMap(supabase, [
+    AI_TOKEN_AUTOMATION_PAUSE_KEY,
     'radar_ai_enabled',
     'radar_ai_min_opportunity_score',
     'radar_ai_max_insights_per_run',
@@ -110,7 +112,7 @@ export async function getRadarInsightRuntimeConfig(supabase: SupabaseClient): Pr
   ])
 
   return {
-    aiEnabled: configs.radar_ai_enabled !== 'false',
+    aiEnabled: configs[AI_TOKEN_AUTOMATION_PAUSE_KEY] !== 'true' && configs.radar_ai_enabled !== 'false',
     minOpportunityScoreForAi: getConfigNumber(configs.radar_ai_min_opportunity_score, 70, 0, 100),
     maxAiInsightsPerRun: getConfigNumber(configs.radar_ai_max_insights_per_run, 6, 0, 50),
     opportunityAlertThreshold: getConfigNumber(configs.radar_opportunity_alert_threshold, 75, 0, 100),

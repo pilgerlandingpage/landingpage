@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { saveAppConfig } from '@/lib/admin/app-config'
+import { getAiAutomationGate } from '@/lib/ai/automation-control'
 import { collectMarketRadarData } from '@/lib/ai/pilger-ceo'
 import { createAdminClient } from '@/lib/supabase/server'
 
@@ -60,9 +61,14 @@ export async function GET(request: NextRequest) {
     const { data } = await supabase
       .from('app_config')
       .select('key, value')
-      .in('key', ['radar_collection_times', 'radar_collection_days'])
+      .in('key', ['radar_ai_enabled', 'radar_collection_times', 'radar_collection_days'])
 
     const config = Object.fromEntries((data || []).map((row: any) => [row.key, String(row.value || '')]))
+    const aiGate = await getAiAutomationGate({
+      supabase,
+      agentId: 'market-radar',
+      enabledKey: 'radar_ai_enabled',
+    })
     const targetHours = (config.radar_collection_times || '06,12,18')
       .split(',')
       .map((hour: string) => hour.trim().padStart(2, '0'))
@@ -72,8 +78,9 @@ export async function GET(request: NextRequest) {
       .map((day: string) => day.trim())
       .filter(Boolean)
     const now = getCurrentTimeSP()
-    const shouldRun = force || (targetHours.includes(now.hour) && targetDays.includes(now.dayOfWeek))
-    const reason = shouldRun ? 'ready' : 'schedule_not_matched'
+    const scheduleMatched = targetHours.includes(now.hour) && targetDays.includes(now.dayOfWeek)
+    const shouldRun = aiGate.allowed && (force || scheduleMatched)
+    const reason = !aiGate.allowed ? aiGate.reason : shouldRun ? 'ready' : 'schedule_not_matched'
 
     await saveCronState(supabase, {
       market_radar_cron_last_checked_at: checkedAt,
@@ -91,6 +98,7 @@ export async function GET(request: NextRequest) {
         success: true,
         skipped: true,
         reason,
+        ai_gate: aiGate,
         schedule: { now, targetDays, targetHours },
       })
     }
@@ -104,6 +112,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       skipped: false,
+      ai_gate: aiGate,
       schedule: { now, targetDays, targetHours },
       collected: result.length,
     })

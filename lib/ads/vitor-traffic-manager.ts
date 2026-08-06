@@ -1,4 +1,5 @@
 import { chatWithGemini } from '@/lib/gemini'
+import { getAiAutomationGate } from '@/lib/ai/automation-control'
 import { VITOR_CREATIVE_REVIEW_RUNTIME_GUARDRAILS, VITOR_CREATIVE_REVIEW_SYSTEM_PROMPT } from '@/lib/ai/prompts'
 import {
   buildCentralContextPrompt,
@@ -496,6 +497,15 @@ async function runVitorAnalysis(params: {
   mediaItems: MediaItem[]
 }) {
   const { supabase, command, creative, mediaItems } = params
+  const aiGate = await getAiAutomationGate({
+    supabase,
+    agentId: 'ads-analyst',
+    enabledKey: 'vitor_ai_enabled',
+  })
+  if (!aiGate.allowed) {
+    return normalizeAnalysis(null, command, mediaItems)
+  }
+
   const commandSource = cleanString(command?.payload?.source, 80)
   const [centralContext, latestPaidReport, systemPrompt] = await Promise.all([
     getAgentCentralContext({

@@ -1,4 +1,5 @@
 import { chatWithGemini } from '@/lib/gemini'
+import { getAiAutomationGate } from '@/lib/ai/automation-control'
 import { getMetaTrafficManagerSnapshot } from '@/lib/ads/meta'
 import { buildAgentContextBrief, getAgentEcosystemContext, recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
 import { saveAgentCentralSnapshot } from '@/lib/intelligence/agent-runtime'
@@ -417,6 +418,15 @@ export async function generatePaidMarketingReport({
 } = {}) {
   const safeDays = Math.min(Math.max(Math.trunc(days), 7), 120)
   const supabase = createAdminClient()
+  const aiGate = await getAiAutomationGate({
+    supabase,
+    agentId: 'ads-analyst',
+    enabledKey: 'paid_report_agent_enabled',
+  })
+  if (!aiGate.allowed) {
+    return { success: true, skipped: true, reason: aiGate.reason, ai_gate: aiGate, report: null }
+  }
+
   const context = await loadPaidContext(supabase, safeDays)
   const ecosystemContext = await getAgentEcosystemContext({ supabase, agent: 'traffic', days: safeDays })
   ;(context.promptPayload as any).ecosystem_context = {

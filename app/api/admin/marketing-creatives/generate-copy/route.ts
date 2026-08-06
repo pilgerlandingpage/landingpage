@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { chatWithGemini } from '@/lib/gemini'
+import { getAiAutomationGate } from '@/lib/ai/automation-control'
 import { createAdminClient } from '@/lib/supabase/server'
 import {
   buildCentralContextPrompt,
@@ -72,6 +73,20 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = createAdminClient()
+    const aiGate = await getAiAutomationGate({
+      supabase,
+      agentId: 'creative-strategy-agent',
+      enabledKey: 'marketing_creative_ai_enabled',
+    })
+    if (!aiGate.allowed) {
+      return NextResponse.json({
+        success: true,
+        skipped: true,
+        reason: aiGate.reason,
+        copy: fallbackCopy(body),
+      })
+    }
+
     const centralContext = await getAgentCentralContext({
       supabase,
       agentId: 'creative-strategy-agent',

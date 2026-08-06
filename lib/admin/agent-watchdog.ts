@@ -1,4 +1,5 @@
 import { markAgentCompleted, markAgentFailed, markAgentStarted } from '@/lib/admin/app-config'
+import { AI_TOKEN_AUTOMATION_PAUSE_KEY } from '@/lib/ai/automation-control'
 import { generatePaidMarketingReport } from '@/lib/ads/paid-report-agent'
 import { runEcosystemSnapshotCycle } from '@/lib/intelligence/ecosystem'
 import { publishDueScheduledPosts } from '@/lib/social/meta-publisher'
@@ -29,6 +30,7 @@ type WatchdogDefinition = {
   minInterval: number
   maxInterval: number
   lockMinutes: number
+  consumesAiTokens?: boolean
   extraKeys?: string[]
   run: (schedule: WatchdogSchedule, supabase: SupabaseAdminLike) => Promise<unknown>
 }
@@ -126,6 +128,7 @@ const definitions: WatchdogDefinition[] = [
     minInterval: 6,
     maxInterval: 168,
     lockMinutes: 90,
+    consumesAiTokens: true,
     run: async () => {
       const result = await generateOrganicMarketingReport({ days: 30 })
       return {
@@ -144,6 +147,7 @@ const definitions: WatchdogDefinition[] = [
     minInterval: 6,
     maxInterval: 168,
     lockMinutes: 90,
+    consumesAiTokens: true,
     run: async () => {
       const result = await generatePaidMarketingReport({ days: 30 })
       return {
@@ -178,6 +182,7 @@ const definitions: WatchdogDefinition[] = [
     minInterval: 1,
     maxInterval: 168,
     lockMinutes: 90,
+    consumesAiTokens: true,
     extraKeys: ['ecosystem_intelligence_snapshot_days'],
     run: async (schedule, supabase) => {
       const days = parseNumber(schedule.extra.ecosystem_intelligence_snapshot_days, 30, 7, 180)
@@ -196,6 +201,7 @@ export function isWatchdogAgentId(value: string): value is WatchdogAgentId {
 
 async function getWatchdogSchedule(supabase: SupabaseAdminLike, definition: WatchdogDefinition): Promise<WatchdogSchedule> {
   const keys = [
+    AI_TOKEN_AUTOMATION_PAUSE_KEY,
     definition.enabledKey,
     definition.intervalKey,
     `${definition.id}_last_run_at`,
@@ -203,7 +209,9 @@ async function getWatchdogSchedule(supabase: SupabaseAdminLike, definition: Watc
     ...(definition.extraKeys || []),
   ]
   const config = await readConfig(supabase, keys)
-  const enabled = config[definition.enabledKey] !== 'false'
+  const pausedByAiTokenGate = definition.consumesAiTokens === true && config[AI_TOKEN_AUTOMATION_PAUSE_KEY] === 'true'
+  const enabledByConfig = config[definition.enabledKey] !== 'false'
+  const enabled = enabledByConfig && !pausedByAiTokenGate
   const interval = parseNumber(config[definition.intervalKey], definition.defaultInterval, definition.minInterval, definition.maxInterval)
   const lastRunAt = config[`${definition.id}_last_run_at`] || null
   const lastStartedAt = config[`${definition.id}_last_started_at`] || null
@@ -220,7 +228,8 @@ async function getWatchdogSchedule(supabase: SupabaseAdminLike, definition: Watc
     : null
 
   let reason = 'ready'
-  if (!enabled) reason = `${definition.id}_disabled`
+  if (pausedByAiTokenGate) reason = 'ai_token_automation_paused'
+  else if (!enabledByConfig) reason = `${definition.id}_disabled`
   else if (hasRecentStart) reason = 'already_running'
   else if (lastRunMs && nowMs - lastRunMs < intervalToMs(interval, definition.unit)) reason = 'interval_not_reached'
 

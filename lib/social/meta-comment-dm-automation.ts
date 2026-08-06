@@ -1,4 +1,5 @@
 import { chatWithGemini, getGeminiApiKey } from '@/lib/gemini'
+import { AI_TOKEN_AUTOMATION_PAUSE_KEY } from '@/lib/ai/automation-control'
 import { getAIConfig, getOpenAIApiKey } from '@/lib/ai/config'
 import { saveAppConfig } from '@/lib/admin/app-config'
 import { getPublicAppUrl } from '@/lib/app-url'
@@ -19,6 +20,7 @@ type DeliverySendStatus = 'pending_approval' | 'sent' | 'skipped' | 'error'
 
 type AppConfig = {
   enabled: boolean
+  aiTokenPauseActive: boolean
   webhookAutoprocess: boolean
   cronEnabled: boolean
   facebookPageId: string
@@ -745,6 +747,7 @@ function deliveryStatusFromDecision(decision: DeliveryDecision): DeliverySendSta
 async function readAppConfig(supabase: SupabaseAdmin): Promise<AppConfig> {
   const keys = [
     'meta_comment_dm_automation_enabled',
+    AI_TOKEN_AUTOMATION_PAUSE_KEY,
     'meta_comment_dm_webhook_autoprocess',
     'meta_comment_dm_cron_enabled',
     'meta_facebook_page_id',
@@ -763,6 +766,7 @@ async function readAppConfig(supabase: SupabaseAdmin): Promise<AppConfig> {
 
   return {
     enabled: raw.meta_comment_dm_automation_enabled !== 'false',
+    aiTokenPauseActive: raw[AI_TOKEN_AUTOMATION_PAUSE_KEY] === 'true',
     webhookAutoprocess: raw.meta_comment_dm_webhook_autoprocess !== 'false',
     cronEnabled: raw.meta_comment_dm_cron_enabled !== 'false',
     facebookPageId: raw.meta_facebook_page_id || process.env.META_FACEBOOK_PAGE_ID || '',
@@ -1930,6 +1934,9 @@ export async function processInstagramCommentForDmAutomation(params: {
   if (!configs.enabled) {
     return { success: true, processed: false, reason: 'automation_disabled' }
   }
+  if (configs.aiTokenPauseActive) {
+    return { success: true, processed: false, reason: 'ai_token_automation_paused' }
+  }
 
   const comment = await loadCommentById(supabase, params)
   if (!comment) return { success: true, processed: false, reason: 'comment_not_found' }
@@ -2025,6 +2032,7 @@ export async function processRecentInstagramCommentsForDm(params: {
   const supabase = createAdminClient()
   const configs = await readAppConfig(supabase)
   if (!configs.enabled) return { success: true, skipped: true, reason: 'automation_disabled' }
+  if (configs.aiTokenPauseActive) return { success: true, skipped: true, reason: 'ai_token_automation_paused' }
   if (params.requireCronEnabled && !configs.cronEnabled) return { success: true, skipped: true, reason: 'cron_disabled' }
 
   const safeLimit = Math.min(Math.max(Math.trunc(params.limit || 30), 1), 100)
@@ -2808,7 +2816,7 @@ export async function ingestMetaWebhookComments(payload: any) {
 export async function shouldAutoprocessWebhook() {
   const supabase = createAdminClient()
   const configs = await readAppConfig(supabase)
-  return configs.enabled && configs.webhookAutoprocess
+  return configs.enabled && !configs.aiTokenPauseActive && configs.webhookAutoprocess
 }
 
 export async function recordCommentDmCronResult(result: unknown, error?: unknown) {

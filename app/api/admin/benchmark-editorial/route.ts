@@ -393,6 +393,10 @@ async function runHandoffForType(params: {
         })
 
     const post = result.post
+    if (!post) {
+        throw new Error(result.reason || 'handoff_target_skipped')
+    }
+
     await recordEcosystemEvent({
         supabase: params.supabase,
         eventType: params.type === 'news' ? 'benchmark_sent_to_news' : 'benchmark_sent_to_blog',

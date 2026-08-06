@@ -19,6 +19,8 @@ import {
     Minimize2,
     Phone,
     Plus,
+    Power,
+    PowerOff,
     RefreshCw,
     Save,
     Search,
@@ -668,6 +670,21 @@ const BEHAVIOR_GROUPS = [
     {
         title: 'Execucao',
         keys: [
+            'whatsapp_agent_enabled',
+            'whatsapp_global_agent_enabled',
+            'whatsapp_rescue_agent_enabled',
+            'whatsapp_followup_agent_enabled',
+            'whatsapp_attendance_coach_enabled',
+            'property_register_agent_enabled',
+            'ads_ai_analysis_enabled',
+            'vitor_ai_enabled',
+            'paid_report_agent_enabled',
+            'finance_ops_agent_enabled',
+            'marketing_creative_ai_enabled',
+            'ecosystem_intelligence_enabled',
+            'lead_executive_briefs_ai_enabled',
+            'crm_action_recommendations_ai_enabled',
+            'property_search_alerts_ai_enabled',
             'research_pilger_enabled',
             'research_pilger_depth',
             'research_pilger_schedule_enabled',
@@ -677,6 +694,9 @@ const BEHAVIOR_GROUPS = [
             'radar_ai_enabled',
             'meta_social_agent_enabled',
             'meta_social_agent_autopilot',
+            'meta_comment_dm_automation_enabled',
+            'meta_comment_dm_cron_enabled',
+            'meta_comment_dm_webhook_autoprocess',
             'organic_report_agent_enabled',
             'marketing_publisher_agent_enabled',
             'marketing_publisher_autopilot',
@@ -732,7 +752,11 @@ const BEHAVIOR_GROUPS = [
             'pilger_weekly_times',
             'radar_collection_days',
             'radar_collection_times',
+            'ecosystem_intelligence_interval_hours',
+            'ecosystem_intelligence_snapshot_days',
             'organic_report_agent_interval_hours',
+            'paid_report_agent_interval_hours',
+            'ads_sync_interval_minutes',
             'marketing_publisher_interval_minutes',
             'email_agent_send_interval_minutes',
             'email_agent_daily_limit',
@@ -746,7 +770,7 @@ const BEHAVIOR_GROUPS = [
     },
     {
         title: 'Criterios',
-        keys: ['radar_ai_min_opportunity_score', 'radar_ai_max_insights_per_run', 'radar_opportunity_alert_threshold', 'event_agent_hot_score_threshold', 'event_agent_report_limit', 'email_agent_min_hours_between_lead_messages', 'email_agent_default_audience', 'editorial_distribution_recommendation_min_score', 'editorial_distribution_recommendation_batch_limit'],
+        keys: ['radar_ai_min_opportunity_score', 'radar_ai_max_insights_per_run', 'radar_opportunity_alert_threshold', 'event_agent_hot_score_threshold', 'event_agent_report_limit', 'broker_candidate_hot_score_threshold', 'email_agent_min_hours_between_lead_messages', 'email_agent_default_audience', 'editorial_distribution_recommendation_min_score', 'editorial_distribution_recommendation_batch_limit'],
     },
 ]
 
@@ -768,6 +792,47 @@ function canEdit(agent: AgentOfficeItem) {
 
 function buildBehaviorDraft(agent?: AgentOfficeItem) {
     return Object.fromEntries((agent?.behaviorControls || []).map(control => [control.key, control.value || control.fallback]))
+}
+
+function resolveAgentEnabledValue(agent: AgentOfficeItem, draft?: Record<string, string>) {
+    if (!agent.enabledKey) return undefined
+    const control = (agent.behaviorControls || []).find(item => item.key === agent.enabledKey)
+    return draft?.[agent.enabledKey] ?? agent.enabledValue ?? control?.value ?? control?.fallback ?? 'true'
+}
+
+function getAgentEnabledPatch(agent: AgentOfficeItem, enabledValue?: string) {
+    if (!agent.enabledKey) return {}
+
+    const isEnabled = enabledValue !== 'false'
+    if (!isEnabled) {
+        return {
+            enabledValue,
+            isEnabled,
+            status: 'Pausado',
+            tone: 'warning' as const,
+        }
+    }
+
+    return {
+        enabledValue,
+        isEnabled,
+        status: agent.source === 'virtual_brokers'
+            ? 'Ativo'
+            : (agent.promptValue.trim() ? 'Configurado' : 'Sem prompt'),
+        tone: agent.source === 'virtual_brokers'
+            ? 'success' as const
+            : (agent.promptValue.trim() ? 'success' as const : 'warning' as const),
+    }
+}
+
+function applyAgentEnabledValue(agent: AgentOfficeItem, enabledKey: string, enabledValue: string): AgentOfficeItem {
+    return {
+        ...agent,
+        ...getAgentEnabledPatch({ ...agent, enabledKey }, enabledValue),
+        behaviorControls: agent.behaviorControls?.map(control => control.key === enabledKey
+            ? { ...control, value: enabledValue }
+            : control),
+    }
 }
 
 function toggleBehaviorListValue(currentValue: string, value: string) {
@@ -1293,6 +1358,7 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
     const [behaviorDraft, setBehaviorDraft] = useState<Record<string, string>>(buildBehaviorDraft(selectedAgent))
     const [saveState, setSaveState] = useState<SaveState>({ status: 'idle', message: '' })
     const [behaviorSaveState, setBehaviorSaveState] = useState<SaveState>({ status: 'idle', message: '' })
+    const [agentToggleState, setAgentToggleState] = useState<SaveState>({ status: 'idle', message: '' })
     const [topicSaveState, setTopicSaveState] = useState<SaveState>({ status: 'idle', message: '' })
     const [researchTopics, setResearchTopics] = useState<ResearchTopic[]>(parseResearchTopics(selectedAgent?.researchTopics))
     const [newResearchTopic, setNewResearchTopic] = useState<ResearchTopic>(EMPTY_RESEARCH_TOPIC)
@@ -1731,6 +1797,7 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
         setBehaviorDraft(buildBehaviorDraft(agent))
         setSaveState({ status: 'idle', message: '' })
         setBehaviorSaveState({ status: 'idle', message: '' })
+        setAgentToggleState({ status: 'idle', message: '' })
         setTopicSaveState({ status: 'idle', message: '' })
         setResearchTopics(parseResearchTopics(agent.researchTopics))
         setNewResearchTopic(EMPTY_RESEARCH_TOPIC)
@@ -2236,14 +2303,21 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
                 throw new Error(payload?.message || payload?.error || 'Nao foi possivel salvar.')
             }
 
-            setAgents(current => current.map(agent => agent.id === selectedAgent.id
-                ? {
+            setAgents(current => current.map(agent => {
+                if (agent.id !== selectedAgent.id) return agent
+
+                const nextAgent: AgentOfficeItem = {
                     ...agent,
                     promptValue: draft,
                     status: draft.trim() ? (agent.source === 'virtual_brokers' ? agent.status : 'Configurado') : 'Sem prompt',
                     tone: draft.trim() ? 'success' : 'warning',
                 }
-                : agent))
+                if (!nextAgent.enabledKey) return nextAgent
+                return {
+                    ...nextAgent,
+                    ...getAgentEnabledPatch(nextAgent, resolveAgentEnabledValue(nextAgent, behaviorDraft)),
+                }
+            }))
             setSaveState({ status: 'success', message: 'Prompt salvo no escritorio de agentes.' })
         } catch (error: any) {
             setSaveState({ status: 'error', message: error?.message || 'Erro ao salvar prompt.' })
@@ -2268,18 +2342,55 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
                 throw new Error(payload?.message || payload?.error || 'Nao foi possivel salvar comportamento.')
             }
 
-            setAgents(current => current.map(agent => agent.id === selectedAgent.id
-                ? {
+            setAgents(current => current.map(agent => {
+                if (agent.id !== selectedAgent.id) return agent
+
+                const nextAgent: AgentOfficeItem = {
                     ...agent,
                     behaviorControls: agent.behaviorControls?.map(control => ({
                         ...control,
                         value: behaviorDraft[control.key] ?? control.fallback,
                     })),
                 }
-                : agent))
+                if (!nextAgent.enabledKey) return nextAgent
+                return {
+                    ...nextAgent,
+                    ...getAgentEnabledPatch(nextAgent, configs[nextAgent.enabledKey] ?? resolveAgentEnabledValue(nextAgent, behaviorDraft)),
+                }
+            }))
             setBehaviorSaveState({ status: 'success', message: 'Comportamento salvo no agente.' })
         } catch (error: any) {
             setBehaviorSaveState({ status: 'error', message: error?.message || 'Erro ao salvar comportamento.' })
+        }
+    }
+
+    const toggleSelectedAgentEnabled = async () => {
+        if (!selectedAgent?.enabledKey || agentToggleState.status === 'saving') return
+
+        const currentValue = resolveAgentEnabledValue(selectedAgent, behaviorDraft)
+        const nextValue = currentValue === 'false' ? 'true' : 'false'
+        const enabling = nextValue === 'true'
+        setAgentToggleState({ status: 'saving', message: enabling ? 'Ativando agente...' : 'Pausando agente...' })
+
+        try {
+            const response = await fetch('/api/admin/configs', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ configs: { [selectedAgent.enabledKey]: nextValue } }),
+            })
+            const payload = await response.json().catch(() => ({}))
+            if (!response.ok || payload?.success === false) {
+                throw new Error(payload?.message || payload?.error || 'Nao foi possivel atualizar o agente.')
+            }
+
+            const enabledKey = selectedAgent.enabledKey
+            setBehaviorDraft(current => ({ ...current, [enabledKey]: nextValue }))
+            setAgents(current => current.map(agent => agent.id === selectedAgent.id
+                ? applyAgentEnabledValue(agent, enabledKey, nextValue)
+                : agent))
+            setAgentToggleState({ status: 'success', message: enabling ? 'Agente ativado.' : 'Agente pausado.' })
+        } catch (error: any) {
+            setAgentToggleState({ status: 'error', message: error?.message || 'Erro ao atualizar agente.' })
         }
     }
 
@@ -2874,9 +2985,32 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
                                 </div>
                             </div>
                         </div>
-                        <div className={`agent-office-status ${toneClass(selectedAgent.tone)}`}>
-                            <CircleDot size={14} />
-                            {selectedAgent.status}
+                        <div className="agent-office-state-actions">
+                            <div className={`agent-office-status ${toneClass(selectedAgent.tone)}`}>
+                                <CircleDot size={14} />
+                                {selectedAgent.status}
+                            </div>
+                            {selectedAgent.enabledKey && (
+                                <button
+                                    type="button"
+                                    className={`agent-office-power-toggle ${selectedAgent.isEnabled === false ? 'is-off' : 'is-on'}`}
+                                    onClick={toggleSelectedAgentEnabled}
+                                    disabled={agentToggleState.status === 'saving'}
+                                    title={selectedAgent.isEnabled === false ? 'Ativar este agente' : 'Pausar este agente'}
+                                >
+                                    {agentToggleState.status === 'saving'
+                                        ? <Loader2 size={14} className="spin" />
+                                        : selectedAgent.isEnabled === false
+                                            ? <Power size={14} />
+                                            : <PowerOff size={14} />}
+                                    {selectedAgent.isEnabled === false ? 'Ativar agente' : 'Pausar agente'}
+                                </button>
+                            )}
+                            {agentToggleState.message && (
+                                <span className={`agent-office-save-message ${agentToggleState.status}`}>
+                                    {agentToggleState.message}
+                                </span>
+                            )}
                         </div>
                     </div>
 

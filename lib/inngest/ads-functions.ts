@@ -4,6 +4,7 @@
 
 import { inngest } from './client'
 import { createClient } from '@supabase/supabase-js'
+import { AI_TOKEN_AUTOMATION_PAUSE_KEY, getAiAutomationGate } from '../ai/automation-control'
 import * as metaAds from '../ads/meta'
 import * as googleAds from '../ads/google'
 import { analyzeCampaignMetrics, calculateBudgetPacing, generateDailyReport } from '../ads/ai-brain'
@@ -236,6 +237,7 @@ async function getOrganicReportSchedule(supabase: ReturnType<typeof getSupabase>
         .from('app_config')
         .select('key, value')
         .in('key', [
+            AI_TOKEN_AUTOMATION_PAUSE_KEY,
             'organic_report_agent_enabled',
             'organic_report_agent_interval_hours',
             'organic_report_agent_last_run_at',
@@ -243,7 +245,8 @@ async function getOrganicReportSchedule(supabase: ReturnType<typeof getSupabase>
         ])
 
     const config = Object.fromEntries((data || []).map((row: any) => [row.key, String(row.value || '')]))
-    const enabled = config.organic_report_agent_enabled !== 'false'
+    const pausedByAiTokenGate = config[AI_TOKEN_AUTOMATION_PAUSE_KEY] === 'true'
+    const enabled = config.organic_report_agent_enabled !== 'false' && !pausedByAiTokenGate
     const intervalHours = parseOrganicReportIntervalHours(config.organic_report_agent_interval_hours)
     const lastRunMs = parseConfigDate(config.organic_report_agent_last_run_at)
     const lastStartedMs = parseConfigDate(config.organic_report_agent_last_started_at)
@@ -253,6 +256,7 @@ async function getOrganicReportSchedule(supabase: ReturnType<typeof getSupabase>
 
     return {
         enabled,
+        pausedByAiTokenGate,
         shouldRun: enabled && (!lastActivityMs || nowMs - lastActivityMs >= intervalHours * 3600000),
         intervalHours,
         elapsedHours,
@@ -266,6 +270,7 @@ async function getPaidReportSchedule(supabase: ReturnType<typeof getSupabase>) {
         .from('app_config')
         .select('key, value')
         .in('key', [
+            AI_TOKEN_AUTOMATION_PAUSE_KEY,
             'paid_report_agent_enabled',
             'paid_report_agent_interval_hours',
             'paid_report_agent_last_run_at',
@@ -273,7 +278,8 @@ async function getPaidReportSchedule(supabase: ReturnType<typeof getSupabase>) {
         ])
 
     const config = Object.fromEntries((data || []).map((row: any) => [row.key, String(row.value || '')]))
-    const enabled = config.paid_report_agent_enabled !== 'false'
+    const pausedByAiTokenGate = config[AI_TOKEN_AUTOMATION_PAUSE_KEY] === 'true'
+    const enabled = config.paid_report_agent_enabled !== 'false' && !pausedByAiTokenGate
     const intervalHours = parsePaidReportIntervalHours(config.paid_report_agent_interval_hours)
     const lastRunMs = parseConfigDate(config.paid_report_agent_last_run_at)
     const lastStartedMs = parseConfigDate(config.paid_report_agent_last_started_at)
@@ -283,6 +289,7 @@ async function getPaidReportSchedule(supabase: ReturnType<typeof getSupabase>) {
 
     return {
         enabled,
+        pausedByAiTokenGate,
         shouldRun: enabled && (!lastActivityMs || nowMs - lastActivityMs >= intervalHours * 3600000),
         intervalHours,
         elapsedHours,
@@ -329,6 +336,7 @@ async function getEcosystemIntelligenceSchedule(supabase: ReturnType<typeof getS
         .from('app_config')
         .select('key, value')
         .in('key', [
+            AI_TOKEN_AUTOMATION_PAUSE_KEY,
             'ecosystem_intelligence_enabled',
             'ecosystem_intelligence_interval_hours',
             'ecosystem_intelligence_snapshot_days',
@@ -337,7 +345,8 @@ async function getEcosystemIntelligenceSchedule(supabase: ReturnType<typeof getS
         ])
 
     const config = Object.fromEntries((data || []).map((row: any) => [row.key, String(row.value || '')]))
-    const enabled = config.ecosystem_intelligence_enabled !== 'false'
+    const pausedByAiTokenGate = config[AI_TOKEN_AUTOMATION_PAUSE_KEY] === 'true'
+    const enabled = config.ecosystem_intelligence_enabled !== 'false' && !pausedByAiTokenGate
     const intervalHours = parseEcosystemIntelligenceIntervalHours(config.ecosystem_intelligence_interval_hours)
     const days = Math.max(7, Math.min(180, Number.parseInt(config.ecosystem_intelligence_snapshot_days || '30', 10) || 30))
     const lastRunMs = parseConfigDate(config.ecosystem_intelligence_last_run_at)
@@ -348,6 +357,7 @@ async function getEcosystemIntelligenceSchedule(supabase: ReturnType<typeof getS
 
     return {
         enabled,
+        pausedByAiTokenGate,
         shouldRun: enabled && (!lastActivityMs || nowMs - lastActivityMs >= intervalHours * 3600000),
         intervalHours,
         elapsedHours,
@@ -362,6 +372,7 @@ async function getBlogAgentSchedule(supabase: ReturnType<typeof getSupabase>) {
         .from('app_config')
         .select('key, value')
         .in('key', [
+            AI_TOKEN_AUTOMATION_PAUSE_KEY,
             'blog_agent_enabled',
             'blog_agent_schedule_day',
             'blog_agent_schedule_time',
@@ -384,7 +395,8 @@ async function getBlogAgentSchedule(supabase: ReturnType<typeof getSupabase>) {
         ])
 
     const config = Object.fromEntries((data || []).map((row: any) => [row.key, String(row.value || '')]))
-    const enabled = config.blog_agent_enabled !== 'false'
+    const pausedByAiTokenGate = config[AI_TOKEN_AUTOMATION_PAUSE_KEY] === 'true'
+    const enabled = config.blog_agent_enabled !== 'false' && !pausedByAiTokenGate
     const slots = getBlogAgentWeeklySlots(config)
     const lastRunMs = parseConfigDate(config.blog_agent_last_run_at)
     const lastStartedMs = parseConfigDate(config.blog_agent_last_started_at)
@@ -403,7 +415,8 @@ async function getBlogAgentSchedule(supabase: ReturnType<typeof getSupabase>) {
     const runInProgress = startedReachedSlot && !completedAfterStart && startedAgeMinutes != null && startedAgeMinutes < BLOG_AGENT_RUN_IN_PROGRESS_GRACE_MINUTES
 
     let reason = 'ready'
-    if (!enabled) reason = 'blog_agent_disabled'
+    if (pausedByAiTokenGate) reason = 'ai_token_automation_paused'
+    else if (!enabled) reason = 'blog_agent_disabled'
     else if (slots.length === 0) reason = 'no_schedule_days'
     else if (todaySlots.length === 0) reason = 'weekday_not_due'
     else if (reachedSlots.length === 0) reason = 'time_not_reached'
@@ -414,6 +427,7 @@ async function getBlogAgentSchedule(supabase: ReturnType<typeof getSupabase>) {
 
     return {
         enabled,
+        pausedByAiTokenGate,
         shouldRun,
         reason,
         scheduleDay: nextSlot?.day || todaySlots[0]?.day || '',
@@ -804,6 +818,12 @@ export const pollMetricsCron = inngest.createFunction(
         const { hour } = getCurrentTimeSP()
         const shouldTriggerAIAnalysis = await step.run('check-daily-ads-ai-analysis', async () => {
             if (hour !== '23') return false
+            const aiGate = await getAiAutomationGate({
+                supabase,
+                agentId: 'ads-analyst',
+                enabledKey: 'ads_ai_analysis_enabled',
+            })
+            if (!aiGate.allowed) return false
 
             const today = getCurrentDateSP()
             const { data } = await supabase
@@ -867,6 +887,18 @@ export const aiAnalyzeMetrics = inngest.createFunction(
     async ({ event, step }) => {
         const { campaign_id, metrics } = event.data
         const supabase = getSupabase()
+
+        const aiGate = await step.run('check-ads-ai-analysis-gate', async () => {
+            return getAiAutomationGate({
+                supabase,
+                agentId: 'ads-analyst',
+                enabledKey: 'ads_ai_analysis_enabled',
+            })
+        })
+
+        if (!aiGate.allowed) {
+            return { skipped: true, reason: aiGate.reason }
+        }
 
         // Buscar campanha
         const campaign = await step.run('fetch-campaign', async () => {
@@ -1223,7 +1255,7 @@ export const organicReportAgentCron = inngest.createFunction(
         })
 
         if (!schedule.enabled) {
-            return { skipped: true, reason: 'organic_report_agent_disabled' }
+            return { skipped: true, reason: schedule.pausedByAiTokenGate ? 'ai_token_automation_paused' : 'organic_report_agent_disabled' }
         }
 
         if (!schedule.shouldRun) {
@@ -1275,7 +1307,7 @@ export const paidReportAgentCron = inngest.createFunction(
         })
 
         if (!schedule.enabled) {
-            return { skipped: true, reason: 'paid_report_agent_disabled' }
+            return { skipped: true, reason: schedule.pausedByAiTokenGate ? 'ai_token_automation_paused' : 'paid_report_agent_disabled' }
         }
 
         if (!schedule.shouldRun) {
@@ -1490,7 +1522,7 @@ export const radarCollectionCron = inngest.createFunction(
             const { data } = await supabase
                 .from('app_config')
                 .select('key, value')
-                .in('key', ['radar_collection_times', 'radar_collection_days'])
+                .in('key', [AI_TOKEN_AUTOMATION_PAUSE_KEY, 'radar_ai_enabled', 'radar_collection_times', 'radar_collection_days'])
             
             // Padrão: 06, 12, 18
             const map = Object.fromEntries((data || []).map((row: any) => [row.key, String(row.value || '')]))
@@ -1503,13 +1535,21 @@ export const radarCollectionCron = inngest.createFunction(
                 .map((v: string) => v.trim())
                 .filter(Boolean)
             const { hour, dayOfWeek } = getCurrentTimeSP()
+            const pausedByAiTokenGate = map[AI_TOKEN_AUTOMATION_PAUSE_KEY] === 'true'
+            const enabled = map.radar_ai_enabled !== 'false' && !pausedByAiTokenGate
 
             return {
-                shouldRun: targetHours.includes(hour) && targetDays.includes(dayOfWeek),
+                enabled,
+                pausedByAiTokenGate,
+                shouldRun: enabled && targetHours.includes(hour) && targetDays.includes(dayOfWeek),
                 currentSlot: hour,
                 currentDay: dayOfWeek
             }
         })
+
+        if (!config.enabled) {
+            return { skipped: true, reason: config.pausedByAiTokenGate ? 'ai_token_automation_paused' : 'radar_ai_disabled' }
+        }
 
         if (!config.shouldRun) {
             return { skipped: true, reason: 'schedule_not_matched', hour: config.currentSlot, day: config.currentDay }
@@ -1534,7 +1574,7 @@ export const researchPilgerCron = inngest.createFunction(
             const { data } = await supabase
                 .from('app_config')
                 .select('key, value')
-                .in('key', ['research_pilger_schedule_enabled', 'research_pilger_run_times', 'research_pilger_weekdays'])
+                .in('key', [AI_TOKEN_AUTOMATION_PAUSE_KEY, 'research_pilger_enabled', 'research_pilger_schedule_enabled', 'research_pilger_run_times', 'research_pilger_weekdays'])
 
             const map = Object.fromEntries((data || []).map((row: any) => [row.key, String(row.value || '')]))
             const targetHours = (map.research_pilger_run_times || '09,15')
@@ -1548,17 +1588,20 @@ export const researchPilgerCron = inngest.createFunction(
             const weekdayMap = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
             const { hour, dayOfWeek } = getCurrentTimeSP()
             const dayKey = weekdayMap[Number(dayOfWeek)] || 'sun'
+            const pausedByAiTokenGate = map[AI_TOKEN_AUTOMATION_PAUSE_KEY] === 'true'
+            const enabled = map.research_pilger_enabled !== 'false' && map.research_pilger_schedule_enabled !== 'false' && !pausedByAiTokenGate
 
             return {
-                enabled: map.research_pilger_schedule_enabled !== 'false',
-                shouldRun: map.research_pilger_schedule_enabled !== 'false' && targetHours.includes(hour) && targetDays.includes(dayKey),
+                enabled,
+                pausedByAiTokenGate,
+                shouldRun: enabled && targetHours.includes(hour) && targetDays.includes(dayKey),
                 currentSlot: hour,
                 currentDay: dayKey,
             }
         })
 
         if (!config.enabled) {
-            return { skipped: true, reason: 'schedule_disabled' }
+            return { skipped: true, reason: config.pausedByAiTokenGate ? 'ai_token_automation_paused' : 'schedule_disabled' }
         }
 
         if (!config.shouldRun) {
@@ -1583,7 +1626,7 @@ export const ecosystemIntelligenceCron = inngest.createFunction(
         })
 
         if (!schedule.enabled) {
-            return { skipped: true, reason: 'ecosystem_intelligence_disabled' }
+            return { skipped: true, reason: schedule.pausedByAiTokenGate ? 'ai_token_automation_paused' : 'ecosystem_intelligence_disabled' }
         }
 
         if (!schedule.shouldRun) {
@@ -1660,9 +1703,11 @@ export const generateDailyPilgerReportCron = inngest.createFunction(
             const { data } = await supabase
                 .from('app_config')
                 .select('key, value')
-                .in('key', ['pilger_daily_time', 'pilger_daily_days'])
+                .in('key', [AI_TOKEN_AUTOMATION_PAUSE_KEY, 'pilger_daily_report_enabled', 'pilger_daily_time', 'pilger_daily_days'])
 
             const map = Object.fromEntries((data || []).map((row: any) => [row.key, String(row.value || '')]))
+            const pausedByAiTokenGate = map[AI_TOKEN_AUTOMATION_PAUSE_KEY] === 'true'
+            const enabled = map.pilger_daily_report_enabled !== 'false' && !pausedByAiTokenGate
             const targetHours = (map.pilger_daily_time || '23')
                 .split(',')
                 .map((v: string) => v.trim().padStart(2, '0'))
@@ -1674,11 +1719,17 @@ export const generateDailyPilgerReportCron = inngest.createFunction(
             const { hour, dayOfWeek } = getCurrentTimeSP()
 
             return {
-                shouldRun: targetHours.includes(hour) && targetDays.includes(dayOfWeek),
+                enabled,
+                pausedByAiTokenGate,
+                shouldRun: enabled && targetHours.includes(hour) && targetDays.includes(dayOfWeek),
                 currentSlot: hour,
                 currentDay: dayOfWeek,
             }
         })
+
+        if (!config.enabled) {
+            return { skipped: true, reason: config.pausedByAiTokenGate ? 'ai_token_automation_paused' : 'pilger_daily_report_disabled' }
+        }
 
         if (!config.shouldRun) {
             return { skipped: true, reason: 'schedule_mismatch', current_hour: config.currentSlot, current_day: config.currentDay }
@@ -1720,9 +1771,11 @@ export const generateWeeklyPilgerReportCron = inngest.createFunction(
             const { data } = await supabase
                 .from('app_config')
                 .select('key, value')
-                .in('key', ['pilger_weekly_days', 'pilger_weekly_times', 'pilger_weekly_day', 'pilger_weekly_time'])
+                .in('key', [AI_TOKEN_AUTOMATION_PAUSE_KEY, 'pilger_weekly_report_enabled', 'pilger_weekly_days', 'pilger_weekly_times', 'pilger_weekly_day', 'pilger_weekly_time'])
 
             const map = Object.fromEntries((data || []).map((row: any) => [row.key, String(row.value || '')]))
+            const pausedByAiTokenGate = map[AI_TOKEN_AUTOMATION_PAUSE_KEY] === 'true'
+            const enabled = map.pilger_weekly_report_enabled !== 'false' && !pausedByAiTokenGate
             const targetDays = (map.pilger_weekly_days || map.pilger_weekly_day || '1')
                 .split(',')
                 .map((v: string) => v.trim())
@@ -1734,11 +1787,17 @@ export const generateWeeklyPilgerReportCron = inngest.createFunction(
 
             const { dayOfWeek, hour } = getCurrentTimeSP()
             return {
-                shouldRun: targetDays.includes(dayOfWeek) && targetHours.includes(hour),
+                enabled,
+                pausedByAiTokenGate,
+                shouldRun: enabled && targetDays.includes(dayOfWeek) && targetHours.includes(hour),
                 currentDay: dayOfWeek,
                 currentHour: hour,
             }
         })
+
+        if (!config.enabled) {
+            return { skipped: true, reason: config.pausedByAiTokenGate ? 'ai_token_automation_paused' : 'pilger_weekly_report_disabled' }
+        }
 
         if (!config.shouldRun) {
             return { skipped: true, reason: 'schedule_mismatch', current_day: config.currentDay, current_hour: config.currentHour }
@@ -1767,5 +1826,3 @@ export const generateWeeklyPilgerReportCron = inngest.createFunction(
         return result
     }
 )
-
-

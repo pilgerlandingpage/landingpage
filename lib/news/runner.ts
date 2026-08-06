@@ -1,4 +1,5 @@
 import { markAgentCompleted, markAgentFailed, markAgentStarted } from '@/lib/admin/app-config'
+import { getAiAutomationGate } from '@/lib/ai/automation-control'
 import { generateNewsArticleDraft } from '@/lib/blog/agent'
 import { notifyBlogReviewReady } from '@/lib/blog/review-notifications'
 import { getAvailableBlogSlug } from '@/lib/blog/types'
@@ -16,6 +17,23 @@ type RunNewsAgentOptions = {
 export async function runNewsAgentDraft(options: RunNewsAgentOptions = {}) {
   const supabase = createAdminClient()
   const source = options.source || 'news_agent'
+  const aiGate = await getAiAutomationGate({
+    supabase,
+    agentId: 'news-intelligence',
+    enabledKey: 'news_agent_enabled',
+  })
+
+  if (!aiGate.allowed) {
+    return {
+      skipped: true,
+      reason: aiGate.reason,
+      source,
+      post: null,
+      intelligence: null,
+      notification: null,
+      ai_gate: aiGate,
+    }
+  }
 
   await markAgentStarted(supabase, 'news_agent')
 

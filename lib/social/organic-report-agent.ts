@@ -1,4 +1,5 @@
 import { chatWithGemini } from '@/lib/gemini'
+import { getAiAutomationGate } from '@/lib/ai/automation-control'
 import { buildAgentContextBrief, getAgentEcosystemContext, recordEcosystemEvent } from '@/lib/intelligence/ecosystem'
 import { saveAgentCentralSnapshot } from '@/lib/intelligence/agent-runtime'
 import { createAdminClient } from '@/lib/supabase/server'
@@ -292,6 +293,15 @@ export async function generateOrganicMarketingReport({
 } = {}) {
   const safeDays = Math.min(Math.max(Math.trunc(days), 7), 120)
   const supabase = createAdminClient()
+  const aiGate = await getAiAutomationGate({
+    supabase,
+    agentId: 'organic-report-agent',
+    enabledKey: 'organic_report_agent_enabled',
+  })
+  if (!aiGate.allowed) {
+    return { success: true, skipped: true, reason: aiGate.reason, ai_gate: aiGate, report: null }
+  }
+
   const context = await loadOrganicContext(supabase, safeDays)
   const ecosystemContext = await getAgentEcosystemContext({ supabase, agent: 'social', days: safeDays })
   ;(context.promptPayload as any).ecosystem_context = {
