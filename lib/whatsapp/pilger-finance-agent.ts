@@ -1233,10 +1233,23 @@ function friendlyDraftContext(draft: FinanceDraft) {
   return humanJoin(parts)
 }
 
-function buildMissingQuestion(identityLabel: string, draft: FinanceDraft, missing: string[], sourceText?: string | null) {
+function buildMissingQuestion(
+  identityLabel: string,
+  draft: FinanceDraft,
+  missing: string[],
+  sourceText?: string | null,
+  options?: { hasPendingDraft?: boolean },
+) {
   const name = firstName(identityLabel)
   const text = [sourceText, draft.source_text].filter(Boolean).join('\n')
   const ask = buildMissingFieldAsk(missing)
+
+  if (options?.hasPendingDraft) {
+    const readable = humanJoin(missing.map(humanMissingField))
+    return readable
+      ? `${name}, perfeito. Falta so me dizer ${readable}.`
+      : `${name}, perfeito. Ja tenho o que preciso para continuar.`
+  }
 
   if (asksToSendFinanceDocument(text) && !draft.attachment_url && !draft.media_analysis) {
     return [
@@ -1260,33 +1273,6 @@ function buildMissingQuestion(identityLabel: string, draft: FinanceDraft, missin
   ].filter(Boolean).join('\n')
 }
 
-function financeDraftSummary(draft: FinanceDraft) {
-  const catalogCreations = [
-    draft.category_creation?.needs_confirmation
-      ? [draft.category_creation.category, draft.category_creation.subcategory].filter(Boolean).join(' / ')
-      : '',
-    draft.counterparty_creation?.needs_confirmation ? draft.counterparty_creation.name : '',
-    draft.payment_method_creation?.needs_confirmation ? draft.payment_method_creation.name : '',
-    draft.cost_center_creation?.needs_confirmation ? draft.cost_center_creation.name : '',
-  ].filter((value): value is string => Boolean(value))
-
-  const lines = [
-    draft.description ? `Lancamento: ${draft.description}` : '',
-    Number(draft.amount || 0) > 0 ? `Valor: ${formatCurrencyBR(Number(draft.amount))}` : '',
-    draft.kind === 'payable_installments' && draft.installment_count ? `Parcelas: ${draft.installment_count}` : '',
-    draft.entity_type ? `Conta: ${draft.entity_type === 'pj' ? 'Pessoa juridica' : 'Pessoa fisica'}` : '',
-    draft.counterparty_name ? `Favorecido: ${draft.counterparty_name}` : '',
-    draft.category ? `Categoria: ${draft.category}${draft.subcategory ? ` / ${draft.subcategory}` : ''}` : '',
-    draft.kind === 'payable_installments' && draft.first_due_date ? `Primeiro vencimento: ${formatDateBR(draft.first_due_date)}` : '',
-    draft.kind === 'paid_expense' && draft.entry_date ? `Data: ${formatDateBR(draft.entry_date)}` : '',
-    draft.payment_method ? `Forma de pagamento: ${draft.payment_method}` : '',
-    draft.cost_center ? `Centro de custo: ${draft.cost_center}` : '',
-    draft.attachment_url ? 'Anexo: recebido' : '',
-    catalogCreations.length > 0 ? `Tambem vou criar no financeiro: ${humanJoin(catalogCreations)}.` : '',
-  ].filter(Boolean)
-  return lines.join('\n')
-}
-
 function hasPendingCatalogCreation(draft: FinanceDraft) {
   return Boolean(
     draft.category_creation?.needs_confirmation
@@ -1297,19 +1283,23 @@ function hasPendingCatalogCreation(draft: FinanceDraft) {
 }
 
 function buildConfirmationQuestion(identityLabel: string, draft: FinanceDraft) {
-  const intro = draft.kind === 'payable_installments'
-    ? 'deixei estas contas a pagar prontas para gravar'
-    : 'deixei esse lancamento pronto para gravar'
-  const question = hasPendingCatalogCreation(draft)
-    ? 'Posso criar os cadastros que faltam e salvar assim?'
-    : 'Posso gravar assim?'
   const context = friendlyDraftContext(draft)
+  const catalogNote = hasPendingCatalogCreation(draft)
+    ? 'Se categoria, favorecido ou forma de pagamento ainda nao existirem, eu crio junto.'
+    : ''
+  const account = draft.entity_type
+    ? `Vai na ${draft.entity_type === 'pj' ? 'pessoa juridica' : 'pessoa fisica'}`
+    : ''
+  const payment = draft.payment_method ? `pago por ${draft.payment_method}` : ''
+  const attachment = draft.attachment_url ? 'com o comprovante anexado' : ''
+  const details = humanJoin([account, payment, attachment].filter(Boolean))
+  const action = draft.kind === 'payable_installments' ? 'criar essas contas a pagar' : 'salvar esse lancamento'
+
   return [
-    `${firstName(identityLabel)}, ${intro}.`,
-    context ? `Resumo: ${context}.` : '',
-    financeDraftSummary(draft),
-    '',
-    question,
+    `${firstName(identityLabel)}, perfeito. ${context ? `Ficou ${context}.` : 'Ja deixei tudo pronto.'}`,
+    details ? `${details}.` : '',
+    catalogNote,
+    `Posso ${action} assim?`,
   ].filter(Boolean).join('\n')
 }
 
@@ -1938,6 +1928,31 @@ function createdByFromCommand(command: any, instance?: any) {
   return instance?.admin_user_id || null
 }
 
+function compactFinanceNote(value: unknown, max = 220) {
+  const text = cleanString(value, max * 2).replace(/\s+/g, ' ').trim()
+  if (!text) return ''
+  return text.length > max ? `${text.slice(0, max - 3)}...` : text
+}
+
+function buildFinanceRecordNotes(params: {
+  command: any
+  draft: FinanceDraft
+  includeCommandId?: boolean
+}) {
+  const { command, draft } = params
+  return [
+    'Lancado pela assistente financeira do WhatsApp Global.',
+    command?.identity_label ? `Solicitante: ${command.identity_label}` : '',
+    command?.phone ? `Telefone: ${command.phone}` : '',
+    params.includeCommandId !== false ? `Comando global: ${command?.id || '-'}` : '',
+    compactFinanceNote(command?.command_text || draft.source_text) ? `Pedido: ${compactFinanceNote(command?.command_text || draft.source_text)}` : '',
+    draft.attachment_url ? 'Comprovante: anexado.' : '',
+    draft.media_filename ? `Arquivo: ${compactFinanceNote(draft.media_filename, 120)}` : '',
+    draft.cost_center ? `Centro de custo: ${draft.cost_center}` : '',
+    draft.operational_tags?.length ? `Tags operacionais: ${draft.operational_tags.join(', ')}` : '',
+  ].filter(Boolean).join('\n')
+}
+
 async function createFinanceEntry(params: {
   supabase: SupabaseLike
   command: any
@@ -1977,16 +1992,7 @@ async function createFinanceEntry(params: {
   if (schema.hasCreatedBy) insertData.created_by = createdByFromCommand(command, instance)
   if (schema.hasUpdatedAt) insertData.updated_at = new Date().toISOString()
   if (schema.hasNotes) {
-    insertData.notes = [
-      'Lancado pela assistente financeira do WhatsApp Global.',
-      command?.identity_label ? `Solicitante: ${command.identity_label}` : '',
-      command?.phone ? `Telefone: ${command.phone}` : '',
-      draft.source_text ? `Solicitacao: ${draft.source_text}` : '',
-      draft.media_analysis ? `Leitura de midia: ${draft.media_analysis}` : '',
-      draft.media_filename ? `Arquivo: ${draft.media_filename}` : '',
-      draft.cost_center ? `Centro de custo: ${draft.cost_center}` : '',
-      draft.operational_tags?.length ? `Tags operacionais: ${draft.operational_tags.join(', ')}` : '',
-    ].filter(Boolean).join('\n')
+    insertData.notes = buildFinanceRecordNotes({ command, draft })
   }
 
   if (schema.dateField === 'created_at' || schema.dateField === 'occurred_at') {
@@ -2054,15 +2060,7 @@ async function createFinancePayables(params: {
     if (schema.hasUpdatedAt) row.updated_at = nowIso
     if (schema.hasPaidAmount) row.paid_amount = 0
     if (schema.hasNotes) {
-      row.notes = [
-        'Criado pela assistente financeira do WhatsApp Global.',
-        command?.identity_label ? `Solicitante: ${command.identity_label}` : '',
-        command?.phone ? `Telefone: ${command.phone}` : '',
-        `Comando global: ${command?.id || '-'}`,
-        draft.source_text ? `Solicitacao: ${draft.source_text}` : '',
-        draft.cost_center ? `Centro de custo: ${draft.cost_center}` : '',
-        draft.operational_tags?.length ? `Tags operacionais: ${draft.operational_tags.join(', ')}` : '',
-      ].filter(Boolean).join('\n')
+      row.notes = buildFinanceRecordNotes({ command, draft })
     }
     return row
   })
@@ -2157,12 +2155,13 @@ function buildPayablesReply(identityLabel: string, window: DateWindow, result: {
 }
 
 function buildCreatedExpenseReply(identityLabel: string, draft: FinanceDraft, entryId?: string | null) {
+  const context = friendlyDraftContext(draft)
   return [
     `${firstName(identityLabel)}, lancado.`,
-    `Gravei ${formatCurrencyBR(Number(draft.amount || 0))} como ${draft.description || 'despesa'}.`,
+    context ? `Gravei ${context}.` : `Gravei ${formatCurrencyBR(Number(draft.amount || 0))} no financeiro.`,
     draft.entity_type ? `Ficou na ${draft.entity_type === 'pj' ? 'pessoa juridica' : 'pessoa fisica'}.` : '',
     draft.attachment_url ? 'Anexei o comprovante ao registro.' : '',
-    entryId ? `Registro financeiro: ${entryId}.` : '',
+    entryId ? 'Ja aparece em Financeiro > Lancamentos.' : '',
   ].filter(Boolean).join('\n')
 }
 
@@ -2507,7 +2506,7 @@ export async function processPilgerFinanceCommand(
         session,
         draft,
         missingFields,
-        responseText: buildMissingQuestion(command.identity_label, draft, missingFields, text),
+        responseText: buildMissingQuestion(command.identity_label, draft, missingFields, text, { hasPendingDraft: Boolean(pending) }),
         action: 'ask_missing',
         sendResponse: shouldSendResponse,
         instanceToken,

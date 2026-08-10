@@ -8,6 +8,8 @@ import {
     ArrowUpCircle,
     CalendarDays,
     CircleDollarSign,
+    ExternalLink,
+    Eye,
     Landmark,
     Link2,
     Plus,
@@ -230,6 +232,19 @@ function formatDate(date: string) {
     return d.toLocaleDateString('pt-BR')
 }
 
+function formatDateTime(value: string | null | undefined) {
+    if (!value) return '-'
+    const date = new Date(value)
+    if (Number.isNaN(date.getTime())) return '-'
+    return date.toLocaleString('pt-BR')
+}
+
+function truncateText(value: string | null | undefined, max = 160) {
+    const text = String(value || '').replace(/\s+/g, ' ').trim()
+    if (!text) return ''
+    return text.length > max ? `${text.slice(0, max - 3)}...` : text
+}
+
 function todayISO() {
     return new Date().toISOString().slice(0, 10)
 }
@@ -339,6 +354,7 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
     const [searchTerm, setSearchTerm] = useState('')
     const [entityFilter, setEntityFilter] = useState('all')
     const [importCsvModal, setImportCsvModal] = useState(false)
+    const [selectedEntry, setSelectedEntry] = useState<FinanceEntry | null>(null)
     const [importResult, setImportResult] = useState<{ imported: number; errors: any[]; message: string } | null>(null)
     const [importLoading, setImportLoading] = useState(false)
     const [sendingAlerts, setSendingAlerts] = useState(false)
@@ -1430,6 +1446,13 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
         }
     }
 
+    const renderEntryDetailField = (label: string, value: any, wide = false) => (
+        <div className={wide ? 'finance-detail-field finance-detail-field-wide' : 'finance-detail-field'}>
+            <span>{label}</span>
+            <strong>{value || '-'}</strong>
+        </div>
+    )
+
     return (
         <div>
             {toast && (
@@ -2268,7 +2291,7 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                                     <th>Status</th>
                                     <th>Centro custo</th>
                                     <th>Conta bancaria</th>
-                                    <th></th>
+                                    <th>Acoes</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -2879,7 +2902,16 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                                         <td>
                                             <div style={{ fontWeight: 600 }}>{entry.description}</div>
                                             {entry.notes ? (
-                                                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{entry.notes}</div>
+                                                <div style={{
+                                                    fontSize: '0.78rem',
+                                                    color: 'var(--text-muted)',
+                                                    maxWidth: 260,
+                                                    maxHeight: 40,
+                                                    overflow: 'hidden',
+                                                    lineHeight: 1.35,
+                                                }}>
+                                                    {truncateText(entry.notes, 170)}
+                                                </div>
                                             ) : null}
                                         </td>
                                         <td>{entry.category || 'Sem categoria'}</td>
@@ -2911,21 +2943,42 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                                             ) : '-'}
                                         </td>
                                         <td>
-                                            <button
-                                                type="button"
-                                                onClick={() => onDeleteEntry(entry.id)}
-                                                style={{
-                                                    border: '1px solid rgba(239,68,68,0.25)',
-                                                    background: 'rgba(239,68,68,0.1)',
-                                                    color: '#ef4444',
-                                                    borderRadius: 8,
-                                                    padding: '6px 8px',
-                                                    cursor: 'pointer',
-                                                }}
-                                                title="Excluir lancamento"
-                                            >
-                                                <Trash2 size={14} />
-                                            </button>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setSelectedEntry(entry)}
+                                                    style={{
+                                                        border: '1px solid rgba(59,130,246,0.25)',
+                                                        background: 'rgba(59,130,246,0.08)',
+                                                        color: '#2563eb',
+                                                        borderRadius: 8,
+                                                        padding: '6px 8px',
+                                                        cursor: 'pointer',
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: 5,
+                                                    }}
+                                                    title="Ver detalhes do lancamento"
+                                                >
+                                                    <Eye size={14} />
+                                                    Ver
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => onDeleteEntry(entry.id)}
+                                                    style={{
+                                                        border: '1px solid rgba(239,68,68,0.25)',
+                                                        background: 'rgba(239,68,68,0.1)',
+                                                        color: '#ef4444',
+                                                        borderRadius: 8,
+                                                        padding: '6px 8px',
+                                                        cursor: 'pointer',
+                                                    }}
+                                                    title="Excluir lancamento"
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                     )
@@ -2935,6 +2988,74 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                     </div>
                 )}
             </div>
+            )}
+
+            {selectedEntry && (
+                <div className="finance-detail-backdrop" onClick={() => setSelectedEntry(null)}>
+                    <div className="finance-detail-modal" onClick={e => e.stopPropagation()}>
+                        <div className="finance-detail-header">
+                            <div>
+                                <div className="finance-detail-kicker">Lancamento financeiro</div>
+                                <h2>{selectedEntry.description}</h2>
+                            </div>
+                            <button type="button" className="finance-detail-close" onClick={() => setSelectedEntry(null)} aria-label="Fechar detalhes">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div className="finance-detail-summary">
+                            <div>
+                                <span>Valor</span>
+                                <strong className={selectedEntry.entry_type === 'income' ? 'finance-detail-income' : 'finance-detail-expense'}>
+                                    {formatCurrency(Number(selectedEntry.amount || 0))}
+                                </strong>
+                            </div>
+                            <div>
+                                <span>Tipo</span>
+                                <strong>{selectedEntry.entry_type === 'income' ? 'Receita' : 'Despesa'}</strong>
+                            </div>
+                            <div>
+                                <span>Status</span>
+                                <strong>{translatePaymentStatus(selectedEntry.payment_status)}</strong>
+                            </div>
+                        </div>
+
+                        <div className="finance-detail-grid">
+                            {renderEntryDetailField('Data', formatDate(selectedEntry.entry_date))}
+                            {renderEntryDetailField('Vencimento', selectedEntry.due_date ? formatDate(selectedEntry.due_date) : '-')}
+                            {renderEntryDetailField('Competencia', selectedEntry.competence_date ? formatDate(selectedEntry.competence_date) : '-')}
+                            {renderEntryDetailField('Categoria', selectedEntry.category || 'Sem categoria')}
+                            {renderEntryDetailField('Subcategoria', selectedEntry.subcategory || '-')}
+                            {renderEntryDetailField('Pagamento', selectedEntry.payment_method || '-')}
+                            {renderEntryDetailField('Favorecido', selectedEntry.counterparty_name || '-')}
+                            {renderEntryDetailField('Tipo pessoa', translateCounterpartyType(selectedEntry.counterparty_type))}
+                            {renderEntryDetailField('Centro de custo', selectedEntry.cost_center_id ? (costCenterById.get(selectedEntry.cost_center_id)?.name || selectedEntry.cost_center_id) : '-')}
+                            {renderEntryDetailField('Conta bancaria', selectedEntry.bank_account_id ? (bankAccountById.get(selectedEntry.bank_account_id)?.name || selectedEntry.bank_account_id) : '-')}
+                            {renderEntryDetailField('Empresa/CC', selectedEntry.reference_company || '-')}
+                            {renderEntryDetailField('Criado em', formatDateTime(selectedEntry.created_at))}
+                            {renderEntryDetailField('Origem', selectedEntry.source_module || '-', true)}
+                            {renderEntryDetailField('Referencia externa', selectedEntry.external_reference || '-', true)}
+                        </div>
+
+                        {selectedEntry.notes && (
+                            <div className="finance-detail-notes">
+                                <span>Observacoes</span>
+                                <pre>{selectedEntry.notes}</pre>
+                            </div>
+                        )}
+
+                        <div className="finance-detail-actions">
+                            {selectedEntry.attachment_url && (
+                                <a href={selectedEntry.attachment_url} target="_blank" rel="noopener noreferrer" className="btn btn-outline">
+                                    <ExternalLink size={15} /> Abrir comprovante
+                                </a>
+                            )}
+                            <button type="button" className="btn btn-primary" onClick={() => setSelectedEntry(null)}>
+                                Fechar
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
 
             {importCsvModal && (
@@ -3079,10 +3200,151 @@ function FinancePageContent({ initialSection }: { initialSection?: string }) {
                 .spin {
                     animation: financeSpin 1s linear infinite;
                 }
+                .finance-detail-backdrop {
+                    position: fixed;
+                    inset: 0;
+                    z-index: 9998;
+                    background: rgba(15, 23, 42, 0.52);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 18px;
+                }
+                .finance-detail-modal {
+                    width: min(860px, 100%);
+                    max-height: min(760px, calc(100vh - 36px));
+                    overflow: auto;
+                    background: var(--bg-card, #fff);
+                    color: var(--text-primary, #111827);
+                    border: 1px solid rgba(148, 163, 184, 0.22);
+                    border-radius: 12px;
+                    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.3);
+                    padding: 22px;
+                }
+                .finance-detail-header {
+                    display: flex;
+                    align-items: flex-start;
+                    justify-content: space-between;
+                    gap: 16px;
+                    margin-bottom: 16px;
+                }
+                .finance-detail-kicker {
+                    font-size: 0.72rem;
+                    font-weight: 800;
+                    text-transform: uppercase;
+                    color: var(--text-muted);
+                    margin-bottom: 4px;
+                }
+                .finance-detail-header h2 {
+                    margin: 0;
+                    font-size: 1.15rem;
+                    line-height: 1.25;
+                }
+                .finance-detail-close {
+                    border: 1px solid rgba(148, 163, 184, 0.28);
+                    background: rgba(148, 163, 184, 0.08);
+                    color: inherit;
+                    border-radius: 9px;
+                    width: 36px;
+                    height: 36px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    flex: 0 0 auto;
+                }
+                .finance-detail-summary {
+                    display: grid;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    gap: 10px;
+                    margin-bottom: 14px;
+                }
+                .finance-detail-summary > div,
+                .finance-detail-field {
+                    border: 1px solid rgba(148, 163, 184, 0.18);
+                    background: rgba(148, 163, 184, 0.06);
+                    border-radius: 8px;
+                    padding: 10px;
+                    min-width: 0;
+                }
+                .finance-detail-summary span,
+                .finance-detail-field span,
+                .finance-detail-notes span {
+                    display: block;
+                    color: var(--text-muted);
+                    font-size: 0.68rem;
+                    font-weight: 800;
+                    text-transform: uppercase;
+                    margin-bottom: 4px;
+                }
+                .finance-detail-summary strong,
+                .finance-detail-field strong {
+                    display: block;
+                    font-size: 0.88rem;
+                    line-height: 1.25;
+                    overflow-wrap: anywhere;
+                }
+                .finance-detail-income { color: #16a34a; }
+                .finance-detail-expense { color: #ef4444; }
+                .finance-detail-grid {
+                    display: grid;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    gap: 10px;
+                }
+                .finance-detail-field-wide {
+                    grid-column: span 3;
+                }
+                .finance-detail-notes {
+                    margin-top: 12px;
+                    border: 1px solid rgba(148, 163, 184, 0.18);
+                    border-radius: 8px;
+                    padding: 10px;
+                    background: rgba(148, 163, 184, 0.05);
+                }
+                .finance-detail-notes pre {
+                    margin: 0;
+                    white-space: pre-wrap;
+                    overflow-wrap: anywhere;
+                    font-family: inherit;
+                    font-size: 0.82rem;
+                    line-height: 1.45;
+                    color: var(--text-primary);
+                }
+                .finance-detail-actions {
+                    display: flex;
+                    justify-content: flex-end;
+                    align-items: center;
+                    gap: 10px;
+                    margin-top: 16px;
+                }
+                .finance-detail-actions .btn {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 7px;
+                    text-decoration: none;
+                }
                 @keyframes financeSpin {
                     to { transform: rotate(360deg); }
                 }
                 @media (max-width: 768px) {
+                    .finance-detail-modal {
+                        padding: 16px;
+                    }
+                    .finance-detail-summary,
+                    .finance-detail-grid {
+                        grid-template-columns: 1fr;
+                    }
+                    .finance-detail-field-wide {
+                        grid-column: span 1;
+                    }
+                    .finance-detail-actions {
+                        justify-content: stretch;
+                        flex-direction: column;
+                        align-items: stretch;
+                    }
+                    .finance-detail-actions .btn {
+                        justify-content: center;
+                    }
                     .admin-content .finance-filter-card {
                         padding: 10px !important;
                         margin-bottom: 10px !important;
