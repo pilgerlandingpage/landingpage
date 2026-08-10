@@ -401,12 +401,34 @@ function detectPaymentMethod(text: unknown): string | null {
   const explicit = extractExplicitPaymentMethod(text)
   if (explicit) return explicit
   if (/\bpix\b/.test(normalized)) return 'PIX'
-  if (/\b(cartao|credito|debito|fatura)\b/.test(normalized)) return 'Cartao'
+  if (/\b(cartao|credito|debito|visa|mastercard|elo)\b/.test(normalized)) return 'Cartao'
   if (/\b(boleto|linha digitavel)\b/.test(normalized)) return 'Boleto'
   if (/\b(ted)\b/.test(normalized)) return 'TED'
   if (/\b(doc)\b/.test(normalized)) return 'DOC'
   if (/\b(dinheiro|especie)\b/.test(normalized)) return 'Dinheiro'
   return null
+}
+
+function knownCounterpartyFromText(text: unknown) {
+  const normalized = normalizeText(text)
+  if (/\bunifique\b/.test(normalized)) return 'Unifique'
+  if (/\bcelesc\b/.test(normalized)) return 'Celesc'
+  if (/\bcasan\b/.test(normalized)) return 'Casan'
+  if (/\bvivo\b/.test(normalized)) return 'Vivo'
+  if (/\bclaro\b/.test(normalized)) return 'Claro'
+  if (/\btim\b/.test(normalized)) return 'TIM'
+  return null
+}
+
+function looksLikeUtilityBill(text: unknown) {
+  return /\b(unifique|internet|telefone|telefonia|fibra|banda larga|celesc|energia|luz|casan|agua|saneamento)\b/.test(normalizeText(text))
+}
+
+function shouldIgnoreDocumentCardPayment(method: string | null, allText: unknown, userText: unknown) {
+  if (method !== 'Cartao') return false
+  if (!looksLikeUtilityBill(allText)) return false
+  const userNormalized = normalizeText(userText)
+  return !/\b(paguei|pagamento|quitado|foi|vai|lanca|lancar)\b.{0,80}\b(cartao|credito|debito)\b/.test(userNormalized)
 }
 
 function detectCategory(text: unknown) {
@@ -429,12 +451,13 @@ function detectCategory(text: unknown) {
       known: true,
     }
   }
-  if (/\b(internet|telefone|telefonia|celular|vivo|claro|tim)\b/.test(normalized)) {
+  if (/\b(unifique|internet|telefone|telefonia|celular|fibra|banda larga|vivo|claro|tim)\b/.test(normalized)) {
+    const counterpartyName = knownCounterpartyFromText(normalized)
     return {
       category: 'Custos Fixos',
       subcategory: 'Internet',
-      description: 'Pagamento de internet/telefonia',
-      counterpartyName: null,
+      description: counterpartyName ? `Pagamento de internet - ${counterpartyName}` : 'Pagamento de internet/telefonia',
+      counterpartyName,
       known: true,
     }
   }
@@ -1030,14 +1053,28 @@ function extractCounterpartyName(text: unknown): string | null {
   const raw = cleanString(text, 800)
   const patterns = [
     /\b(?:pagamento|paguei|transferencia|pix|boleto)?\s*(?:para|pra|pro|ao|a)\s+(?:o|a|os|as)?\s*([\p{L}0-9\s&.'-]{3,90})/iu,
-    /\b(?:favorecido|fornecedor|prestador|beneficiario|empresa)\s+(?:o|a|ao|do|da|de)?\s*([\p{L}0-9\s&.'-]{3,90})/iu,
+    /\b(?:favorecido|fornecedor|prestador|beneficiario|empresa)\s*:?\s*(?:o|a|ao|do|da|de)?\s*([\p{L}0-9\s&.'-]{3,90})/iu,
   ]
   for (const pattern of patterns) {
     const match = raw.match(pattern)
-    const cleaned = cleanupCatalogName(match?.[1], 90)
+    const cleaned = cleanCounterpartyName(match?.[1])
     if (cleaned) return cleaned
   }
   return null
+}
+
+function looksLikeBadCounterpartyCandidate(value: unknown) {
+  const normalized = normalizeText(value)
+  if (!normalized) return true
+  if (/^(periodo|data|vencimento|valor|total|dia|forma|pagamento|descricao|categoria|subcategoria|documento|numero|competencia|emissao|conta|codigo|protocolo)\b/.test(normalized)) return true
+  if (/^\d+(?:[./-]\d+)*$/.test(normalized)) return true
+  return normalized.length < 3
+}
+
+function cleanCounterpartyName(value: unknown) {
+  const cleaned = cleanupCatalogName(value, 90)
+  if (!cleaned || looksLikeBadCounterpartyCandidate(cleaned)) return null
+  return cleaned
 }
 
 function extractCostCenterName(text: unknown): string | null {
@@ -1076,7 +1113,9 @@ function inferDescription(text: unknown, previous?: string | null) {
   const normalized = normalizeText(raw)
   const category = detectCategory(raw)
   const current = cleanString(previous, 160)
-  if (current && !GENERIC_DESCRIPTIONS.has(normalizeText(current))) return current
+  const currentCategoryIsClear = category.known && !isGenericDescription(category.description)
+  if (currentCategoryIsClear && looksLikeUtilityBill(raw)) return category.description
+  if (current && !GENERIC_DESCRIPTIONS.has(normalizeText(current)) && !currentCategoryIsClear) return current
 
   const como = raw.match(/\bcomo\s+(.{3,120})/i)
   if (como?.[1]) {
@@ -1088,6 +1127,7 @@ function inferDescription(text: unknown, previous?: string | null) {
   }
 
   if (/\babastec/.test(normalized)) return 'Abastecimento do carro'
+  if (looksLikeUtilityBill(raw)) return category.description
   if (/\bcartao|fatura/.test(normalized)) return 'Pagamento de cartao de credito'
   if (/\balugue(?:l|is)|locacao/.test(normalized)) return 'Pagamento de aluguel'
   if (/\bboleto/.test(normalized)) return 'Pagamento de boleto'
@@ -1158,18 +1198,28 @@ function buildDraftFromCommand(command: any, previous?: FinanceDraft | null): Fi
     ? (explicitDate || previous?.entry_date || saoPauloDateKey())
     : (previous?.entry_date || saoPauloDateKey())
   const amount = receiptAmount(receipt) || extractAmountFromText(fullText, previous?.amount || null)
-  const paymentMethod = detectPaymentMethod(fullText) || detectPaymentMethod(receipt?.payment_method) || previous?.payment_method || null
+  const userPaymentMethod = detectPaymentMethod([commandText, interpretedText].filter(Boolean).join('\n'))
+  const receiptPaymentMethod = detectPaymentMethod(receipt?.payment_method)
+  const mediaPaymentMethod = detectPaymentMethod(mediaAnalysis)
+  const paymentMethod = userPaymentMethod
+    || (shouldIgnoreDocumentCardPayment(receiptPaymentMethod, fullText, commandText) ? null : receiptPaymentMethod)
+    || (shouldIgnoreDocumentCardPayment(mediaPaymentMethod, fullText, commandText) ? null : mediaPaymentMethod)
+    || previous?.payment_method
+    || null
   const costCenter = extractCostCenterName(fullText) || previous?.cost_center || null
+  const receiptMerchant = cleanCounterpartyName(receipt?.merchant)
+  const knownCounterparty = knownCounterpartyFromText(fullText)
   const counterpartyName = extractCounterpartyName(commandText)
+    || receiptMerchant
+    || knownCounterparty
     || extractCounterpartyName(mediaAnalysis)
-    || cleanString(receipt?.merchant, 90)
     || previous?.counterparty_name
     || category.counterpartyName
     || null
   const counterpartyType = previous?.counterparty_type || inferCounterpartyType(counterpartyName, fullText, entityType)
   let description = inferDescription(fullText, previous?.description)
   const receiptDescription = cleanString(receipt?.description, 160)
-  if (receiptDescription && isGenericDescription(description)) {
+  if (receiptDescription && (isGenericDescription(description) || (receipt && looksLikeUtilityBill(fullText)))) {
     description = receiptDescription
   }
   if (kind === 'payable_installments' && isGenericDescription(description) && counterpartyName) {
@@ -1267,16 +1317,54 @@ function asksToSendFinanceDocument(text: unknown) {
     || /\b(comprovante|recibo|nota fiscal|cupom|pdf|arquivo|foto)\b.{0,80}\b(posso|pode|vou|quer|consigo)\b.{0,80}\b(enviar|mandar|anexar)\b/.test(normalized)
 }
 
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+function lowerFirst(value: string) {
+  return value ? `${value.charAt(0).toLowerCase()}${value.slice(1)}` : ''
+}
+
+function cleanDescriptionForContext(description: string | null | undefined, counterparty?: string | null) {
+  let cleaned = cleanString(description, 160)
+  if (!cleaned || isGenericDescription(cleaned)) return ''
+  if (counterparty) {
+    cleaned = cleaned.replace(new RegExp(`\\s*-\\s*${escapeRegExp(counterparty)}$`, 'i'), '').trim()
+  }
+  return lowerFirst(cleaned)
+}
+
 function friendlyDraftContext(draft: FinanceDraft) {
-  const parts: string[] = []
-  if (Number(draft.amount || 0) > 0) parts.push(formatCurrencyBR(Number(draft.amount)))
-  if (draft.description && !isGenericDescription(draft.description)) parts.push(draft.description)
-  else if (draft.category || draft.subcategory) parts.push([draft.category, draft.subcategory].filter(Boolean).join(' / '))
-  if (draft.kind === 'payable_installments' && draft.installment_count) parts.push(`${draft.installment_count} parcelas`)
-  if (draft.counterparty_name) parts.push(`para ${draft.counterparty_name}`)
-  if (draft.entry_date && draft.kind === 'paid_expense') parts.push(`do dia ${formatDateBR(draft.entry_date)}`)
-  if (draft.first_due_date && draft.kind === 'payable_installments') parts.push(`com primeiro vencimento em ${formatDateBR(draft.first_due_date)}`)
-  return humanJoin(parts)
+  const amount = Number(draft.amount || 0) > 0 ? formatCurrencyBR(Number(draft.amount)) : ''
+  const counterparty = cleanCounterpartyName(draft.counterparty_name)
+  const description = cleanDescriptionForContext(draft.description, counterparty)
+  const category = [draft.category, draft.subcategory].filter(Boolean).join(' / ')
+  const date = draft.entry_date && draft.kind === 'paid_expense' ? formatDateBR(draft.entry_date) : ''
+  const firstDueDate = draft.first_due_date && draft.kind === 'payable_installments' ? formatDateBR(draft.first_due_date) : ''
+
+  if (draft.kind === 'paid_expense' && looksLikeUtilityBill([draft.description, draft.category, draft.subcategory, draft.counterparty_name].filter(Boolean).join(' '))) {
+    return [
+      counterparty ? `a fatura da ${counterparty}` : 'uma fatura',
+      amount ? `de ${amount}` : '',
+      date ? `do dia ${date}` : '',
+    ].filter(Boolean).join(' ')
+  }
+
+  if (draft.kind === 'payable_installments') {
+    return [
+      amount ? `${draft.installment_count || ''} parcelas de ${amount}`.trim() : `${draft.installment_count || ''} parcelas`.trim(),
+      description || category,
+      counterparty ? `para ${counterparty}` : '',
+      firstDueDate ? `com primeiro vencimento em ${firstDueDate}` : '',
+    ].filter(Boolean).join(', ')
+  }
+
+  const subject = description || category || 'lancamento'
+  return [
+    amount ? `${amount} de ${subject}` : subject,
+    counterparty ? `para ${counterparty}` : '',
+    date ? `do dia ${date}` : '',
+  ].filter(Boolean).join(' ')
 }
 
 function buildMissingQuestion(
@@ -1284,14 +1372,21 @@ function buildMissingQuestion(
   draft: FinanceDraft,
   missing: string[],
   sourceText?: string | null,
-  options?: { hasPendingDraft?: boolean },
+  options?: { hasPendingDraft?: boolean; hasFreshReceiptData?: boolean },
 ) {
   const name = firstName(identityLabel)
   const text = [sourceText, draft.source_text].filter(Boolean).join('\n')
   const ask = buildMissingFieldAsk(missing)
+  const context = friendlyDraftContext(draft)
 
   if (options?.hasPendingDraft) {
     const readable = humanJoin(missing.map(humanMissingField))
+    if (options.hasFreshReceiptData && (draft.media_analysis || draft.attachment_url)) {
+      return [
+        `${name}, li o comprovante${context ? `: ${context}.` : ' e deixei o lancamento rascunhado.'}`,
+        readable ? `So falta me dizer ${readable}.` : 'Ja tenho tudo para seguir.',
+      ].join('\n')
+    }
     return readable
       ? `${name}, perfeito. Falta so me dizer ${readable}.`
       : `${name}, perfeito. Ja tenho o que preciso para continuar.`
@@ -1310,7 +1405,6 @@ function buildMissingQuestion(
   const intro = draft.media_analysis || draft.attachment_url
     ? `${name}, vi o comprovante e ja comecei o lancamento.`
     : `${name}, certo, eu preparo esse lancamento.`
-  const context = friendlyDraftContext(draft)
 
   return [
     intro,
@@ -1319,19 +1413,34 @@ function buildMissingQuestion(
   ].filter(Boolean).join('\n')
 }
 
-function hasPendingCatalogCreation(draft: FinanceDraft) {
-  return Boolean(
-    draft.category_creation?.needs_confirmation
-    || draft.payment_method_creation?.needs_confirmation
-    || draft.counterparty_creation?.needs_confirmation
-    || draft.cost_center_creation?.needs_confirmation
-  )
+function pendingCatalogCreationLabels(draft: FinanceDraft) {
+  const labels: string[] = []
+  if (draft.category_creation?.needs_confirmation) {
+    const category = cleanString(draft.category_creation.category || draft.category, 90)
+    const subcategory = cleanString(draft.category_creation.subcategory || draft.subcategory, 90)
+    const label = [category, subcategory].filter(Boolean).join(' / ')
+    if (label) labels.push(label)
+  }
+  if (draft.counterparty_creation?.needs_confirmation) {
+    const name = cleanCounterpartyName(draft.counterparty_creation.name || draft.counterparty_name)
+    if (name) labels.push(name)
+  }
+  if (draft.payment_method_creation?.needs_confirmation) {
+    const name = canonicalPaymentMethod(draft.payment_method_creation.name || draft.payment_method)
+    if (name) labels.push(name)
+  }
+  if (draft.cost_center_creation?.needs_confirmation) {
+    const name = cleanupCatalogName(draft.cost_center_creation.name || draft.cost_center, 90)
+    if (name) labels.push(name)
+  }
+  return Array.from(new Set(labels))
 }
 
 function buildConfirmationQuestion(identityLabel: string, draft: FinanceDraft) {
   const context = friendlyDraftContext(draft)
-  const catalogNote = hasPendingCatalogCreation(draft)
-    ? 'Se categoria, favorecido ou forma de pagamento ainda nao existirem, eu crio junto.'
+  const catalogLabels = pendingCatalogCreationLabels(draft)
+  const catalogNote = catalogLabels.length
+    ? `Tambem vou criar no financeiro: ${humanJoin(catalogLabels)}.`
     : ''
   const account = draft.entity_type
     ? `Vai na ${draft.entity_type === 'pj' ? 'pessoa juridica' : 'pessoa fisica'}`
@@ -1342,7 +1451,7 @@ function buildConfirmationQuestion(identityLabel: string, draft: FinanceDraft) {
   const action = draft.kind === 'payable_installments' ? 'criar essas contas a pagar' : 'salvar esse lancamento'
 
   return [
-    `${firstName(identityLabel)}, perfeito. ${context ? `Ficou ${context}.` : 'Ja deixei tudo pronto.'}`,
+    `${firstName(identityLabel)}, fechou. ${context ? `Deixei pronto: ${context}.` : 'Ja deixei tudo pronto.'}`,
     details ? `${details}.` : '',
     catalogNote,
     `Posso ${action} assim?`,
@@ -2527,6 +2636,7 @@ export async function processPilgerFinanceCommand(
       return { handled: true, whatsappSent, action: 'query_payables', responseText }
     }
 
+    const currentReceipt = receiptAnalysisFromPayload(command?.payload || {})
     const hasMedia = Boolean(command?.payload?.has_media || firstMedia(command?.payload) || payloadMediaText(command?.payload))
     const shouldStartFinanceDraft = pending || looksLikeFinanceCreation(text, hasMedia)
     if (!shouldStartFinanceDraft) {
@@ -2552,7 +2662,10 @@ export async function processPilgerFinanceCommand(
         session,
         draft,
         missingFields,
-        responseText: buildMissingQuestion(command.identity_label, draft, missingFields, text, { hasPendingDraft: Boolean(pending) }),
+        responseText: buildMissingQuestion(command.identity_label, draft, missingFields, text, {
+          hasPendingDraft: Boolean(pending),
+          hasFreshReceiptData: Boolean(currentReceipt),
+        }),
         action: 'ask_missing',
         sendResponse: shouldSendResponse,
         instanceToken,

@@ -3288,9 +3288,28 @@ function normalizeReceiptPaymentMethod(value: unknown): string | null {
     return null
 }
 
+function looksLikeInvalidReceiptMerchant(value: unknown): boolean {
+    const normalized = normalizeTextForMatch(String(value || ''))
+    if (!normalized) return true
+    if (/^(periodo|data|vencimento|valor|total|dia|forma|pagamento|descricao|categoria|subcategoria|documento|numero|competencia|emissao|conta|codigo|protocolo)\b/.test(normalized)) return true
+    if (/^\d+(?:[./-]\d+)*$/.test(normalized)) return true
+    return normalized.length < 3
+}
+
+function knownReceiptMerchantFromText(text: string): string | null {
+    const normalized = normalizeTextForMatch(text)
+    if (/\bunifique\b/.test(normalized)) return 'Unifique'
+    if (/\bcelesc\b/.test(normalized)) return 'Celesc'
+    if (/\bcasan\b/.test(normalized)) return 'Casan'
+    if (/\bvivo\b/.test(normalized)) return 'Vivo'
+    if (/\bclaro\b/.test(normalized)) return 'Claro'
+    if (/\btim\b/.test(normalized)) return 'TIM'
+    return null
+}
+
 function normalizeFinanceReceiptAnalysis(raw: any, fallbackText = ''): FinanceReceiptAnalysis | null {
     if (!raw || typeof raw !== 'object') return null
-    const merchant = String(raw.merchant || raw.favorecido || raw.estabelecimento || raw.supplier || raw.fornecedor || '').trim() || null
+    let merchant = String(raw.merchant || raw.favorecido || raw.estabelecimento || raw.supplier || raw.fornecedor || '').trim() || null
     const rawSummary = String(raw.raw_summary || raw.summary || raw.resumo || fallbackText || '').trim()
     const normalized = normalizeTextForMatch([
         merchant,
@@ -3299,6 +3318,9 @@ function normalizeFinanceReceiptAnalysis(raw: any, fallbackText = ''): FinanceRe
         raw.subcategory_hint || raw.subcategoria,
         rawSummary,
     ].filter(Boolean).join(' '))
+    const knownMerchant = knownReceiptMerchantFromText(normalized)
+    if (merchant && looksLikeInvalidReceiptMerchant(merchant)) merchant = null
+    if (!merchant && knownMerchant) merchant = knownMerchant
     const isTelecom = /\b(unifique|internet|telefone|telefonia|fibra|banda larga)\b/.test(normalized)
     const isEnergy = /\b(celesc|energia|luz)\b/.test(normalized)
     const isWater = /\b(casan|agua|saneamento)\b/.test(normalized)
@@ -3369,7 +3391,9 @@ async function analyzeFinanceReceiptWithGemini(
         'Regras:',
         '- amount deve ser o valor principal a pagar ou pago, em reais, usando ponto decimal.',
         '- date deve ser a data de pagamento, emissao ou vencimento mais relevante para lancamento.',
+        '- merchant deve ser o fornecedor/favorecido real do documento, normalmente no cabecalho ou logo. Nunca use labels como periodo, vencimento, data, valor, protocolo ou numero como merchant.',
         '- Para fatura de internet/telefone, use category_hint "Custos Fixos" e subcategory_hint "Internet".',
+        '- Se aparecer Unifique, o merchant deve ser "Unifique" e a description deve ser "Pagamento de internet - Unifique".',
         '- Para energia use "Custos Fixos" / "Energia"; para agua use "Custos Fixos" / "Agua".',
         '- Para abastecimento use "Consumo despesas" / "Combustivel".',
         '- Se nao encontrar um campo com seguranca, use null.',
