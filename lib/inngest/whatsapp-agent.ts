@@ -3212,6 +3212,213 @@ Se não for possível analisar com confiança, diga isso claramente.`
     return text
 }
 
+type FinanceReceiptAnalysis = {
+    is_receipt: boolean
+    amount: number | null
+    date: string | null
+    merchant: string | null
+    document_number: string | null
+    payment_method: string | null
+    category_hint: string | null
+    subcategory_hint: string | null
+    description: string | null
+    confidence: number
+    raw_summary: string
+}
+
+function parseReceiptMoneyValue(raw: unknown): number | null {
+    if (typeof raw === 'number') {
+        return Number.isFinite(raw) && raw > 0 ? Math.round(raw * 100) / 100 : null
+    }
+    const value = String(raw || '').replace(/[^\d,.]/g, '').trim()
+    if (!value) return null
+    const normalized = value.includes(',')
+        ? value.replace(/\./g, '').replace(',', '.')
+        : value
+    const amount = Number(normalized)
+    return Number.isFinite(amount) && amount > 0 ? Math.round(amount * 100) / 100 : null
+}
+
+function extractJsonObjectFromText(text: string): any | null {
+    const raw = String(text || '').trim()
+    if (!raw) return null
+    const withoutFence = raw
+        .replace(/^```(?:json)?/i, '')
+        .replace(/```$/i, '')
+        .trim()
+    const jsonSlice = withoutFence.includes('{') && withoutFence.includes('}')
+        ? withoutFence.slice(withoutFence.indexOf('{'), withoutFence.lastIndexOf('}') + 1)
+        : ''
+    const candidates = [withoutFence, jsonSlice]
+        .filter(candidate => candidate && candidate.startsWith('{') && candidate.endsWith('}'))
+
+    for (const candidate of candidates) {
+        try {
+            return JSON.parse(candidate)
+        } catch {
+            // Try next candidate.
+        }
+    }
+    return null
+}
+
+function normalizeReceiptDateKey(raw: unknown): string | null {
+    const value = String(raw || '').trim()
+    if (!value) return null
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value
+    const br = value.match(/\b(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})\b/)
+    if (br) {
+        const day = br[1].padStart(2, '0')
+        const month = br[2].padStart(2, '0')
+        const year = br[3].length === 2 ? `20${br[3]}` : br[3]
+        return `${year}-${month}-${day}`
+    }
+    return null
+}
+
+function normalizeReceiptPaymentMethod(value: unknown): string | null {
+    const normalized = normalizeTextForMatch(String(value || ''))
+    if (!normalized) return null
+    if (/\bpix\b/.test(normalized)) return 'PIX'
+    if (/\b(cartao|credito|debito|visa|mastercard|elo)\b/.test(normalized)) return 'Cartao'
+    if (/\bboleto\b/.test(normalized)) return 'Boleto'
+    if (/\bted\b/.test(normalized)) return 'TED'
+    if (/\bdoc\b/.test(normalized)) return 'DOC'
+    if (/\b(dinheiro|especie)\b/.test(normalized)) return 'Dinheiro'
+    return null
+}
+
+function normalizeFinanceReceiptAnalysis(raw: any, fallbackText = ''): FinanceReceiptAnalysis | null {
+    if (!raw || typeof raw !== 'object') return null
+    const merchant = String(raw.merchant || raw.favorecido || raw.estabelecimento || raw.supplier || raw.fornecedor || '').trim() || null
+    const rawSummary = String(raw.raw_summary || raw.summary || raw.resumo || fallbackText || '').trim()
+    const normalized = normalizeTextForMatch([
+        merchant,
+        raw.description || raw.descricao,
+        raw.category_hint || raw.categoria,
+        raw.subcategory_hint || raw.subcategoria,
+        rawSummary,
+    ].filter(Boolean).join(' '))
+    const isTelecom = /\b(unifique|internet|telefone|telefonia|fibra|banda larga)\b/.test(normalized)
+    const isEnergy = /\b(celesc|energia|luz)\b/.test(normalized)
+    const isWater = /\b(casan|agua|saneamento)\b/.test(normalized)
+    const isFuel = /\b(abastec|combustivel|gasolina|etanol|diesel|posto)\b/.test(normalized)
+    const paymentMethod = normalizeReceiptPaymentMethod([
+        raw.payment_method,
+        raw.forma_pagamento,
+        raw.meio_pagamento,
+        rawSummary,
+        fallbackText,
+    ].filter(Boolean).join(' '))
+    const amount = parseReceiptMoneyValue(raw.amount ?? raw.valor ?? raw.total ?? raw.total_amount)
+    const categoryHint = String(raw.category_hint || raw.categoria || '').trim()
+        || (isTelecom || isEnergy || isWater ? 'Custos Fixos' : isFuel ? 'Consumo despesas' : null)
+    const subcategoryHint = String(raw.subcategory_hint || raw.subcategoria || '').trim()
+        || (isTelecom ? 'Internet' : isEnergy ? 'Energia' : isWater ? 'Agua' : isFuel ? 'Combustivel' : null)
+    const description = String(raw.description || raw.descricao || '').trim()
+        || (isTelecom ? `Pagamento de internet${merchant ? ` - ${merchant}` : ''}` : null)
+        || (isEnergy ? 'Pagamento de energia' : null)
+        || (isWater ? 'Pagamento de agua' : null)
+        || (isFuel ? `Abastecimento${merchant ? ` - ${merchant}` : ''}` : null)
+        || (merchant ? `Pagamento - ${merchant}` : null)
+
+    return {
+        is_receipt: raw.is_receipt !== false && Boolean(amount || merchant || rawSummary),
+        amount,
+        date: normalizeReceiptDateKey(raw.date || raw.data || raw.entry_date || raw.vencimento || raw.due_date),
+        merchant,
+        document_number: String(raw.document_number || raw.numero || raw.invoice_number || raw.nota || '').trim() || null,
+        payment_method: paymentMethod,
+        category_hint: categoryHint,
+        subcategory_hint: subcategoryHint,
+        description,
+        confidence: Math.max(0, Math.min(1, Number(raw.confidence || raw.confianca || 0) || 0)),
+        raw_summary: rawSummary,
+    }
+}
+
+function financeReceiptSummary(analysis?: FinanceReceiptAnalysis | null) {
+    if (!analysis) return ''
+    return [
+        '[Analise financeira do comprovante]',
+        analysis.amount ? `Valor: R$ ${analysis.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '',
+        analysis.date ? `Data/vencimento: ${analysis.date}` : '',
+        analysis.merchant ? `Favorecido/fornecedor: ${analysis.merchant}` : '',
+        analysis.description ? `Descricao: ${analysis.description}` : '',
+        analysis.payment_method ? `Forma de pagamento detectada: ${analysis.payment_method}` : '',
+        analysis.category_hint ? `Categoria sugerida: ${analysis.category_hint}` : '',
+        analysis.subcategory_hint ? `Subcategoria sugerida: ${analysis.subcategory_hint}` : '',
+        analysis.document_number ? `Documento: ${analysis.document_number}` : '',
+        analysis.raw_summary ? `Resumo: ${analysis.raw_summary}` : '',
+    ].filter(Boolean).join('\n')
+}
+
+async function analyzeFinanceReceiptWithGemini(
+    mediaBuffer: Buffer,
+    mimeType: string,
+    apiKey: string,
+    model: string,
+    fileName?: string | null,
+    userContext?: string | null
+): Promise<FinanceReceiptAnalysis | null> {
+    const prompt = [
+        'Voce esta ajudando uma assistente financeira interna a lancar comprovantes enviados pelo WhatsApp.',
+        'Analise este PDF, imagem, recibo, fatura, boleto, nota fiscal, cupom ou comprovante de pagamento.',
+        'Retorne somente JSON valido, sem markdown, exatamente neste formato:',
+        '{"is_receipt":true,"amount":123.45,"date":"YYYY-MM-DD","merchant":"Nome do favorecido","document_number":"numero ou null","payment_method":"PIX|Cartao|Boleto|Dinheiro|TED|DOC|null","category_hint":"categoria sugerida","subcategory_hint":"subcategoria sugerida","description":"descricao curta","confidence":0.0,"raw_summary":"resumo curto"}',
+        'Regras:',
+        '- amount deve ser o valor principal a pagar ou pago, em reais, usando ponto decimal.',
+        '- date deve ser a data de pagamento, emissao ou vencimento mais relevante para lancamento.',
+        '- Para fatura de internet/telefone, use category_hint "Custos Fixos" e subcategory_hint "Internet".',
+        '- Para energia use "Custos Fixos" / "Energia"; para agua use "Custos Fixos" / "Agua".',
+        '- Para abastecimento use "Consumo despesas" / "Combustivel".',
+        '- Se nao encontrar um campo com seguranca, use null.',
+        '- Se nao parecer documento financeiro, use is_receipt false.',
+        `Arquivo: ${fileName || 'sem nome'}.`,
+        userContext ? `Mensagem do usuario: ${String(userContext).slice(0, 800)}` : '',
+    ].filter(Boolean).join('\n')
+
+    const modelCandidates = Array.from(new Set([model || 'gemini-2.5-flash', 'gemini-2.5-flash'].filter(Boolean)))
+
+    for (const candidateModel of modelCandidates) {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${candidateModel}:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{
+                    role: 'user',
+                    parts: [
+                        { inlineData: { mimeType, data: mediaBuffer.toString('base64') } },
+                        { text: prompt },
+                    ],
+                }],
+            }),
+        })
+
+        if (!res.ok) {
+            const errorText = await res.text().catch(() => '')
+            console.warn(`[WhatsApp Agent] Gemini finance receipt analysis failed with ${candidateModel} (${res.status}): ${errorText.substring(0, 500)}`)
+            continue
+        }
+
+        const data = await res.json()
+        await recordGeminiUsage({
+            model: candidateModel,
+            feature: 'whatsapp_global_finance_receipt_analysis',
+            usageMetadata: data.usageMetadata,
+            metadata: { mimeType, fileName: fileName || null },
+        })
+        const parts = data?.candidates?.[0]?.content?.parts
+        const text = Array.isArray(parts)
+            ? parts.map((part: any) => part?.text || '').filter(Boolean).join('\n').trim()
+            : ''
+        const analysis = normalizeFinanceReceiptAnalysis(extractJsonObjectFromText(text), text)
+        if (analysis?.is_receipt) return analysis
+    }
+
+    return null
+}
+
 async function analyzeMediaWithOpenAIImage(
     mediaBuffer: Buffer,
     mimeType: string,
@@ -3277,6 +3484,7 @@ type IncomingMediaAnalysisResult = {
     analysisNote?: string
     fileName?: string | null
     messageId?: string | null
+    financeReceiptAnalysis?: FinanceReceiptAnalysis | null
     results?: IncomingMediaAnalysisResult[]
     totals?: Record<string, number>
     skipped?: Record<string, number>
@@ -3324,12 +3532,20 @@ function buildMediaBatchLabel(totals: Record<string, number>): string {
     return labels.length ? labels.join(', ') : 'nenhuma midia'
 }
 
+function financeReceiptAnalysisFromMediaAnalysis(mediaAnalysis: any): FinanceReceiptAnalysis | null {
+    if (!mediaAnalysis) return null
+    if (mediaAnalysis.financeReceiptAnalysis) return mediaAnalysis.financeReceiptAnalysis
+    const results = Array.isArray(mediaAnalysis.results) ? mediaAnalysis.results : []
+    return results.find((result: any) => result?.financeReceiptAnalysis)?.financeReceiptAnalysis || null
+}
+
 async function analyzeIncomingMediaItem(params: {
     supabase: any
     configs: Record<string, string>
     instanceToken: string
     item: IncomingMediaBatchItem
     contextText?: string | null
+    financeMode?: boolean
 }): Promise<IncomingMediaAnalysisResult> {
     const { supabase, configs, instanceToken, item, contextText } = params
     const { kind, messageId, mediaUrl, mediaMimetype, mediaFilename } = item
@@ -3454,9 +3670,24 @@ async function analyzeIncomingMediaItem(params: {
     const effectiveProvider = globalProvider
 
     let analysisText = ''
+    let financeReceiptAnalysis: FinanceReceiptAnalysis | null = null
+
+    if (params.financeMode && (kind === 'image' || kind === 'document') && geminiKey) {
+        financeReceiptAnalysis = await analyzeFinanceReceiptWithGemini(
+            analysisBuffer,
+            mimeType,
+            geminiKey,
+            geminiModel,
+            analysisFileName,
+            analysisContext
+        )
+        if (financeReceiptAnalysis) {
+            analysisText = financeReceiptSummary(financeReceiptAnalysis)
+        }
+    }
 
     if (effectiveProvider === 'openai') {
-        if (openaiKey && kind === 'image' && mimeType.startsWith('image/')) {
+        if (!analysisText && openaiKey && kind === 'image' && mimeType.startsWith('image/')) {
             analysisText = await analyzeMediaWithOpenAIImage(
                 analysisBuffer,
                 mimeType,
@@ -3478,7 +3709,7 @@ async function analyzeIncomingMediaItem(params: {
             )
         }
     } else {
-        if (geminiKey) {
+        if (!analysisText && geminiKey) {
             analysisText = await analyzeMediaWithGemini(
                 analysisBuffer,
                 mimeType,
@@ -3503,7 +3734,7 @@ async function analyzeIncomingMediaItem(params: {
 
     return {
         text: analysisText || '',
-        reason: analysisText ? 'ok' : 'no_analysis',
+        reason: financeReceiptAnalysis ? 'ok_finance_receipt' : analysisText ? 'ok' : 'no_analysis',
         kind,
         mimeType,
         size: mediaBuffer.length,
@@ -3511,6 +3742,7 @@ async function analyzeIncomingMediaItem(params: {
         analysisNote,
         fileName: mediaFilename || null,
         messageId: messageId || null,
+        financeReceiptAnalysis,
     }
 }
 
@@ -5651,6 +5883,7 @@ export const processWhatsAppMessage = inngest.createFunction(
                         instanceToken,
                         item: selected[index],
                         contextText: allMessages || messageText || selected[index].text || null,
+                        financeMode: isGlobalInternalProcessing,
                     })
                     analyzedResults.push(result)
                 }
@@ -5828,9 +6061,24 @@ export const processWhatsAppMessage = inngest.createFunction(
                 const effectiveProvider = globalProvider
 
                 let analysisText = ''
+                let financeReceiptAnalysis: FinanceReceiptAnalysis | null = null
+
+                if (isGlobalInternalProcessing && (kind === 'image' || kind === 'document') && geminiKey) {
+                    financeReceiptAnalysis = await analyzeFinanceReceiptWithGemini(
+                        analysisBuffer,
+                        mimeType,
+                        geminiKey,
+                        geminiModel,
+                        analysisFileName,
+                        analysisContext
+                    )
+                    if (financeReceiptAnalysis) {
+                        analysisText = financeReceiptSummary(financeReceiptAnalysis)
+                    }
+                }
 
                 if (effectiveProvider === 'openai') {
-                    if (openaiKey && kind === 'image' && mimeType.startsWith('image/')) {
+                    if (!analysisText && openaiKey && kind === 'image' && mimeType.startsWith('image/')) {
                         analysisText = await analyzeMediaWithOpenAIImage(
                             analysisBuffer,
                             mimeType,
@@ -5854,7 +6102,7 @@ export const processWhatsAppMessage = inngest.createFunction(
                         )
                     }
                 } else {
-                    if (geminiKey) {
+                    if (!analysisText && geminiKey) {
                         analysisText = await analyzeMediaWithGemini(
                             analysisBuffer,
                             mimeType,
@@ -5879,12 +6127,13 @@ export const processWhatsAppMessage = inngest.createFunction(
 
                 return {
                     text: analysisText || '',
-                    reason: analysisText ? 'ok' : 'no_analysis',
+                    reason: financeReceiptAnalysis ? 'ok_finance_receipt' : analysisText ? 'ok' : 'no_analysis',
                     kind,
                     mimeType,
                     size: mediaBuffer.length,
                     analysisSize: analysisBuffer.length,
-                    analysisNote
+                    analysisNote,
+                    financeReceiptAnalysis,
                 }
             })
             : null)
@@ -6135,6 +6384,9 @@ export const processWhatsAppMessage = inngest.createFunction(
                 const identity = globalIdentity as any
                 const sessionHistory = buildWhatsAppGlobalConversationHistory(conversation)
                 const hasMedia = Boolean(isAudio || isMediaMessage || mediaBatchItems.length > 0)
+                const financeReceiptAnalysis = !isAudio
+                    ? financeReceiptAnalysisFromMediaAnalysis(mediaAnalysis)
+                    : null
                 const internalInput = buildGlobalInternalMediaText({
                     inputText,
                     isAudio,
@@ -6195,6 +6447,7 @@ export const processWhatsAppMessage = inngest.createFunction(
                             media_analysis: !isAudio && mediaAnalysis?.text
                                 ? String(mediaAnalysis.text).slice(0, 2400)
                                 : null,
+                            receipt_analysis: financeReceiptAnalysis,
                         },
                         intentOverride: intent,
                     })
@@ -6266,6 +6519,7 @@ export const processWhatsAppMessage = inngest.createFunction(
                                         media_analysis: !isAudio && mediaAnalysis?.text
                                             ? String(mediaAnalysis.text).slice(0, 2400)
                                             : null,
+                                        receipt_analysis: financeReceiptAnalysis,
                                     },
                                 },
                                 instance,

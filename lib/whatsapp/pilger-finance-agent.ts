@@ -984,8 +984,46 @@ function firstMedia(payload: any) {
   return media.find((item: any) => item?.r2_url || item?.stored_url || item?.url || item?.original_url) || null
 }
 
+function receiptAnalysisFromPayload(payload: any) {
+  if (payload?.receipt_analysis && typeof payload.receipt_analysis === 'object') return payload.receipt_analysis
+  if (payload?.finance_receipt_analysis && typeof payload.finance_receipt_analysis === 'object') return payload.finance_receipt_analysis
+  const media = firstMedia(payload)
+  if (media?.finance_receipt_analysis && typeof media.finance_receipt_analysis === 'object') return media.finance_receipt_analysis
+  if (media?.receipt_analysis && typeof media.receipt_analysis === 'object') return media.receipt_analysis
+  return null
+}
+
+function receiptAnalysisText(receipt: any) {
+  if (!receipt || typeof receipt !== 'object') return ''
+  return [
+    receipt.amount ? `Valor: R$ ${receipt.amount}` : '',
+    receipt.date ? `Data/vencimento: ${receipt.date}` : '',
+    receipt.merchant ? `Favorecido/fornecedor: ${receipt.merchant}` : '',
+    receipt.description ? `Descricao: ${receipt.description}` : '',
+    receipt.payment_method ? `Forma de pagamento: ${receipt.payment_method}` : '',
+    receipt.category_hint ? `Categoria: ${receipt.category_hint}` : '',
+    receipt.subcategory_hint ? `Subcategoria: ${receipt.subcategory_hint}` : '',
+    receipt.document_number ? `Documento: ${receipt.document_number}` : '',
+    receipt.raw_summary ? `Resumo: ${receipt.raw_summary}` : '',
+  ].filter(Boolean).join('\n')
+}
+
+function receiptAmount(receipt: any): number | null {
+  const value = Number(receipt?.amount || 0)
+  return Number.isFinite(value) && value > 0 ? Math.round(value * 100) / 100 : null
+}
+
+function receiptDate(receipt: any): string | null {
+  const value = cleanString(receipt?.date, 20)
+  return /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : null
+}
+
 function payloadMediaText(payload: any) {
-  return cleanString(payload?.media_analysis || payload?.receipt_analysis?.raw_summary || '', 3000)
+  const receipt = receiptAnalysisFromPayload(payload)
+  return cleanString([
+    payload?.media_analysis || '',
+    receiptAnalysisText(receipt),
+  ].filter(Boolean).join('\n'), 3000)
 }
 
 function extractCounterpartyName(text: unknown): string | null {
@@ -1096,6 +1134,7 @@ function formatDateBR(dateKey?: string | null) {
 function buildDraftFromCommand(command: any, previous?: FinanceDraft | null): FinanceDraft {
   const payload = command?.payload || {}
   const media = firstMedia(payload)
+  const receipt = receiptAnalysisFromPayload(payload)
   const mediaAnalysis = payloadMediaText(payload)
   const interpretedText = cleanString(payload?.finance_context?.interpretedText || payload?.finance_context?.interpreted_text || '', 1200)
   const commandText = cleanString(command?.command_text, 3000)
@@ -1105,10 +1144,12 @@ function buildDraftFromCommand(command: any, previous?: FinanceDraft | null): Fi
   const kind: FinanceDraftKind = installmentCount ? 'payable_installments' : (previous?.kind || 'paid_expense')
   const category = detectCategory(fullText)
   const explicitClassification = extractExplicitClassification(fullText, !category.known)
-  const requestedCategory = explicitClassification.category || previous?.requested_category || null
-  const requestedSubcategory = explicitClassification.subcategory || previous?.requested_subcategory || null
+  const receiptCategory = cleanString(receipt?.category_hint, 90) || null
+  const receiptSubcategory = cleanString(receipt?.subcategory_hint, 90) || null
+  const requestedCategory = explicitClassification.category || previous?.requested_category || receiptCategory || null
+  const requestedSubcategory = explicitClassification.subcategory || previous?.requested_subcategory || receiptSubcategory || null
   const entityType = detectEntityType(fullText) || previous?.entity_type || null
-  const explicitDate = parseDateFromText(fullText)
+  const explicitDate = parseDateFromText(fullText) || receiptDate(receipt)
   const monthlyDay = extractMonthlyDueDay(fullText)
   const forceNextMonth = /\b(mes que vem|proximo mes|proximos meses|meses seguintes)\b/.test(normalizeText(fullText))
   const firstDueDate = explicitDate
@@ -1116,16 +1157,21 @@ function buildDraftFromCommand(command: any, previous?: FinanceDraft | null): Fi
   const entryDate = kind === 'paid_expense'
     ? (explicitDate || previous?.entry_date || saoPauloDateKey())
     : (previous?.entry_date || saoPauloDateKey())
-  const amount = extractAmountFromText(fullText, previous?.amount || null)
-  const paymentMethod = detectPaymentMethod(fullText) || previous?.payment_method || null
+  const amount = receiptAmount(receipt) || extractAmountFromText(fullText, previous?.amount || null)
+  const paymentMethod = detectPaymentMethod(fullText) || detectPaymentMethod(receipt?.payment_method) || previous?.payment_method || null
   const costCenter = extractCostCenterName(fullText) || previous?.cost_center || null
   const counterpartyName = extractCounterpartyName(commandText)
     || extractCounterpartyName(mediaAnalysis)
+    || cleanString(receipt?.merchant, 90)
     || previous?.counterparty_name
     || category.counterpartyName
     || null
   const counterpartyType = previous?.counterparty_type || inferCounterpartyType(counterpartyName, fullText, entityType)
   let description = inferDescription(fullText, previous?.description)
+  const receiptDescription = cleanString(receipt?.description, 160)
+  if (receiptDescription && isGenericDescription(description)) {
+    description = receiptDescription
+  }
   if (kind === 'payable_installments' && isGenericDescription(description) && counterpartyName) {
     description = `Pagamento - ${counterpartyName}`
   }
