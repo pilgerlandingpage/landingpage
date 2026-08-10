@@ -3359,6 +3359,7 @@ function normalizeReceiptDateKey(raw: unknown): string | null {
 function normalizeReceiptPaymentMethod(value: unknown): string | null {
     const normalized = normalizeTextForMatch(String(value || ''))
     if (!normalized) return null
+    if (/^(detectado|detectada|sugerido|sugerida|identificado|identificada|forma|metodo|meio|pagamento|null|none)$/.test(normalized)) return null
     if (/\bpix\b/.test(normalized)) return 'PIX'
     if (/\b(cartao|credito|debito|visa|mastercard|elo)\b/.test(normalized)) return 'Cartao'
     if (/\bboleto\b/.test(normalized)) return 'Boleto'
@@ -3379,7 +3380,7 @@ function looksLikeInvalidReceiptMerchant(value: unknown): boolean {
 function knownReceiptMerchantFromText(text: string): string | null {
     const normalized = normalizeTextForMatch(text)
     if (/\bunifique\b/.test(normalized)) return 'Unifique'
-    if (/\bcelesc\b/.test(normalized)) return 'Celesc'
+    if (/\bcelesc\b/.test(normalized)) return 'Celesc Distribuicao S.A.'
     if (/\bcasan\b/.test(normalized)) return 'Casan'
     if (/\bvivo\b/.test(normalized)) return 'Vivo'
     if (/\bclaro\b/.test(normalized)) return 'Claro'
@@ -3387,9 +3388,26 @@ function knownReceiptMerchantFromText(text: string): string | null {
     return null
 }
 
+function cleanReceiptTextField(value: unknown, max = 120): string | null {
+    const text = String(value || '')
+        .replace(/\b(servico identificado|periodo\/referencia|periodo|referencia|categoria sugerida|subcategoria sugerida|forma de pagamento detectada|forma de pagamento|descricao|valor|vencimento|emissao|data principal|documento|resumo)\b.*$/i, '')
+        .replace(/[.,;:]+$/g, '')
+        .trim()
+    if (!text || normalizeTextForMatch(text).length < 2) return null
+    return text.length > max ? text.slice(0, max) : text
+}
+
+function cleanReceiptCatalogHint(value: unknown): string | null {
+    const text = cleanReceiptTextField(value, 90)
+    const normalized = normalizeTextForMatch(text || '')
+    if (!normalized) return null
+    if (/^(sugerido|sugerida|detectado|detectada|identificado|identificada|categoria|subcategoria|null|none)$/.test(normalized)) return null
+    return text
+}
+
 function normalizeFinanceReceiptAnalysis(raw: any, fallbackText = ''): FinanceReceiptAnalysis | null {
     if (!raw || typeof raw !== 'object') return null
-    let merchant = String(raw.merchant || raw.favorecido || raw.estabelecimento || raw.supplier || raw.fornecedor || '').trim() || null
+    let merchant = cleanReceiptTextField(raw.merchant || raw.favorecido || raw.estabelecimento || raw.supplier || raw.fornecedor, 120)
     const rawSummary = String(raw.raw_summary || raw.summary || raw.resumo || fallbackText || '').trim()
     const normalized = normalizeTextForMatch([
         merchant,
@@ -3417,17 +3435,17 @@ function normalizeFinanceReceiptAnalysis(raw: any, fallbackText = ''): FinanceRe
     const genericDate = normalizeReceiptDateKey(raw.date || raw.data || raw.entry_date)
     const date = paymentDate
         || (isTelecom || isEnergy || isWater ? (dueDate || genericDate || documentDate) : (genericDate || dueDate || documentDate))
-    const categoryHint = String(raw.category_hint || raw.categoria || '').trim()
+    const categoryHint = cleanReceiptCatalogHint(raw.category_hint || raw.categoria)
         || (isTelecom || isEnergy || isWater ? 'Custos Fixos' : isFuel ? 'Consumo despesas' : null)
-    const subcategoryHint = String(raw.subcategory_hint || raw.subcategoria || '').trim()
+    const subcategoryHint = cleanReceiptCatalogHint(raw.subcategory_hint || raw.subcategoria)
         || (isTelecom ? 'Internet' : isEnergy ? 'Energia' : isWater ? 'Agua' : isFuel ? 'Combustivel' : null)
-    const serviceType = String(raw.service_type || raw.tipo_servico || raw.servico || '').trim()
+    const serviceType = cleanReceiptTextField(raw.service_type || raw.tipo_servico || raw.servico, 120)
         || (isTelecom ? 'Internet/telefonia' : null)
         || (isEnergy ? 'Energia eletrica' : null)
         || (isWater ? 'Agua/saneamento' : null)
         || (isFuel ? 'Combustivel' : null)
     const referencePeriod = String(raw.reference_period || raw.periodo_referencia || raw.periodo || raw.competencia || '').trim() || null
-    const description = String(raw.description || raw.descricao || '').trim()
+    const description = cleanReceiptTextField(raw.description || raw.descricao, 160)
         || (isTelecom ? `Pagamento de internet${merchant ? ` - ${merchant}` : ''}` : null)
         || (isEnergy ? 'Pagamento de energia' : null)
         || (isWater ? 'Pagamento de agua' : null)

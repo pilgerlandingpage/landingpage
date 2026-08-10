@@ -372,6 +372,7 @@ function cleanupCatalogName(value: unknown, max = 90) {
 function canonicalPaymentMethod(value: unknown) {
   const normalized = normalizeText(value)
   if (!normalized) return null
+  if (/^(detectad[ao]s?|sugerid[ao]s?|identificad[ao]s?|forma|metodo|meio|pagamento|null|none)$/i.test(normalized)) return null
   if (/\b(mercado pago|mercadopago)\b/.test(normalized)) return normalized.includes('pix') ? 'Mercado Pago Pix' : 'Mercado Pago'
   if (/\bpix\b/.test(normalized)) return 'PIX'
   if (/\b(cartao|credito|debito|visa|mastercard|elo)\b/.test(normalized)) return 'Cartao'
@@ -385,7 +386,7 @@ function canonicalPaymentMethod(value: unknown) {
 function extractExplicitPaymentMethod(text: unknown) {
   const raw = cleanString(text, 1200)
   const patterns = [
-    /\b(?:forma de pagamento|metodo de pagamento|meio de pagamento)\s+([\p{L}0-9\s&.-]{2,70})/iu,
+    /\b(?:forma de pagamento|metodo de pagamento|meio de pagamento)\s*:?\s+([\p{L}0-9\s&.-]{2,70})/iu,
     /\b(?:paguei|pago|pagamento|quitado)\s+(?:via|no|na|pelo|pela)\s+([\p{L}0-9\s&.-]{2,70})/iu,
     /\b(?:via|no|na|pelo|pela)\s+(pix|cartao|cartao de credito|cartao de debito|boleto|ted|doc|dinheiro|mercado pago(?: pix)?|stone|cielo|sicredi|itau|bradesco|santander|nubank)\b/iu,
   ]
@@ -544,6 +545,7 @@ function detectCategory(text: unknown) {
 
 function cleanupClassificationName(value: unknown) {
   const cleaned = cleanString(value, 90)
+    .replace(/\b(sugerid[ao]s?|detectad[ao]s?|identificad[ao]s?|categoria|subcategoria|classificacao|servico identificado)\b.*$/i, '')
     .replace(/\b(no|na|em|com|pela|pelo|para|por|dia|vencimento|valor|r\$|pf|pj|cnpj|cpf|pessoa fisica|pessoa juridica).*$/i, '')
     .replace(/[.,;:]+$/g, '')
     .trim()
@@ -551,10 +553,18 @@ function cleanupClassificationName(value: unknown) {
   return sentenceCase(cleaned)
 }
 
+function cleanReceiptCatalogName(value: unknown) {
+  const cleaned = cleanupClassificationName(value)
+  if (!cleaned) return null
+  const normalized = normalizeText(cleaned)
+  if (/^(sugerida|sugerido|detectada|detectado|identificada|identificado|categoria|subcategoria|null|none)$/.test(normalized)) return null
+  return cleaned
+}
+
 function extractExplicitClassification(text: unknown, fallbackCategory: boolean) {
   const raw = cleanString(text, 1200)
-  const categoryMatch = raw.match(/\b(?:categoria financeira|classificacao financeira|classificar em|classifique em|categoria|classificacao)\s+([\p{L}0-9\s&.-]{3,90})/iu)
-  const subcategoryMatch = raw.match(/\b(?:subcategoria|sub categoria)\s+([\p{L}0-9\s&.-]{3,90})/iu)
+  const categoryMatch = raw.match(/\b(?:categoria financeira|classificacao financeira|classificar em|classifique em|categoria|classificacao)\s*:?\s+([\p{L}0-9\s&.-]{3,90})/iu)
+  const subcategoryMatch = raw.match(/\b(?:subcategoria|sub categoria)\s*:?\s+([\p{L}0-9\s&.-]{3,90})/iu)
   const comoMatch = fallbackCategory
     ? raw.match(/\bcomo\s+([\p{L}0-9\s&.-]{3,90})/iu)
     : null
@@ -705,6 +715,10 @@ function mediaContextText(media: any[] | undefined, explicitMediaAnalysis?: stri
     ].filter(Boolean).join(' ')).filter(Boolean)
     : []
   return [explicitMediaAnalysis, ...mediaLines].filter(Boolean).map(value => cleanString(value, 900)).join('\n')
+}
+
+function recentSessionFinanceOrMediaContext(session: any) {
+  return sessionTextContext(session)
 }
 
 function looksLikeNonFinanceMediaContext(text: unknown) {
@@ -914,6 +928,18 @@ export async function resolveGlobalFinanceContext(params: {
   }
 
   const mediaText = mediaContextText(params.media, params.mediaAnalysis)
+  const recentContext = recentSessionFinanceOrMediaContext(params.session)
+  if (looksLikeFinanceContinuation(text, [mediaText, recentContext].filter(Boolean).join('\n'))) {
+    return {
+      isFinance: true,
+      intent: 'create_or_update_finance_record',
+      confidence: 0.9,
+      reason: 'continuidade curta de um lancamento financeiro ou comprovante recente',
+      dateWindow: null,
+      interpretedText: text,
+      source: 'deterministic',
+    }
+  }
   const deterministic = deterministicFinanceContext({
     text,
     hasMedia: params.hasMedia,
@@ -1054,6 +1080,16 @@ function receiptDate(receipt: any): string | null {
   return null
 }
 
+function cleanReceiptDescription(value: unknown) {
+  const cleaned = cleanString(value, 160)
+    .replace(/\b(servico identificado|categoria sugerida|subcategoria sugerida|forma de pagamento detectada|forma de pagamento|periodo\/referencia|periodo|referencia)\b.*$/i, '')
+    .replace(/[.,;:]+$/g, '')
+    .trim()
+  const normalized = normalizeText(cleaned)
+  if (!normalized || /^(detectada|detectado|sugerida|sugerido|identificada|identificado|null|none)$/.test(normalized)) return null
+  return sentenceCase(cleaned)
+}
+
 function payloadMediaText(payload: any) {
   const receipt = receiptAnalysisFromPayload(payload)
   return cleanString([
@@ -1086,8 +1122,11 @@ function looksLikeBadCounterpartyCandidate(value: unknown) {
 
 function cleanCounterpartyName(value: unknown) {
   const cleaned = cleanupCatalogName(value, 90)
+    ?.replace(/\b(servico identificado|periodo\/referencia|periodo|referencia|categoria|subcategoria|forma de pagamento|metodo de pagamento|descricao|valor|vencimento|emissao|data principal|documento|resumo)\b.*$/i, '')
+    .replace(/[.,;:]+$/g, '')
+    .trim()
   if (!cleaned || looksLikeBadCounterpartyCandidate(cleaned)) return null
-  return cleaned
+  return sentenceCase(cleaned)
 }
 
 function extractCostCenterName(text: unknown): string | null {
@@ -1162,7 +1201,16 @@ function isCancelText(text: unknown) {
 }
 
 function hasExplicitExecutionIntent(text: unknown) {
-  return /\b(lanca|lancar|lance|cadastra|cadastrar|cadastre|registra|registrar|registre|inclui|incluir|inclua|cria|criar|crie)\b/.test(normalizeText(text))
+  return /\b(lanca|lancar|lance|cadastra|cadastrar|cadastre|registra|registrar|registre|inclui|incluir|inclua|cria|criar|crie|coloca|colocar|bota|botar)\b/.test(normalizeText(text))
+}
+
+function looksLikeFinanceContinuation(text: unknown, context?: unknown) {
+  const normalized = normalizeText(text)
+  if (!normalized) return false
+  const contextHasFinance = /\b(comprovante|recibo|nota fiscal|cupom|pagamento|despesa|fatura|boleto|pix|cartao|financeiro|lancamento|valor|celesc|unifique|casan|internet|energia|agua)\b/.test(normalizeText(context))
+  const shortContinuation = /\b(pj|pf|juridica|fisica|pessoa juridica|pessoa fisica|pix|boleto|cartao|dinheiro|ted|doc|sim|confirmo|pode|salva|salvar|grava|gravar)\b/.test(normalized)
+  const entityInstruction = /\b(coloca|colocar|bota|botar|vai|lanca|lancar)\b.{0,80}\b(pj|pf|juridica|fisica|pessoa juridica|pessoa fisica)\b/.test(normalized)
+  return (shortContinuation && contextHasFinance) || entityInstruction
 }
 
 function looksLikeFinanceCreation(text: unknown, hasMedia: boolean) {
@@ -1175,7 +1223,7 @@ function looksLikeFinanceCreation(text: unknown, hasMedia: boolean) {
     || /\b(valor|reais|r\$|pf|pj|cnpj|cpf)\b/.test(normalized)
   )
   const mediaFinanceReference = Boolean(hasMedia && /\b(essa|esse|isso|isto|foto|imagem|anexo|arquivo|midia)\b/.test(normalized) && /\b(lanca|lancar|lance|cadastra|cadastrar|cadastre|registrar|registre|financeiro|comprovante|recibo|pagamento|paguei|despesa|gasto)\b/.test(normalized))
-  return financeDomainSignal || executionFinanceSignal || mediaFinanceReference
+  return financeDomainSignal || executionFinanceSignal || mediaFinanceReference || looksLikeFinanceContinuation(text)
 }
 
 function formatDateBR(dateKey?: string | null) {
@@ -1196,11 +1244,14 @@ function buildDraftFromCommand(command: any, previous?: FinanceDraft | null): Fi
   const installmentCount = extractInstallmentCount(fullText) || previous?.installment_count || null
   const kind: FinanceDraftKind = installmentCount ? 'payable_installments' : (previous?.kind || 'paid_expense')
   const category = detectCategory(fullText)
-  const explicitClassification = extractExplicitClassification(fullText, !category.known)
-  const receiptCategory = cleanString(receipt?.category_hint, 90) || null
-  const receiptSubcategory = cleanString(receipt?.subcategory_hint, 90) || null
-  const requestedCategory = explicitClassification.category || previous?.requested_category || receiptCategory || null
-  const requestedSubcategory = explicitClassification.subcategory || previous?.requested_subcategory || receiptSubcategory || null
+  const humanInstructionText = [commandText, interpretedText].filter(Boolean).join('\n')
+  const explicitClassification = extractExplicitClassification(humanInstructionText, !category.known)
+  const receiptCategory = cleanReceiptCatalogName(receipt?.category_hint) || null
+  const receiptSubcategory = cleanReceiptCatalogName(receipt?.subcategory_hint) || null
+  const previousCategory = cleanReceiptCatalogName(previous?.requested_category || previous?.category)
+  const previousSubcategory = cleanReceiptCatalogName(previous?.requested_subcategory || previous?.subcategory)
+  const requestedCategory = explicitClassification.category || receiptCategory || previousCategory || null
+  const requestedSubcategory = explicitClassification.subcategory || receiptSubcategory || previousSubcategory || null
   const entityType = detectEntityType(fullText) || previous?.entity_type || null
   const explicitDate = parseDateFromText(fullText) || receiptDate(receipt)
   const monthlyDay = extractMonthlyDueDay(fullText)
@@ -1211,13 +1262,11 @@ function buildDraftFromCommand(command: any, previous?: FinanceDraft | null): Fi
     ? (explicitDate || previous?.entry_date || saoPauloDateKey())
     : (previous?.entry_date || saoPauloDateKey())
   const amount = receiptAmount(receipt) || extractAmountFromText(fullText, previous?.amount || null)
-  const userPaymentMethod = detectPaymentMethod([commandText, interpretedText].filter(Boolean).join('\n'))
+  const userPaymentMethod = detectPaymentMethod(humanInstructionText)
   const receiptPaymentMethod = detectPaymentMethod(receipt?.payment_method)
-  const mediaPaymentMethod = detectPaymentMethod(mediaAnalysis)
   const paymentMethod = userPaymentMethod
     || (shouldIgnoreDocumentCardPayment(receiptPaymentMethod, fullText, commandText) ? null : receiptPaymentMethod)
-    || (shouldIgnoreDocumentCardPayment(mediaPaymentMethod, fullText, commandText) ? null : mediaPaymentMethod)
-    || previous?.payment_method
+    || canonicalPaymentMethod(previous?.payment_method)
     || null
   const costCenter = extractCostCenterName(fullText) || previous?.cost_center || null
   const receiptMerchant = cleanCounterpartyName(receipt?.merchant)
@@ -1231,7 +1280,7 @@ function buildDraftFromCommand(command: any, previous?: FinanceDraft | null): Fi
     || null
   const counterpartyType = previous?.counterparty_type || inferCounterpartyType(counterpartyName, fullText, entityType)
   let description = inferDescription(fullText, previous?.description)
-  const receiptDescription = cleanString(receipt?.description, 160)
+  const receiptDescription = cleanReceiptDescription(receipt?.description)
   if (receiptDescription && (isGenericDescription(description) || (receipt && looksLikeUtilityBill(fullText)))) {
     description = receiptDescription
   }
@@ -1429,8 +1478,8 @@ function buildMissingQuestion(
 function pendingCatalogCreationLabels(draft: FinanceDraft) {
   const labels: string[] = []
   if (draft.category_creation?.needs_confirmation) {
-    const category = cleanString(draft.category_creation.category || draft.category, 90)
-    const subcategory = cleanString(draft.category_creation.subcategory || draft.subcategory, 90)
+    const category = cleanReceiptCatalogName(draft.category_creation.category || draft.category)
+    const subcategory = cleanReceiptCatalogName(draft.category_creation.subcategory || draft.subcategory)
     const label = [category, subcategory].filter(Boolean).join(' / ')
     if (label) labels.push(label)
   }
@@ -1787,16 +1836,26 @@ async function linkFinancePayableTags(supabase: SupabaseLike, payableIds?: strin
 }
 
 async function resolveDraftCatalogStatus(supabase: SupabaseLike, draft: FinanceDraft): Promise<FinanceCatalogStatus> {
-  const requestedCategory = cleanString(draft.requested_category, 90)
-  const requestedSubcategory = cleanString(draft.requested_subcategory, 90)
-  const paymentMethodName = cleanString(draft.payment_method, 70)
-  const counterpartyName = cleanString(draft.counterparty_name, 90)
+  const requestedCategory = cleanReceiptCatalogName(draft.requested_category)
+  const requestedSubcategory = cleanReceiptCatalogName(draft.requested_subcategory)
+  const paymentMethodName = canonicalPaymentMethod(draft.payment_method)
+  const counterpartyName = cleanCounterpartyName(draft.counterparty_name)
   const costCenterName = cleanString(draft.requested_cost_center || draft.cost_center, 90)
-  let resolvedDraft: FinanceDraft = { ...draft }
+  let resolvedDraft: FinanceDraft = {
+    ...draft,
+    category: cleanReceiptCatalogName(draft.category),
+    subcategory: cleanReceiptCatalogName(draft.subcategory),
+    requested_category: requestedCategory,
+    requested_subcategory: requestedSubcategory,
+    payment_method: paymentMethodName,
+    requested_payment_method: paymentMethodName,
+    counterparty_name: counterpartyName,
+    requested_counterparty: counterpartyName,
+  }
   let needsConfirmation = false
 
-  const categoryName = requestedCategory || cleanString(draft.category, 90)
-  const subcategoryName = requestedSubcategory || cleanString(draft.subcategory, 90)
+  const categoryName = requestedCategory || cleanReceiptCatalogName(draft.category)
+  const subcategoryName = requestedSubcategory || cleanReceiptCatalogName(draft.subcategory)
   const shouldCheckCategory = Boolean(categoryName && (
     requestedCategory
     || requestedSubcategory
