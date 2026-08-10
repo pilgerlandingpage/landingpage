@@ -13,7 +13,7 @@ import SearchAlertsPanel from './SearchAlertsPanel'
 import HomeSearchBar, { type HomeSearchValues } from './HomeSearchBar'
 import type { MapDrawArea, MapSearchFilters } from './PropertyMap'
 import { replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
-import { findMapRegionForSearchParams } from '@/lib/locations/map-regions'
+import { findMapRegionByText, findMapRegionForSearchParams } from '@/lib/locations/map-regions'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 import { getVisitorId, trackEvent } from '@/lib/tracking/client'
 
@@ -22,9 +22,16 @@ const FAVORITES_KEY = 'pilger_property_favorites'
 const HISTORY_KEY = 'pilger_property_history'
 const MAX_MEMORY_PROPERTIES = 10
 const OFFICE_SEARCH_PARAM_VALUE = '1'
+const DEVELOPMENT_SEARCH_CATEGORY_VALUE = 'empreendimentos'
 const MAP_PROPERTY_PARAM = 'mapProperty'
 const DRAW_AREA_PARAM = 'drawArea'
 const MAP_BOUNDS_PARAM = 'mapBounds'
+const SEARCH_MAP_SERVICE_AREA_BOUNDS = {
+    north: -25.0,
+    south: -30.5,
+    east: -47.0,
+    west: -54.5,
+}
 const MAP_FILTER_PARAM_KEYS = [
     'offer',
     'type',
@@ -49,6 +56,8 @@ type SearchDevelopmentResult = {
     priceRange: string
     availableUnitsCount: number | null
     heroImage: string
+    latitude?: number | null
+    longitude?: number | null
     stage: 'launch' | 'ready'
     stageLabel: string
     propertyIds?: string[]
@@ -56,11 +65,16 @@ type SearchDevelopmentResult = {
     sourceSlugs?: string[]
 }
 
+function isDevelopmentSearchCategory(value: string | null) {
+    const normalized = String(value || '').trim().toLowerCase()
+    return ['empreendimento', DEVELOPMENT_SEARCH_CATEGORY_VALUE, 'development', 'developments'].includes(normalized)
+}
+
 const OFFICE_LOCATION_MARKER = {
-    latLng: [-26.95665680834595, -48.62979654548911] as [number, number],
+    latLng: [-26.9567429, -48.629818] as [number, number],
     title: 'Imobiliária Guilherme Pilger',
     subtitle: 'Praia Brava',
-    address: 'Av. Carlos Drummond de Andrade, 33 - Loja 01 - Praia Brava, Itajaí - SC, 88306-800',
+    address: 'Av. Carlos Drummond de Andrade, 33 - Loja 01 - Praia Brava - SC, 88306-800',
 }
 
 function toCoordinate(value: number | string | null | undefined) {
@@ -245,8 +259,8 @@ function getFilterLabel(key: string, value: string) {
         'frente-mar': 'Frente mar',
         'vista-mar': 'Vista mar',
         'quadra-mar': 'Quadra mar',
-        lancamento: 'Lancamento',
-        'em-construcao': 'Em construcao',
+        lancamento: 'Lançamento',
+        'em-construcao': 'Em construção',
         pronto: 'Pronto',
         mobiliado: 'Mobiliado',
     }
@@ -261,6 +275,9 @@ function getFilterLabel(key: string, value: string) {
 
     const labels: Record<string, string> = {
         q: `Busca: ${replaceItajaiWithPraiaBrava(value)}`,
+        category: isDevelopmentSearchCategory(value) ? 'Empreendimentos' : value.replace(/-/g, ' '),
+        resultType: isDevelopmentSearchCategory(value) ? 'Empreendimentos' : value.replace(/-/g, ' '),
+        view: isDevelopmentSearchCategory(value) ? 'Empreendimentos' : value.replace(/-/g, ' '),
         city: cityLabels[value] || replaceItajaiWithPraiaBrava(value),
         type: value,
         price: `Valor: ${priceLabels[value] || value.replace('-', ' até ')}`,
@@ -349,6 +366,68 @@ function developmentUnitLabel(development: SearchDevelopmentResult) {
     return count === 1 ? '1 unidade ativa' : `${count} unidades ativas`
 }
 
+function regionCenter(area: MapDrawArea): [number, number] | null {
+    if (!area.length) return null
+
+    const totals = area.reduce((acc, [lat, lng]) => {
+        acc.lat += lat
+        acc.lng += lng
+        return acc
+    }, { lat: 0, lng: 0 })
+
+    return [totals.lat / area.length, totals.lng / area.length]
+}
+
+function developmentFallbackLatLng(development: SearchDevelopmentResult): [number, number] | null {
+    const region = findMapRegionByText(`${development.locationName} ${development.name}`)
+    return region ? regionCenter(region.area) : null
+}
+
+function isInsideSearchMapServiceArea(latLng: [number, number]) {
+    const [lat, lng] = latLng
+
+    return (
+        lat >= SEARCH_MAP_SERVICE_AREA_BOUNDS.south &&
+        lat <= SEARCH_MAP_SERVICE_AREA_BOUNDS.north &&
+        lng >= SEARCH_MAP_SERVICE_AREA_BOUNDS.west &&
+        lng <= SEARCH_MAP_SERVICE_AREA_BOUNDS.east
+    )
+}
+
+function developmentMapProperty(development: SearchDevelopmentResult) {
+    const ownLatLng = getLatLng(development)
+    const latLng = (ownLatLng && isInsideSearchMapServiceArea(ownLatLng) ? ownLatLng : null)
+        || developmentFallbackLatLng(development)
+
+    return {
+        id: `development:${development.slug}`,
+        source_slug: development.slug,
+        slug: development.slug,
+        title: development.name,
+        city: null,
+        state: 'SC',
+        price: null,
+        bedrooms: null,
+        bathrooms: null,
+        suites: null,
+        parking_spaces: null,
+        area_m2: null,
+        featured_image: development.heroImage || null,
+        images: development.heroImage ? [development.heroImage] : [],
+        video_url: null,
+        property_type: 'Empreendimento',
+        exclusive: false,
+        latitude: latLng?.[0] ?? null,
+        longitude: latLng?.[1] ?? null,
+        neighborhood: development.locationName,
+        purpose: null,
+        source_status: development.stageLabel,
+        description: development.priceRange || developmentUnitLabel(development),
+        amenities: [],
+        __developmentSlug: development.slug,
+    }
+}
+
 interface MapBounds {
     north: number
     south: number
@@ -367,9 +446,12 @@ export default function SearchResults({ properties, lpMap, developmentResults = 
     const router = useRouter()
     const searchParams = useSearchParams()
     const searchKey = searchParams.toString()
+    const isDevelopmentOnlySearch = isDevelopmentSearchCategory(
+        searchParams.get('category') || searchParams.get('resultType') || searchParams.get('view')
+    )
     const propertiesWithCoords = useMemo(
-        () => properties.filter(property => Boolean(getLatLng(property))),
-        [properties]
+        () => isDevelopmentOnlySearch ? [] : properties.filter(property => Boolean(getLatLng(property))),
+        [isDevelopmentOnlySearch, properties]
     )
     const mapSelectionKey = useMemo(() => {
         const params = new URLSearchParams(searchKey)
@@ -392,7 +474,7 @@ export default function SearchResults({ properties, lpMap, developmentResults = 
     const refinePanelRef = useRef<HTMLDivElement>(null)
     const isOfficeSelectedInRefine = refineOfficeSelection.key === searchKey && refineOfficeSelection.selected
     const shouldShowOfficeOnMap = isOfficeSearch || isOfficeSelectedInRefine
-    const mapViewKey = `${searchKey}:${shouldShowOfficeOnMap ? 'office' : 'properties'}`
+    const mapViewKey = `${searchKey}:${shouldShowOfficeOnMap ? 'office' : isDevelopmentOnlySearch ? 'developments' : 'properties'}`
     const urlMapBounds = useMemo(() => parseMapBoundsParam(searchParams.get(MAP_BOUNDS_PARAM)), [searchKey, searchParams])
     const mapBounds = urlMapBounds
     const selectedMapPropertyId = selectedMapPropertyOverride?.key === mapSelectionKey
@@ -553,16 +635,27 @@ export default function SearchResults({ properties, lpMap, developmentResults = 
     }, [searchKey])
 
     const visibleProperties = useMemo(() => {
+        if (isDevelopmentOnlySearch) return []
         return filterPropertiesByDrawArea(filterPropertiesByBounds(properties, mapBounds), selectedDrawArea)
-    }, [properties, mapBounds, selectedDrawArea])
+    }, [isDevelopmentOnlySearch, properties, mapBounds, selectedDrawArea])
+
+    const developmentMapProperties = useMemo(() => {
+        if (!isDevelopmentOnlySearch) return []
+        return developmentResults
+            .map(developmentMapProperty)
+            .filter(property => Boolean(getLatLng(property)))
+    }, [developmentResults, isDevelopmentOnlySearch])
 
     const visibleMapProperties = useMemo(() => {
         if (shouldShowOfficeOnMap) return []
+        if (isDevelopmentOnlySearch) {
+            return filterPropertiesByDrawArea(filterPropertiesByBounds(developmentMapProperties, mapBounds), selectedDrawArea)
+        }
         return filterPropertiesByDrawArea(filterPropertiesByBounds(propertiesWithCoords, mapBounds), selectedDrawArea)
-    }, [mapBounds, propertiesWithCoords, selectedDrawArea, shouldShowOfficeOnMap])
+    }, [developmentMapProperties, isDevelopmentOnlySearch, mapBounds, propertiesWithCoords, selectedDrawArea, shouldShowOfficeOnMap])
 
     const selectedMapProperty = useMemo(() => {
-        if (!selectedMapPropertyId || shouldShowOfficeOnMap) return null
+        if (!selectedMapPropertyId || shouldShowOfficeOnMap || isDevelopmentOnlySearch) return null
         const overrideProperty = selectedMapPropertyOverride?.key === mapSelectionKey
             && selectedMapPropertyOverride.property
             && String(selectedMapPropertyOverride.property.id) === String(selectedMapPropertyId)
@@ -573,7 +666,7 @@ export default function SearchResults({ properties, lpMap, developmentResults = 
             || visibleMapProperties.find(item => String(item.id) === String(selectedMapPropertyId))
             || overrideProperty
             || null
-    }, [mapSelectionKey, propertiesWithCoords, selectedMapPropertyId, selectedMapPropertyOverride, shouldShowOfficeOnMap, visibleMapProperties])
+    }, [isDevelopmentOnlySearch, mapSelectionKey, propertiesWithCoords, selectedMapPropertyId, selectedMapPropertyOverride, shouldShowOfficeOnMap, visibleMapProperties])
     const mapPreviewAnchorProperty = useMemo(() => {
         const anchor = mapPreviewAnchorOverride?.key === mapSelectionKey ? mapPreviewAnchorOverride : null
         if (!anchor?.id) return selectedMapProperty
@@ -592,13 +685,14 @@ export default function SearchResults({ properties, lpMap, developmentResults = 
         const previewProperties = hasSelectedProperty ? visibleMapProperties : [selectedMapProperty, ...visibleMapProperties]
         return orderPropertiesBySmoothGeoPath(previewProperties, mapPreviewAnchorProperty || selectedMapProperty)
     }, [mapPreviewAnchorProperty, selectedMapProperty, visibleMapProperties])
-    const visibleCount = visibleProperties.length
-    const totalCount = properties.length
+    const developmentCount = developmentResults.length
+    const visibleCount = isDevelopmentOnlySearch ? developmentCount : visibleProperties.length
+    const totalCount = isDevelopmentOnlySearch ? developmentCount : properties.length
     const brokerResultName = String(brokerSearchName || '').trim()
     const isBrokerSearch = brokerResultName.length > 0
     const renderedProperties = visibleProperties.slice(0, MAX_RENDERED_CARDS)
     const hiddenVisibleCount = Math.max(0, visibleCount - renderedProperties.length)
-    const isSpatiallyFiltered = Boolean(selectedDrawArea || (mapBounds && visibleCount < totalCount))
+    const isSpatiallyFiltered = !isDevelopmentOnlySearch && Boolean(selectedDrawArea || (mapBounds && visibleCount < totalCount))
     const searchAlertTitle = useMemo(
         () => buildSearchAlertTitle(activeFilters, selectedRegionArea?.label, Boolean(selectedDrawArea)),
         [activeFilters, selectedDrawArea, selectedRegionArea]
@@ -607,7 +701,9 @@ export default function SearchResults({ properties, lpMap, developmentResults = 
         () => visibleProperties.slice(0, 18).map(property => String(property.id || '')).filter(Boolean),
         [visibleProperties]
     )
-    const baseCountLabel = selectedDrawArea
+    const baseCountLabel = isDevelopmentOnlySearch
+        ? (totalCount === 1 ? 'empreendimento encontrado' : 'empreendimentos encontrados')
+        : selectedDrawArea
         ? 'imóveis na área desenhada'
         : mapBounds && visibleCount < totalCount
             ? 'imóveis nesta área'
@@ -616,7 +712,14 @@ export default function SearchResults({ properties, lpMap, developmentResults = 
     const resultTitle = isBrokerSearch ? 'Mais imóveis deste corretor' : 'Imóveis selecionados'
     const resultSubtitle = isBrokerSearch ? `Curadoria de ${brokerResultName}` : ''
 
-    const hasDevelopmentResults = developmentResults.length > 0
+    const developmentSubtitle = searchParams.get('tag') === 'pronto'
+        ? 'Empreendimentos prontos para morar.'
+        : searchParams.get('tag') === 'lancamento' || searchParams.get('tag') === 'em-construcao'
+            ? 'Empreendimentos em lançamento e construção.'
+            : 'Curadoria de empreendimentos.'
+    const displayResultTitle = isDevelopmentOnlySearch ? 'Empreendimentos selecionados' : resultTitle
+    const displayResultSubtitle = isDevelopmentOnlySearch ? developmentSubtitle : resultSubtitle
+    const hasDevelopmentResults = developmentCount > 0
 
     const handleDevelopmentClick = useCallback((development: SearchDevelopmentResult, index: number) => {
         void trackEvent('search_results_development_clicked', {
@@ -766,6 +869,21 @@ export default function SearchResults({ properties, lpMap, developmentResults = 
             selected_region: selectedRegionArea?.id || null,
         })
     }, [activeFilters, mapSelectionKey, selectedRegionArea, totalCount, visibleCount])
+
+    const handleDevelopmentMapSelect = useCallback((property: any) => {
+        const slug = String(property?.__developmentSlug || property?.source_slug || property?.slug || '').replace(/^\/+/, '')
+        if (!slug) return
+
+        void trackEvent('search_results_development_map_pin_clicked', {
+            slug,
+            name: property?.title || null,
+            active_filters: activeFilters,
+            visible_count: visibleCount,
+            total_count: totalCount,
+        })
+
+        router.push(`/${slug}`)
+    }, [activeFilters, router, totalCount, visibleCount])
 
     const handleMapPropertyPreviewClose = useCallback(() => {
         const property = selectedMapProperty
@@ -1467,17 +1585,17 @@ export default function SearchResults({ properties, lpMap, developmentResults = 
             `}</style>
 
             <SearchViews
-                previewOpen={Boolean(selectedMapProperty)}
+                previewOpen={!isDevelopmentOnlySearch && Boolean(selectedMapProperty)}
                 map={
                     <div className="search-map-interactive-layer">
                         <MapSearch
                             properties={visibleMapProperties}
-                            hoveredPropertyId={hoveredPropertyId || selectedMapPropertyId}
-                            selectedPropertyId={selectedMapPropertyId}
+                            hoveredPropertyId={isDevelopmentOnlySearch ? null : hoveredPropertyId || selectedMapPropertyId}
+                            selectedPropertyId={isDevelopmentOnlySearch ? null : selectedMapPropertyId}
                             drawArea={selectedDrawArea}
                             regionArea={selectedRegionArea}
                             onMarkerHover={handleMarkerHover}
-                            onPropertySelect={handleMapPropertySelect}
+                            onPropertySelect={isDevelopmentOnlySearch ? handleDevelopmentMapSelect : handleMapPropertySelect}
                             onDrawAreaChange={handleDrawAreaChange}
                             onSearchFiltersApply={handleMapSearchFiltersApply}
                             refitKey={mapViewKey}
@@ -1505,9 +1623,9 @@ export default function SearchResults({ properties, lpMap, developmentResults = 
                     </div>
                     <div className="result-main-row">
                         <div>
-                            <h1 className="result-title">{resultTitle}</h1>
-                            {resultSubtitle && (
-                                <p className="result-subtitle">{resultSubtitle}</p>
+                            <h1 className="result-title">{displayResultTitle}</h1>
+                            {displayResultSubtitle && (
+                                <p className="result-subtitle">{displayResultSubtitle}</p>
                             )}
                             <p className="result-count">
                                 <strong>{isSpatiallyFiltered ? visibleCount : totalCount}</strong> {countLabel}
@@ -1655,7 +1773,7 @@ export default function SearchResults({ properties, lpMap, developmentResults = 
                     </section>
                 )}
 
-                {(memoryItems.length > 0 || memoryLoading) && (
+                {!isDevelopmentOnlySearch && (memoryItems.length > 0 || memoryLoading) && (
                     <section className="search-memory-panel" aria-label="Imóveis salvos e vistos recentemente">
                         <div className="search-memory-head">
                             <div className="search-memory-title">

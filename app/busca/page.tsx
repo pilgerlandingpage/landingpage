@@ -103,11 +103,13 @@ type MapBounds = {
 }
 
 type SearchPageParams = { [key: string]: string | string[] | undefined }
+type SearchResultMode = 'properties' | 'developments'
 
 type SearchDataInput = {
     rawQ: string | undefined
     q: string | undefined
     developmentTerm: string | undefined
+    resultMode: SearchResultMode
     type: string | undefined
     subtype: string | undefined
     city: string | undefined
@@ -145,12 +147,19 @@ type SearchDevelopmentResult = {
     priceRange: string
     availableUnitsCount: number | null
     heroImage: string
+    latitude: number | null
+    longitude: number | null
     stage: 'launch' | 'ready'
     stageLabel: string
     propertyIds: string[]
     sourceReferences: string[]
     sourceSlugs: string[]
     matchScore: number
+}
+
+type DevelopmentSearchOptions = {
+    includeAll?: boolean
+    stages?: SearchDevelopmentResult['stage'][]
 }
 
 function parseDrawAreaParam(value: string | string[] | undefined): MapDrawArea | null {
@@ -239,10 +248,48 @@ function asText(value: unknown, fallback = '') {
 function asOptionalNumber(value: unknown) {
     if (typeof value === 'number' && Number.isFinite(value)) return value
     if (typeof value === 'string') {
-        const parsed = Number(value)
+        const parsed = Number(value.replace(',', '.'))
         if (Number.isFinite(parsed)) return parsed
     }
     return null
+}
+
+function toValidLatLng(latitude: unknown, longitude: unknown): [number, number] | null {
+    const lat = asOptionalNumber(latitude)
+    const lng = asOptionalNumber(longitude)
+
+    if (
+        lat !== null &&
+        lng !== null &&
+        lat >= -90 &&
+        lat <= 90 &&
+        lng >= -180 &&
+        lng <= 180
+    ) {
+        return [lat, lng]
+    }
+
+    if (
+        lat !== null &&
+        lng !== null &&
+        lng >= -90 &&
+        lng <= 90 &&
+        lat >= -180 &&
+        lat <= 180
+    ) {
+        return [lng, lat]
+    }
+
+    return null
+}
+
+function developmentContentLatLng(content: Record<string, any>, development: Record<string, any>): [number, number] | null {
+    const location = asRecord(development.location ?? development.address ?? content.location)
+    const coordinates = asRecord(development.coordinates ?? development.coords ?? development.geo ?? content.coordinates ?? content.coords)
+
+    return toValidLatLng(development.latitude ?? development.lat ?? content.latitude ?? content.lat, development.longitude ?? development.lng ?? content.longitude ?? content.lng)
+        || toValidLatLng(location.latitude ?? location.lat, location.longitude ?? location.lng)
+        || toValidLatLng(coordinates.latitude ?? coordinates.lat, coordinates.longitude ?? coordinates.lng)
 }
 
 function safePublicSearchTerm(value: string | undefined) {
@@ -330,6 +377,29 @@ function stageFromText(value: unknown): SearchDevelopmentResult['stage'] | null 
     return null
 }
 
+function resolveSearchResultMode(value: string | string[] | undefined): SearchResultMode {
+    const normalized = normalizeSearchText(firstParam(value) || '')
+    return ['empreendimento', 'empreendimentos', 'development', 'developments'].includes(normalized)
+        ? 'developments'
+        : 'properties'
+}
+
+function developmentStagesFromTags(tag: string | undefined, tags: string[]): SearchDevelopmentResult['stage'][] {
+    const stages = new Set<SearchDevelopmentResult['stage']>()
+    const values = [tag, ...tags].map(value => normalizeSearchText(value)).filter(Boolean)
+
+    values.forEach(value => {
+        if (['lancamento', 'em construcao', 'construcao', 'na planta', 'obra'].includes(value)) {
+            stages.add('launch')
+        }
+        if (['pronto', 'pronta', 'entregue', 'pronto para morar'].includes(value)) {
+            stages.add('ready')
+        }
+    })
+
+    return [...stages]
+}
+
 function resolveDevelopmentStage(page: Record<string, any>, content: Record<string, any>, development: Record<string, any>) {
     return stageFromText(
         development.stage
@@ -371,7 +441,7 @@ function collectDevelopmentUnitReferences(units: any[]) {
     }
 }
 
-function normalizeSearchDevelopment(page: Record<string, any>, rawTerm: string): SearchDevelopmentResult | null {
+function normalizeSearchDevelopment(page: Record<string, any>, rawTerm: string, includeWithoutTerm = false): SearchDevelopmentResult | null {
     const content = asRecord(page.content)
     const development = asRecord(content.development)
     if (Object.keys(development).length === 0) return null
@@ -401,10 +471,11 @@ function normalizeSearchDevelopment(page: Record<string, any>, rawTerm: string):
         ...aliases,
     ]
     const matchScore = developmentMatchScore(candidates, rawTerm)
-    if (matchScore <= 0) return null
+    if (matchScore <= 0 && !includeWithoutTerm) return null
 
     const units = asArray(development.units)
     const stage = resolveDevelopmentStage(page, content, development)
+    const latLng = developmentContentLatLng(content, development)
 
     return {
         slug,
@@ -413,10 +484,12 @@ function normalizeSearchDevelopment(page: Record<string, any>, rawTerm: string):
         priceRange: asText(development.priceRange ?? development.price_range, 'Consultar valores'),
         availableUnitsCount: asOptionalNumber(development.availableUnitsCount ?? development.available_units_count ?? content.available_units_count) ?? (units.length || null),
         heroImage: asText(development.heroImage ?? development.hero_image ?? content.custom_hero_image, firstImageFromGallery(content)),
+        latitude: latLng?.[0] ?? null,
+        longitude: latLng?.[1] ?? null,
         stage,
         stageLabel: DEVELOPMENT_STAGE_META[stage].label,
         ...collectDevelopmentUnitReferences(units),
-        matchScore,
+        matchScore: matchScore || 1,
     }
 }
 
@@ -435,9 +508,77 @@ function safeInValues(values: string[]) {
         .slice(0, SEARCH_EXPANSION_IN_FILTER_LIMIT)
 }
 
-async function resolveDevelopmentSearch(supabase: any, rawTerm: string | undefined) {
+function averageCoordinates(rows: Array<Record<string, any>>): [number, number] | null {
+    const points = rows
+        .map(row => toValidLatLng(row.latitude, row.longitude))
+        .filter((point): point is [number, number] => Boolean(point))
+
+    if (points.length === 0) return null
+
+    const totals = points.reduce((acc, [lat, lng]) => {
+        acc.lat += lat
+        acc.lng += lng
+        return acc
+    }, { lat: 0, lng: 0 })
+
+    return [totals.lat / points.length, totals.lng / points.length]
+}
+
+async function hydrateDevelopmentCoordinates(supabase: any, developments: SearchDevelopmentResult[]) {
+    const missing = developments.filter(development => development.latitude === null || development.longitude === null)
+    if (missing.length === 0) return developments
+
+    const propertyIds = safeInValues(missing.flatMap(development => development.propertyIds))
+    const sourceReferences = safeInValues(missing.flatMap(development => development.sourceReferences))
+    const sourceSlugs = safeInValues(missing.flatMap(development => development.sourceSlugs))
+
+    if (propertyIds.length === 0 && sourceReferences.length === 0 && sourceSlugs.length === 0) return developments
+
+    const filters = [
+        propertyIds.length ? `id.in.(${propertyIds.join(',')})` : '',
+        sourceReferences.length ? `source_reference.in.(${sourceReferences.join(',')})` : '',
+        sourceSlugs.length ? `source_slug.in.(${sourceSlugs.join(',')})` : '',
+    ].filter(Boolean)
+
+    if (filters.length === 0) return developments
+
+    const { data, error } = await supabase
+        .from('properties')
+        .select('id, source_reference, source_slug, latitude, longitude')
+        .or(filters.join(','))
+        .limit(1000)
+
+    if (error) {
+        console.warn('[Busca] Development coordinates unavailable:', error.message)
+        return developments
+    }
+
+    const rows = ((data || []) as Array<Record<string, any>>)
+
+    return developments.map(development => {
+        if (development.latitude !== null && development.longitude !== null) return development
+
+        const propertyIdSet = new Set(development.propertyIds.map(String))
+        const referenceSet = new Set(development.sourceReferences.map(String))
+        const slugSet = new Set(development.sourceSlugs.map(String))
+        const relatedRows = rows.filter(row => (
+            propertyIdSet.has(String(row.id || '')) ||
+            referenceSet.has(String(row.source_reference || '')) ||
+            slugSet.has(String(row.source_slug || ''))
+        ))
+        const latLng = averageCoordinates(relatedRows)
+
+        return latLng
+            ? { ...development, latitude: latLng[0], longitude: latLng[1] }
+            : development
+    })
+}
+
+async function resolveDevelopmentSearch(supabase: any, rawTerm: string | undefined, options: DevelopmentSearchOptions = {}) {
     const term = safePublicSearchTerm(rawTerm)
-    if (normalizeSearchText(term).length < 3) {
+    const hasSearchableTerm = normalizeSearchText(term).length >= 3
+    const includeAll = Boolean(options.includeAll)
+    if (!includeAll && !hasSearchableTerm) {
         return {
             developmentResults: [] as SearchDevelopmentResult[],
             expansion: { propertyIds: [], sourceReferences: [], sourceSlugs: [] } satisfies SearchExpansion,
@@ -450,11 +591,13 @@ async function resolveDevelopmentSearch(supabase: any, rawTerm: string | undefin
             .select('slug, title, description, content, metadata, property_id, created_at')
             .eq('status', 'published')
             .order('created_at', { ascending: true }),
-        supabase
-            .from('property_private_details')
-            .select('property_id, source_reference, condominium_name')
-            .ilike('condominium_name', `%${term}%`)
-            .limit(250),
+        hasSearchableTerm
+            ? supabase
+                .from('property_private_details')
+                .select('property_id, source_reference, condominium_name')
+                .ilike('condominium_name', `%${term}%`)
+                .limit(250)
+            : Promise.resolve({ data: [], error: null }),
     ])
 
     if (pagesResult.error) {
@@ -464,11 +607,14 @@ async function resolveDevelopmentSearch(supabase: any, rawTerm: string | undefin
         console.warn('[Busca] Private condominium expansion unavailable:', privateResult.error.message)
     }
 
-    const developmentResults = ((pagesResult.data || []) as Array<Record<string, any>>)
-        .map(page => normalizeSearchDevelopment(page, term))
+    const stageSet = new Set(options.stages || [])
+    const includeWithoutTerm = includeAll && !hasSearchableTerm
+    const developmentResults = await hydrateDevelopmentCoordinates(supabase, ((pagesResult.data || []) as Array<Record<string, any>>)
+        .map(page => normalizeSearchDevelopment(page, term, includeWithoutTerm))
         .filter((item): item is SearchDevelopmentResult => Boolean(item))
+        .filter(item => stageSet.size === 0 || stageSet.has(item.stage))
         .sort((a, b) => b.matchScore - a.matchScore || (b.availableUnitsCount || 0) - (a.availableUnitsCount || 0) || a.name.localeCompare(b.name, 'pt-BR'))
-        .slice(0, DEVELOPMENT_RESULT_LIMIT)
+        .slice(0, DEVELOPMENT_RESULT_LIMIT))
 
     const developmentExpansion = mergeSearchExpansion(...developmentResults.map(result => ({
         propertyIds: result.propertyIds,
@@ -745,6 +891,7 @@ function buildSearchDataInput(resolvedParams: SearchPageParams): SearchDataInput
         rawQ,
         q: naturalSearch.hasStructuredFilters ? naturalSearch.q : rawQ,
         developmentTerm: residualDevelopmentSearchTerm(rawQ, naturalSearch),
+        resultMode: resolveSearchResultMode(resolvedParams.category ?? resolvedParams.resultType ?? resolvedParams.view),
         type: firstParam(resolvedParams.type) || naturalSearch.type,
         subtype: firstParam(resolvedParams.subtype) || naturalSearch.subtype,
         city: firstParam(resolvedParams.city) || naturalSearch.city,
@@ -773,8 +920,14 @@ function buildSearchDataInput(resolvedParams: SearchPageParams): SearchDataInput
 const getCachedSearchData = unstable_cache(async (input: SearchDataInput) => {
     const supabase = createAdminClient()
     const hasServerSpatialFilter = Boolean(input.drawArea || input.mapBounds)
-    const developmentSearch = await resolveDevelopmentSearch(supabase, input.q || input.developmentTerm)
-    const brokerPropertyIds = await resolveBrokerPropertyIds(supabase, input.brokerName, input.brokerLogin)
+    const isDevelopmentMode = input.resultMode === 'developments'
+    const developmentSearch = await resolveDevelopmentSearch(supabase, input.q || input.developmentTerm, {
+        includeAll: isDevelopmentMode,
+        stages: isDevelopmentMode ? developmentStagesFromTags(input.tag, input.tags) : [],
+    })
+    const brokerPropertyIds = isDevelopmentMode
+        ? null
+        : await resolveBrokerPropertyIds(supabase, input.brokerName, input.brokerLogin)
 
     const createPropertyQuery = (useSpatialFilter: boolean) => (
         useSpatialFilter && hasServerSpatialFilter
@@ -867,13 +1020,17 @@ const getCachedSearchData = unstable_cache(async (input: SearchDataInput) => {
         return query.order('created_at', { ascending: false })
     }
 
-    const spatialResult = await applyPropertyFilters(createPropertyQuery(hasServerSpatialFilter))
-    let properties = spatialResult.data
+    let properties: any[] | null = []
 
-    if (spatialResult.error && hasServerSpatialFilter) {
-        console.warn('[Busca] Spatial property search failed; falling back to the regular property query.', spatialResult.error.message)
-        const fallbackResult = await applyPropertyFilters(createPropertyQuery(false))
-        properties = fallbackResult.data
+    if (!isDevelopmentMode) {
+        const spatialResult = await applyPropertyFilters(createPropertyQuery(hasServerSpatialFilter))
+        properties = spatialResult.data
+
+        if (spatialResult.error && hasServerSpatialFilter) {
+            console.warn('[Busca] Spatial property search failed; falling back to the regular property query.', spatialResult.error.message)
+            const fallbackResult = await applyPropertyFilters(createPropertyQuery(false))
+            properties = fallbackResult.data
+        }
     }
 
     const { data: landingPages } = await supabase
