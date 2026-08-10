@@ -1190,41 +1190,99 @@ function missingFieldsForDraft(draft: FinanceDraft): string[] {
   return missing
 }
 
-function buildMissingQuestion(identityLabel: string, draft: FinanceDraft, missing: string[]) {
+function humanMissingField(field: string) {
+  const normalized = normalizeText(field)
+  if (normalized === 'valor') return 'o valor'
+  if (normalized === 'pessoa fisica ou juridica') return 'se eu lanco na pessoa fisica ou juridica'
+  if (normalized === 'forma de pagamento') return 'como foi pago'
+  if (normalized === 'quantidade de parcelas') return 'em quantas parcelas'
+  if (normalized === 'primeiro vencimento') return 'qual e o primeiro vencimento'
+  if (normalized === 'descricao fornecedor') return 'quem e o favorecido ou a descricao'
+  if (normalized === 'como classificar') return 'como voce quer classificar'
+  return field
+}
+
+function humanJoin(items: string[]) {
+  const cleanItems = items.map(item => cleanString(item, 120)).filter(Boolean)
+  if (cleanItems.length <= 1) return cleanItems[0] || ''
+  if (cleanItems.length === 2) return `${cleanItems[0]} e ${cleanItems[1]}`
+  return `${cleanItems.slice(0, -1).join(', ')} e ${cleanItems[cleanItems.length - 1]}`
+}
+
+function buildMissingFieldAsk(missing: string[]) {
+  const readable = humanJoin(missing.map(humanMissingField))
+  if (!readable) return 'Se faltar algum detalhe, eu te pergunto por aqui.'
+  return `Para eu fechar certinho, me diga ${readable}.`
+}
+
+function asksToSendFinanceDocument(text: unknown) {
+  const normalized = normalizeText(text)
+  return /\b(posso|pode|vou|quer|quer que|consigo)\b.{0,80}\b(enviar|mandar|anexar|te enviar|te mandar)\b.{0,80}\b(comprovante|recibo|nota fiscal|cupom|pdf|arquivo|foto)\b/.test(normalized)
+    || /\b(comprovante|recibo|nota fiscal|cupom|pdf|arquivo|foto)\b.{0,80}\b(posso|pode|vou|quer|consigo)\b.{0,80}\b(enviar|mandar|anexar)\b/.test(normalized)
+}
+
+function friendlyDraftContext(draft: FinanceDraft) {
+  const parts: string[] = []
+  if (Number(draft.amount || 0) > 0) parts.push(formatCurrencyBR(Number(draft.amount)))
+  if (draft.description && !isGenericDescription(draft.description)) parts.push(draft.description)
+  else if (draft.category || draft.subcategory) parts.push([draft.category, draft.subcategory].filter(Boolean).join(' / '))
+  if (draft.kind === 'payable_installments' && draft.installment_count) parts.push(`${draft.installment_count} parcelas`)
+  if (draft.counterparty_name) parts.push(`para ${draft.counterparty_name}`)
+  if (draft.entry_date && draft.kind === 'paid_expense') parts.push(`do dia ${formatDateBR(draft.entry_date)}`)
+  if (draft.first_due_date && draft.kind === 'payable_installments') parts.push(`com primeiro vencimento em ${formatDateBR(draft.first_due_date)}`)
+  return humanJoin(parts)
+}
+
+function buildMissingQuestion(identityLabel: string, draft: FinanceDraft, missing: string[], sourceText?: string | null) {
   const name = firstName(identityLabel)
+  const text = [sourceText, draft.source_text].filter(Boolean).join('\n')
+  const ask = buildMissingFieldAsk(missing)
+
+  if (asksToSendFinanceDocument(text) && !draft.attachment_url && !draft.media_analysis) {
+    return [
+      `${name}, pode me enviar sim.`,
+      'Assim que chegar, eu olho o comprovante e preparo o lancamento.',
+      missing.length > 0
+        ? `Se o comprovante nao trouxer tudo, eu te pergunto ${humanJoin(missing.map(humanMissingField))}.`
+        : 'Se faltar algum detalhe, eu te pergunto por aqui.',
+    ].join('\n')
+  }
+
   const intro = draft.media_analysis || draft.attachment_url
-    ? `${name}, vi o comprovante e montei um rascunho financeiro.`
-    : `${name}, entendi a solicitacao financeira.`
-  const known = financeDraftSummary(draft)
-  const question = missing.length === 1
-    ? `Falta me dizer ${missing[0]}.`
-    : `Faltam estes dados: ${missing.join(', ')}.`
+    ? `${name}, vi o comprovante e ja comecei o lancamento.`
+    : `${name}, certo, eu preparo esse lancamento.`
+  const context = friendlyDraftContext(draft)
 
   return [
     intro,
-    known ? `\nO que ja entendi:\n${known}` : '',
-    '',
-    `${question} Me responda em linguagem natural que eu continuo daqui.`,
+    context ? `Pelo que entendi, e ${context}.` : '',
+    ask,
   ].filter(Boolean).join('\n')
 }
 
 function financeDraftSummary(draft: FinanceDraft) {
+  const catalogCreations = [
+    draft.category_creation?.needs_confirmation
+      ? [draft.category_creation.category, draft.category_creation.subcategory].filter(Boolean).join(' / ')
+      : '',
+    draft.counterparty_creation?.needs_confirmation ? draft.counterparty_creation.name : '',
+    draft.payment_method_creation?.needs_confirmation ? draft.payment_method_creation.name : '',
+    draft.cost_center_creation?.needs_confirmation ? draft.cost_center_creation.name : '',
+  ].filter((value): value is string => Boolean(value))
+
   const lines = [
-    draft.description ? `Descricao: ${draft.description}` : '',
+    draft.description ? `Lancamento: ${draft.description}` : '',
     Number(draft.amount || 0) > 0 ? `Valor: ${formatCurrencyBR(Number(draft.amount))}` : '',
     draft.kind === 'payable_installments' && draft.installment_count ? `Parcelas: ${draft.installment_count}` : '',
-    draft.entity_type ? `Empresa/pessoa: ${draft.entity_type === 'pj' ? 'Pessoa juridica' : 'Pessoa fisica'}` : '',
+    draft.entity_type ? `Conta: ${draft.entity_type === 'pj' ? 'Pessoa juridica' : 'Pessoa fisica'}` : '',
     draft.counterparty_name ? `Favorecido: ${draft.counterparty_name}` : '',
     draft.category ? `Categoria: ${draft.category}${draft.subcategory ? ` / ${draft.subcategory}` : ''}` : '',
-    draft.category_creation?.needs_confirmation ? `Novo catalogo: ${draft.category_creation.category}${draft.category_creation.subcategory ? ` / ${draft.category_creation.subcategory}` : ''}` : '',
-    draft.counterparty_creation?.needs_confirmation ? `Novo fornecedor: ${draft.counterparty_creation.name}` : '',
-    draft.payment_method_creation?.needs_confirmation ? `Novo metodo de pagamento: ${draft.payment_method_creation.name}` : '',
-    draft.cost_center_creation?.needs_confirmation ? `Novo centro de custo: ${draft.cost_center_creation.name}` : '',
     draft.kind === 'payable_installments' && draft.first_due_date ? `Primeiro vencimento: ${formatDateBR(draft.first_due_date)}` : '',
     draft.kind === 'paid_expense' && draft.entry_date ? `Data: ${formatDateBR(draft.entry_date)}` : '',
-    draft.payment_method ? `Forma: ${draft.payment_method}` : '',
+    draft.payment_method ? `Forma de pagamento: ${draft.payment_method}` : '',
     draft.cost_center ? `Centro de custo: ${draft.cost_center}` : '',
     draft.attachment_url ? 'Anexo: recebido' : '',
+    catalogCreations.length > 0 ? `Tambem vou criar no financeiro: ${humanJoin(catalogCreations)}.` : '',
   ].filter(Boolean)
   return lines.join('\n')
 }
@@ -1239,18 +1297,20 @@ function hasPendingCatalogCreation(draft: FinanceDraft) {
 }
 
 function buildConfirmationQuestion(identityLabel: string, draft: FinanceDraft) {
-  const verb = draft.kind === 'payable_installments'
-    ? 'Vou criar estas contas a pagar'
-    : 'Vou gravar este lancamento pago'
+  const intro = draft.kind === 'payable_installments'
+    ? 'deixei estas contas a pagar prontas para gravar'
+    : 'deixei esse lancamento pronto para gravar'
   const question = hasPendingCatalogCreation(draft)
-    ? 'Posso criar esses cadastros financeiros e gravar assim?'
+    ? 'Posso criar os cadastros que faltam e salvar assim?'
     : 'Posso gravar assim?'
+  const context = friendlyDraftContext(draft)
   return [
-    `${firstName(identityLabel)}, ${verb}:`,
+    `${firstName(identityLabel)}, ${intro}.`,
+    context ? `Resumo: ${context}.` : '',
     financeDraftSummary(draft),
     '',
     question,
-  ].join('\n')
+  ].filter(Boolean).join('\n')
 }
 
 function firstName(label: unknown) {
@@ -2447,7 +2507,7 @@ export async function processPilgerFinanceCommand(
         session,
         draft,
         missingFields,
-        responseText: buildMissingQuestion(command.identity_label, draft, missingFields),
+        responseText: buildMissingQuestion(command.identity_label, draft, missingFields, text),
         action: 'ask_missing',
         sendResponse: shouldSendResponse,
         instanceToken,
