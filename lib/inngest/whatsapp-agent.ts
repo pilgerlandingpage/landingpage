@@ -3216,11 +3216,15 @@ type FinanceReceiptAnalysis = {
     is_receipt: boolean
     amount: number | null
     date: string | null
+    due_date: string | null
+    document_date: string | null
     merchant: string | null
     document_number: string | null
     payment_method: string | null
     category_hint: string | null
     subcategory_hint: string | null
+    service_type: string | null
+    reference_period: string | null
     description: string | null
     confidence: number
     raw_summary: string
@@ -3329,14 +3333,24 @@ function normalizeFinanceReceiptAnalysis(raw: any, fallbackText = ''): FinanceRe
         raw.payment_method,
         raw.forma_pagamento,
         raw.meio_pagamento,
-        rawSummary,
-        fallbackText,
     ].filter(Boolean).join(' '))
     const amount = parseReceiptMoneyValue(raw.amount ?? raw.valor ?? raw.total ?? raw.total_amount)
+    const dueDate = normalizeReceiptDateKey(raw.due_date || raw.vencimento || raw.data_vencimento)
+    const documentDate = normalizeReceiptDateKey(raw.document_date || raw.issue_date || raw.emissao || raw.data_emissao)
+    const paymentDate = normalizeReceiptDateKey(raw.payment_date || raw.data_pagamento)
+    const genericDate = normalizeReceiptDateKey(raw.date || raw.data || raw.entry_date)
+    const date = paymentDate
+        || (isTelecom || isEnergy || isWater ? (dueDate || genericDate || documentDate) : (genericDate || dueDate || documentDate))
     const categoryHint = String(raw.category_hint || raw.categoria || '').trim()
         || (isTelecom || isEnergy || isWater ? 'Custos Fixos' : isFuel ? 'Consumo despesas' : null)
     const subcategoryHint = String(raw.subcategory_hint || raw.subcategoria || '').trim()
         || (isTelecom ? 'Internet' : isEnergy ? 'Energia' : isWater ? 'Agua' : isFuel ? 'Combustivel' : null)
+    const serviceType = String(raw.service_type || raw.tipo_servico || raw.servico || '').trim()
+        || (isTelecom ? 'Internet/telefonia' : null)
+        || (isEnergy ? 'Energia eletrica' : null)
+        || (isWater ? 'Agua/saneamento' : null)
+        || (isFuel ? 'Combustivel' : null)
+    const referencePeriod = String(raw.reference_period || raw.periodo_referencia || raw.periodo || raw.competencia || '').trim() || null
     const description = String(raw.description || raw.descricao || '').trim()
         || (isTelecom ? `Pagamento de internet${merchant ? ` - ${merchant}` : ''}` : null)
         || (isEnergy ? 'Pagamento de energia' : null)
@@ -3347,12 +3361,16 @@ function normalizeFinanceReceiptAnalysis(raw: any, fallbackText = ''): FinanceRe
     return {
         is_receipt: raw.is_receipt !== false && Boolean(amount || merchant || rawSummary),
         amount,
-        date: normalizeReceiptDateKey(raw.date || raw.data || raw.entry_date || raw.vencimento || raw.due_date),
+        date,
+        due_date: dueDate,
+        document_date: documentDate,
         merchant,
         document_number: String(raw.document_number || raw.numero || raw.invoice_number || raw.nota || '').trim() || null,
         payment_method: paymentMethod,
         category_hint: categoryHint,
         subcategory_hint: subcategoryHint,
+        service_type: serviceType,
+        reference_period: referencePeriod,
         description,
         confidence: Math.max(0, Math.min(1, Number(raw.confidence || raw.confianca || 0) || 0)),
         raw_summary: rawSummary,
@@ -3364,8 +3382,12 @@ function financeReceiptSummary(analysis?: FinanceReceiptAnalysis | null) {
     return [
         '[Analise financeira do comprovante]',
         analysis.amount ? `Valor: R$ ${analysis.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '',
-        analysis.date ? `Data/vencimento: ${analysis.date}` : '',
+        analysis.date ? `Data principal: ${analysis.date}` : '',
+        analysis.due_date ? `Vencimento: ${analysis.due_date}` : '',
+        analysis.document_date ? `Emissao: ${analysis.document_date}` : '',
         analysis.merchant ? `Favorecido/fornecedor: ${analysis.merchant}` : '',
+        analysis.service_type ? `Servico identificado: ${analysis.service_type}` : '',
+        analysis.reference_period ? `Periodo/referencia: ${analysis.reference_period}` : '',
         analysis.description ? `Descricao: ${analysis.description}` : '',
         analysis.payment_method ? `Forma de pagamento detectada: ${analysis.payment_method}` : '',
         analysis.category_hint ? `Categoria sugerida: ${analysis.category_hint}` : '',
@@ -3385,15 +3407,20 @@ async function analyzeFinanceReceiptWithGemini(
 ): Promise<FinanceReceiptAnalysis | null> {
     const prompt = [
         'Voce esta ajudando uma assistente financeira interna a lancar comprovantes enviados pelo WhatsApp.',
-        'Analise este PDF, imagem, recibo, fatura, boleto, nota fiscal, cupom ou comprovante de pagamento.',
+        'Leia o documento inteiro com atencao, incluindo cabecalho, logos, tabelas, rodape e todas as paginas disponiveis.',
+        'Analise este PDF, imagem, recibo, fatura, boleto, nota fiscal, cupom ou comprovante de pagamento como um assistente financeiro faria antes de lancar no sistema.',
         'Retorne somente JSON valido, sem markdown, exatamente neste formato:',
-        '{"is_receipt":true,"amount":123.45,"date":"YYYY-MM-DD","merchant":"Nome do favorecido","document_number":"numero ou null","payment_method":"PIX|Cartao|Boleto|Dinheiro|TED|DOC|null","category_hint":"categoria sugerida","subcategory_hint":"subcategoria sugerida","description":"descricao curta","confidence":0.0,"raw_summary":"resumo curto"}',
+        '{"is_receipt":true,"amount":123.45,"date":"YYYY-MM-DD","due_date":"YYYY-MM-DD ou null","document_date":"YYYY-MM-DD ou null","merchant":"Nome do favorecido","document_number":"numero ou null","payment_method":"PIX|Cartao|Boleto|Dinheiro|TED|DOC|null","category_hint":"categoria sugerida","subcategory_hint":"subcategoria sugerida","service_type":"tipo de servico ou null","reference_period":"periodo ou competencia ou null","description":"descricao curta","confidence":0.0,"raw_summary":"resumo curto"}',
         'Regras:',
         '- amount deve ser o valor principal a pagar ou pago, em reais, usando ponto decimal.',
-        '- date deve ser a data de pagamento, emissao ou vencimento mais relevante para lancamento.',
+        '- date deve ser a melhor data principal para o lancamento. Se for comprovante pago, use a data do pagamento. Se for fatura/conta a pagar, use o vencimento. Se nao houver, use emissao.',
+        '- due_date deve ser o vencimento quando existir. document_date deve ser emissao/geracao quando existir.',
         '- merchant deve ser o fornecedor/favorecido real do documento, normalmente no cabecalho ou logo. Nunca use labels como periodo, vencimento, data, valor, protocolo ou numero como merchant.',
+        '- payment_method deve ser somente a forma realmente usada/registrada como pagamento. Nao marque Cartao apenas porque o documento e uma fatura ou cita cartao como opcao.',
+        '- service_type deve explicar o que esta sendo pago: internet, telefonia, energia, agua, combustivel, aluguel, mercado, etc.',
+        '- reference_period deve guardar competencia/periodo de consumo/referencia quando aparecer, sem confundir isso com fornecedor.',
         '- Para fatura de internet/telefone, use category_hint "Custos Fixos" e subcategory_hint "Internet".',
-        '- Se aparecer Unifique, o merchant deve ser "Unifique" e a description deve ser "Pagamento de internet - Unifique".',
+        '- Se aparecer Unifique, o merchant deve ser "Unifique", service_type deve ser "Internet/telefonia" e a description deve ser "Pagamento de internet - Unifique".',
         '- Para energia use "Custos Fixos" / "Energia"; para agua use "Custos Fixos" / "Agua".',
         '- Para abastecimento use "Consumo despesas" / "Combustivel".',
         '- Se nao encontrar um campo com seguranca, use null.',

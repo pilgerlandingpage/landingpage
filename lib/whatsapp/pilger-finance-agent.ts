@@ -1020,8 +1020,12 @@ function receiptAnalysisText(receipt: any) {
   if (!receipt || typeof receipt !== 'object') return ''
   return [
     receipt.amount ? `Valor: R$ ${receipt.amount}` : '',
-    receipt.date ? `Data/vencimento: ${receipt.date}` : '',
+    receipt.date ? `Data principal: ${receipt.date}` : '',
+    receipt.due_date ? `Vencimento: ${receipt.due_date}` : '',
+    receipt.document_date ? `Emissao: ${receipt.document_date}` : '',
     receipt.merchant ? `Favorecido/fornecedor: ${receipt.merchant}` : '',
+    receipt.service_type ? `Servico identificado: ${receipt.service_type}` : '',
+    receipt.reference_period ? `Periodo/referencia: ${receipt.reference_period}` : '',
     receipt.description ? `Descricao: ${receipt.description}` : '',
     receipt.payment_method ? `Forma de pagamento: ${receipt.payment_method}` : '',
     receipt.category_hint ? `Categoria: ${receipt.category_hint}` : '',
@@ -1037,8 +1041,17 @@ function receiptAmount(receipt: any): number | null {
 }
 
 function receiptDate(receipt: any): string | null {
-  const value = cleanString(receipt?.date, 20)
-  return /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : null
+  const candidates = [
+    receipt?.payment_date,
+    receipt?.date,
+    receipt?.due_date,
+    receipt?.document_date,
+  ]
+  for (const candidate of candidates) {
+    const value = cleanString(candidate, 20)
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value
+  }
+  return null
 }
 
 function payloadMediaText(payload: any) {
