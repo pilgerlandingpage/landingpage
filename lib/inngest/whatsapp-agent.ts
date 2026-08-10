@@ -1294,6 +1294,9 @@ type PendingQueueMessage = {
     mediaUrl?: string | null
     mediaMimetype?: string | null
     mediaFilename?: string | null
+    audioUrl?: string | null
+    audioMediaKey?: string | null
+    audioDirectPath?: string | null
     createdAt?: string | null
     updatedAt?: string | null
 }
@@ -1315,6 +1318,9 @@ function parsePendingQueueValue(raw: any, updatedAt?: string | null): PendingQue
                 mediaUrl: parsed.mediaUrl ? String(parsed.mediaUrl) : null,
                 mediaMimetype: parsed.mediaMimetype ? String(parsed.mediaMimetype) : null,
                 mediaFilename: parsed.mediaFilename ? String(parsed.mediaFilename) : null,
+                audioUrl: parsed.audioUrl ? String(parsed.audioUrl) : null,
+                audioMediaKey: parsed.audioMediaKey ? String(parsed.audioMediaKey) : null,
+                audioDirectPath: parsed.audioDirectPath ? String(parsed.audioDirectPath) : null,
                 createdAt: parsed.createdAt ? String(parsed.createdAt) : null,
                 updatedAt: updatedAt || null,
             }
@@ -1498,9 +1504,18 @@ function isMeaningfulUserText(text?: string | null): boolean {
     return true
 }
 
+function isPendingAudioMessage(item: PendingQueueMessage): boolean {
+    const type = String(item.mediaType || item.type || '').toLowerCase()
+    return type === 'audio' || /^\[audio\]/i.test(String(item.text || '').trim())
+}
+
 function describePendingMediaBatch(items: PendingQueueMessage[]): string {
-    const counts = { image: 0, video: 0, document: 0 }
+    const counts = { image: 0, video: 0, document: 0, audio: 0 }
     for (const item of items) {
+        if (isPendingAudioMessage(item)) {
+            counts.audio += 1
+            continue
+        }
         if (!item.hasMedia) continue
         const kind = normalizePendingMediaKind(item.mediaType || item.type || null)
         if (kind) counts[kind] += 1
@@ -1510,6 +1525,7 @@ function describePendingMediaBatch(items: PendingQueueMessage[]): string {
     if (counts.image) labels.push(`${counts.image} ${counts.image === 1 ? 'imagem' : 'imagens'}`)
     if (counts.video) labels.push(`${counts.video} ${counts.video === 1 ? 'video' : 'videos'}`)
     if (counts.document) labels.push(`${counts.document} ${counts.document === 1 ? 'documento' : 'documentos'}`)
+    if (counts.audio) labels.push(`${counts.audio} ${counts.audio === 1 ? 'audio' : 'audios'}`)
     return labels.join(', ')
 }
 
@@ -2768,6 +2784,66 @@ async function transcribeWithGemini(audioUrl: string, apiKey: string, model: str
 // ═══════════════════════════════════════════════════════════════
 // AUDIO: TTS
 // ═══════════════════════════════════════════════════════════════
+
+function isValidTranscriptionText(text: string | undefined | null): boolean {
+    if (!text) return false
+    const cleaned = text.replace(/[.\s]+/g, '').trim()
+    return cleaned.length >= 2
+}
+
+async function transcribeAudioUrlWithConfiguredProvider(audioUrl: string, configs: Record<string, string>): Promise<string> {
+    const hasGemini = !!configs['gemini_api_key']
+    const hasOpenAI = !!configs['openai_api_key']
+    const geminiModel = configs['gemini_model'] || 'gemini-2.5-flash'
+    const effectiveProvider = configs['ai_provider'] || 'openai'
+    const useWhisperFirst = effectiveProvider === 'openai'
+    let result: string | undefined
+
+    if (useWhisperFirst) {
+        if (hasOpenAI) {
+            result = await transcribeWithWhisper(audioUrl, configs['openai_api_key']).catch(() => '')
+            if (isValidTranscriptionText(result)) return result.trim()
+        }
+        if (hasGemini) {
+            result = await transcribeWithGemini(audioUrl, configs['gemini_api_key'], geminiModel).catch(() => '')
+            if (isValidTranscriptionText(result)) return result.trim()
+        }
+        return ''
+    }
+
+    if (hasGemini) {
+        result = await transcribeWithGemini(audioUrl, configs['gemini_api_key'], geminiModel).catch(() => '')
+        if (isValidTranscriptionText(result)) return result.trim()
+    }
+    if (hasOpenAI) {
+        result = await transcribeWithWhisper(audioUrl, configs['openai_api_key']).catch(() => '')
+        if (isValidTranscriptionText(result)) return result.trim()
+    }
+    return ''
+}
+
+async function transcribePendingAudioQueueItem(params: {
+    item: PendingQueueMessage
+    instanceToken: string
+    supabase: ReturnType<typeof getSupabase>
+    configs: Record<string, string>
+}): Promise<string> {
+    const { item, instanceToken, supabase, configs } = params
+    if (configs['whatsapp_transcription_enabled'] === 'false') return ''
+
+    let audioBuffer: Buffer | null = null
+    if (item.messageId) {
+        audioBuffer = await downloadMedia(item.messageId, instanceToken).catch(() => null)
+    }
+    if (!audioBuffer && item.audioUrl && item.audioMediaKey) {
+        audioBuffer = await decryptWhatsAppMedia(item.audioUrl, item.audioMediaKey, 'audio').catch(() => null)
+    }
+    if (!audioBuffer || audioBuffer.length < 64) return ''
+
+    const audioPublicUrl = await uploadAudioToR2(audioBuffer, supabase)
+    if (!audioPublicUrl) return ''
+    return transcribeAudioUrlWithConfiguredProvider(audioPublicUrl, configs)
+}
 
 async function ttsElevenLabs(text: string, apiKey: string, voiceId: string): Promise<Buffer | null> {
     try {
@@ -5509,11 +5585,45 @@ export const processWhatsAppMessage = inngest.createFunction(
             return { action: 'skipped', reason: 'already_processed_after_sleep' }
         }
 
+        const pendingItemsWithAudioText = await step.run('transcribe-pending-audio-messages', async () => {
+            const audioItems = pendingItems.filter(isPendingAudioMessage)
+            if (!audioItems.length) return pendingItems
+
+            const enriched: PendingQueueMessage[] = []
+            for (const item of pendingItems) {
+                if (!isPendingAudioMessage(item) || isMeaningfulUserText(item.text)) {
+                    enriched.push(item)
+                    continue
+                }
+
+                const transcript = await transcribePendingAudioQueueItem({
+                    item,
+                    instanceToken,
+                    supabase,
+                    configs,
+                }).catch((error) => {
+                    console.warn('[WhatsApp Agent] Pending audio transcription failed:', error)
+                    return ''
+                })
+
+                enriched.push({
+                    ...item,
+                    text: transcript || item.text,
+                })
+            }
+            return enriched
+        })
+
         // Combine all queued messages into one input (they form a single thought)
         const allMessages = pendingHasWork
-            ? buildPendingInputText(pendingItems, messageText)
+            ? buildPendingInputText(pendingItemsWithAudioText, messageText)
             : String(messageText || '').trim()
-        const queuedHistoryType = inferPendingHistoryType(pendingItems, mediaType || messageType || 'text')
+        const queuedHistoryType = inferPendingHistoryType(pendingItemsWithAudioText, mediaType || messageType || 'text')
+        const currentAudioAlreadyTranscribed = Boolean(
+            isAudio
+            && messageId
+            && pendingItemsWithAudioText.some(item => item.messageId === messageId && isMeaningfulUserText(item.text))
+        )
 
         let botMessageIds: string[] = Array.isArray(conversation.bot_message_ids)
             ? conversation.bot_message_ids : []
@@ -5834,7 +5944,7 @@ export const processWhatsAppMessage = inngest.createFunction(
         // 1) Download audio from ConnectyHub
         // 2) Upload to R2 (Cloudflare)
         // 3) Get a stable public URL for transcription
-        const audioR2Url = isAudio ? await step.run('download-audio-to-r2', async () => {
+        const audioR2Url = isAudio && !currentAudioAlreadyTranscribed ? await step.run('download-audio-to-r2', async () => {
             console.log(`[WhatsApp Agent] 🎤 Audio detected from ${cleanPhone}`)
             console.log(`[WhatsApp Agent] 🎤 audioUrl=${audioUrl ? audioUrl.substring(0, 100) + '...' : 'NULL'}, messageId=${messageId || 'NULL'}, mediaKey=${audioMediaKey ? 'available' : 'NULL'}`)
 
@@ -5889,7 +5999,7 @@ export const processWhatsAppMessage = inngest.createFunction(
         }
 
         const mediaBatchItems: IncomingMediaBatchItem[] = []
-        for (const item of pendingItems) {
+        for (const item of pendingItemsWithAudioText) {
             const kind = normalizePendingMediaKind(item.mediaType || item.type || null)
             if (!kind || !item.hasMedia) continue
             mediaBatchItems.push({
@@ -6199,6 +6309,10 @@ export const processWhatsAppMessage = inngest.createFunction(
             console.log(`[WhatsApp Agent] process-input: isAudio=${isAudio}, mediaType=${mediaType || 'none'}, audioR2Url=${audioR2Url ? 'available' : 'null'}, messageText="${messageText}"`)
             
             const transcriptionEnabled = configs['whatsapp_transcription_enabled'] !== 'false'
+
+            if (isAudio && currentAudioAlreadyTranscribed && allMessages?.trim()) {
+                return allMessages
+            }
 
             if (isAudio && !transcriptionEnabled) {
                 return '[O usuário enviou áudio, mas a transcrição de áudio está desativada. Peça para ele enviar em texto ou ative a transcrição.]'

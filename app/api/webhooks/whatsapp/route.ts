@@ -4201,6 +4201,64 @@ export async function POST(request: NextRequest) {
 
         let registeredWhatsappIdentity: Awaited<ReturnType<typeof resolveWhatsAppGlobalIdentity>> | null = null
         let registeredWhatsappIntent: ReturnType<typeof detectWhatsAppGlobalCommandIntent> | null = null
+        let queuedMessageKey: string | null = null
+
+        const queuePendingMessageForDebounce = async () => {
+            if (queuedMessageKey) return queuedMessageKey
+            const msgContent = storedMessageContent
+            if (!msgContent) return null
+
+            await supabase
+                .from('app_config')
+                .delete()
+                .like('key', `_pmq_${finalPhone}_%`)
+                .lt('updated_at', new Date(Date.now() - 60 * 60 * 1000).toISOString())
+
+            const queuedPayload = {
+                text: msgContent,
+                type: messageType,
+                mediaType: isAudio ? 'audio' : mediaType,
+                hasMedia: Boolean(isDocument || isAudio),
+                hasCaption: Boolean(messageText?.trim() && (isDocument || isAudio)),
+                messageId: messageId || null,
+                mediaUrl: mediaUrl || null,
+                mediaMimetype: mediaMimetype || null,
+                mediaFilename: mediaFilename || null,
+                audioUrl: audioUrl || null,
+                audioMediaKey: audioMediaKey || null,
+                audioDirectPath: audioDirectPath || null,
+                createdAt: new Date().toISOString(),
+            }
+            const pendingKey = `_pmq_${finalPhone}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
+            const { error: queueError } = await supabase.from('app_config').insert({
+                key: pendingKey,
+                value: JSON.stringify(queuedPayload),
+                updated_at: new Date().toISOString()
+            })
+            if (queueError) {
+                console.warn('[Webhook] Failed to queue pending message:', queueError)
+                return null
+            }
+
+            queuedMessageKey = pendingKey
+            console.log(`[Webhook] Queued pending message for ${finalPhone} (type: ${messageType})`)
+            return queuedMessageKey
+        }
+
+        const hasPendingDebounceQueue = async () => {
+            await supabase
+                .from('app_config')
+                .delete()
+                .like('key', `_pmq_${finalPhone}_%`)
+                .lt('updated_at', new Date(Date.now() - 60 * 60 * 1000).toISOString())
+
+            const { data } = await supabase
+                .from('app_config')
+                .select('key')
+                .like('key', `_pmq_${finalPhone}_%`)
+                .limit(1)
+            return Boolean(data?.length)
+        }
 
         if (!isFromMe) {
             try {
@@ -4289,6 +4347,7 @@ export async function POST(request: NextRequest) {
                     && hasGlobalMedia
                     && instance.broker_id
                 ) {
+                    const mediaQueuedMessageKey = await queuePendingMessageForDebounce()
                     await inngest.send({
                         name: 'whatsapp/message-received',
                         data: {
@@ -4312,6 +4371,7 @@ export async function POST(request: NextRequest) {
                             instanceName: instance.instance_name,
                             brokerId: instance.broker_id || null,
                             senderName,
+                            queuedMessageKey: mediaQueuedMessageKey,
                             globalIdentity: {
                                 type: globalIdentity.type,
                                 phone: globalIdentity.phone,
@@ -4342,6 +4402,60 @@ export async function POST(request: NextRequest) {
                     return NextResponse.json({
                         success: true,
                         action: 'whatsapp_global_internal_media_dispatched',
+                        identity_type: globalIdentity.type,
+                        command_type: globalIntent.commandType,
+                    })
+                }
+
+                if (
+                    globalIdentity.type !== 'lead'
+                    && isGlobalEntrypoint
+                    && !hasGlobalMedia
+                    && instance.broker_id
+                    && await hasPendingDebounceQueue()
+                ) {
+                    const followUpQueuedMessageKey = await queuePendingMessageForDebounce()
+                    await inngest.send({
+                        name: 'whatsapp/message-received',
+                        data: {
+                            cleanPhone: finalPhone,
+                            messageText: globalMessageText,
+                            messageType,
+                            isAudio,
+                            audioUrl,
+                            audioMediaKey,
+                            audioDirectPath,
+                            messageId,
+                            buttonResponseId: buttonResponseId || null,
+                            buttonResponseTitle: buttonResponseTitle || null,
+                            pollVotes: pollVotes || null,
+                            mediaUrl: mediaUrl || null,
+                            mediaMimetype: mediaMimetype || null,
+                            mediaFilename: mediaFilename || null,
+                            mediaType: mediaType || null,
+                            instanceId: instance.id,
+                            instanceToken: instance.instance_token,
+                            instanceName: instance.instance_name,
+                            brokerId: instance.broker_id || null,
+                            senderName,
+                            queuedMessageKey: followUpQueuedMessageKey,
+                            globalIdentity: {
+                                type: globalIdentity.type,
+                                phone: globalIdentity.phone,
+                                label: globalIdentity.label,
+                                identityId: globalIdentity.identityId || null,
+                                permissions: globalIdentity.permissions,
+                                source: globalIdentity.source,
+                                confidence: globalIdentity.confidence,
+                            },
+                            globalMedia: auditMedia,
+                        },
+                    })
+
+                    await saveAudit({ action: 'whatsapp_global_internal_followup_queued' })
+                    return NextResponse.json({
+                        success: true,
+                        action: 'whatsapp_global_internal_followup_queued',
                         identity_type: globalIdentity.type,
                         command_type: globalIntent.commandType,
                     })
@@ -4984,12 +5098,12 @@ export async function POST(request: NextRequest) {
         }
 
         // 2) Queue message for debounce batching (atomic INSERT, no race condition)
-        let queuedMessageKey: string | null = null
         try {
+            await queuePendingMessageForDebounce()
             // Build content from various message types
             const msgContent = storedMessageContent
 
-            if (msgContent && !isAudio) {
+            if (msgContent && !isAudio && !queuedMessageKey) {
                 await supabase
                     .from('app_config')
                     .delete()
