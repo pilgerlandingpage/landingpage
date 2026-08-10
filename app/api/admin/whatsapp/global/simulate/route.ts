@@ -90,7 +90,7 @@ async function readFinancePreview(params: {
         ? 'Pilger perguntaria se o lancamento e CPF ou CNPJ.'
         : pendingCommand?.id
           ? 'Pilger aplicaria esta resposta na pendencia financeira anterior.'
-          : 'Pilger encaminharia esta mensagem atual ao Agente Financeiro.',
+          : 'Pilger trataria esta mensagem atual como uma solicitacao financeira interna.',
   }
 }
 

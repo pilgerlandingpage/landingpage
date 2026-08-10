@@ -4650,6 +4650,8 @@ export async function POST(request: NextRequest) {
                                 route: pilgerRoute,
                                 agentReply: vitorResult.responseText,
                             })
+                            : financeResult?.handled && financeResult.responseText
+                            ? financeResult.responseText
                             : commandResult.intent.commandType === 'identity_check'
                             ? buildWhatsAppGlobalAcknowledgement({
                                 identity: globalIdentity,

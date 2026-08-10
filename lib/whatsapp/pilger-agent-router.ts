@@ -47,7 +47,7 @@ const PILGER_ROUTE_DEFINITIONS: Record<string, PilgerAgentRouteDefinition> = {
         requiredPermission: 'ads',
         label: 'Trafego pago',
         executionMode: 'sync_executor',
-        userFacingVerb: 'vou conversar com o Vitor Trafego Pago',
+        userFacingVerb: 'vou cuidar da analise de trafego pago',
     },
     paid_traffic_monitoring: {
         commandType: 'paid_traffic_monitoring',
@@ -55,7 +55,7 @@ const PILGER_ROUTE_DEFINITIONS: Record<string, PilgerAgentRouteDefinition> = {
         requiredPermission: 'ads',
         label: 'Monitoramento de trafego pago',
         executionMode: 'sync_executor',
-        userFacingVerb: 'vou consultar o Vitor Trafego Pago',
+        userFacingVerb: 'vou consultar os dados de trafego pago',
     },
     paid_traffic_decision: {
         commandType: 'paid_traffic_decision',
@@ -63,7 +63,7 @@ const PILGER_ROUTE_DEFINITIONS: Record<string, PilgerAgentRouteDefinition> = {
         requiredPermission: 'ads',
         label: 'Decisao humana do Vitor',
         executionMode: 'sync_executor',
-        userFacingVerb: 'vou registrar sua decisao com o Vitor Trafego Pago',
+        userFacingVerb: 'vou registrar sua decisao de trafego pago',
     },
     content_request: {
         commandType: 'content_request',
@@ -71,7 +71,7 @@ const PILGER_ROUTE_DEFINITIONS: Record<string, PilgerAgentRouteDefinition> = {
         requiredPermission: 'blog',
         label: 'Conteudo editorial',
         executionMode: 'sync_executor',
-        userFacingVerb: 'vou conversar com a Isadora Edicao Blog',
+        userFacingVerb: 'vou cuidar do pedido editorial',
     },
     report_request: {
         commandType: 'report_request',
@@ -79,7 +79,7 @@ const PILGER_ROUTE_DEFINITIONS: Record<string, PilgerAgentRouteDefinition> = {
         requiredPermission: 'dashboard',
         label: 'Relatorio interno',
         executionMode: 'sync_executor',
-        userFacingVerb: 'vou consultar o Arthur CEO IA',
+        userFacingVerb: 'vou consultar os dados internos',
     },
     property_request: {
         commandType: 'property_request',
@@ -87,7 +87,7 @@ const PILGER_ROUTE_DEFINITIONS: Record<string, PilgerAgentRouteDefinition> = {
         requiredPermission: 'properties',
         label: 'Consulta de imoveis',
         executionMode: 'sync_executor',
-        userFacingVerb: 'vou conversar com a Bianca Cadastro Imoveis',
+        userFacingVerb: 'vou cuidar da consulta de imoveis',
     },
     finance_request: {
         commandType: 'finance_request',
@@ -95,7 +95,7 @@ const PILGER_ROUTE_DEFINITIONS: Record<string, PilgerAgentRouteDefinition> = {
         requiredPermission: 'finance',
         label: 'Financeiro',
         executionMode: 'sync_executor',
-        userFacingVerb: 'vou encaminhar para o Agente Financeiro',
+        userFacingVerb: 'vou cuidar da solicitacao financeira',
     },
     identity_check: {
         commandType: 'identity_check',
@@ -120,7 +120,7 @@ function routeDefinitionForIntent(intent: WhatsAppGlobalCommandIntent): PilgerAg
             requiredPermission: 'news',
             label: 'Noticia editorial',
             executionMode: 'sync_executor',
-            userFacingVerb: 'vou conversar com a Clara Edicao Noticias',
+            userFacingVerb: 'vou cuidar da pauta de noticias',
         }
     }
 
@@ -132,7 +132,7 @@ function routeDefinitionForIntent(intent: WhatsAppGlobalCommandIntent): PilgerAg
         executionMode: intent.targetAgent && intent.targetAgent !== 'whatsapp-global-agent'
             ? 'queued_handoff'
             : 'conversation',
-        userFacingVerb: 'vou conversar com o agente responsavel',
+        userFacingVerb: 'vou cuidar da solicitacao',
     }
 }
 
@@ -239,16 +239,23 @@ export function buildPilgerAgentRouterAcknowledgement(params: {
     }
 
     if (route.executionMode === 'sync_executor') {
+        if (route.targetAgentId === 'finance-ops-agent') {
+            return [
+                `${identity.label}, certo. Vou cuidar disso no financeiro por aqui.`,
+                'Se faltar algum dado para lancar corretamente, eu te pergunto.',
+            ].join('\n')
+        }
+
         return [
-            `${identity.label}, entendi seu pedido.`,
-            `${route.userFacingVerb} e ja te retorno por aqui com o resultado.`,
+            `${identity.label}, certo. Vou cuidar disso por aqui.`,
+            'Se faltar algum detalhe para responder bem, eu te pergunto.',
         ].join('\n')
     }
 
     if (route.executionMode === 'queued_handoff') {
         return [
-            `${identity.label}, entendi seu pedido.`,
-            `${route.userFacingVerb}. Assim que o agente responsavel devolver o parecer, eu te aviso por aqui.`,
+            `${identity.label}, certo. Vou organizar isso por aqui.`,
+            'Assim que eu tiver o proximo passo, te respondo nesta conversa.',
         ].join('\n')
     }
 
