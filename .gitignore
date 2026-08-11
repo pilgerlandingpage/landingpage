@@ -68,6 +68,7 @@ trabalhe-conosco-*.png
 temp_config.json
 /tmp/
 /output/
+/private/finance-backups/
 supabase/.temp/
 public/images/products/corretor-nota-8-guilherme-hero.jpg
 public/images/products/corretor-nota-8-guilherme-author.jpg

@@ -154,6 +154,14 @@ const ENV_FALLBACKS: Record<string, string> = {
     meta_whatsapp_api_version: 'META_WHATSAPP_API_VERSION',
     meta_whatsapp_default_language: 'META_WHATSAPP_DEFAULT_LANGUAGE',
     meta_whatsapp_support_redirect_phone: 'META_WHATSAPP_SUPPORT_REDIRECT_PHONE',
+    meta_whatsapp_triage_enabled: 'META_WHATSAPP_TRIAGE_ENABLED',
+    meta_whatsapp_triage_ai_enabled: 'META_WHATSAPP_TRIAGE_AI_ENABLED',
+    meta_whatsapp_triage_ai_min_confidence: 'META_WHATSAPP_TRIAGE_AI_MIN_CONFIDENCE',
+    meta_whatsapp_triage_ai_prompt: 'META_WHATSAPP_TRIAGE_AI_PROMPT',
+    meta_whatsapp_triage_interest_notify_phone: 'META_WHATSAPP_TRIAGE_INTEREST_NOTIFY_PHONE',
+    meta_whatsapp_triage_interest_reply: 'META_WHATSAPP_TRIAGE_INTEREST_REPLY',
+    meta_whatsapp_triage_opt_out_reply: 'META_WHATSAPP_TRIAGE_OPT_OUT_REPLY',
+    meta_whatsapp_triage_privacy_reply: 'META_WHATSAPP_TRIAGE_PRIVACY_REPLY',
     meta_whatsapp_send_rate_per_minute: 'META_WHATSAPP_SEND_RATE_PER_MINUTE',
     meta_whatsapp_daily_limit_per_number: 'META_WHATSAPP_DAILY_LIMIT_PER_NUMBER',
     meta_whatsapp_editorial_blog_template_name: 'META_WHATSAPP_EDITORIAL_BLOG_TEMPLATE_NAME',
@@ -281,6 +289,20 @@ const CONFIG_AGENT_CENTRAL_MAP: Record<string, string> = {
     teo_webhooks_events_enabled: 'teo-webhooks-events',
 }
 
+const DEFAULT_META_WHATSAPP_TRIAGE_AI_PROMPT = [
+    'Voce e um agente de triagem de respostas de campanhas oficiais de WhatsApp da imobiliaria.',
+    'Sua tarefa e classificar a intencao do lead sem entregar detalhes do imovel, campanha, preco ou oferta.',
+    'Retorne somente JSON valido, sem markdown, neste formato:',
+    '{"intent":"interested|opt_out|question|unknown","confidence":0-100,"reason":"motivo curto"}',
+    '',
+    'Regras:',
+    '- interested: o lead pede "saiba mais", quer detalhes, pergunta valor, agenda visita, pede atendimento ou demonstra curiosidade positiva.',
+    '- opt_out: o lead pede para sair, parar, remover, apagar dados, nao receber mais, ou expressa rejeicao clara.',
+    '- question: o lead pergunta sobre origem do contato, privacidade, cadastro ou dados, sem pedir remocao e sem demonstrar interesse.',
+    '- unknown: mensagens vagas, saudacoes soltas ou textos sem decisao operacional.',
+    'Quando houver interesse misturado com duvida, prefira interested. Quando houver pedido de remocao, sempre prefira opt_out.',
+].join('\n')
+
 const DEFAULT_CONFIGS: Record<string, string> = {
     ai_provider: 'gemini',
     gemini_model: 'gemini-2.5-flash',
@@ -391,6 +413,14 @@ const DEFAULT_CONFIGS: Record<string, string> = {
     meta_whatsapp_api_version: 'v21.0',
     meta_whatsapp_default_language: 'pt_BR',
     meta_whatsapp_support_redirect_phone: '',
+    meta_whatsapp_triage_enabled: 'true',
+    meta_whatsapp_triage_ai_enabled: 'true',
+    meta_whatsapp_triage_ai_min_confidence: '70',
+    meta_whatsapp_triage_ai_prompt: DEFAULT_META_WHATSAPP_TRIAGE_AI_PROMPT,
+    meta_whatsapp_triage_interest_notify_phone: '',
+    meta_whatsapp_triage_interest_reply: 'Perfeito. Vou encaminhar seu contato para um especialista da nossa equipe dar continuidade ao atendimento.',
+    meta_whatsapp_triage_opt_out_reply: 'Pronto. Removemos seu contato da nossa lista. Voce nao recebera novas campanhas por este canal.',
+    meta_whatsapp_triage_privacy_reply: 'Voce estava em nossa base de contatos de campanhas anteriores da imobiliaria. Se quiser sair da lista, responda SAIR que removemos seu contato.',
     meta_whatsapp_send_rate_per_minute: '40',
     meta_whatsapp_daily_limit_per_number: '1000',
     meta_whatsapp_editorial_blog_template_name: '',
@@ -562,6 +592,7 @@ function normalizeConfigValue(key: string, value: string) {
         commerce_pix_pending_after_minutes: { fallback: DEFAULT_CONFIGS.commerce_pix_pending_after_minutes, min: 3, max: 1440 },
         commerce_pix_expiring_before_minutes: { fallback: DEFAULT_CONFIGS.commerce_pix_expiring_before_minutes, min: 3, max: 1440 },
         commerce_checkout_lost_after_hours: { fallback: DEFAULT_CONFIGS.commerce_checkout_lost_after_hours, min: 1, max: 720 },
+        meta_whatsapp_triage_ai_min_confidence: { fallback: DEFAULT_CONFIGS.meta_whatsapp_triage_ai_min_confidence, min: 0, max: 100 },
         meta_whatsapp_send_rate_per_minute: { fallback: DEFAULT_CONFIGS.meta_whatsapp_send_rate_per_minute, min: 1, max: 1000 },
         meta_whatsapp_daily_limit_per_number: { fallback: DEFAULT_CONFIGS.meta_whatsapp_daily_limit_per_number, min: 1, max: 1000000 },
         wikimedia_commons_priority: { fallback: DEFAULT_CONFIGS.wikimedia_commons_priority, min: 1, max: 4 },
@@ -670,6 +701,8 @@ function normalizeConfigValue(key: string, value: string) {
     if (key === 'meta_social_agent_enabled') return value === 'true' ? 'true' : 'false'
     if (key === 'meta_social_agent_autopilot') return value === 'true' ? 'true' : 'false'
     if (key === 'meta_whatsapp_enabled') return value === 'true' ? 'true' : 'false'
+    if (key === 'meta_whatsapp_triage_enabled') return value === 'false' ? 'false' : 'true'
+    if (key === 'meta_whatsapp_triage_ai_enabled') return value === 'false' ? 'false' : 'true'
     if (key === 'mercado_pago_enabled') return value === 'true' ? 'true' : 'false'
     if (key === 'commerce_automation_enabled') return value === 'false' ? 'false' : 'true'
     if (key === 'commerce_whatsapp_notifications_enabled') return value === 'false' ? 'false' : 'true'
@@ -688,8 +721,18 @@ function normalizeConfigValue(key: string, value: string) {
     if (key === 'commerce_support_whatsapp') {
         return String(value || '').replace(/\D/g, '').slice(0, 20)
     }
-    if (key === 'meta_whatsapp_support_redirect_phone') {
+    if (key === 'meta_whatsapp_support_redirect_phone' || key === 'meta_whatsapp_triage_interest_notify_phone') {
         return String(value || '').replace(/\D/g, '').slice(0, 20)
+    }
+    if (
+        key === 'meta_whatsapp_triage_interest_reply' ||
+        key === 'meta_whatsapp_triage_opt_out_reply' ||
+        key === 'meta_whatsapp_triage_privacy_reply'
+    ) {
+        return String(value || '').trim().slice(0, 600)
+    }
+    if (key === 'meta_whatsapp_triage_ai_prompt') {
+        return String(value || '').trim().slice(0, 4000) || DEFAULT_CONFIGS.meta_whatsapp_triage_ai_prompt
     }
     if (key === 'meta_whatsapp_api_version') {
         const selected = String(value || '').trim().toLowerCase()

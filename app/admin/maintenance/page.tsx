@@ -15,7 +15,7 @@ interface IntegrationCard {
         label: string
         placeholder: string
         isSecret: boolean
-        type?: 'text' | 'password' | 'select'
+        type?: 'text' | 'password' | 'select' | 'textarea'
         options?: { value: string; label: string }[]
     }[]
 }
@@ -162,6 +162,34 @@ const INTEGRATIONS: IntegrationCard[] = [
             { key: 'meta_whatsapp_api_version', label: 'Graph API Version', placeholder: 'v21.0', isSecret: false },
             { key: 'meta_whatsapp_default_language', label: 'Idioma padrao dos templates', placeholder: 'pt_BR', isSecret: false },
             { key: 'meta_whatsapp_support_redirect_phone', label: 'Numero ConnectyHub de atendimento', placeholder: '5547999999999', isSecret: false },
+            {
+                key: 'meta_whatsapp_triage_enabled',
+                label: 'Triagem automatica de respostas',
+                placeholder: 'Ativo',
+                isSecret: false,
+                type: 'select',
+                options: [
+                    { value: 'true', label: 'Ativo' },
+                    { value: 'false', label: 'Inativo' },
+                ],
+            },
+            {
+                key: 'meta_whatsapp_triage_ai_enabled',
+                label: 'IA para interpretar contexto',
+                placeholder: 'Ativo',
+                isSecret: false,
+                type: 'select',
+                options: [
+                    { value: 'true', label: 'Ativo' },
+                    { value: 'false', label: 'Inativo' },
+                ],
+            },
+            { key: 'meta_whatsapp_triage_ai_min_confidence', label: 'Confianca minima da IA (0 a 100)', placeholder: '70', isSecret: false },
+            { key: 'meta_whatsapp_triage_ai_prompt', label: 'Prompt da IA de triagem', placeholder: 'Regras para classificar interesse, saida, origem do contato ou desconhecido.', isSecret: false, type: 'textarea' },
+            { key: 'meta_whatsapp_triage_interest_notify_phone', label: 'Numero interno para leads interessados', placeholder: '5547999999999', isSecret: false },
+            { key: 'meta_whatsapp_triage_interest_reply', label: 'Resposta automatica - saiba mais', placeholder: 'Perfeito. Vou encaminhar seu contato para um especialista da nossa equipe dar continuidade ao atendimento.', isSecret: false, type: 'textarea' },
+            { key: 'meta_whatsapp_triage_opt_out_reply', label: 'Resposta automatica - sair', placeholder: 'Pronto. Removemos seu contato da nossa lista. Voce nao recebera novas campanhas por este canal.', isSecret: false, type: 'textarea' },
+            { key: 'meta_whatsapp_triage_privacy_reply', label: 'Resposta automatica - origem do contato', placeholder: 'Voce estava em nossa base de contatos de campanhas anteriores da imobiliaria. Se quiser sair da lista, responda SAIR que removemos seu contato.', isSecret: false, type: 'textarea' },
             { key: 'meta_whatsapp_editorial_blog_template_name', label: 'Template oficial para blog', placeholder: 'pilger_blog_editorial', isSecret: false },
             { key: 'meta_whatsapp_editorial_news_template_name', label: 'Template oficial para noticia', placeholder: 'pilger_news_editorial', isSecret: false },
             { key: 'meta_whatsapp_property_followup_template_name', label: 'Template oficial para recomendacao', placeholder: 'pilger_property_followup', isSecret: false },
@@ -1496,20 +1524,7 @@ export default function MaintenancePage() {
                                         {field.label}
                                     </label>
                                     <div style={{ position: 'relative' }}>
-                                        {field.type !== 'select' ? (
-                                            <input
-                                                className="form-input"
-                                                type={field.isSecret && !visibleFields[field.key] ? 'password' : 'text'}
-                                                value={configs[field.key] || ''}
-                                                onChange={e => updateConfigField(field.key, e.target.value)}
-                                                placeholder={field.placeholder}
-                                                style={{
-                                                    paddingRight: field.isSecret ? '44px' : undefined,
-                                                    fontFamily: field.isSecret && !visibleFields[field.key] ? 'inherit' : 'monospace',
-                                                    fontSize: '0.9rem',
-                                                }}
-                                            />
-                                        ) : field.type === 'select' ? (
+                                        {field.type === 'select' ? (
                                             <div style={{ position: 'relative' }}>
                                                 <select
                                                     className="form-input"
@@ -1524,6 +1539,20 @@ export default function MaintenancePage() {
                                                     ))}
                                                 </select>
                                             </div>
+                                        ) : field.type === 'textarea' ? (
+                                            <textarea
+                                                className="form-input"
+                                                rows={field.key === 'meta_whatsapp_triage_ai_prompt' ? 8 : 3}
+                                                value={configs[field.key] || ''}
+                                                onChange={e => updateConfigField(field.key, e.target.value)}
+                                                placeholder={field.placeholder}
+                                                style={{
+                                                    fontFamily: 'inherit',
+                                                    fontSize: '0.9rem',
+                                                    minHeight: field.key === 'meta_whatsapp_triage_ai_prompt' ? '180px' : '88px',
+                                                    resize: 'vertical',
+                                                }}
+                                            />
                                         ) : (
                                             <input
                                                 className="form-input"

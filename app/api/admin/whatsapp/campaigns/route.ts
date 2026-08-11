@@ -14,6 +14,7 @@ import {
     manageMetaWhatsAppCampaign,
     retryFailedMetaWhatsAppCampaignRecipients,
 } from '@/lib/meta/whatsapp-campaigns'
+import { listMetaWhatsAppReplyIntents } from '@/lib/meta/whatsapp-triage'
 
 function getSupabase() {
     return createClient(
@@ -33,13 +34,31 @@ export async function GET(request: NextRequest) {
     try {
         const provider = request.nextUrl.searchParams.get('provider')
         if (provider === 'meta_whatsapp') {
+            const report = request.nextUrl.searchParams.get('report')
+            if (report === 'reply_intents') {
+                const result = await listMetaWhatsAppReplyIntents({
+                    campaignId: request.nextUrl.searchParams.get('campaign_id'),
+                    intent: request.nextUrl.searchParams.get('intent'),
+                    limit: Math.min(Math.max(Number(request.nextUrl.searchParams.get('limit') || 200), 1), 500),
+                })
+                return NextResponse.json({ success: true, provider: 'meta_whatsapp', ...result })
+            }
+
             const campaignId = request.nextUrl.searchParams.get('campaign_id')
             if (campaignId) {
-                const detail = await getMetaWhatsAppCampaignDetail({
-                    campaignId,
-                    limit: Number(request.nextUrl.searchParams.get('limit') || 80),
+                const [detail, replies] = await Promise.all([
+                    getMetaWhatsAppCampaignDetail({
+                        campaignId,
+                        limit: Number(request.nextUrl.searchParams.get('limit') || 80),
+                    }),
+                    listMetaWhatsAppReplyIntents({ campaignId, limit: 80 }),
+                ])
+                return NextResponse.json({
+                    success: true,
+                    provider: 'meta_whatsapp',
+                    ...detail,
+                    replyIntents: replies.replies || [],
                 })
-                return NextResponse.json({ success: true, provider: 'meta_whatsapp', ...detail })
             }
 
             const result = await listMetaWhatsAppCampaigns({

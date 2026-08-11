@@ -3475,10 +3475,10 @@ function FinancePageFallback() {
     )
 }
 
-export default function FinancePage({ initialSection }: { initialSection?: string }) {
+export default function FinancePage() {
     return (
         <Suspense fallback={<FinancePageFallback />}>
-            <FinancePageContent initialSection={initialSection} />
+            <FinancePageContent />
         </Suspense>
     )
 }

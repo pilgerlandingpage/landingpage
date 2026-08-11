@@ -7,7 +7,7 @@ import {
     Plus, Trash2, Pause, Play, FileText, Image, Mic, Video,
     Tag, RefreshCw, MessageSquare, ChevronUp,
     Smartphone, Search, BarChart3, TrendingUp, Eye, Inbox, Activity,
-    XCircle, Upload, Download
+    XCircle, Upload, Download, Bot
 } from 'lucide-react'
 import {
     Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart,
@@ -113,10 +113,76 @@ interface MetaCampaignEvent {
     payload?: unknown
 }
 
+interface MetaReplyIntent {
+    id: string
+    conversation_id?: string | null
+    message_id?: string | null
+    event_id?: string | null
+    campaign_id?: string | null
+    recipient_id?: string | null
+    sender_id?: string | null
+    phone_number_id?: string | null
+    provider_message_id?: string | null
+    contact_phone: string
+    contact_name?: string | null
+    intent: string
+    confidence?: number | null
+    source?: string | null
+    button_text?: string | null
+    button_payload?: string | null
+    raw_text?: string | null
+    campaign_name?: string | null
+    template_name?: string | null
+    auto_reply_status?: string | null
+    auto_reply_message?: string | null
+    auto_reply_error?: string | null
+    notified_status?: string | null
+    notified_phone?: string | null
+    notified_at?: string | null
+    notified_error?: string | null
+    metadata?: unknown
+    created_at: string
+    updated_at?: string | null
+}
+
+interface MetaReplyReportGroup {
+    key: string
+    campaign_id?: string | null
+    campaign_name?: string
+    template_name?: string
+    count: number
+    interested: number
+    optOut: number
+    question: number
+    unknown: number
+    lastSeenAt?: string | null
+}
+
+interface MetaReplyReportSummary {
+    total: number
+    interested: number
+    optOut: number
+    question: number
+    unknown: number
+    autoRepliesSent: number
+    autoRepliesFailed: number
+    notificationsSent: number
+    notificationsFailed: number
+    byIntent: Record<string, number>
+    byTemplate: MetaReplyReportGroup[]
+    byCampaign: MetaReplyReportGroup[]
+}
+
+interface MetaReplyReport {
+    replies: MetaReplyIntent[]
+    summary: MetaReplyReportSummary
+}
+
 interface MetaCampaignDetail {
     campaign?: MetaCampaign
     recipients: MetaCampaignRecipient[]
     events: MetaCampaignEvent[]
+    replyIntents?: MetaReplyIntent[]
 }
 
 interface MetaCampaignSummary {
@@ -490,6 +556,9 @@ export default function CampaignsPage() {
     const [loadingMetaCampaignDetail, setLoadingMetaCampaignDetail] = useState('')
     const [metaCampaignDetails, setMetaCampaignDetails] = useState<Record<string, MetaCampaignDetail>>({})
     const [retryingMetaCampaignId, setRetryingMetaCampaignId] = useState('')
+    const [metaReplyReport, setMetaReplyReport] = useState<MetaReplyReport | null>(null)
+    const [loadingMetaReplyReport, setLoadingMetaReplyReport] = useState(false)
+    const [metaReplyIntentFilter, setMetaReplyIntentFilter] = useState('')
     const [showCreateForm, setShowCreateForm] = useState(false)
     const [sending, setSending] = useState(false)
     const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
@@ -609,6 +678,35 @@ export default function CampaignsPage() {
         }
     }
 
+    const loadMetaReplyReport = async () => {
+        setLoadingMetaReplyReport(true)
+        try {
+            const intentParam = metaReplyIntentFilter ? `&intent=${encodeURIComponent(metaReplyIntentFilter)}` : ''
+            const res = await fetch(`/api/admin/whatsapp/campaigns?provider=meta_whatsapp&report=reply_intents&limit=200${intentParam}`)
+            const data = await res.json()
+            if (data.success) {
+                setMetaReplyReport({
+                    replies: data.replies || [],
+                    summary: data.summary || emptyMetaReplyReportSummary(),
+                })
+            } else {
+                setFeedback({ type: 'error', text: data.message || 'Erro ao carregar respostas Meta' })
+            }
+        } catch {
+            setFeedback({ type: 'error', text: 'Erro ao carregar respostas Meta' })
+        } finally {
+            setLoadingMetaReplyReport(false)
+        }
+    }
+
+    const refreshMetaWorkspace = async () => {
+        await Promise.all([
+            loadMetaCampaigns(),
+            loadMetaContactLists(),
+            loadMetaReplyReport(),
+        ])
+    }
+
     const toggleMetaCampaignDetail = async (campaignId: string) => {
         if (expandedMetaCampaignId === campaignId) {
             setExpandedMetaCampaignId('')
@@ -629,6 +727,7 @@ export default function CampaignsPage() {
                         campaign: data.campaign,
                         recipients: data.recipients || [],
                         events: data.events || [],
+                        replyIntents: data.replyIntents || [],
                     },
                 }))
             } else {
@@ -645,14 +744,50 @@ export default function CampaignsPage() {
         if (sendProvider === 'meta_whatsapp') {
             loadMetaCampaigns()
             loadMetaContactLists()
+            loadMetaReplyReport()
         }
-    }, [sendProvider, metaStatusFilter])
+    }, [sendProvider, metaStatusFilter, metaReplyIntentFilter])
 
     const parseNumbers = (): string[] => {
         return numbersInput
             .split(/[\n,;]+/)
             .map(n => n.replace(/\D/g, '').trim())
             .filter(n => n.length >= 10)
+    }
+
+    const exportMetaRepliesCsv = (intent?: string) => {
+        const allReplies = metaReplyReport?.replies || []
+        const filtered = intent ? allReplies.filter(reply => reply.intent === intent) : allReplies
+        if (filtered.length === 0) {
+            setFeedback({ type: 'error', text: 'Nenhuma resposta encontrada para exportar.' })
+            return
+        }
+
+        const csv = [
+            ['telefone', 'nome', 'intencao', 'campanha', 'template', 'resposta', 'botao', 'auto_resposta', 'alerta_interno', 'data']
+                .map(escapeAudienceCell)
+                .join(';'),
+            ...filtered.map(reply => [
+                reply.contact_phone,
+                reply.contact_name || '',
+                metaReplyIntentLabel(reply.intent),
+                reply.campaign_name || '',
+                reply.template_name || '',
+                reply.raw_text || '',
+                reply.button_text || reply.button_payload || '',
+                metaReplyStatusLabel(reply.auto_reply_status),
+                metaReplyStatusLabel(reply.notified_status),
+                formatMetaDate(reply.created_at),
+            ].map(escapeAudienceCell).join(';')),
+        ].join('\n')
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+        const url = URL.createObjectURL(blob)
+        const anchor = document.createElement('a')
+
+        anchor.href = url
+        anchor.download = `respostas-meta-whatsapp-${intent || 'todas'}.csv`
+        anchor.click()
+        URL.revokeObjectURL(url)
     }
 
     const downloadAudienceTemplate = () => {
@@ -2307,13 +2442,19 @@ export default function CampaignsPage() {
                     senders={metaSenders}
                     summary={metaSummary}
                     analytics={metaAnalytics}
+                    replyReport={metaReplyReport}
+                    replyReportLoading={loadingMetaReplyReport}
+                    replyIntentFilter={metaReplyIntentFilter}
                     loading={loadingMetaCampaigns}
                     statusFilter={metaStatusFilter}
                     expandedCampaignId={expandedMetaCampaignId}
                     loadingDetailCampaignId={loadingMetaCampaignDetail}
                     campaignDetails={metaCampaignDetails}
                     onStatusFilterChange={setMetaStatusFilter}
-                    onRefresh={loadMetaCampaigns}
+                    onReplyIntentFilterChange={setMetaReplyIntentFilter}
+                    onRefresh={refreshMetaWorkspace}
+                    onReplyRefresh={loadMetaReplyReport}
+                    onReplyExport={exportMetaRepliesCsv}
                     onToggleDetail={toggleMetaCampaignDetail}
                     onManage={manageMetaCampaign}
                     retryingCampaignId={retryingMetaCampaignId}
@@ -2485,13 +2626,19 @@ function MetaOfficialCampaignPanel({
     senders,
     summary,
     analytics,
+    replyReport,
+    replyReportLoading,
+    replyIntentFilter,
     loading,
     statusFilter,
     expandedCampaignId,
     loadingDetailCampaignId,
     campaignDetails,
     onStatusFilterChange,
+    onReplyIntentFilterChange,
     onRefresh,
+    onReplyRefresh,
+    onReplyExport,
     onToggleDetail,
     onManage,
     retryingCampaignId,
@@ -2501,13 +2648,19 @@ function MetaOfficialCampaignPanel({
     senders: MetaSender[]
     summary: MetaCampaignSummary | null
     analytics: MetaCampaignAnalytics | null
+    replyReport: MetaReplyReport | null
+    replyReportLoading: boolean
+    replyIntentFilter: string
     loading: boolean
     statusFilter: string
     expandedCampaignId: string
     loadingDetailCampaignId: string
     campaignDetails: Record<string, MetaCampaignDetail>
     onStatusFilterChange: (value: string) => void
+    onReplyIntentFilterChange: (value: string) => void
     onRefresh: () => void
+    onReplyRefresh: () => void
+    onReplyExport: (intent?: string) => void
     onToggleDetail: (campaignId: string) => void
     onManage: (campaignId: string, action: 'pause' | 'resume' | 'cancel') => void
     retryingCampaignId: string
@@ -2865,6 +3018,15 @@ function MetaOfficialCampaignPanel({
                 </div>
             </div>
 
+            <MetaReplyOpsPanel
+                report={replyReport}
+                loading={replyReportLoading}
+                intentFilter={replyIntentFilter}
+                onIntentFilterChange={onReplyIntentFilterChange}
+                onRefresh={onReplyRefresh}
+                onExport={onReplyExport}
+            />
+
             <div style={{
                 borderRadius: '12px',
                 background: 'var(--bg-secondary)',
@@ -3111,6 +3273,7 @@ function MetaSelectedCampaignAside({
     const detailCampaign = detail?.campaign || campaign
     const recipients = detail?.recipients || []
     const events = detail?.events || []
+    const replyIntents = detail?.replyIntents || []
     const errors = campaignErrorGroups(recipients, events)
     const acceptedTotal = detailCampaign.total_sent || recipients.filter(item => ['sent', 'delivered', 'read'].includes(item.status)).length
     const deliveredTotal = detailCampaign.total_delivered || recipients.filter(item => ['delivered', 'read'].includes(item.status)).length
@@ -3269,13 +3432,14 @@ function MetaSelectedCampaignAside({
                         recipients={recipients}
                         events={events}
                         errors={errors}
-                        acceptedTotal={acceptedTotal}
-                        deliveredTotal={deliveredTotal}
-                        readTotal={readTotal}
-                        failedTotal={failedTotal}
-                        retrying={retrying}
-                        onRetryFailed={onRetryFailed}
-                    />
+                                acceptedTotal={acceptedTotal}
+                                deliveredTotal={deliveredTotal}
+                                readTotal={readTotal}
+                                failedTotal={failedTotal}
+                                replyIntents={replyIntents}
+                                retrying={retrying}
+                                onRetryFailed={onRetryFailed}
+                            />
                 ) : (
                     <div style={{ color: 'var(--text-muted)', fontSize: '0.76rem', lineHeight: 1.45 }}>
                         Clique em Detalhes para carregar destinatarios, eventos da Meta e diagnostico de falhas desta campanha.
@@ -3554,6 +3718,7 @@ function MetaCampaignDetailPanel({
     deliveredTotal,
     readTotal,
     failedTotal,
+    replyIntents,
     retrying,
     onRetryFailed,
 }: {
@@ -3565,6 +3730,7 @@ function MetaCampaignDetailPanel({
     deliveredTotal: number
     readTotal: number
     failedTotal: number
+    replyIntents: MetaReplyIntent[]
     retrying: boolean
     onRetryFailed: (campaignId: string, failedCount: number) => void
 }) {
@@ -3587,6 +3753,9 @@ function MetaCampaignDetailPanel({
             ? `Selecionados: ${segmentFilteredContacts || total} de ${segmentTotalContacts || total}`
             : '',
     ].filter(Boolean).join(' | ')
+    const interestedReplies = replyIntents.filter(item => item.intent === 'interested').length
+    const optOutReplies = replyIntents.filter(item => item.intent === 'opt_out').length
+    const questionReplies = replyIntents.filter(item => item.intent === 'question').length
 
     return (
         <div style={{ display: 'grid', gap: '12px' }}>
@@ -3663,6 +3832,67 @@ function MetaCampaignDetailPanel({
                             {error.detail && <span style={{ color: 'var(--text-muted)', fontSize: '0.68rem' }}>{error.detail}</span>}
                         </div>
                     ))}
+                </div>
+            )}
+
+            {replyIntents.length > 0 && (
+                <div style={{
+                    border: '1px solid rgba(34,197,94,0.18)',
+                    borderRadius: '10px',
+                    background: 'rgba(34,197,94,0.045)',
+                    padding: '12px',
+                    display: 'grid',
+                    gap: '10px',
+                }}>
+                    <strong style={{ color: 'var(--text-primary)', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '7px' }}>
+                        <Bot size={15} style={{ color: '#22c55e' }} />
+                        Respostas dos leads
+                    </strong>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '8px' }}>
+                        {[
+                            { label: 'Interessados', value: interestedReplies, color: '#22c55e' },
+                            { label: 'Saidas', value: optOutReplies, color: '#ef4444' },
+                            { label: 'Perguntas', value: questionReplies, color: '#f59e0b' },
+                        ].map(item => (
+                            <div key={item.label} style={{
+                                border: '1px solid var(--border)',
+                                borderRadius: '8px',
+                                padding: '9px',
+                                background: 'rgba(255,255,255,0.035)',
+                                display: 'grid',
+                                gap: '3px',
+                            }}>
+                                <strong style={{ color: item.color, fontSize: '0.9rem' }}>{item.value}</strong>
+                                <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>{item.label}</span>
+                            </div>
+                        ))}
+                    </div>
+                    <div style={{ display: 'grid', gap: '6px' }}>
+                        {replyIntents.slice(0, 12).map(reply => (
+                            <div key={reply.id} style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'minmax(130px, 1fr) 110px minmax(160px, 1.6fr) 120px',
+                                gap: '8px',
+                                alignItems: 'center',
+                                border: '1px solid var(--border)',
+                                borderRadius: '8px',
+                                background: 'rgba(255,255,255,0.03)',
+                                padding: '8px 9px',
+                                fontSize: '0.72rem',
+                            }}>
+                                <span style={{ color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    {reply.contact_name || reply.contact_phone}
+                                </span>
+                                <span style={{ color: metaReplyIntentColor(reply.intent), fontWeight: 900 }}>
+                                    {metaReplyIntentLabel(reply.intent)}
+                                </span>
+                                <span title={metaReplyClassifierSummary(reply)} style={{ color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                    {metaReplyPreview(reply)}
+                                </span>
+                                <span style={{ color: 'var(--text-muted)' }}>{formatMetaDate(reply.created_at)}</span>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             )}
 
@@ -3785,6 +4015,297 @@ function MetaDetailLine({ label, value }: { label: string; value: string }) {
         <div style={{ display: 'grid', gap: '2px' }}>
             <span style={{ color: 'var(--text-muted)', fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</span>
             <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', overflow: 'hidden', textOverflow: 'ellipsis' }}>{value || '-'}</span>
+        </div>
+    )
+}
+
+function metaReplyIntentLabel(value?: string | null) {
+    const labels: Record<string, string> = {
+        interested: 'Interessado',
+        opt_out: 'Saiu da lista',
+        question: 'Pergunta',
+        unknown: 'Sem classificacao',
+    }
+    return labels[String(value || '')] || String(value || 'Sem classificacao')
+}
+
+function metaReplyIntentColor(value?: string | null) {
+    const colors: Record<string, string> = {
+        interested: '#22c55e',
+        opt_out: '#ef4444',
+        question: '#f59e0b',
+        unknown: 'var(--text-muted)',
+    }
+    return colors[String(value || '')] || 'var(--text-muted)'
+}
+
+function metaReplyStatusLabel(value?: string | null) {
+    const labels: Record<string, string> = {
+        pending: 'Pendente',
+        sent: 'Enviado',
+        skipped: 'Ignorado',
+        failed: 'Falhou',
+    }
+    return labels[String(value || '')] || String(value || 'Nao aplicado')
+}
+
+function emptyMetaReplyReportSummary(): MetaReplyReportSummary {
+    return {
+        total: 0,
+        interested: 0,
+        optOut: 0,
+        question: 0,
+        unknown: 0,
+        autoRepliesSent: 0,
+        autoRepliesFailed: 0,
+        notificationsSent: 0,
+        notificationsFailed: 0,
+        byIntent: {},
+        byTemplate: [],
+        byCampaign: [],
+    }
+}
+
+function metaReplyPreview(reply: MetaReplyIntent) {
+    return reply.button_text || reply.button_payload || reply.raw_text || '-'
+}
+
+function metaReplyClassifierSummary(reply: MetaReplyIntent) {
+    const meta = asRecord(reply.metadata)
+    const triage = asRecord(meta.triage)
+    return textValue(triage.reason) || '-'
+}
+
+function MetaReplyOpsPanel({
+    report,
+    loading,
+    intentFilter,
+    onIntentFilterChange,
+    onRefresh,
+    onExport,
+}: {
+    report: MetaReplyReport | null
+    loading: boolean
+    intentFilter: string
+    onIntentFilterChange: (value: string) => void
+    onRefresh: () => void
+    onExport: (intent?: string) => void
+}) {
+    const summary = report?.summary || emptyMetaReplyReportSummary()
+    const replies = report?.replies || []
+    const metricItems = [
+        { label: 'Respostas', value: summary.total, icon: MessageSquare, color: 'var(--gold)' },
+        { label: 'Interessados', value: summary.interested, icon: Users, color: '#22c55e' },
+        { label: 'Saidas', value: summary.optOut, icon: XCircle, color: '#ef4444' },
+        { label: 'Perguntas', value: summary.question, icon: Bot, color: '#f59e0b' },
+        { label: 'Alertas enviados', value: summary.notificationsSent, icon: Send, color: '#38bdf8' },
+        { label: 'Auto respostas', value: summary.autoRepliesSent, icon: CheckCircle2, color: '#22c55e' },
+    ]
+
+    return (
+        <div id="central-respostas" style={{
+            borderRadius: '12px',
+            background: 'var(--bg-secondary)',
+            border: '1px solid var(--border)',
+            overflow: 'hidden',
+        }}>
+            <div style={{
+                padding: '13px 14px',
+                borderBottom: '1px solid var(--border)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '10px',
+                flexWrap: 'wrap',
+            }}>
+                <div>
+                    <strong style={{ color: 'var(--text-primary)', fontSize: '0.92rem', display: 'flex', alignItems: 'center', gap: '7px' }}>
+                        <Bot size={16} style={{ color: 'var(--gold)' }} />
+                        Central de respostas
+                    </strong>
+                    <p style={{ margin: '4px 0 0', color: 'var(--text-muted)', fontSize: '0.74rem' }}>
+                        Leads interessados, opt-outs e perguntas detectadas pelo agente das campanhas Meta WhatsApp.
+                    </p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <select
+                        value={intentFilter}
+                        onChange={event => onIntentFilterChange(event.target.value)}
+                        style={{
+                            minHeight: '36px',
+                            borderRadius: '8px',
+                            border: '1px solid var(--border)',
+                            background: 'var(--bg-primary)',
+                            color: 'var(--text-primary)',
+                            padding: '0 10px',
+                            fontSize: '0.76rem',
+                        }}
+                    >
+                        <option value="">Todas as respostas</option>
+                        <option value="interested">Interessados</option>
+                        <option value="opt_out">Saidas</option>
+                        <option value="question">Perguntas</option>
+                        <option value="unknown">Sem classificacao</option>
+                    </select>
+                    <button
+                        type="button"
+                        onClick={() => onExport(intentFilter || undefined)}
+                        disabled={replies.length === 0}
+                        style={{
+                            minHeight: '36px',
+                            borderRadius: '8px',
+                            border: '1px solid var(--border)',
+                            background: 'rgba(255,255,255,0.04)',
+                            color: 'var(--text-secondary)',
+                            padding: '0 10px',
+                            cursor: replies.length === 0 ? 'not-allowed' : 'pointer',
+                            fontSize: '0.74rem',
+                            fontWeight: 800,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                        }}
+                    >
+                        <Download size={14} /> Exportar
+                    </button>
+                    <button
+                        type="button"
+                        onClick={onRefresh}
+                        disabled={loading}
+                        style={{
+                            minHeight: '36px',
+                            borderRadius: '8px',
+                            border: '1px solid var(--border)',
+                            background: 'rgba(255,255,255,0.04)',
+                            color: 'var(--text-secondary)',
+                            padding: '0 10px',
+                            cursor: loading ? 'not-allowed' : 'pointer',
+                            fontSize: '0.74rem',
+                            fontWeight: 800,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                        }}
+                    >
+                        <RefreshCw size={14} className={loading ? 'spin' : ''} /> Atualizar
+                    </button>
+                </div>
+            </div>
+
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(6, minmax(126px, 1fr))',
+                borderBottom: '1px solid var(--border)',
+                overflowX: 'auto',
+            }}>
+                {metricItems.map(item => {
+                    const Icon = item.icon
+                    return (
+                        <div key={item.label} style={{
+                            minWidth: '126px',
+                            padding: '12px',
+                            borderRight: '1px solid var(--border)',
+                            display: 'grid',
+                            gap: '5px',
+                        }}>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.66rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.04em', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                <Icon size={13} style={{ color: item.color }} />
+                                {item.label}
+                            </span>
+                            <strong style={{ color: item.color, fontSize: '0.92rem' }}>{Number(item.value || 0).toLocaleString('pt-BR')}</strong>
+                        </div>
+                    )
+                })}
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(250px, 320px)', minHeight: '230px' }}>
+                <div style={{ minWidth: 0, borderRight: '1px solid var(--border)', overflowX: 'auto' }}>
+                    <div style={{
+                        minWidth: '820px',
+                        display: 'grid',
+                        gridTemplateColumns: '150px 120px 1fr 150px 120px 120px',
+                        gap: '8px',
+                        padding: '9px 12px',
+                        color: 'var(--text-muted)',
+                        fontSize: '0.66rem',
+                        fontWeight: 900,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em',
+                        borderBottom: '1px solid var(--border)',
+                        background: 'rgba(255,255,255,0.025)',
+                    }}>
+                        <span>Contato</span>
+                        <span>Intencao</span>
+                        <span>Resposta</span>
+                        <span>Campanha</span>
+                        <span>Alerta</span>
+                        <span>Recebida</span>
+                    </div>
+                    {loading ? (
+                        <div style={{ minWidth: '820px', padding: '32px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                            <Loader2 size={16} className="spin" /> Carregando respostas...
+                        </div>
+                    ) : replies.length === 0 ? (
+                        <div style={{ minWidth: '820px', padding: '32px', color: 'var(--text-muted)', textAlign: 'center' }}>
+                            Nenhuma resposta classificada neste filtro.
+                        </div>
+                    ) : (
+                        <div style={{ minWidth: '820px' }}>
+                            {replies.slice(0, 12).map(reply => (
+                                <div key={reply.id} style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: '150px 120px 1fr 150px 120px 120px',
+                                    gap: '8px',
+                                    padding: '10px 12px',
+                                    borderBottom: '1px solid var(--border)',
+                                    alignItems: 'center',
+                                    fontSize: '0.74rem',
+                                }}>
+                                    <span style={{ color: 'var(--text-primary)', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                        {reply.contact_name || reply.contact_phone}
+                                    </span>
+                                    <span style={{ color: metaReplyIntentColor(reply.intent), fontWeight: 900 }}>
+                                        {metaReplyIntentLabel(reply.intent)}
+                                    </span>
+                                    <span title={metaReplyClassifierSummary(reply)} style={{ color: 'var(--text-secondary)', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                        {metaReplyPreview(reply)}
+                                    </span>
+                                    <span style={{ color: 'var(--text-muted)', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                        {reply.campaign_name || reply.template_name || '-'}
+                                    </span>
+                                    <span style={{ color: reply.notified_status === 'failed' ? '#ef4444' : 'var(--text-muted)' }}>
+                                        {metaReplyStatusLabel(reply.notified_status)}
+                                    </span>
+                                    <span style={{ color: 'var(--text-muted)' }}>{formatMetaDate(reply.created_at)}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                <div style={{ padding: '12px', display: 'grid', gap: '10px', alignContent: 'start' }}>
+                    <MetaMiniRanking
+                        title="Templates com resposta"
+                        rows={(summary.byTemplate || []).slice(0, 5).map(item => ({
+                            key: String(item.key || item.template_name || 'template'),
+                            name: String(item.template_name || item.key || 'Sem template'),
+                            detail: `${Number(item.interested || 0)} interessados | ${Number(item.optOut || 0)} saidas`,
+                            value: String(item.count || 0),
+                            color: Number(item.optOut || 0) > Number(item.interested || 0) ? '#ef4444' : '#22c55e',
+                        }))}
+                    />
+                    <MetaMiniRanking
+                        title="Campanhas com resposta"
+                        rows={(summary.byCampaign || []).slice(0, 5).map(item => ({
+                            key: String(item.key || item.campaign_id || 'campaign'),
+                            name: String(item.campaign_name || item.key || 'Sem campanha'),
+                            detail: `${Number(item.interested || 0)} interessados | ${Number(item.question || 0)} perguntas`,
+                            value: String(item.count || 0),
+                            color: Number(item.interested || 0) > 0 ? '#22c55e' : 'var(--gold)',
+                        }))}
+                    />
+                </div>
+            </div>
         </div>
     )
 }

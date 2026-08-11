@@ -1,6 +1,7 @@
 import { centsToMoney, loadCommerceConfig } from './checkout'
 import { ensureMemberAuthAccess } from './member-auth-access'
 import { commerceMessageVariables, dispatchCommerceMessage } from './transactional-messages'
+import { syncApprovedCommerceSaleToFinance } from '@/lib/finance/commerce-sales-sync'
 
 type SupabaseAdminLike = {
   from: (table: string) => any
@@ -244,6 +245,14 @@ export async function fulfillApprovedOrder(params: FulfillmentParams) {
     items,
     source,
   })
+  const financeSync = await syncApprovedCommerceSaleToFinance({
+    supabase,
+    order,
+    payment,
+    customer,
+    items,
+    source,
+  })
 
   await Promise.all([
     supabase
@@ -258,6 +267,7 @@ export async function fulfillApprovedOrder(params: FulfillmentParams) {
           member_account_id: member.id,
           entitlements_count: entitlements.length,
           fulfilled_at: now,
+          finance_sync: financeSync,
         },
       })
       .eq('id', order.id),
@@ -315,6 +325,7 @@ export async function fulfillApprovedOrder(params: FulfillmentParams) {
       auth_user_id: authAccess.auth_user_id || null,
       auth_access_link_generated: false,
       entitlements_count: entitlements.length,
+      finance: financeSync,
       whatsapp: { skipped: true, reason: 'suppressed_notifications' },
       email: { skipped: true, reason: 'suppressed_notifications' },
     }
@@ -393,6 +404,7 @@ export async function fulfillApprovedOrder(params: FulfillmentParams) {
     auth_user_id: authAccess.auth_user_id || null,
     auth_access_link_generated: Boolean(authAccess.access_link),
     entitlements_count: entitlements.length,
+    finance: financeSync,
     whatsapp: whatsappResult,
     email: emailResult,
   }

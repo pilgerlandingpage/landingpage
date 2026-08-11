@@ -658,7 +658,7 @@ export async function getMetaWhatsAppConversationDetail(
   const selected = cleanText(conversationId, 80)
   if (!selected) throw new Error('conversation_id obrigatorio.')
 
-  const [conversationResult, messagesResult] = await Promise.all([
+  const [conversationResult, messagesResult, replyIntentResult] = await Promise.all([
     supabase
       .from('meta_whatsapp_conversations')
       .select(`
@@ -675,10 +675,17 @@ export async function getMetaWhatsAppConversationDetail(
       .eq('conversation_id', selected)
       .order('created_at', { ascending: true })
       .limit(300),
+    supabase
+      .from('meta_whatsapp_reply_intents')
+      .select('id, intent, confidence, source, raw_text, campaign_name, template_name, notified_status, notified_phone, notified_at, auto_reply_status, created_at, updated_at')
+      .eq('conversation_id', selected)
+      .order('created_at', { ascending: false })
+      .limit(1),
   ])
 
   if (conversationResult.error) throw conversationResult.error
   if (messagesResult.error) throw messagesResult.error
+  if (replyIntentResult.error) throw replyIntentResult.error
   if (!conversationResult.data) throw new Error('Conversa Meta WhatsApp nao encontrada.')
 
   const [conversation] = await enrichConversationsWithContactAvatars(supabase, [conversationResult.data])
@@ -686,6 +693,7 @@ export async function getMetaWhatsAppConversationDetail(
   return {
     conversation: conversation || conversationResult.data,
     messages: messagesResult.data || [],
+    replyIntent: replyIntentResult.data?.[0] || null,
   }
 }
 

@@ -102,6 +102,68 @@ async function getMarketingCostCenterId(admin: any) {
     return data?.id || null
 }
 
+async function ensurePaidAdsFinanceCatalogs(admin: any) {
+    const now = new Date().toISOString()
+    let categoryId: string | null = null
+
+    const { data: category, error: categoryError } = await admin
+        .from('finance_categories')
+        .upsert({
+            name: 'Marketing',
+            entry_type: 'expense',
+            is_active: true,
+            updated_at: now,
+        }, { onConflict: 'name' })
+        .select('id')
+        .maybeSingle()
+
+    if (!categoryError) categoryId = category?.id || null
+
+    if (categoryId) {
+        const { error: subcategoryError } = await admin
+            .from('finance_subcategories')
+            .upsert([
+                { category_id: categoryId, name: 'Meta Ads', is_active: true, updated_at: now },
+                { category_id: categoryId, name: 'Google Ads', is_active: true, updated_at: now },
+            ], { onConflict: 'category_id,name' })
+
+        if (subcategoryError) {
+            console.warn('[Ads Finance Sync] failed to seed subcategories:', subcategoryError.message)
+        }
+    } else if (categoryError) {
+        console.warn('[Ads Finance Sync] failed to seed Marketing category:', categoryError.message)
+    }
+
+    const { error: paymentMethodError } = await admin
+        .from('finance_payment_methods')
+        .upsert({
+            name: 'Cartao',
+            is_active: true,
+            updated_at: now,
+        }, { onConflict: 'name' })
+
+    if (paymentMethodError) {
+        console.warn('[Ads Finance Sync] failed to seed Cartao payment method:', paymentMethodError.message)
+    }
+
+    const { data: costCenter, error: costCenterError } = await admin
+        .from('finance_cost_centers')
+        .upsert({
+            name: 'Marketing',
+            code: 'MKT',
+            is_active: true,
+            updated_at: now,
+        }, { onConflict: 'name' })
+        .select('id')
+        .maybeSingle()
+
+    if (costCenterError) {
+        console.warn('[Ads Finance Sync] failed to seed Marketing cost center:', costCenterError.message)
+    }
+
+    return costCenter?.id || await getMarketingCostCenterId(admin)
+}
+
 async function getLiveMonthlySpend(month: string): Promise<{ spends: PlatformSpend[]; errors: string[] }> {
     const errors: string[] = []
     const spends: PlatformSpend[] = []
@@ -237,7 +299,7 @@ export async function syncPaidAdsSpendToFinance(admin: any, options?: { month?: 
     const live = await getLiveMonthlySpend(month)
     result.errors.push(...live.errors)
 
-    const costCenterId = await getMarketingCostCenterId(admin)
+    const costCenterId = await ensurePaidAdsFinanceCatalogs(admin)
     for (const platform of ['meta', 'google'] as Platform[]) {
         const spend = live.spends.find(item => item.platform === platform) || {
             platform,
@@ -291,7 +353,7 @@ export async function syncHistoricalPaidAdsSpendToFinance(admin: any): Promise<H
     result.combined_total = roundCurrency(result.meta_total + result.google_total)
 
     result.months = months.length
-    const costCenterId = await getMarketingCostCenterId(admin)
+    const costCenterId = await ensurePaidAdsFinanceCatalogs(admin)
 
     for (const month of months) {
         for (const platform of ['meta', 'google'] as Platform[]) {

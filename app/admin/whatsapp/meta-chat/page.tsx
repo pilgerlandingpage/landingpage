@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
+import Link from 'next/link'
 import {
   Archive,
   Check,
@@ -30,6 +31,7 @@ import {
 import AdminLoadingState from '@/components/admin/AdminLoadingState'
 
 type ConversationStatus = 'open' | 'pending' | 'closed' | 'archived'
+type ReplyIntent = 'interested' | 'opt_out' | 'question' | 'unknown'
 
 type SenderSummary = {
   display_name?: string | null
@@ -99,11 +101,34 @@ type MetaMessage = {
   created_at: string
 }
 
+type MetaReplyIntent = {
+  id: string
+  intent: ReplyIntent
+  confidence?: number | null
+  source?: 'button' | 'keyword' | 'manual' | 'system' | null
+  raw_text?: string | null
+  campaign_name?: string | null
+  template_name?: string | null
+  notified_status?: 'skipped' | 'sent' | 'failed' | null
+  notified_phone?: string | null
+  notified_at?: string | null
+  auto_reply_status?: 'skipped' | 'sent' | 'failed' | null
+  created_at?: string | null
+  updated_at?: string | null
+}
+
 type ChatPayload = {
   success: boolean
   conversations?: MetaConversation[]
   conversation?: MetaConversation
   messages?: MetaMessage[]
+  replyIntent?: MetaReplyIntent | null
+  result?: {
+    intent?: ReplyIntent
+    notifiedStatus?: 'skipped' | 'sent' | 'failed'
+    notifiedPhone?: string | null
+    intentId?: string | null
+  }
   summary?: {
     total: number
     unread: number
@@ -128,6 +153,26 @@ const statusLabels: Record<string, string> = {
   pending: 'Pendente',
   closed: 'Fechada',
   archived: 'Arquivada',
+}
+
+const triageLabels: Record<ReplyIntent, string> = {
+  interested: 'Interessado',
+  opt_out: 'Sair da lista',
+  question: 'Duvida',
+  unknown: 'Neutro',
+}
+
+const triageSourceLabels: Record<string, string> = {
+  button: 'Botao',
+  keyword: 'Texto',
+  manual: 'Manual',
+  system: 'Sistema',
+}
+
+const notifyStatusLabels: Record<string, string> = {
+  sent: 'Aviso enviado',
+  failed: 'Aviso falhou',
+  skipped: 'Sem aviso',
 }
 
 function asSingle<T>(value?: T | T[] | null): T | null {
@@ -283,12 +328,14 @@ export default function MetaWhatsAppChatPage() {
   const [selectedId, setSelectedId] = useState('')
   const [selected, setSelected] = useState<MetaConversation | null>(null)
   const [messages, setMessages] = useState<MetaMessage[]>([])
+  const [selectedReplyIntent, setSelectedReplyIntent] = useState<MetaReplyIntent | null>(null)
   const [statusFilter, setStatusFilter] = useState<'all' | ConversationStatus>('all')
   const [search, setSearch] = useState('')
   const [reply, setReply] = useState('')
   const [loading, setLoading] = useState(true)
   const [loadingDetail, setLoadingDetail] = useState(false)
   const [sending, setSending] = useState(false)
+  const [triaging, setTriaging] = useState<ReplyIntent | null>(null)
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
 
@@ -327,6 +374,7 @@ export default function MetaWhatsAppChatPage() {
     if (!conversationId) {
       setSelected(null)
       setMessages([])
+      setSelectedReplyIntent(null)
       return
     }
 
@@ -338,6 +386,7 @@ export default function MetaWhatsAppChatPage() {
       if (!payload.success) throw new Error(payload.error || 'Erro ao carregar conversa.')
       setSelected(payload.conversation || null)
       setMessages(payload.messages || [])
+      setSelectedReplyIntent(payload.replyIntent || null)
     } catch (error) {
       setFeedback({ type: 'error', text: error instanceof Error ? error.message : 'Erro ao carregar conversa.' })
     } finally {
@@ -404,6 +453,41 @@ export default function MetaWhatsAppChatPage() {
     }
   }
 
+  const manualTriage = async (intent: ReplyIntent) => {
+    if (!selectedId || triaging) return
+    setTriaging(intent)
+    setFeedback(null)
+    try {
+      const response = await fetch('/api/admin/whatsapp/meta-chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'triage',
+          conversation_id: selectedId,
+          intent,
+          note: `Marcado manualmente como ${triageLabels[intent]} no chat Meta WhatsApp.`,
+        }),
+      })
+      const payload: ChatPayload = await response.json()
+      if (!payload.success) throw new Error(payload.error || 'Erro ao registrar triagem.')
+
+      let message = `${triageLabels[intent]} registrado.`
+      if (intent === 'interested') {
+        if (payload.result?.notifiedStatus === 'sent') message = 'Lead interessado registrado e aviso interno enviado.'
+        if (payload.result?.notifiedStatus === 'failed') message = 'Lead interessado registrado, mas o aviso interno falhou.'
+        if (payload.result?.notifiedStatus === 'skipped') message = 'Lead interessado registrado. Configure um numero interno para receber o aviso.'
+      }
+      if (intent === 'opt_out') message = 'Contato marcado para sair da lista e conversa fechada.'
+
+      setFeedback({ type: payload.result?.notifiedStatus === 'failed' ? 'error' : 'success', text: message })
+      await Promise.all([loadConversations(true), loadDetail(selectedId)])
+    } catch (error) {
+      setFeedback({ type: 'error', text: error instanceof Error ? error.message : 'Erro ao registrar triagem.' })
+    } finally {
+      setTriaging(null)
+    }
+  }
+
   const sendReply = async (event?: FormEvent<HTMLFormElement>) => {
     event?.preventDefault()
     const text = reply.trim()
@@ -448,17 +532,23 @@ export default function MetaWhatsAppChatPage() {
           </h1>
           <p>Caixa de entrada oficial para respostas das campanhas via WhatsApp Cloud API.</p>
         </div>
-        <button
-          type="button"
-          className="meta-button"
-          onClick={() => {
-            loadConversations(true)
-            if (selectedId) loadDetail(selectedId)
-          }}
-        >
-          <RefreshCw size={16} />
-          Atualizar
-        </button>
+        <div className="wa-page-actions">
+          <Link href="/admin/whatsapp/campaigns#central-respostas" className="meta-button meta-link">
+            <Inbox size={16} />
+            Central de respostas
+          </Link>
+          <button
+            type="button"
+            className="meta-button"
+            onClick={() => {
+              loadConversations(true)
+              if (selectedId) loadDetail(selectedId)
+            }}
+          >
+            <RefreshCw size={16} />
+            Atualizar
+          </button>
+        </div>
       </header>
 
       {feedback && (
@@ -629,6 +719,43 @@ export default function MetaWhatsAppChatPage() {
                 <button type="button" className={selected.status === 'open' ? 'active' : ''} onClick={() => updateStatus('open')}>Aberta</button>
                 <button type="button" className={selected.status === 'pending' ? 'active' : ''} onClick={() => updateStatus('pending')}>Pendente</button>
                 <button type="button" className={selected.status === 'closed' ? 'active' : ''} onClick={() => updateStatus('closed')}>Fechada</button>
+                <span className="wa-strip-divider" />
+                <button
+                  type="button"
+                  className="triage interested"
+                  onClick={() => manualTriage('interested')}
+                  disabled={Boolean(triaging)}
+                >
+                  {triaging === 'interested' ? <Loader2 size={14} className="spin" /> : <Check size={14} />}
+                  Interessado
+                </button>
+                <button
+                  type="button"
+                  className="triage optout"
+                  onClick={() => manualTriage('opt_out')}
+                  disabled={Boolean(triaging)}
+                >
+                  {triaging === 'opt_out' ? <Loader2 size={14} className="spin" /> : <XCircle size={14} />}
+                  Sair
+                </button>
+                <button
+                  type="button"
+                  className="triage question"
+                  onClick={() => manualTriage('question')}
+                  disabled={Boolean(triaging)}
+                >
+                  {triaging === 'question' ? <Loader2 size={14} className="spin" /> : <MessageSquareText size={14} />}
+                  Duvida
+                </button>
+                <button
+                  type="button"
+                  className="triage unknown"
+                  onClick={() => manualTriage('unknown')}
+                  disabled={Boolean(triaging)}
+                >
+                  {triaging === 'unknown' ? <Loader2 size={14} className="spin" /> : <CircleDot size={14} />}
+                  Neutro
+                </button>
               </div>
 
               <div className="wa-messages">
@@ -696,6 +823,30 @@ export default function MetaWhatsAppChatPage() {
                   <dd>{selectedLead?.lead_budget || '-'}</dd>
                 </dl>
               </div>
+              <div className="info-card triage-card">
+                <h2>Triagem</h2>
+                {selectedReplyIntent ? (
+                  <>
+                    <span className={`triage-pill ${selectedReplyIntent.intent}`}>
+                      {triageLabels[selectedReplyIntent.intent] || 'Neutro'}
+                    </span>
+                    <dl>
+                      <dt>Confianca</dt>
+                      <dd>{selectedReplyIntent.confidence != null ? `${Math.round(Number(selectedReplyIntent.confidence))}%` : '-'}</dd>
+                      <dt>Origem</dt>
+                      <dd>{triageSourceLabels[selectedReplyIntent.source || ''] || '-'}</dd>
+                      <dt>Resposta</dt>
+                      <dd>{shortText(selectedReplyIntent.raw_text, 80)}</dd>
+                      <dt>Aviso interno</dt>
+                      <dd>{notifyStatusLabels[selectedReplyIntent.notified_status || ''] || '-'}</dd>
+                      <dt>Registrada em</dt>
+                      <dd>{formatDate(selectedReplyIntent.created_at)}</dd>
+                    </dl>
+                  </>
+                ) : (
+                  <p className="muted">Nenhuma triagem registrada nesta conversa.</p>
+                )}
+              </div>
               <div className="info-card">
                 <h2>Origem</h2>
                 <dl>
@@ -755,6 +906,14 @@ export default function MetaWhatsAppChatPage() {
           font-size: 14px;
         }
 
+        .wa-page-actions {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+          justify-content: flex-end;
+        }
+
         .meta-button,
         .icon-button,
         .wa-tabs button,
@@ -774,6 +933,10 @@ export default function MetaWhatsAppChatPage() {
 
         .meta-button {
           padding: 0 13px;
+        }
+
+        .meta-link {
+          text-decoration: none;
         }
 
         .icon-button {
@@ -1128,6 +1291,46 @@ export default function MetaWhatsAppChatPage() {
           background: #d9fdd3;
         }
 
+        .wa-status-strip button:disabled {
+          cursor: wait;
+          opacity: 0.7;
+        }
+
+        .wa-strip-divider {
+          width: 1px;
+          height: 24px;
+          background: #d7dde3;
+          flex: 0 0 auto;
+        }
+
+        .wa-status-strip button.triage {
+          border-radius: 999px;
+        }
+
+        .wa-status-strip button.triage.interested {
+          border-color: #bbf7d0;
+          background: #ecfdf5;
+          color: #047857;
+        }
+
+        .wa-status-strip button.triage.optout {
+          border-color: #fecaca;
+          background: #fef2f2;
+          color: #b91c1c;
+        }
+
+        .wa-status-strip button.triage.question {
+          border-color: #bfdbfe;
+          background: #eff6ff;
+          color: #1d4ed8;
+        }
+
+        .wa-status-strip button.triage.unknown {
+          border-color: #d7dde3;
+          background: #f8fafc;
+          color: #475467;
+        }
+
         .wa-messages {
           overflow: auto;
           padding: 22px 44px;
@@ -1306,6 +1509,49 @@ export default function MetaWhatsAppChatPage() {
           color: #111827;
           font-size: 13px;
           font-weight: 700;
+        }
+
+        .triage-card {
+          display: grid;
+          gap: 12px;
+        }
+
+        .triage-pill {
+          width: fit-content;
+          display: inline-flex;
+          align-items: center;
+          min-height: 28px;
+          padding: 0 10px;
+          border-radius: 999px;
+          font-size: 12px;
+          font-weight: 800;
+        }
+
+        .triage-pill.interested {
+          background: #dcfce7;
+          color: #047857;
+        }
+
+        .triage-pill.opt_out {
+          background: #fee2e2;
+          color: #b91c1c;
+        }
+
+        .triage-pill.question {
+          background: #dbeafe;
+          color: #1d4ed8;
+        }
+
+        .triage-pill.unknown {
+          background: #f1f5f9;
+          color: #475467;
+        }
+
+        .muted {
+          margin: 0;
+          color: #667085;
+          font-size: 13px;
+          line-height: 1.45;
         }
 
         .empty-list,

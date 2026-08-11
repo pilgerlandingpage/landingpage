@@ -5,11 +5,23 @@ import {
   sendMetaWhatsAppChatReply,
   updateMetaWhatsAppConversation,
 } from '@/lib/meta/whatsapp-chat'
+import {
+  manuallyClassifyMetaWhatsAppConversationReply,
+  type ReplyIntent,
+} from '@/lib/meta/whatsapp-triage'
 
 export const dynamic = 'force-dynamic'
 
 function cleanText(value: unknown, maxLength = 2000) {
   return String(value || '').trim().slice(0, maxLength)
+}
+
+function normalizeReplyIntent(value: unknown): ReplyIntent | null {
+  const intent = cleanText(value, 40)
+  if (intent === 'interested' || intent === 'opt_out' || intent === 'question' || intent === 'unknown') {
+    return intent
+  }
+  return null
 }
 
 export async function GET(request: NextRequest) {
@@ -66,6 +78,22 @@ export async function POST(request: NextRequest) {
         status: cleanText(body.status, 20),
       })
       return NextResponse.json({ success: true, action, conversation })
+    }
+
+    if (action === 'triage') {
+      const intent = normalizeReplyIntent(body.intent)
+      if (!intent) {
+        return NextResponse.json({ success: false, error: 'Informe uma classificacao valida.' }, { status: 400 })
+      }
+
+      const result = await manuallyClassifyMetaWhatsAppConversationReply({
+        conversationId,
+        intent,
+        messageId: cleanText(body.message_id || body.messageId, 80) || null,
+        note: cleanText(body.note, 500) || null,
+      })
+
+      return NextResponse.json({ success: true, action, result })
     }
 
     return NextResponse.json({ success: false, error: 'Acao invalida.' }, { status: 400 })

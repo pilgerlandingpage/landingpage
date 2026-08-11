@@ -15,6 +15,7 @@ import {
   recordInboundMetaWhatsAppMessage,
   recordMetaWhatsAppMessageStatus,
 } from '@/lib/meta/whatsapp-chat'
+import { handleMetaWhatsAppReplyTriage } from '@/lib/meta/whatsapp-triage'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -147,14 +148,6 @@ function getWhatsAppContactName(value: any, fromPhone: string) {
   return contact?.profile?.name || null
 }
 
-function isOptOutText(value: unknown) {
-  const text = String(value || '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-  return /\b(sair|cancelar|parar|stop|descadastrar|remover)\b/.test(text)
-}
-
 async function findMetaWhatsAppSenderId(supabase: ReturnType<typeof createAdminClient>, phoneNumberId?: string) {
   const selected = String(phoneNumberId || '').trim()
   if (!selected) return null
@@ -174,11 +167,136 @@ async function findMetaWhatsAppRecipient(supabase: ReturnType<typeof createAdmin
 
   const { data } = await supabase
     .from('meta_whatsapp_campaign_recipients')
-    .select('id, campaign_id, sender_id')
+    .select('id, campaign_id, sender_id, recipient_phone, cost_amount, metadata')
     .eq('provider_message_id', selected)
     .maybeSingle()
 
   return data || null
+}
+
+function normalizePricingCategory(value: unknown) {
+  const selected = String(value || '').trim().toLowerCase()
+  if (['marketing', 'utility', 'authentication', 'service'].includes(selected)) return selected
+  return selected || null
+}
+
+function inferWhatsAppMarketCode(phone: unknown, recipientUserId?: unknown) {
+  const userId = String(recipientUserId || '').trim()
+  const userMarket = userId.match(/^([A-Z]{2})\./)?.[1]
+  if (userMarket) return userMarket
+
+  const normalized = normalizeMetaWhatsAppPhone(phone)
+  if (normalized.startsWith('55')) return 'BR'
+  if (normalized.startsWith('1')) return 'US'
+  return null
+}
+
+function numericCost(value: unknown) {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) && parsed >= 0 ? Number(parsed.toFixed(4)) : null
+}
+
+async function getMetaWhatsAppCostRate(params: {
+  supabase: ReturnType<typeof createAdminClient>
+  marketCode: string | null
+  category: string | null
+  eventDate: string
+}) {
+  if (!params.marketCode || !params.category) return null
+
+  const { data, error } = await params.supabase
+    .from('meta_whatsapp_pricing_rates')
+    .select('amount_per_message, currency')
+    .eq('is_active', true)
+    .eq('market_code', params.marketCode)
+    .eq('pricing_category', params.category)
+    .lte('effective_from', params.eventDate)
+    .or(`effective_to.is.null,effective_to.gte.${params.eventDate}`)
+    .order('effective_from', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (error) return null
+  return data?.amount_per_message !== undefined
+    ? { amount: numericCost(data.amount_per_message), currency: String(data.currency || 'BRL') }
+    : null
+}
+
+async function buildMetaWhatsAppCostUpdate(params: {
+  supabase: ReturnType<typeof createAdminClient>
+  statusEvent: any
+  recipient: any
+  status: string
+  receivedAt: string
+}) {
+  const pricing = params.statusEvent?.pricing
+  if (!pricing || typeof pricing !== 'object') return {}
+
+  const category = normalizePricingCategory(pricing.category)
+  const billable = Boolean(pricing.billable)
+  const marketCode = inferWhatsAppMarketCode(
+    params.statusEvent?.recipient_id || params.recipient?.recipient_phone,
+    params.statusEvent?.recipient_user_id,
+  )
+  const finalBillingStatus = params.status === 'delivered' || params.status === 'read'
+  const shouldRecordCostStatus = finalBillingStatus
+    && (params.recipient?.cost_amount === null || params.recipient?.cost_amount === undefined)
+  const currentMetadata = params.recipient?.metadata && typeof params.recipient.metadata === 'object'
+    ? params.recipient.metadata
+    : {}
+
+  const updatePayload: Record<string, unknown> = {
+    cost_category: category,
+    currency: 'BRL',
+    metadata: {
+      ...currentMetadata,
+      meta_pricing: pricing,
+      meta_pricing_market: marketCode,
+      meta_pricing_received_at: params.receivedAt,
+    },
+  }
+
+  try {
+    updatePayload.pricing_type = pricing.type || null
+    updatePayload.pricing_model = pricing.pricing_model || null
+    updatePayload.pricing_billable = billable
+    updatePayload.cost_market = marketCode
+  } catch {
+    // Backward compatible with databases that have not received the extra pricing columns yet.
+  }
+
+  if (shouldRecordCostStatus) {
+    updatePayload.cost_recorded_at = params.receivedAt
+  }
+
+  if (!shouldRecordCostStatus) {
+    return updatePayload
+  }
+
+  if (!billable) {
+    updatePayload.cost_amount = 0
+    updatePayload.currency = 'BRL'
+    updatePayload.cost_status = 'free'
+    return updatePayload
+  }
+
+  const eventDate = params.receivedAt.slice(0, 10)
+  const rate = await getMetaWhatsAppCostRate({
+    supabase: params.supabase,
+    marketCode,
+    category,
+    eventDate,
+  })
+
+  if (rate?.amount !== null && rate?.amount !== undefined) {
+    updatePayload.cost_amount = rate.amount
+    updatePayload.currency = rate.currency
+    updatePayload.cost_status = 'estimated'
+  } else {
+    updatePayload.cost_status = 'rate_missing'
+  }
+
+  return updatePayload
 }
 
 async function ingestMetaWhatsAppWebhook(payload: any) {
@@ -213,6 +331,14 @@ async function ingestMetaWhatsAppWebhook(payload: any) {
               updatePayload.error_code = statusEvent?.errors?.[0]?.code ? String(statusEvent.errors[0].code) : null
               updatePayload.error_message = statusEvent?.errors?.[0]?.message || statusEvent?.errors?.[0]?.title || null
             }
+
+            Object.assign(updatePayload, await buildMetaWhatsAppCostUpdate({
+              supabase,
+              statusEvent,
+              recipient,
+              status,
+              receivedAt,
+            }))
 
             await supabase
               .from('meta_whatsapp_campaign_recipients')
@@ -272,7 +398,7 @@ async function ingestMetaWhatsAppWebhook(payload: any) {
 
           if (error) throw error
 
-          await recordInboundMetaWhatsAppMessage({
+          const conversation = await recordInboundMetaWhatsAppMessage({
             providerMessageId,
             senderId,
             phoneNumberId: value?.metadata?.phone_number_id,
@@ -284,17 +410,21 @@ async function ingestMetaWhatsAppWebhook(payload: any) {
             eventId: event?.id || null,
           }, supabase)
 
-          if (fromPhone && isOptOutText(textBody)) {
-            await supabase
-              .from('meta_whatsapp_opt_outs')
-              .upsert({
-                phone_e164: fromPhone,
-                source: 'meta_whatsapp_webhook',
-                reason: 'user_requested_opt_out',
-                raw_payload: message,
-                requested_at: receivedAt,
-              }, { onConflict: 'phone_e164' })
-          }
+          const triage = await handleMetaWhatsAppReplyTriage({
+            providerMessageId,
+            conversation,
+            eventId: event?.id || null,
+            senderId,
+            phoneNumberId: value?.metadata?.phone_number_id,
+            fromPhone,
+            contactName,
+            textBody,
+            messageType: message?.type || null,
+            payload: message,
+            receivedAt,
+          }, supabase)
+
+          if (triage?.campaignId) touchedCampaignIds.add(triage.campaignId)
 
           inboundMessagesIngested += 1
           eventsIngested += 1

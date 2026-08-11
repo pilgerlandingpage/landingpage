@@ -20,30 +20,18 @@ type MenuSection = {
     links: MenuLink[]
 }
 
+type DevelopmentMenuOption = {
+    label: string
+    href: string
+    description: string
+}
+
 type HeaderInstagramPost = {
     id: string
     caption?: string | null
     media_url?: string | null
     thumbnail_url?: string | null
     permalink?: string | null
-}
-
-type DevelopmentMenuPage = {
-    slug: string
-    name: string
-    locationName?: string
-    priceRange?: string
-    availableUnitsCount?: number | null
-    stage?: 'launch' | 'construction' | 'ready'
-    stageLabel?: string
-}
-
-type DevelopmentMenuGroup = {
-    id: string
-    label: string
-    href: string
-    total?: number
-    developments: DevelopmentMenuPage[]
 }
 
 const TiktokIcon = ({ size = 16 }: { size?: number }) => (
@@ -59,42 +47,18 @@ function busca(params: Record<string, string | number>) {
     ).toString()}`
 }
 
-const developmentStageFallback: Record<string, { label: string; href: string }> = {
-    launch: { label: 'Lancamentos', href: busca({ tag: 'lancamento' }) },
-    construction: { label: 'Em construcao', href: busca({ tag: 'em-construcao' }) },
-    ready: { label: 'Prontos', href: busca({ tag: 'pronto' }) },
-}
-
-const developmentStageOrder = ['launch', 'construction', 'ready']
-
-function normalizeDevelopmentMenuGroups(data: any): DevelopmentMenuGroup[] {
-    if (Array.isArray(data?.groups)) {
-        return data.groups
-            .map((group: any) => ({
-                id: String(group.id || ''),
-                label: String(group.label || developmentStageFallback[group.id]?.label || 'Empreendimentos'),
-                href: String(group.href || developmentStageFallback[group.id]?.href || '/busca'),
-                total: typeof group.total === 'number' ? group.total : undefined,
-                developments: Array.isArray(group.developments) ? group.developments : [],
-            }))
-            .filter((group: DevelopmentMenuGroup) => group.id && group.developments.length > 0)
-    }
-
-    const pages = Array.isArray(data?.developments) ? data.developments : []
-    return developmentStageOrder
-        .map(stage => {
-            const fallback = developmentStageFallback[stage]
-            const developments = pages.filter((page: DevelopmentMenuPage) => (page.stage || 'ready') === stage)
-            return {
-                id: stage,
-                label: fallback.label,
-                href: fallback.href,
-                total: developments.length,
-                developments,
-            }
-        })
-        .filter(group => group.developments.length > 0)
-}
+const developmentMenuOptions: DevelopmentMenuOption[] = [
+    {
+        label: 'Lançamentos',
+        href: busca({ category: 'empreendimentos', tag: 'lancamento' }),
+        description: 'Ver empreendimentos em lançamento na busca.',
+    },
+    {
+        label: 'Prontos',
+        href: busca({ category: 'empreendimentos', tag: 'pronto' }),
+        description: 'Ver empreendimentos prontos para morar na busca.',
+    },
+]
 
 const saleSections: MenuSection[] = [
     {
@@ -228,37 +192,21 @@ function MobileLink({ link, onClose }: { link: MenuLink; onClose: () => void }) 
     )
 }
 
-function DesktopDevelopmentGroup({ group }: { group: DevelopmentMenuGroup }) {
+function DesktopDevelopmentOption({ option, onClick }: { option: DevelopmentMenuOption; onClick: () => void }) {
     return (
-        <div className="gh-development-group">
-            <div className="gh-development-group-head">
-                <strong>{group.label}</strong>
-                <Link href={group.href}>Ver todos</Link>
-            </div>
-            {group.developments.map(development => (
-                <Link key={development.slug} href={`/${development.slug}`} className="gh-development-link">
-                    <strong>{development.name}</strong>
-                    <span>{development.locationName || development.priceRange || 'Empreendimento Guilherme Pilger'}</span>
-                </Link>
-            ))}
-        </div>
+        <Link href={option.href} className="gh-development-link gh-development-option" onClick={onClick}>
+            <strong>{option.label}</strong>
+            <span>{option.description}</span>
+        </Link>
     )
 }
 
-function MobileDevelopmentGroup({ group, onClose }: { group: DevelopmentMenuGroup; onClose: () => void }) {
+function MobileDevelopmentOption({ option, onClose }: { option: DevelopmentMenuOption; onClose: () => void }) {
     return (
-        <div className="gh-mobile-development-group">
-            <div className="gh-mobile-development-group-title">
-                <span>{group.label}</span>
-                <Link href={group.href} onClick={onClose}>Ver todos</Link>
-            </div>
-            {group.developments.map(development => (
-                <Link key={development.slug} href={`/${development.slug}`} className="gh-mobile-development-link" onClick={onClose}>
-                    <strong>{development.name}</strong>
-                    <small>{development.locationName || development.priceRange || 'Guilherme Pilger'}</small>
-                </Link>
-            ))}
-        </div>
+        <Link href={option.href} className="gh-mobile-development-link" onClick={onClose}>
+            <strong>{option.label}</strong>
+            <small>{option.description}</small>
+        </Link>
     )
 }
 
@@ -267,10 +215,10 @@ export default function GlobalHeader() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const [openAccordion, setOpenAccordion] = useState<string | null>(null)
     const [searchOpen, setSearchOpen] = useState(false)
+    const [developmentsOpen, setDevelopmentsOpen] = useState(false)
     const [mobileInstagramPosts, setMobileInstagramPosts] = useState<HeaderInstagramPost[]>([])
-    const [developmentGroups, setDevelopmentGroups] = useState<DevelopmentMenuGroup[]>([])
     const searchRef = useRef<HTMLLIElement>(null)
-    const hasDevelopmentGroups = developmentGroups.some(group => group.developments.length > 0)
+    const developmentsRef = useRef<HTMLLIElement>(null)
 
     const closeMobileMenu = () => {
         setMobileMenuOpen(false)
@@ -307,20 +255,14 @@ export default function GlobalHeader() {
     }, [searchOpen])
 
     useEffect(() => {
-        let cancelled = false
-
-        fetch('/api/public/developments?menu=1')
-            .then(response => response.ok ? response.json() : null)
-            .then(data => {
-                if (cancelled) return
-                setDevelopmentGroups(normalizeDevelopmentMenuGroups(data))
-            })
-            .catch(() => null)
-
-        return () => {
-            cancelled = true
+        const handleClick = (e: MouseEvent) => {
+            if (developmentsRef.current && !developmentsRef.current.contains(e.target as Node)) {
+                setDevelopmentsOpen(false)
+            }
         }
-    }, [])
+        if (developmentsOpen) document.addEventListener('mousedown', handleClick)
+        return () => document.removeEventListener('mousedown', handleClick)
+    }, [developmentsOpen])
 
     useEffect(() => {
         if (!mobileMenuOpen || mobileInstagramPosts.length) return
@@ -378,20 +320,26 @@ export default function GlobalHeader() {
                             <Link href="/" className="gh-menu-label" aria-label="Home"><Home size={18} color="currentColor" /></Link>
                         </li>
 
-                        {hasDevelopmentGroups && (
-                            <li className="gh-menu-item">
-                                <span className="gh-menu-label">EMPREENDIMENTOS</span>
-                                <div className="gh-dropdown gh-developments-dropdown">
-                                    <Link href="/#empreendimentos" className="gh-development-link gh-development-overview">
-                                        <strong>Empreendimentos em destaque</strong>
-                                        <span>Ver vitrine selecionada na pagina inicial</span>
-                                    </Link>
-                                    {developmentGroups.map(group => (
-                                        <DesktopDevelopmentGroup key={group.id} group={group} />
-                                    ))}
-                                </div>
-                            </li>
-                        )}
+                        <li className={`gh-menu-item ${developmentsOpen ? 'is-open' : ''}`} ref={developmentsRef}>
+                            <button
+                                type="button"
+                                className="gh-menu-label"
+                                onClick={() => setDevelopmentsOpen(open => !open)}
+                                aria-expanded={developmentsOpen}
+                                aria-haspopup="menu"
+                            >
+                                EMPREENDIMENTOS
+                            </button>
+                            <div className="gh-dropdown gh-developments-dropdown" role="menu">
+                                {developmentMenuOptions.map(option => (
+                                    <DesktopDevelopmentOption
+                                        key={option.href}
+                                        option={option}
+                                        onClick={() => setDevelopmentsOpen(false)}
+                                    />
+                                ))}
+                            </div>
+                        </li>
 
                         <li className="gh-menu-item">
                             <span className="gh-menu-label">A IMOBILIÁRIA ▾</span>
@@ -499,24 +447,16 @@ export default function GlobalHeader() {
                                 <span className="gh-mobile-link-main"><Search size={17} strokeWidth={1.75} /><span>Pesquisar imoveis</span></span>
                             </Link>
 
-                            {hasDevelopmentGroups && (
-                                <>
-                                    <button className="gh-mobile-nav-item" onClick={() => toggleAccordion('empreendimentos')} aria-expanded={openAccordion === 'empreendimentos'}>
-                                        <span className="gh-mobile-link-main"><Building2 size={17} strokeWidth={1.75} /><span>Empreendimentos</span></span>
-                                        <ChevronDown className="gh-mobile-chevron" size={15} strokeWidth={1.75} />
-                                    </button>
-                                    {openAccordion === 'empreendimentos' && (
-                                        <div className="gh-mobile-sub gh-mobile-developments-sub">
-                                            <Link href="/#empreendimentos" className="gh-mobile-development-link gh-accent" onClick={closeMobileMenu}>
-                                                <strong>Empreendimentos em destaque</strong>
-                                                <small>Ver vitrine selecionada na home</small>
-                                            </Link>
-                                            {developmentGroups.map(group => (
-                                                <MobileDevelopmentGroup key={group.id} group={group} onClose={closeMobileMenu} />
-                                            ))}
-                                        </div>
-                                    )}
-                                </>
+                            <button className="gh-mobile-nav-item" onClick={() => toggleAccordion('empreendimentos')} aria-expanded={openAccordion === 'empreendimentos'}>
+                                <span className="gh-mobile-link-main"><Building2 size={17} strokeWidth={1.75} /><span>Empreendimentos</span></span>
+                                <ChevronDown className="gh-mobile-chevron" size={15} strokeWidth={1.75} />
+                            </button>
+                            {openAccordion === 'empreendimentos' && (
+                                <div className="gh-mobile-sub gh-mobile-developments-sub">
+                                    {developmentMenuOptions.map(option => (
+                                        <MobileDevelopmentOption key={option.href} option={option} onClose={closeMobileMenu} />
+                                    ))}
+                                </div>
                             )}
 
                             <button className="gh-mobile-nav-item" onClick={() => toggleAccordion('imobiliaria')} aria-expanded={openAccordion === 'imobiliaria'}>
