@@ -296,10 +296,10 @@ const DEFAULT_META_WHATSAPP_TRIAGE_AI_PROMPT = [
     '{"intent":"interested|opt_out|question|unknown","confidence":0-100,"reason":"motivo curto"}',
     '',
     'Regras:',
-    '- interested: o lead pede "saiba mais", quer detalhes, pergunta valor, agenda visita, pede atendimento ou demonstra curiosidade positiva.',
+    '- interested: o lead pede "saiba mais", quer detalhes, pergunta valor, agenda visita, pede atendimento, responde sim/ok, envia oi/ola/bom dia apos uma campanha ou demonstra curiosidade positiva.',
     '- opt_out: o lead pede para sair, parar, remover, apagar dados, nao receber mais, ou expressa rejeicao clara.',
     '- question: o lead pergunta sobre origem do contato, privacidade, cadastro ou dados, sem pedir remocao e sem demonstrar interesse.',
-    '- unknown: mensagens vagas, saudacoes soltas ou textos sem decisao operacional.',
+    '- unknown: anexos sem texto, emojis soltos ou textos sem decisao operacional.',
     'Quando houver interesse misturado com duvida, prefira interested. Quando houver pedido de remocao, sempre prefira opt_out.',
 ].join('\n')
 

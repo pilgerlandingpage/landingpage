@@ -56,10 +56,10 @@ const DEFAULT_TRIAGE_AI_PROMPT = [
   '{"intent":"interested|opt_out|question|unknown","confidence":0-100,"reason":"motivo curto"}',
   '',
   'Regras:',
-  '- interested: o lead pede "saiba mais", quer detalhes, pergunta valor, agenda visita, pede atendimento ou demonstra curiosidade positiva.',
+  '- interested: o lead pede "saiba mais", quer detalhes, pergunta valor, agenda visita, pede atendimento, responde sim/ok, envia oi/ola/bom dia apos uma campanha ou demonstra curiosidade positiva.',
   '- opt_out: o lead pede para sair, parar, remover, apagar dados, nao receber mais, ou expressa rejeicao clara.',
   '- question: o lead pergunta sobre origem do contato, privacidade, cadastro ou dados, sem pedir remocao e sem demonstrar interesse.',
-  '- unknown: mensagens vagas, saudacoes soltas ou textos sem decisao operacional.',
+  '- unknown: anexos sem texto, emojis soltos ou textos sem decisao operacional.',
   'Quando houver interesse misturado com duvida, prefira interested. Quando houver pedido de remocao, sempre prefira opt_out.',
 ].join('\n')
 
@@ -92,6 +92,12 @@ function includesAny(text: string, patterns: Array<string | RegExp>) {
       ? text.includes(pattern)
       : pattern.test(text)
   ))
+}
+
+function isSimplePositiveReply(text: string) {
+  if (!text || text.length > 90) return false
+
+  return /^(oi+|ola+|opa|bom dia|boa tarde|boa noite|e ai|eae|tudo bem|td bem|oi tudo bem|ola tudo bem|sim|ss|ok|okay|beleza|show|quero|pode|pode sim|manda|manda ai|me chama)[\s.!?]*$/i.test(text)
 }
 
 function extractButtonSignal(payload: unknown) {
@@ -164,11 +170,16 @@ function classifyMetaWhatsAppReply(input: {
     /\binteresse\b/,
     'quero saber',
     'quero mais',
+    /\bquero\b/,
     'pode chamar',
+    'pode mandar',
+    'manda ai',
+    'me passa',
     'me chama',
     'chama no whatsapp',
     'quero sim',
     'sim tenho',
+    /\bsim\b/,
     /\bdetalhes\b/,
     /\bvalor\b/,
     /\bpreco\b/,
@@ -212,6 +223,19 @@ function classifyMetaWhatsAppReply(input: {
       rawText: rawText || null,
       classifier: 'rules',
       reason: 'Interesse identificado por botao ou palavra-chave.',
+    }
+  }
+
+  if (isSimplePositiveReply(combined)) {
+    return {
+      intent: 'interested',
+      confidence: source === 'button' ? 98 : 86,
+      source,
+      buttonText: button.text || null,
+      buttonPayload: button.payload || null,
+      rawText: rawText || null,
+      classifier: 'rules',
+      reason: 'Resposta curta positiva tratada como interesse leve no canal oficial.',
     }
   }
 
@@ -1079,10 +1103,7 @@ export async function handleMetaWhatsAppReplyTriage(
 
   let notifiedStatus: 'skipped' | 'sent' | 'failed' = 'skipped'
   if (classification.intent === 'interested') {
-    const notifyPhone = normalizeMetaWhatsAppPhone(
-      configMap.meta_whatsapp_triage_interest_notify_phone
-      || configMap.meta_whatsapp_support_redirect_phone
-    )
+    const notifyPhone = normalizeMetaWhatsAppPhone(configMap.meta_whatsapp_triage_interest_notify_phone)
 
     if (notifyPhone) {
       try {
