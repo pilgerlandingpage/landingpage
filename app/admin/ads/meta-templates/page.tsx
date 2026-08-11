@@ -13,6 +13,7 @@ import {
   Save,
   Send,
   Trash2,
+  Upload,
 } from 'lucide-react'
 import AdminLoadingState from '@/components/admin/AdminLoadingState'
 
@@ -59,6 +60,7 @@ interface TemplateForm {
   headerFormat: HeaderFormat
   headerText: string
   headerExample: string
+  headerMediaSampleUrl: string
   headerMediaHandle: string
   bodyText: string
   bodyExamples: string
@@ -82,6 +84,7 @@ const emptyForm: TemplateForm = {
   headerFormat: 'NONE',
   headerText: '',
   headerExample: '',
+  headerMediaSampleUrl: '',
   headerMediaHandle: '',
   bodyText: '',
   bodyExamples: '',
@@ -146,6 +149,8 @@ function parseTemplateToForm(template: MetaTemplateRow | TemplateDraft): Templat
   const footer = components.find(component => textValue(component.type).toUpperCase() === 'FOOTER')
   const buttons = components.find(component => textValue(component.type).toUpperCase() === 'BUTTONS')
   const rawButtons = Array.isArray(buttons?.buttons) ? buttons?.buttons.map(asRecord) : []
+  const headerExample = asRecord(header?.example)
+  const headerHandle = Array.isArray(headerExample.header_handle) ? textValue(headerExample.header_handle[0]) : ''
 
   if ('form' in template && template.form) {
     return { ...emptyForm, ...template.form, name: template.name, language: template.language, category: template.category as TemplateForm['category'] }
@@ -158,6 +163,7 @@ function parseTemplateToForm(template: MetaTemplateRow | TemplateDraft): Templat
     category: (template.category || 'MARKETING').toUpperCase() as TemplateForm['category'],
     headerFormat: (textValue(header?.format).toUpperCase() || 'NONE') as HeaderFormat,
     headerText: textValue(header?.text),
+    headerMediaHandle: headerHandle,
     bodyText: textValue(body?.text),
     footerText: textValue(footer?.text),
     buttons: rawButtons.map(button => ({
@@ -185,6 +191,7 @@ export default function MetaTemplatesPage() {
   const [drafts, setDrafts] = useState<TemplateDraft[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [uploadingTemplateMedia, setUploadingTemplateMedia] = useState(false)
   const [syncing, setSyncing] = useState(false)
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [activeStatus, setActiveStatus] = useState<TemplateStatus>('all')
@@ -248,7 +255,10 @@ export default function MetaTemplatesPage() {
           if (!form.headerExample.trim()) throw new Error('Exemplo da variavel do header obrigatorio.')
           header.example = { header_text: [form.headerExample.trim()] }
         }
-      } else if (form.headerMediaHandle.trim()) {
+      } else {
+        if (!form.headerMediaHandle.trim()) {
+          throw new Error('Gere ou informe o handle de midia Meta para aprovar template com imagem, video ou documento.')
+        }
         header.example = { header_handle: [form.headerMediaHandle.trim()] }
       }
       components.push(header)
@@ -349,6 +359,34 @@ export default function MetaTemplatesPage() {
       form: { ...form, name },
     }, 'Rascunho salvo.')
     if (payload?.draft?.id) setEditingDraftId(payload.draft.id)
+  }
+
+  const generateHeaderMediaHandle = async () => {
+    const url = form.headerMediaSampleUrl.trim()
+    if (!url) {
+      setFeedback({ type: 'error', text: 'Informe a URL publica da midia de exemplo.' })
+      return
+    }
+
+    setUploadingTemplateMedia(true)
+    setFeedback(null)
+    try {
+      const response = await fetch('/api/admin/whatsapp/template-media', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      })
+      const payload = await response.json()
+      if (!payload.success || !payload.handle) {
+        throw new Error(payload.message || 'Falha ao gerar handle de midia.')
+      }
+      updateForm({ headerMediaHandle: payload.handle })
+      setFeedback({ type: 'success', text: 'Handle de midia gerado. Agora o template pode ser enviado para aprovacao.' })
+    } catch (error) {
+      setFeedback({ type: 'error', text: error instanceof Error ? error.message : 'Erro ao gerar handle de midia' })
+    } finally {
+      setUploadingTemplateMedia(false)
+    }
   }
 
   const submitToMeta = async () => {
@@ -490,9 +528,19 @@ export default function MetaTemplatesPage() {
                   <input value={form.headerText} onChange={event => updateForm({ headerText: event.target.value })} placeholder="Oportunidade para {{1}}" style={inputStyle} />
                 </Field>
               ) : form.headerFormat !== 'NONE' ? (
-                <Field label="Handle de midia Meta">
-                  <input value={form.headerMediaHandle} onChange={event => updateForm({ headerMediaHandle: event.target.value })} placeholder="Opcional: handle de exemplo da midia" style={inputStyle} />
-                </Field>
+                <>
+                  <Field label="URL da midia de exemplo">
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'stretch' }}>
+                      <input value={form.headerMediaSampleUrl} onChange={event => updateForm({ headerMediaSampleUrl: event.target.value })} placeholder="https://... imagem publica" style={inputStyle} />
+                      <button type="button" onClick={generateHeaderMediaHandle} disabled={uploadingTemplateMedia || saving} style={{ ...actionButtonStyle(false), whiteSpace: 'nowrap' }}>
+                        {uploadingTemplateMedia ? <Loader2 size={16} className="spin" /> : <Upload size={16} />} Gerar
+                      </button>
+                    </div>
+                  </Field>
+                  <Field label="Handle de midia Meta">
+                    <input value={form.headerMediaHandle} onChange={event => updateForm({ headerMediaHandle: event.target.value })} placeholder="Gerado pela Meta para aprovacao" style={inputStyle} />
+                  </Field>
+                </>
               ) : <div />}
               {form.headerFormat === 'TEXT' && headerVariables.length > 0 ? (
                 <Field label="Exemplo do header">
@@ -572,8 +620,10 @@ export default function MetaTemplatesPage() {
           <div style={{ borderRadius: 18, padding: 14, background: '#efe7dc', color: '#111827', minHeight: 360 }}>
             <div style={{ maxWidth: '88%', marginLeft: 'auto', borderRadius: '12px 12px 3px 12px', padding: '10px 12px', background: '#dcf8c6', boxShadow: '0 1px 2px rgba(0,0,0,0.16)', fontSize: '0.86rem', lineHeight: 1.45, whiteSpace: 'pre-wrap' }}>
               {form.headerFormat !== 'NONE' && form.headerFormat !== 'TEXT' && (
-                <div style={{ minHeight: 92, borderRadius: 10, background: '#cbd5e1', display: 'grid', placeItems: 'center', color: '#475569', fontWeight: 800, marginBottom: 8 }}>
-                  {form.headerFormat}
+                <div style={{ minHeight: 92, borderRadius: 10, background: '#cbd5e1', display: 'grid', placeItems: 'center', color: '#475569', fontWeight: 800, marginBottom: 8, overflow: 'hidden' }}>
+                  {form.headerFormat === 'IMAGE' && form.headerMediaSampleUrl ? (
+                    <img src={form.headerMediaSampleUrl} alt="" style={{ width: '100%', display: 'block', objectFit: 'cover', maxHeight: 180 }} />
+                  ) : form.headerFormat}
                 </div>
               )}
               {form.headerFormat === 'TEXT' && form.headerText && (

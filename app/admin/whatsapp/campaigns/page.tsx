@@ -902,7 +902,7 @@ export default function CampaignsPage() {
         template.name === metaTemplateName && template.language === metaTemplateLanguage
     ) || null
 
-    const getMissingMetaTemplateFields = (skipBodyValues = false) => {
+    const getMissingMetaTemplateFields = (skipBodyValues = false, skipHeaderMedia = false) => {
         const template = getSelectedMetaTemplate()
         if (!template) return []
 
@@ -913,7 +913,7 @@ export default function CampaignsPage() {
         const headerVariables = extractTemplateVariables(textValue(header?.text))
         const bodyVariables = extractTemplateVariables(textValue(body?.text))
 
-        if (header && ['IMAGE', 'VIDEO', 'DOCUMENT'].includes(headerFormat) && !metaHeaderMediaUrl.trim()) {
+        if (!skipHeaderMedia && header && ['IMAGE', 'VIDEO', 'DOCUMENT'].includes(headerFormat) && !metaHeaderMediaUrl.trim()) {
             missing.push(`midia do header ${headerFormat.toLowerCase()}`)
         }
         if (headerFormat === 'TEXT' && headerVariables.length && !metaHeaderParameterValue.trim()) {
@@ -934,7 +934,10 @@ export default function CampaignsPage() {
         return missing
     }
 
-    const buildMetaTemplateParameters = (bodyValues: Record<string, string> = metaBodyParameterValues) => {
+    const buildMetaTemplateParameters = (
+        bodyValues: Record<string, string> = metaBodyParameterValues,
+        headerMediaUrl: string = metaHeaderMediaUrl
+    ) => {
         const template = getSelectedMetaTemplate()
         if (!template) {
             return metaTemplateParameters
@@ -951,10 +954,10 @@ export default function CampaignsPage() {
         const bodyVariables = extractTemplateVariables(textValue(body?.text))
 
         if (header) {
-            if (['IMAGE', 'VIDEO', 'DOCUMENT'].includes(headerFormat) && metaHeaderMediaUrl.trim()) {
+            if (['IMAGE', 'VIDEO', 'DOCUMENT'].includes(headerFormat) && headerMediaUrl.trim()) {
                 components.push({
                     type: 'header',
-                    parameters: [buildHeaderParameter(headerFormat, metaHeaderMediaUrl)],
+                    parameters: [buildHeaderParameter(headerFormat, headerMediaUrl)],
                 })
             } else if (headerFormat === 'TEXT' && headerVariables.length && metaHeaderParameterValue.trim()) {
                 components.push({
@@ -1029,17 +1032,30 @@ export default function CampaignsPage() {
                 if (!bodyValues[key] && variable === 1 && name) bodyValues[key] = name
             })
 
+            const selectedTemplate = getSelectedMetaTemplate()
+            const header = findTemplateComponent(selectedTemplate, 'HEADER')
+            const headerFormat = textValue(header?.format).toUpperCase()
+            const headerUsesMedia = ['IMAGE', 'VIDEO', 'DOCUMENT'].includes(headerFormat)
+            const rowHeaderMediaUrl = headerUsesMedia
+                ? (columns[selectedBodyVariables.length + 2] || metaHeaderMediaUrl).trim()
+                : ''
+
             const missingVariables = selectedBodyVariables
                 .filter(variable => !bodyValues[String(variable)]?.trim())
                 .map(variable => `{{${variable}}}`)
 
+            if (headerUsesMedia && !rowHeaderMediaUrl) {
+                missingVariables.push('midia do header')
+            }
+
             recipients.push({
                 phone,
                 name: name || undefined,
-                templateParameters: buildMetaTemplateParameters(bodyValues),
+                templateParameters: buildMetaTemplateParameters(bodyValues, rowHeaderMediaUrl),
                 metadata: {
                     source_line: lineIndex + 1,
                     personalized_campaign_row: true,
+                    ...(rowHeaderMediaUrl ? { header_media_url: rowHeaderMediaUrl } : {}),
                 },
                 missingVariables,
             })
@@ -1072,7 +1088,7 @@ export default function CampaignsPage() {
             return
         }
         if (sendProvider === 'meta_whatsapp') {
-            const missingFields = getMissingMetaTemplateFields(metaAudiencePersonalized)
+            const missingFields = getMissingMetaTemplateFields(metaAudiencePersonalized, metaAudiencePersonalized)
             if (missingFields.length) {
                 setFeedback({ type: 'error', text: `Preencha ${missingFields.join(', ')}.` })
                 return
@@ -1244,6 +1260,7 @@ export default function CampaignsPage() {
     const selectedFooterComponent = findTemplateComponent(selectedMetaTemplate, 'FOOTER')
     const selectedTemplateButtons = getTemplateButtons(selectedMetaTemplate)
     const selectedHeaderFormat = textValue(selectedHeaderComponent?.format).toUpperCase()
+    const selectedHeaderUsesMedia = ['IMAGE', 'VIDEO', 'DOCUMENT'].includes(selectedHeaderFormat)
     const selectedHeaderText = textValue(selectedHeaderComponent?.text)
     const selectedBodyText = textValue(selectedBodyComponent?.text)
     const selectedFooterText = textValue(selectedFooterComponent?.text)
@@ -2170,7 +2187,7 @@ export default function CampaignsPage() {
                             </div>
                             <textarea value={numbersInput} onChange={e => setNumbersInput(e.target.value)}
                                 placeholder={sendProvider === 'meta_whatsapp' && metaAudiencePersonalized
-                                    ? "5547999999999; Maria; Maria; Apartamento frente mar; https://guilhermepilger.ai/imovel\n5547888888888; Joao; Joao; Cobertura vista mar; https://guilhermepilger.ai/imovel-2"
+                                    ? `5547999999999; Maria${selectedBodyVariables.map(variable => `; valor {{${variable}}}`).join('') || '; valor {{1}}'}${selectedHeaderUsesMedia ? '; https://guilhermepilger.ai/foto.jpg' : ''}\n5547888888888; Joao${selectedBodyVariables.map(variable => `; valor {{${variable}}}`).join('') || '; valor {{1}}'}${selectedHeaderUsesMedia ? '; https://guilhermepilger.ai/foto-2.jpg' : ''}`
                                     : "5547999999999\n5547888888888\n5511777777777"}
                                 rows={5}
                                 style={{
@@ -2187,7 +2204,7 @@ export default function CampaignsPage() {
                             </div>
                             {sendProvider === 'meta_whatsapp' && metaAudiencePersonalized && (
                                 <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '6px', lineHeight: 1.45 }}>
-                                    Formato: telefone; nome{selectedBodyVariables.map(variable => `; valor para {{${variable}}}`).join('') || '; valor para {{1}}'}.
+                                    Formato: telefone; nome{selectedBodyVariables.map(variable => `; valor para {{${variable}}}`).join('') || '; valor para {{1}}'}{selectedHeaderUsesMedia ? '; URL da midia do header' : ''}.
                                     {parsedMetaRecipientDrafts.some(recipient => (recipient.missingVariables || []).length > 0) && (
                                         <span style={{ color: '#ef4444', display: 'block', marginTop: '4px' }}>
                                             Existem linhas com variaveis obrigatorias vazias.
