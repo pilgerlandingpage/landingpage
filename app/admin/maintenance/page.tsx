@@ -190,6 +190,20 @@ const INTEGRATIONS: IntegrationCard[] = [
             { key: 'meta_whatsapp_triage_interest_reply', label: 'Resposta automatica - saiba mais', placeholder: 'Perfeito. Vou encaminhar seu contato para um especialista da nossa equipe dar continuidade ao atendimento.', isSecret: false, type: 'textarea' },
             { key: 'meta_whatsapp_triage_opt_out_reply', label: 'Resposta automatica - sair', placeholder: 'Pronto. Removemos seu contato da nossa lista. Voce nao recebera novas campanhas por este canal.', isSecret: false, type: 'textarea' },
             { key: 'meta_whatsapp_triage_privacy_reply', label: 'Resposta automatica - origem do contato', placeholder: 'Voce estava em nossa base de contatos de campanhas anteriores da imobiliaria. Se quiser sair da lista, responda SAIR que removemos seu contato.', isSecret: false, type: 'textarea' },
+            {
+                key: 'meta_whatsapp_agent_enabled',
+                label: 'Agente IA de pre-atendimento',
+                placeholder: 'Ativo',
+                isSecret: false,
+                type: 'select',
+                options: [
+                    { value: 'true', label: 'Ativo' },
+                    { value: 'false', label: 'Inativo' },
+                ],
+            },
+            { key: 'meta_whatsapp_agent_history_limit', label: 'Historico usado pelo agente', placeholder: '12', isSecret: false },
+            { key: 'meta_whatsapp_agent_prompt', label: 'Prompt do agente IA de respostas', placeholder: 'Regras de atendimento conversacional, interesse, saida e privacidade.', isSecret: false, type: 'textarea' },
+            { key: 'meta_whatsapp_agent_unknown_reply', label: 'Resposta fallback do agente', placeholder: 'Oi, tudo bem? Quer falar com um especialista?', isSecret: false, type: 'textarea' },
             { key: 'meta_whatsapp_editorial_blog_template_name', label: 'Template oficial para blog', placeholder: 'pilger_blog_editorial', isSecret: false },
             { key: 'meta_whatsapp_editorial_news_template_name', label: 'Template oficial para noticia', placeholder: 'pilger_news_editorial', isSecret: false },
             { key: 'meta_whatsapp_property_followup_template_name', label: 'Template oficial para recomendacao', placeholder: 'pilger_property_followup', isSecret: false },
@@ -1542,14 +1556,14 @@ export default function MaintenancePage() {
                                         ) : field.type === 'textarea' ? (
                                             <textarea
                                                 className="form-input"
-                                                rows={field.key === 'meta_whatsapp_triage_ai_prompt' ? 8 : 3}
+                                                rows={field.key === 'meta_whatsapp_agent_prompt' ? 10 : field.key === 'meta_whatsapp_triage_ai_prompt' ? 8 : 3}
                                                 value={configs[field.key] || ''}
                                                 onChange={e => updateConfigField(field.key, e.target.value)}
                                                 placeholder={field.placeholder}
                                                 style={{
                                                     fontFamily: 'inherit',
                                                     fontSize: '0.9rem',
-                                                    minHeight: field.key === 'meta_whatsapp_triage_ai_prompt' ? '180px' : '88px',
+                                                    minHeight: field.key === 'meta_whatsapp_agent_prompt' ? '220px' : field.key === 'meta_whatsapp_triage_ai_prompt' ? '180px' : '88px',
                                                     resize: 'vertical',
                                                 }}
                                             />
@@ -2661,6 +2675,4 @@ export default function MaintenancePage() {
         </div >
     )
 }
-
-
 
