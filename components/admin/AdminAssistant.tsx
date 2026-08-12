@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MessageSquare, X, Send, User, Bot, Loader2, Sparkles } from 'lucide-react'
 
@@ -11,6 +12,7 @@ interface Message {
 }
 
 export default function AdminAssistant() {
+    const pathname = usePathname()
     const [isOpen, setIsOpen] = useState(false)
     const [messages, setMessages] = useState<Message[]>([])
     const [input, setInput] = useState('')
@@ -45,6 +47,10 @@ export default function AdminAssistant() {
             }])
         }
     }, [isOpen, hasGreeted])
+
+    if (pathname === '/admin/whatsapp/meta-chat') {
+        return null
+    }
 
     const handleSend = async () => {
         if (!input.trim() || isLoading) return

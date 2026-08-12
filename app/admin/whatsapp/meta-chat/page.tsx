@@ -339,6 +339,15 @@ export default function MetaWhatsAppChatPage() {
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
 
+  useEffect(() => {
+    const adminContent = document.querySelector('.admin-content')
+    adminContent?.classList.add('admin-content--whatsapp-chat')
+
+    return () => {
+      adminContent?.classList.remove('admin-content--whatsapp-chat')
+    }
+  }, [])
+
   const selectedSender = useMemo(() => asSingle(selected?.sender), [selected])
   const selectedCampaign = useMemo(() => asSingle(selected?.campaign), [selected])
   const selectedLead = useMemo(() => asSingle(selected?.lead), [selected])
@@ -1654,10 +1663,17 @@ export default function MetaWhatsAppChatPage() {
         }
 
         /* WhatsApp Web style shell */
+        :global(.admin-content.admin-content--whatsapp-chat) {
+          height: 100vh;
+          min-height: 100vh;
+          padding: 0;
+          overflow: hidden;
+        }
+
         .wa-page {
           position: relative;
-          height: calc(100vh - 76px);
-          min-height: 740px;
+          height: 100vh;
+          min-height: 0;
           padding: 0;
           background: #f0f2f5;
           overflow: hidden;
@@ -1680,6 +1696,8 @@ export default function MetaWhatsAppChatPage() {
 
         .wa-shell {
           grid-template-columns: 64px minmax(390px, 470px) minmax(0, 1fr);
+          width: 100%;
+          max-width: 100%;
           height: 100%;
           min-height: 0;
           border: 0;
@@ -2028,6 +2046,12 @@ export default function MetaWhatsAppChatPage() {
         }
 
         @media (max-width: 860px) {
+          :global(.admin-content.admin-content--whatsapp-chat) {
+            height: auto;
+            min-height: 100vh;
+            overflow: auto;
+          }
+
           .wa-page {
             height: auto;
             min-height: 100vh;
