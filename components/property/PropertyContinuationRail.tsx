@@ -1,16 +1,17 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { MouseEvent } from 'react'
 import Link from 'next/link'
 import { ArrowRight, Clock3, Heart } from 'lucide-react'
-import PropertyCard from '@/components/marketplace/PropertyCard'
-import { replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
+import { displayLocationName, normalizeLocationName, replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
+import { getPropertyPrimaryQualityLabel } from '@/lib/properties/intelligence'
+import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 import { trackEvent } from '@/lib/tracking/client'
 
 const FAVORITES_KEY = 'pilger_property_favorites'
 const HISTORY_KEY = 'pilger_property_history'
 const MAX_MEMORY_ITEMS = 8
+const FALLBACK_IMAGE = '/opengraph-image'
 
 type MemoryProperty = {
     id: string
@@ -70,19 +71,46 @@ function mergeMemoryIds(currentPropertyId: string) {
     }
 }
 
-function toCardProperty(property: MemoryProperty) {
-    return {
-        ...property,
-        id: property.id,
-        title: replaceItajaiWithPraiaBrava(property.seo_title || property.title || 'Imóvel selecionado'),
-        city: property.city || null,
-        state: property.state || null,
-        price: property.price || null,
-        bedrooms: property.bedrooms || null,
-        bathrooms: property.bathrooms || null,
-        area_m2: property.area_m2 || null,
-        featured_image: property.featured_image || null,
+function toNumber(value: unknown) {
+    if (typeof value === 'number') return Number.isFinite(value) ? value : 0
+    const normalized = String(value || '')
+        .replace(/[^\d,.-]/g, '')
+        .replace(/\./g, '')
+        .replace(',', '.')
+    const parsed = Number(normalized)
+    return Number.isFinite(parsed) ? parsed : 0
+}
+
+function formatMoney(value?: number | null, fallback = 'Sob consulta') {
+    const numericValue = toNumber(value)
+    if (!numericValue) return fallback
+
+    return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+        maximumFractionDigits: 0,
+    }).format(numericValue)
+}
+
+function statLabel(value: number, singular: string, plural: string) {
+    return value === 1 ? singular : plural
+}
+
+function buildDisplayLocationParts(neighborhood: unknown, city: unknown) {
+    const displayNeighborhood = replaceItajaiWithPraiaBrava(neighborhood)
+    const displayCity = displayLocationName(city)
+
+    if (normalizeLocationName(displayNeighborhood) === normalizeLocationName(displayCity)) {
+        return [displayNeighborhood || displayCity].filter(Boolean)
     }
+
+    return [displayNeighborhood, displayCity].filter(Boolean)
+}
+
+function cleanRepeatedPraiaBravaText(value: unknown) {
+    return replaceItajaiWithPraiaBrava(value)
+        .replace(/\b(na|no|em)\s+Praia Brava\s+em\s+Praia Brava\b/gi, '$1 Praia Brava')
+        .replace(/\bPraia Brava\s+em\s+Praia Brava\b/gi, 'Praia Brava')
 }
 
 export default function PropertyContinuationRail({ currentPropertyId, title }: PropertyContinuationRailProps) {
@@ -166,10 +194,7 @@ export default function PropertyContinuationRail({ currentPropertyId, title }: P
         })
     }, [currentPropertyId, favoriteIds.length, historyIds.length, title, visibleProperties])
 
-    const handlePropertyClick = (event: MouseEvent<HTMLDivElement>, property: MemoryProperty, index: number) => {
-        const target = event.target instanceof Element ? event.target : null
-        if (target?.closest('button')) return
-
+    const handlePropertyClick = (property: MemoryProperty, index: number) => {
         void trackEvent('property_details_continuation_property_clicked', {
             property_id: property.id,
             source_property_id: currentPropertyId,
@@ -184,10 +209,10 @@ export default function PropertyContinuationRail({ currentPropertyId, title }: P
     if (!isLoading && visibleProperties.length === 0) return null
 
     return (
-        <section className="plp-continuation-rail" aria-label="Imóveis salvos e vistos recentemente">
-            <div className="plp-continuation-head">
+        <section className="plp-related-band plp-continuation-rail" aria-label="Imóveis salvos e vistos recentemente">
+            <div className="plp-related-head plp-continuation-head">
                 <div>
-                    <span>
+                    <span className="plp-continuation-kicker">
                         <Clock3 size={14} />
                         Continue de onde parou
                     </span>
@@ -214,32 +239,48 @@ export default function PropertyContinuationRail({ currentPropertyId, title }: P
             {isLoading && visibleProperties.length === 0 ? (
                 <div className="plp-continuation-loading">Carregando sua selecao...</div>
             ) : (
-                <div className="plp-continuation-grid">
-                    {visibleProperties.map((property, index) => (
-                        <div
-                            className="plp-continuation-card"
-                            key={property.id}
-                            onClick={(event) => handlePropertyClick(event, property, index)}
-                        >
-                            <PropertyCard
-                                property={toCardProperty(property)}
-                                imagePriority={index === 0}
-                                variant="homeCompact"
-                            />
-                        </div>
-                    ))}
+                <div className="plp-related-grid plp-continuation-grid">
+                    {visibleProperties.map((property, index) => {
+                        const image = property.featured_image || property.images?.[0] || FALLBACK_IMAGE
+                        const itemArea = toNumber(property.area_private_m2 || property.area_m2)
+                        const itemSuites = toNumber(property.suites || property.bedrooms)
+                        const itemParking = toNumber(property.parking_spaces)
+                        const relatedLocation = buildDisplayLocationParts(property.neighborhood, property.city).join(' - ')
+                        const relatedTitle = cleanRepeatedPraiaBravaText(property.seo_title || property.title || 'Imovel selecionado')
+                        const itemQualityLabel = getPropertyPrimaryQualityLabel(property)
+
+                        return (
+                            <Link
+                                key={property.id}
+                                href={propertyDetailsPath(property)}
+                                className="plp-related-card plp-continuation-card"
+                                onClick={() => handlePropertyClick(property, index)}
+                            >
+                                <div className="plp-related-media">
+                                    <img src={image} alt={relatedTitle} loading={index === 0 ? 'eager' : 'lazy'} />
+                                    <span className={`plp-card-ribbon plp-card-ribbon-${itemQualityLabel.tone}`}>
+                                        {itemQualityLabel.label}
+                                    </span>
+                                </div>
+                                <div className="plp-related-body">
+                                    <h3>{relatedTitle}</h3>
+                                    <p>{relatedLocation || 'Litoral catarinense'}</p>
+                                    <strong>{formatMoney(property.price)}</strong>
+                                    <div className="plp-related-meta">
+                                        {itemArea > 0 && <span>{itemArea.toLocaleString('pt-BR')} m²</span>}
+                                        {itemSuites > 0 && <span>{itemSuites} {statLabel(itemSuites, 'suíte', 'suítes')}</span>}
+                                        {itemParking > 0 && <span>{itemParking} {statLabel(itemParking, 'vaga', 'vagas')}</span>}
+                                    </div>
+                                </div>
+                            </Link>
+                        )
+                    })}
                 </div>
             )}
 
             <style jsx>{`
                 .plp-continuation-rail {
-                    margin: 26px 22px 0;
-                    padding: 16px 18px 18px;
-                    border: 1px solid rgba(184, 148, 95, 0.18);
-                    border-radius: var(--plp-radius);
-                    background:
-                        linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(248,246,241,0.98) 100%);
-                    color: var(--plp-ink);
+                    margin-top: 28px;
                 }
 
                 .plp-continuation-head {
@@ -250,14 +291,14 @@ export default function PropertyContinuationRail({ currentPropertyId, title }: P
                     margin-bottom: 12px;
                 }
 
-                .plp-continuation-head span,
+                .plp-continuation-kicker,
                 .plp-continuation-head a {
                     display: inline-flex;
                     align-items: center;
                     gap: 7px;
                 }
 
-                .plp-continuation-head span {
+                .plp-continuation-kicker {
                     margin-bottom: 0;
                     color: var(--plp-gold-dark);
                     font-size: 12px;
@@ -288,25 +329,8 @@ export default function PropertyContinuationRail({ currentPropertyId, title }: P
                     box-shadow: 0 12px 28px rgba(36, 29, 20, 0.07);
                 }
 
-                .plp-continuation-grid {
-                    display: flex;
-                    gap: 12px;
-                    margin: 0 -18px;
-                    overflow-x: auto;
-                    overflow-y: hidden;
-                    padding: 0 18px 4px;
-                    scroll-snap-type: x proximity;
-                    scrollbar-width: none;
-                }
-
-                .plp-continuation-grid::-webkit-scrollbar {
-                    display: none;
-                }
-
                 .plp-continuation-card {
-                    flex: 0 0 clamp(210px, 21vw, 255px);
                     min-width: 0;
-                    scroll-snap-align: start;
                 }
 
                 .plp-continuation-loading {
@@ -319,27 +343,10 @@ export default function PropertyContinuationRail({ currentPropertyId, title }: P
                     font: 750 13px/1 'Inter', sans-serif;
                 }
 
-                @media (max-width: 1020px) {
-                    .plp-continuation-card {
-                        flex-basis: min(235px, 72vw);
-                    }
-                }
-
                 @media (max-width: 760px) {
-                    .plp-continuation-rail {
-                        margin: 20px 9px 0;
-                        padding: 16px 10px 18px;
-                    }
-
                     .plp-continuation-head {
                         align-items: flex-start;
                         display: grid;
-                    }
-
-                    .plp-continuation-grid {
-                        gap: 10px;
-                        margin: 0 -10px;
-                        padding-inline: 10px;
                     }
                 }
             `}</style>

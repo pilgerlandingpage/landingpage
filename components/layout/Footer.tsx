@@ -26,6 +26,29 @@ const cityLinks = [
     ['Porto Belo', '/busca?city=Porto+Belo'],
 ]
 
+const brandLinks = [
+    ['Sobre Guilherme Pilger', '/sobre'],
+    ['Consultoria imobiliária', '/consultoria-imobiliaria-personalizada'],
+    ['Guias imobiliários', '/guias'],
+    ['Blog', '/blog'],
+    ['Notícias', '/noticias'],
+    ['Eventos', '/eventos'],
+]
+
+const guideLinks = [
+    ['Guia de imóveis de luxo', '/guias/imoveis-luxo-litoral-catarinense'],
+    ['Luxo em Balneário Camboriú', '/guias/imoveis-de-luxo-balneario-camboriu'],
+    ['Frente mar em Balneário Camboriú', '/guias/apartamentos-frente-mar-balneario-camboriu'],
+    ['Coberturas em Itapema', '/guias/coberturas-de-luxo-itapema'],
+    ['Luxo na Praia Brava', '/guias/imoveis-de-luxo-praia-brava'],
+]
+
+const serviceLinks = [
+    ['Busca premium', '/busca'],
+    ['Política de privacidade', '/politica-de-privacidade'],
+    ['Termos de serviço', '/termos-de-servico'],
+]
+
 const FOOTER_OFFICE_FALLBACK_ADDRESS = 'Av. Carlos Drummond de Andrade, 33 - Loja 01 - Praia Brava, Itajaí - SC, 88306-800'
 const FOOTER_OFFICE_FALLBACK_MAPS_URL = `https://www.google.com/maps/search/${encodeURIComponent(FOOTER_OFFICE_FALLBACK_ADDRESS)}`
 const FOOTER_OFFICE_FALLBACK_PHOTO = '/images/eventos/fundo-imobiliaria.jpeg'
@@ -462,17 +485,20 @@ export default function Footer({ showGoogleReviews = true }: FooterProps) {
 
                 <nav className="footer-section" aria-label="Institucional">
                     <h3>Marca Pilger</h3>
-                    <Link href="/sobre">Sobre Guilherme Pilger</Link>
-                    <Link href="/consultoria-imobiliaria-personalizada">Consultoria imobiliária</Link>
-                    <Link href="/guias">Guias imobiliários</Link>
-                    <Link href="/guias/imoveis-luxo-litoral-catarinense">Guia de imóveis de luxo</Link>
-                    <Link href="/guias/imoveis-de-luxo-balneario-camboriu">Luxo em Balneário Camboriú</Link>
-                    <Link href="/guias/apartamentos-frente-mar-balneario-camboriu">Frente mar em Balneário Camboriú</Link>
-                    <Link href="/guias/coberturas-de-luxo-itapema">Coberturas em Itapema</Link>
-                    <Link href="/guias/imoveis-de-luxo-praia-brava">Luxo na Praia Brava</Link>
-                    <Link href="/blog">Blog</Link>
-                    <Link href="/noticias">Notícias</Link>
-                    <Link href="/eventos">Eventos</Link>
+                    {brandLinks.map(([label, href]) => (
+                        <Link href={href} key={href}>{label}</Link>
+                    ))}
+                </nav>
+
+                <nav className="footer-section" aria-label="Guias imobiliários">
+                    <h3>Guias</h3>
+                    {guideLinks.map(([label, href]) => (
+                        <Link href={href} key={href}>{label}</Link>
+                    ))}
+                </nav>
+
+                <nav className="footer-section" aria-label="Atendimento e legal">
+                    <h3>Atendimento</h3>
                     <WhatsAppCaptureLink
                         phone="5547992528080"
                         message="Olá! Quero falar com um especialista."
@@ -481,9 +507,9 @@ export default function Footer({ showGoogleReviews = true }: FooterProps) {
                     >
                         Contato
                     </WhatsAppCaptureLink>
-                    <Link href="/busca">Busca premium</Link>
-                    <Link href="/politica-de-privacidade">Política de privacidade</Link>
-                    <Link href="/termos-de-servico">Termos de serviço</Link>
+                    {serviceLinks.map(([label, href]) => (
+                        <Link href={href} key={href}>{label}</Link>
+                    ))}
                 </nav>
             </div>
 
@@ -506,12 +532,12 @@ export default function Footer({ showGoogleReviews = true }: FooterProps) {
                 .site-footer::before {
                     content: 'PILGER';
                     position: absolute;
-                    right: -3vw;
-                    bottom: 5%;
-                    color: rgba(255,255,255,0.035);
-                    font-size: clamp(7rem, 20vw, 20rem);
+                    right: 1vw;
+                    bottom: 28px;
+                    color: rgba(255,255,255,0.018);
+                    font-size: clamp(4.5rem, 12vw, 12rem);
                     font-weight: 950;
-                    letter-spacing: 0.08em;
+                    letter-spacing: 0.05em;
                     pointer-events: none;
                 }
                 .footer-cta {
@@ -570,11 +596,12 @@ export default function Footer({ showGoogleReviews = true }: FooterProps) {
                     position: relative;
                     z-index: 1;
                     display: grid;
-                    grid-template-columns: minmax(260px, 1.4fr) repeat(3, minmax(160px, 1fr));
-                    gap: clamp(24px, 4vw, 54px);
-                    max-width: 1320px;
+                    grid-template-columns: minmax(240px, 1.25fr) repeat(5, minmax(112px, 0.72fr));
+                    align-items: start;
+                    gap: clamp(18px, 2.4vw, 34px);
+                    max-width: 1360px;
                     margin: 0 auto;
-                    padding: clamp(34px, 5vw, 58px) clamp(20px, 4vw, 44px);
+                    padding: clamp(26px, 3.5vw, 44px) clamp(20px, 4vw, 44px);
                 }
                 .footer-logo {
                     display: inline-flex;
@@ -583,23 +610,23 @@ export default function Footer({ showGoogleReviews = true }: FooterProps) {
                 .footer-logo-name {
                     color: #fff8ea;
                     font-family: 'Playfair Display', Georgia, serif;
-                    font-size: clamp(1.4rem, 2vw, 2rem);
+                    font-size: clamp(1.25rem, 1.6vw, 1.7rem);
                     font-weight: 700;
                     letter-spacing: 0.08em;
                     line-height: 1;
                 }
                 .footer-description {
-                    max-width: 430px;
-                    margin: 18px 0 0;
+                    max-width: 360px;
+                    margin: 14px 0 0;
                     color: rgba(255,255,255,0.62);
-                    font-size: 0.9rem;
-                    line-height: 1.7;
+                    font-size: 0.82rem;
+                    line-height: 1.58;
                 }
                 .footer-meta {
                     display: flex;
                     flex-wrap: wrap;
                     gap: 8px;
-                    margin-top: 18px;
+                    margin-top: 14px;
                 }
                 .footer-meta span {
                     display: inline-flex;
@@ -618,7 +645,7 @@ export default function Footer({ showGoogleReviews = true }: FooterProps) {
                 .footer-socials {
                     display: flex;
                     gap: 10px;
-                    margin-top: 20px;
+                    margin-top: 16px;
                 }
                 .footer-socials a {
                     display: grid;
@@ -639,22 +666,23 @@ export default function Footer({ showGoogleReviews = true }: FooterProps) {
                 .footer-section {
                     display: flex;
                     flex-direction: column;
-                    gap: 9px;
+                    gap: 7px;
+                    min-width: 0;
                 }
                 .footer-section h3 {
-                    margin: 0 0 6px;
+                    margin: 0 0 5px;
                     color: #d8b979;
                     font-family: 'Inter', sans-serif;
-                    font-size: 0.7rem;
+                    font-size: 0.66rem;
                     font-weight: 950;
                     letter-spacing: 0.16em;
                     text-transform: uppercase;
                 }
                 .footer-section a {
                     color: rgba(255,255,255,0.62) !important;
-                    font-size: 0.86rem;
+                    font-size: 0.79rem;
                     font-weight: 650;
-                    line-height: 1.55;
+                    line-height: 1.35;
                     transition: color 0.18s ease, transform 0.18s ease;
                 }
                 .footer-section a:hover {
@@ -668,9 +696,9 @@ export default function Footer({ showGoogleReviews = true }: FooterProps) {
                     align-items: center;
                     justify-content: space-between;
                     gap: 18px;
-                    max-width: 1320px;
+                    max-width: 1360px;
                     margin: 0 auto;
-                    padding: 18px clamp(20px, 4vw, 44px) 24px;
+                    padding: 15px clamp(20px, 4vw, 44px) 20px;
                     border-top: 1px solid rgba(255,255,255,0.08);
                     color: rgba(255,255,255,0.38);
                     font-size: 0.72rem;
@@ -678,6 +706,14 @@ export default function Footer({ showGoogleReviews = true }: FooterProps) {
                 }
                 .footer-bottom p {
                     margin: 0;
+                }
+                @media (max-width: 1180px) {
+                    .footer-main {
+                        grid-template-columns: repeat(3, minmax(0, 1fr));
+                    }
+                    .footer-brand {
+                        grid-column: 1 / -1;
+                    }
                 }
                 @media (max-width: 900px) {
                     .footer-cta {
@@ -689,9 +725,6 @@ export default function Footer({ showGoogleReviews = true }: FooterProps) {
                     }
                     .footer-main {
                         grid-template-columns: 1fr 1fr;
-                    }
-                    .footer-brand {
-                        grid-column: 1 / -1;
                     }
                     .footer-bottom {
                         display: grid;
