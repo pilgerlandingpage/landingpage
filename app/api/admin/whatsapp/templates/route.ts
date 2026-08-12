@@ -51,6 +51,11 @@ function normalizeLanguage(value: unknown) {
   return /^[a-z]{2}_[A-Z]{2}$/.test(selected) ? selected : 'pt_BR'
 }
 
+function isMetaApplicationLimit(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error || '')
+  return message.includes('Application request limit reached') || message.includes('(#4)')
+}
+
 async function readDrafts(supabase = createAdminClient()): Promise<TemplateDraft[]> {
   const { data } = await supabase
     .from('app_config')
@@ -323,9 +328,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false, message: 'Acao invalida.' }, { status: 400 })
   } catch (error) {
     console.error('[Meta Templates POST]', error)
+    const limited = isMetaApplicationLimit(error)
     return NextResponse.json({
       success: false,
-      message: error instanceof Error ? error.message : 'Erro ao gerenciar template Meta',
-    }, { status: 500 })
+      retryable: limited,
+      message: limited
+        ? 'A Meta bloqueou temporariamente a criacao do template por limite de requisicoes do App ID. Aguarde o limite reduzir ou configure um Meta WhatsApp App ID dedicado na sala de manutencao.'
+        : error instanceof Error ? error.message : 'Erro ao gerenciar template Meta',
+    }, { status: limited ? 429 : 500 })
   }
 }

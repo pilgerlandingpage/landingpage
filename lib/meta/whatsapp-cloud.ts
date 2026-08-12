@@ -7,6 +7,7 @@ const CONFIG_KEYS = [
   'meta_app_secret',
   'meta_access_token',
   'meta_whatsapp_enabled',
+  'meta_whatsapp_app_id',
   'meta_whatsapp_business_account_id',
   'meta_whatsapp_default_phone_number_id',
   'meta_whatsapp_access_token',
@@ -196,7 +197,12 @@ export function resolveMetaWhatsAppConfig(config: ConfigMap = {}): MetaWhatsAppR
     config.meta_whatsapp_default_phone_number_id,
     process.env.META_WHATSAPP_DEFAULT_PHONE_NUMBER_ID
   )
-  const appId = firstText(config.meta_app_id, process.env.META_APP_ID)
+  const appId = firstText(
+    config.meta_whatsapp_app_id,
+    process.env.META_WHATSAPP_APP_ID,
+    config.meta_app_id,
+    process.env.META_APP_ID
+  )
   const defaultLanguage = normalizeLanguage(firstText(
     config.meta_whatsapp_default_language,
     process.env.META_WHATSAPP_DEFAULT_LANGUAGE,

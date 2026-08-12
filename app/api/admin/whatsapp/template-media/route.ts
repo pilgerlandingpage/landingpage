@@ -9,6 +9,11 @@ function cleanText(value: unknown, maxLength = 500) {
   return String(value || '').trim().slice(0, maxLength)
 }
 
+function isMetaApplicationLimit(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error || '')
+  return message.includes('Application request limit reached') || message.includes('(#4)')
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -45,9 +50,13 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('[Meta Template Media POST]', error)
+    const limited = isMetaApplicationLimit(error)
     return NextResponse.json({
       success: false,
-      message: error instanceof Error ? error.message : 'Erro ao gerar handle de midia Meta',
-    }, { status: 500 })
+      retryable: limited,
+      message: limited
+        ? 'A Meta bloqueou temporariamente o upload de midia por limite de requisicoes do App ID. Aguarde o limite reduzir ou configure um Meta WhatsApp App ID dedicado na sala de manutencao.'
+        : error instanceof Error ? error.message : 'Erro ao gerar handle de midia Meta',
+    }, { status: limited ? 429 : 500 })
   }
 }

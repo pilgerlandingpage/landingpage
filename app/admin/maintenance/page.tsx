@@ -154,6 +154,7 @@ const INTEGRATIONS: IntegrationCard[] = [
                     { value: 'false', label: 'Inativo' },
                 ],
             },
+            { key: 'meta_whatsapp_app_id', label: 'Meta WhatsApp App ID', placeholder: 'App ID dedicado do app WhatsApp (opcional)', isSecret: false },
             { key: 'meta_whatsapp_business_account_id', label: 'WhatsApp Business Account ID', placeholder: 'WABA ID do WhatsApp Manager', isSecret: false },
             { key: 'meta_whatsapp_default_phone_number_id', label: 'Phone Number ID padrao', placeholder: 'ID do numero oficial de disparo', isSecret: false },
             { key: 'meta_whatsapp_access_token', label: 'System User Access Token', placeholder: 'Token com whatsapp_business_messaging e whatsapp_business_management', isSecret: true },
