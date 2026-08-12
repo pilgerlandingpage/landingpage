@@ -41,6 +41,10 @@ import { getDefaultEmailAgentTemplatesJson, parseEmailAgentTemplatesJson } from 
 import { getDefaultWhatsAppEditorialTemplatesJson, parseWhatsAppEditorialTemplatesJson } from '@/lib/whatsapp/editorial-templates'
 import { getDefaultPushEditorialTemplatesJson, parsePushEditorialTemplatesJson } from '@/lib/push/editorial-templates'
 import { resolveAgentCentralProfile, type AgentCentralProfile } from '@/lib/intelligence/agent-runtime'
+import {
+    DEFAULT_META_WHATSAPP_AGENT_PROMPT,
+    DEFAULT_META_WHATSAPP_TRIAGE_AI_PROMPT,
+} from '@/lib/meta/whatsapp-agent-prompts'
 
 export type AgentOfficeTone = 'success' | 'warning' | 'danger' | 'info' | 'muted'
 
@@ -54,6 +58,7 @@ export type AgentOfficeBehaviorControl = {
     min?: number
     max?: number
     step?: number
+    rows?: number
     options?: Array<{ label: string; value: string }>
 }
 
@@ -294,6 +299,12 @@ const AGENT_PERSONAS: Record<string, AgentPersona> = {
         jobTitle: 'Instancia global do ecossistema',
         bio: 'Atende o ecossistema pelo numero global, identifica o perfil de quem conversa e roteia pedidos para o setor correto.',
         avatarTone: 'blue',
+    },
+    'agente-guilherme-meta-api': {
+        personaName: 'Agente Guilherme',
+        jobTitle: 'Pre-atendimento Meta API',
+        bio: 'Atende leads do WhatsApp oficial com conversa natural, registra intencao e chama especialistas somente quando existe interesse real.',
+        avatarTone: 'gold',
     },
     'whatsapp-rescue-agent': {
         personaName: 'Nara Resgate Leads',
@@ -692,6 +703,90 @@ const OFFICE_PROMPT_AGENTS: AgentOfficeDefinition[] = [
         editHref: '/admin/whatsapp/agent-config',
         behaviorControls: [
             activePausedControl('whatsapp_global_agent_enabled', 'Agente ativo'),
+        ],
+    },
+    {
+        id: 'agente-guilherme-meta-api',
+        name: 'Agente Guilherme',
+        role: 'Pre-atendimento de leads do WhatsApp oficial',
+        sector: 'Meta API',
+        promptKey: 'meta_whatsapp_agent_prompt',
+        fallback: DEFAULT_META_WHATSAPP_AGENT_PROMPT,
+        detail: 'Conversa com leads das mensagens oficiais Meta WhatsApp sem mencionar campanha, identifica interesse real, registra intencao no CRM e sinaliza o numero interno quando precisa de especialista.',
+        tools: ['Meta WhatsApp Cloud API', 'Gemini', 'CRM', 'handoff interno'],
+        autonomy: 'Pode conversar, classificar intencao, encerrar opt-out e sinalizar especialistas; nao entrega detalhes de empreendimento, valor ou negociacao.',
+        enabledKey: 'meta_whatsapp_agent_enabled',
+        behaviorControls: [
+            activePausedControl(
+                'meta_whatsapp_agent_enabled',
+                'Agente Guilherme ativo',
+                'true',
+                'Liga ou pausa as respostas conversacionais do agente no WhatsApp oficial.'
+            ),
+            activePausedControl(
+                'meta_whatsapp_triage_enabled',
+                'Registro de intencao ativo',
+                'true',
+                'Controla se as respostas do lead geram intencao no CRM e opt-out quando necessario.'
+            ),
+            activePausedControl(
+                'meta_whatsapp_triage_ai_enabled',
+                'Leitura de intencao com IA',
+                'true',
+                'Usa Gemini/OpenAI para interpretar mensagens naturais antes de classificar interesse, saida ou duvida.'
+            ),
+            {
+                key: 'meta_whatsapp_triage_ai_min_confidence',
+                label: 'Confianca minima',
+                type: 'number',
+                fallback: '70',
+                min: 0,
+                max: 100,
+                step: 5,
+                help: 'Abaixo deste percentual o agente conversa sem registrar interesse como certeza operacional.',
+            },
+            {
+                key: 'meta_whatsapp_agent_history_limit',
+                label: 'Historico usado',
+                type: 'number',
+                fallback: '12',
+                min: 4,
+                max: 30,
+                step: 1,
+                help: 'Quantidade de mensagens recentes enviadas ao LLM para evitar repeticao e manter contexto.',
+            },
+            {
+                key: 'meta_whatsapp_triage_interest_notify_phone',
+                label: 'Numero que recebe interessados',
+                type: 'text',
+                fallback: '',
+                help: 'Numero interno em DDI+DDD+telefone que recebera os leads quando houver interesse real.',
+            },
+            {
+                key: 'meta_whatsapp_triage_ai_prompt',
+                label: 'Prompt de leitura de intencao',
+                type: 'textarea',
+                fallback: DEFAULT_META_WHATSAPP_TRIAGE_AI_PROMPT,
+                rows: 8,
+                help: 'Prompt tecnico que classifica intencao; nao e uma resposta pronta enviada ao lead.',
+            },
+        ],
+        runtimeFacts: configs => [
+            {
+                label: 'Secao',
+                value: 'Meta API',
+                tone: 'info',
+            },
+            {
+                label: 'API oficial',
+                value: configs.meta_whatsapp_enabled === 'true' ? 'Canal ativo' : 'Canal inativo',
+                tone: configs.meta_whatsapp_enabled === 'true' ? 'success' : 'warning',
+            },
+            {
+                label: 'Destino dos interessados',
+                value: configs.meta_whatsapp_triage_interest_notify_phone || 'Sem numero cadastrado',
+                tone: configs.meta_whatsapp_triage_interest_notify_phone ? 'success' : 'warning',
+            },
         ],
     },
     {

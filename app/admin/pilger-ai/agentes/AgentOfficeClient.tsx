@@ -46,7 +46,7 @@ import {
     type PushEditorialTemplateDefinition,
 } from '@/lib/push/editorial-templates'
 
-const SECTOR_ORDER = ['Todos', 'Diretoria', 'Compliance e Governança', 'Financeiro', 'Imoveis', 'WhatsApp', 'Marketing', 'Comercial', 'Recrutamento', 'Inteligencia', 'Operacoes']
+const SECTOR_ORDER = ['Todos', 'Diretoria', 'Compliance e Governança', 'Financeiro', 'Imoveis', 'WhatsApp', 'Meta API', 'Marketing', 'Comercial', 'Recrutamento', 'Inteligencia', 'Operacoes']
 const MAX_AVATAR_SIZE = 20 * 1024 * 1024
 const DATA_ROLE_OPTIONS = [
     { value: 'all', label: 'Todos', description: 'Todos os colaboradores digitais' },
@@ -68,6 +68,7 @@ const DATA_ROLE_HYBRID_IDS = new Set([
     'whatsapp-lead-extraction',
     'whatsapp-attendance-coach',
     'whatsapp-global-agent',
+    'agente-guilherme-meta-api',
     'ads-analyst',
     'finance-ops-agent',
     'social-attendance-agent',
@@ -3996,7 +3997,7 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
                                                                 <textarea
                                                                     value={behaviorDraft[control.key] ?? control.fallback}
                                                                     onChange={event => updateBehaviorControl(control.key, event.target.value)}
-                                                                    rows={4}
+                                                                    rows={control.rows ?? 4}
                                                                 />
                                                             ) : (
                                                                 <input
