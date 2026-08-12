@@ -425,7 +425,10 @@ export default function MetaWhatsAppChatPage() {
   }, [selectedId, statusFilter, search])
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ block: 'end' })
+    const messagesContainer = messagesEndRef.current?.parentElement
+    if (!messagesContainer) return
+
+    messagesContainer.scrollTop = messagesContainer.scrollHeight
   }, [messages, selectedId])
 
   const updateStatus = async (status: ConversationStatus) => {
@@ -1664,14 +1667,32 @@ export default function MetaWhatsAppChatPage() {
 
         /* WhatsApp Web style shell */
         :global(.admin-content.admin-content--whatsapp-chat) {
+          flex: 0 0 auto;
+          width: calc(100vw - var(--admin-sidebar-expanded-width));
+          max-width: calc(100vw - var(--admin-sidebar-expanded-width));
           height: 100vh;
           min-height: 100vh;
           padding: 0;
           overflow: hidden;
         }
 
+        :global(.admin-sidebar.is-auto-collapsed + .admin-content.admin-content--whatsapp-chat) {
+          margin-left: var(--admin-sidebar-collapsed-width);
+          width: calc(100vw - var(--admin-sidebar-collapsed-width));
+          max-width: calc(100vw - var(--admin-sidebar-collapsed-width));
+        }
+
+        :global(.admin-sidebar.is-auto-collapsed:not(.is-rail-locked):hover + .admin-content.admin-content--whatsapp-chat),
+        :global(.admin-sidebar.is-auto-collapsed:not(.is-rail-locked):focus-within + .admin-content.admin-content--whatsapp-chat) {
+          margin-left: var(--admin-sidebar-expanded-width);
+          width: calc(100vw - var(--admin-sidebar-expanded-width));
+          max-width: calc(100vw - var(--admin-sidebar-expanded-width));
+        }
+
         .wa-page {
           position: relative;
+          width: 100%;
+          max-width: 100%;
           height: 100vh;
           min-height: 0;
           padding: 0;
@@ -1700,6 +1721,7 @@ export default function MetaWhatsAppChatPage() {
           max-width: 100%;
           height: 100%;
           min-height: 0;
+          overflow: hidden;
           border: 0;
           border-radius: 0;
           box-shadow: none;
@@ -1756,6 +1778,8 @@ export default function MetaWhatsAppChatPage() {
 
         .wa-sidebar {
           grid-template-rows: auto auto auto 1fr;
+          min-height: 0;
+          overflow: hidden;
           border-right-color: #d1d7db;
           background: #fff;
         }
@@ -1833,8 +1857,11 @@ export default function MetaWhatsAppChatPage() {
         }
 
         .wa-list {
+          min-height: 0;
+          overflow-y: auto;
           border-top: 0;
           background: #fff;
+          overscroll-behavior: contain;
         }
 
         .wa-row {
@@ -1895,6 +1922,8 @@ export default function MetaWhatsAppChatPage() {
 
         .wa-conversation {
           grid-template-rows: auto 1fr auto;
+          min-height: 0;
+          overflow: hidden;
           background: #efeae2;
         }
 
@@ -1938,6 +1967,9 @@ export default function MetaWhatsAppChatPage() {
         }
 
         .wa-messages {
+          min-height: 0;
+          overflow-y: auto;
+          overscroll-behavior: contain;
           padding: 22px 64px 18px;
           background-color: #efeae2;
           background-image: url("https://pub-eaf679ed02634f958b68991d910a997b.r2.dev/8c98994518b575bfd8c949e91d20548b.jpg");
@@ -2047,8 +2079,12 @@ export default function MetaWhatsAppChatPage() {
 
         @media (max-width: 860px) {
           :global(.admin-content.admin-content--whatsapp-chat) {
+            width: 100vw;
+            max-width: 100vw;
             height: auto;
             min-height: 100vh;
+            margin-left: 0;
+            padding: 0;
             overflow: auto;
           }
 
