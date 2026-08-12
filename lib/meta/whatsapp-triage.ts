@@ -587,7 +587,7 @@ async function loadConversationHistory(
 
   return (data || [])
     .reverse()
-    .map((message: Record<string, any>) => ({
+    .map((message: Record<string, any>): TriageConversationHistoryMessage => ({
       direction: (['inbound', 'outbound', 'system'].includes(String(message.direction))
         ? message.direction
         : 'system') as TriageConversationHistoryMessage['direction'],
@@ -595,7 +595,7 @@ async function loadConversationHistory(
       createdAt: message.created_at || null,
       status: message.status || null,
     }))
-    .filter(message => Boolean(message.text))
+    .filter((message: TriageConversationHistoryMessage) => Boolean(message.text))
 }
 
 function buildAgentUserMessage(input: {
