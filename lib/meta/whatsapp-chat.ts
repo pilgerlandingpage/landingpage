@@ -2,6 +2,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import {
   loadMetaWhatsAppConfigMap,
   normalizeMetaWhatsAppPhone,
+  sendMetaWhatsAppAudioMessage,
   sendMetaWhatsAppTextMessage,
 } from '@/lib/meta/whatsapp-cloud'
 
@@ -39,6 +40,12 @@ export interface SendMetaWhatsAppChatReplyInput {
   conversationId: string
   text: string
   previewUrl?: boolean
+}
+
+export interface SendMetaWhatsAppChatAudioReplyInput {
+  conversationId: string
+  audioUrl: string
+  textFallback?: string | null
 }
 
 function cleanText(value: unknown, maxLength = 300) {
@@ -783,6 +790,102 @@ export async function sendMetaWhatsAppChatReply(
         status: 'failed',
         error_message: message.slice(0, 500),
         payload: { error: message },
+        failed_at: now,
+        created_at: now,
+      })
+    throw error
+  }
+}
+
+export async function sendMetaWhatsAppChatAudioReply(
+  input: SendMetaWhatsAppChatAudioReplyInput,
+  supabase = createAdminClient()
+) {
+  const audioUrl = cleanText(input.audioUrl, 2000)
+  if (!audioUrl) throw new Error('URL do audio ausente.')
+
+  const { conversation } = await getMetaWhatsAppConversationDetail(input.conversationId, supabase)
+  const windowExpiresAt = toTimestamp(conversation.customer_window_expires_at)
+  if (!windowExpiresAt || windowExpiresAt <= Date.now()) {
+    throw new Error('A janela de atendimento desta conversa expirou. Use um template aprovado para reabrir contato.')
+  }
+
+  const sender = Array.isArray(conversation.sender) ? conversation.sender[0] : conversation.sender
+  const phoneNumberId = cleanText(sender?.phone_number_id || conversation.phone_number_id, 120)
+  if (!phoneNumberId) throw new Error('Numero oficial da conversa sem Phone Number ID.')
+
+  const configMap = await loadMetaWhatsAppConfigMap(supabase)
+  const now = isoNow()
+  const textFallback = cleanText(input.textFallback, 1200)
+
+  try {
+    const result = await sendMetaWhatsAppAudioMessage({
+      to: conversation.contact_phone,
+      audioUrl,
+      phoneNumberId,
+      config: configMap,
+    })
+
+    const { data: message, error: messageError } = await supabase
+      .from('meta_whatsapp_messages')
+      .insert({
+        conversation_id: conversation.id,
+        sender_id: conversation.sender_id,
+        campaign_id: conversation.last_campaign_id || null,
+        recipient_id: conversation.last_recipient_id || null,
+        lead_id: conversation.lead_id || null,
+        provider_message_id: result.providerMessageId || null,
+        direction: 'outbound',
+        message_type: 'audio',
+        text_body: textFallback || null,
+        status: 'sent',
+        payload: {
+          ...(result.raw || {}),
+          audio_url: audioUrl,
+        },
+        sent_at: now,
+        created_at: now,
+      })
+      .select('*')
+      .single()
+
+    if (messageError) throw messageError
+
+    const { data: updatedConversation, error: conversationError } = await supabase
+      .from('meta_whatsapp_conversations')
+      .update({
+        status: 'pending',
+        unread_count: 0,
+        last_message_preview: textFallback ? messagePreview(textFallback) : 'Audio enviado',
+        last_message_at: now,
+        last_outbound_at: now,
+      })
+      .eq('id', conversation.id)
+      .select('*')
+      .single()
+
+    if (conversationError) throw conversationError
+
+    return {
+      conversation: updatedConversation,
+      message,
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    await supabase
+      .from('meta_whatsapp_messages')
+      .insert({
+        conversation_id: conversation.id,
+        sender_id: conversation.sender_id,
+        campaign_id: conversation.last_campaign_id || null,
+        recipient_id: conversation.last_recipient_id || null,
+        lead_id: conversation.lead_id || null,
+        direction: 'outbound',
+        message_type: 'audio',
+        text_body: textFallback || null,
+        status: 'failed',
+        error_message: message.slice(0, 500),
+        payload: { error: message, audio_url: audioUrl },
         failed_at: now,
         created_at: now,
       })

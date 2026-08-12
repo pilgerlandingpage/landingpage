@@ -24,6 +24,16 @@ const CONFIG_KEYS = [
   'meta_whatsapp_agent_enabled',
   'meta_whatsapp_agent_prompt',
   'meta_whatsapp_agent_history_limit',
+  'meta_whatsapp_agent_humanize_enabled',
+  'meta_whatsapp_agent_typing_indicator_enabled',
+  'meta_whatsapp_agent_split_messages',
+  'meta_whatsapp_agent_response_delay_min_ms',
+  'meta_whatsapp_agent_response_delay_max_ms',
+  'meta_whatsapp_agent_typing_ms_per_char',
+  'meta_whatsapp_agent_chunk_delay_min_ms',
+  'meta_whatsapp_agent_chunk_delay_max_ms',
+  'meta_whatsapp_agent_audio_enabled',
+  'meta_whatsapp_agent_response_mode',
   'meta_whatsapp_send_rate_per_minute',
   'meta_whatsapp_daily_limit_per_number',
   'whatsapp_global_system_prompt',
@@ -98,6 +108,20 @@ export interface SendTextMessageInput {
   phoneNumberId?: string
   config?: ConfigMap
   previewUrl?: boolean
+}
+
+export interface SendAudioMessageInput {
+  to: string
+  audioUrl: string
+  phoneNumberId?: string
+  config?: ConfigMap
+}
+
+export interface MarkMessageReadInput {
+  messageId: string
+  phoneNumberId?: string
+  config?: ConfigMap
+  typingIndicator?: boolean
 }
 
 export interface MetaWhatsAppConnectionTest {
@@ -557,6 +581,65 @@ export async function sendMetaWhatsAppTextMessage(input: SendTextMessageInput) {
     providerMessageId: payload.messages?.[0]?.id || '',
     raw: payload,
   }
+}
+
+export async function sendMetaWhatsAppAudioMessage(input: SendAudioMessageInput) {
+  const resolved = resolveMetaWhatsAppConfig(input.config || {})
+  const phoneNumberId = cleanText(input.phoneNumberId || resolved.defaultPhoneNumberId, 80)
+  const to = normalizeMetaWhatsAppPhone(input.to)
+  const audioUrl = cleanText(input.audioUrl, 2000)
+
+  if (!resolved.accessToken) throw new Error('System User Access Token ausente.')
+  if (!phoneNumberId) throw new Error('Phone Number ID ausente.')
+  if (!to) throw new Error('Destinatario WhatsApp ausente.')
+  if (!audioUrl) throw new Error('URL do audio ausente.')
+
+  const payload = await graphRequest<{ messages?: Array<{ id?: string }> }>(resolved, `/${phoneNumberId}/messages`, {
+    method: 'POST',
+    body: {
+      messaging_product: 'whatsapp',
+      recipient_type: 'individual',
+      to,
+      type: 'audio',
+      audio: {
+        link: audioUrl,
+      },
+    },
+  })
+
+  return {
+    providerMessageId: payload.messages?.[0]?.id || '',
+    raw: payload,
+  }
+}
+
+export async function markMetaWhatsAppMessageAsRead(input: MarkMessageReadInput) {
+  const resolved = resolveMetaWhatsAppConfig(input.config || {})
+  const phoneNumberId = cleanText(input.phoneNumberId || resolved.defaultPhoneNumberId, 80)
+  const messageId = cleanText(input.messageId, 300)
+
+  if (!resolved.accessToken) throw new Error('System User Access Token ausente.')
+  if (!phoneNumberId) throw new Error('Phone Number ID ausente.')
+  if (!messageId) throw new Error('Message ID ausente.')
+
+  const payload = await graphRequest<Record<string, unknown>>(resolved, `/${phoneNumberId}/messages`, {
+    method: 'POST',
+    body: {
+      messaging_product: 'whatsapp',
+      status: 'read',
+      message_id: messageId,
+      ...(input.typingIndicator ? { typing_indicator: { type: 'text' } } : {}),
+    },
+  })
+
+  return { raw: payload }
+}
+
+export async function sendMetaWhatsAppTypingIndicator(input: Omit<MarkMessageReadInput, 'typingIndicator'>) {
+  return markMetaWhatsAppMessageAsRead({
+    ...input,
+    typingIndicator: true,
+  })
 }
 
 export async function syncMetaWhatsAppAssets(config: ConfigMap = {}, supabase = createAdminClient()) {

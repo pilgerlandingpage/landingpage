@@ -2,11 +2,13 @@ import { createAdminClient } from '@/lib/supabase/server'
 import {
   loadMetaWhatsAppConfigMap,
   normalizeMetaWhatsAppPhone,
+  sendMetaWhatsAppTypingIndicator,
   sendMetaWhatsAppTextMessage,
 } from '@/lib/meta/whatsapp-cloud'
-import { sendMetaWhatsAppChatReply } from '@/lib/meta/whatsapp-chat'
+import { sendMetaWhatsAppChatAudioReply, sendMetaWhatsAppChatReply } from '@/lib/meta/whatsapp-chat'
 import { getAIConfig, getActiveAIProvider, getOpenAIApiKey } from '@/lib/ai/config'
 import { chatWithGemini, getGeminiApiKey, getGeminiModel } from '@/lib/gemini'
+import { generateWorkflowElevenLabsAudioUrl } from '@/lib/workflows/tts-audio'
 import {
   DEFAULT_WHATSAPP_GLOBAL_SYSTEM_PROMPT,
   WHATSAPP_GLOBAL_RUNTIME_GUARDRAILS,
@@ -736,6 +738,159 @@ function clampInteger(value: unknown, fallback: number, min = 0, max = 100) {
   const parsed = Number.parseInt(String(value || ''), 10)
   if (!Number.isFinite(parsed)) return fallback
   return Math.min(max, Math.max(min, parsed))
+}
+
+const META_AGENT_MAX_TOTAL_HUMAN_DELAY_MS = 9000
+
+function configBoolean(configMap: Record<string, string | undefined>, key: string, fallback: boolean) {
+  const value = String(configMap[key] ?? '').trim().toLowerCase()
+  if (!value) return fallback
+  if (['false', '0', 'off', 'no', 'nao', 'não'].includes(value)) return false
+  if (['true', '1', 'on', 'yes', 'sim'].includes(value)) return true
+  return fallback
+}
+
+function normalizeMetaAgentResponseMode(value: unknown) {
+  const mode = cleanText(value, 20).toLowerCase()
+  if (mode === 'audio' || mode === 'mirror') return mode
+  return 'text'
+}
+
+function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, Math.max(0, ms)))
+}
+
+function humanizedDelay(
+  configMap: Record<string, string | undefined>,
+  text: string,
+  variant: 'initial' | 'chunk'
+) {
+  const minKey = variant === 'chunk'
+    ? 'meta_whatsapp_agent_chunk_delay_min_ms'
+    : 'meta_whatsapp_agent_response_delay_min_ms'
+  const maxKey = variant === 'chunk'
+    ? 'meta_whatsapp_agent_chunk_delay_max_ms'
+    : 'meta_whatsapp_agent_response_delay_max_ms'
+
+  const fallbackMin = variant === 'chunk' ? 700 : 900
+  const fallbackMax = variant === 'chunk' ? 2200 : 4200
+  const min = clampInteger(configMap[minKey], fallbackMin, 0, 8000)
+  const max = Math.max(min, clampInteger(configMap[maxKey], fallbackMax, 0, 10000))
+  const charMs = clampInteger(configMap.meta_whatsapp_agent_typing_ms_per_char, 18, 0, 80)
+  const proportional = text.length * charMs
+  const clamped = Math.min(max, Math.max(min, proportional))
+  return Math.floor(clamped * (0.75 + Math.random() * 0.5))
+}
+
+function splitMetaAgentReplyIntoChunks(text: string) {
+  const selected = cleanText(text, 1200)
+  if (selected.length <= 120) return [selected]
+
+  const sentences = selected.split(/(?<=[.!?])\s+|\n+/).map(item => item.trim()).filter(Boolean)
+  if (sentences.length <= 1) return [selected]
+
+  const chunks: string[] = []
+  let current = ''
+  for (const sentence of sentences) {
+    if (current && current.length + sentence.length + 1 > 130) {
+      chunks.push(current.trim())
+      current = sentence
+    } else {
+      current = current ? `${current} ${sentence}` : sentence
+    }
+  }
+  if (current.trim()) chunks.push(current.trim())
+
+  if (chunks.length <= 4) return chunks
+
+  const merged: string[] = []
+  const perGroup = Math.ceil(chunks.length / 4)
+  for (let index = 0; index < chunks.length; index += perGroup) {
+    merged.push(chunks.slice(index, index + perGroup).join(' ').trim())
+  }
+  return merged.filter(Boolean)
+}
+
+async function showMetaAgentTypingIndicator(input: {
+  configMap: Record<string, string | undefined>
+  phoneNumberId?: string | null
+  providerMessageId?: string | null
+}) {
+  if (!configBoolean(input.configMap, 'meta_whatsapp_agent_typing_indicator_enabled', true)) return
+  const messageId = cleanText(input.providerMessageId, 300)
+  if (!messageId) return
+
+  try {
+    await sendMetaWhatsAppTypingIndicator({
+      messageId,
+      phoneNumberId: cleanText(input.phoneNumberId, 120) || undefined,
+      config: input.configMap,
+    })
+  } catch (error) {
+    console.warn('[Meta WhatsApp Agent] typing indicator skipped:', error)
+  }
+}
+
+async function sendHumanizedMetaWhatsAppReply(input: {
+  supabase: SupabaseAdmin
+  conversationId: string
+  text: string
+  configMap: Record<string, string | undefined>
+  phoneNumberId?: string | null
+  providerMessageId?: string | null
+  messageType?: string | null
+}) {
+  const replyText = cleanText(input.text, 1200)
+  if (!replyText) return { sentAs: 'skipped' as const, parts: 0 }
+
+  const humanizeEnabled = configBoolean(input.configMap, 'meta_whatsapp_agent_humanize_enabled', true)
+  const responseMode = normalizeMetaAgentResponseMode(input.configMap.meta_whatsapp_agent_response_mode)
+  const audioEnabled = configBoolean(input.configMap, 'meta_whatsapp_agent_audio_enabled', false)
+  const shouldTryAudio = audioEnabled
+    && (responseMode === 'audio' || (responseMode === 'mirror' && cleanText(input.messageType, 30).toLowerCase() === 'audio'))
+
+  if (shouldTryAudio) {
+    if (humanizeEnabled) {
+      await showMetaAgentTypingIndicator(input)
+      await sleep(Math.min(humanizedDelay(input.configMap, replyText, 'initial'), 3500))
+    }
+
+    try {
+      const audioUrl = await generateWorkflowElevenLabsAudioUrl(replyText)
+      await sendMetaWhatsAppChatAudioReply({
+        conversationId: input.conversationId,
+        audioUrl,
+        textFallback: replyText,
+      }, input.supabase)
+      return { sentAs: 'audio' as const, parts: 1 }
+    } catch (error) {
+      console.warn('[Meta WhatsApp Agent] audio reply failed, falling back to text:', error)
+    }
+  }
+
+  const splitEnabled = configBoolean(input.configMap, 'meta_whatsapp_agent_split_messages', true)
+  const chunks = splitEnabled ? splitMetaAgentReplyIntoChunks(replyText) : [replyText]
+  let totalDelayMs = 0
+
+  for (let index = 0; index < chunks.length; index += 1) {
+    const chunk = chunks[index]
+    if (!chunk) continue
+
+    if (humanizeEnabled) {
+      await showMetaAgentTypingIndicator(input)
+      const desiredDelay = humanizedDelay(input.configMap, chunk, index === 0 ? 'initial' : 'chunk')
+      const allowedDelay = Math.max(0, Math.min(desiredDelay, META_AGENT_MAX_TOTAL_HUMAN_DELAY_MS - totalDelayMs))
+      totalDelayMs += allowedDelay
+      if (allowedDelay > 0) await sleep(allowedDelay)
+    }
+
+    await sendMetaWhatsAppChatReply({
+      conversationId: input.conversationId,
+      text: chunk,
+    }, input.supabase)
+  }
+
+  return { sentAs: 'text' as const, parts: chunks.length }
 }
 
 function normalizeAiConfidence(value: unknown, fallback = 50) {
@@ -2291,10 +2446,15 @@ export async function handleMetaWhatsAppReplyTriage(
 
   if (replyText && conversation?.id) {
     try {
-      await sendMetaWhatsAppChatReply({
+      await sendHumanizedMetaWhatsAppReply({
+        supabase,
         conversationId: String(conversation.id),
         text: replyText,
-      }, supabase)
+        configMap,
+        phoneNumberId,
+        providerMessageId,
+        messageType: input.messageType,
+      })
       await updateReplyIntent(supabase, intentRow?.id, {
         auto_reply_status: 'sent',
         auto_reply_message: replyText,
