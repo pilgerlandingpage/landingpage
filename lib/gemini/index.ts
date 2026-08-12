@@ -102,6 +102,7 @@ interface ChatOptions {
     userMessage: string
     temperature?: number
     maxTokens?: number
+    responseMimeType?: string
 }
 
 export async function chatWithGemini({
@@ -110,6 +111,7 @@ export async function chatWithGemini({
     userMessage,
     temperature = 0.7,
     maxTokens = 1024,
+    responseMimeType,
 }: ChatOptions): Promise<string> {
     const apiKey = await getGeminiApiKey()
     if (!apiKey) throw new Error('GEMINI_API_KEY not configured')
@@ -131,6 +133,7 @@ export async function chatWithGemini({
                 generationConfig: {
                     temperature,
                     maxOutputTokens: maxTokens,
+                    ...(responseMimeType ? { responseMimeType } : {}),
                 },
             }),
         }

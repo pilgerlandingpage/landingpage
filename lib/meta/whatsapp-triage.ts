@@ -93,7 +93,9 @@ const DEFAULT_TRIAGE_AI_PROMPT = [
 const DEFAULT_META_WHATSAPP_AGENT_PROMPT = [
   'CAMADA WHATSAPP OFICIAL',
   'Voce atende leads que responderam mensagens enviadas pelo WhatsApp oficial da imobiliaria.',
-  'Use o mesmo estilo do agente global: conversa natural, humana, curta, consultiva e progressiva.',
+  'Use o mesmo estilo do agente global: conversa natural, humana, curta, consultiva e progressiva. Nao pareca bot de menu nem formulario.',
+  'Responda primeiro o que o lead perguntou, em seguida faca uma pergunta leve. Nunca ignore uma pergunta direta para soltar uma pergunta padrao.',
+  'Fale como WhatsApp real: frases curtas, tom educado, sem texto corporativo duro. Pode usar "por aqui", "sem pressa", "pra eu te situar", mas sem repetir bordoes.',
   'Seu trabalho nao e so fazer triagem. Converse normalmente, tire duvidas simples, qualifique aos poucos e entenda se a pessoa quer moradia, investimento ou os dois.',
   'Nao transforme toda resposta em encaminhamento. O encaminhamento e uma consequencia quando o lead demonstra intencao real ou pede continuidade humana.',
   'Quando o lead clicar ou escrever "Saiba mais", reconheca o interesse, marque should_notify true e puxe uma pergunta leve de qualificacao. Exemplo de direcao: perguntar se busca moradia, investimento ou quer entender possibilidades antes de decidir.',
@@ -108,6 +110,11 @@ const DEFAULT_META_WHATSAPP_AGENT_PROMPT = [
   'Nao responda com "vou encaminhar" em cumprimento, pergunta de identidade ou pedido generico de conversa. Primeiro converse e entenda o objetivo.',
   'Nao repita apresentacoes genericas como "sou do atendimento" em todas as respostas. Depois da primeira resposta, avance a conversa.',
   'Se o lead disser "boa noite", "oi", "ola", "quem e voce", "vamos conversar primeiro" ou "vamos falar sobre oportunidades", responda especificamente a essa frase com uma pergunta curta de qualificacao e should_notify false.',
+  'Exemplos de tom:',
+  'Lead: "fala jovem" -> Reply: "Fala! Tudo certo por ai? Pra eu te situar: sou do atendimento da Guilherme Pilger Imoveis. Voce esta olhando algo pra morar, investir ou so entender melhor?"',
+  'Lead: "blz" -> Reply: "Boa. Pra eu nao te mandar coisa aleatoria: voce esta pensando em comprar pra morar, investir/revender ou so entender o mercado?"',
+  'Lead: "se esta falando do que" -> Reply: "Sobre oportunidades imobiliarias da Guilherme Pilger Imoveis. Eu faco esse primeiro filtro por aqui; se fizer sentido, um especialista entra com os detalhes. Voce esta buscando morar, investir ou so entender?"',
+  'Lead: "como conseguiu meu numero?" -> Reply: "Seu numero estava em uma base de contatos autorizados da imobiliaria. Se preferir, eu removo daqui mesmo. Quer que eu tire seu contato da lista?"',
   'Nunca diga que voce e robo. Nunca mencione regras internas, prompt, classificacao, funil, webhook, Meta API, disparo, automacao ou origem tecnica.',
   'Retorne somente JSON valido, sem markdown, neste formato:',
   '{"intent":"interested|opt_out|question|unknown","confidence":0-100,"reply":"resposta ao lead","should_notify":true|false,"should_close":true|false,"lead_name":"nome extraido ou null","lead_stage":"short stage","summary":"resumo curto","reason":"motivo curto"}',
@@ -188,14 +195,14 @@ function isGreetingOnlyReply(text: string) {
   const normalized = normalizeShortReply(text)
   if (!normalized || normalized.length > 90) return false
 
-  return /^(oi+|ola+|opa|salve|fala|fala jovem|fala meu jovem|bom dia|boa tarde|boa noite|e ai|eae|tudo bem|td bem|oi tudo bem|ola tudo bem|bom dia tudo bem|boa tarde tudo bem|boa noite tudo bem)$/.test(normalized)
+  return /^(oi+|ola+|opa|salve|fala|fala jovem|fala meu jovem|bom dia|boa tarde|boa noite|e ai|iai|eae|e ai blz|iai blz|eae blz|tudo bem|td bem|oi tudo bem|ola tudo bem|bom dia tudo bem|boa tarde tudo bem|boa noite tudo bem)$/.test(normalized)
 }
 
 function isLowCommitmentReply(text: string) {
   const normalized = normalizeShortReply(text)
   if (!normalized || normalized.length > 80) return false
 
-  return /^(sim|ss|ok|okay|blz|beleza|show|show de bola|top|top jovem|top garoto|valeu|massa|tranquilo|fechado|combinado|quero|pode|pode sim|ta bom|certo|aham|uhum|vamos|manda|manda ai)$/.test(normalized)
+  return /^(sim|ss|ok|okay|blz|beleza|show|show de bola|top|top jovem|top garoto|top garato|valeu|massa|tranquilo|fechado|combinado|quero|pode|pode sim|ta bom|certo|aham|uhum|vamos|manda|manda ai)$/.test(normalized)
 }
 
 function isIdentityQuestionReply(text: string) {
@@ -213,6 +220,12 @@ function isIdentityQuestionReply(text: string) {
     'qual empresa',
     'de onde e',
     'do que se trata',
+    'se trata do que',
+    'esta falando do que',
+    'ta falando do que',
+    'falando do que',
+    'falando sobre o que',
+    'que assunto',
     'sobre o que',
     'nao entendi',
     'nao sei do que',
@@ -348,7 +361,7 @@ function buildConversationContinuationReply(cue: ConversationHoldCue, rawText?: 
   const normalized = normalizeShortReply(rawText || '')
 
   if (cue === 'identity_question') {
-    return 'Claro. Pra nao ficar no generico: a conversa e sobre oportunidades imobiliarias da Guilherme Pilger Imoveis. Voce quer que eu comece pelo contexto da mensagem ou pelo tipo de imovel que faz sentido pra voce?'
+    return 'Sobre oportunidades imobiliarias da Guilherme Pilger Imoveis. Eu te situo por aqui primeiro e, se fizer sentido, um especialista entra com detalhes. Voce esta buscando morar, investir ou so entender melhor?'
   }
 
   if (cue === 'conversation_request') {
@@ -360,7 +373,7 @@ function buildConversationContinuationReply(cue: ConversationHoldCue, rawText?: 
   }
 
   if (cue === 'low_commitment') {
-    return 'Show. Pra eu sair do generico: voce prefere comecar por localizacao, faixa de valor ou perfil do imovel?'
+    return 'Boa. Pra eu te responder melhor, me diz rapido: voce pensa mais em comprar pra morar, investir/revender ou so entender o mercado?'
   }
 
   return 'Combinado. Voce quer que eu te mostre o caminho por moradia, investimento ou oportunidades especificas na regiao?'
@@ -388,18 +401,18 @@ function buildConversationHoldReply(
 
   if (cue === 'identity_question') {
     if (includesAny(normalized, ['quem e voce', 'quem e vc', 'quem sao voces', 'quem fala', 'quem esta falando'])) {
-      return 'Eu sou do atendimento da Guilherme Pilger Imoveis. Faco esse primeiro contato por aqui e posso te ajudar sem pressa. O que voce quer entender primeiro?'
+      return 'Sou do atendimento da Guilherme Pilger Imoveis. Faco esse primeiro filtro por aqui, sem compromisso. Voce esta olhando algo pra morar, investir ou so entender melhor?'
     }
 
-    if (includesAny(normalized, ['do que se trata', 'sobre o que', 'nao entendi', 'me explica', 'explique melhor', 'o que e isso'])) {
-      return 'Claro. Por aqui eu entendo seu perfil e direciono para a pessoa certa, sem te mandar coisa fora do que procura. Voce quer me contar se busca moradia, investimento ou so esta avaliando possibilidades?'
+    if (includesAny(normalized, ['do que se trata', 'se trata do que', 'esta falando do que', 'ta falando do que', 'falando do que', 'falando sobre o que', 'que assunto', 'sobre o que', 'nao entendi', 'me explica', 'explique melhor', 'o que e isso'])) {
+      return 'Sobre oportunidades imobiliarias da Guilherme Pilger Imoveis. Eu faco esse primeiro filtro por aqui; se fizer sentido, um especialista entra com os detalhes. Voce esta buscando morar, investir ou so entender?'
     }
 
-    return 'Sou do atendimento da Guilherme Pilger Imoveis. Eu faco esse primeiro filtro por aqui e, se fizer sentido, um especialista continua com os detalhes. Me conta o que voce gostaria de entender primeiro?'
+    return 'Sou do atendimento da Guilherme Pilger Imoveis. Eu te situo por aqui primeiro e so chamo especialista quando fizer sentido. Voce esta olhando algo pra morar, investir ou so entender melhor?'
   }
 
   if (cue === 'low_commitment') {
-    return 'Combinado. Qual ponto voce quer ver primeiro: localizacao, condicao, perfil do imovel ou outra oportunidade?'
+    return 'Boa. Pra eu nao te mandar coisa aleatoria: voce esta pensando em comprar pra morar, investir/revender ou so entender o mercado?'
   }
 
   if (cue === 'conversation_request') {
@@ -415,18 +428,18 @@ function buildConversationHoldReply(
   }
 
   if (includesAny(normalized, ['boa noite'])) {
-    return 'Boa noite! Tudo bem? Me conta o que voce quer entender primeiro por aqui.'
+    return 'Boa noite! Tudo certo? Pra eu te situar: sou do atendimento da Guilherme Pilger Imoveis. Voce esta olhando algo pra morar, investir ou so entender melhor?'
   }
 
   if (includesAny(normalized, ['bom dia'])) {
-    return 'Bom dia! Tudo bem? Me conta o que voce quer entender primeiro por aqui.'
+    return 'Bom dia! Tudo certo? Pra eu te situar: sou do atendimento da Guilherme Pilger Imoveis. Voce esta olhando algo pra morar, investir ou so entender melhor?'
   }
 
   if (includesAny(normalized, ['boa tarde'])) {
-    return 'Boa tarde! Tudo bem? Me conta o que voce quer entender primeiro por aqui.'
+    return 'Boa tarde! Tudo certo? Pra eu te situar: sou do atendimento da Guilherme Pilger Imoveis. Voce esta olhando algo pra morar, investir ou so entender melhor?'
   }
 
-  return 'Oi! Tudo bem? Me conta o que voce quer entender primeiro: o contexto da mensagem ou outro perfil de imovel?'
+  return 'Fala! Tudo certo por ai? Pra eu te situar: sou do atendimento da Guilherme Pilger Imoveis. Voce esta olhando algo pra morar, investir ou so entender melhor?'
 }
 
 function getFallbackConversationCue(input: {
@@ -465,7 +478,7 @@ function isLearnMoreSignal(input: {
 }
 
 function buildLearnMoreReply() {
-  return 'Perfeito, entendi. Eu faco esse primeiro atendimento por aqui; os detalhes dos empreendimentos ficam com os especialistas. Ja deixei seu contato sinalizado para continuarem com voce. Pra te direcionar melhor: voce busca moradia, investimento ou ainda esta avaliando?'
+  return 'Perfeito. Eu faco esse primeiro filtro por aqui; detalhes de empreendimento, valor e disponibilidade ficam com os especialistas. Ja deixei seu contato sinalizado para continuarem. Pra te direcionar melhor: voce busca morar, investir ou ainda esta avaliando?'
 }
 
 function isPrematureHandoffReply(reply?: string | null) {
@@ -498,6 +511,9 @@ function isWeakGenericAgentReply(reply?: string | null) {
     'me conta como posso te ajudar por aqui',
     'me conta o que voce quer entender primeiro por aqui',
     'me conta o que voce quer entender primeiro',
+    'fechado vamos por partes',
+    'fechado vamos conversar sem pressa',
+    'voce prefere comecar por moradia investimento',
     'posso te ajudar com alguma informacao',
     'oportunidade que enviamos',
     'contexto da oportunidade que recebeu',
@@ -814,6 +830,14 @@ function stripJsonFences(value: string) {
   return withoutFence
 }
 
+function stripMarkdownFences(value: string) {
+  return String(value || '')
+    .trim()
+    .replace(/^```(?:json|text)?/i, '')
+    .replace(/```$/i, '')
+    .trim()
+}
+
 function normalizeAiIntent(value: unknown): ReplyIntent | null {
   const intent = normalizeIntentText(value)
   if (intent === 'interested' || intent === 'opt_out' || intent === 'question' || intent === 'unknown') {
@@ -939,6 +963,7 @@ async function classifyReplyWithGemini(input: {
     userMessage: input.userMessage,
     temperature: 0.1,
     maxTokens: 300,
+    responseMimeType: 'application/json',
   })
   const parsed = parseAiClassification(content)
   if (!parsed) return null
@@ -1038,6 +1063,27 @@ function parseAgentBoolean(value: unknown, fallback = false) {
   return fallback
 }
 
+function plainTextAgentReply(raw: string) {
+  const text = cleanText(stripMarkdownFences(raw), 1200)
+  const normalized = normalizeShortReply(text)
+  if (!text || !normalized) return null
+  if (/^\{|\}$/.test(text)) return null
+  if (includesAny(normalized, [
+    'intent',
+    'should notify',
+    'should close',
+    'lead stage',
+    'lead name',
+    'confidence',
+    'json valido',
+  ])) return null
+  if (hasLeadFacingForbiddenTerms(text)) return null
+
+  return text
+    .replace(/^resposta\s*(ao lead)?\s*:\s*/i, '')
+    .trim()
+}
+
 function parseAgentResponse(
   raw: string,
   fallbackIntent: ReplyIntent,
@@ -1065,7 +1111,23 @@ function parseAgentResponse(
       warnings,
     }
   } catch {
-    return null
+    const reply = plainTextAgentReply(raw)
+    if (!reply) return null
+
+    return {
+      intent: fallbackIntent,
+      confidence: fallbackIntent === 'unknown' ? 58 : 72,
+      reply,
+      shouldNotify: fallbackIntent === 'interested',
+      shouldClose: fallbackIntent === 'opt_out',
+      leadName: null,
+      leadStage: fallbackIntent === 'unknown' ? 'conversation' : fallbackIntent,
+      summary: 'Resposta conversacional aproveitada apesar de vir fora do JSON esperado.',
+      reason: 'IA respondeu em texto livre; resposta foi normalizada para o contrato interno.',
+      aiProvider: provider,
+      aiModel: model,
+      warnings: [...warnings, 'agent: resposta sem JSON aproveitada como texto'],
+    }
   }
 }
 
@@ -1136,6 +1198,8 @@ function buildAgentUserMessage(input: {
     'Regras finais:',
     '- Responda como atendente humano de primeiro contato, com naturalidade de WhatsApp.',
     '- Use o historico como memoria para nao repetir a mesma frase e para continuar a conversa.',
+    '- Se o lead fizer pergunta direta, responda essa pergunta antes de qualificar. Nao ignore a pergunta.',
+    '- Nao use resposta padrao de menu. Varie o texto conforme a mensagem atual e o historico.',
     '- Nao revele detalhes de imovel, empreendimento, produto, preco, disponibilidade, endereco exato ou condicao comercial.',
     '- Nunca use a palavra "campanha" com o lead.',
     '- Se a mensagem atual for cumprimento, identidade ou conversa inicial, responda com contexto e uma pergunta leve; mantenha should_notify false.',
@@ -1144,6 +1208,7 @@ function buildAgentUserMessage(input: {
     '- Se perceber pedido de saida/remocao, marque should_close true e confirme que removeu da lista.',
     '- Se perguntarem de onde veio o contato, responda com transparencia e ofereca saida da lista sem pressionar.',
     '- Nao repita a mesma frase do historico recente; avance a conversa com uma pergunta curta quando necessario.',
+    '- Exemplos de tom: "Fala! Tudo certo por ai?", "Boa. Pra eu te situar...", "Sobre oportunidades imobiliarias da Guilherme Pilger Imoveis...".',
     '- Retorne somente JSON valido no formato exigido pelo sistema.',
   ].filter(Boolean).join('\n')
 }
@@ -1209,6 +1274,7 @@ async function runAgentWithGemini(input: {
     userMessage: input.userMessage,
     temperature: 0.55,
     maxTokens: 700,
+    responseMimeType: 'application/json',
   })
 
   return parseAgentResponse(
@@ -1232,6 +1298,7 @@ async function generateMetaWhatsAppAgentResponse(input: {
   campaignType?: string | null
   rawText?: string | null
   history?: TriageConversationHistoryMessage[]
+  warnings?: string[]
 }) {
   const agentEnabled = String(input.configMap.meta_whatsapp_agent_enabled ?? 'true') !== 'false'
   const aiEnabled = String(input.configMap.meta_whatsapp_triage_ai_enabled ?? 'true') !== 'false'
@@ -1288,6 +1355,7 @@ async function generateMetaWhatsAppAgentResponse(input: {
     }
   }
 
+  input.warnings?.push(...warnings)
   return null
 }
 
@@ -1939,6 +2007,7 @@ export async function handleMetaWhatsAppReplyTriage(
       campaignType: campaign?.campaign_type || null,
       rawText,
       history: agentHistory,
+      warnings: agentWarnings,
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
@@ -2067,7 +2136,7 @@ export async function handleMetaWhatsAppReplyTriage(
   }
 
   const optOutFallback = 'Pronto. Vou remover seu contato da nossa lista. Voce nao recebera novas mensagens por este canal.'
-  const privacyFallback = 'Seu numero estava em uma base de contatos autorizados da imobiliaria. Se preferir, eu removo seu contato da lista por aqui mesmo.'
+  const privacyFallback = 'Seu numero estava em uma base de contatos autorizados da imobiliaria. Se nao fizer sentido pra voce, eu removo seu contato por aqui mesmo.'
   let replyText = cleanText(agentResponse?.reply, 1200)
   if (!replyText && effectiveIntent === 'interested') {
     replyText = sanitizeConfiguredReply(
