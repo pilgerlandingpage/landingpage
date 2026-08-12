@@ -187,7 +187,7 @@ const INTEGRATIONS: IntegrationCard[] = [
             { key: 'meta_whatsapp_triage_ai_min_confidence', label: 'Confianca minima da IA (0 a 100)', placeholder: '70', isSecret: false },
             { key: 'meta_whatsapp_triage_ai_prompt', label: 'Prompt da IA de triagem', placeholder: 'Regras para classificar interesse, saida, origem do contato ou desconhecido.', isSecret: false, type: 'textarea' },
             { key: 'meta_whatsapp_triage_interest_notify_phone', label: 'Numero interno para leads interessados', placeholder: '5547999999999', isSecret: false },
-            { key: 'meta_whatsapp_triage_interest_reply', label: 'Resposta automatica - saiba mais', placeholder: 'Perfeito. Vou encaminhar seu contato para um especialista da nossa equipe dar continuidade ao atendimento.', isSecret: false, type: 'textarea' },
+            { key: 'meta_whatsapp_triage_interest_reply', label: 'Resposta automatica - saiba mais', placeholder: 'Legal, eu te ajudo sim. Para eu entender melhor: voce busca moradia, investimento ou quer primeiro entender a oportunidade que enviamos?', isSecret: false, type: 'textarea' },
             { key: 'meta_whatsapp_triage_opt_out_reply', label: 'Resposta automatica - sair', placeholder: 'Pronto. Removemos seu contato da nossa lista. Voce nao recebera novas campanhas por este canal.', isSecret: false, type: 'textarea' },
             { key: 'meta_whatsapp_triage_privacy_reply', label: 'Resposta automatica - origem do contato', placeholder: 'Voce estava em nossa base de contatos de campanhas anteriores da imobiliaria. Se quiser sair da lista, responda SAIR que removemos seu contato.', isSecret: false, type: 'textarea' },
             {
@@ -203,7 +203,7 @@ const INTEGRATIONS: IntegrationCard[] = [
             },
             { key: 'meta_whatsapp_agent_history_limit', label: 'Historico usado pelo agente', placeholder: '12', isSecret: false },
             { key: 'meta_whatsapp_agent_prompt', label: 'Prompt do agente IA de respostas', placeholder: 'Regras de atendimento conversacional, interesse, saida e privacidade.', isSecret: false, type: 'textarea' },
-            { key: 'meta_whatsapp_agent_unknown_reply', label: 'Resposta fallback do agente', placeholder: 'Oi, tudo bem? Quer falar com um especialista?', isSecret: false, type: 'textarea' },
+            { key: 'meta_whatsapp_agent_unknown_reply', label: 'Resposta fallback do agente', placeholder: 'Oi, tudo bem? Aqui e o atendimento da Guilherme Pilger Imoveis. Me conta como posso te ajudar por aqui.', isSecret: false, type: 'textarea' },
             { key: 'meta_whatsapp_editorial_blog_template_name', label: 'Template oficial para blog', placeholder: 'pilger_blog_editorial', isSecret: false },
             { key: 'meta_whatsapp_editorial_news_template_name', label: 'Template oficial para noticia', placeholder: 'pilger_news_editorial', isSecret: false },
             { key: 'meta_whatsapp_property_followup_template_name', label: 'Template oficial para recomendacao', placeholder: 'pilger_property_followup', isSecret: false },
@@ -2675,4 +2675,3 @@ export default function MaintenancePage() {
         </div >
     )
 }
-

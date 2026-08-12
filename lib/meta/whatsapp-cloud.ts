@@ -29,6 +29,7 @@ const CONFIG_KEYS = [
   'meta_whatsapp_agent_unknown_reply',
   'meta_whatsapp_send_rate_per_minute',
   'meta_whatsapp_daily_limit_per_number',
+  'whatsapp_global_system_prompt',
 ] as const
 
 type ConfigMap = Record<string, string | undefined>
