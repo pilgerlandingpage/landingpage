@@ -44,6 +44,7 @@ import { resolveAgentCentralProfile, type AgentCentralProfile } from '@/lib/inte
 import {
     DEFAULT_META_WHATSAPP_AGENT_PROMPT,
     DEFAULT_META_WHATSAPP_TRIAGE_AI_PROMPT,
+    isLegacyMetaWhatsAppAgentPrompt,
 } from '@/lib/meta/whatsapp-agent-prompts'
 
 export type AgentOfficeTone = 'success' | 'warning' | 'danger' | 'info' | 'muted'
@@ -764,11 +765,11 @@ const OFFICE_PROMPT_AGENTS: AgentOfficeDefinition[] = [
             },
             {
                 key: 'meta_whatsapp_triage_ai_prompt',
-                label: 'Prompt de leitura de intencao',
+                label: 'Prompt da triagem silenciosa',
                 type: 'textarea',
                 fallback: DEFAULT_META_WHATSAPP_TRIAGE_AI_PROMPT,
                 rows: 8,
-                help: 'Prompt tecnico que classifica intencao; nao e uma resposta pronta enviada ao lead.',
+                help: 'Prompt tecnico usado depois da conversa para classificar intencao no CRM; nao aparece para o lead e nao escreve respostas.',
             },
         ],
         runtimeFacts: configs => [
@@ -2502,7 +2503,11 @@ export async function getAgentOfficeSnapshot(): Promise<AgentOfficeSnapshot> {
         const detail = isGlobalAgent && globalInstance
             ? `${agent.detail} Instancia global ${globalStatusLabel}${globalPhone ? ` - ${globalPhone}` : ''}.`
             : agent.detail
-        const promptValue = applyAgentIdentity(agent, persona, getConfig(configs, agent.promptKey, agent.fallback))
+        const storedPromptValue = getConfig(configs, agent.promptKey, agent.fallback)
+        const editablePromptValue = agent.id === 'agente-guilherme-meta-api' && isLegacyMetaWhatsAppAgentPrompt(storedPromptValue)
+            ? agent.fallback
+            : storedPromptValue
+        const promptValue = applyAgentIdentity(agent, persona, editablePromptValue)
         const behaviorControls = agent.behaviorControls?.map(control => ({
             ...control,
             value: getConfig(configs, control.key, control.fallback),

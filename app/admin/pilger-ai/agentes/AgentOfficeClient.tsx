@@ -1386,6 +1386,7 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
     const isUploadingAvatar = avatarSaveState.status === 'saving'
     const isBrokerAgent = selectedAgent?.source === 'virtual_brokers' && Boolean(selectedAgent?.brokerId)
     const isGlobalWhatsAppAgent = selectedAgent?.id === 'whatsapp-global-agent'
+    const isGuilhermeMetaAgent = selectedAgent?.id === 'agente-guilherme-meta-api'
     const isEventAgent = selectedAgent?.id === 'event-agent'
     const isCandidateAgent = selectedAgent?.id === 'broker-candidate-agent'
     const [brokerDraft, setBrokerDraft] = useState<OfficeBrokerDraft | null>(null)
@@ -4875,10 +4876,12 @@ export default function AgentOfficeClient({ snapshot }: { snapshot: AgentOfficeS
                     <div className={`agent-office-prompt-card ${isBrokerAgent || isEventAgent || isCandidateAgent ? 'has-tags' : ''}`}>
                         <div className="agent-office-prompt-head">
                             <div>
-                                <h3><Sparkles size={17} /> {isGlobalWhatsAppAgent ? 'Prompt do WhatsApp Global' : isBrokerAgent ? 'Prompt do agente comercial' : 'Prompt do agente'}</h3>
+                                <h3><Sparkles size={17} /> {isGlobalWhatsAppAgent ? 'Prompt do WhatsApp Global' : isGuilhermeMetaAgent ? 'Prompt de conversa do Agente Guilherme' : isBrokerAgent ? 'Prompt do agente comercial' : 'Prompt do agente'}</h3>
                                 <p>
                                     {isGlobalWhatsAppAgent
                                         ? 'Prompt operacional salvo na base real do WhatsApp Global'
+                                        : isGuilhermeMetaAgent
+                                            ? 'Fala visivel ao lead. A leitura de intencao roda separada e silenciosa no comportamento operacional.'
                                         : selectedAgent.promptKey ? `Chave: ${selectedAgent.promptKey}` : 'Prompt individual do corretor IA'}
                                 </p>
                             </div>

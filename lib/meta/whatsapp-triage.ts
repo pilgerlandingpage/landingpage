@@ -14,6 +14,7 @@ import {
 import {
   DEFAULT_META_WHATSAPP_AGENT_PROMPT,
   DEFAULT_META_WHATSAPP_TRIAGE_AI_PROMPT,
+  isLegacyMetaWhatsAppAgentPrompt,
 } from '@/lib/meta/whatsapp-agent-prompts'
 
 type SupabaseAdmin = ReturnType<typeof createAdminClient>
@@ -92,31 +93,10 @@ function cleanText(value: unknown, maxLength = 300) {
   return String(value || '').trim().slice(0, maxLength)
 }
 
-function isLegacyMetaAgentPrompt(prompt: string) {
-  const normalized = normalizeIntentText(prompt)
-  return includesAny(normalized, [
-    'camada meta whatsapp campanhas',
-    'responderam campanhas enviadas',
-    'rejeitar a campanha',
-    'campanhas anteriores',
-    'oportunidade que enviamos',
-    'agente de pre atendimento oficial',
-    'se houver interesse encaminhe',
-    'especialista da nossa equipe dar continuidade',
-    'parecer pronto para falar com alguem',
-    'quer que eu peca para um especialista',
-    'retorne somente json valido',
-    'should_notify',
-    'should_close',
-    'lead_stage',
-    'contrato de saida',
-  ])
-}
-
 function buildMetaWhatsAppAgentPrompt(configMap: Record<string, string | undefined>) {
   const globalPrompt = cleanText(configMap.whatsapp_global_system_prompt, 14000) || DEFAULT_WHATSAPP_GLOBAL_SYSTEM_PROMPT
   const configuredMetaPrompt = cleanText(configMap.meta_whatsapp_agent_prompt, 10000)
-  const metaPrompt = configuredMetaPrompt && !isLegacyMetaAgentPrompt(configuredMetaPrompt)
+  const metaPrompt = configuredMetaPrompt && !isLegacyMetaWhatsAppAgentPrompt(configuredMetaPrompt)
     ? configuredMetaPrompt
     : DEFAULT_META_WHATSAPP_AGENT_PROMPT
 
