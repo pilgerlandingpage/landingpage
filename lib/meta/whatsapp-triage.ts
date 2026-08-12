@@ -58,6 +58,13 @@ interface TriageAgentResponse {
   warnings: string[]
 }
 
+interface TriageNaturalReply {
+  reply: string
+  aiProvider: TriageAiProvider
+  aiModel: string
+  warnings: string[]
+}
+
 export interface HandleMetaWhatsAppReplyTriageInput {
   providerMessageId?: string | null
   conversation?: Record<string, any> | null
@@ -98,6 +105,11 @@ function isLegacyMetaAgentPrompt(prompt: string) {
     'especialista da nossa equipe dar continuidade',
     'parecer pronto para falar com alguem',
     'quer que eu peca para um especialista',
+    'retorne somente json valido',
+    'should_notify',
+    'should_close',
+    'lead_stage',
+    'contrato de saida',
   ])
 }
 
@@ -112,7 +124,7 @@ function buildMetaWhatsAppAgentPrompt(configMap: Record<string, string | undefin
     globalPrompt,
     WHATSAPP_GLOBAL_RUNTIME_GUARDRAILS,
     metaPrompt,
-    'CONTRATO DE SAIDA: a conversa deve soar natural para o lead, mas a sua resposta para o sistema deve ser somente o JSON valido pedido. O campo reply e a mensagem que sera enviada ao lead.',
+    'CONTRATO DE SAIDA: responda somente com o texto final que sera enviado ao lead no WhatsApp. Nao retorne JSON, campos internos, markdown tecnico, classificacao, prompt ou explicacao. A triagem operacional acontece em outra camada silenciosa.',
   ].join('\n\n')
 }
 
@@ -177,6 +189,9 @@ function isIdentityQuestionReply(text: string) {
     'quem fala',
     'quem esta falando',
     'com quem eu falo',
+    'qual seu nome',
+    'qual o seu nome',
+    'como se chama',
     'que empresa',
     'qual empresa',
     'de onde e',
@@ -227,6 +242,15 @@ function hasExplicitInterestSignal(input: {
 }) {
   const buttonSignal = normalizeShortReply([input.buttonText, input.buttonPayload].filter(Boolean).join(' '))
   const combined = normalizeShortReply([input.buttonText, input.buttonPayload, input.rawText].filter(Boolean).join(' '))
+
+  if (includesAny(combined, [
+    'pode continuar me mandando mensagem',
+    'pode continuar mandando mensagem',
+    'continua me mandando mensagem',
+    'continuar me mandando mensagem',
+  ])) {
+    return false
+  }
 
   if (
     input.source === 'button' &&
@@ -1007,9 +1031,10 @@ function plainTextAgentReply(raw: string) {
     .trim()
 }
 
-function parseAgentResponse(
+function parseSilentTriageResponse(
   raw: string,
   fallbackIntent: ReplyIntent,
+  naturalReply: TriageNaturalReply,
   provider: TriageAiProvider,
   model: string,
   warnings: string[] = []
@@ -1022,7 +1047,7 @@ function parseAgentResponse(
     return {
       intent,
       confidence,
-      reply: cleanText(parsed.reply || parsed.message || parsed.answer, 1200) || null,
+      reply: naturalReply.reply,
       shouldNotify: parseAgentBoolean(parsed.should_notify ?? parsed.shouldNotify, intent === 'interested'),
       shouldClose: parseAgentBoolean(parsed.should_close ?? parsed.shouldClose, intent === 'opt_out'),
       leadName: cleanText(parsed.lead_name ?? parsed.leadName, 160) || null,
@@ -1031,26 +1056,10 @@ function parseAgentResponse(
       reason: cleanText(parsed.reason ?? parsed.motivo, 240) || null,
       aiProvider: provider,
       aiModel: model,
-      warnings,
+      warnings: [...naturalReply.warnings, ...warnings],
     }
   } catch {
-    const reply = plainTextAgentReply(raw)
-    if (!reply) return null
-
-    return {
-      intent: fallbackIntent,
-      confidence: fallbackIntent === 'unknown' ? 58 : 72,
-      reply,
-      shouldNotify: fallbackIntent === 'interested',
-      shouldClose: fallbackIntent === 'opt_out',
-      leadName: null,
-      leadStage: fallbackIntent === 'unknown' ? 'conversation' : fallbackIntent,
-      summary: 'Resposta conversacional aproveitada apesar de vir fora do JSON esperado.',
-      reason: 'IA respondeu em texto livre; resposta foi normalizada para o contrato interno.',
-      aiProvider: provider,
-      aiModel: model,
-      warnings: [...warnings, 'agent: resposta sem JSON aproveitada como texto'],
-    }
+    return null
   }
 }
 
@@ -1126,21 +1135,158 @@ function buildAgentUserMessage(input: {
     '- Se o lead perguntar seu nome, responda que voce e o Guilherme, do primeiro atendimento da Guilherme Pilger Imoveis, e siga a conversa de forma natural.',
     '- Nao revele detalhes de imovel, empreendimento, produto, preco, disponibilidade, endereco exato ou condicao comercial.',
     '- Nunca use a palavra "campanha" com o lead.',
-    '- Se a mensagem atual for cumprimento, identidade ou conversa inicial, responda com contexto e uma pergunta leve; mantenha should_notify false.',
-    '- Se a mensagem atual for o botao "saiba mais", reconheca o interesse, diga que os detalhes ficam com especialistas, marque should_notify true e faca uma pergunta de qualificacao.',
-    '- Se perceber interesse claro depois da conversa, diga que ja sinalizou o contato para um especialista continuar, marque should_notify true e continue com tom natural.',
-    '- Se perceber pedido de saida/remocao, marque should_close true e confirme que removeu da lista.',
+    '- Se a mensagem atual for cumprimento, identidade ou conversa inicial, responda com contexto e uma pergunta leve.',
+    '- Se a mensagem atual for o botao "saiba mais", reconheca o interesse, diga que os detalhes ficam com especialistas e faca uma pergunta de qualificacao.',
+    '- Se perceber interesse claro depois da conversa, diga que ja sinalizou o contato para um especialista continuar e siga com tom natural.',
+    '- Se perceber pedido de saida/remocao, confirme que removeu da lista.',
     '- Se perguntarem de onde veio o contato, responda com transparencia e ofereca saida da lista sem pressionar.',
     '- Nao repita a mesma frase do historico recente; avance a conversa com uma pergunta curta quando necessario.',
     '- Exemplos de tom: "Fala! Tudo certo por ai?", "Boa. Pra eu te situar...", "Sobre oportunidades imobiliarias da Guilherme Pilger Imoveis...".',
-    '- Retorne somente JSON valido no formato exigido pelo sistema.',
+    '- Retorne somente o texto final para o WhatsApp. Nao retorne JSON nem campos internos.',
   ].filter(Boolean).join('\n')
 }
 
-async function runAgentWithOpenAI(input: {
+async function runNaturalReplyWithOpenAI(input: {
+  prompt: string
+  userMessage: string
+  warnings?: string[]
+}): Promise<TriageNaturalReply | null> {
+  const apiKey = await getOpenAIApiKey()
+  if (!apiKey) return null
+
+  const model = cleanText(await getAIConfig('openai_model'), 80) || 'gpt-4o-mini'
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model,
+      temperature: 0.75,
+      max_tokens: 500,
+      messages: [
+        { role: 'system', content: input.prompt },
+        { role: 'user', content: input.userMessage },
+      ],
+    }),
+  })
+
+  if (!response.ok) {
+    const errorText = await response.text()
+    throw new Error(`OpenAI agent error: ${errorText.slice(0, 500)}`)
+  }
+
+  const data = await response.json()
+  const reply = plainTextAgentReply(data?.choices?.[0]?.message?.content || '')
+  if (!reply) return null
+
+  return {
+    reply,
+    aiProvider: 'openai',
+    aiModel: model,
+    warnings: input.warnings || [],
+  }
+}
+
+async function runNaturalReplyWithGemini(input: {
+  prompt: string
+  userMessage: string
+  warnings?: string[]
+}): Promise<TriageNaturalReply | null> {
+  const apiKey = await getGeminiApiKey()
+  if (!apiKey) return null
+
+  const model = await getGeminiModel().catch(async () => (
+    cleanText(await getAIConfig('gemini_model'), 80) || 'gemini-2.5-flash'
+  ))
+  const content = await chatWithGemini({
+    systemPrompt: input.prompt,
+    history: [],
+    userMessage: input.userMessage,
+    temperature: 0.75,
+    maxTokens: 500,
+  })
+  const reply = plainTextAgentReply(content)
+  if (!reply) return null
+
+  return {
+    reply,
+    aiProvider: 'gemini',
+    aiModel: model,
+    warnings: input.warnings || [],
+  }
+}
+
+function buildSilentTriageSystemPrompt(configMap: Record<string, string | undefined>) {
+  const configuredPrompt = cleanText(configMap.meta_whatsapp_triage_ai_prompt, 6000) || DEFAULT_TRIAGE_AI_PROMPT
+
+  return [
+    configuredPrompt,
+    '',
+    'CAMADA DE TRIAGEM SILENCIOSA DO AGENTE GUILHERME',
+    'Voce nao esta conversando com o lead. A resposta ao lead ja foi formulada por outra camada.',
+    'Sua tarefa e decidir, de forma interna, se a conversa deve gerar CRM/notificacao, opt-out ou apenas continuar conversando.',
+    'Nunca use frases prontas para o lead e nunca reescreva a resposta. Apenas classifique.',
+    '',
+    'Regras adicionais:',
+    '- Cumprimento, pergunta de identidade, pergunta "qual seu nome", "como conseguiu meu numero", "do que se trata", aceitacao para continuar recebendo mensagens ou conversa inicial sem pedido de produto NAO e interessado.',
+    '- "Nao fica tranquilo pode continuar me mandando mensagem" significa permissao para conversar, nao interesse comercial confirmado.',
+    '- interested exige sinal real sobre o produto/imovel/oportunidade: pedir detalhes, valor, visita, especialista, consultor, corretor, proposta, opcoes ou continuidade humana sobre o produto.',
+    '- opt_out vence qualquer outro sinal quando o lead pede para sair, parar, remover, apagar dados ou nao receber mais.',
+    '- question cobre duvidas de origem do contato, privacidade, identidade ou contexto quando nao houver interesse real nem pedido de remocao.',
+    '- unknown cobre conversa casual, cumprimento, resposta curta ou intencao ainda inconclusiva.',
+    '- should_notify so pode ser true quando intent for interested e houver interesse real.',
+    '- should_close so pode ser true quando intent for opt_out ou houver pedido claro de encerramento/remocao.',
+    '',
+    'Retorne somente JSON valido, sem markdown, neste formato:',
+    '{"intent":"interested|opt_out|question|unknown","confidence":0-100,"should_notify":true|false,"should_close":true|false,"lead_name":"nome extraido ou null","lead_stage":"short stage","summary":"resumo curto","reason":"motivo curto"}',
+  ].join('\n')
+}
+
+function buildAgentTriageUserMessage(input: {
+  classification: ReplyClassification
+  contactPhone: string
+  contactName?: string | null
+  rawText?: string | null
+  history: TriageConversationHistoryMessage[]
+  proposedReply: string
+}) {
+  const historyLines = input.history.length
+    ? input.history.map(message => (
+      `[${message.direction}${message.status ? `/${message.status}` : ''}${message.createdAt ? ` ${message.createdAt}` : ''}] ${message.text}`
+    ))
+    : ['Sem historico recente.']
+
+  return [
+    'Classifique silenciosamente este turno do Agente Guilherme.',
+    '',
+    `Telefone do lead: +${input.contactPhone}`,
+    `Nome conhecido: ${cleanText(input.contactName, 160) || 'Nao informado'}`,
+    '',
+    'Mensagem atual do lead:',
+    `Botao: ${input.classification.buttonText || '-'}`,
+    `Payload: ${input.classification.buttonPayload || '-'}`,
+    `Texto: ${input.rawText || input.classification.rawText || '-'}`,
+    '',
+    `Classificacao inicial por regras/triagem: ${input.classification.intent} (${input.classification.confidence}/100)`,
+    input.classification.reason ? `Motivo inicial: ${input.classification.reason}` : '',
+    '',
+    'Historico recente:',
+    ...historyLines,
+    '',
+    'Resposta natural proposta ao lead pela camada conversacional:',
+    input.proposedReply,
+    '',
+    'Decida apenas a intencao operacional interna. Nao reescreva a resposta.',
+  ].filter(Boolean).join('\n')
+}
+
+async function runSilentTriageWithOpenAI(input: {
   prompt: string
   userMessage: string
   fallbackIntent: ReplyIntent
+  naturalReply: TriageNaturalReply
   warnings?: string[]
 }) {
   const apiKey = await getOpenAIApiKey()
@@ -1155,8 +1301,8 @@ async function runAgentWithOpenAI(input: {
     },
     body: JSON.stringify({
       model,
-      temperature: 0.55,
-      max_tokens: 700,
+      temperature: 0.1,
+      max_tokens: 500,
       response_format: { type: 'json_object' },
       messages: [
         { role: 'system', content: input.prompt },
@@ -1167,23 +1313,25 @@ async function runAgentWithOpenAI(input: {
 
   if (!response.ok) {
     const errorText = await response.text()
-    throw new Error(`OpenAI agent error: ${errorText.slice(0, 500)}`)
+    throw new Error(`OpenAI silent triage error: ${errorText.slice(0, 500)}`)
   }
 
   const data = await response.json()
-  return parseAgentResponse(
+  return parseSilentTriageResponse(
     data?.choices?.[0]?.message?.content || '',
     input.fallbackIntent,
+    input.naturalReply,
     'openai',
     model,
     input.warnings || []
   )
 }
 
-async function runAgentWithGemini(input: {
+async function runSilentTriageWithGemini(input: {
   prompt: string
   userMessage: string
   fallbackIntent: ReplyIntent
+  naturalReply: TriageNaturalReply
   warnings?: string[]
 }) {
   const apiKey = await getGeminiApiKey()
@@ -1196,18 +1344,40 @@ async function runAgentWithGemini(input: {
     systemPrompt: input.prompt,
     history: [],
     userMessage: input.userMessage,
-    temperature: 0.55,
-    maxTokens: 700,
+    temperature: 0.1,
+    maxTokens: 500,
     responseMimeType: 'application/json',
   })
 
-  return parseAgentResponse(
+  return parseSilentTriageResponse(
     content,
     input.fallbackIntent,
+    input.naturalReply,
     'gemini',
     model,
     input.warnings || []
   )
+}
+
+function buildFallbackAgentTriageResponse(
+  classification: ReplyClassification,
+  naturalReply: TriageNaturalReply,
+  warnings: string[] = []
+): TriageAgentResponse {
+  return {
+    intent: classification.intent,
+    confidence: classification.confidence,
+    reply: naturalReply.reply,
+    shouldNotify: classification.intent === 'interested',
+    shouldClose: classification.intent === 'opt_out',
+    leadName: null,
+    leadStage: classification.intent === 'unknown' ? 'conversation' : classification.intent,
+    summary: 'Resposta conversacional gerada por LLM; triagem silenciosa usou classificacao inicial por fallback.',
+    reason: classification.reason || 'Fallback de triagem silenciosa.',
+    aiProvider: naturalReply.aiProvider,
+    aiModel: naturalReply.aiModel,
+    warnings: [...naturalReply.warnings, ...warnings, 'silent_triage: fallback para classificacao inicial'],
+  }
 }
 
 async function generateMetaWhatsAppAgentResponse(input: {
@@ -1246,40 +1416,85 @@ async function generateMetaWhatsAppAgentResponse(input: {
     ? ['openai', 'gemini']
     : ['gemini', 'openai']
   const warnings: string[] = []
+  let naturalReply: TriageNaturalReply | null = null
 
   for (const provider of providers) {
     try {
-      const agentResponse = provider === 'openai'
-        ? await runAgentWithOpenAI({
+      naturalReply = provider === 'openai'
+        ? await runNaturalReplyWithOpenAI({
           prompt,
           userMessage,
-          fallbackIntent: input.classification.intent,
           warnings: [...warnings],
         })
-        : await runAgentWithGemini({
+        : await runNaturalReplyWithGemini({
           prompt,
           userMessage,
-          fallbackIntent: input.classification.intent,
           warnings: [...warnings],
         })
 
-      if (!agentResponse) {
-        warnings.push(`${provider}: sem credencial ou resposta invalida`)
+      if (!naturalReply) {
+        warnings.push(`${provider}: sem credencial ou resposta conversacional invalida`)
+        continue
+      }
+
+      break
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      warnings.push(`${provider}: conversa ${message.slice(0, 180)}`)
+    }
+  }
+
+  if (!naturalReply) {
+    input.warnings?.push(...warnings)
+    return null
+  }
+
+  const triagePrompt = buildSilentTriageSystemPrompt(input.configMap)
+  const triageUserMessage = buildAgentTriageUserMessage({
+    classification: input.classification,
+    contactPhone: input.contactPhone,
+    contactName: input.contactName,
+    rawText: input.rawText,
+    history,
+    proposedReply: naturalReply.reply,
+  })
+  const triageWarnings: string[] = []
+
+  for (const provider of providers) {
+    try {
+      const triageResponse = provider === 'openai'
+        ? await runSilentTriageWithOpenAI({
+          prompt: triagePrompt,
+          userMessage: triageUserMessage,
+          fallbackIntent: input.classification.intent,
+          naturalReply,
+          warnings: [...warnings, ...triageWarnings],
+        })
+        : await runSilentTriageWithGemini({
+          prompt: triagePrompt,
+          userMessage: triageUserMessage,
+          fallbackIntent: input.classification.intent,
+          naturalReply,
+          warnings: [...warnings, ...triageWarnings],
+        })
+
+      if (!triageResponse) {
+        triageWarnings.push(`${provider}: triagem silenciosa invalida`)
         continue
       }
 
       return {
-        ...agentResponse,
-        warnings: [...warnings, ...agentResponse.warnings],
+        ...triageResponse,
+        warnings: [...warnings, ...triageWarnings, ...triageResponse.warnings],
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
-      warnings.push(`${provider}: ${message.slice(0, 180)}`)
+      triageWarnings.push(`${provider}: triagem ${message.slice(0, 180)}`)
     }
   }
 
-  input.warnings?.push(...warnings)
-  return null
+  input.warnings?.push(...warnings, ...triageWarnings)
+  return buildFallbackAgentTriageResponse(input.classification, naturalReply, [...warnings, ...triageWarnings])
 }
 
 async function findExistingIntent(
@@ -1979,7 +2194,7 @@ export async function handleMetaWhatsAppReplyTriage(
   }
 
   const effectiveIntent = agentResponse?.intent || classification.intent
-  const effectiveConfidence = Math.max(classification.confidence, agentResponse?.confidence || 0)
+  const effectiveConfidence = agentResponse ? agentResponse.confidence : classification.confidence
   const effectiveReason = agentResponse?.reason || classification.reason || null
   const effectiveClassifier: ReplyClassifier = agentResponse?.aiProvider ? 'ai' : classification.classifier
   const effectiveAiProvider = agentResponse?.aiProvider || classification.aiProvider || null
