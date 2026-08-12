@@ -462,27 +462,6 @@ function isPrematureHandoffReply(reply?: string | null) {
   ])
 }
 
-function isWeakGenericAgentReply(reply?: string | null) {
-  const normalized = normalizeShortReply(reply || '')
-  if (!normalized) return false
-
-  return includesAny(normalized, [
-    'aqui e o atendimento da guilherme pilger imoveis',
-    'sou do atendimento da guilherme pilger imoveis',
-    'me conta como posso te ajudar por aqui',
-    'me conta o que voce quer entender primeiro por aqui',
-    'me conta o que voce quer entender primeiro',
-    'fechado vamos por partes',
-    'fechado vamos conversar sem pressa',
-    'voce prefere comecar por moradia investimento',
-    'posso te ajudar com alguma informacao',
-    'oportunidade que enviamos',
-    'contexto da oportunidade que recebeu',
-    'voce prefere falar sobre o contexto da mensagem',
-    'quer que eu peca para um especialista continuar',
-  ])
-}
-
 function hasLeadFacingForbiddenTerms(reply?: string | null) {
   const normalized = normalizeShortReply(reply || '')
   if (!normalized) return false
@@ -509,10 +488,8 @@ function buildConversationHoldAgentResponse(
 ): TriageAgentResponse {
   const canKeepAgentReply = Boolean(
     agentResponse?.reply &&
-    agentResponse.intent !== 'interested' &&
-    !agentResponse.shouldNotify &&
     !isPrematureHandoffReply(agentResponse.reply) &&
-    !isWeakGenericAgentReply(agentResponse.reply) &&
+    !hasLeadFacingForbiddenTerms(agentResponse.reply) &&
     !isRecentlyRepeatedReply(agentResponse.reply, history)
   )
 
@@ -540,14 +517,15 @@ function softenLearnMoreAgentResponse(
   agentResponse: TriageAgentResponse | null,
   warnings: string[] = []
 ): TriageAgentResponse {
+  const canKeepAgentReply = Boolean(
+    agentResponse?.reply &&
+    !hasLeadFacingForbiddenTerms(agentResponse.reply)
+  )
+
   return {
     intent: 'interested',
     confidence: Math.max(agentResponse?.confidence || 0, 92),
-    reply: agentResponse?.reply &&
-      !isPrematureHandoffReply(agentResponse.reply) &&
-      !isWeakGenericAgentReply(agentResponse.reply)
-      ? agentResponse.reply
-      : buildLearnMoreReply(),
+    reply: canKeepAgentReply ? agentResponse?.reply || null : buildLearnMoreReply(),
     shouldNotify: true,
     shouldClose: false,
     leadName: agentResponse?.leadName || null,
@@ -1145,6 +1123,7 @@ function buildAgentUserMessage(input: {
     '- Use o historico como memoria para nao repetir a mesma frase e para continuar a conversa.',
     '- Se o lead fizer pergunta direta, responda essa pergunta antes de qualificar. Nao ignore a pergunta.',
     '- Nao use resposta padrao de menu. Varie o texto conforme a mensagem atual e o historico.',
+    '- Se o lead perguntar seu nome, responda que voce e o Guilherme, do primeiro atendimento da Guilherme Pilger Imoveis, e siga a conversa de forma natural.',
     '- Nao revele detalhes de imovel, empreendimento, produto, preco, disponibilidade, endereco exato ou condicao comercial.',
     '- Nunca use a palavra "campanha" com o lead.',
     '- Se a mensagem atual for cumprimento, identidade ou conversa inicial, responda com contexto e uma pergunta leve; mantenha should_notify false.',
@@ -1246,8 +1225,7 @@ async function generateMetaWhatsAppAgentResponse(input: {
   warnings?: string[]
 }) {
   const agentEnabled = String(input.configMap.meta_whatsapp_agent_enabled ?? 'true') !== 'false'
-  const aiEnabled = String(input.configMap.meta_whatsapp_triage_ai_enabled ?? 'true') !== 'false'
-  if (!agentEnabled || !aiEnabled) return null
+  if (!agentEnabled) return null
 
   const prompt = buildMetaWhatsAppAgentPrompt(input.configMap)
   const historyLimit = clampInteger(input.configMap.meta_whatsapp_agent_history_limit, 12, 4, 30)
@@ -1978,7 +1956,7 @@ export async function handleMetaWhatsAppReplyTriage(
     agentResponse = softenLearnMoreAgentResponse(agentResponse)
   } else if (
     agentResponse?.reply &&
-    (isPrematureHandoffReply(agentResponse.reply) || isWeakGenericAgentReply(agentResponse.reply)) &&
+    isPrematureHandoffReply(agentResponse.reply) &&
     !hasExplicitInterestSignal({
       source: classification.source,
       buttonText: classification.buttonText,
