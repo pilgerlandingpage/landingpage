@@ -46,6 +46,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Handle de midia gerado para aprovacao do template.',
+      sourceUrl: url,
+      fileName: cleanText(body.fileName, 180) || inferredName,
+      fileType: contentType,
       ...result,
     })
   } catch (error) {

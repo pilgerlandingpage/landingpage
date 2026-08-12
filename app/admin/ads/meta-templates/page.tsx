@@ -69,6 +69,22 @@ interface TemplateForm {
   messageSendTtlSeconds: string
 }
 
+interface HeaderMediaUploadResponse {
+  success?: boolean
+  handle?: string
+  message?: string
+  fileName?: string
+  fileType?: string
+  sourceUrl?: string
+}
+
+interface HeaderMediaUploadResult {
+  handle: string
+  fileName?: string
+  fileType?: string
+  sourceUrl?: string
+}
+
 const emptyButton: ButtonDraft = {
   type: 'QUICK_REPLY',
   text: '',
@@ -238,7 +254,11 @@ export default function MetaTemplatesPage() {
 
   const updateForm = (patch: Partial<TemplateForm>) => setForm(prev => ({ ...prev, ...patch }))
 
-  const buildComponents = () => {
+  const buildComponents = (
+    headerMediaHandleOverride = '',
+    options: { requireHeaderMediaHandle?: boolean } = {},
+  ) => {
+    const requireHeaderMediaHandle = options.requireHeaderMediaHandle !== false
     const components: Record<string, unknown>[] = []
     const normalizedBody = form.bodyText.trim()
     if (!normalizedBody) throw new Error('Corpo do template obrigatorio.')
@@ -256,10 +276,14 @@ export default function MetaTemplatesPage() {
           header.example = { header_text: [form.headerExample.trim()] }
         }
       } else {
-        if (!form.headerMediaHandle.trim()) {
-          throw new Error('Gere ou informe o handle de midia Meta para aprovar template com imagem, video ou documento.')
+        const headerMediaHandle = (headerMediaHandleOverride || form.headerMediaHandle).trim()
+        if (!headerMediaHandle) {
+          if (requireHeaderMediaHandle) {
+            throw new Error('Informe a URL publica da midia de exemplo. O painel vai gerar o handle da Meta automaticamente ao enviar para aprovacao.')
+          }
+        } else {
+          header.example = { header_handle: [headerMediaHandle] }
         }
-        header.example = { header_handle: [form.headerMediaHandle.trim()] }
       }
       components.push(header)
     }
@@ -345,7 +369,7 @@ export default function MetaTemplatesPage() {
     }
     let components: unknown[] = []
     try {
-      components = form.bodyText.trim() ? buildComponents() : []
+      components = form.bodyText.trim() ? buildComponents('', { requireHeaderMediaHandle: false }) : []
     } catch {
       components = []
     }
@@ -361,6 +385,25 @@ export default function MetaTemplatesPage() {
     if (payload?.draft?.id) setEditingDraftId(payload.draft.id)
   }
 
+  const requestHeaderMediaHandle = async (url: string): Promise<HeaderMediaUploadResult> => {
+    const response = await fetch('/api/admin/whatsapp/template-media', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url }),
+    })
+    const payload = await response.json() as HeaderMediaUploadResponse
+    const handle = typeof payload.handle === 'string' ? payload.handle.trim() : ''
+    if (!response.ok || !payload.success || !handle) {
+      throw new Error(payload.message || 'Falha ao gerar handle de midia.')
+    }
+    return {
+      handle,
+      fileName: payload.fileName,
+      fileType: payload.fileType,
+      sourceUrl: payload.sourceUrl || url,
+    }
+  }
+
   const generateHeaderMediaHandle = async () => {
     const url = form.headerMediaSampleUrl.trim()
     if (!url) {
@@ -371,15 +414,7 @@ export default function MetaTemplatesPage() {
     setUploadingTemplateMedia(true)
     setFeedback(null)
     try {
-      const response = await fetch('/api/admin/whatsapp/template-media', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url }),
-      })
-      const payload = await response.json()
-      if (!payload.success || !payload.handle) {
-        throw new Error(payload.message || 'Falha ao gerar handle de midia.')
-      }
+      const payload = await requestHeaderMediaHandle(url)
       updateForm({ headerMediaHandle: payload.handle })
       setFeedback({ type: 'success', text: 'Handle de midia gerado. Agora o template pode ser enviado para aprovacao.' })
     } catch (error) {
@@ -389,10 +424,33 @@ export default function MetaTemplatesPage() {
     }
   }
 
+  const ensureHeaderMediaHandle = async (): Promise<HeaderMediaUploadResult | null> => {
+    if (form.headerFormat === 'NONE' || form.headerFormat === 'TEXT') return null
+    const existingHandle = form.headerMediaHandle.trim()
+    const mediaUrl = form.headerMediaSampleUrl.trim()
+    if (existingHandle) {
+      return { handle: existingHandle, sourceUrl: mediaUrl || undefined }
+    }
+    if (!mediaUrl) {
+      throw new Error('Informe a URL publica da midia de exemplo para aprovar template com imagem, video ou documento.')
+    }
+
+    setUploadingTemplateMedia(true)
+    try {
+      const payload = await requestHeaderMediaHandle(mediaUrl)
+      updateForm({ headerMediaHandle: payload.handle })
+      return payload
+    } finally {
+      setUploadingTemplateMedia(false)
+    }
+  }
+
   const submitToMeta = async () => {
     try {
+      setFeedback(null)
       const name = normalizeTemplateName(form.name)
-      const components = buildComponents()
+      const headerMedia = await ensureHeaderMediaHandle()
+      const components = buildComponents(headerMedia?.handle || '')
       if (!name) throw new Error('Nome do template obrigatorio.')
       await runAction({
         action: editingTemplate ? 'edit' : 'create',
@@ -402,6 +460,13 @@ export default function MetaTemplatesPage() {
         category: form.category,
         components,
         messageSendTtlSeconds: Number(form.messageSendTtlSeconds || 0) || undefined,
+        panelHeaderMedia: headerMedia?.sourceUrl ? {
+          url: headerMedia.sourceUrl,
+          handle: headerMedia.handle,
+          fileName: headerMedia.fileName,
+          contentType: headerMedia.fileType,
+          headerFormat: form.headerFormat,
+        } : undefined,
       }, editingTemplate ? 'Template atualizado.' : 'Template enviado para Meta.')
       resetBuilder()
     } catch (error) {
@@ -605,11 +670,12 @@ export default function MetaTemplatesPage() {
             </Field>
 
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-              <button type="button" onClick={saveDraft} disabled={saving} style={actionButtonStyle(false)}>
+              <button type="button" onClick={saveDraft} disabled={saving || uploadingTemplateMedia} style={actionButtonStyle(false)}>
                 {saving ? <Loader2 size={16} className="spin" /> : <Save size={16} />} Salvar rascunho
               </button>
-              <button type="button" onClick={submitToMeta} disabled={saving} style={actionButtonStyle(true)}>
-                {saving ? <Loader2 size={16} className="spin" /> : <Send size={16} />} {editingTemplate ? 'Atualizar na Meta' : 'Enviar para aprovacao'}
+              <button type="button" onClick={submitToMeta} disabled={saving || uploadingTemplateMedia} style={actionButtonStyle(true)}>
+                {saving || uploadingTemplateMedia ? <Loader2 size={16} className="spin" /> : <Send size={16} />}
+                {uploadingTemplateMedia ? 'Gerando midia...' : editingTemplate ? 'Atualizar na Meta' : 'Enviar para aprovacao'}
               </button>
             </div>
           </div>
