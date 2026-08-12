@@ -76,8 +76,8 @@ export interface ManualMetaWhatsAppReplyTriageInput {
 }
 
 const DEFAULT_TRIAGE_AI_PROMPT = [
-  'Voce e um agente de triagem de respostas de campanhas oficiais de WhatsApp da imobiliaria.',
-  'Sua tarefa e classificar a intencao do lead sem entregar detalhes do imovel, campanha, preco ou oferta.',
+  'Voce e um agente de triagem de respostas de envios oficiais de WhatsApp da imobiliaria.',
+  'Sua tarefa e classificar a intencao do lead sem entregar detalhes do imovel, empreendimento, preco ou oferta.',
   'Retorne somente JSON valido, sem markdown, neste formato:',
   '{"intent":"interested|opt_out|question|unknown","confidence":0-100,"reason":"motivo curto"}',
   '',
@@ -91,22 +91,24 @@ const DEFAULT_TRIAGE_AI_PROMPT = [
 ].join('\n')
 
 const DEFAULT_META_WHATSAPP_AGENT_PROMPT = [
-  'CAMADA META WHATSAPP CAMPANHAS',
-  'Voce atende leads que responderam campanhas enviadas pelo WhatsApp Cloud API oficial da Meta.',
+  'CAMADA WHATSAPP OFICIAL',
+  'Voce atende leads que responderam mensagens enviadas pelo WhatsApp oficial da imobiliaria.',
   'Use o mesmo estilo do agente global: conversa natural, humana, curta, consultiva e progressiva.',
   'Seu trabalho nao e so fazer triagem. Converse normalmente, tire duvidas simples, qualifique aos poucos e entenda se a pessoa quer moradia, investimento ou os dois.',
   'Nao transforme toda resposta em encaminhamento. O encaminhamento e uma consequencia quando o lead demonstra intencao real ou pede continuidade humana.',
-  'Quando o lead clicar ou escrever "Saiba mais", reconheca o interesse e puxe uma pergunta leve de qualificacao. Exemplo de direcao: perguntar se busca moradia, investimento ou quer entender a oportunidade primeiro.',
+  'Quando o lead clicar ou escrever "Saiba mais", reconheca o interesse, marque should_notify true e puxe uma pergunta leve de qualificacao. Exemplo de direcao: perguntar se busca moradia, investimento ou quer entender possibilidades antes de decidir.',
   'Cumprimentos, "quem e voce?", "do que se trata?", "vamos conversar primeiro", "ok" ou "sim" sem contexto nao sao handoff. Responda com contexto, converse e marque should_notify false.',
-  'Voce nao deve inventar detalhes de imovel, preco, disponibilidade, endereco exato, condicao comercial ou negociacao. Se pedirem detalhes especificos, diga que pode organizar a continuidade com um especialista e faca uma pergunta curta para qualificar.',
-  'Se houver interesse real, pedido de detalhes, valor, visita, consultor, corretor ou continuidade humana, marque intent interested e should_notify true, mas ainda responda de forma natural, sem parecer mensagem automatica repetida.',
-  'Se o lead pedir para sair, remover, parar, nao receber, apagar dados, reclamar de contato ou rejeitar a campanha, classifique como opt_out, confirme a remocao da lista e marque should_close true.',
-  'Se o lead perguntar onde conseguimos o numero ou sobre privacidade, explique com calma que ele estava em uma base de contatos de campanhas anteriores da imobiliaria e ofereca remover da lista se desejar.',
-  'Evite repetir frases do historico recente. Se voce ja disse que vai encaminhar, avance com uma pergunta ou responda o que a pessoa perguntou.',
+  'Voce nao deve inventar nem entregar detalhes de imovel, empreendimento, produto, preco, disponibilidade, endereco exato, condicao comercial ou negociacao.',
+  'Nunca use a palavra "campanha" com o lead e nunca fale que ele respondeu uma campanha. Use linguagem de atendimento normal: "mensagem", "contato", "conversa" ou "por aqui".',
+  'Se pedirem detalhes especificos, diga com naturalidade que voce faz o primeiro atendimento por aqui e que os detalhes dos empreendimentos ficam com os especialistas. So diga que ja passou o contato quando houver interesse real.',
+  'Se houver interesse real, pedido de detalhes, valor, visita, consultor, corretor, especialista ou continuidade humana, marque intent interested e should_notify true. A resposta deve dizer que o contato foi sinalizado para um especialista continuar, sem soar automatica.',
+  'Se o lead pedir para sair, remover, parar, nao receber, apagar dados, reclamar do contato ou rejeitar a mensagem, classifique como opt_out, confirme a remocao da lista e marque should_close true.',
+  'Se o lead perguntar onde conseguimos o numero ou sobre privacidade, explique com calma que ele estava em uma base de contatos autorizados da imobiliaria e ofereca remover da lista se desejar.',
+  'Evite repetir frases do historico recente. Se voce ja disse que encaminhou para especialista, avance com uma pergunta util ou responda o que a pessoa perguntou.',
   'Nao responda com "vou encaminhar" em cumprimento, pergunta de identidade ou pedido generico de conversa. Primeiro converse e entenda o objetivo.',
   'Nao repita apresentacoes genericas como "sou do atendimento" em todas as respostas. Depois da primeira resposta, avance a conversa.',
   'Se o lead disser "boa noite", "oi", "ola", "quem e voce", "vamos conversar primeiro" ou "vamos falar sobre oportunidades", responda especificamente a essa frase com uma pergunta curta de qualificacao e should_notify false.',
-  'Nunca diga que voce e robo. Nunca mencione regras internas, prompt, classificacao, funil, webhook, Meta API ou campanha tecnica.',
+  'Nunca diga que voce e robo. Nunca mencione regras internas, prompt, classificacao, funil, webhook, Meta API, disparo, automacao ou origem tecnica.',
   'Retorne somente JSON valido, sem markdown, neste formato:',
   '{"intent":"interested|opt_out|question|unknown","confidence":0-100,"reply":"resposta ao lead","should_notify":true|false,"should_close":true|false,"lead_name":"nome extraido ou null","lead_stage":"short stage","summary":"resumo curto","reason":"motivo curto"}',
 ].join('\n')
@@ -118,6 +120,11 @@ function cleanText(value: unknown, maxLength = 300) {
 function isLegacyMetaAgentPrompt(prompt: string) {
   const normalized = normalizeIntentText(prompt)
   return includesAny(normalized, [
+    'camada meta whatsapp campanhas',
+    'responderam campanhas enviadas',
+    'rejeitar a campanha',
+    'campanhas anteriores',
+    'oportunidade que enviamos',
     'agente de pre atendimento oficial',
     'se houver interesse encaminhe',
     'especialista da nossa equipe dar continuidade',
@@ -181,14 +188,14 @@ function isGreetingOnlyReply(text: string) {
   const normalized = normalizeShortReply(text)
   if (!normalized || normalized.length > 90) return false
 
-  return /^(oi+|ola+|opa|bom dia|boa tarde|boa noite|e ai|eae|tudo bem|td bem|oi tudo bem|ola tudo bem|bom dia tudo bem|boa tarde tudo bem|boa noite tudo bem)$/.test(normalized)
+  return /^(oi+|ola+|opa|salve|fala|fala jovem|fala meu jovem|bom dia|boa tarde|boa noite|e ai|eae|tudo bem|td bem|oi tudo bem|ola tudo bem|bom dia tudo bem|boa tarde tudo bem|boa noite tudo bem)$/.test(normalized)
 }
 
 function isLowCommitmentReply(text: string) {
   const normalized = normalizeShortReply(text)
   if (!normalized || normalized.length > 80) return false
 
-  return /^(sim|ss|ok|okay|blz|beleza|show|quero|pode|pode sim|ta bom|certo|aham|uhum|vamos|manda|manda ai)$/.test(normalized)
+  return /^(sim|ss|ok|okay|blz|beleza|show|show de bola|top|top jovem|top garoto|valeu|massa|tranquilo|fechado|combinado|quero|pode|pode sim|ta bom|certo|aham|uhum|vamos|manda|manda ai)$/.test(normalized)
 }
 
 function isIdentityQuestionReply(text: string) {
@@ -271,7 +278,10 @@ function hasExplicitInterestSignal(input: {
     'pode mandar',
     'manda as informacoes',
     'manda informacoes',
-    'me passa',
+    'me passa as informacoes',
+    'me passa os detalhes',
+    'me passa o valor',
+    'me passa as opcoes',
     'me chama',
     'chama no whatsapp',
     'falar com alguem',
@@ -304,19 +314,88 @@ function getConversationHoldCue(input: {
   return null
 }
 
-function buildConversationHoldReply(cue: ConversationHoldCue, rawText?: string | null) {
+function hasRecentOutboundLike(
+  history: TriageConversationHistoryMessage[] = [],
+  patterns: Array<string | RegExp>
+) {
+  const recentOutbound = history
+    .filter(message => message.direction === 'outbound')
+    .slice(-5)
+    .map(message => normalizeShortReply(message.text))
+    .join(' | ')
+
+  return Boolean(recentOutbound && includesAny(recentOutbound, patterns))
+}
+
+function isRecentlyRepeatedReply(reply?: string | null, history: TriageConversationHistoryMessage[] = []) {
+  const normalizedReply = normalizeShortReply(reply || '')
+  if (!normalizedReply) return false
+
+  return history
+    .filter(message => message.direction === 'outbound')
+    .slice(-5)
+    .some(message => {
+      const previous = normalizeShortReply(message.text)
+      return previous && (
+        previous === normalizedReply ||
+        previous.includes(normalizedReply) ||
+        normalizedReply.includes(previous)
+      )
+    })
+}
+
+function buildConversationContinuationReply(cue: ConversationHoldCue, rawText?: string | null) {
   const normalized = normalizeShortReply(rawText || '')
 
   if (cue === 'identity_question') {
+    return 'Claro. Pra nao ficar no generico: a conversa e sobre oportunidades imobiliarias da Guilherme Pilger Imoveis. Voce quer que eu comece pelo contexto da mensagem ou pelo tipo de imovel que faz sentido pra voce?'
+  }
+
+  if (cue === 'conversation_request') {
+    if (includesAny(normalized, ['oportunidade', 'oportunidades'])) {
+      return 'Perfeito, vamos por partes. Voce esta olhando mais para moradia, investimento ou quer primeiro mapear oportunidades no litoral?'
+    }
+
+    return 'Fechado, vamos conversar sem pressa. Pra eu te orientar melhor: voce busca morar, investir ou ainda esta so entendendo o mercado?'
+  }
+
+  if (cue === 'low_commitment') {
+    return 'Show. Pra eu sair do generico: voce prefere comecar por localizacao, faixa de valor ou perfil do imovel?'
+  }
+
+  return 'Combinado. Voce quer que eu te mostre o caminho por moradia, investimento ou oportunidades especificas na regiao?'
+}
+
+function buildConversationHoldReply(
+  cue: ConversationHoldCue,
+  rawText?: string | null,
+  history: TriageConversationHistoryMessage[] = []
+) {
+  const normalized = normalizeShortReply(rawText || '')
+  const alreadyAskedBroadQuestion = hasRecentOutboundLike(history, [
+    'me conta o que voce quer entender primeiro',
+    'o que voce quer saber primeiro',
+    'o que voce gostaria de entender primeiro',
+    'qual ponto voce quer ver primeiro',
+    'contexto da mensagem ou perfil',
+    'contexto da mensagem',
+    'explicar o contexto primeiro',
+  ])
+
+  if (alreadyAskedBroadQuestion) {
+    return buildConversationContinuationReply(cue, rawText)
+  }
+
+  if (cue === 'identity_question') {
     if (includesAny(normalized, ['quem e voce', 'quem e vc', 'quem sao voces', 'quem fala', 'quem esta falando'])) {
-      return 'Eu sou do atendimento da Guilherme Pilger Imoveis. Recebi sua resposta por aqui e posso te ajudar a entender a oportunidade sem pressa. O que voce quer saber primeiro?'
+      return 'Eu sou do atendimento da Guilherme Pilger Imoveis. Faco esse primeiro contato por aqui e posso te ajudar sem pressa. O que voce quer entender primeiro?'
     }
 
     if (includesAny(normalized, ['do que se trata', 'sobre o que', 'nao entendi', 'me explica', 'explique melhor', 'o que e isso'])) {
-      return 'Claro. E uma conversa sobre oportunidades imobiliarias da Guilherme Pilger Imoveis. Voce quer que eu explique o contexto primeiro ou prefere me contar o que esta procurando?'
+      return 'Claro. Por aqui eu entendo seu perfil e direciono para a pessoa certa, sem te mandar coisa fora do que procura. Voce quer me contar se busca moradia, investimento ou so esta avaliando possibilidades?'
     }
 
-    return 'Sou do atendimento da Guilherme Pilger Imoveis. A gente ajuda pessoas que buscam oportunidades imobiliarias no litoral. Me conta o que voce gostaria de entender primeiro?'
+    return 'Sou do atendimento da Guilherme Pilger Imoveis. Eu faco esse primeiro filtro por aqui e, se fizer sentido, um especialista continua com os detalhes. Me conta o que voce gostaria de entender primeiro?'
   }
 
   if (cue === 'low_commitment') {
@@ -332,7 +411,7 @@ function buildConversationHoldReply(cue: ConversationHoldCue, rawText?: string |
       return 'Vamos conversar primeiro, claro. Sem compromisso: voce prefere que eu explique o contexto da mensagem ou quer me contar o que esta buscando?'
     }
 
-    return 'Vamos sim. Me conta qual caminho faz mais sentido agora: entender a oportunidade que chegou ou falar sobre o tipo de imovel que voce procura?'
+    return 'Vamos sim. Me conta qual caminho faz mais sentido agora: entender o contexto da mensagem ou falar sobre o tipo de imovel que voce procura?'
   }
 
   if (includesAny(normalized, ['boa noite'])) {
@@ -347,7 +426,7 @@ function buildConversationHoldReply(cue: ConversationHoldCue, rawText?: string |
     return 'Boa tarde! Tudo bem? Me conta o que voce quer entender primeiro por aqui.'
   }
 
-  return 'Oi! Tudo bem? Me conta o que voce quer entender primeiro: a oportunidade que enviamos ou outro perfil de imovel?'
+  return 'Oi! Tudo bem? Me conta o que voce quer entender primeiro: o contexto da mensagem ou outro perfil de imovel?'
 }
 
 function getFallbackConversationCue(input: {
@@ -386,7 +465,7 @@ function isLearnMoreSignal(input: {
 }
 
 function buildLearnMoreReply() {
-  return 'Legal, eu te ajudo sim. Para eu entender melhor e te orientar do jeito certo: voce busca moradia, investimento ou quer primeiro entender a oportunidade que enviamos?'
+  return 'Perfeito, entendi. Eu faco esse primeiro atendimento por aqui; os detalhes dos empreendimentos ficam com os especialistas. Ja deixei seu contato sinalizado para continuarem com voce. Pra te direcionar melhor: voce busca moradia, investimento ou ainda esta avaliando?'
 }
 
 function isPrematureHandoffReply(reply?: string | null) {
@@ -417,9 +496,30 @@ function isWeakGenericAgentReply(reply?: string | null) {
     'aqui e o atendimento da guilherme pilger imoveis',
     'sou do atendimento da guilherme pilger imoveis',
     'me conta como posso te ajudar por aqui',
+    'me conta o que voce quer entender primeiro por aqui',
+    'me conta o que voce quer entender primeiro',
     'posso te ajudar com alguma informacao',
-    'voce prefere falar sobre a oportunidade que enviamos',
+    'oportunidade que enviamos',
+    'contexto da oportunidade que recebeu',
+    'voce prefere falar sobre o contexto da mensagem',
     'quer que eu peca para um especialista continuar',
+  ])
+}
+
+function hasLeadFacingForbiddenTerms(reply?: string | null) {
+  const normalized = normalizeShortReply(reply || '')
+  if (!normalized) return false
+
+  return includesAny(normalized, [
+    /\bcampanha(s)?\b/,
+    /\bdisparo(s)?\b/,
+    /\btemplate(s)?\b/,
+    'meta api',
+    'webhook',
+    'origem tecnica',
+    'automacao',
+    'classificacao',
+    'funil',
   ])
 }
 
@@ -427,20 +527,22 @@ function buildConversationHoldAgentResponse(
   cue: ConversationHoldCue,
   agentResponse: TriageAgentResponse | null,
   warnings: string[] = [],
-  rawText?: string | null
+  rawText?: string | null,
+  history: TriageConversationHistoryMessage[] = []
 ): TriageAgentResponse {
   const canKeepAgentReply = Boolean(
     agentResponse?.reply &&
     agentResponse.intent !== 'interested' &&
     !agentResponse.shouldNotify &&
     !isPrematureHandoffReply(agentResponse.reply) &&
-    !isWeakGenericAgentReply(agentResponse.reply)
+    !isWeakGenericAgentReply(agentResponse.reply) &&
+    !isRecentlyRepeatedReply(agentResponse.reply, history)
   )
 
   return {
     intent: 'unknown',
     confidence: Math.max(agentResponse?.confidence || 0, 88),
-    reply: canKeepAgentReply ? agentResponse?.reply || null : buildConversationHoldReply(cue, rawText),
+    reply: canKeepAgentReply ? agentResponse?.reply || null : buildConversationHoldReply(cue, rawText, history),
     shouldNotify: false,
     shouldClose: false,
     leadName: agentResponse?.leadName || null,
@@ -473,8 +575,8 @@ function softenLearnMoreAgentResponse(
     shouldClose: false,
     leadName: agentResponse?.leadName || null,
     leadStage: agentResponse?.leadStage || 'clicked_learn_more',
-    summary: agentResponse?.summary || 'Lead clicou em saiba mais e iniciou conversa sobre a campanha.',
-    reason: agentResponse?.reason || 'Lead acionou botao de interesse da campanha.',
+    summary: agentResponse?.summary || 'Lead clicou em saiba mais e demonstrou intencao de entender melhor.',
+    reason: agentResponse?.reason || 'Lead acionou botao de interesse.',
     aiProvider: agentResponse?.aiProvider || null,
     aiModel: agentResponse?.aiModel || null,
     warnings: [
@@ -485,9 +587,19 @@ function softenLearnMoreAgentResponse(
   }
 }
 
-function sanitizeConfiguredReply(reply: string | null, fallback: string) {
+function sanitizeConfiguredReply(
+  reply: string | null,
+  fallback: string,
+  history: TriageConversationHistoryMessage[] = []
+) {
   const cleaned = cleanText(reply, 1200)
-  if (!cleaned || isPrematureHandoffReply(cleaned) || isWeakGenericAgentReply(cleaned)) return fallback
+  if (
+    !cleaned ||
+    isPrematureHandoffReply(cleaned) ||
+    isWeakGenericAgentReply(cleaned) ||
+    isRecentlyRepeatedReply(cleaned, history) ||
+    hasLeadFacingForbiddenTerms(cleaned)
+  ) return fallback
   return cleaned
 }
 
@@ -568,7 +680,10 @@ function classifyMetaWhatsAppReply(input: {
     'pode mandar',
     'manda as informacoes',
     'manda informacoes',
-    'me passa',
+    'me passa as informacoes',
+    'me passa os detalhes',
+    'me passa o valor',
+    'me passa as opcoes',
     'me chama',
     'chama no whatsapp',
     'falar com alguem',
@@ -612,6 +727,19 @@ function classifyMetaWhatsAppReply(input: {
     }
   }
 
+  if (includesAny(combined, privacyPatterns)) {
+    return {
+      intent: 'question',
+      confidence: 78,
+      source,
+      buttonText: button.text || null,
+      buttonPayload: button.payload || null,
+      rawText: rawText || null,
+      classifier: 'rules',
+      reason: 'Pergunta sobre origem do contato ou privacidade identificada por regra.',
+    }
+  }
+
   if (hasExplicitInterestSignal({
     source,
     buttonText: button.text,
@@ -627,19 +755,6 @@ function classifyMetaWhatsAppReply(input: {
       rawText: rawText || null,
       classifier: 'rules',
       reason: 'Interesse identificado por botao ou palavra-chave.',
-    }
-  }
-
-  if (includesAny(combined, privacyPatterns)) {
-    return {
-      intent: 'question',
-      confidence: 72,
-      source,
-      buttonText: button.text || null,
-      buttonPayload: button.payload || null,
-      rawText: rawText || null,
-      classifier: 'rules',
-      reason: 'Pergunta sobre origem do contato ou privacidade identificada por regra.',
     }
   }
 
@@ -1005,9 +1120,7 @@ function buildAgentUserMessage(input: {
     '',
     `Telefone do lead: +${input.contactPhone}`,
     `Nome conhecido: ${cleanText(input.contactName, 160) || 'Nao informado'}`,
-    `Campanha de origem: ${cleanText(input.campaignName, 180) || 'Nao encontrada'}`,
-    `Template de origem: ${cleanText(input.templateName, 180) || 'Nao encontrado'}`,
-    `Tipo da campanha: ${cleanText(input.campaignType, 80) || 'Nao informado'}`,
+    'Contexto interno: o lead respondeu a uma mensagem ativa da imobiliaria. Nao cite campanha, disparo, template, origem tecnica ou detalhes do produto.',
     '',
     'Mensagem atual:',
     `Botao: ${input.classification.buttonText || '-'}`,
@@ -1023,10 +1136,11 @@ function buildAgentUserMessage(input: {
     'Regras finais:',
     '- Responda como atendente humano de primeiro contato, com naturalidade de WhatsApp.',
     '- Use o historico como memoria para nao repetir a mesma frase e para continuar a conversa.',
-    '- Nao revele detalhes da campanha, imovel, preco, disponibilidade, endereco exato ou condicao comercial que nao estejam seguros no contexto.',
+    '- Nao revele detalhes de imovel, empreendimento, produto, preco, disponibilidade, endereco exato ou condicao comercial.',
+    '- Nunca use a palavra "campanha" com o lead.',
     '- Se a mensagem atual for cumprimento, identidade ou conversa inicial, responda com contexto e uma pergunta leve; mantenha should_notify false.',
-    '- Se a mensagem atual for o botao "saiba mais", reconheca o interesse, faca uma pergunta de qualificacao e marque should_notify true sem encerrar a conversa.',
-    '- Se perceber interesse claro depois da conversa, pode avisar que um especialista pode continuar, marque should_notify true e continue com tom natural.',
+    '- Se a mensagem atual for o botao "saiba mais", reconheca o interesse, diga que os detalhes ficam com especialistas, marque should_notify true e faca uma pergunta de qualificacao.',
+    '- Se perceber interesse claro depois da conversa, diga que ja sinalizou o contato para um especialista continuar, marque should_notify true e continue com tom natural.',
     '- Se perceber pedido de saida/remocao, marque should_close true e confirme que removeu da lista.',
     '- Se perguntarem de onde veio o contato, responda com transparencia e ofereca saida da lista sem pressionar.',
     '- Nao repita a mesma frase do historico recente; avance a conversa com uma pergunta curta quando necessario.',
@@ -1117,6 +1231,7 @@ async function generateMetaWhatsAppAgentResponse(input: {
   templateName?: string | null
   campaignType?: string | null
   rawText?: string | null
+  history?: TriageConversationHistoryMessage[]
 }) {
   const agentEnabled = String(input.configMap.meta_whatsapp_agent_enabled ?? 'true') !== 'false'
   const aiEnabled = String(input.configMap.meta_whatsapp_triage_ai_enabled ?? 'true') !== 'false'
@@ -1124,7 +1239,7 @@ async function generateMetaWhatsAppAgentResponse(input: {
 
   const prompt = buildMetaWhatsAppAgentPrompt(input.configMap)
   const historyLimit = clampInteger(input.configMap.meta_whatsapp_agent_history_limit, 12, 4, 30)
-  const history = await loadConversationHistory(input.supabase, input.conversation?.id, historyLimit)
+  const history = input.history || await loadConversationHistory(input.supabase, input.conversation?.id, historyLimit)
   const userMessage = buildAgentUserMessage({
     classification: input.classification,
     contactPhone: input.contactPhone,
@@ -1799,6 +1914,17 @@ export async function handleMetaWhatsAppReplyTriage(
   const rawText = classification.rawText || classification.buttonText || classification.buttonPayload || ''
   let agentResponse: TriageAgentResponse | null = null
   const agentWarnings: string[] = []
+  let agentHistory: TriageConversationHistoryMessage[] = []
+
+  if (conversation?.id) {
+    try {
+      const historyLimit = clampInteger(configMap.meta_whatsapp_agent_history_limit, 12, 4, 30)
+      agentHistory = await loadConversationHistory(supabase, conversation.id, historyLimit)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      agentWarnings.push(`history: ${message.slice(0, 180)}`)
+    }
+  }
 
   try {
     agentResponse = await generateMetaWhatsAppAgentResponse({
@@ -1812,6 +1938,7 @@ export async function handleMetaWhatsAppReplyTriage(
       templateName: campaign?.template_name || null,
       campaignType: campaign?.campaign_type || null,
       rawText,
+      history: agentHistory,
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
@@ -1829,7 +1956,8 @@ export async function handleMetaWhatsAppReplyTriage(
       conversationHoldCue,
       agentResponse,
       [],
-      classification.rawText || rawText
+      classification.rawText || rawText,
+      agentHistory
     )
   } else if (isLearnMoreSignal({
     source: classification.source,
@@ -1857,7 +1985,8 @@ export async function handleMetaWhatsAppReplyTriage(
       }),
       agentResponse,
       ['guardrail: resposta generica ou encaminhamento prematuro neutralizada'],
-      classification.rawText || rawText
+      classification.rawText || rawText,
+      agentHistory
     )
   }
 
@@ -1937,6 +2066,8 @@ export async function handleMetaWhatsAppReplyTriage(
     })
   }
 
+  const optOutFallback = 'Pronto. Vou remover seu contato da nossa lista. Voce nao recebera novas mensagens por este canal.'
+  const privacyFallback = 'Seu numero estava em uma base de contatos autorizados da imobiliaria. Se preferir, eu removo seu contato da lista por aqui mesmo.'
   let replyText = cleanText(agentResponse?.reply, 1200)
   if (!replyText && effectiveIntent === 'interested') {
     replyText = sanitizeConfiguredReply(
@@ -1948,16 +2079,16 @@ export async function handleMetaWhatsAppReplyTriage(
       buildLearnMoreReply()
     )
   } else if (!replyText && effectiveIntent === 'opt_out') {
-    replyText = templateReply(
-      configMap,
-      'meta_whatsapp_triage_opt_out_reply',
-      'Pronto. Removemos seu contato da nossa lista. Voce nao recebera novas campanhas por este canal.'
+    replyText = sanitizeConfiguredReply(
+      templateReply(configMap, 'meta_whatsapp_triage_opt_out_reply', optOutFallback),
+      optOutFallback,
+      agentHistory
     )
   } else if (!replyText && effectiveIntent === 'question') {
-    replyText = templateReply(
-      configMap,
-      'meta_whatsapp_triage_privacy_reply',
-      'Voce estava em nossa base de contatos de campanhas anteriores da imobiliaria. Se quiser sair da lista, responda SAIR que removemos seu contato.'
+    replyText = sanitizeConfiguredReply(
+      templateReply(configMap, 'meta_whatsapp_triage_privacy_reply', privacyFallback),
+      privacyFallback,
+      agentHistory
     )
   } else if (!replyText && String(configMap.meta_whatsapp_agent_enabled ?? 'true') !== 'false') {
     const fallbackCue = getConversationHoldCue({
@@ -1967,16 +2098,35 @@ export async function handleMetaWhatsAppReplyTriage(
       rawText: classification.rawText || rawText,
     })
     const conversationalFallback = fallbackCue
-      ? buildConversationHoldReply(fallbackCue, classification.rawText || rawText)
-      : 'Me conta o que voce quer entender primeiro por aqui. Posso te ajudar a organizar a conversa sem pressa.'
+      ? buildConversationHoldReply(fallbackCue, classification.rawText || rawText, agentHistory)
+      : buildConversationHoldReply('conversation_request', classification.rawText || rawText, agentHistory)
     replyText = sanitizeConfiguredReply(
       templateReply(
         configMap,
         'meta_whatsapp_agent_unknown_reply',
         conversationalFallback
       ),
-      conversationalFallback
+      conversationalFallback,
+      agentHistory
     )
+  }
+
+  if (replyText && hasLeadFacingForbiddenTerms(replyText)) {
+    if (effectiveIntent === 'interested') {
+      replyText = buildLearnMoreReply()
+    } else if (effectiveIntent === 'opt_out') {
+      replyText = optOutFallback
+    } else if (effectiveIntent === 'question') {
+      replyText = privacyFallback
+    } else {
+      const fallbackCue = getFallbackConversationCue({
+        source: classification.source,
+        buttonText: classification.buttonText,
+        buttonPayload: classification.buttonPayload,
+        rawText: classification.rawText || rawText,
+      })
+      replyText = buildConversationHoldReply(fallbackCue, classification.rawText || rawText, agentHistory)
+    }
   }
 
   if (replyText && conversation?.id) {
