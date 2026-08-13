@@ -45,6 +45,7 @@ interface MetaSender {
     messaging_limit_tier?: string | null
     daily_limit: number
     daily_sent_count: number
+    daily_limit_resets_at?: string | null
     use_case: string
 }
 
@@ -343,6 +344,40 @@ function asRecord(value: unknown): Record<string, unknown> {
 
 function textValue(value: unknown) {
     return typeof value === 'string' ? value : ''
+}
+
+function asFiniteNumber(value: unknown) {
+    const parsed = Number(value || 0)
+    return Number.isFinite(parsed) ? parsed : 0
+}
+
+function metaSenderUsage(sender: MetaSender) {
+    const limit = asFiniteNumber(sender.daily_limit)
+    const sent = asFiniteNumber(sender.daily_sent_count)
+    return {
+        limit,
+        sent,
+        remaining: Math.max(limit - sent, 0),
+        usageLabel: `${sent}/${limit || 'sem limite'}`,
+    }
+}
+
+function isMetaSenderAvailable(sender: MetaSender) {
+    const usage = metaSenderUsage(sender)
+    return sender.local_status === 'active'
+        && String(sender.meta_status || '').toUpperCase() === 'CONNECTED'
+        && usage.limit > 0
+        && usage.sent < usage.limit
+}
+
+function metaSenderOptionLabel(sender: MetaSender) {
+    const usage = metaSenderUsage(sender)
+    const name = sender.display_name || sender.phone_number
+    const base = `${name} - ${sender.phone_number} (${usage.usageLabel})`
+    if (sender.local_status !== 'active') return `${base} - pausado`
+    if (String(sender.meta_status || '').toUpperCase() !== 'CONNECTED') return `${base} - Meta ${sender.meta_status || 'sem status'}`
+    if (usage.limit > 0 && usage.sent >= usage.limit) return `${base} - limite esgotado`
+    return `${base} - ${usage.remaining} disponiveis`
 }
 
 function getTemplateComponents(template?: MetaTemplate | null): TemplateComponentRecord[] {
@@ -1255,6 +1290,17 @@ export default function CampaignsPage() {
             }
         }
 
+        if (sendProvider === 'meta_whatsapp') {
+            if (readyMetaSenders.length === 0) {
+                setFeedback({ type: 'error', text: 'Todos os numeros Meta ativos atingiram o limite diario ou nao estao prontos. Aguarde o reset diario ou ative outro numero conectado.' })
+                return
+            }
+            if (selectedMetaSenderId && selectedMetaSender && !isMetaSenderAvailable(selectedMetaSender)) {
+                setFeedback({ type: 'error', text: `O numero selecionado esta indisponivel para envio (${metaSenderOptionLabel(selectedMetaSender)}). Use Pool automatico por capacidade ou escolha outro numero.` })
+                return
+            }
+        }
+
         setSending(true)
         setFeedback(null)
         try {
@@ -1406,6 +1452,8 @@ export default function CampaignsPage() {
     const currentInstance = instances.find(i => i.id === selectedInstance)
     const approvedMetaTemplates = metaTemplates.filter(template => String(template.status || '').toUpperCase() === 'APPROVED')
     const activeMetaSenders = metaSenders.filter(sender => sender.local_status === 'active')
+    const readyMetaSenders = activeMetaSenders.filter(isMetaSenderAvailable)
+    const selectedMetaSender = activeMetaSenders.find(sender => sender.id === selectedMetaSenderId) || null
     const selectedContactList = metaContactLists.find(list => list.id === selectedContactListId) || null
     const selectedMetaTemplate = approvedMetaTemplates.find(template => template.name === metaTemplateName && template.language === metaTemplateLanguage) || null
     const selectedHeaderComponent = findTemplateComponent(selectedMetaTemplate, 'HEADER')
@@ -1421,6 +1469,16 @@ export default function CampaignsPage() {
     const selectedBodyVariables = extractTemplateVariables(selectedBodyText)
     const selectedTemplateHeaderMediaUrl = getTemplateHeaderMediaUrl(selectedMetaTemplate)
     const previewHeaderText = replaceTemplateVariables(selectedHeaderText, { 1: metaHeaderParameterValue }, 'header')
+
+    useEffect(() => {
+        if (selectedMetaSenderId && selectedMetaSender && !isMetaSenderAvailable(selectedMetaSender)) {
+            setSelectedMetaSenderId('')
+            setFeedback({
+                type: 'error',
+                text: `O numero selecionado atingiu o limite diario (${metaSenderUsage(selectedMetaSender).usageLabel}). Alterei para Pool automatico por capacidade.`,
+            })
+        }
+    }, [selectedMetaSenderId, selectedMetaSender])
     const previewBodyText = replaceTemplateVariables(selectedBodyText, metaBodyParameterValues, 'exemplo')
     const parsedMetaRecipientDrafts = sendProvider === 'meta_whatsapp' && metaAudiencePersonalized ? parseMetaRecipientDrafts() : []
     const parsedNumbers = sendProvider === 'meta_whatsapp' && metaAudiencePersonalized
@@ -1735,14 +1793,24 @@ export default function CampaignsPage() {
                                             background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)',
                                             color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box',
                                         }}
-                                    >
-                                        <option value="">Pool automatico por capacidade</option>
+                                        >
+                                        <option value="">Pool automatico por capacidade ({readyMetaSenders.length} disponivel(is))</option>
                                         {activeMetaSenders.map(sender => (
-                                            <option key={sender.id} value={sender.id}>
-                                                {sender.display_name || sender.phone_number} - {sender.phone_number} ({sender.daily_sent_count}/{sender.daily_limit})
+                                            <option key={sender.id} value={sender.id} disabled={!isMetaSenderAvailable(sender)}>
+                                                {metaSenderOptionLabel(sender)}
                                             </option>
                                         ))}
                                     </select>
+                                    {selectedMetaSender && !isMetaSenderAvailable(selectedMetaSender) && (
+                                        <div style={{ marginTop: '8px', color: '#ef4444', fontSize: '0.78rem', fontWeight: 700 }}>
+                                            Este numero atingiu o limite diario. Use o pool automatico ou outro numero conectado.
+                                        </div>
+                                    )}
+                                    {!selectedMetaSenderId && readyMetaSenders.length > 0 && (
+                                        <div style={{ marginTop: '8px', color: '#16a34a', fontSize: '0.78rem', fontWeight: 700 }}>
+                                            Pool automatico vai usar o numero com capacidade disponivel.
+                                        </div>
+                                    )}
                                 </div>
                                 <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--border)', background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)', fontSize: '0.82rem', lineHeight: 1.45 }}>
                                     <input
@@ -3706,7 +3774,9 @@ function MetaCampaignDashboard({
                             name: sender.display_name || sender.phone_number,
                             detail: `${sender.meta_status || 'sem status'} | uso diario ${percentLabel(sender.usageRate)} | falha ${percentLabel(sender.failureRate)}`,
                             value: `${sender.daily_sent_count}/${sender.daily_limit}`,
-                            color: sender.meta_status === 'CONNECTED' ? '#22c55e' : '#f59e0b',
+                            color: sender.daily_limit > 0 && sender.daily_sent_count >= sender.daily_limit
+                                ? '#ef4444'
+                                : sender.meta_status === 'CONNECTED' ? '#22c55e' : '#f59e0b',
                         }))}
                     />
                     <MetaMiniRanking

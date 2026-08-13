@@ -152,14 +152,82 @@ function isCampaignTemplateEligible(template: any) {
 
 function isMetaSenderReady(sender: any) {
   const metaStatus = cleanText(sender?.meta_status, 40).toUpperCase()
-  return sender?.local_status === 'active'
+  const dailyLimit = Number(sender.daily_limit || 0)
+  return dailyLimit > 0
+    && sender?.local_status === 'active'
     && metaStatus === 'CONNECTED'
-    && Number(sender.daily_sent_count || 0) < Number(sender.daily_limit || 0)
+    && senderDailySentCount(sender) < dailyLimit
 }
 
 function asNumber(value: unknown) {
   const parsed = Number(value || 0)
   return Number.isFinite(parsed) ? parsed : 0
+}
+
+function nextSaoPauloMidnightIso(from = new Date()) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Sao_Paulo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(from)
+  const byType = Object.fromEntries(parts.map(part => [part.type, part.value]))
+  const year = Number(byType.year)
+  const month = Number(byType.month)
+  const day = Number(byType.day)
+  return new Date(Date.UTC(year, month - 1, day + 1, 3, 0, 0, 0)).toISOString()
+}
+
+function senderResetAt(sender: any) {
+  const value = cleanText(sender?.daily_limit_resets_at, 80)
+  if (!value) return null
+  const date = new Date(value)
+  return Number.isFinite(date.getTime()) ? date : null
+}
+
+function isSenderUsageExpired(sender: any, now = new Date()) {
+  const resetAt = senderResetAt(sender)
+  return Boolean(resetAt && resetAt.getTime() <= now.getTime())
+}
+
+function senderDailySentCount(sender: any) {
+  return isSenderUsageExpired(sender) ? 0 : asNumber(sender?.daily_sent_count)
+}
+
+async function resetExpiredSenderUsage(supabase: SupabaseAdmin, senders: any[]) {
+  const now = new Date()
+  const expired = senders.filter(sender => isSenderUsageExpired(sender, now))
+  if (!expired.length) return senders
+
+  const nextReset = nextSaoPauloMidnightIso(now)
+  await supabase
+    .from('meta_whatsapp_senders')
+    .update({
+      daily_sent_count: 0,
+      daily_limit_resets_at: nextReset,
+      last_health_check_at: now.toISOString(),
+      last_error: null,
+    })
+    .in('id', expired.map(sender => sender.id).filter(Boolean))
+
+  return senders.map(sender => isSenderUsageExpired(sender, now)
+    ? { ...sender, daily_sent_count: 0, daily_limit_resets_at: nextReset }
+    : sender)
+}
+
+function describeSenderAvailability(sender: any) {
+  if (!sender) return 'numero selecionado nao encontrado.'
+  const name = sender.display_name || sender.phone_number || 'Numero Meta'
+  const metaStatus = cleanText(sender.meta_status, 40).toUpperCase() || 'sem status'
+  const localStatus = cleanText(sender.local_status, 40) || 'sem status local'
+  const dailyLimit = asNumber(sender.daily_limit)
+  const dailySent = senderDailySentCount(sender)
+
+  if (localStatus !== 'active') return `${name}: status local ${localStatus}.`
+  if (metaStatus !== 'CONNECTED') return `${name}: status Meta ${metaStatus}.`
+  if (dailyLimit <= 0) return `${name}: limite diario nao configurado.`
+  if (dailyLimit > 0 && dailySent >= dailyLimit) return `${name}: limite diario esgotado (${dailySent}/${dailyLimit}).`
+  return `${name}: disponivel (${dailySent}/${dailyLimit || 'sem limite'}).`
 }
 
 function percentage(part: number, total: number) {
@@ -399,7 +467,7 @@ function buildMetaWhatsAppAnalytics(campaigns: any[], senders: any[], recipients
         failed: 0,
       }
       const dailyLimit = asNumber(sender.daily_limit)
-      const dailySent = asNumber(sender.daily_sent_count)
+      const dailySent = senderDailySentCount(sender)
       return {
         sender_id: sender.id,
         display_name: sender.display_name || sender.phone_number || 'Numero Meta',
@@ -521,20 +589,42 @@ export async function createMetaWhatsAppCampaign(input: CreateMetaWhatsAppCampai
 
   const { data: senders, error: sendersError } = await supabase
     .from('meta_whatsapp_senders')
-    .select('id, display_name, phone_number, phone_number_id, local_status, meta_status, daily_limit, daily_sent_count, use_case')
+    .select('id, display_name, phone_number, phone_number_id, local_status, meta_status, daily_limit, daily_sent_count, daily_limit_resets_at, use_case')
     .eq('waba_id', resolved.wabaId)
     .eq('local_status', 'active')
     .limit(50)
 
   if (sendersError) throw sendersError
-  const hasReadySender = (senders || []).some((sender: any) => {
-    if (input.defaultSenderId && sender.id !== input.defaultSenderId) return false
-    return isMetaSenderReady(sender)
-  })
+  const preparedSenders = await resetExpiredSenderUsage(supabase, senders || [])
+  const selectedSender = input.defaultSenderId
+    ? preparedSenders.find((sender: any) => sender.id === input.defaultSenderId)
+    : null
+  const readyPoolSenders = preparedSenders.filter(isMetaSenderReady)
+  const hasReadySender = input.defaultSenderId
+    ? Boolean(selectedSender && isMetaSenderReady(selectedSender))
+    : readyPoolSenders.length > 0
 
   if (!hasReadySender) {
-    const knownStatus = (senders || [])
-      .map((sender: any) => `${sender.display_name || sender.phone_number}: ${sender.meta_status || 'sem status'}`)
+    if (input.defaultSenderId) {
+      throw new Error(`Numero oficial selecionado indisponivel para envio: ${describeSenderAvailability(selectedSender)} Escolha "Pool automatico por capacidade" ou um numero com saldo diario.`)
+    }
+
+    const connectedButExhausted = preparedSenders.some((sender: any) => (
+      sender.local_status === 'active'
+      && cleanText(sender.meta_status, 40).toUpperCase() === 'CONNECTED'
+      && asNumber(sender.daily_limit) > 0
+      && senderDailySentCount(sender) >= asNumber(sender.daily_limit)
+    ))
+    if (connectedButExhausted) {
+      const knownUsage = preparedSenders
+        .filter((sender: any) => sender.local_status === 'active')
+        .map(describeSenderAvailability)
+        .join(' ')
+      throw new Error(`Todos os numeros Meta conectados atingiram o limite diario configurado. ${knownUsage}`)
+    }
+
+    const knownStatus = preparedSenders
+      .map(describeSenderAvailability)
       .join(', ')
     throw new Error(`Nenhum numero Meta conectado para envio. O Phone Number precisa estar com status CONNECTED na Meta. Status atual: ${knownStatus || 'nenhum numero sincronizado'}.`)
   }
@@ -646,11 +736,12 @@ export async function listMetaWhatsAppCampaigns(input: ListMetaWhatsAppCampaigns
 
   const { data: senders, error: sendersError } = await supabase
     .from('meta_whatsapp_senders')
-    .select('id, display_name, phone_number, phone_number_id, local_status, meta_status, quality_rating, messaging_limit_tier, daily_limit, daily_sent_count, use_case, weight')
+    .select('id, display_name, phone_number, phone_number_id, local_status, meta_status, quality_rating, messaging_limit_tier, daily_limit, daily_sent_count, daily_limit_resets_at, use_case, weight')
     .order('local_status', { ascending: true })
     .order('display_name', { ascending: true })
 
   if (sendersError) throw sendersError
+  const preparedSenders = await resetExpiredSenderUsage(supabase, senders || [])
 
   const { data: templates, error: templatesError } = await supabase
     .from('meta_whatsapp_templates')
@@ -714,14 +805,14 @@ export async function listMetaWhatsAppCampaigns(input: ListMetaWhatsAppCampaigns
 
   const analytics = buildMetaWhatsAppAnalytics(
     campaigns || [],
-    senders || [],
+    preparedSenders,
     analyticsRecipients,
     analyticsEvents
   )
 
   return {
     campaigns: campaigns || [],
-    senders: senders || [],
+    senders: preparedSenders,
     templates: campaignTemplates,
     summary,
     analytics,
@@ -951,7 +1042,8 @@ async function selectSenderForRecipient(supabase: SupabaseAdmin, campaign: any, 
       .eq('id', recipient.sender_id)
       .eq('waba_id', wabaId)
       .maybeSingle()
-    if (data && isMetaSenderReady(data)) return data
+    const [sender] = await resetExpiredSenderUsage(supabase, data ? [data] : [])
+    if (sender && isMetaSenderReady(sender)) return sender
   }
 
   if (campaign.default_sender_id) {
@@ -962,7 +1054,8 @@ async function selectSenderForRecipient(supabase: SupabaseAdmin, campaign: any, 
       .eq('waba_id', wabaId)
       .eq('local_status', 'active')
       .maybeSingle()
-    if (data && isMetaSenderReady(data)) return data
+    const [sender] = await resetExpiredSenderUsage(supabase, data ? [data] : [])
+    if (sender && isMetaSenderReady(sender)) return sender
   }
 
   const preferredUseCase = campaign.campaign_type === 'editorial'
@@ -983,7 +1076,8 @@ async function selectSenderForRecipient(supabase: SupabaseAdmin, campaign: any, 
 
   if (error) throw error
 
-  return (data || []).find(isMetaSenderReady) || null
+  const preparedSenders = await resetExpiredSenderUsage(supabase, data || [])
+  return preparedSenders.find(isMetaSenderReady) || null
 }
 
 async function markRecipientFailed(supabase: SupabaseAdmin, recipientId: string, error: unknown) {
@@ -999,12 +1093,14 @@ async function markRecipientFailed(supabase: SupabaseAdmin, recipientId: string,
 }
 
 async function incrementSenderUsage(supabase: SupabaseAdmin, sender: any) {
-  const sentCount = Number(sender.daily_sent_count || 0) + 1
+  const now = new Date()
+  const sentCount = senderDailySentCount(sender) + 1
   await supabase
     .from('meta_whatsapp_senders')
     .update({
       daily_sent_count: sentCount,
-      last_health_check_at: new Date().toISOString(),
+      daily_limit_resets_at: nextSaoPauloMidnightIso(now),
+      last_health_check_at: now.toISOString(),
       last_error: null,
     })
     .eq('id', sender.id)
