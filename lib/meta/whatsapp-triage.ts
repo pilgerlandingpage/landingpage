@@ -1767,28 +1767,35 @@ async function loadRecipientContext(
   const phoneCandidates = metaWhatsAppPhoneCandidates(contactPhone)
   if (!phoneCandidates.length) return null
 
-  let query = supabase
-    .from('meta_whatsapp_campaign_recipients')
-    .select(`
-      id,
-      campaign_id,
-      sender_id,
-      recipient_name,
-      recipient_phone,
-      template_parameters,
-      metadata,
-      campaign:meta_whatsapp_campaigns(id, name, template_name, template_language, campaign_type)
-    `)
-    .in('recipient_phone', phoneCandidates)
-    .order('created_at', { ascending: false })
-    .limit(1)
-
   const selectedSenderId = cleanText(senderId || conversation?.sender_id, 80)
-  if (selectedSenderId) query = query.eq('sender_id', selectedSenderId)
+  const findRecipient = async (scopedSenderId?: string | null) => {
+    let query = supabase
+      .from('meta_whatsapp_campaign_recipients')
+      .select(`
+        id,
+        campaign_id,
+        sender_id,
+        recipient_name,
+        recipient_phone,
+        template_parameters,
+        metadata,
+        campaign:meta_whatsapp_campaigns(id, name, template_name, template_language, campaign_type)
+      `)
+      .in('recipient_phone', phoneCandidates)
+      .order('created_at', { ascending: false })
+      .limit(1)
 
-  const { data, error } = await query
-  if (error) throw error
-  return data?.[0] || null
+    if (scopedSenderId) query = query.eq('sender_id', scopedSenderId)
+
+    const { data, error } = await query
+    if (error) throw error
+    return data?.[0] || null
+  }
+
+  const senderScopedRecipient = selectedSenderId
+    ? await findRecipient(selectedSenderId)
+    : null
+  return senderScopedRecipient || await findRecipient()
 }
 
 async function updateReplyIntent(

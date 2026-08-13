@@ -179,36 +179,44 @@ async function findLatestCampaignRecipient(
   const phoneCandidates = metaWhatsAppPhoneCandidates(phone)
   if (!phoneCandidates.length) return null
 
-  let query = supabase
-    .from('meta_whatsapp_campaign_recipients')
-    .select(`
-      id,
-      campaign_id,
-      sender_id,
-      lead_id,
-      recipient_name,
-      recipient_phone,
-      provider_message_id,
-      status,
-      error_code,
-      error_message,
-      sent_at,
-      delivered_at,
-      read_at,
-      failed_at,
-      created_at,
-      template_parameters,
-      campaign:meta_whatsapp_campaigns(id, name, template_name, template_language, campaign_type)
-    `)
-    .in('recipient_phone', phoneCandidates)
-    .order('created_at', { ascending: false })
-    .limit(1)
+  const findRecipient = async (selectedSenderId?: string | null) => {
+    let query = supabase
+      .from('meta_whatsapp_campaign_recipients')
+      .select(`
+        id,
+        campaign_id,
+        sender_id,
+        lead_id,
+        recipient_name,
+        recipient_phone,
+        provider_message_id,
+        status,
+        error_code,
+        error_message,
+        sent_at,
+        delivered_at,
+        read_at,
+        failed_at,
+        created_at,
+        template_parameters,
+        campaign:meta_whatsapp_campaigns(id, name, template_name, template_language, campaign_type)
+      `)
+      .in('recipient_phone', phoneCandidates)
+      .order('created_at', { ascending: false })
+      .limit(1)
 
-  if (senderId) query = query.eq('sender_id', senderId)
+    if (selectedSenderId) query = query.eq('sender_id', selectedSenderId)
 
-  const { data, error } = await query
-  if (error) throw error
-  return data?.[0] || null
+    const { data, error } = await query
+    if (error) throw error
+    return data?.[0] || null
+  }
+
+  const selectedSenderId = cleanText(senderId, 80)
+  const senderScopedRecipient = selectedSenderId
+    ? await findRecipient(selectedSenderId)
+    : null
+  return senderScopedRecipient || await findRecipient()
 }
 
 async function ensureCampaignOutboundMessage(
@@ -502,6 +510,11 @@ export async function recordInboundMetaWhatsAppMessage(
   const receivedAt = input.receivedAt || isoNow()
   const textBody = extractInboundText(input.payload, input.messageType)
   const latestRecipient = await findLatestCampaignRecipient(supabase, contactPhone, sender.id)
+  const contextMatchedSender = !latestRecipient?.sender_id || latestRecipient.sender_id === sender.id
+  let campaignContextMatch: 'sender' | 'phone_fallback' | null = null
+  if (latestRecipient) {
+    campaignContextMatch = contextMatchedSender ? 'sender' : 'phone_fallback'
+  }
   const lead = latestRecipient?.lead_id ? null : await findLeadByPhone(supabase, contactPhone)
   const leadId = latestRecipient?.lead_id || lead?.id || null
   const contactName = cleanText(input.profileName || latestRecipient?.recipient_name || lead?.name, 160) || null
@@ -541,6 +554,8 @@ export async function recordInboundMetaWhatsAppMessage(
         metadata: {
           first_source: 'meta_whatsapp_webhook',
           first_event_id: input.eventId || null,
+          campaign_context_match: campaignContextMatch,
+          campaign_context_sender_id: latestRecipient?.sender_id || null,
         },
       })
       .select('*')
@@ -565,6 +580,8 @@ export async function recordInboundMetaWhatsAppMessage(
         metadata: {
           ...(existing.metadata || {}),
           last_inbound_event_id: input.eventId || null,
+          campaign_context_match: campaignContextMatch,
+          campaign_context_sender_id: latestRecipient?.sender_id || null,
         },
       })
       .eq('id', existing.id)
@@ -574,7 +591,9 @@ export async function recordInboundMetaWhatsAppMessage(
     conversation = data
   }
 
-  await ensureCampaignOutboundMessage(supabase, conversation.id, latestRecipient, leadId)
+  if (contextMatchedSender) {
+    await ensureCampaignOutboundMessage(supabase, conversation.id, latestRecipient, leadId)
+  }
 
   const { error: messageError } = await supabase
     .from('meta_whatsapp_messages')
