@@ -21,6 +21,8 @@ const CONFIG_KEYS = [
   'meta_whatsapp_triage_ai_min_confidence',
   'meta_whatsapp_triage_ai_prompt',
   'meta_whatsapp_triage_interest_notify_phone',
+  'meta_whatsapp_triage_interest_notify_template_name',
+  'meta_whatsapp_triage_interest_notify_template_language',
   'meta_whatsapp_agent_enabled',
   'meta_whatsapp_agent_prompt',
   'meta_whatsapp_agent_history_limit',

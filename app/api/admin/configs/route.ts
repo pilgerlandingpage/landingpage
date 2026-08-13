@@ -163,6 +163,8 @@ const ENV_FALLBACKS: Record<string, string> = {
     meta_whatsapp_triage_ai_min_confidence: 'META_WHATSAPP_TRIAGE_AI_MIN_CONFIDENCE',
     meta_whatsapp_triage_ai_prompt: 'META_WHATSAPP_TRIAGE_AI_PROMPT',
     meta_whatsapp_triage_interest_notify_phone: 'META_WHATSAPP_TRIAGE_INTEREST_NOTIFY_PHONE',
+    meta_whatsapp_triage_interest_notify_template_name: 'META_WHATSAPP_TRIAGE_INTEREST_NOTIFY_TEMPLATE_NAME',
+    meta_whatsapp_triage_interest_notify_template_language: 'META_WHATSAPP_TRIAGE_INTEREST_NOTIFY_TEMPLATE_LANGUAGE',
     meta_whatsapp_agent_enabled: 'META_WHATSAPP_AGENT_ENABLED',
     meta_whatsapp_agent_prompt: 'META_WHATSAPP_AGENT_PROMPT',
     meta_whatsapp_agent_history_limit: 'META_WHATSAPP_AGENT_HISTORY_LIMIT',
@@ -241,6 +243,8 @@ const CONFIG_AGENT_CENTRAL_MAP: Record<string, string> = {
     meta_whatsapp_triage_ai_min_confidence: 'agente-guilherme-meta-api',
     meta_whatsapp_triage_ai_prompt: 'agente-guilherme-meta-api',
     meta_whatsapp_triage_interest_notify_phone: 'agente-guilherme-meta-api',
+    meta_whatsapp_triage_interest_notify_template_name: 'agente-guilherme-meta-api',
+    meta_whatsapp_triage_interest_notify_template_language: 'agente-guilherme-meta-api',
     whatsapp_rescue_system_prompt: 'whatsapp-rescue-agent',
     whatsapp_rescue_agent_enabled: 'whatsapp-rescue-agent',
     whatsapp_followup_system_prompt: 'whatsapp-followup-agent',
@@ -436,6 +440,8 @@ const DEFAULT_CONFIGS: Record<string, string> = {
     meta_whatsapp_triage_ai_min_confidence: '70',
     meta_whatsapp_triage_ai_prompt: DEFAULT_META_WHATSAPP_TRIAGE_AI_PROMPT,
     meta_whatsapp_triage_interest_notify_phone: '',
+    meta_whatsapp_triage_interest_notify_template_name: '',
+    meta_whatsapp_triage_interest_notify_template_language: 'pt_BR',
     meta_whatsapp_agent_enabled: 'true',
     meta_whatsapp_agent_history_limit: '12',
     meta_whatsapp_agent_prompt: DEFAULT_META_WHATSAPP_AGENT_PROMPT,
@@ -777,14 +783,15 @@ function normalizeConfigValue(key: string, value: string) {
         const selected = String(value || '').trim().toLowerCase()
         return /^v\d+\.\d+$/.test(selected) ? selected : DEFAULT_CONFIGS.meta_whatsapp_api_version
     }
-    if (key === 'meta_whatsapp_default_language') {
+    if (key === 'meta_whatsapp_default_language' || key === 'meta_whatsapp_triage_interest_notify_template_language') {
         const selected = String(value || '').trim().replace('-', '_')
         return /^[a-z]{2}_[A-Z]{2}$/.test(selected) ? selected : DEFAULT_CONFIGS.meta_whatsapp_default_language
     }
     if (
         key === 'meta_whatsapp_editorial_blog_template_name' ||
         key === 'meta_whatsapp_editorial_news_template_name' ||
-        key === 'meta_whatsapp_property_followup_template_name'
+        key === 'meta_whatsapp_property_followup_template_name' ||
+        key === 'meta_whatsapp_triage_interest_notify_template_name'
     ) {
         return String(value || '')
             .trim()

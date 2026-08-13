@@ -4,6 +4,7 @@ import {
   normalizeMetaWhatsAppPhone,
   sendMetaWhatsAppTypingIndicator,
   sendMetaWhatsAppTextMessage,
+  sendMetaWhatsAppTemplateMessage,
 } from '@/lib/meta/whatsapp-cloud'
 import { sendMetaWhatsAppChatAudioReply, sendMetaWhatsAppChatReply } from '@/lib/meta/whatsapp-chat'
 import { getAIConfig, getActiveAIProvider, getOpenAIApiKey } from '@/lib/ai/config'
@@ -88,6 +89,21 @@ export interface ManualMetaWhatsAppReplyTriageInput {
   intent: ReplyIntent
   messageId?: string | null
   note?: string | null
+}
+
+interface InternalNotificationInput {
+  contactPhone: string
+  leadId?: string | null
+  contactName?: string | null
+  recipientName?: string | null
+  campaignName?: string | null
+  templateName?: string | null
+  responseText?: string | null
+  respondedAt?: string | null
+  leadStage?: string | null
+  summary?: string | null
+  agentReply?: string | null
+  reason?: string | null
 }
 
 const DEFAULT_TRIAGE_AI_PROMPT = DEFAULT_META_WHATSAPP_TRIAGE_AI_PROMPT
@@ -1839,20 +1855,7 @@ function formatAdminTimestamp(value?: string | null) {
   }).format(date)} (BRT)`
 }
 
-function buildInternalNotification(input: {
-  contactPhone: string
-  leadId?: string | null
-  contactName?: string | null
-  recipientName?: string | null
-  campaignName?: string | null
-  templateName?: string | null
-  responseText?: string | null
-  respondedAt?: string | null
-  leadStage?: string | null
-  summary?: string | null
-  agentReply?: string | null
-  reason?: string | null
-}) {
+function buildInternalNotification(input: InternalNotificationInput) {
   const name = cleanText(input.contactName || input.recipientName, 160) || 'Nao informado'
   const response = cleanText(input.responseText, 500) || '-'
   const campaign = cleanText(input.campaignName, 160) || 'Sem campanha vinculada ao painel'
@@ -1886,6 +1889,153 @@ function buildInternalNotification(input: {
     whatsappLink,
     ...(agentReply ? ['', 'Mensagem enviada ao lead:', agentReply] : []),
   ].filter(Boolean).join('\n')
+}
+
+function buildInternalNotificationTemplateComponents(input: InternalNotificationInput) {
+  const name = cleanText(input.contactName || input.recipientName, 160) || 'Nao informado'
+  const phone = formatAdminPhone(input.contactPhone)
+  const whatsappLink = `https://wa.me/${normalizeMetaWhatsAppPhone(input.contactPhone)}`
+  const campaign = cleanText(input.campaignName, 160) || 'Sem campanha vinculada ao painel'
+  const template = cleanText(input.templateName, 160) || 'Sem template vinculado'
+  const respondedAt = formatAdminTimestamp(input.respondedAt)
+  const response = cleanText(input.responseText, 500) || '-'
+  const leadId = cleanText(input.leadId, 80) || '-'
+  const agentReply = cleanText(input.agentReply, 700) || '-'
+
+  return [{
+    type: 'body',
+    parameters: [
+      name,
+      phone,
+      whatsappLink,
+      campaign,
+      template,
+      respondedAt,
+      response,
+      leadId,
+      agentReply,
+    ].map(text => ({ type: 'text', text })),
+  }]
+}
+
+async function sendInternalAdminNotification(input: {
+  notifyPhone: string
+  notification: InternalNotificationInput
+  phoneNumberId?: string | null
+  configMap: Record<string, string | undefined>
+}) {
+  const templateName = cleanText(input.configMap.meta_whatsapp_triage_interest_notify_template_name, 120)
+  const templateLanguage = cleanText(
+    input.configMap.meta_whatsapp_triage_interest_notify_template_language
+      || input.configMap.meta_whatsapp_default_language,
+    20
+  ) || 'pt_BR'
+  const text = buildInternalNotification(input.notification)
+
+  if (templateName) {
+    try {
+      const result = await sendMetaWhatsAppTemplateMessage({
+        to: input.notifyPhone,
+        templateName,
+        language: templateLanguage,
+        phoneNumberId: input.phoneNumberId || undefined,
+        components: buildInternalNotificationTemplateComponents(input.notification),
+        config: input.configMap,
+      })
+      return {
+        mode: 'template',
+        providerMessageId: result.providerMessageId || '',
+        raw: result.raw,
+        templateName,
+        templateLanguage,
+        fallbackError: null,
+      }
+    } catch (error) {
+      let fallbackResult: Awaited<ReturnType<typeof sendMetaWhatsAppTextMessage>>
+      try {
+        fallbackResult = await sendMetaWhatsAppTextMessage({
+          to: input.notifyPhone,
+          text,
+          phoneNumberId: input.phoneNumberId || undefined,
+          config: input.configMap,
+        })
+      } catch (fallbackError) {
+        const templateError = error instanceof Error ? error.message.slice(0, 500) : String(error).slice(0, 500)
+        const textError = fallbackError instanceof Error ? fallbackError.message.slice(0, 500) : String(fallbackError).slice(0, 500)
+        throw new Error(`Template interno falhou: ${templateError}. Fallback em texto falhou: ${textError}`)
+      }
+      return {
+        mode: 'text_fallback',
+        providerMessageId: fallbackResult.providerMessageId || '',
+        raw: fallbackResult.raw,
+        templateName,
+        templateLanguage,
+        fallbackError: error instanceof Error ? error.message.slice(0, 500) : String(error).slice(0, 500),
+      }
+    }
+  }
+
+  const result = await sendMetaWhatsAppTextMessage({
+    to: input.notifyPhone,
+    text,
+    phoneNumberId: input.phoneNumberId || undefined,
+    config: input.configMap,
+  })
+  return {
+    mode: 'text',
+    providerMessageId: result.providerMessageId || '',
+    raw: result.raw,
+    templateName: null,
+    templateLanguage: null,
+    fallbackError: null,
+  }
+}
+
+function buildInternalNotificationMetadata(params: {
+  currentMetadata: unknown
+  sendResult: Awaited<ReturnType<typeof sendInternalAdminNotification>>
+  notifyPhone: string
+  acceptedAt: string
+}) {
+  const metadata = asRecord(params.currentMetadata)
+  const currentNotification = asRecord(metadata.internal_notification)
+
+  return {
+    ...metadata,
+    internal_notification: {
+      ...currentNotification,
+      mode: params.sendResult.mode,
+      provider_message_id: params.sendResult.providerMessageId || null,
+      notified_phone: params.notifyPhone,
+      template_name: params.sendResult.templateName,
+      template_language: params.sendResult.templateLanguage,
+      template_fallback_error: params.sendResult.fallbackError,
+      accepted_at: params.acceptedAt,
+      provider_status: 'accepted',
+      last_status_at: params.acceptedAt,
+    },
+  }
+}
+
+function buildInternalNotificationFailureMetadata(params: {
+  currentMetadata: unknown
+  notifyPhone: string
+  failedAt: string
+  errorMessage: string
+}) {
+  const metadata = asRecord(params.currentMetadata)
+  const currentNotification = asRecord(metadata.internal_notification)
+
+  return {
+    ...metadata,
+    internal_notification: {
+      ...currentNotification,
+      notified_phone: params.notifyPhone,
+      provider_status: 'failed_to_submit',
+      last_status_at: params.failedAt,
+      error_message: params.errorMessage,
+    },
+  }
 }
 
 async function findLeadForMetaWhatsAppAgent(input: {
@@ -2408,9 +2558,9 @@ export async function manuallyClassifyMetaWhatsAppConversationReply(
 
     if (notifyPhone) {
       try {
-        await sendMetaWhatsAppTextMessage({
-          to: notifyPhone,
-          text: buildInternalNotification({
+        const sendResult = await sendInternalAdminNotification({
+          notifyPhone,
+          notification: {
             contactPhone,
             leadId: leadSignal?.id || null,
             contactName,
@@ -2420,9 +2570,9 @@ export async function manuallyClassifyMetaWhatsAppConversationReply(
             responseText: rawText,
             respondedAt: cleanText(message?.received_at || message?.created_at, 80) || now,
             reason: note || 'Lead marcado manualmente como interessado no chat.',
-          }),
+          },
           phoneNumberId: phoneNumberId || undefined,
-          config: configMap,
+          configMap,
         })
         notifiedStatus = 'sent'
         await updateReplyIntent(supabase, intentRow?.id, {
@@ -2430,13 +2580,26 @@ export async function manuallyClassifyMetaWhatsAppConversationReply(
           notified_phone: notifyPhone,
           notified_at: now,
           notified_error: null,
+          metadata: buildInternalNotificationMetadata({
+            currentMetadata: intentRow?.metadata,
+            sendResult,
+            notifyPhone,
+            acceptedAt: now,
+          }),
         })
       } catch (error) {
         notifiedStatus = 'failed'
+        const errorMessage = error instanceof Error ? error.message.slice(0, 500) : String(error).slice(0, 500)
         await updateReplyIntent(supabase, intentRow?.id, {
           notified_status: 'failed',
           notified_phone: notifyPhone,
-          notified_error: error instanceof Error ? error.message.slice(0, 500) : String(error).slice(0, 500),
+          notified_error: errorMessage,
+          metadata: buildInternalNotificationFailureMetadata({
+            currentMetadata: intentRow?.metadata,
+            notifyPhone,
+            failedAt: isoNow(),
+            errorMessage,
+          }),
         })
       }
     } else {
@@ -2828,9 +2991,10 @@ export async function handleMetaWhatsAppReplyTriage(
 
     if (notifyPhone) {
       try {
-        await sendMetaWhatsAppTextMessage({
-          to: notifyPhone,
-          text: buildInternalNotification({
+        const acceptedAt = isoNow()
+        const sendResult = await sendInternalAdminNotification({
+          notifyPhone,
+          notification: {
             contactPhone,
             leadId: leadSignal?.id || null,
             contactName,
@@ -2843,23 +3007,36 @@ export async function handleMetaWhatsAppReplyTriage(
             summary: agentResponse?.summary || null,
             agentReply: replyText,
             reason: effectiveReason,
-          }),
+          },
           phoneNumberId: phoneNumberId || undefined,
-          config: configMap,
+          configMap,
         })
         notifiedStatus = 'sent'
         await updateReplyIntent(supabase, intentRow?.id, {
           notified_status: 'sent',
           notified_phone: notifyPhone,
-          notified_at: isoNow(),
+          notified_at: acceptedAt,
           notified_error: null,
+          metadata: buildInternalNotificationMetadata({
+            currentMetadata: intentRow?.metadata,
+            sendResult,
+            notifyPhone,
+            acceptedAt,
+          }),
         })
       } catch (error) {
         notifiedStatus = 'failed'
+        const errorMessage = error instanceof Error ? error.message.slice(0, 500) : String(error).slice(0, 500)
         await updateReplyIntent(supabase, intentRow?.id, {
           notified_status: 'failed',
           notified_phone: notifyPhone,
-          notified_error: error instanceof Error ? error.message.slice(0, 500) : String(error).slice(0, 500),
+          notified_error: errorMessage,
+          metadata: buildInternalNotificationFailureMetadata({
+            currentMetadata: intentRow?.metadata,
+            notifyPhone,
+            failedAt: isoNow(),
+            errorMessage,
+          }),
         })
       }
     }

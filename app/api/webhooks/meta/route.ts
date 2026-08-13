@@ -126,6 +126,16 @@ function normalizeMetaWhatsAppPhone(value: unknown) {
   return String(value || '').replace(/\D/g, '').slice(0, 20)
 }
 
+function cleanText(value: unknown, maxLength = 300) {
+  return String(value || '').trim().slice(0, maxLength)
+}
+
+function asRecord(value: unknown): Record<string, any> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+    ? value as Record<string, any>
+    : {}
+}
+
 function timestampToIso(value: unknown) {
   const parsed = Number(value)
   if (!Number.isFinite(parsed) || parsed <= 0) return new Date().toISOString()
@@ -172,6 +182,70 @@ async function findMetaWhatsAppRecipient(supabase: ReturnType<typeof createAdmin
     .maybeSingle()
 
   return data || null
+}
+
+function getMetaStatusError(statusEvent: any) {
+  const error = Array.isArray(statusEvent?.errors) ? statusEvent.errors[0] : null
+  const code = error?.code ? String(error.code) : ''
+  const title = cleanText(error?.title, 160)
+  const message = cleanText(error?.message, 300)
+  const details = cleanText(error?.error_data?.details, 500)
+  return {
+    code: code || null,
+    message: [code, title || message, details].filter(Boolean).join(' | ') || null,
+  }
+}
+
+async function updateInternalNotificationStatus(params: {
+  supabase: ReturnType<typeof createAdminClient>
+  providerMessageId: string
+  status: string
+  receivedAt: string
+  statusEvent: any
+}) {
+  const providerMessageId = cleanText(params.providerMessageId, 200)
+  if (!providerMessageId || !['sent', 'delivered', 'read', 'failed'].includes(params.status)) return
+
+  const { data, error } = await params.supabase
+    .from('meta_whatsapp_reply_intents')
+    .select('id, metadata')
+    .contains('metadata', {
+      internal_notification: {
+        provider_message_id: providerMessageId,
+      },
+    })
+    .limit(20)
+
+  if (error) {
+    console.warn('[Meta WhatsApp Webhook] Falha ao localizar notificacao interna:', error)
+    return
+  }
+
+  const statusError = getMetaStatusError(params.statusEvent)
+  for (const row of data || []) {
+    const metadata = asRecord(row.metadata)
+    const currentNotification = asRecord(metadata.internal_notification)
+    const failed = params.status === 'failed'
+
+    await params.supabase
+      .from('meta_whatsapp_reply_intents')
+      .update({
+        notified_status: failed ? 'failed' : 'sent',
+        notified_error: failed ? statusError.message : null,
+        updated_at: new Date().toISOString(),
+        metadata: {
+          ...metadata,
+          internal_notification: {
+            ...currentNotification,
+            provider_status: params.status,
+            last_status_at: params.receivedAt,
+            error_code: failed ? statusError.code : null,
+            error_message: failed ? statusError.message : null,
+          },
+        },
+      })
+      .eq('id', row.id)
+  }
 }
 
 function normalizePricingCategory(value: unknown) {
@@ -355,6 +429,14 @@ async function ingestMetaWhatsAppWebhook(payload: any) {
             errorCode: statusEvent?.errors?.[0]?.code ? String(statusEvent.errors[0].code) : null,
             errorMessage: statusEvent?.errors?.[0]?.message || statusEvent?.errors?.[0]?.title || null,
           }, supabase)
+
+          await updateInternalNotificationStatus({
+            supabase,
+            providerMessageId,
+            status,
+            receivedAt,
+            statusEvent,
+          })
 
           const { error } = await supabase
             .from('meta_whatsapp_events')
