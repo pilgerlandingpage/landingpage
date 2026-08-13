@@ -137,6 +137,33 @@ function includesAny(text: string, patterns: Array<string | RegExp>) {
   ))
 }
 
+function metaWhatsAppPhoneCandidates(value: unknown) {
+  const base = normalizeMetaWhatsAppPhone(value)
+  if (!base) return []
+
+  const set = new Set<string>()
+  const add = (raw: string) => {
+    const digits = normalizeMetaWhatsAppPhone(raw)
+    if (digits) set.add(digits)
+  }
+
+  add(base)
+  if (base.startsWith('55')) {
+    const local = base.slice(2)
+    add(local)
+    if (local.length === 11 && local[2] === '9') {
+      add(`55${local.slice(0, 2)}${local.slice(3)}`)
+      add(`${local.slice(0, 2)}${local.slice(3)}`)
+    }
+    if (local.length === 10) {
+      add(`55${local.slice(0, 2)}9${local.slice(2)}`)
+      add(`${local.slice(0, 2)}9${local.slice(2)}`)
+    }
+  }
+
+  return [...set]
+}
+
 type ConversationHoldCue = 'greeting' | 'identity_question' | 'low_commitment' | 'conversation_request'
 
 function normalizeShortReply(text: string) {
@@ -1708,6 +1735,9 @@ async function loadRecipientContext(
     if (data) return data
   }
 
+  const phoneCandidates = metaWhatsAppPhoneCandidates(contactPhone)
+  if (!phoneCandidates.length) return null
+
   let query = supabase
     .from('meta_whatsapp_campaign_recipients')
     .select(`
@@ -1720,7 +1750,7 @@ async function loadRecipientContext(
       metadata,
       campaign:meta_whatsapp_campaigns(id, name, template_name, template_language, campaign_type)
     `)
-    .eq('recipient_phone', contactPhone)
+    .in('recipient_phone', phoneCandidates)
     .order('created_at', { ascending: false })
     .limit(1)
 
@@ -1821,24 +1851,27 @@ function buildInternalNotification(input: {
   const respondedAt = formatAdminTimestamp(input.respondedAt)
 
   return [
-    'NOVO LEAD INTERESSADO',
-    'Status: pronto para distribuir',
+    'LEAD PARA DISTRIBUIR',
+    '--------------------',
     '',
-    'LEAD',
     `Nome: ${name}`,
     `Celular: ${phone}`,
-    `WhatsApp: ${whatsappLink}`,
-    leadId ? `CRM: ${leadId}` : null,
-    '',
-    'ORIGEM',
-    `Campanha: ${campaign}`,
-    `Template: ${template}`,
     `Hora da resposta: ${respondedAt}`,
     `Resposta: ${response}`,
     '',
-    'PROXIMO PASSO',
-    'Enviar este lead para um especialista chamar agora.',
-    agentReply ? `Mensagem enviada ao lead: ${agentReply}` : null,
+    'ORIGEM DO LEAD',
+    '--------------',
+    `Campanha: ${campaign}`,
+    `Template: ${template}`,
+    leadId ? `CRM: ${leadId}` : null,
+    '',
+    'ACAO',
+    '----',
+    'Encaminhar para um especialista chamar agora.',
+    '',
+    'Abrir conversa do lead:',
+    whatsappLink,
+    ...(agentReply ? ['', 'Mensagem enviada ao lead:', agentReply] : []),
   ].filter(Boolean).join('\n')
 }
 
