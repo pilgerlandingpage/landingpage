@@ -83,6 +83,8 @@ interface MetaCampaign {
     metadata?: unknown
 }
 
+type MetaCampaignManageAction = 'pause' | 'resume' | 'cancel' | 'delete'
+
 interface MetaCampaignRecipient {
     id: string
     campaign_id?: string
@@ -1415,7 +1417,12 @@ export default function CampaignsPage() {
         } catch { /* ignore */ }
     }
 
-    const manageMetaCampaign = async (campaignId: string, action: 'pause' | 'resume' | 'cancel') => {
+    const manageMetaCampaign = async (campaignId: string, action: MetaCampaignManageAction) => {
+        if (action === 'delete') {
+            const confirmed = window.confirm('Excluir esta campanha do painel? Ela nao aparecera mais na lista, mas os dados historicos continuam salvos.')
+            if (!confirmed) return
+        }
+
         try {
             const res = await fetch('/api/admin/whatsapp/campaigns', {
                 method: 'POST',
@@ -1429,6 +1436,14 @@ export default function CampaignsPage() {
             const data = await res.json()
             if (data.success) {
                 setFeedback({ type: 'success', text: data.message || 'Campanha Meta atualizada' })
+                if (action === 'delete') {
+                    setExpandedMetaCampaignId(current => current === campaignId ? '' : current)
+                    setMetaCampaignDetails(prev => {
+                        const next = { ...prev }
+                        delete next[campaignId]
+                        return next
+                    })
+                }
                 loadMetaCampaigns()
             } else {
                 setFeedback({ type: 'error', text: data.message || 'Erro ao atualizar campanha Meta' })
@@ -2827,7 +2842,7 @@ function MetaOfficialCampaignPanel({
     onReplyRefresh: () => void
     onReplyExport: (intent?: string) => void
     onToggleDetail: (campaignId: string) => void
-    onManage: (campaignId: string, action: 'pause' | 'resume' | 'cancel') => void
+    onManage: (campaignId: string, action: MetaCampaignManageAction) => void
     retryingCampaignId: string
     onRetryFailed: (campaignId: string, failedCount: number) => void
 }) {
@@ -3107,9 +3122,9 @@ function MetaOfficialCampaignPanel({
                 <div className="meta-campaigns-workspace">
                     <div className="meta-campaign-table-pane">
                         <div style={{
-                            minWidth: '980px',
+                            minWidth: '1020px',
                             display: 'grid',
-                            gridTemplateColumns: '90px minmax(280px, 1.45fr) 116px 96px 96px 86px 86px 132px',
+                            gridTemplateColumns: '90px minmax(280px, 1.45fr) 116px 96px 96px 86px 86px 152px',
                             gap: '0',
                             padding: '9px 12px',
                             borderBottom: '1px solid var(--border)',
@@ -3144,7 +3159,7 @@ function MetaOfficialCampaignPanel({
                                 Nenhuma campanha encontrada para a busca atual.
                             </div>
                         ) : (
-                            <div style={{ minWidth: '980px' }}>
+                            <div style={{ minWidth: '1020px' }}>
                                 {filteredCampaigns.map(campaign => (
                                     <MetaCampaignTableRow
                                         key={campaign.id}
@@ -3224,7 +3239,7 @@ function MetaCampaignTableRow({
     loadingDetail: boolean
     retrying: boolean
     onSelect: (campaignId: string) => void
-    onManage: (campaignId: string, action: 'pause' | 'resume' | 'cancel') => void
+    onManage: (campaignId: string, action: MetaCampaignManageAction) => void
     onRetryFailed: (campaignId: string, failedCount: number) => void
 }) {
     const progress = metaProgress(campaign)
@@ -3232,6 +3247,8 @@ function MetaCampaignTableRow({
     const finalStatus = ['completed', 'cancelled', 'failed'].includes(campaign.status)
     const canPause = ['scheduled', 'queued', 'sending', 'preparing'].includes(campaign.status)
     const canResume = campaign.status === 'paused'
+    const canCancel = ['scheduled', 'queued', 'sending', 'preparing'].includes(campaign.status)
+    const canDelete = finalStatus || ['draft', 'paused'].includes(campaign.status)
     const canRetryFailed = campaign.total_failed > 0 && !['queued', 'sending', 'scheduled', 'preparing', 'cancelled'].includes(campaign.status)
 
     return (
@@ -3246,7 +3263,7 @@ function MetaCampaignTableRow({
             }}
             style={{
                 display: 'grid',
-                gridTemplateColumns: '90px minmax(280px, 1.45fr) 116px 96px 96px 86px 86px 132px',
+                gridTemplateColumns: '90px minmax(280px, 1.45fr) 116px 96px 96px 86px 86px 152px',
                 gap: '0',
                 alignItems: 'center',
                 padding: '10px 12px',
@@ -3362,7 +3379,7 @@ function MetaCampaignTableRow({
                         <Play size={14} />
                     </button>
                 )}
-                {!finalStatus && (
+                {canCancel && (
                     <button
                         type="button"
                         onClick={event => {
@@ -3370,6 +3387,19 @@ function MetaCampaignTableRow({
                             onManage(campaign.id, 'cancel')
                         }}
                         title="Cancelar"
+                        style={{ padding: '7px', borderRadius: '7px', border: '1px solid rgba(239,68,68,0.16)', background: 'rgba(239,68,68,0.08)', color: '#ef4444', cursor: 'pointer' }}
+                    >
+                        <Trash2 size={14} />
+                    </button>
+                )}
+                {canDelete && (
+                    <button
+                        type="button"
+                        onClick={event => {
+                            event.stopPropagation()
+                            onManage(campaign.id, 'delete')
+                        }}
+                        title="Excluir do painel"
                         style={{ padding: '7px', borderRadius: '7px', border: '1px solid rgba(239,68,68,0.16)', background: 'rgba(239,68,68,0.08)', color: '#ef4444', cursor: 'pointer' }}
                     >
                         <Trash2 size={14} />
@@ -3413,7 +3443,7 @@ function MetaSelectedCampaignAside({
     loadingDetail: boolean
     retrying: boolean
     onSelect: (campaignId: string) => void
-    onManage: (campaignId: string, action: 'pause' | 'resume' | 'cancel') => void
+    onManage: (campaignId: string, action: MetaCampaignManageAction) => void
     onRetryFailed: (campaignId: string, failedCount: number) => void
 }) {
     if (!campaign) {
@@ -3441,6 +3471,8 @@ function MetaSelectedCampaignAside({
     const finalStatus = ['completed', 'cancelled', 'failed'].includes(detailCampaign.status)
     const canPause = ['scheduled', 'queued', 'sending', 'preparing'].includes(detailCampaign.status)
     const canResume = detailCampaign.status === 'paused'
+    const canCancel = ['scheduled', 'queued', 'sending', 'preparing'].includes(detailCampaign.status)
+    const canDelete = finalStatus || ['draft', 'paused'].includes(detailCampaign.status)
     const canRetryFailed = failedTotal > 0 && !['queued', 'sending', 'scheduled', 'preparing', 'cancelled'].includes(detailCampaign.status)
 
     return (
@@ -3537,8 +3569,13 @@ function MetaSelectedCampaignAside({
                             <Play size={14} />
                         </button>
                     )}
-                    {!finalStatus && (
+                    {canCancel && (
                         <button type="button" onClick={() => onManage(campaign.id, 'cancel')} title="Cancelar" style={{ padding: '7px', borderRadius: '8px', border: '1px solid rgba(239,68,68,0.16)', background: 'rgba(239,68,68,0.08)', color: '#ef4444', cursor: 'pointer' }}>
+                            <Trash2 size={14} />
+                        </button>
+                    )}
+                    {canDelete && (
+                        <button type="button" onClick={() => onManage(campaign.id, 'delete')} title="Excluir do painel" style={{ padding: '7px', borderRadius: '8px', border: '1px solid rgba(239,68,68,0.16)', background: 'rgba(239,68,68,0.08)', color: '#ef4444', cursor: 'pointer' }}>
                             <Trash2 size={14} />
                         </button>
                     )}

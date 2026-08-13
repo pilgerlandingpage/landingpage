@@ -758,18 +758,22 @@ function normalizeCampaignStatusFilter(value?: string | null) {
 
 export async function listMetaWhatsAppCampaigns(input: ListMetaWhatsAppCampaignsInput = {}, supabase = createAdminClient()) {
   const limit = Math.min(100, Math.max(1, Number(input.limit || 40)))
+  const queryLimit = Math.min(300, limit * 3)
   const status = normalizeCampaignStatusFilter(input.status)
 
   let query = supabase
     .from('meta_whatsapp_campaigns')
     .select('*')
     .order('created_at', { ascending: false })
-    .limit(limit)
+    .limit(queryLimit)
 
   if (status) query = query.eq('status', status)
 
   const { data: campaigns, error } = await query
   if (error) throw error
+  const visibleCampaigns = (campaigns || [])
+    .filter((campaign: any) => !asMetadata(campaign.metadata).deleted_from_panel_at)
+    .slice(0, limit)
 
   const { data: senders, error: sendersError } = await supabase
     .from('meta_whatsapp_senders')
@@ -790,7 +794,7 @@ export async function listMetaWhatsAppCampaigns(input: ListMetaWhatsAppCampaigns
   if (templatesError) throw templatesError
   const campaignTemplates = (templates || []).filter(isCampaignTemplateEligible)
 
-  const summary = (campaigns || []).reduce((acc: any, campaign: any) => {
+  const summary = visibleCampaigns.reduce((acc: any, campaign: any) => {
     acc.total += 1
     acc.recipients += Number(campaign.total_recipients || 0)
     acc.queued += Number(campaign.total_queued || 0)
@@ -813,7 +817,7 @@ export async function listMetaWhatsAppCampaigns(input: ListMetaWhatsAppCampaigns
     byStatus: {},
   })
 
-  const campaignIds = (campaigns || []).map((campaign: any) => String(campaign.id)).filter(Boolean)
+  const campaignIds = visibleCampaigns.map((campaign: any) => String(campaign.id)).filter(Boolean)
   let analyticsRecipients: any[] = []
   let analyticsEvents: any[] = []
 
@@ -841,14 +845,14 @@ export async function listMetaWhatsAppCampaigns(input: ListMetaWhatsAppCampaigns
   }
 
   const analytics = buildMetaWhatsAppAnalytics(
-    campaigns || [],
+    visibleCampaigns,
     preparedSenders,
     analyticsRecipients,
     analyticsEvents
   )
 
   return {
-    campaigns: campaigns || [],
+    campaigns: visibleCampaigns,
     senders: preparedSenders,
     templates: campaignTemplates,
     summary,
@@ -897,14 +901,14 @@ export async function getMetaWhatsAppCampaignDetail(input: GetMetaWhatsAppCampai
 
 export async function manageMetaWhatsAppCampaign(params: {
   campaignId: string
-  action: 'pause' | 'resume' | 'cancel'
+  action: 'pause' | 'resume' | 'cancel' | 'delete'
 }, supabase = createAdminClient()) {
   const campaignId = cleanText(params.campaignId, 80)
   if (!campaignId) throw new Error('campaignId obrigatorio.')
 
   const { data: campaign, error } = await supabase
     .from('meta_whatsapp_campaigns')
-    .select('id, status, scheduled_for, total_queued')
+    .select('id, status, scheduled_for, total_queued, metadata')
     .eq('id', campaignId)
     .maybeSingle()
 
@@ -912,11 +916,47 @@ export async function manageMetaWhatsAppCampaign(params: {
   if (!campaign) throw new Error('Campanha Meta nao encontrada.')
 
   const currentStatus = String(campaign.status || '')
+  const now = new Date().toISOString()
+
+  if (params.action === 'delete') {
+    if (['scheduled', 'preparing', 'queued', 'sending'].includes(currentStatus)) {
+      throw new Error('Pause ou cancele a campanha antes de excluir do painel.')
+    }
+
+    const { error: recipientsError } = await supabase
+      .from('meta_whatsapp_campaign_recipients')
+      .update({ status: 'cancelled' })
+      .eq('campaign_id', campaignId)
+      .in('status', ['queued', 'sending'])
+    if (recipientsError) throw recipientsError
+
+    const metadata = asMetadata(campaign.metadata)
+    const updatePayload: Record<string, unknown> = {
+      metadata: {
+        ...metadata,
+        deleted_from_panel: true,
+        deleted_from_panel_at: now,
+      },
+    }
+
+    if (['draft', 'paused'].includes(currentStatus)) {
+      updatePayload.status = 'cancelled'
+      updatePayload.completed_at = now
+    }
+
+    const { error: updateError } = await supabase
+      .from('meta_whatsapp_campaigns')
+      .update(updatePayload)
+      .eq('id', campaignId)
+    if (updateError) throw updateError
+
+    return { status: 'deleted' }
+  }
+
   if (['completed', 'cancelled', 'failed'].includes(currentStatus)) {
     throw new Error(`Campanha ja esta em estado final: ${currentStatus}.`)
   }
 
-  const now = new Date().toISOString()
   if (params.action === 'pause') {
     const { error: updateError } = await supabase
       .from('meta_whatsapp_campaigns')

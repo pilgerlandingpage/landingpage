@@ -166,11 +166,10 @@ export async function POST(request: NextRequest) {
 
         if (action === 'meta_manage') {
             const manageAction = campaignData.manageAction || campaignData.manage_action
-            const normalizedAction = manageAction === 'resume' || manageAction === 'continue'
-                ? 'resume'
-                : manageAction === 'cancel' || manageAction === 'delete'
-                    ? 'cancel'
-                    : 'pause'
+            let normalizedAction: 'pause' | 'resume' | 'cancel' | 'delete' = 'pause'
+            if (manageAction === 'delete' || manageAction === 'hide') normalizedAction = 'delete'
+            if (manageAction === 'resume' || manageAction === 'continue') normalizedAction = 'resume'
+            if (manageAction === 'cancel') normalizedAction = 'cancel'
 
             const campaignId = campaignData.campaignId || campaignData.campaign_id
             const result = await manageMetaWhatsAppCampaign({
@@ -192,7 +191,9 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({
                 success: true,
                 result,
-                message: `Campanha Meta ${result.status}.`,
+                message: result.status === 'deleted'
+                    ? 'Campanha Meta excluida do painel.'
+                    : `Campanha Meta ${result.status}.`,
             })
         }
 
