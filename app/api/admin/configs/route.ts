@@ -456,7 +456,7 @@ const DEFAULT_CONFIGS: Record<string, string> = {
     meta_whatsapp_agent_audio_enabled: 'false',
     meta_whatsapp_agent_response_mode: 'text',
     meta_whatsapp_send_rate_per_minute: '40',
-    meta_whatsapp_daily_limit_per_number: '1000',
+    meta_whatsapp_daily_limit_per_number: '2000',
     meta_whatsapp_editorial_blog_template_name: '',
     meta_whatsapp_editorial_news_template_name: '',
     meta_whatsapp_property_followup_template_name: '',
