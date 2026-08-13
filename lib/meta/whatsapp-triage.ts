@@ -444,8 +444,19 @@ function isLearnMoreSignal(input: {
   ])
 }
 
-function buildLearnMoreReply() {
-  return 'Perfeito. Eu faco esse primeiro filtro por aqui; detalhes de empreendimento, valor e disponibilidade ficam com os especialistas. Ja deixei seu contato sinalizado para continuarem. Pra te direcionar melhor: voce busca morar, investir ou ainda esta avaliando?'
+function firstNameFromContact(value?: string | null) {
+  const name = cleanText(value, 80)
+  if (!name || /^\+?\d{8,}$/.test(name)) return ''
+  return name.split(/\s+/)[0] || ''
+}
+
+function buildLearnMoreReply(contactName?: string | null) {
+  const firstName = firstNameFromContact(contactName)
+  return [
+    `Perfeito${firstName ? `, ${firstName}` : ''}.`,
+    'Vou passar seu contato para um especialista da equipe.',
+    'Ele ja vai te chamar por aqui para continuar o atendimento e te enviar os detalhes.',
+  ].join(' ')
 }
 
 function isPrematureHandoffReply(reply?: string | null) {
@@ -521,17 +532,13 @@ function buildConversationHoldAgentResponse(
 
 function softenLearnMoreAgentResponse(
   agentResponse: TriageAgentResponse | null,
-  warnings: string[] = []
+  warnings: string[] = [],
+  contactName?: string | null
 ): TriageAgentResponse {
-  const canKeepAgentReply = Boolean(
-    agentResponse?.reply &&
-    !hasLeadFacingForbiddenTerms(agentResponse.reply)
-  )
-
   return {
     intent: 'interested',
     confidence: Math.max(agentResponse?.confidence || 0, 92),
-    reply: canKeepAgentReply ? agentResponse?.reply || null : buildLearnMoreReply(),
+    reply: buildLearnMoreReply(agentResponse?.leadName || contactName),
     shouldNotify: true,
     shouldClose: false,
     leadName: agentResponse?.leadName || null,
@@ -1765,6 +1772,7 @@ async function upsertOptOut(input: {
 
 function buildInternalNotification(input: {
   contactPhone: string
+  leadId?: string | null
   contactName?: string | null
   recipientName?: string | null
   campaignName?: string | null
@@ -1781,12 +1789,16 @@ function buildInternalNotification(input: {
   const summary = cleanText(input.summary, 700)
   const agentReply = cleanText(input.agentReply, 700)
   const reason = cleanText(input.reason, 240)
+  const leadId = cleanText(input.leadId, 80)
 
   return [
-    'Novo lead interessado no WhatsApp Meta',
+    'Novo lead interessado para distribuir',
     '',
+    'Acao: lead registrado no CRM. Distribua para um especialista chamar agora.',
     `Nome: ${name}`,
     `Telefone: +${input.contactPhone}`,
+    `WhatsApp: https://wa.me/${input.contactPhone}`,
+    leadId ? `Lead CRM: ${leadId}` : null,
     `Campanha: ${cleanText(input.campaignName, 160) || '-'}`,
     `Template: ${cleanText(input.templateName, 160) || '-'}`,
     `Resposta: ${response}`,
@@ -1805,7 +1817,7 @@ async function findLeadForMetaWhatsAppAgent(input: {
   contactPhone: string
 }) {
   const conversationLeadId = cleanText(input.conversation?.lead_id, 80)
-  const select = 'id,name,phone,phone_e164,metadata,ai_summary,funnel_stage,lead_classification'
+  const select = 'id,name,phone,phone_e164,metadata,ai_summary,funnel_stage,lead_classification,acquired_via'
 
   if (conversationLeadId) {
     const { data, error } = await input.supabase
@@ -1843,11 +1855,49 @@ async function findLeadForMetaWhatsAppAgent(input: {
   return null
 }
 
+async function linkMetaWhatsAppLeadContext(input: {
+  supabase: SupabaseAdmin
+  leadId: string
+  conversation: Record<string, any> | null
+  messageId?: string | null
+  recipientId?: string | null
+}) {
+  const leadId = cleanText(input.leadId, 80)
+  if (!leadId) return
+
+  const conversationId = cleanText(input.conversation?.id, 80)
+  if (conversationId) {
+    await input.supabase
+      .from('meta_whatsapp_conversations')
+      .update({ lead_id: leadId })
+      .eq('id', conversationId)
+  }
+
+  const messageId = cleanText(input.messageId, 80)
+  if (messageId) {
+    await input.supabase
+      .from('meta_whatsapp_messages')
+      .update({ lead_id: leadId })
+      .eq('id', messageId)
+  }
+
+  const recipientId = cleanText(input.recipientId || input.conversation?.last_recipient_id, 80)
+  if (recipientId) {
+    await input.supabase
+      .from('meta_whatsapp_campaign_recipients')
+      .update({ lead_id: leadId })
+      .eq('id', recipientId)
+  }
+}
+
 async function updateLeadWithAgentSignal(input: {
   supabase: SupabaseAdmin
   conversation: Record<string, any> | null
   contactPhone: string
   contactName?: string | null
+  campaignId?: string | null
+  recipientId?: string | null
+  messageId?: string | null
   campaignName?: string | null
   templateName?: string | null
   rawText?: string | null
@@ -1858,16 +1908,18 @@ async function updateLeadWithAgentSignal(input: {
   agentResponse?: TriageAgentResponse | null
   reason?: string | null
 }) {
-  const lead = await findLeadForMetaWhatsAppAgent({
+  let lead = await findLeadForMetaWhatsAppAgent({
     supabase: input.supabase,
     conversation: input.conversation,
     contactPhone: input.contactPhone,
   })
 
-  if (!lead?.id) return
-
   const now = isoNow()
-  const metadata = asRecord(lead.metadata)
+  const phone = normalizeMetaWhatsAppPhone(input.contactPhone)
+  if (!phone) return null
+
+  const shouldCreateLead = input.effectiveIntent === 'interested' || Boolean(input.agentResponse?.shouldNotify)
+  const metadata = asRecord(lead?.metadata)
   const agentMetadata = {
     intent: input.effectiveIntent,
     confidence: input.confidence,
@@ -1882,14 +1934,81 @@ async function updateLeadWithAgentSignal(input: {
     reason: cleanText(input.reason || input.agentResponse?.reason, 240) || null,
     ai_provider: input.agentResponse?.aiProvider || null,
     ai_model: input.agentResponse?.aiModel || null,
+    campaign_id: cleanText(input.campaignId, 80) || null,
+    recipient_id: cleanText(input.recipientId, 80) || null,
+    message_id: cleanText(input.messageId, 80) || null,
     at: now,
+  }
+  const nextMetadata = {
+    ...metadata,
+    first_contact_channel: metadata.first_contact_channel || 'meta_whatsapp',
+    last_contact_channel: 'meta_whatsapp',
+    last_contact_at: now,
+    meta_whatsapp_agent: agentMetadata,
+  }
+
+  if (!lead?.id) {
+    if (!shouldCreateLead) return null
+
+    const agentName = cleanText(input.agentResponse?.leadName || input.contactName, 160)
+    const fallbackName = agentName || `WhatsApp ${phone}`
+    const insertPayload: Record<string, unknown> = {
+      name: fallbackName,
+      phone,
+      phone_e164: phone,
+      funnel_stage: 'qualified',
+      lead_classification: 'hot',
+      acquired_via: 'meta_whatsapp',
+      metadata: nextMetadata,
+      conversation_log: [],
+      conversation_started_at: now,
+    }
+    if (agentMetadata.summary) insertPayload.ai_summary = agentMetadata.summary
+
+    const { data, error } = await input.supabase
+      .from('leads')
+      .insert(insertPayload)
+      .select('id,name,phone,phone_e164,metadata,ai_summary,funnel_stage,lead_classification,acquired_via')
+      .single()
+
+    if (error) throw error
+    lead = data
+
+    await linkMetaWhatsAppLeadContext({
+      supabase: input.supabase,
+      leadId: lead.id,
+      conversation: input.conversation,
+      messageId: input.messageId,
+      recipientId: input.recipientId,
+    })
+
+    await input.supabase
+      .from('funnel_events')
+      .insert({
+        lead_id: lead.id,
+        event_type: 'meta_whatsapp_interest',
+        metadata: {
+          phone,
+          contact_name: fallbackName,
+          campaign_id: agentMetadata.campaign_id,
+          campaign_name: agentMetadata.campaign_name,
+          template_name: agentMetadata.template_name,
+          response: agentMetadata.last_response,
+          intent: agentMetadata.intent,
+          confidence: agentMetadata.confidence,
+          notified_status: agentMetadata.notified_status,
+          notified_phone: agentMetadata.notified_phone,
+          at: now,
+        },
+      })
+
+    return lead
   }
 
   const update: Record<string, unknown> = {
-    metadata: {
-      ...metadata,
-      meta_whatsapp_agent: agentMetadata,
-    },
+    phone: cleanText(lead.phone, 40) || phone,
+    phone_e164: cleanText(lead.phone_e164, 40) || phone,
+    metadata: nextMetadata,
     updated_at: now,
   }
 
@@ -1913,6 +2032,16 @@ async function updateLeadWithAgentSignal(input: {
     .from('leads')
     .update(update)
     .eq('id', lead.id)
+
+  await linkMetaWhatsAppLeadContext({
+    supabase: input.supabase,
+    leadId: lead.id,
+    conversation: input.conversation,
+    messageId: input.messageId,
+    recipientId: input.recipientId,
+  })
+
+  return lead
 }
 
 async function loadManualTriageMessage(
@@ -2115,12 +2244,29 @@ export async function manuallyClassifyMetaWhatsAppConversationReply(
   let notifiedStatus: 'skipped' | 'sent' | 'failed' = 'skipped'
   let notifiedPhone: string | null = existingIntent?.notified_phone || null
   const alreadyNotified = existingIntent?.notified_status === 'sent'
+  let leadSignal = await updateLeadWithAgentSignal({
+    supabase,
+    conversation,
+    contactPhone,
+    contactName,
+    campaignId,
+    recipientId,
+    messageId,
+    campaignName: campaign?.name || null,
+    templateName: campaign?.template_name || null,
+    rawText,
+    effectiveIntent: intent,
+    confidence: 100,
+    notifiedStatus,
+    notifiedPhone,
+    agentResponse: null,
+    reason: note || 'Classificacao manual registrada no chat.',
+  }).catch(() => null)
 
   if (intent === 'interested' && !alreadyNotified) {
     const configMap = await loadMetaWhatsAppConfigMap(supabase)
     const notifyPhone = normalizeMetaWhatsAppPhone(
       configMap.meta_whatsapp_triage_interest_notify_phone
-      || configMap.meta_whatsapp_support_redirect_phone
     )
     notifiedPhone = notifyPhone || null
 
@@ -2130,6 +2276,7 @@ export async function manuallyClassifyMetaWhatsAppConversationReply(
           to: notifyPhone,
           text: buildInternalNotification({
             contactPhone,
+            leadId: leadSignal?.id || null,
             contactName,
             recipientName: recipient?.recipient_name || null,
             campaignName: campaign?.name || null,
@@ -2171,6 +2318,25 @@ export async function manuallyClassifyMetaWhatsAppConversationReply(
   } else if (alreadyNotified) {
     notifiedStatus = 'sent'
   }
+
+  leadSignal = await updateLeadWithAgentSignal({
+    supabase,
+    conversation,
+    contactPhone,
+    contactName,
+    campaignId,
+    recipientId,
+    messageId,
+    campaignName: campaign?.name || null,
+    templateName: campaign?.template_name || null,
+    rawText,
+    effectiveIntent: intent,
+    confidence: 100,
+    notifiedStatus,
+    notifiedPhone,
+    agentResponse: null,
+    reason: note || 'Classificacao manual registrada no chat.',
+  }).catch(() => leadSignal)
 
   if (recipientId) {
     await supabase
@@ -2303,7 +2469,7 @@ export async function handleMetaWhatsAppReplyTriage(
     buttonPayload: classification.buttonPayload,
     rawText: classification.rawText || rawText,
   })) {
-    agentResponse = softenLearnMoreAgentResponse(agentResponse)
+    agentResponse = softenLearnMoreAgentResponse(agentResponse, [], contactName)
   } else if (
     agentResponse?.reply &&
     isPrematureHandoffReply(agentResponse.reply) &&
@@ -2489,10 +2655,28 @@ export async function handleMetaWhatsAppReplyTriage(
 
   let notifiedStatus: 'skipped' | 'sent' | 'failed' = 'skipped'
   let notifiedPhoneForLead: string | null = null
+  let leadSignal = await updateLeadWithAgentSignal({
+    supabase,
+    conversation,
+    contactPhone,
+    contactName,
+    campaignId,
+    recipientId,
+    messageId,
+    campaignName: campaign?.name || null,
+    templateName: campaign?.template_name || null,
+    rawText,
+    effectiveIntent,
+    confidence: effectiveConfidence,
+    notifiedStatus,
+    notifiedPhone: notifiedPhoneForLead,
+    agentResponse,
+    reason: effectiveReason,
+  }).catch(() => null)
+
   if (effectiveIntent === 'interested' || agentResponse?.shouldNotify) {
     const notifyPhone = normalizeMetaWhatsAppPhone(
       configMap.meta_whatsapp_triage_interest_notify_phone
-      || configMap.meta_whatsapp_support_redirect_phone
     )
     notifiedPhoneForLead = notifyPhone || null
 
@@ -2502,6 +2686,7 @@ export async function handleMetaWhatsAppReplyTriage(
           to: notifyPhone,
           text: buildInternalNotification({
             contactPhone,
+            leadId: leadSignal?.id || null,
             contactName,
             recipientName: recipient?.recipient_name || null,
             campaignName: campaign?.name || null,
@@ -2565,11 +2750,14 @@ export async function handleMetaWhatsAppReplyTriage(
       .eq('id', recipientId)
   }
 
-  await updateLeadWithAgentSignal({
+  leadSignal = await updateLeadWithAgentSignal({
     supabase,
     conversation,
     contactPhone,
     contactName,
+    campaignId,
+    recipientId,
+    messageId,
     campaignName: campaign?.name || null,
     templateName: campaign?.template_name || null,
     rawText,
@@ -2579,7 +2767,7 @@ export async function handleMetaWhatsAppReplyTriage(
     notifiedPhone: notifiedPhoneForLead,
     agentResponse,
     reason: effectiveReason,
-  }).catch(() => undefined)
+  }).catch(() => leadSignal)
 
   return {
     intent: effectiveIntent,
