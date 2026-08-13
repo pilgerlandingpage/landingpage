@@ -127,6 +127,28 @@ function buildContactListSegments(contacts: ContactRow[]) {
   }
 }
 
+async function fetchAllContactListContacts(supabase: ReturnType<typeof createAdminClient>, listId: string) {
+  const contacts: ContactRow[] = []
+  const pageSize = 1000
+
+  for (let from = 0; ; from += pageSize) {
+    const { data, error } = await supabase
+      .from('meta_whatsapp_contact_list_contacts')
+      .select('id, list_id, phone_e164, name, email, city, tags, template_variables, metadata, created_at')
+      .eq('list_id', listId)
+      .order('created_at', { ascending: true })
+      .range(from, from + pageSize - 1)
+
+    if (error) throw error
+
+    const page = (data || []) as ContactRow[]
+    contacts.push(...page)
+    if (page.length < pageSize) break
+  }
+
+  return contacts
+}
+
 export async function GET(request: NextRequest) {
   try {
     const supabase = createAdminClient()
@@ -138,25 +160,16 @@ export async function GET(request: NextRequest) {
     }
 
     if (listId) {
-      const [{ data: list, error: listError }, { data: contacts, error: contactsError }] = await Promise.all([
-        supabase
-          .from('meta_whatsapp_contact_lists')
-          .select('*')
-          .eq('id', listId)
-          .maybeSingle(),
-        supabase
-          .from('meta_whatsapp_contact_list_contacts')
-          .select('id, list_id, phone_e164, name, email, city, tags, template_variables, metadata, created_at')
-          .eq('list_id', listId)
-          .order('created_at', { ascending: true })
-          .limit(5000),
-      ])
+      const { data: list, error: listError } = await supabase
+        .from('meta_whatsapp_contact_lists')
+        .select('*')
+        .eq('id', listId)
+        .maybeSingle()
 
       if (listError) throw listError
-      if (contactsError) throw contactsError
       if (!list) return NextResponse.json({ success: false, message: 'Lista nao encontrada.' }, { status: 404 })
 
-      const allContacts = (contacts || []) as ContactRow[]
+      const allContacts = await fetchAllContactListContacts(supabase, listId)
       const filteredContacts = allContacts.filter(contact => contactMatchesFilters(contact, filters))
 
       return NextResponse.json({
