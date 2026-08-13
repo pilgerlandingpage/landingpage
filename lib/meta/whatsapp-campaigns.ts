@@ -212,6 +212,12 @@ function portfolioDailyUsage(senders: any[]) {
   }
 }
 
+function currentSaoPauloDayStartIso(from = new Date()) {
+  const nextReset = new Date(nextSaoPauloMidnightIso(from))
+  nextReset.setUTCDate(nextReset.getUTCDate() - 1)
+  return nextReset.toISOString()
+}
+
 async function resetExpiredSenderUsage(supabase: SupabaseAdmin, senders: any[]) {
   const now = new Date()
   const expired = senders.filter(sender => isSenderUsageExpired(sender, now))
@@ -231,6 +237,64 @@ async function resetExpiredSenderUsage(supabase: SupabaseAdmin, senders: any[]) 
   return senders.map(sender => isSenderUsageExpired(sender, now)
     ? { ...sender, daily_sent_count: 0, daily_limit_resets_at: nextReset }
     : sender)
+}
+
+async function syncSenderDailyUsageFromCampaignRecipients(supabase: SupabaseAdmin, senders: any[]) {
+  const preparedSenders = await resetExpiredSenderUsage(supabase, senders)
+  const senderIds = preparedSenders.map((sender: any) => String(sender.id || '')).filter(Boolean)
+  if (!senderIds.length) return preparedSenders
+
+  const now = new Date()
+  const usageStart = currentSaoPauloDayStartIso(now)
+  const nextReset = nextSaoPauloMidnightIso(now)
+  const { data: reservedRecipients, error } = await supabase
+    .from('meta_whatsapp_campaign_recipients')
+    .select('sender_id, recipient_phone')
+    .in('sender_id', senderIds)
+    .in('status', ['sending', 'sent', 'delivered', 'read'])
+    .gte('updated_at', usageStart)
+    .limit(50000)
+
+  if (error) throw error
+
+  const usageBySender = new Map<string, Set<string>>()
+  for (const recipient of reservedRecipients || []) {
+    const senderId = String((recipient as any).sender_id || '')
+    if (!senderId) continue
+    const phone = normalizeMetaWhatsAppPhone((recipient as any).recipient_phone)
+    const key = phone || `row:${senderId}:${usageBySender.get(senderId)?.size || 0}`
+    const usage = usageBySender.get(senderId) || new Set<string>()
+    usage.add(key)
+    usageBySender.set(senderId, usage)
+  }
+
+  const updates = preparedSenders
+    .map((sender: any) => ({
+      sender,
+      count: usageBySender.get(String(sender.id))?.size || 0,
+    }))
+    .filter(item => senderDailySentCount(item.sender) !== item.count || !item.sender.daily_limit_resets_at)
+
+  if (updates.length) {
+    const results = await Promise.all(updates.map(item => supabase
+      .from('meta_whatsapp_senders')
+      .update({
+        daily_sent_count: item.count,
+        daily_limit_resets_at: nextReset,
+        last_health_check_at: now.toISOString(),
+        last_error: null,
+      })
+      .eq('id', item.sender.id)
+    ))
+    const updateError = results.find(result => result.error)?.error
+    if (updateError) throw updateError
+  }
+
+  return preparedSenders.map((sender: any) => ({
+    ...sender,
+    daily_sent_count: usageBySender.get(String(sender.id))?.size || 0,
+    daily_limit_resets_at: sender.daily_limit_resets_at || nextReset,
+  }))
 }
 
 function describeSenderAvailability(sender: any) {
@@ -627,7 +691,7 @@ export async function createMetaWhatsAppCampaign(input: CreateMetaWhatsAppCampai
     .limit(50)
 
   if (sendersError) throw sendersError
-  const preparedSenders = await resetExpiredSenderUsage(supabase, senders || [])
+  const preparedSenders = await syncSenderDailyUsageFromCampaignRecipients(supabase, senders || [])
   const portfolioUsage = portfolioDailyUsage(preparedSenders)
   const selectedSender = input.defaultSenderId
     ? preparedSenders.find((sender: any) => sender.id === input.defaultSenderId)
@@ -782,7 +846,7 @@ export async function listMetaWhatsAppCampaigns(input: ListMetaWhatsAppCampaigns
     .order('display_name', { ascending: true })
 
   if (sendersError) throw sendersError
-  const preparedSenders = await resetExpiredSenderUsage(supabase, senders || [])
+  const preparedSenders = await syncSenderDailyUsageFromCampaignRecipients(supabase, senders || [])
 
   const { data: templates, error: templatesError } = await supabase
     .from('meta_whatsapp_templates')
@@ -1119,7 +1183,7 @@ async function selectSenderForRecipient(supabase: SupabaseAdmin, campaign: any, 
     .eq('local_status', 'active')
 
   if (portfolioSendersError) throw portfolioSendersError
-  const preparedPortfolioSenders = await resetExpiredSenderUsage(supabase, portfolioSenders || [])
+  const preparedPortfolioSenders = await syncSenderDailyUsageFromCampaignRecipients(supabase, portfolioSenders || [])
   const usage = portfolioDailyUsage(preparedPortfolioSenders)
   if (usage.remaining <= 0) {
     throw new Error(`${describePortfolioAvailability(preparedPortfolioSenders)} Nenhuma nova conversa iniciada pelo negocio pode ser aberta agora.`)
@@ -1175,6 +1239,48 @@ async function incrementSenderUsage(supabase: SupabaseAdmin, sender: any) {
       last_error: null,
     })
     .eq('id', sender.id)
+}
+
+async function decrementSenderUsage(supabase: SupabaseAdmin, senderId: string) {
+  const selectedSenderId = cleanText(senderId, 80)
+  if (!selectedSenderId) return
+
+  const { data: sender, error } = await supabase
+    .from('meta_whatsapp_senders')
+    .select('id, daily_sent_count, daily_limit_resets_at')
+    .eq('id', selectedSenderId)
+    .maybeSingle()
+
+  if (error) throw error
+  if (!sender) return
+
+  const now = new Date()
+  const sentCount = Math.max(senderDailySentCount(sender) - 1, 0)
+  await supabase
+    .from('meta_whatsapp_senders')
+    .update({
+      daily_sent_count: sentCount,
+      daily_limit_resets_at: nextSaoPauloMidnightIso(now),
+      last_health_check_at: now.toISOString(),
+    })
+    .eq('id', sender.id)
+}
+
+export async function releaseMetaWhatsAppSenderUsageReservation(params: {
+  senderId?: string | null
+  previousStatus?: string | null
+  nextStatus?: string | null
+}, supabase = createAdminClient()) {
+  const senderId = cleanText(params.senderId, 80)
+  const previousStatus = cleanText(params.previousStatus, 40).toLowerCase()
+  const nextStatus = cleanText(params.nextStatus, 40).toLowerCase()
+
+  if (!senderId) return { released: false, reason: 'missing_sender' }
+  if (nextStatus !== 'failed') return { released: false, reason: 'not_failed' }
+  if (previousStatus !== 'sent') return { released: false, reason: `previous_${previousStatus || 'unknown'}` }
+
+  await decrementSenderUsage(supabase, senderId)
+  return { released: true }
 }
 
 async function findContactGroupReplySignal(

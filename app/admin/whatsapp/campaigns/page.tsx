@@ -385,7 +385,7 @@ function metaSenderOptionLabel(sender: MetaSender) {
     if (sender.local_status !== 'active') return `${base} - pausado`
     if (String(sender.meta_status || '').toUpperCase() !== 'CONNECTED') return `${base} - Meta ${sender.meta_status || 'sem status'}`
     if (usage.limit > 0 && usage.sent >= usage.limit) return `${base} - limite esgotado`
-    return `${base} - ${usage.remaining} disponiveis`
+    return `${base} - ${usage.remaining} livres`
 }
 
 function metaPortfolioUsageFromSenders(senders: MetaSender[]) {
@@ -1311,15 +1311,15 @@ export default function CampaignsPage() {
 
         if (sendProvider === 'meta_whatsapp') {
             if (!hasMetaPortfolioCapacity) {
-                setFeedback({ type: 'error', text: `O portfolio Meta atingiu o limite diario compartilhado (${metaPortfolioUsage.usageLabel}). Aguarde o reset da janela de 24h ou agende para depois.` })
+                setFeedback({ type: 'error', text: `O portfolio Meta atingiu o uso/reserva diaria compartilhada (${metaPortfolioUsage.usageLabel}). Aguarde liberacao por falha, reset da janela de 24h ou agende para depois.` })
                 return
             }
             if (!scheduleDate && numbers.length > metaPortfolioUsage.remaining) {
-                setFeedback({ type: 'error', text: `A lista tem ${numbers.length} contatos, mas restam ${metaPortfolioUsage.remaining} conversas novas no limite compartilhado do portfolio Meta hoje. Divida a lista ou agende para depois.` })
+                setFeedback({ type: 'error', text: `A lista tem ${numbers.length} contatos, mas restam ${metaPortfolioUsage.remaining} vagas livres no limite compartilhado do portfolio Meta hoje. Divida a lista ou agende para depois.` })
                 return
             }
             if (readyMetaSenders.length === 0) {
-                setFeedback({ type: 'error', text: 'Todos os numeros Meta ativos atingiram o limite diario ou nao estao prontos. Aguarde o reset diario ou ative outro numero conectado.' })
+                setFeedback({ type: 'error', text: 'Todos os numeros Meta ativos atingiram o uso/reserva diaria ou nao estao prontos. Aguarde liberacao por falha, reset diario ou ative outro numero conectado.' })
                 return
             }
             if (selectedMetaSenderId && selectedMetaSender && !isMetaSenderAvailable(selectedMetaSender)) {
@@ -1518,8 +1518,8 @@ export default function CampaignsPage() {
             setFeedback({
                 type: 'error',
                 text: hasMetaPortfolioCapacity
-                    ? `O numero selecionado atingiu o limite diario (${metaSenderUsage(selectedMetaSender).usageLabel}). Alterei para Pool automatico por capacidade.`
-                    : `O portfolio Meta atingiu o limite diario compartilhado (${metaPortfolioUsage.usageLabel}).`,
+                    ? `O numero selecionado atingiu o uso/reserva diaria (${metaSenderUsage(selectedMetaSender).usageLabel}). Alterei para Pool automatico por capacidade.`
+                    : `O portfolio Meta atingiu o uso/reserva diaria compartilhada (${metaPortfolioUsage.usageLabel}).`,
             })
         }
     }, [selectedMetaSenderId, selectedMetaSender, hasMetaPortfolioCapacity, metaPortfolioUsage.usageLabel])
@@ -1838,7 +1838,7 @@ export default function CampaignsPage() {
                                             color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box',
                                         }}
                                         >
-                                        <option value="">Pool automatico por capacidade ({metaPortfolioUsage.remaining} restantes no portfolio)</option>
+                                        <option value="">Pool automatico por capacidade ({metaPortfolioUsage.remaining} vagas livres no portfolio)</option>
                                         {activeMetaSenders.map(sender => (
                                             <option key={sender.id} value={sender.id} disabled={!isMetaSenderAvailable(sender) || !hasMetaPortfolioCapacity}>
                                                 {metaSenderOptionLabel(sender)}
@@ -1846,11 +1846,11 @@ export default function CampaignsPage() {
                                         ))}
                                     </select>
                                     <div style={{ marginTop: '8px', color: hasMetaPortfolioCapacity ? '#16a34a' : '#ef4444', fontSize: '0.78rem', fontWeight: 700 }}>
-                                        Limite compartilhado do portfolio: {metaPortfolioUsage.usageLabel}; restam {metaPortfolioUsage.remaining}.
+                                        Uso/reserva compartilhada do portfolio: {metaPortfolioUsage.usageLabel}; vagas livres {metaPortfolioUsage.remaining}.
                                     </div>
                                     {selectedMetaSender && !isMetaSenderAvailable(selectedMetaSender) && (
                                         <div style={{ marginTop: '8px', color: '#ef4444', fontSize: '0.78rem', fontWeight: 700 }}>
-                                            Este numero atingiu o limite diario. Use o pool automatico ou outro numero conectado.
+                                            Este numero atingiu o uso/reserva diaria. Use o pool automatico ou outro numero conectado.
                                         </div>
                                     )}
                                     {!selectedMetaSenderId && readyMetaSenders.length > 0 && hasMetaPortfolioCapacity && (
@@ -3841,7 +3841,7 @@ function MetaCampaignDashboard({
                         rows={(analytics?.senderHealth || []).map(sender => ({
                             key: sender.sender_id,
                             name: sender.display_name || sender.phone_number,
-                            detail: `${sender.meta_status || 'sem status'} | uso diario ${percentLabel(sender.usageRate)} | falha ${percentLabel(sender.failureRate)}`,
+                            detail: `${sender.meta_status || 'sem status'} | uso/reserva ${percentLabel(sender.usageRate)} | falha ${percentLabel(sender.failureRate)}`,
                             value: `${sender.daily_sent_count}/${sender.daily_limit}`,
                             color: sender.daily_limit > 0 && sender.daily_sent_count >= sender.daily_limit
                                 ? '#ef4444'

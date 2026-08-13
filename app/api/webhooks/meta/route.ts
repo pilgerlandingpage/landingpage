@@ -10,7 +10,10 @@ import {
   processInstagramDirectVoteProof,
   shouldAutoprocessWebhook,
 } from '@/lib/social/meta-comment-dm-automation'
-import { refreshMetaWhatsAppCampaignTotals } from '@/lib/meta/whatsapp-campaigns'
+import {
+  refreshMetaWhatsAppCampaignTotals,
+  releaseMetaWhatsAppSenderUsageReservation,
+} from '@/lib/meta/whatsapp-campaigns'
 import {
   recordInboundMetaWhatsAppMessage,
   recordMetaWhatsAppMessageStatus,
@@ -177,7 +180,7 @@ async function findMetaWhatsAppRecipient(supabase: ReturnType<typeof createAdmin
 
   const { data } = await supabase
     .from('meta_whatsapp_campaign_recipients')
-    .select('id, campaign_id, sender_id, recipient_phone, cost_amount, metadata')
+    .select('id, campaign_id, sender_id, recipient_phone, status, cost_amount, metadata')
     .eq('provider_message_id', selected)
     .maybeSingle()
 
@@ -418,6 +421,12 @@ async function ingestMetaWhatsAppWebhook(payload: any) {
               .from('meta_whatsapp_campaign_recipients')
               .update(updatePayload)
               .eq('id', recipient.id)
+
+            await releaseMetaWhatsAppSenderUsageReservation({
+              senderId: recipient.sender_id,
+              previousStatus: recipient.status,
+              nextStatus: status,
+            }, supabase)
 
             if (recipient.campaign_id) touchedCampaignIds.add(recipient.campaign_id)
           }
