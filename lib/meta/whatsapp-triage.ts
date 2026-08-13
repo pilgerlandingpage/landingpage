@@ -18,6 +18,7 @@ import {
   DEFAULT_META_WHATSAPP_TRIAGE_AI_PROMPT,
   isLegacyMetaWhatsAppAgentPrompt,
 } from '@/lib/meta/whatsapp-agent-prompts'
+import { refreshMetaWhatsAppCampaignTotals } from '@/lib/meta/whatsapp-campaigns'
 
 type SupabaseAdmin = ReturnType<typeof createAdminClient>
 export type ReplyIntent = 'interested' | 'opt_out' | 'question' | 'unknown'
@@ -162,6 +163,18 @@ function metaWhatsAppPhoneCandidates(value: unknown) {
   }
 
   return [...set]
+}
+
+function contactGroupKeyFromName(value?: string | null) {
+  const normalized = cleanText(value, 180)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .replace(/\s+/g, ' ')
+
+  return normalized.length >= 3 ? `name:${normalized}` : ''
 }
 
 type ConversationHoldCue = 'greeting' | 'identity_question' | 'low_commitment' | 'conversation_request'
@@ -1954,6 +1967,65 @@ async function linkMetaWhatsAppLeadContext(input: {
   }
 }
 
+async function suppressQueuedContactGroupSiblings(input: {
+  supabase: SupabaseAdmin
+  recipient: Record<string, any> | null | undefined
+  replyIntentId?: string | null
+  contactPhone: string
+  contactName?: string | null
+  effectiveIntent: ReplyIntent
+}) {
+  const recipient = input.recipient
+  const campaignId = cleanText(recipient?.campaign_id, 80)
+  const recipientId = cleanText(recipient?.id, 80)
+  const metadata = asRecord(recipient?.metadata)
+  const shouldStop = metadata.contact_group_stop_on_reply !== false
+  const groupKey = cleanText(metadata.contact_group_key, 220)
+    || contactGroupKeyFromName(cleanText(recipient?.recipient_name || input.contactName, 180))
+
+  if (!campaignId || !recipientId || !groupKey || !shouldStop) return 0
+
+  const { data: siblings, error } = await input.supabase
+    .from('meta_whatsapp_campaign_recipients')
+    .select('id, recipient_phone, recipient_name, metadata')
+    .eq('campaign_id', campaignId)
+    .eq('status', 'queued')
+    .neq('id', recipientId)
+    .contains('metadata', { contact_group_key: groupKey })
+    .limit(500)
+
+  if (error) throw error
+
+  let updated = 0
+  for (const sibling of siblings || []) {
+    await input.supabase
+      .from('meta_whatsapp_campaign_recipients')
+      .update({
+        status: 'skipped',
+        metadata: {
+          ...(sibling.metadata || {}),
+          group_suppression: {
+            reason: 'contact_group_replied',
+            reply_intent_id: input.replyIntentId || null,
+            responder_recipient_id: recipientId,
+            responder_phone: input.contactPhone,
+            responder_name: input.contactName || recipient?.recipient_name || null,
+            intent: input.effectiveIntent,
+            reacted_at: isoNow(),
+          },
+        },
+      })
+      .eq('id', sibling.id)
+    updated += 1
+  }
+
+  if (updated > 0) {
+    await refreshMetaWhatsAppCampaignTotals(campaignId, input.supabase)
+  }
+
+  return updated
+}
+
 async function updateLeadWithAgentSignal(input: {
   supabase: SupabaseAdmin
   conversation: Record<string, any> | null
@@ -2423,6 +2495,15 @@ export async function manuallyClassifyMetaWhatsAppConversationReply(
       .eq('id', recipientId)
   }
 
+  await suppressQueuedContactGroupSiblings({
+    supabase,
+    recipient,
+    replyIntentId: intentRow?.id || null,
+    contactPhone,
+    contactName,
+    effectiveIntent: intent,
+  }).catch(() => 0)
+
   return {
     intent,
     campaignId,
@@ -2815,6 +2896,15 @@ export async function handleMetaWhatsAppReplyTriage(
       })
       .eq('id', recipientId)
   }
+
+  await suppressQueuedContactGroupSiblings({
+    supabase,
+    recipient,
+    replyIntentId: intentRow?.id || null,
+    contactPhone,
+    contactName,
+    effectiveIntent,
+  }).catch(() => 0)
 
   leadSignal = await updateLeadWithAgentSignal({
     supabase,

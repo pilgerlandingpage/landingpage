@@ -70,6 +70,72 @@ function asMetadata(value: unknown): Record<string, unknown> {
     : {}
 }
 
+function normalizeRecipientPhone(value: unknown) {
+  const digits = normalizeMetaWhatsAppPhone(value)
+  if (!digits) return ''
+  if (digits.length === 10 || digits.length === 11) return `55${digits}`
+  if (digits.startsWith('55') || digits.length > 11) return digits
+  return digits
+}
+
+function normalizeContactGroupText(value: unknown) {
+  return cleanText(value, 180)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .replace(/\s+/g, ' ')
+}
+
+function contactGroupKeyFromName(value?: string | null) {
+  const normalized = normalizeContactGroupText(value)
+  return normalized.length >= 3 ? `name:${normalized}` : ''
+}
+
+function enrichRecipientContactGroup(recipient: MetaWhatsAppRecipientInput): MetaWhatsAppRecipientInput {
+  const metadata = asMetadata(recipient.metadata)
+  const existingKey = cleanText(metadata.contact_group_key, 220)
+  const groupName = cleanText(metadata.contact_group_name || recipient.name, 180)
+  const groupKey = existingKey || contactGroupKeyFromName(groupName)
+
+  if (!groupKey) {
+    return {
+      ...recipient,
+      metadata,
+    }
+  }
+
+  return {
+    ...recipient,
+    metadata: {
+      ...metadata,
+      contact_group_key: groupKey,
+      contact_group_name: groupName || recipient.name || null,
+      contact_group_source: cleanText(metadata.contact_group_source, 80) || 'recipient_name',
+      contact_group_stop_on_reply: metadata.contact_group_stop_on_reply !== false,
+    },
+  }
+}
+
+function recipientContactGroupKey(recipient: any) {
+  return cleanText(asMetadata(recipient?.metadata).contact_group_key, 220)
+}
+
+function shouldStopContactGroupOnReply(recipient: any) {
+  const metadata = asMetadata(recipient?.metadata)
+  return Boolean(metadata.contact_group_key) && metadata.contact_group_stop_on_reply !== false
+}
+
+type ContactGroupReplySignal = {
+  replyIntentId: string | null
+  responderRecipientId: string | null
+  responderPhone: string | null
+  responderName: string | null
+  intent: string | null
+  reactedAt: string | null
+}
+
 function isLegacySyncedTemplate(template: any) {
   const name = cleanText(template?.name, 160)
   return /^sir\d+_\d+_[a-f0-9]+$/i.test(name)
@@ -375,7 +441,7 @@ function normalizeRecipients(input: CreateMetaWhatsAppCampaignInput) {
   const byPhone = new Map<string, MetaWhatsAppRecipientInput>()
 
   for (const number of input.numbers || []) {
-    const phone = normalizeMetaWhatsAppPhone(number)
+    const phone = normalizeRecipientPhone(number)
     if (!phone) continue
     byPhone.set(phone, {
       phone,
@@ -385,7 +451,7 @@ function normalizeRecipients(input: CreateMetaWhatsAppCampaignInput) {
   }
 
   for (const recipient of input.recipients || []) {
-    const phone = normalizeMetaWhatsAppPhone(recipient.phone)
+    const phone = normalizeRecipientPhone(recipient.phone)
     if (!phone) continue
     byPhone.set(phone, {
       ...recipient,
@@ -395,7 +461,7 @@ function normalizeRecipients(input: CreateMetaWhatsAppCampaignInput) {
     })
   }
 
-  return Array.from(byPhone.values())
+  return Array.from(byPhone.values()).map(enrichRecipientContactGroup)
 }
 
 async function fetchOptOutPhones(supabase: SupabaseAdmin, phones: string[]) {
@@ -944,6 +1010,75 @@ async function incrementSenderUsage(supabase: SupabaseAdmin, sender: any) {
     .eq('id', sender.id)
 }
 
+async function findContactGroupReplySignal(
+  supabase: SupabaseAdmin,
+  campaignId: string,
+  recipient: any
+): Promise<ContactGroupReplySignal | null> {
+  if (!shouldStopContactGroupOnReply(recipient)) return null
+
+  const groupKey = recipientContactGroupKey(recipient)
+  if (!groupKey) return null
+
+  const { data: groupRecipients, error: recipientsError } = await supabase
+    .from('meta_whatsapp_campaign_recipients')
+    .select('id, recipient_phone, recipient_name, metadata')
+    .eq('campaign_id', campaignId)
+    .neq('id', recipient.id)
+    .contains('metadata', { contact_group_key: groupKey })
+    .limit(200)
+
+  if (recipientsError) throw recipientsError
+  const siblingIds = (groupRecipients || []).map((row: any) => String(row.id || '')).filter(Boolean)
+  if (!siblingIds.length) return null
+
+  const { data: replyIntents, error: replyError } = await supabase
+    .from('meta_whatsapp_reply_intents')
+    .select('id, recipient_id, intent, contact_phone, contact_name, created_at')
+    .in('recipient_id', siblingIds)
+    .order('created_at', { ascending: false })
+    .limit(1)
+
+  if (replyError) throw replyError
+  const reply = replyIntents?.[0]
+  if (!reply?.id) return null
+
+  return {
+    replyIntentId: reply.id || null,
+    responderRecipientId: reply.recipient_id || null,
+    responderPhone: reply.contact_phone || null,
+    responderName: reply.contact_name || null,
+    intent: reply.intent || null,
+    reactedAt: reply.created_at || null,
+  }
+}
+
+async function markRecipientSkippedByContactGroup(
+  supabase: SupabaseAdmin,
+  recipient: any,
+  signal: ContactGroupReplySignal
+) {
+  await supabase
+    .from('meta_whatsapp_campaign_recipients')
+    .update({
+      status: 'skipped',
+      metadata: {
+        ...(recipient.metadata || {}),
+        group_suppression: {
+          reason: 'contact_group_already_replied',
+          reply_intent_id: signal.replyIntentId,
+          responder_recipient_id: signal.responderRecipientId,
+          responder_phone: signal.responderPhone,
+          responder_name: signal.responderName,
+          intent: signal.intent,
+          reacted_at: signal.reactedAt,
+          skipped_at: new Date().toISOString(),
+        },
+      },
+    })
+    .eq('id', recipient.id)
+}
+
 async function updateCampaignTotals(supabase: SupabaseAdmin, campaignId: string) {
   const statuses = ['queued', 'sending', 'sent', 'delivered', 'read', 'failed', 'skipped', 'opted_out']
   const counts = new Map<string, number>()
@@ -1041,10 +1176,26 @@ export async function processMetaWhatsAppCampaignBatch(params: {
   let sent = 0
   let failed = 0
   let skipped = 0
+  let deferred = 0
+  const attemptedGroupKeys = new Set<string>()
 
   for (const recipient of recipients) {
     try {
       const phone = normalizeMetaWhatsAppPhone(recipient.recipient_phone)
+      const groupKey = recipientContactGroupKey(recipient)
+      const groupStopsOnReply = shouldStopContactGroupOnReply(recipient)
+      const contactGroupSignal = await findContactGroupReplySignal(supabase, campaign.id, recipient)
+      if (contactGroupSignal) {
+        await markRecipientSkippedByContactGroup(supabase, recipient, contactGroupSignal)
+        skipped += 1
+        continue
+      }
+
+      if (groupStopsOnReply && groupKey && attemptedGroupKeys.has(groupKey)) {
+        deferred += 1
+        continue
+      }
+
       const { data: optOut } = await supabase
         .from('meta_whatsapp_opt_outs')
         .select('id')
@@ -1059,6 +1210,8 @@ export async function processMetaWhatsAppCampaignBatch(params: {
         skipped += 1
         continue
       }
+
+      if (groupStopsOnReply && groupKey) attemptedGroupKeys.add(groupKey)
 
       const sender = await selectSenderForRecipient(supabase, campaign, recipient, resolved.wabaId)
       if (!sender?.phone_number_id) {
@@ -1109,6 +1262,7 @@ export async function processMetaWhatsAppCampaignBatch(params: {
     sent,
     failed,
     optedOut: skipped,
+    deferred,
     hasMore: totals.queued > 0,
     totals,
   }

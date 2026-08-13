@@ -102,10 +102,83 @@ function findHeaderIndex(headers: string[], candidates: string[]) {
   return headers.findIndex(header => normalizedCandidates.has(header))
 }
 
+function normalizeImportPhone(value: unknown) {
+  const digits = normalizeMetaWhatsAppPhone(value)
+  if (!digits) return ''
+  if (digits.length === 10 || digits.length === 11) return `55${digits}`
+  if (digits.startsWith('55') || digits.length > 11) return digits
+  return digits
+}
+
+function extractPhoneCandidates(value: unknown) {
+  const raw = cleanText(value, 5000)
+  if (!raw) return []
+
+  const parts = raw
+    .split(/\s*(?:\||;|,|\r?\n)+\s*/)
+    .map(part => normalizeImportPhone(part))
+    .filter(phone => phone.length >= 10)
+
+  const phones = parts.length ? parts : [normalizeImportPhone(raw)].filter(phone => phone.length >= 10)
+  return Array.from(new Set(phones))
+}
+
+function normalizeContactGroupText(value: unknown) {
+  return cleanText(value, 180)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .replace(/\s+/g, ' ')
+}
+
+function buildContactGroup(input: { name?: string | null; document?: string | null }) {
+  const document = normalizeMetaWhatsAppPhone(input.document)
+  if (document.length >= 8) {
+    return {
+      key: `document:${document}`,
+      source: 'document',
+      name: cleanText(input.name, 160) || null,
+    }
+  }
+
+  const normalizedName = normalizeContactGroupText(input.name)
+  if (normalizedName.length >= 3) {
+    return {
+      key: `name:${normalizedName}`,
+      source: 'name',
+      name: cleanText(input.name, 160) || null,
+    }
+  }
+
+  return {
+    key: '',
+    source: '',
+    name: null,
+  }
+}
+
 function rowLooksLikeHeader(row: string[]) {
   const headers = row.map(normalizeHeader)
   return headers.some(header =>
-    ['telefone', 'phone', 'whatsapp', 'celular', 'numero', 'numerodetelefone', 'nome', 'name', 'lead', 'cliente', 'contato'].includes(header)
+    [
+      'telefone',
+      'telefones',
+      'phone',
+      'whatsapp',
+      'celular',
+      'numero',
+      'numerodetelefone',
+      'nome',
+      'name',
+      'lead',
+      'cliente',
+      'contato',
+      'proprietario',
+      'proprietaria',
+      'cpfcnpj',
+    ].includes(header)
     || /^var\d+$/.test(header)
     || /^variavel\d+$/.test(header)
     || /^\{\{\d+\}\}$/.test(header)
@@ -149,14 +222,15 @@ function contactsFromRows(rows: string[][], source: { fileName: string; sheetNam
   const dataRows = hasHeader ? normalizedRows.slice(1) : normalizedRows
 
   const phoneIndex = hasHeader
-    ? findHeaderIndex(headers, ['telefone', 'phone', 'whatsapp', 'celular', 'numero', 'numero de telefone', 'numero do telefone'])
+    ? findHeaderIndex(headers, ['telefone', 'telefones', 'phone', 'whatsapp', 'celular', 'numero', 'numero de telefone', 'numero do telefone'])
     : guessPhoneColumn(dataRows)
   const nameIndex = hasHeader
-    ? findHeaderIndex(headers, ['nome', 'name', 'lead', 'cliente', 'contato'])
+    ? findHeaderIndex(headers, ['nome', 'name', 'lead', 'cliente', 'contato', 'proprietario', 'proprietaria'])
     : (phoneIndex === 0 ? 1 : 0)
-  const emailIndex = hasHeader ? findHeaderIndex(headers, ['email', 'e-mail', 'mail']) : -1
+  const emailIndex = hasHeader ? findHeaderIndex(headers, ['email', 'emails', 'e-mail', 'mail']) : -1
   const cityIndex = hasHeader ? findHeaderIndex(headers, ['cidade', 'city', 'municipio']) : -1
-  const tagsIndex = hasHeader ? findHeaderIndex(headers, ['tags', 'tag', 'etiquetas', 'marcadores']) : -1
+  const tagsIndex = hasHeader ? findHeaderIndex(headers, ['tags', 'tag', 'etiquetas', 'marcadores', 'segmento', 'segmentos']) : -1
+  const documentIndex = hasHeader ? findHeaderIndex(headers, ['cpf_cnpj', 'cpfcnpj', 'cpf', 'cnpj', 'documento']) : -1
 
   if (phoneIndex < 0) {
     throw new Error('Nao encontrei uma coluna de telefone na lista.')
@@ -168,21 +242,18 @@ function contactsFromRows(rows: string[][], source: { fileName: string; sheetNam
   let invalidContacts = 0
 
   dataRows.forEach((row, index) => {
-    const phone = normalizeMetaWhatsAppPhone(row[phoneIndex])
-    if (phone.length < 10) {
+    const phones = extractPhoneCandidates(row[phoneIndex])
+    if (!phones.length) {
       invalidContacts += 1
       return
     }
-    if (seenPhones.has(phone)) {
-      duplicateContacts += 1
-      return
-    }
-    seenPhones.add(phone)
 
     const name = nameIndex >= 0 && nameIndex !== phoneIndex ? cleanText(row[nameIndex], 160) : ''
     const email = emailIndex >= 0 ? cleanText(row[emailIndex], 180) : ''
     const city = cityIndex >= 0 ? cleanText(row[cityIndex], 120) : ''
     const tags = tagsIndex >= 0 ? splitTags(cleanText(row[tagsIndex], 1000)) : []
+    const document = documentIndex >= 0 ? cleanText(row[documentIndex], 80) : ''
+    const contactGroup = buildContactGroup({ name, document })
     const templateVariables: Record<string, string> = {}
     const originalColumns: Record<string, string> = {}
 
@@ -197,19 +268,36 @@ function contactsFromRows(rows: string[][], source: { fileName: string; sheetNam
 
     if (name && !templateVariables['1']) templateVariables['1'] = name
 
-    contacts.push({
-      phone_e164: phone,
-      name: name || null,
-      email: email || null,
-      city: city || null,
-      tags,
-      template_variables: templateVariables,
-      metadata: {
-        source_file_name: source.fileName,
-        source_sheet_name: source.sheetName,
-        source_row: hasHeader ? index + 2 : index + 1,
-        original_columns: originalColumns,
-      },
+    phones.forEach((phone, phoneIndexInRow) => {
+      if (seenPhones.has(phone)) {
+        duplicateContacts += 1
+        return
+      }
+      seenPhones.add(phone)
+
+      contacts.push({
+        phone_e164: phone,
+        name: name || null,
+        email: email || null,
+        city: city || null,
+        tags,
+        template_variables: templateVariables,
+        metadata: {
+          source_file_name: source.fileName,
+          source_sheet_name: source.sheetName,
+          source_row: hasHeader ? index + 2 : index + 1,
+          source_phone_index: phoneIndexInRow + 1,
+          source_phone_count: phones.length,
+          original_phone_cell: cleanText(row[phoneIndex], 1000),
+          original_columns: originalColumns,
+          ...(contactGroup.key ? {
+            contact_group_key: contactGroup.key,
+            contact_group_name: contactGroup.name || name || null,
+            contact_group_source: contactGroup.source,
+            contact_group_stop_on_reply: true,
+          } : {}),
+        },
+      })
     })
   })
 

@@ -1159,12 +1159,20 @@ export default function CampaignsPage() {
 
     const parseMetaRecipientDrafts = (): MetaRecipientDraft[] => {
         const recipients: MetaRecipientDraft[] = []
+        const selectedContactsByPhone = new Map(
+            selectedContactListContacts.map(contact => [
+                String(contact.phone_e164 || '').replace(/\D/g, '').slice(0, 20),
+                contact,
+            ])
+        )
 
         numbersInput.split(/\n+/).forEach((line, lineIndex) => {
             const columns = splitAudienceRow(line).map(column => column.trim())
             const phone = (columns[0] || '').replace(/\D/g, '').slice(0, 20)
             if (!phone) return
 
+            const savedContact = selectedContactsByPhone.get(phone) || null
+            const savedContactMetadata = asRecord(savedContact?.metadata)
             const name = columns[1] || ''
             const bodyValues: Record<string, string> = { ...metaBodyParameterValues }
             selectedBodyVariables.forEach((variable, variableIndex) => {
@@ -1195,8 +1203,11 @@ export default function CampaignsPage() {
                 name: name || undefined,
                 templateParameters: buildMetaTemplateParameters(bodyValues, rowHeaderMediaUrl),
                 metadata: {
+                    ...savedContactMetadata,
                     source_line: lineIndex + 1,
                     personalized_campaign_row: true,
+                    ...(selectedContactListId ? { contact_list_id: selectedContactListId } : {}),
+                    ...(savedContact?.id ? { contact_list_contact_id: savedContact.id } : {}),
                     ...(rowHeaderMediaUrl ? { header_media_url: rowHeaderMediaUrl } : {}),
                 },
                 missingVariables,
