@@ -1449,7 +1449,54 @@ export default function CampaignsPage() {
     if (loading) return <AdminLoadingState minHeight="400px" />
 
     return (
-        <div>
+        <div className="meta-campaigns-page">
+            <style>{`
+                .meta-campaigns-workspace {
+                    display: grid;
+                    grid-template-columns: minmax(700px, 1fr) minmax(440px, 520px);
+                    min-height: 470px;
+                }
+
+                .meta-campaign-table-pane {
+                    min-width: 0;
+                    border-right: 1px solid var(--border);
+                    overflow-x: auto;
+                }
+
+                .meta-campaign-detail-aside {
+                    min-width: 0;
+                    background: rgba(255,255,255,0.02);
+                    display: grid;
+                    grid-template-rows: auto 1fr;
+                }
+
+                .meta-campaign-detail-text {
+                    overflow-wrap: anywhere;
+                    word-break: break-word;
+                    white-space: normal;
+                }
+
+                .meta-campaigns-table-empty {
+                    min-width: 980px;
+                }
+
+                @media (max-width: 1500px) {
+                    .meta-campaigns-workspace {
+                        grid-template-columns: minmax(0, 1fr);
+                    }
+
+                    .meta-campaign-table-pane {
+                        border-right: 0;
+                        border-bottom: 1px solid var(--border);
+                    }
+                }
+
+                @media (max-width: 900px) {
+                    .meta-campaigns-table-empty {
+                        min-width: 880px;
+                    }
+                }
+            `}</style>
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
                 <div>
@@ -2957,20 +3004,12 @@ function MetaOfficialCampaignPanel({
                     )}
                 </div>
 
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'minmax(0, 1fr) minmax(360px, 430px)',
-                    minHeight: '470px',
-                }}>
-                    <div style={{
-                        minWidth: 0,
-                        borderRight: '1px solid var(--border)',
-                        overflowX: 'auto',
-                    }}>
+                <div className="meta-campaigns-workspace">
+                    <div className="meta-campaign-table-pane">
                         <div style={{
-                            minWidth: '880px',
+                            minWidth: '980px',
                             display: 'grid',
-                            gridTemplateColumns: '92px minmax(250px, 1.35fr) 125px 105px 105px 105px 105px 118px',
+                            gridTemplateColumns: '90px minmax(280px, 1.45fr) 116px 96px 96px 86px 86px 132px',
                             gap: '0',
                             padding: '9px 12px',
                             borderBottom: '1px solid var(--border)',
@@ -2992,20 +3031,20 @@ function MetaOfficialCampaignPanel({
                         </div>
 
                         {loading ? (
-                            <div style={{ minWidth: '880px', padding: '34px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                            <div className="meta-campaigns-table-empty" style={{ padding: '34px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                                 <Loader2 size={18} className="spin" /> Carregando campanhas Meta...
                             </div>
                         ) : campaigns.length === 0 ? (
-                            <div style={{ minWidth: '880px', textAlign: 'center', padding: '46px', color: 'var(--text-muted)' }}>
+                            <div className="meta-campaigns-table-empty" style={{ textAlign: 'center', padding: '46px', color: 'var(--text-muted)' }}>
                                 <Send size={32} style={{ opacity: 0.3, marginBottom: '8px' }} />
                                 <p style={{ margin: 0 }}>Nenhuma campanha oficial de WhatsApp encontrada.</p>
                             </div>
                         ) : filteredCampaigns.length === 0 ? (
-                            <div style={{ minWidth: '880px', textAlign: 'center', padding: '38px', color: 'var(--text-muted)' }}>
+                            <div className="meta-campaigns-table-empty" style={{ textAlign: 'center', padding: '38px', color: 'var(--text-muted)' }}>
                                 Nenhuma campanha encontrada para a busca atual.
                             </div>
                         ) : (
-                            <div style={{ minWidth: '880px' }}>
+                            <div style={{ minWidth: '980px' }}>
                                 {filteredCampaigns.map(campaign => (
                                     <MetaCampaignTableRow
                                         key={campaign.id}
@@ -3107,7 +3146,7 @@ function MetaCampaignTableRow({
             }}
             style={{
                 display: 'grid',
-                gridTemplateColumns: '92px minmax(250px, 1.35fr) 125px 105px 105px 105px 105px 118px',
+                gridTemplateColumns: '90px minmax(280px, 1.45fr) 116px 96px 96px 86px 86px 132px',
                 gap: '0',
                 alignItems: 'center',
                 padding: '10px 12px',
@@ -3305,12 +3344,7 @@ function MetaSelectedCampaignAside({
     const canRetryFailed = failedTotal > 0 && !['queued', 'sending', 'scheduled', 'preparing', 'cancelled'].includes(detailCampaign.status)
 
     return (
-        <aside style={{
-            minWidth: 0,
-            background: 'rgba(255,255,255,0.02)',
-            display: 'grid',
-            gridTemplateRows: 'auto 1fr',
-        }}>
+        <aside className="meta-campaign-detail-aside">
             <div style={{ padding: '18px 18px 14px', borderBottom: '1px solid var(--border)', display: 'grid', gap: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
                     <span style={{
@@ -3328,10 +3362,10 @@ function MetaSelectedCampaignAside({
                         {(campaign.name || 'M').slice(0, 1).toUpperCase()}
                     </span>
                     <div style={{ minWidth: 0, flex: 1 }}>
-                        <strong style={{ color: 'var(--text-primary)', fontSize: '0.92rem', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <strong className="meta-campaign-detail-text" style={{ color: 'var(--text-primary)', fontSize: '0.92rem', display: 'block', lineHeight: 1.25 }}>
                             {campaign.name || 'Campanha Meta'}
                         </strong>
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem', display: 'block', marginTop: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <span className="meta-campaign-detail-text" style={{ color: 'var(--text-muted)', fontSize: '0.72rem', display: 'block', marginTop: '3px', lineHeight: 1.35 }}>
                             {campaign.template_name || '-'} | {sender?.display_name || sender?.phone_number || 'Pool automatico'}
                         </span>
                     </div>
@@ -3846,8 +3880,8 @@ function MetaCampaignDetailPanel({
                                 </span>
                                 <span style={{ color: '#ef4444', fontSize: '0.72rem', fontWeight: 800 }}>{error.message}</span>
                             </div>
-                            <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>{error.hint}</span>
-                            {error.detail && <span style={{ color: 'var(--text-muted)', fontSize: '0.68rem' }}>{error.detail}</span>}
+                                <span className="meta-campaign-detail-text" style={{ color: 'var(--text-muted)', fontSize: '0.72rem', lineHeight: 1.35 }}>{error.hint}</span>
+                            {error.detail && <span className="meta-campaign-detail-text" style={{ color: 'var(--text-muted)', fontSize: '0.68rem', lineHeight: 1.35 }}>{error.detail}</span>}
                         </div>
                     ))}
                 </div>
@@ -4032,7 +4066,7 @@ function MetaDetailLine({ label, value }: { label: string; value: string }) {
     return (
         <div style={{ display: 'grid', gap: '2px' }}>
             <span style={{ color: 'var(--text-muted)', fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</span>
-            <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', overflow: 'hidden', textOverflow: 'ellipsis' }}>{value || '-'}</span>
+            <span className="meta-campaign-detail-text" style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', lineHeight: 1.35 }}>{value || '-'}</span>
         </div>
     )
 }
