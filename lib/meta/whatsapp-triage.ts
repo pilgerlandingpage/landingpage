@@ -1770,6 +1770,32 @@ async function upsertOptOut(input: {
     }, { onConflict: 'phone_e164' })
 }
 
+function formatAdminPhone(value: string) {
+  const digits = normalizeMetaWhatsAppPhone(value)
+  if (!digits) return '-'
+  if (digits.startsWith('55') && digits.length >= 12) {
+    const local = digits.slice(2)
+    const ddd = local.slice(0, 2)
+    const number = local.slice(2)
+    if (number.length === 9) return `+55 ${ddd} ${number.slice(0, 5)}-${number.slice(5)}`
+    if (number.length === 8) return `+55 ${ddd} ${number.slice(0, 4)}-${number.slice(4)}`
+  }
+  return `+${digits}`
+}
+
+function formatAdminTimestamp(value?: string | null) {
+  const date = value ? new Date(value) : new Date()
+  if (Number.isNaN(date.getTime())) return '-'
+  return `${new Intl.DateTimeFormat('pt-BR', {
+    timeZone: 'America/Sao_Paulo',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date)} (BRT)`
+}
+
 function buildInternalNotification(input: {
   contactPhone: string
   leadId?: string | null
@@ -1778,6 +1804,7 @@ function buildInternalNotification(input: {
   campaignName?: string | null
   templateName?: string | null
   responseText?: string | null
+  respondedAt?: string | null
   leadStage?: string | null
   summary?: string | null
   agentReply?: string | null
@@ -1785,29 +1812,33 @@ function buildInternalNotification(input: {
 }) {
   const name = cleanText(input.contactName || input.recipientName, 160) || 'Nao informado'
   const response = cleanText(input.responseText, 500) || '-'
-  const stage = cleanText(input.leadStage, 100)
-  const summary = cleanText(input.summary, 700)
+  const campaign = cleanText(input.campaignName, 160) || 'Sem campanha vinculada ao painel'
+  const template = cleanText(input.templateName, 160) || 'Sem template vinculado'
   const agentReply = cleanText(input.agentReply, 700)
-  const reason = cleanText(input.reason, 240)
   const leadId = cleanText(input.leadId, 80)
+  const phone = formatAdminPhone(input.contactPhone)
+  const whatsappLink = `https://wa.me/${normalizeMetaWhatsAppPhone(input.contactPhone)}`
+  const respondedAt = formatAdminTimestamp(input.respondedAt)
 
   return [
-    'Novo lead interessado para distribuir',
+    'NOVO LEAD INTERESSADO',
+    'Status: pronto para distribuir',
     '',
-    'Acao: lead registrado no CRM. Distribua para um especialista chamar agora.',
+    'LEAD',
     `Nome: ${name}`,
-    `Telefone: +${input.contactPhone}`,
-    `WhatsApp: https://wa.me/${input.contactPhone}`,
-    leadId ? `Lead CRM: ${leadId}` : null,
-    `Campanha: ${cleanText(input.campaignName, 160) || '-'}`,
-    `Template: ${cleanText(input.templateName, 160) || '-'}`,
-    `Resposta: ${response}`,
-    stage ? `Etapa IA: ${stage}` : null,
-    summary ? `Resumo IA: ${summary}` : null,
-    agentReply ? `Resposta enviada: ${agentReply}` : null,
-    reason ? `Motivo: ${reason}` : null,
+    `Celular: ${phone}`,
+    `WhatsApp: ${whatsappLink}`,
+    leadId ? `CRM: ${leadId}` : null,
     '',
-    'Origem: Campanhas Meta WhatsApp',
+    'ORIGEM',
+    `Campanha: ${campaign}`,
+    `Template: ${template}`,
+    `Hora da resposta: ${respondedAt}`,
+    `Resposta: ${response}`,
+    '',
+    'PROXIMO PASSO',
+    'Enviar este lead para um especialista chamar agora.',
+    agentReply ? `Mensagem enviada ao lead: ${agentReply}` : null,
   ].filter(Boolean).join('\n')
 }
 
@@ -2282,6 +2313,7 @@ export async function manuallyClassifyMetaWhatsAppConversationReply(
             campaignName: campaign?.name || null,
             templateName: campaign?.template_name || null,
             responseText: rawText,
+            respondedAt: cleanText(message?.received_at || message?.created_at, 80) || now,
             reason: note || 'Lead marcado manualmente como interessado no chat.',
           }),
           phoneNumberId: phoneNumberId || undefined,
@@ -2692,6 +2724,7 @@ export async function handleMetaWhatsAppReplyTriage(
             campaignName: campaign?.name || null,
             templateName: campaign?.template_name || null,
             responseText: rawText,
+            respondedAt: receivedAt,
             leadStage: agentResponse?.leadStage || null,
             summary: agentResponse?.summary || null,
             agentReply: replyText,
