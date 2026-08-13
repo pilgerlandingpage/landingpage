@@ -210,6 +210,12 @@ interface MetaCampaignAnalyticsBucket {
 }
 
 interface MetaCampaignAnalytics {
+    portfolioUsage?: {
+        daily_limit: number
+        daily_sent_count: number
+        remaining: number
+        usageRate: number
+    }
     rates: {
         acceptedRate: number
         deliveryRate: number
@@ -378,6 +384,17 @@ function metaSenderOptionLabel(sender: MetaSender) {
     if (String(sender.meta_status || '').toUpperCase() !== 'CONNECTED') return `${base} - Meta ${sender.meta_status || 'sem status'}`
     if (usage.limit > 0 && usage.sent >= usage.limit) return `${base} - limite esgotado`
     return `${base} - ${usage.remaining} disponiveis`
+}
+
+function metaPortfolioUsageFromSenders(senders: MetaSender[]) {
+    const limit = Math.max(...senders.map(sender => asFiniteNumber(sender.daily_limit)), 0)
+    const sent = senders.reduce((total, sender) => total + asFiniteNumber(sender.daily_sent_count), 0)
+    return {
+        limit,
+        sent,
+        remaining: Math.max(limit - sent, 0),
+        usageLabel: `${sent}/${limit || 'sem limite'}`,
+    }
 }
 
 function getTemplateComponents(template?: MetaTemplate | null): TemplateComponentRecord[] {
@@ -1291,6 +1308,14 @@ export default function CampaignsPage() {
         }
 
         if (sendProvider === 'meta_whatsapp') {
+            if (!hasMetaPortfolioCapacity) {
+                setFeedback({ type: 'error', text: `O portfolio Meta atingiu o limite diario compartilhado (${metaPortfolioUsage.usageLabel}). Aguarde o reset da janela de 24h ou agende para depois.` })
+                return
+            }
+            if (!scheduleDate && numbers.length > metaPortfolioUsage.remaining) {
+                setFeedback({ type: 'error', text: `A lista tem ${numbers.length} contatos, mas restam ${metaPortfolioUsage.remaining} conversas novas no limite compartilhado do portfolio Meta hoje. Divida a lista ou agende para depois.` })
+                return
+            }
             if (readyMetaSenders.length === 0) {
                 setFeedback({ type: 'error', text: 'Todos os numeros Meta ativos atingiram o limite diario ou nao estao prontos. Aguarde o reset diario ou ative outro numero conectado.' })
                 return
@@ -1452,6 +1477,8 @@ export default function CampaignsPage() {
     const currentInstance = instances.find(i => i.id === selectedInstance)
     const approvedMetaTemplates = metaTemplates.filter(template => String(template.status || '').toUpperCase() === 'APPROVED')
     const activeMetaSenders = metaSenders.filter(sender => sender.local_status === 'active')
+    const metaPortfolioUsage = metaPortfolioUsageFromSenders(activeMetaSenders)
+    const hasMetaPortfolioCapacity = metaPortfolioUsage.limit > 0 && metaPortfolioUsage.remaining > 0
     const readyMetaSenders = activeMetaSenders.filter(isMetaSenderAvailable)
     const selectedMetaSender = activeMetaSenders.find(sender => sender.id === selectedMetaSenderId) || null
     const selectedContactList = metaContactLists.find(list => list.id === selectedContactListId) || null
@@ -1471,14 +1498,16 @@ export default function CampaignsPage() {
     const previewHeaderText = replaceTemplateVariables(selectedHeaderText, { 1: metaHeaderParameterValue }, 'header')
 
     useEffect(() => {
-        if (selectedMetaSenderId && selectedMetaSender && !isMetaSenderAvailable(selectedMetaSender)) {
+        if (selectedMetaSenderId && selectedMetaSender && (!isMetaSenderAvailable(selectedMetaSender) || !hasMetaPortfolioCapacity)) {
             setSelectedMetaSenderId('')
             setFeedback({
                 type: 'error',
-                text: `O numero selecionado atingiu o limite diario (${metaSenderUsage(selectedMetaSender).usageLabel}). Alterei para Pool automatico por capacidade.`,
+                text: hasMetaPortfolioCapacity
+                    ? `O numero selecionado atingiu o limite diario (${metaSenderUsage(selectedMetaSender).usageLabel}). Alterei para Pool automatico por capacidade.`
+                    : `O portfolio Meta atingiu o limite diario compartilhado (${metaPortfolioUsage.usageLabel}).`,
             })
         }
-    }, [selectedMetaSenderId, selectedMetaSender])
+    }, [selectedMetaSenderId, selectedMetaSender, hasMetaPortfolioCapacity, metaPortfolioUsage.usageLabel])
     const previewBodyText = replaceTemplateVariables(selectedBodyText, metaBodyParameterValues, 'exemplo')
     const parsedMetaRecipientDrafts = sendProvider === 'meta_whatsapp' && metaAudiencePersonalized ? parseMetaRecipientDrafts() : []
     const parsedNumbers = sendProvider === 'meta_whatsapp' && metaAudiencePersonalized
@@ -1794,21 +1823,24 @@ export default function CampaignsPage() {
                                             color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box',
                                         }}
                                         >
-                                        <option value="">Pool automatico por capacidade ({readyMetaSenders.length} disponivel(is))</option>
+                                        <option value="">Pool automatico por capacidade ({metaPortfolioUsage.remaining} restantes no portfolio)</option>
                                         {activeMetaSenders.map(sender => (
-                                            <option key={sender.id} value={sender.id} disabled={!isMetaSenderAvailable(sender)}>
+                                            <option key={sender.id} value={sender.id} disabled={!isMetaSenderAvailable(sender) || !hasMetaPortfolioCapacity}>
                                                 {metaSenderOptionLabel(sender)}
                                             </option>
                                         ))}
                                     </select>
+                                    <div style={{ marginTop: '8px', color: hasMetaPortfolioCapacity ? '#16a34a' : '#ef4444', fontSize: '0.78rem', fontWeight: 700 }}>
+                                        Limite compartilhado do portfolio: {metaPortfolioUsage.usageLabel}; restam {metaPortfolioUsage.remaining}.
+                                    </div>
                                     {selectedMetaSender && !isMetaSenderAvailable(selectedMetaSender) && (
                                         <div style={{ marginTop: '8px', color: '#ef4444', fontSize: '0.78rem', fontWeight: 700 }}>
                                             Este numero atingiu o limite diario. Use o pool automatico ou outro numero conectado.
                                         </div>
                                     )}
-                                    {!selectedMetaSenderId && readyMetaSenders.length > 0 && (
+                                    {!selectedMetaSenderId && readyMetaSenders.length > 0 && hasMetaPortfolioCapacity && (
                                         <div style={{ marginTop: '8px', color: '#16a34a', fontSize: '0.78rem', fontWeight: 700 }}>
-                                            Pool automatico vai usar o numero com capacidade disponivel.
+                                            Pool automatico vai usar um numero conectado, respeitando o limite compartilhado.
                                         </div>
                                     )}
                                 </div>

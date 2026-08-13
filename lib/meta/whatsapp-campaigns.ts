@@ -194,6 +194,24 @@ function senderDailySentCount(sender: any) {
   return isSenderUsageExpired(sender) ? 0 : asNumber(sender?.daily_sent_count)
 }
 
+function portfolioDailyLimit(senders: any[]) {
+  return Math.max(...senders.map(sender => asNumber(sender?.daily_limit)), 0)
+}
+
+function portfolioDailySentCount(senders: any[]) {
+  return senders.reduce((total, sender) => total + senderDailySentCount(sender), 0)
+}
+
+function portfolioDailyUsage(senders: any[]) {
+  const limit = portfolioDailyLimit(senders)
+  const sent = portfolioDailySentCount(senders)
+  return {
+    limit,
+    sent,
+    remaining: Math.max(limit - sent, 0),
+  }
+}
+
 async function resetExpiredSenderUsage(supabase: SupabaseAdmin, senders: any[]) {
   const now = new Date()
   const expired = senders.filter(sender => isSenderUsageExpired(sender, now))
@@ -228,6 +246,13 @@ function describeSenderAvailability(sender: any) {
   if (dailyLimit <= 0) return `${name}: limite diario nao configurado.`
   if (dailyLimit > 0 && dailySent >= dailyLimit) return `${name}: limite diario esgotado (${dailySent}/${dailyLimit}).`
   return `${name}: disponivel (${dailySent}/${dailyLimit || 'sem limite'}).`
+}
+
+function describePortfolioAvailability(senders: any[]) {
+  const usage = portfolioDailyUsage(senders)
+  if (usage.limit <= 0) return 'Limite diario do portfolio Meta nao configurado.'
+  if (usage.remaining <= 0) return `Limite diario do portfolio Meta esgotado (${usage.sent}/${usage.limit}).`
+  return `Portfolio Meta disponivel (${usage.sent}/${usage.limit}, restam ${usage.remaining}).`
 }
 
 function percentage(part: number, total: number) {
@@ -440,8 +465,15 @@ function buildMetaWhatsAppAnalytics(campaigns: any[], senders: any[], recipients
     readRate: percentage(template.read, template.delivered || template.accepted || template.recipients),
     failureRate: percentage(template.failed, template.recipients),
   }))
+  const portfolioUsage = portfolioDailyUsage(senders || [])
 
   return {
+    portfolioUsage: {
+      daily_limit: portfolioUsage.limit,
+      daily_sent_count: portfolioUsage.sent,
+      remaining: portfolioUsage.remaining,
+      usageRate: percentage(portfolioUsage.sent, portfolioUsage.limit),
+    },
     rates: {
       acceptedRate: percentage(summary.accepted, summary.recipients),
       deliveryRate: percentage(summary.delivered, summary.accepted || summary.recipients),
@@ -596,6 +628,7 @@ export async function createMetaWhatsAppCampaign(input: CreateMetaWhatsAppCampai
 
   if (sendersError) throw sendersError
   const preparedSenders = await resetExpiredSenderUsage(supabase, senders || [])
+  const portfolioUsage = portfolioDailyUsage(preparedSenders)
   const selectedSender = input.defaultSenderId
     ? preparedSenders.find((sender: any) => sender.id === input.defaultSenderId)
     : null
@@ -603,6 +636,10 @@ export async function createMetaWhatsAppCampaign(input: CreateMetaWhatsAppCampai
   const hasReadySender = input.defaultSenderId
     ? Boolean(selectedSender && isMetaSenderReady(selectedSender))
     : readyPoolSenders.length > 0
+
+  if (portfolioUsage.remaining <= 0) {
+    throw new Error(`${describePortfolioAvailability(preparedSenders)} Aguarde o reset da janela de 24h ou crie a campanha agendada para depois.`)
+  }
 
   if (!hasReadySender) {
     if (input.defaultSenderId) {
@@ -1035,26 +1072,26 @@ function bodyParametersFromTemplateParameters(value: unknown) {
 }
 
 async function selectSenderForRecipient(supabase: SupabaseAdmin, campaign: any, recipient: any, wabaId: string) {
+  const { data: portfolioSenders, error: portfolioSendersError } = await supabase
+    .from('meta_whatsapp_senders')
+    .select('*')
+    .eq('waba_id', wabaId)
+    .eq('local_status', 'active')
+
+  if (portfolioSendersError) throw portfolioSendersError
+  const preparedPortfolioSenders = await resetExpiredSenderUsage(supabase, portfolioSenders || [])
+  const usage = portfolioDailyUsage(preparedPortfolioSenders)
+  if (usage.remaining <= 0) {
+    throw new Error(`${describePortfolioAvailability(preparedPortfolioSenders)} Nenhuma nova conversa iniciada pelo negocio pode ser aberta agora.`)
+  }
+
   if (recipient.sender_id) {
-    const { data } = await supabase
-      .from('meta_whatsapp_senders')
-      .select('*')
-      .eq('id', recipient.sender_id)
-      .eq('waba_id', wabaId)
-      .maybeSingle()
-    const [sender] = await resetExpiredSenderUsage(supabase, data ? [data] : [])
+    const sender = preparedPortfolioSenders.find((item: any) => item.id === recipient.sender_id)
     if (sender && isMetaSenderReady(sender)) return sender
   }
 
   if (campaign.default_sender_id) {
-    const { data } = await supabase
-      .from('meta_whatsapp_senders')
-      .select('*')
-      .eq('id', campaign.default_sender_id)
-      .eq('waba_id', wabaId)
-      .eq('local_status', 'active')
-      .maybeSingle()
-    const [sender] = await resetExpiredSenderUsage(supabase, data ? [data] : [])
+    const sender = preparedPortfolioSenders.find((item: any) => item.id === campaign.default_sender_id)
     if (sender && isMetaSenderReady(sender)) return sender
   }
 
@@ -1064,20 +1101,14 @@ async function selectSenderForRecipient(supabase: SupabaseAdmin, campaign: any, 
       ? ['followup', 'campaign', 'global']
       : ['campaign', 'global']
 
-  const { data, error } = await supabase
-    .from('meta_whatsapp_senders')
-    .select('*')
-    .eq('waba_id', wabaId)
-    .eq('local_status', 'active')
-    .in('use_case', preferredUseCase)
-    .order('daily_sent_count', { ascending: true })
-    .order('weight', { ascending: false })
-    .limit(20)
-
-  if (error) throw error
-
-  const preparedSenders = await resetExpiredSenderUsage(supabase, data || [])
-  return preparedSenders.find(isMetaSenderReady) || null
+  return preparedPortfolioSenders
+    .filter((sender: any) => preferredUseCase.includes(cleanText(sender.use_case, 40)))
+    .sort((a: any, b: any) => {
+      const sentDiff = senderDailySentCount(a) - senderDailySentCount(b)
+      if (sentDiff !== 0) return sentDiff
+      return asNumber(b.weight) - asNumber(a.weight)
+    })
+    .find(isMetaSenderReady) || null
 }
 
 async function markRecipientFailed(supabase: SupabaseAdmin, recipientId: string, error: unknown) {
