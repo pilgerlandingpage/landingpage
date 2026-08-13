@@ -363,7 +363,14 @@ function getTemplateButtons(template?: MetaTemplate | null): TemplateButtonRecor
 function getTemplateHeaderMediaUrl(template?: MetaTemplate | null) {
     const metadata = asRecord(template?.metadata)
     const panelHeaderMedia = asRecord(metadata.panel_header_media)
-    return textValue(panelHeaderMedia.url) || textValue(metadata.header_media_url)
+    const savedUrl = textValue(panelHeaderMedia.url) || textValue(metadata.header_media_url)
+    if (savedUrl) return savedUrl
+
+    const header = findTemplateComponent(template, 'HEADER')
+    const example = asRecord(header?.example)
+    const headerHandles = Array.isArray(example.header_handle) ? example.header_handle : []
+    const metaSampleUrl = textValue(headerHandles[0])
+    return metaSampleUrl.startsWith('https://') ? metaSampleUrl : ''
 }
 
 function extractTemplateVariables(text: string) {

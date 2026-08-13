@@ -133,10 +133,25 @@ export interface MetaWhatsAppConnectionTest {
   warnings: string[]
 }
 
+export interface MetaWhatsAppErrorInfo {
+  message: string
+  status?: number
+  code?: string | number
+  subcode?: string | number
+  type?: string
+  fbtraceId?: string
+  details?: string
+  userTitle?: string
+  userMessage?: string
+}
+
 class MetaWhatsAppApiError extends Error {
   status: number
   code?: string | number
   type?: string
+  subcode?: string | number
+  fbtraceId?: string
+  payload?: unknown
 
   constructor(message: string, status: number, payload?: any) {
     super(message)
@@ -144,6 +159,29 @@ class MetaWhatsAppApiError extends Error {
     this.status = status
     this.code = payload?.error?.code
     this.type = payload?.error?.type
+    this.subcode = payload?.error?.error_subcode
+    this.fbtraceId = payload?.error?.fbtrace_id
+    this.payload = payload
+  }
+}
+
+export function getMetaWhatsAppErrorInfo(error: unknown): MetaWhatsAppErrorInfo {
+  if (error instanceof MetaWhatsAppApiError) {
+    return {
+      message: error.message,
+      status: error.status,
+      code: error.code,
+      subcode: error.subcode,
+      type: error.type,
+      fbtraceId: error.fbtraceId,
+      details: cleanText((error.payload as any)?.error?.error_data?.details, 1000),
+      userTitle: cleanText((error.payload as any)?.error?.error_user_title, 300),
+      userMessage: cleanText((error.payload as any)?.error?.error_user_msg, 1000),
+    }
+  }
+
+  return {
+    message: error instanceof Error ? error.message : String(error || ''),
   }
 }
 
@@ -396,12 +434,85 @@ export function normalizeMetaWhatsAppTemplateName(value: unknown) {
     .slice(0, 512)
 }
 
+function extractPositionalTemplateVariables(text: unknown) {
+  const source = String(text || '')
+  const matches = Array.from(source.matchAll(/{{\s*(\d+)\s*}}/g))
+  return Array.from(new Set(matches.map(match => Number(match[1]))))
+    .filter(Number.isFinite)
+    .sort((a, b) => a - b)
+}
+
+function assertSequentialVariables(label: string, variables: number[]) {
+  for (let index = 0; index < variables.length; index += 1) {
+    if (variables[index] !== index + 1) {
+      throw new Error(`${label} deve usar variaveis sequenciais a partir de {{1}}.`)
+    }
+  }
+}
+
+function firstTemplateExampleList(value: unknown) {
+  if (!Array.isArray(value)) return []
+  return Array.isArray(value[0]) ? value[0] : value
+}
+
 function cleanTemplateComponents(value: unknown): unknown[] {
   if (!Array.isArray(value)) return []
   return value
     .filter(component => typeof component === 'object' && component !== null && !Array.isArray(component))
     .map(component => component as Record<string, unknown>)
     .filter(component => cleanText(component.type, 30))
+}
+
+function validateMetaWhatsAppTemplateComponents(components: unknown[]) {
+  for (const componentValue of components) {
+    const component = asMetadata(componentValue)
+    const type = cleanText(component.type, 30).toUpperCase()
+
+    if (type === 'HEADER') {
+      const format = cleanText(component.format, 30).toUpperCase()
+      const example = asMetadata(component.example)
+
+      if (format === 'TEXT') {
+        const variables = extractPositionalTemplateVariables(component.text)
+        assertSequentialVariables('Header do template', variables)
+        if (variables.length > 1) throw new Error('Header de texto aceita somente uma variavel.')
+        if (variables.length && !firstTemplateExampleList(example.header_text).some(value => cleanText(value, 5000))) {
+          throw new Error('Informe exemplo para a variavel do header.')
+        }
+      }
+
+      if (['IMAGE', 'VIDEO', 'DOCUMENT'].includes(format)) {
+        const hasHandle = firstTemplateExampleList(example.header_handle).some(value => cleanText(value, 5000))
+        if (!hasHandle) throw new Error('Header com midia precisa do handle de exemplo gerado pela Meta.')
+      }
+    }
+
+    if (type === 'BODY') {
+      const variables = extractPositionalTemplateVariables(component.text)
+      assertSequentialVariables('Corpo do template', variables)
+      if (variables.length) {
+        const examples = firstTemplateExampleList(asMetadata(component.example).body_text)
+        if (examples.length < variables.length) {
+          throw new Error(`Informe ${variables.length} exemplo(s) para as variaveis do corpo.`)
+        }
+      }
+    }
+
+    if (type === 'BUTTONS') {
+      const buttons = Array.isArray(component.buttons) ? component.buttons : []
+      for (const buttonValue of buttons) {
+        const button = asMetadata(buttonValue)
+        const buttonType = cleanText(button.type, 30).toUpperCase()
+        if (buttonType === 'URL') {
+          const variables = extractPositionalTemplateVariables(button.url)
+          assertSequentialVariables('URL do botao', variables)
+          if (variables.length && !firstTemplateExampleList(button.example).some(value => cleanText(value, 2000))) {
+            throw new Error(`Informe exemplo para a URL dinamica do botao ${cleanText(button.text, 80) || 'URL'}.`)
+          }
+        }
+      }
+    }
+  }
 }
 
 export async function createMetaWhatsAppTemplate(input: MetaWhatsAppTemplateMutationInput, config: ConfigMap = {}) {
@@ -414,6 +525,7 @@ export async function createMetaWhatsAppTemplate(input: MetaWhatsAppTemplateMuta
   if (!components.some(component => cleanText((component as Record<string, unknown>).type).toUpperCase() === 'BODY')) {
     throw new Error('Template precisa ter componente BODY.')
   }
+  validateMetaWhatsAppTemplateComponents(components)
 
   return graphRequest<{ id?: string; status?: string; category?: string }>(resolved, `/${resolved.wabaId}/message_templates`, {
     method: 'POST',
@@ -421,6 +533,7 @@ export async function createMetaWhatsAppTemplate(input: MetaWhatsAppTemplateMuta
       name,
       language: normalizeLanguage(input.language || resolved.defaultLanguage),
       category: normalizeTemplateCategory(input.category),
+      parameter_format: 'positional',
       components,
       ...(input.messageSendTtlSeconds ? { message_send_ttl_seconds: input.messageSendTtlSeconds } : {}),
     },
@@ -434,6 +547,7 @@ export async function editMetaWhatsAppTemplate(input: MetaWhatsAppTemplateMutati
   const templateId = cleanText(input.templateId, 120)
   const components = cleanTemplateComponents(input.components)
   if (!templateId) throw new Error('ID Meta do template obrigatorio para editar.')
+  if (components.length) validateMetaWhatsAppTemplateComponents(components)
 
   const body: Record<string, unknown> = {
     ...(input.category ? { category: normalizeTemplateCategory(input.category) } : {}),
@@ -676,7 +790,7 @@ export async function syncMetaWhatsAppAssets(config: ConfigMap = {}, supabase = 
   if (templates.length) {
     const { data: existingTemplates, error: existingTemplatesError } = await supabase
       .from('meta_whatsapp_templates')
-      .select('waba_id, name, language, metadata')
+      .select('waba_id, name, language, status, metadata')
       .eq('waba_id', resolved.wabaId)
 
     if (existingTemplatesError) throw existingTemplatesError
@@ -689,10 +803,13 @@ export async function syncMetaWhatsAppAssets(config: ConfigMap = {}, supabase = 
       )
     }
 
+    const syncedTemplateKeys = new Set<string>()
     const templateRows = templates.map(template => ({
       ...(() => {
         const language = template.language || resolved.defaultLanguage
-        const existingMetadata = existingMetadataByTemplate.get(`${resolved.wabaId}:${template.name}:${language}`) || {}
+        const templateKey = `${resolved.wabaId}:${template.name}:${language}`
+        const existingMetadata = existingMetadataByTemplate.get(templateKey) || {}
+        syncedTemplateKeys.add(templateKey)
         return {
           waba_id: resolved.wabaId,
           template_external_id: template.id || null,
@@ -717,6 +834,36 @@ export async function syncMetaWhatsAppAssets(config: ConfigMap = {}, supabase = 
       .from('meta_whatsapp_templates')
       .upsert(templateRows, { onConflict: 'waba_id,name,language' })
     if (error) throw error
+
+    const staleTemplates = ((existingTemplates || []) as Array<{
+      waba_id: string
+      name: string
+      language: string
+      status?: string | null
+      metadata?: unknown
+    }>)
+      .filter(row => row.status !== 'deleted')
+      .filter(row => !syncedTemplateKeys.has(`${row.waba_id}:${row.name}:${row.language}`))
+
+    await Promise.all(staleTemplates.map(async row => {
+      const staleMetadata = asMetadata(row.metadata)
+      const { error: staleError } = await supabase
+        .from('meta_whatsapp_templates')
+        .update({
+          status: 'deleted',
+          metadata: {
+            ...staleMetadata,
+            deleted_from_meta_at: new Date().toISOString(),
+            last_missing_from_meta_sync_at: new Date().toISOString(),
+          },
+          updated_at: new Date().toISOString(),
+        })
+        .eq('waba_id', row.waba_id)
+        .eq('name', row.name)
+        .eq('language', row.language)
+
+      if (staleError) throw staleError
+    }))
   }
 
   return {

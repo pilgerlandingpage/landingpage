@@ -134,6 +134,14 @@ function extractTemplateVariables(text: string) {
   return Array.from(new Set(matches.map(match => Number(match[1])))).filter(Number.isFinite).sort((a, b) => a - b)
 }
 
+function assertSequentialVariables(label: string, variables: number[]) {
+  for (let index = 0; index < variables.length; index += 1) {
+    if (variables[index] !== index + 1) {
+      throw new Error(`${label} deve usar variaveis sequenciais a partir de {{1}}.`)
+    }
+  }
+}
+
 function replaceTemplateVariables(text: string, values: string[]) {
   return text.replace(/{{\s*(\d+)\s*}}/g, (_, index: string) => values[Number(index) - 1] || `{{${index}}}`)
 }
@@ -262,6 +270,7 @@ export default function MetaTemplatesPage() {
     const components: Record<string, unknown>[] = []
     const normalizedBody = form.bodyText.trim()
     if (!normalizedBody) throw new Error('Corpo do template obrigatorio.')
+    assertSequentialVariables('Corpo do template', bodyVariables)
 
     if (form.headerFormat !== 'NONE') {
       const header: Record<string, unknown> = {
@@ -270,6 +279,8 @@ export default function MetaTemplatesPage() {
       }
       if (form.headerFormat === 'TEXT') {
         if (!form.headerText.trim()) throw new Error('Texto do header obrigatorio.')
+        assertSequentialVariables('Header do template', headerVariables)
+        if (headerVariables.length > 1) throw new Error('Header de texto aceita somente uma variavel.')
         header.text = form.headerText.trim()
         if (headerVariables.length) {
           if (!form.headerExample.trim()) throw new Error('Exemplo da variavel do header obrigatorio.')
@@ -312,11 +323,16 @@ export default function MetaTemplatesPage() {
         if (button.type === 'QUICK_REPLY') return { type: 'QUICK_REPLY', text: button.text.trim().slice(0, 25) }
         if (button.type === 'URL') {
           if (!button.url.trim()) throw new Error(`URL obrigatoria no botao ${button.text}.`)
+          const urlVariables = extractTemplateVariables(button.url)
+          assertSequentialVariables(`URL do botao ${button.text}`, urlVariables)
+          if (urlVariables.length && !button.example.trim()) {
+            throw new Error(`Exemplo da URL dinamica obrigatorio no botao ${button.text}.`)
+          }
           return {
             type: 'URL',
             text: button.text.trim().slice(0, 25),
             url: button.url.trim(),
-            ...(extractTemplateVariables(button.url).length && button.example.trim()
+            ...(urlVariables.length
               ? { example: [button.example.trim()] }
               : {}),
           }
@@ -389,7 +405,11 @@ export default function MetaTemplatesPage() {
     const response = await fetch('/api/admin/whatsapp/template-media', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url }),
+      body: JSON.stringify({
+        url,
+        headerFormat: form.headerFormat,
+        fileName: normalizeTemplateName(form.name) || undefined,
+      }),
     })
     const payload = await response.json() as HeaderMediaUploadResponse
     const handle = typeof payload.handle === 'string' ? payload.handle.trim() : ''
@@ -452,7 +472,7 @@ export default function MetaTemplatesPage() {
       const headerMedia = await ensureHeaderMediaHandle()
       const components = buildComponents(headerMedia?.handle || '')
       if (!name) throw new Error('Nome do template obrigatorio.')
-      await runAction({
+      const payload = await runAction({
         action: editingTemplate ? 'edit' : 'create',
         templateId: editingTemplate?.template_external_id,
         name,
@@ -468,7 +488,7 @@ export default function MetaTemplatesPage() {
           headerFormat: form.headerFormat,
         } : undefined,
       }, editingTemplate ? 'Template atualizado.' : 'Template enviado para Meta.')
-      resetBuilder()
+      if (payload) resetBuilder()
     } catch (error) {
       setFeedback({ type: 'error', text: error instanceof Error ? error.message : 'Erro ao montar template' })
     }

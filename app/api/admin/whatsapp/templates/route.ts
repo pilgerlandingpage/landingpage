@@ -4,6 +4,7 @@ import {
   createMetaWhatsAppTemplate,
   deleteMetaWhatsAppTemplate,
   editMetaWhatsAppTemplate,
+  getMetaWhatsAppErrorInfo,
   loadMetaWhatsAppConfigMap,
   resolveMetaWhatsAppConfig,
   syncMetaWhatsAppAssets,
@@ -52,8 +53,38 @@ function normalizeLanguage(value: unknown) {
 }
 
 function isMetaApplicationLimit(error: unknown) {
+  const metaError = getMetaWhatsAppErrorInfo(error)
+  const message = metaError.message || ''
+  return String(metaError.code || '') === '4'
+    || message.includes('Application request limit reached')
+    || message.includes('(#4)')
+}
+
+function formatMetaErrorDetails(error: unknown) {
+  const metaError = getMetaWhatsAppErrorInfo(error)
+  return [
+    metaError.details ? `detalhes ${metaError.details}` : '',
+    metaError.status ? `status ${metaError.status}` : '',
+    metaError.code ? `codigo ${metaError.code}` : '',
+    metaError.subcode ? `subcodigo ${metaError.subcode}` : '',
+    metaError.type ? `tipo ${metaError.type}` : '',
+    metaError.fbtraceId ? `fbtrace ${metaError.fbtraceId}` : '',
+  ].filter(Boolean).join(' | ')
+}
+
+function isTemplatePayloadError(error: unknown) {
   const message = error instanceof Error ? error.message : String(error || '')
-  return message.includes('Application request limit reached') || message.includes('(#4)')
+  return [
+    'Nome do template',
+    'Template precisa',
+    'Header',
+    'Corpo do template',
+    'variave',
+    'midia',
+    'botao',
+    'exemplo',
+    'component',
+  ].some(fragment => message.toLowerCase().includes(fragment.toLowerCase()))
 }
 
 async function readDrafts(supabase = createAdminClient()): Promise<TemplateDraft[]> {
@@ -329,12 +360,28 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('[Meta Templates POST]', error)
     const limited = isMetaApplicationLimit(error)
+    const metaError = getMetaWhatsAppErrorInfo(error)
+    const details = formatMetaErrorDetails(error)
+    const status = limited
+      ? 429
+      : metaError.status && metaError.status >= 400 && metaError.status < 500
+        ? 400
+        : isTemplatePayloadError(error)
+          ? 400
+        : 500
+    const message = limited
+      ? 'A Meta bloqueou temporariamente a criacao do template por limite de requisicoes do App ID. Aguarde o limite reduzir ou configure um Meta WhatsApp App ID dedicado na sala de manutencao.'
+      : [
+          metaError.userMessage || metaError.message || 'Erro ao gerenciar template Meta',
+          details ? `Detalhes: ${details}` : '',
+        ].filter(Boolean).join(' ')
+
     return NextResponse.json({
       success: false,
       retryable: limited,
-      message: limited
-        ? 'A Meta bloqueou temporariamente a criacao do template por limite de requisicoes do App ID. Aguarde o limite reduzir ou configure um Meta WhatsApp App ID dedicado na sala de manutencao.'
-        : error instanceof Error ? error.message : 'Erro ao gerenciar template Meta',
-    }, { status: limited ? 429 : 500 })
+      message,
+      details,
+      metaError,
+    }, { status })
   }
 }
