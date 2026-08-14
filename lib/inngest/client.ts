@@ -203,5 +203,16 @@ export const inngest = new Inngest({
                 reason?: string
             }
         }
+        'meta-whatsapp/contact-list-validate': {
+            data: {
+                list_id: string
+                run_id: string
+                batch_number?: number
+                batch_size?: number
+                force?: boolean
+                instance_token?: string | null
+                reason?: string
+            }
+        }
     }>()
 })

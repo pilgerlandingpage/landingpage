@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
+import { inngest } from '@/lib/inngest/client'
 import { parseMetaContactListImport } from '@/lib/meta/contact-list-import'
+import { startMetaWhatsAppContactListValidation } from '@/lib/meta/whatsapp-contact-list-validation'
 
 export const runtime = 'nodejs'
 
@@ -55,6 +57,14 @@ function asVariableRecord(value: unknown) {
     : {}
 }
 
+function contactWhatsAppCheckStatus(contact: ContactRow) {
+  const metadata = asVariableRecord(contact.metadata)
+  const check = asVariableRecord(metadata.whatsapp_check)
+  const status = cleanText(check.status, 40).toLowerCase()
+  if (status === 'valid' || status === 'invalid' || status === 'unknown' || status === 'error') return status
+  return 'unchecked'
+}
+
 function contactSearchIndex(contact: ContactRow) {
   const variables = Object.values(asVariableRecord(contact.template_variables))
   return normalizeSearchText([
@@ -99,6 +109,11 @@ function buildContactListSegments(contacts: ContactRow[]) {
   let withCity = 0
   let withTags = 0
   let withVariables = 0
+  let whatsappValid = 0
+  let whatsappInvalid = 0
+  let whatsappUnknown = 0
+  let whatsappError = 0
+  let whatsappUnchecked = 0
 
   contacts.forEach(contact => {
     if (cleanText(contact.name, 160)) withName += 1
@@ -112,6 +127,13 @@ function buildContactListSegments(contacts: ContactRow[]) {
     contactTags.forEach(tag => addCount(tags, tag))
 
     if (Object.keys(asVariableRecord(contact.template_variables)).length) withVariables += 1
+
+    const whatsappStatus = contactWhatsAppCheckStatus(contact)
+    if (whatsappStatus === 'valid') whatsappValid += 1
+    if (whatsappStatus === 'invalid') whatsappInvalid += 1
+    if (whatsappStatus === 'unknown') whatsappUnknown += 1
+    if (whatsappStatus === 'error') whatsappError += 1
+    if (whatsappStatus === 'unchecked') whatsappUnchecked += 1
   })
 
   return {
@@ -123,6 +145,12 @@ function buildContactListSegments(contacts: ContactRow[]) {
       with_city: withCity,
       with_tags: withTags,
       with_variables: withVariables,
+      whatsapp_valid: whatsappValid,
+      whatsapp_invalid: whatsappInvalid,
+      whatsapp_unknown: whatsappUnknown,
+      whatsapp_error: whatsappError,
+      whatsapp_unchecked: whatsappUnchecked,
+      whatsapp_checked: contacts.length - whatsappUnchecked,
     },
   }
 }
@@ -223,6 +251,46 @@ export async function POST(request: NextRequest) {
 
         if (error) throw error
         return NextResponse.json({ success: true, message: 'Lista arquivada.' })
+      }
+
+      if (action === 'validate_whatsapp') {
+        const runId = crypto.randomUUID()
+        const force = Boolean(body.force)
+        const batchSize = Math.min(Math.max(Number(body.batchSize || body.batch_size || 100), 10), 250)
+        const list = await startMetaWhatsAppContactListValidation({
+          listId,
+          runId,
+          force,
+          batchSize,
+          instanceToken: cleanText(body.instanceToken || body.instance_token, 120) || null,
+        }, supabase)
+
+        const validation = asVariableRecord(asVariableRecord(list.metadata).whatsapp_validation)
+        const remainingContacts = Number(validation.remaining_contacts || 0)
+        if (remainingContacts > 0) {
+          await inngest.send({
+            name: 'meta-whatsapp/contact-list-validate',
+            data: {
+              list_id: listId,
+              run_id: runId,
+              batch_number: 1,
+              batch_size: batchSize,
+              force,
+              instance_token: cleanText(body.instanceToken || body.instance_token, 120) || null,
+              reason: 'admin_contact_list_validate_whatsapp',
+            },
+          })
+        }
+
+        return NextResponse.json({
+          success: true,
+          list,
+          runId,
+          remainingContacts,
+          message: remainingContacts > 0
+            ? `Validacao WhatsApp iniciada para ${remainingContacts} contato(s). Atualize a lista em alguns instantes para acompanhar.`
+            : 'Lista ja esta validada para WhatsApp.',
+        })
       }
 
       return NextResponse.json({ success: false, message: 'Acao invalida.' }, { status: 400 })

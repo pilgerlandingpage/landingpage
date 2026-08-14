@@ -872,12 +872,88 @@ export async function sendPollMessage({ phone, title, options, multiSelect, inst
 // ═══════════════════════════════════════════════════════════════
 
 /** Verificar se número tem WhatsApp */
-export async function checkNumberExists(phone: string, instanceToken: string) {
-    return uazapiFetch('/contact/check', {
+export interface ConnectyHubWhatsAppNumberCheck {
+    query: string
+    jid: string | null
+    lid: string | null
+    isInWhatsapp: boolean | null
+    verifiedName: string | null
+    groupName: string | null
+    error: string | null
+}
+
+function normalizeWhatsAppCheckBoolean(value: unknown): boolean | null {
+    if (typeof value === 'boolean') return value
+    if (typeof value === 'string') {
+        const normalized = value.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        if (['true', '1', 'yes', 'sim'].includes(normalized)) return true
+        if (['false', '0', 'no', 'nao'].includes(normalized)) return false
+    }
+    return null
+}
+
+function normalizeConnectyHubWhatsAppCheckResult(value: any): ConnectyHubWhatsAppNumberCheck {
+    return {
+        query: String(value?.query || value?.number || value?.phone || '').trim(),
+        jid: String(value?.jid || '').trim() || null,
+        lid: String(value?.lid || '').trim() || null,
+        isInWhatsapp: normalizeWhatsAppCheckBoolean(value?.isInWhatsapp ?? value?.isInWhatsApp ?? value?.exists ?? value?.valid),
+        verifiedName: String(value?.verifiedName || value?.verified_name || '').trim() || null,
+        groupName: String(value?.groupName || value?.group_name || '').trim() || null,
+        error: String(value?.error || value?.message || '').trim() || null,
+    }
+}
+
+function normalizeConnectyHubWhatsAppCheckPayload(payload: unknown): ConnectyHubWhatsAppNumberCheck[] {
+    const source = payload as any
+    const rows = Array.isArray(source)
+        ? source
+        : Array.isArray(source?.data)
+            ? source.data
+            : Array.isArray(source?.results)
+                ? source.results
+                : Array.isArray(source?.items)
+                    ? source.items
+                    : source ? [source] : []
+
+    return rows.map(normalizeConnectyHubWhatsAppCheckResult)
+}
+
+/** Verificar em lote se numeros possuem WhatsApp pela ConnectyHub. */
+export async function checkWhatsAppNumbers(numbers: string[], instanceToken?: string) {
+    const cleanedNumbers = Array.from(new Set(
+        numbers
+            .map(number => cleanPhone(String(number || '')))
+            .filter(number => number.length >= 10)
+    ))
+
+    if (!cleanedNumbers.length) return []
+
+    const token = instanceToken || await resolveDefaultWhatsAppInstanceToken() || undefined
+    if (!token) {
+        throw new Error('Nenhuma instancia ConnectyHub conectada para validar numeros WhatsApp.')
+    }
+
+    const payload = await uazapiFetch('/chat/check', {
         method: 'POST',
-        token: instanceToken,
-        body: { number: cleanPhone(phone) },
+        token,
+        body: { numbers: cleanedNumbers },
     })
+
+    return normalizeConnectyHubWhatsAppCheckPayload(payload)
+}
+
+export async function checkNumberExists(phone: string, instanceToken: string) {
+    const [result] = await checkWhatsAppNumbers([phone], instanceToken)
+    return result || {
+        query: cleanPhone(phone),
+        jid: null,
+        lid: null,
+        isInWhatsapp: null,
+        verifiedName: null,
+        groupName: null,
+        error: 'ConnectyHub nao retornou resultado para o numero.',
+    }
 }
 
 interface ListContactsOptions {

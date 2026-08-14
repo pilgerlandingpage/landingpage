@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/server'
+import { processMetaWhatsAppContactListValidationBatch } from '@/lib/meta/whatsapp-contact-list-validation'
 import { processMetaWhatsAppCampaignBatch } from '@/lib/meta/whatsapp-campaigns'
 import { inngest } from './client'
 
@@ -122,8 +123,47 @@ export const metaWhatsAppDueCampaignCron = inngest.createFunction(
   }
 )
 
+export const metaWhatsAppContactListValidate = inngest.createFunction(
+  { id: 'meta-whatsapp-contact-list-validate', name: 'Meta WhatsApp - validar lista de contatos' },
+  { event: 'meta-whatsapp/contact-list-validate' },
+  async ({ event, step }) => {
+    const batchNumber = Number(event.data.batch_number || 1)
+    const batchSize = Math.min(250, Math.max(10, Number(event.data.batch_size || 100)))
+
+    const result = await step.run(`validate-meta-whatsapp-contact-list-${batchNumber}`, async () => {
+      return processMetaWhatsAppContactListValidationBatch({
+        listId: event.data.list_id,
+        runId: event.data.run_id,
+        batchNumber,
+        batchSize,
+        force: Boolean(event.data.force),
+        instanceToken: event.data.instance_token || null,
+      })
+    })
+
+    if (result.hasMore && result.status !== 'stale') {
+      await step.sleep(`meta-whatsapp-contact-list-validate-cooldown-${batchNumber}`, '20s')
+      await step.sendEvent(`validate-meta-whatsapp-contact-list-next-${batchNumber + 1}`, {
+        name: 'meta-whatsapp/contact-list-validate',
+        data: {
+          list_id: event.data.list_id,
+          run_id: event.data.run_id,
+          batch_number: batchNumber + 1,
+          batch_size: batchSize,
+          force: Boolean(event.data.force),
+          instance_token: event.data.instance_token || null,
+          reason: 'contact_list_validation_has_more',
+        },
+      })
+    }
+
+    return result
+  }
+)
+
 export const metaWhatsAppCampaignFunctions = [
   metaWhatsAppCampaignCreated,
   metaWhatsAppSendBatch,
   metaWhatsAppDueCampaignCron,
+  metaWhatsAppContactListValidate,
 ]

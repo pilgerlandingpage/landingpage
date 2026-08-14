@@ -295,6 +295,7 @@ interface MetaContactList {
     valid_contacts: number
     duplicate_contacts: number
     invalid_contacts: number
+    metadata?: unknown
     created_at: string
     updated_at: string
 }
@@ -325,6 +326,12 @@ interface MetaContactListSegments {
         with_city: number
         with_tags: number
         with_variables: number
+        whatsapp_valid?: number
+        whatsapp_invalid?: number
+        whatsapp_unknown?: number
+        whatsapp_error?: number
+        whatsapp_unchecked?: number
+        whatsapp_checked?: number
     }
 }
 
@@ -357,6 +364,48 @@ function textValue(value: unknown) {
 function asFiniteNumber(value: unknown) {
     const parsed = Number(value || 0)
     return Number.isFinite(parsed) ? parsed : 0
+}
+
+function normalizeWhatsAppCheckStatus(value: unknown) {
+    const status = textValue(value).toLowerCase()
+    if (status === 'valid' || status === 'invalid' || status === 'unknown' || status === 'error') return status
+    return 'unchecked'
+}
+
+function getContactWhatsAppCheck(contact?: MetaContactListContact | null) {
+    return asRecord(asRecord(contact?.metadata).whatsapp_check)
+}
+
+function getContactWhatsAppCheckStatus(contact?: MetaContactListContact | null) {
+    return normalizeWhatsAppCheckStatus(getContactWhatsAppCheck(contact).status)
+}
+
+function isContactWithoutWhatsApp(contact?: MetaContactListContact | null) {
+    return getContactWhatsAppCheckStatus(contact) === 'invalid'
+}
+
+function getContactListWhatsAppValidation(list?: MetaContactList | null) {
+    return asRecord(asRecord(list?.metadata).whatsapp_validation)
+}
+
+function contactListValidationStatus(list?: MetaContactList | null) {
+    const status = textValue(getContactListWhatsAppValidation(list).status).toLowerCase()
+    if (status === 'queued' || status === 'running' || status === 'completed' || status === 'failed') return status
+    return ''
+}
+
+function contactListValidationStats(list?: MetaContactList | null) {
+    const validation = getContactListWhatsAppValidation(list)
+    return {
+        total: asFiniteNumber(validation.total_contacts),
+        checked: asFiniteNumber(validation.checked_contacts),
+        valid: asFiniteNumber(validation.valid_contacts),
+        invalid: asFiniteNumber(validation.invalid_contacts),
+        unknown: asFiniteNumber(validation.unknown_contacts),
+        error: asFiniteNumber(validation.error_contacts),
+        unchecked: asFiniteNumber(validation.unchecked_contacts),
+        remaining: asFiniteNumber(validation.remaining_contacts),
+    }
 }
 
 function metaSenderUsage(sender: MetaSender) {
@@ -610,6 +659,7 @@ export default function CampaignsPage() {
     const [savingContactList, setSavingContactList] = useState(false)
     const [loadingContactLists, setLoadingContactLists] = useState(false)
     const [loadingContactListAudience, setLoadingContactListAudience] = useState(false)
+    const [validatingContactListId, setValidatingContactListId] = useState('')
     const [metaSummary, setMetaSummary] = useState<MetaCampaignSummary | null>(null)
     const [metaAnalytics, setMetaAnalytics] = useState<MetaCampaignAnalytics | null>(null)
     const [metaStatusFilter, setMetaStatusFilter] = useState('')
@@ -950,7 +1000,11 @@ export default function CampaignsPage() {
     }
 
     const buildAudienceLinesFromContacts = (contacts: MetaContactListContact[]) => {
+        const requireConfirmedWhatsApp = contacts.some(contact => getContactWhatsAppCheckStatus(contact) !== 'unchecked')
         return contacts
+            .filter(contact => requireConfirmedWhatsApp
+                ? getContactWhatsAppCheckStatus(contact) === 'valid'
+                : !isContactWithoutWhatsApp(contact))
             .map(contact => {
                 const templateVariables = asRecord(contact.template_variables)
                 const name = textValue(contact.name) || ''
@@ -1031,6 +1085,28 @@ export default function CampaignsPage() {
         }
     }
 
+    useEffect(() => {
+        const hasActiveValidation = metaContactLists.some(list => {
+            const status = contactListValidationStatus(list)
+            return status === 'queued' || status === 'running'
+        })
+        if (!hasActiveValidation) return
+
+        const timer = window.setInterval(() => {
+            void loadMetaContactLists()
+            if (selectedContactListId) {
+                void loadSavedContactListIntoAudience(selectedContactListId, {
+                    city: contactSegmentCity,
+                    tag: contactSegmentTag,
+                    search: contactSegmentSearch,
+                    silent: true,
+                })
+            }
+        }, 20000)
+
+        return () => window.clearInterval(timer)
+    }, [metaContactLists, selectedContactListId, contactSegmentCity, contactSegmentTag, contactSegmentSearch])
+
     const uploadSavedContactList = async (file?: File) => {
         if (!file) return
 
@@ -1075,6 +1151,54 @@ export default function CampaignsPage() {
             setFeedback({ type: 'error', text: 'Nao consegui salvar essa lista. Use XLSX, CSV ou TXT com coluna de telefone.' })
         } finally {
             setSavingContactList(false)
+        }
+    }
+
+    const validateSelectedContactListWhatsApp = async () => {
+        if (!selectedContactListId || !selectedContactList) return
+
+        const currentStatus = contactListValidationStatus(selectedContactList)
+        const force = currentStatus === 'completed'
+            ? window.confirm('Revalidar todos os contatos desta lista na ConnectyHub?')
+            : false
+        if (currentStatus === 'completed' && !force) return
+
+        setValidatingContactListId(selectedContactListId)
+        setFeedback(null)
+        try {
+            const res = await fetch('/api/admin/whatsapp/contact-lists', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'validate_whatsapp',
+                    listId: selectedContactListId,
+                    force,
+                    batchSize: 100,
+                }),
+            })
+            const data = await res.json()
+
+            if (!data.success) {
+                setFeedback({ type: 'error', text: data.message || 'Erro ao iniciar validacao WhatsApp da lista.' })
+                return
+            }
+
+            if (data.list) {
+                setMetaContactLists(prev => prev.map(list => list.id === data.list.id ? data.list : list))
+            }
+
+            setFeedback({
+                type: 'success',
+                text: data.message || 'Validacao WhatsApp iniciada para a lista.',
+            })
+            await loadMetaContactLists()
+            if (selectedContactListId) {
+                await loadSavedContactListIntoAudience(selectedContactListId, { silent: true })
+            }
+        } catch {
+            setFeedback({ type: 'error', text: 'Erro ao iniciar validacao WhatsApp da lista.' })
+        } finally {
+            setValidatingContactListId('')
         }
     }
 
@@ -1227,6 +1351,12 @@ export default function CampaignsPage() {
 
             const savedContact = selectedContactsByPhone.get(phone) || null
             const savedContactMetadata = asRecord(savedContact?.metadata)
+            if (savedContact) {
+                const checkStatus = getContactWhatsAppCheckStatus(savedContact)
+                if (selectedContactListRequiresConfirmedWhatsApp && checkStatus !== 'valid') return
+                if (checkStatus === 'invalid') return
+            }
+
             const name = columns[1] || ''
             const bodyValues: Record<string, string> = { ...metaBodyParameterValues }
             selectedBodyVariables.forEach((variable, variableIndex) => {
@@ -1310,6 +1440,14 @@ export default function CampaignsPage() {
         }
 
         if (sendProvider === 'meta_whatsapp') {
+            if (selectedContactList && (selectedContactListValidationStatus === 'queued' || selectedContactListValidationStatus === 'running')) {
+                setFeedback({ type: 'error', text: 'Aguarde a validacao WhatsApp desta lista terminar antes de criar a campanha Meta.' })
+                return
+            }
+            if (selectedContactListRequiresConfirmedWhatsApp && selectedContactListEligibleContacts.length === 0) {
+                setFeedback({ type: 'error', text: 'Esta lista ja foi validada, mas nenhum contato ficou confirmado com WhatsApp.' })
+                return
+            }
             if (!hasMetaPortfolioCapacity) {
                 setFeedback({ type: 'error', text: `O portfolio Meta atingiu o uso/reserva diaria compartilhada (${metaPortfolioUsage.usageLabel}). Aguarde liberacao por falha, reset da janela de 24h ou agende para depois.` })
                 return
@@ -1497,6 +1635,15 @@ export default function CampaignsPage() {
     const readyMetaSenders = activeMetaSenders.filter(isMetaSenderAvailable)
     const selectedMetaSender = activeMetaSenders.find(sender => sender.id === selectedMetaSenderId) || null
     const selectedContactList = metaContactLists.find(list => list.id === selectedContactListId) || null
+    const selectedContactListValidationStatus = contactListValidationStatus(selectedContactList)
+    const selectedContactListValidationStats = contactListValidationStats(selectedContactList)
+    const selectedContactListHasCheckedContacts = selectedContactListContacts.some(contact => getContactWhatsAppCheckStatus(contact) !== 'unchecked')
+    const selectedContactListRequiresConfirmedWhatsApp = selectedContactListValidationStats.checked > 0 || selectedContactListHasCheckedContacts
+    const selectedContactListEligibleContacts = selectedContactListContacts.filter(contact => (
+        selectedContactListRequiresConfirmedWhatsApp
+            ? getContactWhatsAppCheckStatus(contact) === 'valid'
+            : !isContactWithoutWhatsApp(contact)
+    ))
     const selectedMetaTemplate = approvedMetaTemplates.find(template => template.name === metaTemplateName && template.language === metaTemplateLanguage) || null
     const selectedHeaderComponent = findTemplateComponent(selectedMetaTemplate, 'HEADER')
     const selectedBodyComponent = findTemplateComponent(selectedMetaTemplate, 'BODY')
@@ -2279,6 +2426,30 @@ export default function CampaignsPage() {
                                                     Filtre a lista por cidade, tag ou busca antes de enviar. O campo de numeros e atualizado automaticamente.
                                                 </p>
                                             </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => void validateSelectedContactListWhatsApp()}
+                                                disabled={Boolean(validatingContactListId) || selectedContactListValidationStatus === 'queued' || selectedContactListValidationStatus === 'running'}
+                                                style={{
+                                                    padding: '7px 10px',
+                                                    borderRadius: '8px',
+                                                    border: '1px solid var(--gold)',
+                                                    background: 'rgba(201,169,110,0.12)',
+                                                    color: 'var(--gold)',
+                                                    cursor: validatingContactListId || selectedContactListValidationStatus === 'queued' || selectedContactListValidationStatus === 'running' ? 'not-allowed' : 'pointer',
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    gap: '6px',
+                                                    fontSize: '0.76rem',
+                                                    fontWeight: 800,
+                                                }}
+                                                title="Verificar pela ConnectyHub quais contatos possuem WhatsApp."
+                                            >
+                                                {validatingContactListId === selectedContactListId || selectedContactListValidationStatus === 'queued' || selectedContactListValidationStatus === 'running'
+                                                    ? <Loader2 size={13} className="spin" />
+                                                    : <CheckCircle2 size={13} />}
+                                                {selectedContactListValidationStatus === 'completed' ? 'Revalidar WhatsApp' : 'Validar WhatsApp'}
+                                            </button>
                                             <span style={{
                                                 padding: '6px 10px',
                                                 borderRadius: '999px',
@@ -2288,9 +2459,23 @@ export default function CampaignsPage() {
                                                 fontSize: '0.76rem',
                                                 fontWeight: 700,
                                             }}>
-                                                {contactListAudienceCounts.filtered || selectedContactListContacts.length} de {contactListAudienceCounts.all || selectedContactList.valid_contacts} selecionados
+                                                {selectedContactListEligibleContacts.length} elegiveis de {contactListAudienceCounts.all || selectedContactList.valid_contacts}
                                             </span>
                                         </div>
+
+                                        {selectedContactListValidationStats.total > 0 && (
+                                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', color: 'var(--text-muted)', fontSize: '0.74rem' }}>
+                                                <span style={{ color: '#22c55e', fontWeight: 700 }}>
+                                                    {selectedContactListValidationStats.valid} com WhatsApp
+                                                </span>
+                                                <span style={{ color: selectedContactListValidationStats.invalid ? '#ef4444' : 'var(--text-muted)', fontWeight: 700 }}>
+                                                    {selectedContactListValidationStats.invalid} sem WhatsApp
+                                                </span>
+                                                <span>{selectedContactListValidationStats.unknown + selectedContactListValidationStats.error} para revisar</span>
+                                                <span>{selectedContactListValidationStats.remaining || selectedContactListValidationStats.unchecked} pendente(s)</span>
+                                                {selectedContactListValidationStatus && <span>Status: {selectedContactListValidationStatus}</span>}
+                                            </div>
+                                        )}
 
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px', alignItems: 'end' }}>
                                             <div>
@@ -2426,6 +2611,12 @@ export default function CampaignsPage() {
                                                 <span>{contactListSegments.stats.with_city} com cidade</span>
                                                 <span>{contactListSegments.stats.with_tags} com tags</span>
                                                 <span>{contactListSegments.stats.with_variables} com variaveis</span>
+                                                {asFiniteNumber(contactListSegments.stats.whatsapp_checked) > 0 && (
+                                                    <>
+                                                        <span style={{ color: '#22c55e' }}>{contactListSegments.stats.whatsapp_valid || 0} WhatsApp ok</span>
+                                                        <span style={{ color: asFiniteNumber(contactListSegments.stats.whatsapp_invalid) ? '#ef4444' : 'var(--text-muted)' }}>{contactListSegments.stats.whatsapp_invalid || 0} sem WhatsApp</span>
+                                                    </>
+                                                )}
                                             </div>
                                         )}
                                     </div>
@@ -2446,9 +2637,12 @@ export default function CampaignsPage() {
                                         lineHeight: 1.45,
                                     }}>
                                         <strong style={{ color: 'var(--text-primary)' }}>{selectedContactList.name}</strong>
-                                        {' '}carregada com {selectedContactListContacts.length} contato(s).
+                                        {' '}carregada com {selectedContactListEligibleContacts.length} contato(s) elegivel(is).
                                         {contactListAudienceCounts.all && contactListAudienceCounts.all !== selectedContactListContacts.length ? ` Total da lista: ${contactListAudienceCounts.all}.` : ''}
                                         {selectedContactList.source_file_name ? ` Origem: ${selectedContactList.source_file_name}.` : ''}
+                                        {selectedContactListValidationStats.checked > 0 ? (
+                                            <> WhatsApp: {selectedContactListValidationStats.valid} confirmado(s), {selectedContactListValidationStats.invalid} sem WhatsApp ignorado(s).</>
+                                        ) : null}
                                         {selectedContactList.duplicate_contacts || selectedContactList.invalid_contacts ? (
                                             <> Ignorados: {selectedContactList.duplicate_contacts} duplicado(s), {selectedContactList.invalid_contacts} invalido(s).</>
                                         ) : null}

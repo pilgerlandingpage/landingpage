@@ -70,6 +70,17 @@ function asMetadata(value: unknown): Record<string, unknown> {
     : {}
 }
 
+function recipientWhatsAppCheckStatus(recipient: MetaWhatsAppRecipientInput) {
+  const metadata = asMetadata(recipient.metadata)
+  const check = asMetadata(metadata.whatsapp_check)
+  return cleanText(check.status, 40).toLowerCase()
+}
+
+function isRecipientNotConfirmedByWhatsAppCheck(recipient: MetaWhatsAppRecipientInput) {
+  const status = recipientWhatsAppCheckStatus(recipient)
+  return status === 'invalid' || status === 'unknown' || status === 'error'
+}
+
 function normalizeRecipientPhone(value: unknown) {
   const digits = normalizeMetaWhatsAppPhone(value)
   if (!digits) return ''
@@ -764,6 +775,7 @@ export async function createMetaWhatsAppCampaign(input: CreateMetaWhatsAppCampai
   const now = new Date().toISOString()
   const rows = recipients.map(recipient => {
     const optedOut = optOutPhones.has(recipient.phone)
+    const withoutWhatsApp = isRecipientNotConfirmedByWhatsAppCheck(recipient)
     return {
       campaign_id: campaign.id,
       template_id: template?.id || null,
@@ -774,10 +786,18 @@ export async function createMetaWhatsAppCampaign(input: CreateMetaWhatsAppCampai
       recipient_name: cleanText(recipient.name, 160) || null,
       opt_in_source: cleanText(recipient.optInSource || input.optInSource || 'manual_admin_confirmed', 160),
       opt_in_at: recipient.optInAt || now,
-      status: optedOut ? 'opted_out' : 'queued',
+      status: optedOut ? 'opted_out' : withoutWhatsApp ? 'skipped' : 'queued',
+      error_code: withoutWhatsApp ? 'connectyhub_whatsapp_not_confirmed' : null,
+      error_message: withoutWhatsApp ? 'Numero nao confirmado como WhatsApp pela ConnectyHub.' : null,
       scheduled_for: scheduledFor,
       template_parameters: recipient.templateParameters ?? {},
-      metadata: recipient.metadata || {},
+      metadata: {
+        ...(recipient.metadata || {}),
+        ...(withoutWhatsApp ? {
+          skipped_reason: 'connectyhub_whatsapp_not_confirmed',
+          skipped_at: now,
+        } : {}),
+      },
     }
   })
 
