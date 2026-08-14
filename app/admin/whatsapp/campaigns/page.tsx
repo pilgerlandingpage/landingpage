@@ -380,6 +380,7 @@ const MSG_TYPES = [
 type TemplateComponentRecord = Record<string, unknown>
 type TemplateButtonRecord = Record<string, unknown>
 type ContactListValidationMode = 'confirmed_only' | 'include_unverified'
+type CreativeDeduplicationMode = 'skip_previous' | 'allow_repeat'
 
 function asRecord(value: unknown): Record<string, unknown> {
     return typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -1481,6 +1482,7 @@ export default function CampaignsPage() {
     }
 
     const sendCampaign = async () => {
+        let creativeDeduplicationMode: CreativeDeduplicationMode = 'skip_previous'
         const metaRecipientDrafts = sendProvider === 'meta_whatsapp' && metaAudiencePersonalized
             ? parseMetaRecipientDrafts()
             : []
@@ -1542,9 +1544,10 @@ export default function CampaignsPage() {
                     `A lista "${selectedContactList.name}" ja foi usada com o template "${selectedTemplateUsage.template_name}" em ${selectedTemplateUsage.campaigns} campanha(s).\n\n` +
                     `Ultima campanha: ${selectedTemplateUsage.last_campaign_name || 'sem nome'}\n` +
                     `Ultimo uso: ${formatMetaDate(selectedTemplateUsage.last_used_at)}\n\n` +
-                    'O sistema vai pular contatos que ja receberam ou estao na fila para este mesmo criativo. Deseja continuar?'
+                    'Se continuar, o sistema vai reenviar este mesmo criativo tambem para contatos que ja receberam ou estao na fila. Deseja continuar mesmo assim?'
                 )
                 if (!confirmed) return
+                creativeDeduplicationMode = 'allow_repeat'
             }
             if (!hasMetaPortfolioCapacity) {
                 setFeedback({ type: 'error', text: `O portfolio Meta atingiu o uso/reserva diaria compartilhada (${metaPortfolioUsage.usageLabel}). Aguarde liberacao por falha, reset da janela de 24h ou agende para depois.` })
@@ -1588,7 +1591,7 @@ export default function CampaignsPage() {
                         contactListId: selectedContactListId || undefined,
                         whatsAppValidationMode: selectedContactListId ? contactListValidationMode : undefined,
                         allowUnverifiedWhatsApp: selectedContactListId ? contactListValidationMode === 'include_unverified' : undefined,
-                        creativeDeduplicationMode: 'skip_previous',
+                        creativeDeduplicationMode,
                         contactSegment: selectedContactListId ? {
                             city: contactSegmentCity.trim() || null,
                             tag: contactSegmentTag.trim() || null,
@@ -2673,7 +2676,7 @@ export default function CampaignsPage() {
                                                             <AlertCircle size={14} style={{ flex: '0 0 auto', marginTop: '1px' }} />
                                                             <span>
                                                                 Este template ja foi usado nesta lista em {selectedTemplateUsage.campaigns} campanha(s).
-                                                                Ao lancar, o backend vai pular contatos que ja receberam ou estao na fila para este mesmo criativo.
+                                                                Ao lancar, o sistema vai pedir confirmacao antes de reenviar este mesmo criativo para os mesmos contatos.
                                                             </span>
                                                         </div>
                                                     ) : (
