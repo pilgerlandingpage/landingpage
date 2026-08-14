@@ -1141,7 +1141,7 @@ export async function getMetaWhatsAppDailyReport(
         read_at,
         failed_at,
         cost_amount,
-        cost_currency,
+        currency,
         cost_status,
         cost_recorded_at,
         created_at,
@@ -1207,8 +1207,8 @@ export async function getMetaWhatsAppDailyReport(
     if (failedCounted) failed += 1
     if (rowCost > 0) {
       costAmount += rowCost
-      const currency = cleanText(row.cost_currency || 'BRL', 12)
-      if (currency) currencies.add(currency)
+      const rowCurrency = cleanText(row.currency || 'BRL', 12)
+      if (rowCurrency) currencies.add(rowCurrency)
     }
 
     if (dispatchedInRange || deliveredCounted || readInRange || failedCounted || rowCost > 0) {
