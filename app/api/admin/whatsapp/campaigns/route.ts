@@ -136,6 +136,10 @@ export async function POST(request: NextRequest) {
                 || campaignData.allow_unverified_whatsapp === true
                 ? 'include_unverified'
                 : 'confirmed_only'
+            const creativeDeduplicationMode = campaignData.creativeDeduplicationMode === 'allow_repeat'
+                || campaignData.creative_deduplication_mode === 'allow_repeat'
+                ? 'allow_repeat'
+                : 'skip_previous'
 
             const result = await createMetaWhatsAppCampaign({
                 name: campaignData.name || campaignData.folder || `Campanha Meta ${new Date().toLocaleDateString('pt-BR')}`,
@@ -150,11 +154,13 @@ export async function POST(request: NextRequest) {
                 senderRoutingMode: campaignData.senderRoutingMode || campaignData.sender_routing_mode || 'weighted_pool',
                 defaultSenderId: campaignData.defaultSenderId || campaignData.default_sender_id || null,
                 whatsAppValidationMode,
+                creativeDeduplicationMode,
                 templateParameters: campaignData.templateParameters || campaignData.template_parameters || {},
                 audienceSource: contactListId ? 'saved_contact_list' : campaignData.audienceSource || campaignData.audience_source || 'custom_paste',
                 metadata: {
                     ...contactListMetadata,
                     whatsapp_validation_mode: whatsAppValidationMode,
+                    creative_deduplication_mode: creativeDeduplicationMode,
                     contact_segment: asMetadataRecord(campaignData.contactSegment || campaignData.contact_segment),
                     created_from: 'admin_whatsapp_campaigns',
                     legacy_instance_id_ignored: instanceId || null,
@@ -178,8 +184,8 @@ export async function POST(request: NextRequest) {
                 queued: result.queuedCount,
                 skipped: result.skippedCount,
                 message: result.queuedCount > 0
-                    ? `Campanha lancada com sucesso. ${result.queuedCount} contato(s) foram 100% liberados para envio em segundo plano pela Meta.`
-                    : 'Campanha preparada, mas nenhum contato ficou elegivel para envio.',
+                    ? `Campanha lancada com sucesso. ${result.queuedCount} contato(s) foram 100% liberados para envio em segundo plano pela Meta.${result.skippedCount > 0 ? ` ${result.skippedCount} contato(s) foram bloqueados por opt-out, validacao, regra de lista ou criativo repetido.` : ''}`
+                    : `Campanha preparada, mas nenhum contato ficou elegivel para envio.${result.skippedCount > 0 ? ` ${result.skippedCount} contato(s) foram bloqueados por opt-out, validacao, regra de lista ou criativo repetido.` : ''}`,
             })
         }
 

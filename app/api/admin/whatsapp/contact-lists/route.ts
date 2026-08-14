@@ -31,6 +31,51 @@ type ContactRow = {
   created_at?: string | null
 }
 
+type ContactListUsageTemplate = {
+  template_name: string
+  template_language: string
+  campaigns: number
+  total_recipients: number
+  total_queued: number
+  total_sent: number
+  total_delivered: number
+  total_read: number
+  total_failed: number
+  total_skipped: number
+  last_used_at: string | null
+  last_campaign_id: string | null
+  last_campaign_name: string | null
+  last_status: string | null
+}
+
+type ContactListUsageSummary = {
+  total_campaigns: number
+  total_recipients: number
+  last_used_at: string | null
+  last_campaign_id: string | null
+  last_campaign_name: string | null
+  last_template_name: string | null
+  last_template_language: string | null
+  templates: ContactListUsageTemplate[]
+}
+
+type ContactListUsageCampaignRow = {
+  id: string
+  name?: string | null
+  status?: string | null
+  template_name?: string | null
+  template_language?: string | null
+  total_recipients?: number | null
+  total_queued?: number | null
+  total_sent?: number | null
+  total_delivered?: number | null
+  total_read?: number | null
+  total_failed?: number | null
+  total_skipped?: number | null
+  created_at?: string | null
+  metadata?: unknown
+}
+
 function normalizeSearchText(value: unknown) {
   return String(value || '')
     .normalize('NFD')
@@ -55,6 +100,129 @@ function asVariableRecord(value: unknown) {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
     ? value as Record<string, unknown>
     : {}
+}
+
+function asNumber(value: unknown) {
+  const number = Number(value || 0)
+  return Number.isFinite(number) ? number : 0
+}
+
+function emptyContactListUsageSummary(): ContactListUsageSummary {
+  return {
+    total_campaigns: 0,
+    total_recipients: 0,
+    last_used_at: null,
+    last_campaign_id: null,
+    last_campaign_name: null,
+    last_template_name: null,
+    last_template_language: null,
+    templates: [],
+  }
+}
+
+function contactListIdFromCampaign(campaign: ContactListUsageCampaignRow) {
+  return cleanText(asVariableRecord(campaign.metadata).contact_list_id, 80)
+}
+
+function normalizeTemplateUsageKey(templateName?: string | null, templateLanguage?: string | null) {
+  return `${cleanText(templateName, 120).toLowerCase()}::${cleanText(templateLanguage || 'pt_BR', 40).toLowerCase()}`
+}
+
+function campaignUsedAfter(a?: string | null, b?: string | null) {
+  if (!a) return false
+  if (!b) return true
+  return new Date(a).getTime() > new Date(b).getTime()
+}
+
+async function fetchContactListUsageSummaries(
+  supabase: ReturnType<typeof createAdminClient>,
+  listIds: string[]
+) {
+  const ids = Array.from(new Set(listIds.map(id => cleanText(id, 80)).filter(Boolean)))
+  const usageByListId = new Map<string, ContactListUsageSummary>()
+  ids.forEach(id => usageByListId.set(id, emptyContactListUsageSummary()))
+  if (!ids.length) return usageByListId
+
+  const { data, error } = await supabase
+    .from('meta_whatsapp_campaigns')
+    .select('id, name, status, template_name, template_language, total_recipients, total_queued, total_sent, total_delivered, total_read, total_failed, total_skipped, created_at, metadata')
+    .eq('audience_source', 'saved_contact_list')
+    .in('metadata->>contact_list_id', ids)
+    .order('created_at', { ascending: false })
+    .limit(5000)
+
+  if (error) throw error
+
+  const templateMaps = new Map<string, Map<string, ContactListUsageTemplate>>()
+  ;((data || []) as ContactListUsageCampaignRow[]).forEach(campaign => {
+    const metadata = asVariableRecord(campaign.metadata)
+    if (metadata.deleted_from_panel_at) return
+
+    const listId = contactListIdFromCampaign(campaign)
+    if (!listId || !usageByListId.has(listId)) return
+
+    const summary = usageByListId.get(listId) || emptyContactListUsageSummary()
+    const campaignDate = cleanText(campaign.created_at, 40) || null
+    const templateName = cleanText(campaign.template_name, 120) || 'Sem template'
+    const templateLanguage = cleanText(campaign.template_language || 'pt_BR', 40)
+    summary.total_campaigns += 1
+    summary.total_recipients += asNumber(campaign.total_recipients)
+
+    if (campaignUsedAfter(campaignDate, summary.last_used_at)) {
+      summary.last_used_at = campaignDate
+      summary.last_campaign_id = campaign.id
+      summary.last_campaign_name = cleanText(campaign.name, 180) || null
+      summary.last_template_name = templateName
+      summary.last_template_language = templateLanguage
+    }
+
+    const byTemplate = templateMaps.get(listId) || new Map<string, ContactListUsageTemplate>()
+    const templateKey = normalizeTemplateUsageKey(templateName, templateLanguage)
+    const templateUsage = byTemplate.get(templateKey) || {
+      template_name: templateName,
+      template_language: templateLanguage,
+      campaigns: 0,
+      total_recipients: 0,
+      total_queued: 0,
+      total_sent: 0,
+      total_delivered: 0,
+      total_read: 0,
+      total_failed: 0,
+      total_skipped: 0,
+      last_used_at: null,
+      last_campaign_id: null,
+      last_campaign_name: null,
+      last_status: null,
+    }
+
+    templateUsage.campaigns += 1
+    templateUsage.total_recipients += asNumber(campaign.total_recipients)
+    templateUsage.total_queued += asNumber(campaign.total_queued)
+    templateUsage.total_sent += asNumber(campaign.total_sent)
+    templateUsage.total_delivered += asNumber(campaign.total_delivered)
+    templateUsage.total_read += asNumber(campaign.total_read)
+    templateUsage.total_failed += asNumber(campaign.total_failed)
+    templateUsage.total_skipped += asNumber(campaign.total_skipped)
+
+    if (campaignUsedAfter(campaignDate, templateUsage.last_used_at)) {
+      templateUsage.last_used_at = campaignDate
+      templateUsage.last_campaign_id = campaign.id
+      templateUsage.last_campaign_name = cleanText(campaign.name, 180) || null
+      templateUsage.last_status = cleanText(campaign.status, 40) || null
+    }
+
+    byTemplate.set(templateKey, templateUsage)
+    templateMaps.set(listId, byTemplate)
+    usageByListId.set(listId, summary)
+  })
+
+  usageByListId.forEach((summary, listId) => {
+    const byTemplate = templateMaps.get(listId)
+    summary.templates = Array.from(byTemplate?.values() || [])
+      .sort((a, b) => new Date(b.last_used_at || 0).getTime() - new Date(a.last_used_at || 0).getTime())
+  })
+
+  return usageByListId
 }
 
 function contactWhatsAppCheckStatus(contact: ContactRow) {
@@ -199,10 +367,14 @@ export async function GET(request: NextRequest) {
 
       const allContacts = await fetchAllContactListContacts(supabase, listId)
       const filteredContacts = allContacts.filter(contact => contactMatchesFilters(contact, filters))
+      const usageByListId = await fetchContactListUsageSummaries(supabase, [listId])
 
       return NextResponse.json({
         success: true,
-        list,
+        list: {
+          ...list,
+          usage: usageByListId.get(listId) || emptyContactListUsageSummary(),
+        },
         contacts: filteredContacts,
         allContactsCount: allContacts.length,
         filteredContactsCount: filteredContacts.length,
@@ -219,7 +391,15 @@ export async function GET(request: NextRequest) {
       .limit(200)
 
     if (error) throw error
-    return NextResponse.json({ success: true, lists: lists || [] })
+    const activeLists = (lists || []) as Array<{ id: string } & Record<string, unknown>>
+    const usageByListId = await fetchContactListUsageSummaries(supabase, activeLists.map(list => list.id))
+    return NextResponse.json({
+      success: true,
+      lists: activeLists.map(list => ({
+        ...list,
+        usage: usageByListId.get(list.id) || emptyContactListUsageSummary(),
+      })),
+    })
   } catch (error) {
     console.error('[Meta Contact Lists GET]', error)
     return NextResponse.json({

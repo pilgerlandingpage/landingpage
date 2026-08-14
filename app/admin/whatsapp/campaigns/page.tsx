@@ -284,6 +284,34 @@ interface MetaRecipientDraft {
     missingVariables?: string[]
 }
 
+interface MetaContactListUsageTemplate {
+    template_name: string
+    template_language: string
+    campaigns: number
+    total_recipients: number
+    total_queued: number
+    total_sent: number
+    total_delivered: number
+    total_read: number
+    total_failed: number
+    total_skipped: number
+    last_used_at?: string | null
+    last_campaign_id?: string | null
+    last_campaign_name?: string | null
+    last_status?: string | null
+}
+
+interface MetaContactListUsageSummary {
+    total_campaigns: number
+    total_recipients: number
+    last_used_at?: string | null
+    last_campaign_id?: string | null
+    last_campaign_name?: string | null
+    last_template_name?: string | null
+    last_template_language?: string | null
+    templates: MetaContactListUsageTemplate[]
+}
+
 interface MetaContactList {
     id: string
     name: string
@@ -296,6 +324,7 @@ interface MetaContactList {
     duplicate_contacts: number
     invalid_contacts: number
     metadata?: unknown
+    usage?: MetaContactListUsageSummary | null
     created_at: string
     updated_at: string
 }
@@ -417,6 +446,27 @@ function contactListValidationStats(list?: MetaContactList | null) {
         unchecked: asFiniteNumber(validation.unchecked_contacts),
         remaining: asFiniteNumber(validation.remaining_contacts),
     }
+}
+
+function templateUsageKey(templateName?: string | null, templateLanguage?: string | null) {
+    return `${String(templateName || '').trim().toLowerCase()}::${String(templateLanguage || 'pt_BR').trim().toLowerCase()}`
+}
+
+function emptyContactListUsage(): MetaContactListUsageSummary {
+    return {
+        total_campaigns: 0,
+        total_recipients: 0,
+        last_used_at: null,
+        last_campaign_id: null,
+        last_campaign_name: null,
+        last_template_name: null,
+        last_template_language: null,
+        templates: [],
+    }
+}
+
+function contactListUsage(list?: MetaContactList | null) {
+    return list?.usage || emptyContactListUsage()
 }
 
 function metaSenderUsage(sender: MetaSender) {
@@ -1071,6 +1121,13 @@ export default function CampaignsPage() {
             if (nextValidationMode !== contactListValidationMode) {
                 setContactListValidationMode(nextValidationMode)
             }
+            if (data.list) {
+                setMetaContactLists(prev => {
+                    const exists = prev.some(list => list.id === data.list.id)
+                    if (!exists) return [data.list, ...prev]
+                    return prev.map(list => list.id === data.list.id ? data.list : list)
+                })
+            }
             setSelectedContactListId(listId)
             setSelectedContactListContacts(contacts)
             setContactListSegments(data.segments || null)
@@ -1480,6 +1537,15 @@ export default function CampaignsPage() {
                 )
                 if (!confirmed) return
             }
+            if (selectedContactList && selectedTemplateWasUsedForList && selectedTemplateUsage) {
+                const confirmed = window.confirm(
+                    `A lista "${selectedContactList.name}" ja foi usada com o template "${selectedTemplateUsage.template_name}" em ${selectedTemplateUsage.campaigns} campanha(s).\n\n` +
+                    `Ultima campanha: ${selectedTemplateUsage.last_campaign_name || 'sem nome'}\n` +
+                    `Ultimo uso: ${formatMetaDate(selectedTemplateUsage.last_used_at)}\n\n` +
+                    'O sistema vai pular contatos que ja receberam ou estao na fila para este mesmo criativo. Deseja continuar?'
+                )
+                if (!confirmed) return
+            }
             if (!hasMetaPortfolioCapacity) {
                 setFeedback({ type: 'error', text: `O portfolio Meta atingiu o uso/reserva diaria compartilhada (${metaPortfolioUsage.usageLabel}). Aguarde liberacao por falha, reset da janela de 24h ou agende para depois.` })
                 return
@@ -1522,6 +1588,7 @@ export default function CampaignsPage() {
                         contactListId: selectedContactListId || undefined,
                         whatsAppValidationMode: selectedContactListId ? contactListValidationMode : undefined,
                         allowUnverifiedWhatsApp: selectedContactListId ? contactListValidationMode === 'include_unverified' : undefined,
+                        creativeDeduplicationMode: 'skip_previous',
                         contactSegment: selectedContactListId ? {
                             city: contactSegmentCity.trim() || null,
                             tag: contactSegmentTag.trim() || null,
@@ -1669,6 +1736,7 @@ export default function CampaignsPage() {
     const readyMetaSenders = activeMetaSenders.filter(isMetaSenderAvailable)
     const selectedMetaSender = activeMetaSenders.find(sender => sender.id === selectedMetaSenderId) || null
     const selectedContactList = metaContactLists.find(list => list.id === selectedContactListId) || null
+    const selectedContactListUsage = contactListUsage(selectedContactList)
     const selectedContactListValidationStatus = contactListValidationStatus(selectedContactList)
     const selectedContactListValidationStats = contactListValidationStats(selectedContactList)
     const selectedContactListHasCheckedContacts = selectedContactListContacts.some(contact => getContactWhatsAppCheckStatus(contact) !== 'unchecked')
@@ -1691,6 +1759,10 @@ export default function CampaignsPage() {
     const selectedContactListWillIncludeUnverified = contactListValidationMode === 'include_unverified'
         && selectedContactListHasPendingValidation
     const selectedMetaTemplate = approvedMetaTemplates.find(template => template.name === metaTemplateName && template.language === metaTemplateLanguage) || null
+    const selectedTemplateUsage = selectedContactListUsage.templates.find(template =>
+        templateUsageKey(template.template_name, template.template_language) === templateUsageKey(metaTemplateName, metaTemplateLanguage)
+    ) || null
+    const selectedTemplateWasUsedForList = Boolean(selectedContactList && metaTemplateName.trim() && selectedTemplateUsage?.campaigns)
     const selectedHeaderComponent = findTemplateComponent(selectedMetaTemplate, 'HEADER')
     const selectedBodyComponent = findTemplateComponent(selectedMetaTemplate, 'BODY')
     const selectedFooterComponent = findTemplateComponent(selectedMetaTemplate, 'FOOTER')
@@ -2571,6 +2643,75 @@ export default function CampaignsPage() {
                                                             ? 'Esta campanha vai incluir numeros ainda nao verificados. O sistema vai pedir confirmacao final ao lancar.'
                                                             : 'A lista ainda nao esta 100% validada. Neste modo, apenas numeros confirmados entram no envio.'}
                                                     </span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div style={{
+                                            display: 'grid',
+                                            gap: '9px',
+                                            padding: '10px',
+                                            borderRadius: '10px',
+                                            border: selectedTemplateWasUsedForList ? '1px solid rgba(245,158,11,0.42)' : '1px solid var(--border)',
+                                            background: selectedTemplateWasUsedForList ? 'rgba(245,158,11,0.1)' : 'rgba(255,255,255,0.04)',
+                                        }}>
+                                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                <strong style={{ color: 'var(--text-primary)', fontSize: '0.8rem' }}>Historico lista x criativo</strong>
+                                                <span style={{ color: 'var(--text-muted)', fontSize: '0.73rem', fontWeight: 700 }}>
+                                                    {selectedContactListUsage.total_campaigns} campanha(s) com esta lista
+                                                </span>
+                                            </div>
+                                            {selectedContactListUsage.total_campaigns > 0 ? (
+                                                <>
+                                                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', color: 'var(--text-muted)', fontSize: '0.74rem' }}>
+                                                        <span>{selectedContactListUsage.total_recipients} destinatario(s) historicos</span>
+                                                        <span>Ultima: {selectedContactListUsage.last_campaign_name || 'sem nome'}</span>
+                                                        <span>{formatMetaDate(selectedContactListUsage.last_used_at)}</span>
+                                                    </div>
+                                                    {selectedTemplateWasUsedForList && selectedTemplateUsage ? (
+                                                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '7px', color: '#f59e0b', fontSize: '0.74rem', lineHeight: 1.4 }}>
+                                                            <AlertCircle size={14} style={{ flex: '0 0 auto', marginTop: '1px' }} />
+                                                            <span>
+                                                                Este template ja foi usado nesta lista em {selectedTemplateUsage.campaigns} campanha(s).
+                                                                Ao lancar, o backend vai pular contatos que ja receberam ou estao na fila para este mesmo criativo.
+                                                            </span>
+                                                        </div>
+                                                    ) : (
+                                                        <div style={{ color: 'var(--text-muted)', fontSize: '0.74rem', lineHeight: 1.4 }}>
+                                                            {metaTemplateName.trim()
+                                                                ? 'Este template ainda nao aparece no historico desta lista.'
+                                                                : 'Escolha um template aprovado para checar repeticao nesta lista.'}
+                                                        </div>
+                                                    )}
+                                                    <div style={{ display: 'grid', gap: '6px' }}>
+                                                        {selectedContactListUsage.templates.slice(0, 4).map(template => (
+                                                            <div
+                                                                key={templateUsageKey(template.template_name, template.template_language)}
+                                                                style={{
+                                                                    display: 'grid',
+                                                                    gridTemplateColumns: 'minmax(0, 1fr) auto',
+                                                                    gap: '8px',
+                                                                    alignItems: 'center',
+                                                                    fontSize: '0.72rem',
+                                                                    color: 'var(--text-muted)',
+                                                                    padding: '6px 8px',
+                                                                    borderRadius: '8px',
+                                                                    background: 'rgba(255,255,255,0.04)',
+                                                                }}
+                                                            >
+                                                                <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                                    {template.template_name} ({template.template_language}) - {template.last_campaign_name || 'sem nome'}
+                                                                </span>
+                                                                <strong style={{ color: templateUsageKey(template.template_name, template.template_language) === templateUsageKey(metaTemplateName, metaTemplateLanguage) ? '#f59e0b' : 'var(--text-secondary)' }}>
+                                                                    {template.campaigns} uso(s)
+                                                                </strong>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </>
+                                            ) : (
+                                                <div style={{ color: 'var(--text-muted)', fontSize: '0.74rem', lineHeight: 1.4 }}>
+                                                    Esta lista ainda nao tem campanha Meta registrada no painel.
                                                 </div>
                                             )}
                                         </div>
