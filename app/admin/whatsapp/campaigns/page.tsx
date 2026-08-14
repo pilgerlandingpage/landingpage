@@ -350,6 +350,7 @@ const MSG_TYPES = [
 
 type TemplateComponentRecord = Record<string, unknown>
 type TemplateButtonRecord = Record<string, unknown>
+type ContactListValidationMode = 'confirmed_only' | 'include_unverified'
 
 function asRecord(value: unknown): Record<string, unknown> {
     return typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -382,6 +383,16 @@ function getContactWhatsAppCheckStatus(contact?: MetaContactListContact | null) 
 
 function isContactWithoutWhatsApp(contact?: MetaContactListContact | null) {
     return getContactWhatsAppCheckStatus(contact) === 'invalid'
+}
+
+function isContactAllowedByValidationMode(
+    contact: MetaContactListContact,
+    input: { requiresConfirmedWhatsApp: boolean; mode: ContactListValidationMode }
+) {
+    const status = getContactWhatsAppCheckStatus(contact)
+    if (status === 'invalid') return false
+    if (input.mode === 'include_unverified') return true
+    return status === 'valid'
 }
 
 function getContactListWhatsAppValidation(list?: MetaContactList | null) {
@@ -655,6 +666,7 @@ export default function CampaignsPage() {
     const [contactSegmentCity, setContactSegmentCity] = useState('')
     const [contactSegmentTag, setContactSegmentTag] = useState('')
     const [contactSegmentSearch, setContactSegmentSearch] = useState('')
+    const [contactListValidationMode, setContactListValidationMode] = useState<ContactListValidationMode>('confirmed_only')
     const [contactListName, setContactListName] = useState('')
     const [savingContactList, setSavingContactList] = useState(false)
     const [loadingContactLists, setLoadingContactLists] = useState(false)
@@ -999,12 +1011,16 @@ export default function CampaignsPage() {
         }
     }
 
-    const buildAudienceLinesFromContacts = (contacts: MetaContactListContact[]) => {
+    const buildAudienceLinesFromContacts = (
+        contacts: MetaContactListContact[],
+        mode: ContactListValidationMode = contactListValidationMode
+    ) => {
         const requireConfirmedWhatsApp = contacts.some(contact => getContactWhatsAppCheckStatus(contact) !== 'unchecked')
         return contacts
-            .filter(contact => requireConfirmedWhatsApp
-                ? getContactWhatsAppCheckStatus(contact) === 'valid'
-                : !isContactWithoutWhatsApp(contact))
+            .filter(contact => isContactAllowedByValidationMode(contact, {
+                requiresConfirmedWhatsApp: requireConfirmedWhatsApp,
+                mode,
+            }))
             .map(contact => {
                 const templateVariables = asRecord(contact.template_variables)
                 const name = textValue(contact.name) || ''
@@ -1051,6 +1067,10 @@ export default function CampaignsPage() {
             }
 
             const contacts = data.contacts || []
+            const nextValidationMode = listId !== selectedContactListId ? 'confirmed_only' : contactListValidationMode
+            if (nextValidationMode !== contactListValidationMode) {
+                setContactListValidationMode(nextValidationMode)
+            }
             setSelectedContactListId(listId)
             setSelectedContactListContacts(contacts)
             setContactListSegments(data.segments || null)
@@ -1065,7 +1085,7 @@ export default function CampaignsPage() {
                 setContactSegmentTag(tag)
                 setContactSegmentSearch(search)
             }
-            setNumbersInput(buildAudienceLinesFromContacts(contacts))
+            setNumbersInput(buildAudienceLinesFromContacts(contacts, nextValidationMode))
             setMetaAudiencePersonalized(true)
             if (!options.silent) {
                 const activeFilters = [
@@ -1207,6 +1227,7 @@ export default function CampaignsPage() {
         setSelectedContactListContacts([])
         setContactListSegments(null)
         setContactListAudienceCounts({ all: 0, filtered: 0 })
+        setContactListValidationMode('confirmed_only')
         resetContactSegmentFilters()
     }
 
@@ -1352,9 +1373,10 @@ export default function CampaignsPage() {
             const savedContact = selectedContactsByPhone.get(phone) || null
             const savedContactMetadata = asRecord(savedContact?.metadata)
             if (savedContact) {
-                const checkStatus = getContactWhatsAppCheckStatus(savedContact)
-                if (selectedContactListRequiresConfirmedWhatsApp && checkStatus !== 'valid') return
-                if (checkStatus === 'invalid') return
+                if (!isContactAllowedByValidationMode(savedContact, {
+                    requiresConfirmedWhatsApp: selectedContactListRequiresConfirmedWhatsApp,
+                    mode: contactListValidationMode,
+                })) return
             }
 
             const name = columns[1] || ''
@@ -1409,6 +1431,10 @@ export default function CampaignsPage() {
             ? metaRecipientDrafts.map(recipient => recipient.phone)
             : parseNumbers()
         if (numbers.length === 0) {
+            if (sendProvider === 'meta_whatsapp' && selectedContactListId) {
+                setFeedback({ type: 'error', text: 'Nenhum contato ficou liberado neste modo. Use somente confirmados quando houver validos, ou marque incluir pendentes/nao verificados para enviar com pressa.' })
+                return
+            }
             setFeedback({ type: 'error', text: 'Adicione pelo menos um número válido' })
             return
         }
@@ -1440,13 +1466,19 @@ export default function CampaignsPage() {
         }
 
         if (sendProvider === 'meta_whatsapp') {
-            if (selectedContactList && (selectedContactListValidationStatus === 'queued' || selectedContactListValidationStatus === 'running')) {
-                setFeedback({ type: 'error', text: 'Aguarde a validacao WhatsApp desta lista terminar antes de criar a campanha Meta.' })
+            if (selectedContactListRequiresConfirmedWhatsApp && selectedContactListEligibleContacts.length === 0) {
+                setFeedback({ type: 'error', text: 'Esta lista nao tem contato confirmado para este modo. Para enviar com pressa, altere para incluir pendentes/nao verificados.' })
                 return
             }
-            if (selectedContactListRequiresConfirmedWhatsApp && selectedContactListEligibleContacts.length === 0) {
-                setFeedback({ type: 'error', text: 'Esta lista ja foi validada, mas nenhum contato ficou confirmado com WhatsApp.' })
-                return
+            if (selectedContactList && selectedContactListWillIncludeUnverified) {
+                const confirmed = window.confirm(
+                    `A lista "${selectedContactList.name}" ainda nao esta 100% validada.\n\n` +
+                    `Confirmados com WhatsApp: ${selectedContactListConfirmedContacts.length}\n` +
+                    `Pendentes/erro/sem verificacao: ${selectedContactListUnverifiedContacts.length}\n` +
+                    `Sem WhatsApp confirmado: ${selectedContactListInvalidContacts.length}\n\n` +
+                    'Enviar mesmo assim pode gastar limite Meta com numeros que talvez nao tenham WhatsApp. Deseja continuar?'
+                )
+                if (!confirmed) return
             }
             if (!hasMetaPortfolioCapacity) {
                 setFeedback({ type: 'error', text: `O portfolio Meta atingiu o uso/reserva diaria compartilhada (${metaPortfolioUsage.usageLabel}). Aguarde liberacao por falha, reset da janela de 24h ou agende para depois.` })
@@ -1488,6 +1520,8 @@ export default function CampaignsPage() {
                         templateLanguage: metaTemplateLanguage.trim() || 'pt_BR',
                         templateParameters,
                         contactListId: selectedContactListId || undefined,
+                        whatsAppValidationMode: selectedContactListId ? contactListValidationMode : undefined,
+                        allowUnverifiedWhatsApp: selectedContactListId ? contactListValidationMode === 'include_unverified' : undefined,
                         contactSegment: selectedContactListId ? {
                             city: contactSegmentCity.trim() || null,
                             tag: contactSegmentTag.trim() || null,
@@ -1640,10 +1674,22 @@ export default function CampaignsPage() {
     const selectedContactListHasCheckedContacts = selectedContactListContacts.some(contact => getContactWhatsAppCheckStatus(contact) !== 'unchecked')
     const selectedContactListRequiresConfirmedWhatsApp = selectedContactListValidationStats.checked > 0 || selectedContactListHasCheckedContacts
     const selectedContactListEligibleContacts = selectedContactListContacts.filter(contact => (
-        selectedContactListRequiresConfirmedWhatsApp
-            ? getContactWhatsAppCheckStatus(contact) === 'valid'
-            : !isContactWithoutWhatsApp(contact)
+        isContactAllowedByValidationMode(contact, {
+            requiresConfirmedWhatsApp: selectedContactListRequiresConfirmedWhatsApp,
+            mode: contactListValidationMode,
+        })
     ))
+    const selectedContactListConfirmedContacts = selectedContactListContacts.filter(contact => getContactWhatsAppCheckStatus(contact) === 'valid')
+    const selectedContactListInvalidContacts = selectedContactListContacts.filter(isContactWithoutWhatsApp)
+    const selectedContactListUnverifiedContacts = selectedContactListContacts.filter(contact => {
+        const status = getContactWhatsAppCheckStatus(contact)
+        return status === 'unchecked' || status === 'unknown' || status === 'error'
+    })
+    const selectedContactListHasPendingValidation = selectedContactListUnverifiedContacts.length > 0
+        || selectedContactListValidationStatus === 'queued'
+        || selectedContactListValidationStatus === 'running'
+    const selectedContactListWillIncludeUnverified = contactListValidationMode === 'include_unverified'
+        && selectedContactListHasPendingValidation
     const selectedMetaTemplate = approvedMetaTemplates.find(template => template.name === metaTemplateName && template.language === metaTemplateLanguage) || null
     const selectedHeaderComponent = findTemplateComponent(selectedMetaTemplate, 'HEADER')
     const selectedBodyComponent = findTemplateComponent(selectedMetaTemplate, 'BODY')
@@ -1681,7 +1727,7 @@ export default function CampaignsPage() {
         if (!selectedContactListId || selectedContactListContacts.length === 0) return
         setNumbersInput(buildAudienceLinesFromContacts(selectedContactListContacts))
         setMetaAudiencePersonalized(true)
-    }, [selectedContactListId, selectedContactListContacts, selectedBodyVariablesKey])
+    }, [selectedContactListId, selectedContactListContacts, selectedBodyVariablesKey, contactListValidationMode])
 
     useEffect(() => {
         if (!selectedMetaTemplate) {
@@ -2477,6 +2523,58 @@ export default function CampaignsPage() {
                                             </div>
                                         )}
 
+                                        <div style={{
+                                            display: 'grid',
+                                            gap: '8px',
+                                            padding: '10px',
+                                            borderRadius: '10px',
+                                            border: selectedContactListWillIncludeUnverified ? '1px solid rgba(245,158,11,0.35)' : '1px solid var(--border)',
+                                            background: selectedContactListWillIncludeUnverified ? 'rgba(245,158,11,0.1)' : 'rgba(255,255,255,0.04)',
+                                        }}>
+                                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                <strong style={{ color: 'var(--text-primary)', fontSize: '0.8rem' }}>Regra de envio Meta</strong>
+                                                <div style={{ display: 'inline-flex', gap: '4px', padding: '3px', borderRadius: '9px', border: '1px solid var(--border)', background: 'rgba(0,0,0,0.12)' }}>
+                                                    {([
+                                                        ['confirmed_only', 'Somente confirmados'],
+                                                        ['include_unverified', 'Incluir pendentes'],
+                                                    ] as Array<[ContactListValidationMode, string]>).map(([mode, label]) => (
+                                                        <button
+                                                            key={mode}
+                                                            type="button"
+                                                            onClick={() => setContactListValidationMode(mode)}
+                                                            style={{
+                                                                border: 'none',
+                                                                borderRadius: '7px',
+                                                                padding: '7px 9px',
+                                                                cursor: 'pointer',
+                                                                fontSize: '0.74rem',
+                                                                fontWeight: 800,
+                                                                background: contactListValidationMode === mode ? 'var(--gold)' : 'transparent',
+                                                                color: contactListValidationMode === mode ? '#111827' : 'var(--text-secondary)',
+                                                            }}
+                                                        >
+                                                            {label}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', color: 'var(--text-muted)', fontSize: '0.74rem' }}>
+                                                <span style={{ color: '#22c55e', fontWeight: 700 }}>{selectedContactListConfirmedContacts.length} confirmados</span>
+                                                <span style={{ color: selectedContactListUnverifiedContacts.length ? '#f59e0b' : 'var(--text-muted)', fontWeight: 700 }}>{selectedContactListUnverifiedContacts.length} pendentes/erro</span>
+                                                <span style={{ color: selectedContactListInvalidContacts.length ? '#ef4444' : 'var(--text-muted)', fontWeight: 700 }}>{selectedContactListInvalidContacts.length} sem WhatsApp bloqueados</span>
+                                            </div>
+                                            {selectedContactListHasPendingValidation && (
+                                                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '7px', color: selectedContactListWillIncludeUnverified ? '#f59e0b' : 'var(--text-muted)', fontSize: '0.74rem', lineHeight: 1.4 }}>
+                                                    <AlertCircle size={14} style={{ flex: '0 0 auto', marginTop: '1px' }} />
+                                                    <span>
+                                                        {selectedContactListWillIncludeUnverified
+                                                            ? 'Esta campanha vai incluir numeros ainda nao verificados. O sistema vai pedir confirmacao final ao lancar.'
+                                                            : 'A lista ainda nao esta 100% validada. Neste modo, apenas numeros confirmados entram no envio.'}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
+
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px', alignItems: 'end' }}>
                                             <div>
                                                 <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
@@ -2642,6 +2740,11 @@ export default function CampaignsPage() {
                                         {selectedContactList.source_file_name ? ` Origem: ${selectedContactList.source_file_name}.` : ''}
                                         {selectedContactListValidationStats.checked > 0 ? (
                                             <> WhatsApp: {selectedContactListValidationStats.valid} confirmado(s), {selectedContactListValidationStats.invalid} sem WhatsApp ignorado(s).</>
+                                        ) : null}
+                                        {selectedContactListWillIncludeUnverified ? (
+                                            <> Incluindo {selectedContactListUnverifiedContacts.length} pendente(s)/erro por decisao manual.</>
+                                        ) : selectedContactListHasPendingValidation ? (
+                                            <> Pendente(s)/erro fora do envio neste modo: {selectedContactListUnverifiedContacts.length}.</>
                                         ) : null}
                                         {selectedContactList.duplicate_contacts || selectedContactList.invalid_contacts ? (
                                             <> Ignorados: {selectedContactList.duplicate_contacts} duplicado(s), {selectedContactList.invalid_contacts} invalido(s).</>

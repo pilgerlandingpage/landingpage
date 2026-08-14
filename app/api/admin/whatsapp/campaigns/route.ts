@@ -114,19 +114,28 @@ export async function POST(request: NextRequest) {
             if (contactListId) {
                 const { data: contactList } = await supabase
                     .from('meta_whatsapp_contact_lists')
-                    .select('id, name, valid_contacts, source_file_name')
+                    .select('id, name, valid_contacts, source_file_name, metadata')
                     .eq('id', contactListId)
                     .maybeSingle()
 
                 if (contactList) {
+                    const listMetadata = asMetadataRecord(contactList.metadata)
                     contactListMetadata = {
                         contact_list_id: contactList.id,
                         contact_list_name: contactList.name,
                         contact_list_valid_contacts: contactList.valid_contacts,
                         contact_list_source_file_name: contactList.source_file_name,
+                        contact_list_whatsapp_validation: asMetadataRecord(listMetadata.whatsapp_validation),
                     }
                 }
             }
+
+            const whatsAppValidationMode = campaignData.whatsAppValidationMode === 'include_unverified'
+                || campaignData.whatsapp_validation_mode === 'include_unverified'
+                || campaignData.allowUnverifiedWhatsApp === true
+                || campaignData.allow_unverified_whatsapp === true
+                ? 'include_unverified'
+                : 'confirmed_only'
 
             const result = await createMetaWhatsAppCampaign({
                 name: campaignData.name || campaignData.folder || `Campanha Meta ${new Date().toLocaleDateString('pt-BR')}`,
@@ -140,10 +149,12 @@ export async function POST(request: NextRequest) {
                 optInSource: campaignData.optInSource || campaignData.opt_in_source || 'site_lead_authorized',
                 senderRoutingMode: campaignData.senderRoutingMode || campaignData.sender_routing_mode || 'weighted_pool',
                 defaultSenderId: campaignData.defaultSenderId || campaignData.default_sender_id || null,
+                whatsAppValidationMode,
                 templateParameters: campaignData.templateParameters || campaignData.template_parameters || {},
                 audienceSource: contactListId ? 'saved_contact_list' : campaignData.audienceSource || campaignData.audience_source || 'custom_paste',
                 metadata: {
                     ...contactListMetadata,
+                    whatsapp_validation_mode: whatsAppValidationMode,
                     contact_segment: asMetadataRecord(campaignData.contactSegment || campaignData.contact_segment),
                     created_from: 'admin_whatsapp_campaigns',
                     legacy_instance_id_ignored: instanceId || null,

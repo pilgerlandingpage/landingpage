@@ -34,6 +34,7 @@ export interface CreateMetaWhatsAppCampaignInput {
   optInSource?: string
   senderRoutingMode?: 'single' | 'round_robin' | 'weighted_pool'
   defaultSenderId?: string | null
+  whatsAppValidationMode?: 'confirmed_only' | 'include_unverified'
   templateParameters?: unknown
   audienceSource?: 'custom_paste' | 'saved_contact_list' | 'lead_filter' | 'commerce_customers' | 'education_leads' | 'editorial_distribution'
   metadata?: Record<string, unknown>
@@ -78,9 +79,20 @@ function recipientWhatsAppCheckStatus(recipient: MetaWhatsAppRecipientInput) {
   return cleanText(check.status, 40).toLowerCase()
 }
 
-function isRecipientNotConfirmedByWhatsAppCheck(recipient: MetaWhatsAppRecipientInput) {
+function isSavedContactListRecipient(recipient: MetaWhatsAppRecipientInput) {
+  const metadata = asMetadata(recipient.metadata)
+  return Boolean(metadata.contact_list_id || metadata.contact_list_contact_id)
+}
+
+function isRecipientNotConfirmedByWhatsAppCheck(
+  recipient: MetaWhatsAppRecipientInput,
+  mode: 'confirmed_only' | 'include_unverified' = 'confirmed_only'
+) {
   const status = recipientWhatsAppCheckStatus(recipient)
-  return status === 'invalid' || status === 'unknown' || status === 'error'
+  if (status === 'invalid') return true
+  if (mode === 'include_unverified') return false
+  if (isSavedContactListRecipient(recipient) && status !== 'valid') return true
+  return status === 'unknown' || status === 'error'
 }
 
 function normalizeRecipientPhone(value: unknown) {
@@ -683,6 +695,9 @@ export async function createMetaWhatsAppCampaign(input: CreateMetaWhatsAppCampai
   const templateLanguage = normalizeLanguage(input.templateLanguage || resolved.defaultLanguage)
   const scheduledFor = parseScheduledFor(input.scheduledFor)
   const campaignType = input.campaignType || 'marketing'
+  const whatsAppValidationMode = input.whatsAppValidationMode === 'include_unverified'
+    ? 'include_unverified'
+    : 'confirmed_only'
 
   const { data: template } = await supabase
     .from('meta_whatsapp_templates')
@@ -759,11 +774,13 @@ export async function createMetaWhatsAppCampaign(input: CreateMetaWhatsAppCampai
       audience_query: {
         count: recipients.length,
         opt_in_source: input.optInSource || 'manual_admin_confirmed',
+        whatsapp_validation_mode: whatsAppValidationMode,
       },
       scheduled_for: scheduledFor,
       total_recipients: recipients.length,
       metadata: {
         ...(input.metadata || {}),
+        whatsapp_validation_mode: whatsAppValidationMode,
         template_status_at_creation: template?.status || 'not_synced',
         support_redirect_phone: resolved.supportRedirectPhone,
       },
@@ -777,7 +794,7 @@ export async function createMetaWhatsAppCampaign(input: CreateMetaWhatsAppCampai
   const now = new Date().toISOString()
   const rows = recipients.map(recipient => {
     const optedOut = optOutPhones.has(recipient.phone)
-    const withoutWhatsApp = isRecipientNotConfirmedByWhatsAppCheck(recipient)
+    const withoutWhatsApp = isRecipientNotConfirmedByWhatsAppCheck(recipient, whatsAppValidationMode)
     return {
       campaign_id: campaign.id,
       template_id: template?.id || null,
@@ -795,6 +812,7 @@ export async function createMetaWhatsAppCampaign(input: CreateMetaWhatsAppCampai
       template_parameters: recipient.templateParameters ?? {},
       metadata: {
         ...(recipient.metadata || {}),
+        whatsapp_validation_mode: whatsAppValidationMode,
         ...(withoutWhatsApp ? {
           skipped_reason: 'connectyhub_whatsapp_not_confirmed',
           skipped_at: now,
