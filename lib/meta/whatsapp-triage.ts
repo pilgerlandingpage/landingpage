@@ -3178,15 +3178,34 @@ function buildReplyIntentSummary(replies: ReplyIntentRow[]) {
   }
 }
 
+function saoPauloDateRangeFromInput(value?: string | null) {
+  const selected = cleanText(value, 20)
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(selected)) return null
+
+  const [year, month, day] = selected.split('-').map(Number)
+  const start = new Date(Date.UTC(year, month - 1, day, 3, 0, 0, 0))
+  if (!Number.isFinite(start.getTime())) return null
+
+  const end = new Date(start)
+  end.setUTCDate(end.getUTCDate() + 1)
+  return {
+    date: selected,
+    startAt: start.toISOString(),
+    endAt: end.toISOString(),
+  }
+}
+
 export async function listMetaWhatsAppReplyIntents(
   input: {
     campaignId?: string | null
     intent?: ReplyIntent | string | null
+    date?: string | null
     limit?: number
   } = {},
   supabase = createAdminClient()
 ) {
   const limit = Math.min(Math.max(Number(input.limit || 200), 1), 500)
+  const dateRange = saoPauloDateRangeFromInput(input.date)
   let query = supabase
     .from('meta_whatsapp_reply_intents')
     .select(`
@@ -3225,6 +3244,7 @@ export async function listMetaWhatsAppReplyIntents(
 
   if (input.campaignId) query = query.eq('campaign_id', input.campaignId)
   if (input.intent) query = query.eq('intent', input.intent)
+  if (dateRange) query = query.gte('created_at', dateRange.startAt).lt('created_at', dateRange.endAt)
 
   const { data, error } = await query
   if (error) throw error
@@ -3233,5 +3253,11 @@ export async function listMetaWhatsAppReplyIntents(
   return {
     replies,
     summary: buildReplyIntentSummary(replies),
+    filters: {
+      date: dateRange?.date || null,
+      start_at: dateRange?.startAt || null,
+      end_at: dateRange?.endAt || null,
+      timezone: dateRange ? 'America/Sao_Paulo' : null,
+    },
   }
 }

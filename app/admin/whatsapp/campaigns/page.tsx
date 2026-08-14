@@ -803,6 +803,7 @@ export default function CampaignsPage() {
     const [metaReplyReport, setMetaReplyReport] = useState<MetaReplyReport | null>(null)
     const [loadingMetaReplyReport, setLoadingMetaReplyReport] = useState(false)
     const [metaReplyIntentFilter, setMetaReplyIntentFilter] = useState('')
+    const [metaReplyDateFilter, setMetaReplyDateFilter] = useState('')
     const [showCreateForm, setShowCreateForm] = useState(false)
     const [sending, setSending] = useState(false)
     const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
@@ -925,8 +926,14 @@ export default function CampaignsPage() {
     const loadMetaReplyReport = async () => {
         setLoadingMetaReplyReport(true)
         try {
-            const intentParam = metaReplyIntentFilter ? `&intent=${encodeURIComponent(metaReplyIntentFilter)}` : ''
-            const res = await fetch(`/api/admin/whatsapp/campaigns?provider=meta_whatsapp&report=reply_intents&limit=200${intentParam}`)
+            const params = new URLSearchParams({
+                provider: 'meta_whatsapp',
+                report: 'reply_intents',
+                limit: '200',
+            })
+            if (metaReplyIntentFilter) params.set('intent', metaReplyIntentFilter)
+            if (metaReplyDateFilter) params.set('date', metaReplyDateFilter)
+            const res = await fetch(`/api/admin/whatsapp/campaigns?${params.toString()}`)
             const data = await res.json()
             if (data.success) {
                 setMetaReplyReport({
@@ -1014,7 +1021,7 @@ export default function CampaignsPage() {
             loadMetaReplyReport()
             loadMetaDailyReport()
         }
-    }, [sendProvider, metaStatusFilter, metaReplyIntentFilter, metaDailyReportDate])
+    }, [sendProvider, metaStatusFilter, metaReplyIntentFilter, metaReplyDateFilter, metaDailyReportDate])
 
     const parseNumbers = (): string[] => {
         return numbersInput
@@ -1053,7 +1060,7 @@ export default function CampaignsPage() {
         const anchor = document.createElement('a')
 
         anchor.href = url
-        anchor.download = `respostas-meta-whatsapp-${intent || 'todas'}.csv`
+        anchor.download = `respostas-meta-whatsapp-${intent || 'todas'}${metaReplyDateFilter ? `-${metaReplyDateFilter}` : ''}.csv`
         anchor.click()
         URL.revokeObjectURL(url)
     }
@@ -3220,6 +3227,7 @@ export default function CampaignsPage() {
                     replyReport={metaReplyReport}
                     replyReportLoading={loadingMetaReplyReport}
                     replyIntentFilter={metaReplyIntentFilter}
+                    replyDateFilter={metaReplyDateFilter}
                     loading={loadingMetaCampaigns}
                     statusFilter={metaStatusFilter}
                     expandedCampaignId={expandedMetaCampaignId}
@@ -3230,6 +3238,7 @@ export default function CampaignsPage() {
                     onDailyReportRefresh={() => loadMetaDailyReport()}
                     onDailyReportExport={exportMetaDailyReportCsv}
                     onReplyIntentFilterChange={setMetaReplyIntentFilter}
+                    onReplyDateFilterChange={setMetaReplyDateFilter}
                     onRefresh={refreshMetaWorkspace}
                     onReplyRefresh={loadMetaReplyReport}
                     onReplyExport={exportMetaRepliesCsv}
@@ -3576,6 +3585,7 @@ function MetaOfficialCampaignPanel({
     replyReport,
     replyReportLoading,
     replyIntentFilter,
+    replyDateFilter,
     loading,
     statusFilter,
     expandedCampaignId,
@@ -3586,6 +3596,7 @@ function MetaOfficialCampaignPanel({
     onDailyReportRefresh,
     onDailyReportExport,
     onReplyIntentFilterChange,
+    onReplyDateFilterChange,
     onRefresh,
     onReplyRefresh,
     onReplyExport,
@@ -3604,6 +3615,7 @@ function MetaOfficialCampaignPanel({
     replyReport: MetaReplyReport | null
     replyReportLoading: boolean
     replyIntentFilter: string
+    replyDateFilter: string
     loading: boolean
     statusFilter: string
     expandedCampaignId: string
@@ -3614,6 +3626,7 @@ function MetaOfficialCampaignPanel({
     onDailyReportRefresh: () => void
     onDailyReportExport: () => void
     onReplyIntentFilterChange: (value: string) => void
+    onReplyDateFilterChange: (value: string) => void
     onRefresh: () => void
     onReplyRefresh: () => void
     onReplyExport: (intent?: string) => void
@@ -3979,7 +3992,9 @@ function MetaOfficialCampaignPanel({
                 report={replyReport}
                 loading={replyReportLoading}
                 intentFilter={replyIntentFilter}
+                dateFilter={replyDateFilter}
                 onIntentFilterChange={onReplyIntentFilterChange}
+                onDateFilterChange={onReplyDateFilterChange}
                 onRefresh={onReplyRefresh}
                 onExport={onReplyExport}
             />
@@ -5056,14 +5071,18 @@ function MetaReplyOpsPanel({
     report,
     loading,
     intentFilter,
+    dateFilter,
     onIntentFilterChange,
+    onDateFilterChange,
     onRefresh,
     onExport,
 }: {
     report: MetaReplyReport | null
     loading: boolean
     intentFilter: string
+    dateFilter: string
     onIntentFilterChange: (value: string) => void
+    onDateFilterChange: (value: string) => void
     onRefresh: () => void
     onExport: (intent?: string) => void
 }) {
@@ -5123,6 +5142,40 @@ function MetaReplyOpsPanel({
                         <option value="question">Perguntas</option>
                         <option value="unknown">Sem classificacao</option>
                     </select>
+                    <input
+                        type="date"
+                        value={dateFilter}
+                        onChange={event => onDateFilterChange(event.target.value)}
+                        title="Filtrar respostas pela data recebida"
+                        style={{
+                            minHeight: '36px',
+                            borderRadius: '8px',
+                            border: '1px solid var(--border)',
+                            background: 'var(--bg-primary)',
+                            color: 'var(--text-primary)',
+                            padding: '0 10px',
+                            fontSize: '0.76rem',
+                        }}
+                    />
+                    {dateFilter && (
+                        <button
+                            type="button"
+                            onClick={() => onDateFilterChange('')}
+                            style={{
+                                minHeight: '36px',
+                                borderRadius: '8px',
+                                border: '1px solid var(--border)',
+                                background: 'rgba(255,255,255,0.04)',
+                                color: 'var(--text-secondary)',
+                                padding: '0 10px',
+                                cursor: 'pointer',
+                                fontSize: '0.74rem',
+                                fontWeight: 800,
+                            }}
+                        >
+                            Limpar data
+                        </button>
+                    )}
                     <button
                         type="button"
                         onClick={() => onExport(intentFilter || undefined)}

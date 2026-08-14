@@ -48,6 +48,7 @@ export async function GET(request: NextRequest) {
                 const result = await listMetaWhatsAppReplyIntents({
                     campaignId: request.nextUrl.searchParams.get('campaign_id'),
                     intent: request.nextUrl.searchParams.get('intent'),
+                    date: request.nextUrl.searchParams.get('date'),
                     limit: Math.min(Math.max(Number(request.nextUrl.searchParams.get('limit') || 200), 1), 500),
                 })
                 return NextResponse.json({ success: true, provider: 'meta_whatsapp', ...result })
