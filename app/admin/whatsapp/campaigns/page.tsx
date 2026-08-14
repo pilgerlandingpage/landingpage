@@ -3407,6 +3407,7 @@ function campaignErrorGroups(recipients: MetaCampaignRecipient[], events: MetaCa
 }
 
 const META_CHART_COLORS = ['#b08a43', '#22c55e', '#38bdf8', '#ef4444', '#6366f1', '#f59e0b']
+type MetaCampaignWorkspaceTab = 'overview' | 'campaigns' | 'replies' | 'diagnostics'
 
 function MetaDailyReportPanel({
     report,
@@ -3636,6 +3637,7 @@ function MetaOfficialCampaignPanel({
     onRetryFailed: (campaignId: string, failedCount: number) => void
 }) {
     const [searchTerm, setSearchTerm] = useState('')
+    const [activeTab, setActiveTab] = useState<MetaCampaignWorkspaceTab>('overview')
     const normalizedSearch = searchTerm.trim().toLowerCase()
     const statusCounts = summary?.byStatus || {}
     const statusOptions = [
@@ -3660,6 +3662,13 @@ function MetaOfficialCampaignPanel({
         { label: 'Entrega', value: percentLabel(analytics?.rates?.deliveryRate ?? metricRate(summary?.delivered || 0, summary?.sent || summary?.recipients || 0)), color: '#22c55e' },
         { label: 'Leitura', value: percentLabel(analytics?.rates?.readRate ?? metricRate(summary?.read || 0, summary?.delivered || summary?.sent || summary?.recipients || 0)), color: '#0ea5e9' },
         { label: 'Falha', value: percentLabel(analytics?.rates?.failureRate ?? metricRate(summary?.failed || 0, summary?.recipients || 0)), color: '#ef4444' },
+    ]
+    const replySummary = replyReport?.summary || emptyMetaReplyReportSummary()
+    const tabItems: Array<{ key: MetaCampaignWorkspaceTab; label: string; count: number; icon: typeof MessageSquare }> = [
+        { key: 'overview', label: 'Resumo', count: dailyReport?.totals?.dispatched || summary?.total || 0, icon: BarChart3 },
+        { key: 'campaigns', label: 'Campanhas', count: summary?.total || campaigns.length, icon: Send },
+        { key: 'replies', label: 'Respostas', count: replySummary.total || 0, icon: MessageSquare },
+        { key: 'diagnostics', label: 'Diagnostico', count: analytics?.errorBreakdown?.length || summary?.failed || 0, icon: Activity },
     ]
     const filteredCampaigns = campaigns.filter(campaign => {
         if (!normalizedSearch) return true
@@ -3698,6 +3707,68 @@ function MetaOfficialCampaignPanel({
                 border: '1px solid var(--border)',
                 overflow: 'hidden',
             }}>
+                <div style={{
+                    padding: '12px 14px',
+                    borderBottom: '1px solid var(--border)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '10px',
+                    flexWrap: 'wrap',
+                    background: 'rgba(255,255,255,0.025)',
+                }}>
+                    <div>
+                        <strong style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>Painel Meta WhatsApp</strong>
+                        <p style={{ margin: '3px 0 0', color: 'var(--text-muted)', fontSize: '0.72rem' }}>
+                            Use as abas para separar operacao, respostas e diagnosticos sem misturar os dados.
+                        </p>
+                    </div>
+                    <div style={{ display: 'inline-flex', gap: '5px', padding: '4px', borderRadius: '10px', border: '1px solid var(--border)', background: 'rgba(0,0,0,0.08)', overflowX: 'auto' }}>
+                        {tabItems.map(tab => {
+                            const active = activeTab === tab.key
+                            const Icon = tab.icon
+                            return (
+                                <button
+                                    key={tab.key}
+                                    type="button"
+                                    onClick={() => setActiveTab(tab.key)}
+                                    style={{
+                                        minHeight: '34px',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        padding: '7px 10px',
+                                        cursor: 'pointer',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '7px',
+                                        background: active ? 'var(--gold)' : 'transparent',
+                                        color: active ? '#111827' : 'var(--text-secondary)',
+                                        fontSize: '0.76rem',
+                                        fontWeight: 900,
+                                        whiteSpace: 'nowrap',
+                                    }}
+                                >
+                                    <Icon size={14} />
+                                    {tab.label}
+                                    <span style={{
+                                        minWidth: '20px',
+                                        height: '20px',
+                                        borderRadius: '999px',
+                                        background: active ? 'rgba(17,24,39,0.12)' : 'rgba(148,163,184,0.14)',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        padding: '0 6px',
+                                        fontSize: '0.66rem',
+                                    }}>
+                                        {Number(tab.count || 0).toLocaleString('pt-BR')}
+                                    </span>
+                                </button>
+                            )
+                        })}
+                    </div>
+                </div>
+                {activeTab === 'campaigns' && (
                 <div style={{
                     padding: '12px 14px 10px',
                     borderBottom: '1px solid var(--border)',
@@ -3748,6 +3819,7 @@ function MetaOfficialCampaignPanel({
                         )
                     })}
                 </div>
+                )}
 
                 <div style={{
                     padding: '10px 14px',
@@ -3773,7 +3845,9 @@ function MetaOfficialCampaignPanel({
                         <input
                             value={searchTerm}
                             onChange={event => setSearchTerm(event.target.value)}
-                            placeholder="Pesquisar campanha, template, numero ou status"
+                            placeholder={activeTab === 'replies'
+                                ? 'Pesquisar contato, numero, resposta, campanha ou template'
+                                : 'Pesquisar campanha, template, numero ou status'}
                             style={{
                                 border: 0,
                                 outline: 'none',
@@ -3784,28 +3858,30 @@ function MetaOfficialCampaignPanel({
                             }}
                         />
                     </label>
-                    <select
-                        value={statusFilter}
-                        onChange={e => onStatusFilterChange(e.target.value)}
-                        style={{
-                            minHeight: '38px',
-                            padding: '8px 10px',
-                            borderRadius: '8px',
-                            border: '1px solid var(--border)',
-                            background: 'rgba(255,255,255,0.06)',
-                            color: 'var(--text-primary)',
-                            fontSize: '0.82rem',
-                        }}
-                    >
-                        <option value="">Todos os status</option>
-                        <option value="scheduled">Agendadas</option>
-                        <option value="queued">Na fila</option>
-                        <option value="sending">Enviando</option>
-                        <option value="paused">Pausadas</option>
-                        <option value="completed">Concluidas</option>
-                        <option value="failed">Falhas</option>
-                        <option value="cancelled">Canceladas</option>
-                    </select>
+                    {activeTab === 'campaigns' && (
+                        <select
+                            value={statusFilter}
+                            onChange={e => onStatusFilterChange(e.target.value)}
+                            style={{
+                                minHeight: '38px',
+                                padding: '8px 10px',
+                                borderRadius: '8px',
+                                border: '1px solid var(--border)',
+                                background: 'rgba(255,255,255,0.06)',
+                                color: 'var(--text-primary)',
+                                fontSize: '0.82rem',
+                            }}
+                        >
+                            <option value="">Todos os status</option>
+                            <option value="scheduled">Agendadas</option>
+                            <option value="queued">Na fila</option>
+                            <option value="sending">Enviando</option>
+                            <option value="paused">Pausadas</option>
+                            <option value="completed">Concluidas</option>
+                            <option value="failed">Falhas</option>
+                            <option value="cancelled">Canceladas</option>
+                        </select>
+                    )}
                     <button
                         type="button"
                         onClick={onRefresh}
@@ -3878,46 +3954,50 @@ function MetaOfficialCampaignPanel({
                     ))}
                 </div>
 
-                <MetaDailyReportPanel
-                    report={dailyReport}
-                    date={dailyReportDate}
-                    loading={dailyReportLoading}
-                    onDateChange={onDailyReportDateChange}
-                    onRefresh={onDailyReportRefresh}
-                    onExport={onDailyReportExport}
-                />
+                {activeTab === 'overview' && (
+                    <MetaDailyReportPanel
+                        report={dailyReport}
+                        date={dailyReportDate}
+                        loading={dailyReportLoading}
+                        onDateChange={onDailyReportDateChange}
+                        onRefresh={onDailyReportRefresh}
+                        onExport={onDailyReportExport}
+                    />
+                )}
 
-                <div style={{
-                    padding: '10px 14px',
-                    borderBottom: '1px solid var(--border)',
-                    display: 'flex',
-                    gap: '8px',
-                    alignItems: 'center',
-                    flexWrap: 'wrap',
-                }}>
-                    <strong style={{ color: 'var(--text-primary)', fontSize: '0.78rem', marginRight: '4px' }}>Numeros oficiais</strong>
-                    {senders.length === 0 ? (
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.76rem' }}>
-                            Nenhum numero Meta sincronizado.
-                        </span>
-                    ) : (
-                        senders.map(sender => (
-                            <span key={sender.id} style={{
-                                padding: '6px 9px',
-                                borderRadius: '999px',
-                                border: '1px solid var(--border)',
-                                color: sender.local_status === 'active' ? '#22c55e' : 'var(--text-muted)',
-                                background: sender.local_status === 'active' ? 'rgba(34,197,94,0.08)' : 'rgba(255,255,255,0.03)',
-                                fontSize: '0.72rem',
-                                fontWeight: 800,
-                            }}>
-                                {sender.display_name || sender.phone_number} | {sender.daily_sent_count}/{sender.daily_limit}
+                {activeTab === 'campaigns' && (
+                    <>
+                    <div style={{
+                        padding: '10px 14px',
+                        borderBottom: '1px solid var(--border)',
+                        display: 'flex',
+                        gap: '8px',
+                        alignItems: 'center',
+                        flexWrap: 'wrap',
+                    }}>
+                        <strong style={{ color: 'var(--text-primary)', fontSize: '0.78rem', marginRight: '4px' }}>Numeros oficiais</strong>
+                        {senders.length === 0 ? (
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.76rem' }}>
+                                Nenhum numero Meta sincronizado.
                             </span>
-                        ))
-                    )}
-                </div>
+                        ) : (
+                            senders.map(sender => (
+                                <span key={sender.id} style={{
+                                    padding: '6px 9px',
+                                    borderRadius: '999px',
+                                    border: '1px solid var(--border)',
+                                    color: sender.local_status === 'active' ? '#22c55e' : 'var(--text-muted)',
+                                    background: sender.local_status === 'active' ? 'rgba(34,197,94,0.08)' : 'rgba(255,255,255,0.03)',
+                                    fontSize: '0.72rem',
+                                    fontWeight: 800,
+                                }}>
+                                    {sender.display_name || sender.phone_number} | {sender.daily_sent_count}/{sender.daily_limit}
+                                </span>
+                            ))
+                        )}
+                    </div>
 
-                <div className="meta-campaigns-workspace">
+                    <div className="meta-campaigns-workspace">
                     <div className="meta-campaign-table-pane">
                         <div style={{
                             minWidth: '1020px',
@@ -3985,40 +4065,47 @@ function MetaOfficialCampaignPanel({
                         onManage={onManage}
                         onRetryFailed={onRetryFailed}
                     />
-                </div>
-            </div>
-
-            <MetaReplyOpsPanel
-                report={replyReport}
-                loading={replyReportLoading}
-                intentFilter={replyIntentFilter}
-                dateFilter={replyDateFilter}
-                onIntentFilterChange={onReplyIntentFilterChange}
-                onDateFilterChange={onReplyDateFilterChange}
-                onRefresh={onReplyRefresh}
-                onExport={onReplyExport}
-            />
-
-            <div style={{
-                borderRadius: '12px',
-                background: 'var(--bg-secondary)',
-                border: '1px solid var(--border)',
-                padding: '14px',
-            }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', marginBottom: '12px', flexWrap: 'wrap' }}>
-                    <div>
-                        <strong style={{ color: 'var(--text-primary)', fontSize: '0.92rem' }}>Relatorios e diagnosticos</strong>
-                        <p style={{ margin: '4px 0 0', color: 'var(--text-muted)', fontSize: '0.74rem' }}>
-                            Indicadores de saude, funil e principais erros das campanhas oficiais.
-                        </p>
                     </div>
-                </div>
-                <MetaCampaignDashboard
-                    summary={summary}
-                    analytics={analytics}
-                    campaigns={campaigns}
-                />
+                    </>
+                )}
             </div>
+
+            {activeTab === 'replies' && (
+                <MetaReplyOpsPanel
+                    report={replyReport}
+                    loading={replyReportLoading}
+                    intentFilter={replyIntentFilter}
+                    dateFilter={replyDateFilter}
+                    searchTerm={searchTerm}
+                    onIntentFilterChange={onReplyIntentFilterChange}
+                    onDateFilterChange={onReplyDateFilterChange}
+                    onRefresh={onReplyRefresh}
+                    onExport={onReplyExport}
+                />
+            )}
+
+            {activeTab === 'diagnostics' && (
+                <div style={{
+                    borderRadius: '12px',
+                    background: 'var(--bg-secondary)',
+                    border: '1px solid var(--border)',
+                    padding: '14px',
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', marginBottom: '12px', flexWrap: 'wrap' }}>
+                        <div>
+                            <strong style={{ color: 'var(--text-primary)', fontSize: '0.92rem' }}>Relatorios e diagnosticos</strong>
+                            <p style={{ margin: '4px 0 0', color: 'var(--text-muted)', fontSize: '0.74rem' }}>
+                                Indicadores de saude, funil e principais erros das campanhas oficiais.
+                            </p>
+                        </div>
+                    </div>
+                    <MetaCampaignDashboard
+                        summary={summary}
+                        analytics={analytics}
+                        campaigns={campaigns}
+                    />
+                </div>
+            )}
         </div>
     )
 }
@@ -5057,6 +5144,62 @@ function emptyMetaReplyReportSummary(): MetaReplyReportSummary {
     }
 }
 
+function incrementMetaReplyGroup(map: Map<string, MetaReplyReportGroup>, key: string, reply: MetaReplyIntent) {
+    const intent = String(reply.intent || 'unknown')
+    const existing = map.get(key) || {
+        key,
+        campaign_id: reply.campaign_id || null,
+        campaign_name: reply.campaign_name || '',
+        template_name: reply.template_name || '',
+        count: 0,
+        interested: 0,
+        optOut: 0,
+        question: 0,
+        unknown: 0,
+        lastSeenAt: null,
+    }
+
+    existing.count += 1
+    if (intent === 'interested') existing.interested += 1
+    else if (intent === 'opt_out') existing.optOut += 1
+    else if (intent === 'question') existing.question += 1
+    else existing.unknown += 1
+
+    if (reply.created_at && (!existing.lastSeenAt || new Date(reply.created_at).getTime() > new Date(String(existing.lastSeenAt)).getTime())) {
+        existing.lastSeenAt = reply.created_at
+    }
+
+    map.set(key, existing)
+}
+
+function buildMetaReplyReportSummary(replies: MetaReplyIntent[]): MetaReplyReportSummary {
+    const byTemplate = new Map<string, MetaReplyReportGroup>()
+    const byCampaign = new Map<string, MetaReplyReportGroup>()
+    const byIntent: Record<string, number> = {}
+
+    replies.forEach(reply => {
+        const intent = String(reply.intent || 'unknown')
+        byIntent[intent] = (byIntent[intent] || 0) + 1
+        incrementMetaReplyGroup(byTemplate, String(reply.template_name || 'Sem template'), reply)
+        incrementMetaReplyGroup(byCampaign, String(reply.campaign_id || reply.campaign_name || 'Sem campanha'), reply)
+    })
+
+    return {
+        total: replies.length,
+        interested: byIntent.interested || 0,
+        optOut: byIntent.opt_out || 0,
+        question: byIntent.question || 0,
+        unknown: byIntent.unknown || 0,
+        autoRepliesSent: replies.filter(reply => reply.auto_reply_status === 'sent').length,
+        autoRepliesFailed: replies.filter(reply => reply.auto_reply_status === 'failed').length,
+        notificationsSent: replies.filter(reply => reply.notified_status === 'sent').length,
+        notificationsFailed: replies.filter(reply => reply.notified_status === 'failed').length,
+        byIntent,
+        byTemplate: Array.from(byTemplate.values()).sort((a, b) => b.count - a.count),
+        byCampaign: Array.from(byCampaign.values()).sort((a, b) => b.count - a.count),
+    }
+}
+
 function metaReplyPreview(reply: MetaReplyIntent) {
     return reply.button_text || reply.button_payload || reply.raw_text || '-'
 }
@@ -5072,6 +5215,7 @@ function MetaReplyOpsPanel({
     loading,
     intentFilter,
     dateFilter,
+    searchTerm,
     onIntentFilterChange,
     onDateFilterChange,
     onRefresh,
@@ -5081,13 +5225,27 @@ function MetaReplyOpsPanel({
     loading: boolean
     intentFilter: string
     dateFilter: string
+    searchTerm?: string
     onIntentFilterChange: (value: string) => void
     onDateFilterChange: (value: string) => void
     onRefresh: () => void
     onExport: (intent?: string) => void
 }) {
-    const summary = report?.summary || emptyMetaReplyReportSummary()
-    const replies = report?.replies || []
+    const normalizedSearch = String(searchTerm || '').trim().toLowerCase()
+    const rawReplies = report?.replies || []
+    const replies = normalizedSearch
+        ? rawReplies.filter(reply => [
+            reply.contact_name,
+            reply.contact_phone,
+            reply.intent,
+            reply.raw_text,
+            reply.button_text,
+            reply.button_payload,
+            reply.campaign_name,
+            reply.template_name,
+        ].some(value => String(value || '').toLowerCase().includes(normalizedSearch)))
+        : rawReplies
+    const summary = normalizedSearch ? buildMetaReplyReportSummary(replies) : report?.summary || emptyMetaReplyReportSummary()
     const metricItems = [
         { label: 'Respostas', value: summary.total, icon: MessageSquare, color: 'var(--gold)' },
         { label: 'Interessados', value: summary.interested, icon: Users, color: '#22c55e' },
