@@ -9,6 +9,7 @@ import {
 import { inngest } from '@/lib/inngest/client'
 import {
     createMetaWhatsAppCampaign,
+    getMetaWhatsAppDailyReport,
     getMetaWhatsAppCampaignDetail,
     listMetaWhatsAppCampaigns,
     manageMetaWhatsAppCampaign,
@@ -50,6 +51,12 @@ export async function GET(request: NextRequest) {
                     limit: Math.min(Math.max(Number(request.nextUrl.searchParams.get('limit') || 200), 1), 500),
                 })
                 return NextResponse.json({ success: true, provider: 'meta_whatsapp', ...result })
+            }
+            if (report === 'daily') {
+                const result = await getMetaWhatsAppDailyReport({
+                    date: request.nextUrl.searchParams.get('date'),
+                })
+                return NextResponse.json({ success: true, provider: 'meta_whatsapp', report: 'daily', ...result })
             }
 
             const campaignId = request.nextUrl.searchParams.get('campaign_id')

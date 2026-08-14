@@ -47,6 +47,10 @@ export interface ListMetaWhatsAppCampaignsInput {
   limit?: number
 }
 
+export interface GetMetaWhatsAppDailyReportInput {
+  date?: string | null
+}
+
 type MetaWhatsAppAnalyticsBucket = {
   date: string
   campaigns: number
@@ -189,6 +193,11 @@ function isMetaSenderReady(sender: any) {
 function asNumber(value: unknown) {
   const parsed = Number(value || 0)
   return Number.isFinite(parsed) ? parsed : 0
+}
+
+function metricRate(part: number, total: number) {
+  if (!total) return 0
+  return Math.round((part / total) * 1000) / 10
 }
 
 function nextSaoPauloMidnightIso(from = new Date()) {
@@ -1019,6 +1028,245 @@ function normalizeCampaignStatusFilter(value?: string | null) {
   const selected = cleanText(value, 40).toLowerCase()
   const allowed = new Set(['draft', 'scheduled', 'preparing', 'queued', 'sending', 'paused', 'completed', 'cancelled', 'failed'])
   return allowed.has(selected) ? selected : ''
+}
+
+function saoPauloDateParts(from = new Date()) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Sao_Paulo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(from)
+  const byType = Object.fromEntries(parts.map(part => [part.type, part.value]))
+  return {
+    year: Number(byType.year),
+    month: Number(byType.month),
+    day: Number(byType.day),
+  }
+}
+
+function normalizeReportDate(value?: string | null) {
+  const selected = cleanText(value, 20)
+  if (/^\d{4}-\d{2}-\d{2}$/.test(selected)) return selected
+
+  const today = saoPauloDateParts(new Date())
+  const yesterday = new Date(Date.UTC(today.year, today.month - 1, today.day - 1, 3, 0, 0, 0))
+  const parts = saoPauloDateParts(yesterday)
+  return [
+    String(parts.year).padStart(4, '0'),
+    String(parts.month).padStart(2, '0'),
+    String(parts.day).padStart(2, '0'),
+  ].join('-')
+}
+
+function saoPauloDateRangeIso(date: string) {
+  const [year, month, day] = date.split('-').map(Number)
+  const start = new Date(Date.UTC(year, month - 1, day, 3, 0, 0, 0))
+  const end = new Date(start)
+  end.setUTCDate(end.getUTCDate() + 1)
+  return { startAt: start.toISOString(), endAt: end.toISOString() }
+}
+
+function dateInRange(value: unknown, startAt: string, endAt: string) {
+  const raw = cleanText(value, 80)
+  if (!raw) return false
+  const time = new Date(raw).getTime()
+  return Number.isFinite(time)
+    && time >= new Date(startAt).getTime()
+    && time < new Date(endAt).getTime()
+}
+
+function rowCampaign(row: any) {
+  if (Array.isArray(row?.campaign)) return row.campaign[0] || null
+  return row?.campaign || null
+}
+
+function dailyCampaignKey(row: any) {
+  return cleanText(row?.campaign_id || rowCampaign(row)?.id || 'sem-campanha', 120) || 'sem-campanha'
+}
+
+function emptyDailyCampaignRow(row: any) {
+  const campaign = rowCampaign(row)
+  return {
+    campaign_id: cleanText(row?.campaign_id || campaign?.id, 80) || null,
+    campaign_name: cleanText(campaign?.name || row?.campaign_name, 180) || 'Sem campanha vinculada',
+    template_name: cleanText(campaign?.template_name || row?.template_name, 120) || 'Sem template',
+    template_language: cleanText(campaign?.template_language, 40) || null,
+    campaign_type: cleanText(campaign?.campaign_type, 60) || null,
+    dispatched: 0,
+    delivered: 0,
+    read: 0,
+    failed: 0,
+    replies: 0,
+    positive_replies: 0,
+    cost_amount: 0,
+  }
+}
+
+function incrementDailyCampaignRow(
+  map: Map<string, ReturnType<typeof emptyDailyCampaignRow>>,
+  row: any,
+  updates: Partial<ReturnType<typeof emptyDailyCampaignRow>>
+) {
+  const key = dailyCampaignKey(row)
+  const current = map.get(key) || emptyDailyCampaignRow(row)
+  current.dispatched += Number(updates.dispatched || 0)
+  current.delivered += Number(updates.delivered || 0)
+  current.read += Number(updates.read || 0)
+  current.failed += Number(updates.failed || 0)
+  current.replies += Number(updates.replies || 0)
+  current.positive_replies += Number(updates.positive_replies || 0)
+  current.cost_amount += Number(updates.cost_amount || 0)
+  map.set(key, current)
+}
+
+export async function getMetaWhatsAppDailyReport(
+  input: GetMetaWhatsAppDailyReportInput = {},
+  supabase = createAdminClient()
+) {
+  const date = normalizeReportDate(input.date)
+  const { startAt, endAt } = saoPauloDateRangeIso(date)
+
+  const [recipientsResult, repliesResult] = await Promise.all([
+    supabase
+      .from('meta_whatsapp_campaign_recipients')
+      .select(`
+        id,
+        campaign_id,
+        recipient_phone,
+        recipient_name,
+        status,
+        sent_at,
+        delivered_at,
+        read_at,
+        failed_at,
+        cost_amount,
+        cost_currency,
+        cost_status,
+        cost_recorded_at,
+        created_at,
+        updated_at,
+        campaign:meta_whatsapp_campaigns(id, name, status, campaign_type, template_name, template_language, metadata)
+      `)
+      .or(`sent_at.gte.${startAt},delivered_at.gte.${startAt},read_at.gte.${startAt},failed_at.gte.${startAt},cost_recorded_at.gte.${startAt},updated_at.gte.${startAt}`)
+      .order('updated_at', { ascending: false })
+      .limit(20000),
+    supabase
+      .from('meta_whatsapp_reply_intents')
+      .select(`
+        id,
+        campaign_id,
+        contact_phone,
+        contact_name,
+        intent,
+        button_text,
+        button_payload,
+        raw_text,
+        campaign_name,
+        template_name,
+        created_at,
+        campaign:meta_whatsapp_campaigns(id, name, status, campaign_type, template_name, template_language, metadata)
+      `)
+      .gte('created_at', startAt)
+      .lt('created_at', endAt)
+      .order('created_at', { ascending: false })
+      .limit(20000),
+  ])
+
+  if (recipientsResult.error) throw recipientsResult.error
+  if (repliesResult.error) throw repliesResult.error
+
+  const campaignRows = new Map<string, ReturnType<typeof emptyDailyCampaignRow>>()
+  const recipients = ((recipientsResult.data || []) as any[])
+    .filter(row => !asMetadata(rowCampaign(row)?.metadata).deleted_from_panel_at)
+
+  let dispatched = 0
+  let delivered = 0
+  let read = 0
+  let failed = 0
+  let costAmount = 0
+  const currencies = new Set<string>()
+
+  recipients.forEach(row => {
+    const sentInRange = dateInRange(row.sent_at, startAt, endAt)
+    const deliveredInRange = dateInRange(row.delivered_at, startAt, endAt)
+    const readInRange = dateInRange(row.read_at, startAt, endAt)
+    const failedInRange = dateInRange(row.failed_at, startAt, endAt)
+    const fallbackSentInRange = !row.sent_at
+      && ['sent', 'delivered', 'read'].includes(cleanText(row.status, 40).toLowerCase())
+      && (deliveredInRange || readInRange || dateInRange(row.updated_at, startAt, endAt))
+    const dispatchedInRange = sentInRange || fallbackSentInRange
+    const deliveredCounted = deliveredInRange || (!row.delivered_at && readInRange)
+    const failedCounted = failedInRange
+      || (cleanText(row.status, 40).toLowerCase() === 'failed' && dateInRange(row.updated_at, startAt, endAt))
+    const rowCost = dispatchedInRange ? asNumber(row.cost_amount) : 0
+
+    if (dispatchedInRange) dispatched += 1
+    if (deliveredCounted) delivered += 1
+    if (readInRange) read += 1
+    if (failedCounted) failed += 1
+    if (rowCost > 0) {
+      costAmount += rowCost
+      const currency = cleanText(row.cost_currency || 'BRL', 12)
+      if (currency) currencies.add(currency)
+    }
+
+    if (dispatchedInRange || deliveredCounted || readInRange || failedCounted || rowCost > 0) {
+      incrementDailyCampaignRow(campaignRows, row, {
+        dispatched: dispatchedInRange ? 1 : 0,
+        delivered: deliveredCounted ? 1 : 0,
+        read: readInRange ? 1 : 0,
+        failed: failedCounted ? 1 : 0,
+        cost_amount: rowCost,
+      })
+    }
+  })
+
+  const replies = ((repliesResult.data || []) as any[])
+    .filter(row => !asMetadata(rowCampaign(row)?.metadata).deleted_from_panel_at)
+  let positiveReplies = 0
+  let optOutReplies = 0
+  let questionReplies = 0
+  let unknownReplies = 0
+
+  replies.forEach(row => {
+    const intent = cleanText(row.intent, 40).toLowerCase()
+    if (intent === 'interested') positiveReplies += 1
+    else if (intent === 'opt_out') optOutReplies += 1
+    else if (intent === 'question') questionReplies += 1
+    else unknownReplies += 1
+
+    incrementDailyCampaignRow(campaignRows, row, {
+      replies: 1,
+      positive_replies: intent === 'interested' ? 1 : 0,
+    })
+  })
+
+  const campaigns = Array.from(campaignRows.values())
+    .sort((a, b) => b.dispatched - a.dispatched || b.replies - a.replies || a.campaign_name.localeCompare(b.campaign_name))
+
+  return {
+    date,
+    timezone: 'America/Sao_Paulo',
+    start_at: startAt,
+    end_at: endAt,
+    totals: {
+      dispatched,
+      delivered,
+      read,
+      failed,
+      replies: replies.length,
+      positive_replies: positiveReplies,
+      opt_out_replies: optOutReplies,
+      question_replies: questionReplies,
+      unknown_replies: unknownReplies,
+      cost_amount: Number(costAmount.toFixed(4)),
+      cost_currency: currencies.size === 1 ? Array.from(currencies)[0] : 'BRL',
+      response_rate: metricRate(replies.length, dispatched),
+      positive_response_rate: metricRate(positiveReplies, dispatched),
+    },
+    campaigns,
+  }
 }
 
 export async function listMetaWhatsAppCampaigns(input: ListMetaWhatsAppCampaignsInput = {}, supabase = createAdminClient()) {

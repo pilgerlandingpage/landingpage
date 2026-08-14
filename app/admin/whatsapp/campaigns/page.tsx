@@ -7,7 +7,7 @@ import {
     Plus, Trash2, Pause, Play, FileText, Image, Mic, Video,
     Tag, RefreshCw, MessageSquare, ChevronUp,
     Smartphone, Search, BarChart3, TrendingUp, Eye, Inbox, Activity,
-    XCircle, Upload, Download, Bot
+    XCircle, Upload, Download, Bot, Calendar, DollarSign
 } from 'lucide-react'
 import {
     Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart,
@@ -276,6 +276,44 @@ interface MetaCampaignAnalytics {
     }>
 }
 
+interface MetaDailyReportCampaign {
+    campaign_id?: string | null
+    campaign_name: string
+    template_name: string
+    template_language?: string | null
+    campaign_type?: string | null
+    dispatched: number
+    delivered: number
+    read: number
+    failed: number
+    replies: number
+    positive_replies: number
+    cost_amount: number
+}
+
+interface MetaDailyReport {
+    date: string
+    timezone: string
+    start_at: string
+    end_at: string
+    totals: {
+        dispatched: number
+        delivered: number
+        read: number
+        failed: number
+        replies: number
+        positive_replies: number
+        opt_out_replies: number
+        question_replies: number
+        unknown_replies: number
+        cost_amount: number
+        cost_currency: string
+        response_rate: number
+        positive_response_rate: number
+    }
+    campaigns: MetaDailyReportCampaign[]
+}
+
 interface MetaRecipientDraft {
     phone: string
     name?: string
@@ -468,6 +506,35 @@ function emptyContactListUsage(): MetaContactListUsageSummary {
 
 function contactListUsage(list?: MetaContactList | null) {
     return list?.usage || emptyContactListUsage()
+}
+
+function saoPauloDateInputDaysAgo(daysAgo: number) {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'America/Sao_Paulo',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    }).formatToParts(new Date())
+    const byType = Object.fromEntries(parts.map(part => [part.type, part.value]))
+    const date = new Date(Date.UTC(
+        Number(byType.year),
+        Number(byType.month) - 1,
+        Number(byType.day) - daysAgo,
+        3,
+        0,
+        0,
+        0
+    ))
+    return date.toISOString().slice(0, 10)
+}
+
+function formatCurrencyBRL(value: number, currency = 'BRL') {
+    return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: currency || 'BRL',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    }).format(Number(value || 0))
 }
 
 function metaSenderUsage(sender: MetaSender) {
@@ -725,6 +792,9 @@ export default function CampaignsPage() {
     const [validatingContactListId, setValidatingContactListId] = useState('')
     const [metaSummary, setMetaSummary] = useState<MetaCampaignSummary | null>(null)
     const [metaAnalytics, setMetaAnalytics] = useState<MetaCampaignAnalytics | null>(null)
+    const [metaDailyReport, setMetaDailyReport] = useState<MetaDailyReport | null>(null)
+    const [metaDailyReportDate, setMetaDailyReportDate] = useState(() => saoPauloDateInputDaysAgo(1))
+    const [loadingMetaDailyReport, setLoadingMetaDailyReport] = useState(false)
     const [metaStatusFilter, setMetaStatusFilter] = useState('')
     const [expandedMetaCampaignId, setExpandedMetaCampaignId] = useState('')
     const [loadingMetaCampaignDetail, setLoadingMetaCampaignDetail] = useState('')
@@ -873,11 +943,34 @@ export default function CampaignsPage() {
         }
     }
 
+    const loadMetaDailyReport = async (date = metaDailyReportDate) => {
+        setLoadingMetaDailyReport(true)
+        try {
+            const params = new URLSearchParams({
+                provider: 'meta_whatsapp',
+                report: 'daily',
+                date,
+            })
+            const res = await fetch(`/api/admin/whatsapp/campaigns?${params.toString()}`)
+            const data = await res.json()
+            if (data.success) {
+                setMetaDailyReport(data)
+            } else {
+                setFeedback({ type: 'error', text: data.message || 'Erro ao carregar relatorio diario Meta' })
+            }
+        } catch {
+            setFeedback({ type: 'error', text: 'Erro ao carregar relatorio diario Meta' })
+        } finally {
+            setLoadingMetaDailyReport(false)
+        }
+    }
+
     const refreshMetaWorkspace = async () => {
         await Promise.all([
             loadMetaCampaigns(),
             loadMetaContactLists(),
             loadMetaReplyReport(),
+            loadMetaDailyReport(),
         ])
     }
 
@@ -919,8 +1012,9 @@ export default function CampaignsPage() {
             loadMetaCampaigns()
             loadMetaContactLists()
             loadMetaReplyReport()
+            loadMetaDailyReport()
         }
-    }, [sendProvider, metaStatusFilter, metaReplyIntentFilter])
+    }, [sendProvider, metaStatusFilter, metaReplyIntentFilter, metaDailyReportDate])
 
     const parseNumbers = (): string[] => {
         return numbersInput
@@ -960,6 +1054,63 @@ export default function CampaignsPage() {
 
         anchor.href = url
         anchor.download = `respostas-meta-whatsapp-${intent || 'todas'}.csv`
+        anchor.click()
+        URL.revokeObjectURL(url)
+    }
+
+    const exportMetaDailyReportCsv = () => {
+        if (!metaDailyReport) {
+            setFeedback({ type: 'error', text: 'Carregue um relatorio diario antes de exportar.' })
+            return
+        }
+
+        const totals = metaDailyReport.totals
+        const summaryRows = [
+            ['data', metaDailyReport.date],
+            ['fuso', metaDailyReport.timezone],
+            ['disparos_aceitos_meta', String(totals.dispatched || 0)],
+            ['entregues', String(totals.delivered || 0)],
+            ['lidas', String(totals.read || 0)],
+            ['falhas', String(totals.failed || 0)],
+            ['respostas_totais', String(totals.replies || 0)],
+            ['respostas_positivas', String(totals.positive_replies || 0)],
+            ['respostas_saida', String(totals.opt_out_replies || 0)],
+            ['perguntas', String(totals.question_replies || 0)],
+            ['custo', String(totals.cost_amount || 0).replace('.', ',')],
+            ['moeda', totals.cost_currency || 'BRL'],
+        ].map(row => row.map(escapeAudienceCell).join(';'))
+
+        const campaignRows = [
+            ['campanha', 'template', 'idioma', 'disparos', 'entregues', 'lidas', 'falhas', 'respostas', 'positivas', 'custo']
+                .map(escapeAudienceCell)
+                .join(';'),
+            ...metaDailyReport.campaigns.map(campaign => [
+                campaign.campaign_name,
+                campaign.template_name,
+                campaign.template_language || '',
+                String(campaign.dispatched || 0),
+                String(campaign.delivered || 0),
+                String(campaign.read || 0),
+                String(campaign.failed || 0),
+                String(campaign.replies || 0),
+                String(campaign.positive_replies || 0),
+                String(campaign.cost_amount || 0).replace('.', ','),
+            ].map(escapeAudienceCell).join(';')),
+        ]
+
+        const csv = [
+            'resumo',
+            ...summaryRows,
+            '',
+            'campanhas',
+            ...campaignRows,
+        ].join('\n')
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+        const url = URL.createObjectURL(blob)
+        const anchor = document.createElement('a')
+
+        anchor.href = url
+        anchor.download = `relatorio-meta-whatsapp-${metaDailyReport.date}.csv`
         anchor.click()
         URL.revokeObjectURL(url)
     }
@@ -3063,6 +3214,9 @@ export default function CampaignsPage() {
                     senders={metaSenders}
                     summary={metaSummary}
                     analytics={metaAnalytics}
+                    dailyReport={metaDailyReport}
+                    dailyReportDate={metaDailyReportDate}
+                    dailyReportLoading={loadingMetaDailyReport}
                     replyReport={metaReplyReport}
                     replyReportLoading={loadingMetaReplyReport}
                     replyIntentFilter={metaReplyIntentFilter}
@@ -3072,6 +3226,9 @@ export default function CampaignsPage() {
                     loadingDetailCampaignId={loadingMetaCampaignDetail}
                     campaignDetails={metaCampaignDetails}
                     onStatusFilterChange={setMetaStatusFilter}
+                    onDailyReportDateChange={setMetaDailyReportDate}
+                    onDailyReportRefresh={() => loadMetaDailyReport()}
+                    onDailyReportExport={exportMetaDailyReportCsv}
                     onReplyIntentFilterChange={setMetaReplyIntentFilter}
                     onRefresh={refreshMetaWorkspace}
                     onReplyRefresh={loadMetaReplyReport}
@@ -3242,11 +3399,180 @@ function campaignErrorGroups(recipients: MetaCampaignRecipient[], events: MetaCa
 
 const META_CHART_COLORS = ['#b08a43', '#22c55e', '#38bdf8', '#ef4444', '#6366f1', '#f59e0b']
 
+function MetaDailyReportPanel({
+    report,
+    date,
+    loading,
+    onDateChange,
+    onRefresh,
+    onExport,
+}: {
+    report: MetaDailyReport | null
+    date: string
+    loading: boolean
+    onDateChange: (value: string) => void
+    onRefresh: () => void
+    onExport: () => void
+}) {
+    const totals = report?.totals
+    const costCurrency = totals?.cost_currency || 'BRL'
+    const items = [
+        { label: 'Disparos do dia', value: totals?.dispatched || 0, detail: 'Aceitos pela Meta', icon: Send, color: '#38bdf8' },
+        { label: 'Respostas totais', value: totals?.replies || 0, detail: percentLabel(totals?.response_rate || 0), icon: MessageSquare, color: '#f59e0b' },
+        { label: 'Respostas positivas', value: totals?.positive_replies || 0, detail: percentLabel(totals?.positive_response_rate || 0), icon: CheckCircle2, color: '#22c55e' },
+        { label: 'Custo do dia', value: formatCurrencyBRL(totals?.cost_amount || 0, costCurrency), detail: costCurrency, icon: DollarSign, color: 'var(--gold)' },
+    ]
+
+    return (
+        <div style={{
+            padding: '12px 14px',
+            borderBottom: '1px solid var(--border)',
+            display: 'grid',
+            gap: '12px',
+            background: 'rgba(176,138,67,0.035)',
+        }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
+                <div>
+                    <strong style={{ color: 'var(--text-primary)', fontSize: '0.86rem', display: 'flex', alignItems: 'center', gap: '7px' }}>
+                        <Calendar size={15} style={{ color: 'var(--gold)' }} /> Relatorio diario Meta
+                    </strong>
+                    <p style={{ margin: '4px 0 0', color: 'var(--text-muted)', fontSize: '0.72rem', lineHeight: 1.4 }}>
+                        Recorte pelo fuso America/Sao_Paulo. Disparos sao mensagens aceitas pela Meta no dia selecionado.
+                    </p>
+                </div>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <input
+                        type="date"
+                        value={date}
+                        onChange={event => onDateChange(event.target.value)}
+                        style={{
+                            minHeight: '36px',
+                            padding: '8px 10px',
+                            borderRadius: '8px',
+                            border: '1px solid var(--border)',
+                            background: 'rgba(255,255,255,0.06)',
+                            color: 'var(--text-primary)',
+                            fontSize: '0.8rem',
+                        }}
+                    />
+                    <button
+                        type="button"
+                        onClick={onRefresh}
+                        disabled={loading}
+                        style={{
+                            minHeight: '36px',
+                            padding: '8px 10px',
+                            borderRadius: '8px',
+                            border: '1px solid var(--border)',
+                            background: 'rgba(255,255,255,0.04)',
+                            color: 'var(--text-secondary)',
+                            cursor: loading ? 'not-allowed' : 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            fontWeight: 800,
+                            fontSize: '0.78rem',
+                        }}
+                    >
+                        <RefreshCw size={14} className={loading ? 'spin' : ''} /> Atualizar
+                    </button>
+                    <button
+                        type="button"
+                        onClick={onExport}
+                        disabled={!report || loading}
+                        style={{
+                            minHeight: '36px',
+                            padding: '8px 10px',
+                            borderRadius: '8px',
+                            border: '1px solid rgba(176,138,67,0.42)',
+                            background: 'rgba(176,138,67,0.13)',
+                            color: 'var(--gold)',
+                            cursor: !report || loading ? 'not-allowed' : 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            fontWeight: 900,
+                            fontSize: '0.78rem',
+                        }}
+                    >
+                        <Download size={14} /> Exportar CSV
+                    </button>
+                </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(155px, 1fr))', gap: '10px' }}>
+                {items.map(item => {
+                    const Icon = item.icon
+                    return (
+                        <div key={item.label} style={{
+                            border: '1px solid var(--border)',
+                            borderRadius: '10px',
+                            padding: '11px',
+                            background: 'rgba(255,255,255,0.04)',
+                            display: 'grid',
+                            gap: '6px',
+                        }}>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', fontSize: '0.68rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                                <Icon size={14} style={{ color: item.color }} /> {item.label}
+                            </span>
+                            <strong style={{ color: item.color, fontSize: '1rem' }}>
+                                {typeof item.value === 'number' ? item.value.toLocaleString('pt-BR') : item.value}
+                            </strong>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>{item.detail}</span>
+                        </div>
+                    )
+                })}
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', color: 'var(--text-muted)', fontSize: '0.72rem' }}>
+                <span>Entregues: <strong style={{ color: '#22c55e' }}>{Number(totals?.delivered || 0).toLocaleString('pt-BR')}</strong></span>
+                <span>Lidas: <strong style={{ color: '#0ea5e9' }}>{Number(totals?.read || 0).toLocaleString('pt-BR')}</strong></span>
+                <span>Falhas: <strong style={{ color: '#ef4444' }}>{Number(totals?.failed || 0).toLocaleString('pt-BR')}</strong></span>
+                <span>Saidas: <strong style={{ color: '#ef4444' }}>{Number(totals?.opt_out_replies || 0).toLocaleString('pt-BR')}</strong></span>
+                <span>Perguntas: <strong style={{ color: '#f59e0b' }}>{Number(totals?.question_replies || 0).toLocaleString('pt-BR')}</strong></span>
+            </div>
+
+            {(report?.campaigns?.length || 0) > 0 && (
+                <div style={{ display: 'grid', gap: '6px' }}>
+                    {report?.campaigns.slice(0, 6).map(campaign => (
+                        <div
+                            key={campaign.campaign_id || `${campaign.campaign_name}-${campaign.template_name}`}
+                            style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'minmax(0, 1.3fr) repeat(4, minmax(70px, auto))',
+                                gap: '8px',
+                                alignItems: 'center',
+                                padding: '7px 9px',
+                                borderRadius: '8px',
+                                background: 'rgba(255,255,255,0.035)',
+                                color: 'var(--text-muted)',
+                                fontSize: '0.72rem',
+                                overflowX: 'auto',
+                            }}
+                        >
+                            <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text-secondary)', fontWeight: 800 }}>
+                                {campaign.campaign_name} | {campaign.template_name}
+                            </span>
+                            <span>{campaign.dispatched} disp.</span>
+                            <span>{campaign.replies} resp.</span>
+                            <span style={{ color: '#22c55e' }}>{campaign.positive_replies} pos.</span>
+                            <span>{formatCurrencyBRL(campaign.cost_amount || 0, costCurrency)}</span>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    )
+}
+
 function MetaOfficialCampaignPanel({
     campaigns,
     senders,
     summary,
     analytics,
+    dailyReport,
+    dailyReportDate,
+    dailyReportLoading,
     replyReport,
     replyReportLoading,
     replyIntentFilter,
@@ -3256,6 +3582,9 @@ function MetaOfficialCampaignPanel({
     loadingDetailCampaignId,
     campaignDetails,
     onStatusFilterChange,
+    onDailyReportDateChange,
+    onDailyReportRefresh,
+    onDailyReportExport,
     onReplyIntentFilterChange,
     onRefresh,
     onReplyRefresh,
@@ -3269,6 +3598,9 @@ function MetaOfficialCampaignPanel({
     senders: MetaSender[]
     summary: MetaCampaignSummary | null
     analytics: MetaCampaignAnalytics | null
+    dailyReport: MetaDailyReport | null
+    dailyReportDate: string
+    dailyReportLoading: boolean
     replyReport: MetaReplyReport | null
     replyReportLoading: boolean
     replyIntentFilter: string
@@ -3278,6 +3610,9 @@ function MetaOfficialCampaignPanel({
     loadingDetailCampaignId: string
     campaignDetails: Record<string, MetaCampaignDetail>
     onStatusFilterChange: (value: string) => void
+    onDailyReportDateChange: (value: string) => void
+    onDailyReportRefresh: () => void
+    onDailyReportExport: () => void
     onReplyIntentFilterChange: (value: string) => void
     onRefresh: () => void
     onReplyRefresh: () => void
@@ -3529,6 +3864,15 @@ function MetaOfficialCampaignPanel({
                         </div>
                     ))}
                 </div>
+
+                <MetaDailyReportPanel
+                    report={dailyReport}
+                    date={dailyReportDate}
+                    loading={dailyReportLoading}
+                    onDateChange={onDailyReportDateChange}
+                    onRefresh={onDailyReportRefresh}
+                    onExport={onDailyReportExport}
+                />
 
                 <div style={{
                     padding: '10px 14px',
