@@ -3,6 +3,9 @@ import { processMetaWhatsAppContactListValidationBatch } from '@/lib/meta/whatsa
 import { processMetaWhatsAppCampaignBatch } from '@/lib/meta/whatsapp-campaigns'
 import { inngest } from './client'
 
+const DEFAULT_META_WHATSAPP_BATCH_SIZE = 50
+const META_WHATSAPP_BATCH_COOLDOWN = '60s'
+
 function minutesUntil(value?: string | null) {
   if (!value) return 0
   const target = new Date(value).getTime()
@@ -47,7 +50,7 @@ export const metaWhatsAppCampaignCreated = inngest.createFunction(
       data: {
         campaign_id: campaignId,
         batch_number: 1,
-        batch_size: event.data.batch_size || 25,
+        batch_size: event.data.batch_size || DEFAULT_META_WHATSAPP_BATCH_SIZE,
         reason: event.data.reason || 'campaign_created',
       },
     })
@@ -61,7 +64,7 @@ export const metaWhatsAppSendBatch = inngest.createFunction(
   { event: 'meta-whatsapp/send-batch' },
   async ({ event, step }) => {
     const batchNumber = Number(event.data.batch_number || 1)
-    const batchSize = Number(event.data.batch_size || 25)
+    const batchSize = Number(event.data.batch_size || DEFAULT_META_WHATSAPP_BATCH_SIZE)
 
     const result = await step.run(`send-meta-whatsapp-batch-${batchNumber}`, async () => {
       return processMetaWhatsAppCampaignBatch({
@@ -71,7 +74,7 @@ export const metaWhatsAppSendBatch = inngest.createFunction(
     })
 
     if (result.hasMore) {
-      await step.sleep(`meta-whatsapp-batch-cooldown-${batchNumber}`, '60s')
+      await step.sleep(`meta-whatsapp-batch-cooldown-${batchNumber}`, META_WHATSAPP_BATCH_COOLDOWN)
       await step.sendEvent(`send-meta-whatsapp-next-batch-${batchNumber + 1}`, {
         name: 'meta-whatsapp/send-batch',
         data: {
@@ -113,7 +116,7 @@ export const metaWhatsAppDueCampaignCron = inngest.createFunction(
         data: {
           campaign_id: campaign.id,
           batch_number: 1,
-          batch_size: 25,
+          batch_size: DEFAULT_META_WHATSAPP_BATCH_SIZE,
           reason: 'cron_due_campaign',
         },
       })

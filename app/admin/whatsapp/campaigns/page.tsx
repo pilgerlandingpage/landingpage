@@ -1516,7 +1516,7 @@ export default function CampaignsPage() {
             })
             const data = await res.json()
             if (data.success) {
-                setFeedback({ type: 'success', text: `✅ ${data.message}` })
+                setFeedback({ type: 'success', text: data.message || 'Campanha lancada com sucesso. Os contatos foram 100% liberados para envio em segundo plano.' })
                 setShowCreateForm(false)
                 setNumbersInput('')
                 clearSavedContactListSelection()
@@ -1526,10 +1526,10 @@ export default function CampaignsPage() {
                 if (sendProvider === 'connectyhub') loadCampaigns()
                 if (sendProvider === 'meta_whatsapp') loadMetaCampaigns()
             } else {
-                setFeedback({ type: 'error', text: `❌ ${data.message}` })
+                setFeedback({ type: 'error', text: data.message || 'Erro ao lancar campanha.' })
             }
         } catch (e) {
-            setFeedback({ type: 'error', text: '❌ Erro de conexão' })
+            setFeedback({ type: 'error', text: 'Erro de conexao ao lancar campanha.' })
         } finally {
             setSending(false)
         }
@@ -2775,7 +2775,7 @@ export default function CampaignsPage() {
                                 transition: 'all 0.2s',
                             }}>
                             {sending ? <Loader2 size={18} className="spin" /> : <Send size={18} />}
-                            {sending ? 'Enviando...' : scheduleDate ? `Agendar para ${parsedNumbers.length} contatos` : `Enviar para ${parsedNumbers.length} contatos`}
+                            {sending ? 'Lancando...' : scheduleDate ? `Agendar lancamento para ${parsedNumbers.length} contatos` : `Lancar campanha para ${parsedNumbers.length} contatos`}
                         </button>
                     </div>
                 </div>

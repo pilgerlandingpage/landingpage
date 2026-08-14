@@ -29,6 +29,14 @@ function asMetadataRecord(value: unknown) {
         : {}
 }
 
+const DEFAULT_META_WHATSAPP_BATCH_SIZE = 50
+
+function normalizeMetaBatchSize(value: unknown) {
+    const parsed = Math.floor(Number(value || 0))
+    if (!Number.isFinite(parsed) || parsed < 1) return DEFAULT_META_WHATSAPP_BATCH_SIZE
+    return Math.min(parsed, 100)
+}
+
 // GET — Listar campanhas de uma instância
 export async function GET(request: NextRequest) {
     try {
@@ -148,7 +156,7 @@ export async function POST(request: NextRequest) {
                     data: {
                         campaign_id: result.campaign.id,
                         reason: 'admin_meta_whatsapp_campaign',
-                        batch_size: Number(campaignData.batchSize || campaignData.batch_size || 25),
+                        batch_size: normalizeMetaBatchSize(campaignData.batchSize || campaignData.batch_size),
                     },
                 })
             }
@@ -159,8 +167,8 @@ export async function POST(request: NextRequest) {
                 queued: result.queuedCount,
                 skipped: result.skippedCount,
                 message: result.queuedCount > 0
-                    ? `Campanha oficial Meta criada com ${result.queuedCount} contato(s) na fila.`
-                    : 'Campanha oficial Meta criada, mas nenhum contato ficou elegivel para envio.',
+                    ? `Campanha lancada com sucesso. ${result.queuedCount} contato(s) foram 100% liberados para envio em segundo plano pela Meta.`
+                    : 'Campanha preparada, mas nenhum contato ficou elegivel para envio.',
             })
         }
 
@@ -183,7 +191,7 @@ export async function POST(request: NextRequest) {
                     data: {
                         campaign_id: campaignId,
                         reason: 'admin_meta_whatsapp_campaign_resumed',
-                        batch_size: Number(campaignData.batchSize || campaignData.batch_size || 25),
+                        batch_size: normalizeMetaBatchSize(campaignData.batchSize || campaignData.batch_size),
                     },
                 })
             }
@@ -207,7 +215,7 @@ export async function POST(request: NextRequest) {
                     data: {
                         campaign_id: campaignId,
                         reason: 'admin_meta_whatsapp_campaign_retry_failed',
-                        batch_size: Number(campaignData.batchSize || campaignData.batch_size || 25),
+                        batch_size: normalizeMetaBatchSize(campaignData.batchSize || campaignData.batch_size),
                     },
                 })
             }

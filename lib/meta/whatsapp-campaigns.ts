@@ -55,6 +55,8 @@ type MetaWhatsAppAnalyticsBucket = {
   skipped: number
 }
 
+const DEFAULT_META_WHATSAPP_BATCH_SIZE = 50
+
 export interface GetMetaWhatsAppCampaignDetailInput {
   campaignId: string
   limit?: number
@@ -1442,7 +1444,7 @@ export async function processMetaWhatsAppCampaignBatch(params: {
     return { skipped: true, reason: 'campaign_not_due', processed: 0, hasMore: true }
   }
 
-  const batchSize = Math.min(100, Math.max(1, Number(params.batchSize || 25)))
+  const batchSize = Math.min(100, Math.max(1, Number(params.batchSize || DEFAULT_META_WHATSAPP_BATCH_SIZE)))
   await supabase
     .from('meta_whatsapp_campaigns')
     .update({
