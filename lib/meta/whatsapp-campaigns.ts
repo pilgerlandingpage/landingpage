@@ -1270,8 +1270,8 @@ export async function getMetaWhatsAppDailyReport(
 }
 
 export async function listMetaWhatsAppCampaigns(input: ListMetaWhatsAppCampaignsInput = {}, supabase = createAdminClient()) {
-  const limit = Math.min(100, Math.max(1, Number(input.limit || 40)))
-  const queryLimit = Math.min(300, limit * 3)
+  const limit = Math.min(250, Math.max(1, Number(input.limit || 40)))
+  const queryLimit = Math.min(500, limit * 3)
   const status = normalizeCampaignStatusFilter(input.status)
 
   let query = supabase

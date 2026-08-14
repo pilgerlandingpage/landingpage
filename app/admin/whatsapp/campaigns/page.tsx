@@ -5,7 +5,7 @@ import Link from 'next/link'
 import {
     Send, Loader2, AlertCircle, CheckCircle2, Users,
     Plus, Trash2, Pause, Play, FileText, Image, Mic, Video,
-    Tag, RefreshCw, MessageSquare, ChevronUp,
+    Tag, RefreshCw, MessageSquare, ChevronUp, ChevronLeft, ChevronRight,
     Smartphone, Search, BarChart3, TrendingUp, Eye, Inbox, Activity,
     XCircle, Upload, Download, Bot, Calendar, DollarSign
 } from 'lucide-react'
@@ -868,7 +868,7 @@ export default function CampaignsPage() {
         setLoadingMetaCampaigns(true)
         try {
             const statusParam = metaStatusFilter ? `&status=${encodeURIComponent(metaStatusFilter)}` : ''
-            const res = await fetch(`/api/admin/whatsapp/campaigns?provider=meta_whatsapp&limit=60${statusParam}`)
+            const res = await fetch(`/api/admin/whatsapp/campaigns?provider=meta_whatsapp&limit=250${statusParam}`)
             const data = await res.json()
             if (data.success) {
                 setMetaCampaigns(data.campaigns || [])
@@ -1981,8 +1981,8 @@ export default function CampaignsPage() {
             <style>{`
                 .meta-campaigns-workspace {
                     display: grid;
-                    grid-template-columns: minmax(700px, 1fr) minmax(440px, 520px);
-                    min-height: 470px;
+                    grid-template-columns: minmax(640px, 1fr) minmax(380px, 460px);
+                    min-height: 0;
                 }
 
                 .meta-campaign-table-pane {
@@ -1991,11 +1991,22 @@ export default function CampaignsPage() {
                     overflow-x: auto;
                 }
 
+                .meta-campaign-table-shell {
+                    min-width: 980px;
+                }
+
+                .meta-campaign-list-scroll {
+                    max-height: 620px;
+                    overflow-y: auto;
+                }
+
                 .meta-campaign-detail-aside {
                     min-width: 0;
                     background: rgba(255,255,255,0.02);
                     display: grid;
                     grid-template-rows: auto 1fr;
+                    align-self: start;
+                    max-height: 760px;
                 }
 
                 .meta-campaign-detail-text {
@@ -2016,6 +2027,10 @@ export default function CampaignsPage() {
                     .meta-campaign-table-pane {
                         border-right: 0;
                         border-bottom: 1px solid var(--border);
+                    }
+
+                    .meta-campaign-detail-aside {
+                        max-height: 560px;
                     }
                 }
 
@@ -3312,6 +3327,45 @@ function metaProgress(campaign: MetaCampaign) {
     return Math.min(100, Math.round((done / total) * 100))
 }
 
+function metaCampaignDateMs(value?: string | null) {
+    if (!value) return 0
+    const date = new Date(value)
+    const time = date.getTime()
+    return Number.isFinite(time) ? time : 0
+}
+
+function metaCampaignDeliveryRate(campaign: MetaCampaign) {
+    return metricRate(Number(campaign.total_delivered || 0), Number(campaign.total_sent || campaign.total_recipients || 0))
+}
+
+function metaCampaignReadRate(campaign: MetaCampaign) {
+    return metricRate(Number(campaign.total_read || 0), Number(campaign.total_delivered || campaign.total_sent || campaign.total_recipients || 0))
+}
+
+function metaCampaignFailureRate(campaign: MetaCampaign) {
+    return metricRate(Number(campaign.total_failed || 0), Number(campaign.total_recipients || 0))
+}
+
+function metaCampaignMatchesSignal(campaign: MetaCampaign, filter: MetaCampaignSignalFilter) {
+    if (filter === 'with_failures') return Number(campaign.total_failed || 0) > 0
+    if (filter === 'high_failure') return metaCampaignFailureRate(campaign) >= 30
+    if (filter === 'with_reads') return Number(campaign.total_read || 0) > 0
+    if (filter === 'without_failures') return Number(campaign.total_failed || 0) === 0
+    return true
+}
+
+function sortMetaCampaigns(campaigns: MetaCampaign[], sortKey: MetaCampaignSortKey) {
+    return [...campaigns].sort((a, b) => {
+        if (sortKey === 'created_asc') return metaCampaignDateMs(a.created_at) - metaCampaignDateMs(b.created_at)
+        if (sortKey === 'name_asc') return String(a.name || '').localeCompare(String(b.name || ''), 'pt-BR')
+        if (sortKey === 'recipients_desc') return Number(b.total_recipients || 0) - Number(a.total_recipients || 0)
+        if (sortKey === 'failed_desc') return Number(b.total_failed || 0) - Number(a.total_failed || 0)
+        if (sortKey === 'delivery_desc') return metaCampaignDeliveryRate(b) - metaCampaignDeliveryRate(a)
+        if (sortKey === 'read_desc') return metaCampaignReadRate(b) - metaCampaignReadRate(a)
+        return metaCampaignDateMs(b.created_at) - metaCampaignDateMs(a.created_at)
+    })
+}
+
 function metricRate(part: number, total: number) {
     if (!total) return 0
     return Math.round((part / total) * 1000) / 10
@@ -3408,6 +3462,9 @@ function campaignErrorGroups(recipients: MetaCampaignRecipient[], events: MetaCa
 
 const META_CHART_COLORS = ['#b08a43', '#22c55e', '#38bdf8', '#ef4444', '#6366f1', '#f59e0b']
 type MetaCampaignWorkspaceTab = 'overview' | 'campaigns' | 'replies' | 'diagnostics'
+type MetaCampaignSortKey = 'created_desc' | 'created_asc' | 'name_asc' | 'recipients_desc' | 'failed_desc' | 'delivery_desc' | 'read_desc'
+type MetaCampaignSignalFilter = 'all' | 'with_failures' | 'high_failure' | 'with_reads' | 'without_failures'
+const META_CAMPAIGN_PAGE_SIZE_OPTIONS = [20, 50, 100]
 
 function MetaDailyReportPanel({
     report,
@@ -3637,7 +3694,11 @@ function MetaOfficialCampaignPanel({
     onRetryFailed: (campaignId: string, failedCount: number) => void
 }) {
     const [searchTerm, setSearchTerm] = useState('')
-    const [activeTab, setActiveTab] = useState<MetaCampaignWorkspaceTab>('overview')
+    const [activeTab, setActiveTab] = useState<MetaCampaignWorkspaceTab>('campaigns')
+    const [campaignPage, setCampaignPage] = useState(1)
+    const [campaignPageSize, setCampaignPageSize] = useState(20)
+    const [campaignSort, setCampaignSort] = useState<MetaCampaignSortKey>('created_desc')
+    const [campaignSignalFilter, setCampaignSignalFilter] = useState<MetaCampaignSignalFilter>('all')
     const normalizedSearch = searchTerm.trim().toLowerCase()
     const statusCounts = summary?.byStatus || {}
     const statusOptions = [
@@ -3671,6 +3732,7 @@ function MetaOfficialCampaignPanel({
         { key: 'diagnostics', label: 'Diagnostico', count: analytics?.errorBreakdown?.length || summary?.failed || 0, icon: Activity },
     ]
     const filteredCampaigns = campaigns.filter(campaign => {
+        if (!metaCampaignMatchesSignal(campaign, campaignSignalFilter)) return false
         if (!normalizedSearch) return true
         const sender = senders.find(item => item.id === campaign.default_sender_id)
         return [
@@ -3679,14 +3741,24 @@ function MetaOfficialCampaignPanel({
             campaign.template_name,
             campaign.template_language,
             campaign.campaign_type,
+            campaign.created_at,
+            campaign.started_at,
+            campaign.completed_at,
+            campaign.scheduled_for,
+            formatMetaDate(campaign.created_at),
             sender?.display_name,
             sender?.phone_number,
         ].some(value => String(value || '').toLowerCase().includes(normalizedSearch))
     })
+    const sortedCampaigns = sortMetaCampaigns(filteredCampaigns, campaignSort)
+    const campaignPageTotal = Math.max(1, Math.ceil(sortedCampaigns.length / campaignPageSize))
+    const safeCampaignPage = Math.min(campaignPage, campaignPageTotal)
+    const campaignPageStart = sortedCampaigns.length ? (safeCampaignPage - 1) * campaignPageSize : 0
+    const campaignPageEnd = Math.min(campaignPageStart + campaignPageSize, sortedCampaigns.length)
+    const paginatedCampaigns = sortedCampaigns.slice(campaignPageStart, campaignPageEnd)
     const selectedCampaign = (
-        filteredCampaigns.find(item => item.id === expandedCampaignId)
-        || campaigns.find(item => item.id === expandedCampaignId)
-        || filteredCampaigns[0]
+        paginatedCampaigns.find(item => item.id === expandedCampaignId)
+        || paginatedCampaigns[0]
         || null
     )
     const selectedSender = selectedCampaign
@@ -3697,6 +3769,9 @@ function MetaOfficialCampaignPanel({
     const selectCampaign = (campaignId: string) => {
         if (expandedCampaignId === campaignId) return
         onToggleDetail(campaignId)
+    }
+    const changeCampaignPage = (nextPage: number) => {
+        setCampaignPage(Math.min(campaignPageTotal, Math.max(1, nextPage)))
     }
 
     return (
@@ -3783,7 +3858,10 @@ function MetaOfficialCampaignPanel({
                             <button
                                 key={option.value || 'all'}
                                 type="button"
-                                onClick={() => onStatusFilterChange(option.value)}
+                                onClick={() => {
+                                    setCampaignPage(1)
+                                    onStatusFilterChange(option.value)
+                                }}
                                 style={{
                                     minHeight: '34px',
                                     padding: '7px 11px',
@@ -3844,10 +3922,13 @@ function MetaOfficialCampaignPanel({
                         <Search size={15} />
                         <input
                             value={searchTerm}
-                            onChange={event => setSearchTerm(event.target.value)}
+                            onChange={event => {
+                                setCampaignPage(1)
+                                setSearchTerm(event.target.value)
+                            }}
                             placeholder={activeTab === 'replies'
                                 ? 'Pesquisar contato, numero, resposta, campanha ou template'
-                                : 'Pesquisar campanha, template, numero ou status'}
+                                : 'Pesquisar campanha, template, numero, data ou status'}
                             style={{
                                 border: 0,
                                 outline: 'none',
@@ -3861,7 +3942,10 @@ function MetaOfficialCampaignPanel({
                     {activeTab === 'campaigns' && (
                         <select
                             value={statusFilter}
-                            onChange={e => onStatusFilterChange(e.target.value)}
+                            onChange={event => {
+                                setCampaignPage(1)
+                                onStatusFilterChange(event.target.value)
+                            }}
                             style={{
                                 minHeight: '38px',
                                 padding: '8px 10px',
@@ -3997,74 +4081,220 @@ function MetaOfficialCampaignPanel({
                         )}
                     </div>
 
-                    <div className="meta-campaigns-workspace">
-                    <div className="meta-campaign-table-pane">
-                        <div style={{
-                            minWidth: '1020px',
-                            display: 'grid',
-                            gridTemplateColumns: '90px minmax(280px, 1.45fr) 116px 96px 96px 86px 86px 152px',
-                            gap: '0',
-                            padding: '9px 12px',
-                            borderBottom: '1px solid var(--border)',
-                            color: 'var(--text-muted)',
-                            fontSize: '0.66rem',
-                            fontWeight: 900,
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.04em',
-                            background: 'rgba(255,255,255,0.025)',
-                        }}>
-                            <span>Status</span>
-                            <span>Campanha</span>
-                            <span>Destinatarios</span>
-                            <span>Aceitas</span>
-                            <span>Entregues</span>
-                            <span>Lidas</span>
-                            <span>Falhas</span>
-                            <span>Acoes</span>
+                    <div style={{
+                        padding: '10px 14px',
+                        borderBottom: '1px solid var(--border)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '10px',
+                        flexWrap: 'wrap',
+                        background: 'rgba(255,255,255,0.018)',
+                    }}>
+                        <div style={{ display: 'grid', gap: '3px' }}>
+                            <strong style={{ color: 'var(--text-primary)', fontSize: '0.82rem' }}>
+                                Campanhas encontradas
+                            </strong>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>
+                                {sortedCampaigns.length === 0
+                                    ? 'Nenhum resultado para os filtros atuais'
+                                    : `Mostrando ${campaignPageStart + 1}-${campaignPageEnd} de ${sortedCampaigns.length}`}
+                                {campaigns.length !== sortedCampaigns.length ? ` | total carregado ${campaigns.length}` : ''}
+                            </span>
                         </div>
 
-                        {loading ? (
-                            <div className="meta-campaigns-table-empty" style={{ padding: '34px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                                <Loader2 size={18} className="spin" /> Carregando campanhas Meta...
-                            </div>
-                        ) : campaigns.length === 0 ? (
-                            <div className="meta-campaigns-table-empty" style={{ textAlign: 'center', padding: '46px', color: 'var(--text-muted)' }}>
-                                <Send size={32} style={{ opacity: 0.3, marginBottom: '8px' }} />
-                                <p style={{ margin: 0 }}>Nenhuma campanha oficial de WhatsApp encontrada.</p>
-                            </div>
-                        ) : filteredCampaigns.length === 0 ? (
-                            <div className="meta-campaigns-table-empty" style={{ textAlign: 'center', padding: '38px', color: 'var(--text-muted)' }}>
-                                Nenhuma campanha encontrada para a busca atual.
-                            </div>
-                        ) : (
-                            <div style={{ minWidth: '1020px' }}>
-                                {filteredCampaigns.map(campaign => (
-                                    <MetaCampaignTableRow
-                                        key={campaign.id}
-                                        campaign={campaign}
-                                        sender={senders.find(item => item.id === campaign.default_sender_id)}
-                                        selected={campaign.id === selectedCampaignId}
-                                        loadingDetail={loadingDetailCampaignId === campaign.id}
-                                        retrying={retryingCampaignId === campaign.id}
-                                        onSelect={selectCampaign}
-                                        onManage={onManage}
-                                        onRetryFailed={onRetryFailed}
-                                    />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            <select
+                                value={campaignSignalFilter}
+                                onChange={event => {
+                                    setCampaignPage(1)
+                                    setCampaignSignalFilter(event.target.value as MetaCampaignSignalFilter)
+                                }}
+                                style={{
+                                    minHeight: '34px',
+                                    padding: '7px 9px',
+                                    borderRadius: '8px',
+                                    border: '1px solid var(--border)',
+                                    background: 'rgba(255,255,255,0.06)',
+                                    color: 'var(--text-primary)',
+                                    fontSize: '0.76rem',
+                                }}
+                                title="Filtrar campanhas por sinal operacional"
+                            >
+                                <option value="all">Todos os sinais</option>
+                                <option value="with_failures">Com falhas</option>
+                                <option value="high_failure">Falha acima de 30%</option>
+                                <option value="with_reads">Com leituras</option>
+                                <option value="without_failures">Sem falhas</option>
+                            </select>
+
+                            <select
+                                value={campaignSort}
+                                onChange={event => {
+                                    setCampaignPage(1)
+                                    setCampaignSort(event.target.value as MetaCampaignSortKey)
+                                }}
+                                style={{
+                                    minHeight: '34px',
+                                    padding: '7px 9px',
+                                    borderRadius: '8px',
+                                    border: '1px solid var(--border)',
+                                    background: 'rgba(255,255,255,0.06)',
+                                    color: 'var(--text-primary)',
+                                    fontSize: '0.76rem',
+                                }}
+                                title="Ordenar campanhas"
+                            >
+                                <option value="created_desc">Mais recentes</option>
+                                <option value="created_asc">Mais antigas</option>
+                                <option value="name_asc">Nome A-Z</option>
+                                <option value="recipients_desc">Mais destinatarios</option>
+                                <option value="failed_desc">Mais falhas</option>
+                                <option value="delivery_desc">Melhor entrega</option>
+                                <option value="read_desc">Melhor leitura</option>
+                            </select>
+
+                            <select
+                                value={campaignPageSize}
+                                onChange={event => {
+                                    setCampaignPage(1)
+                                    setCampaignPageSize(Number(event.target.value))
+                                }}
+                                style={{
+                                    minHeight: '34px',
+                                    padding: '7px 9px',
+                                    borderRadius: '8px',
+                                    border: '1px solid var(--border)',
+                                    background: 'rgba(255,255,255,0.06)',
+                                    color: 'var(--text-primary)',
+                                    fontSize: '0.76rem',
+                                }}
+                                title="Quantidade por pagina"
+                            >
+                                {META_CAMPAIGN_PAGE_SIZE_OPTIONS.map(size => (
+                                    <option key={size} value={size}>{size} por pagina</option>
                                 ))}
+                            </select>
+
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                                <button
+                                    type="button"
+                                    onClick={() => changeCampaignPage(safeCampaignPage - 1)}
+                                    disabled={safeCampaignPage <= 1}
+                                    title="Pagina anterior"
+                                    style={{
+                                        width: '34px',
+                                        height: '34px',
+                                        borderRadius: '8px',
+                                        border: '1px solid var(--border)',
+                                        background: 'rgba(255,255,255,0.04)',
+                                        color: 'var(--text-secondary)',
+                                        cursor: safeCampaignPage <= 1 ? 'not-allowed' : 'pointer',
+                                        opacity: safeCampaignPage <= 1 ? 0.48 : 1,
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}
+                                >
+                                    <ChevronLeft size={15} />
+                                </button>
+                                <span style={{ color: 'var(--text-muted)', fontSize: '0.74rem', minWidth: '74px', textAlign: 'center' }}>
+                                    {safeCampaignPage}/{campaignPageTotal}
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() => changeCampaignPage(safeCampaignPage + 1)}
+                                    disabled={safeCampaignPage >= campaignPageTotal}
+                                    title="Proxima pagina"
+                                    style={{
+                                        width: '34px',
+                                        height: '34px',
+                                        borderRadius: '8px',
+                                        border: '1px solid var(--border)',
+                                        background: 'rgba(255,255,255,0.04)',
+                                        color: 'var(--text-secondary)',
+                                        cursor: safeCampaignPage >= campaignPageTotal ? 'not-allowed' : 'pointer',
+                                        opacity: safeCampaignPage >= campaignPageTotal ? 0.48 : 1,
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}
+                                >
+                                    <ChevronRight size={15} />
+                                </button>
                             </div>
-                        )}
+                        </div>
                     </div>
 
-                    <MetaSelectedCampaignAside
-                        campaign={selectedCampaign}
-                        sender={selectedSender}
-                        detail={selectedDetail}
-                        loadingDetail={Boolean(selectedCampaign && loadingDetailCampaignId === selectedCampaign.id)}
-                        retrying={Boolean(selectedCampaign && retryingCampaignId === selectedCampaign.id)}
-                        onSelect={selectCampaign}
-                        onManage={onManage}
-                        onRetryFailed={onRetryFailed}
-                    />
+                    <div className="meta-campaigns-workspace">
+                        <div className="meta-campaign-table-pane">
+                            <div className="meta-campaign-table-shell">
+                                <div style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: '84px minmax(260px, 1.45fr) 108px 84px 84px 78px 78px 142px',
+                                    gap: '0',
+                                    padding: '9px 12px',
+                                    borderBottom: '1px solid var(--border)',
+                                    color: 'var(--text-muted)',
+                                    fontSize: '0.66rem',
+                                    fontWeight: 900,
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.04em',
+                                    background: 'rgba(255,255,255,0.025)',
+                                }}>
+                                    <span>Status</span>
+                                    <span>Campanha</span>
+                                    <span>Destinatarios</span>
+                                    <span>Aceitas</span>
+                                    <span>Entregues</span>
+                                    <span>Lidas</span>
+                                    <span>Falhas</span>
+                                    <span>Acoes</span>
+                                </div>
+
+                                {loading ? (
+                                    <div className="meta-campaigns-table-empty" style={{ padding: '34px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                                        <Loader2 size={18} className="spin" /> Carregando campanhas Meta...
+                                    </div>
+                                ) : campaigns.length === 0 ? (
+                                    <div className="meta-campaigns-table-empty" style={{ textAlign: 'center', padding: '46px', color: 'var(--text-muted)' }}>
+                                        <Send size={32} style={{ opacity: 0.3, marginBottom: '8px' }} />
+                                        <p style={{ margin: 0 }}>Nenhuma campanha oficial de WhatsApp encontrada.</p>
+                                    </div>
+                                ) : sortedCampaigns.length === 0 ? (
+                                    <div className="meta-campaigns-table-empty" style={{ textAlign: 'center', padding: '38px', color: 'var(--text-muted)' }}>
+                                        Nenhuma campanha encontrada para a busca ou filtro atual.
+                                    </div>
+                                ) : (
+                                    <div className="meta-campaign-list-scroll">
+                                        {paginatedCampaigns.map(campaign => (
+                                            <MetaCampaignTableRow
+                                                key={campaign.id}
+                                                campaign={campaign}
+                                                sender={senders.find(item => item.id === campaign.default_sender_id)}
+                                                selected={campaign.id === selectedCampaignId}
+                                                loadingDetail={loadingDetailCampaignId === campaign.id}
+                                                retrying={retryingCampaignId === campaign.id}
+                                                onSelect={selectCampaign}
+                                                onManage={onManage}
+                                                onRetryFailed={onRetryFailed}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <MetaSelectedCampaignAside
+                            campaign={selectedCampaign}
+                            sender={selectedSender}
+                            detail={selectedDetail}
+                            loadingDetail={Boolean(selectedCampaign && loadingDetailCampaignId === selectedCampaign.id)}
+                            retrying={Boolean(selectedCampaign && retryingCampaignId === selectedCampaign.id)}
+                            onSelect={selectCampaign}
+                            onManage={onManage}
+                            onRetryFailed={onRetryFailed}
+                        />
                     </div>
                     </>
                 )}
@@ -4150,10 +4380,10 @@ function MetaCampaignTableRow({
             }}
             style={{
                 display: 'grid',
-                gridTemplateColumns: '90px minmax(280px, 1.45fr) 116px 96px 96px 86px 86px 152px',
+                gridTemplateColumns: '84px minmax(260px, 1.45fr) 108px 84px 84px 78px 78px 142px',
                 gap: '0',
                 alignItems: 'center',
-                padding: '10px 12px',
+                padding: '8px 12px',
                 borderBottom: '1px solid var(--border)',
                 background: selected ? 'rgba(176,138,67,0.08)' : 'transparent',
                 cursor: 'pointer',
