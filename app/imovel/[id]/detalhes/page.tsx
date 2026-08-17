@@ -232,7 +232,7 @@ const PROPERTY_BRAVA_CONCETTO_FALLBACK_DEVELOPMENT = {
     locationName: 'Praia Brava, Itajai - SC',
     priceRange: 'R$ 8.600.000 a R$ 21.000.000',
     availableUnitsCount: 3,
-    areaRange: '280m2 a 592m2',
+        areaRange: '280 m² a 592 m²',
     suitesRange: '4 suites',
     heroImage: '/images/brava-concetto/1_CL_BC_FACHADA_DIURNA_R01.jpg',
     description: 'Um empreendimento de poucas unidades na Praia Brava, pensado para quem busca privacidade, arquitetura autoral e leitura clara de patrimonio.',
@@ -240,7 +240,7 @@ const PROPERTY_BRAVA_CONCETTO_FALLBACK_DEVELOPMENT = {
         {
             type: 'Apartamento Tipo',
             title: 'Apartamento no Ed. Brava Concetto',
-            area: '280m2',
+            area: '280 m²',
             suites: '4 suites',
             price: 'R$ 8.600.000',
             sourceSlug: 'apartamento-garden-no-ed-brava-concetto-na-praia-brava-em-itajaisc',
@@ -248,7 +248,7 @@ const PROPERTY_BRAVA_CONCETTO_FALLBACK_DEVELOPMENT = {
         {
             type: 'Apartamento Garden',
             title: 'Apartamento Garden no Ed. Brava Concetto',
-            area: '368m2',
+            area: '368 m²',
             suites: '4 suites',
             price: 'R$ 10.000.000',
             sourceSlug: 'apartamento-garden-no-ed-brava-concetto-na-praia-brava-em-itajaisc',
@@ -256,7 +256,7 @@ const PROPERTY_BRAVA_CONCETTO_FALLBACK_DEVELOPMENT = {
         {
             type: 'Cobertura Duplex',
             title: 'Cobertura Duplex no Ed. Brava Concetto',
-            area: '592m2',
+            area: '592 m²',
             suites: '4 suites',
             price: 'R$ 21.000.000',
             sourceSlug: 'apartamento-garden-no-ed-brava-concetto-na-praia-brava-em-itajaisc',
@@ -375,8 +375,8 @@ function normalizeDevelopmentUnitContext(value: unknown): PropertyDevelopmentUni
         sourceReference,
         title,
         type,
-        area: asSafeText(record.area, 'Area sob consulta'),
-        suites: asSafeText(record.suites, 'Configuracao sob consulta'),
+        area: asSafeText(record.area, 'Área sob consulta'),
+        suites: asSafeText(record.suites, 'Configuração sob consulta'),
         price: asSafeText(record.price, 'Consulte'),
         sourceSlug,
     }
@@ -592,10 +592,10 @@ function propertyDevelopmentFallbackUnit(property: any): PropertyDevelopmentUnit
         sourceReference,
         title: asSafeText(property?.seo_title ?? property?.title, 'Unidade relacionada'),
         type: asSafeText(property?.property_type, 'Unidade'),
-        area: privateArea ? `${privateArea.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}m2` : 'Area sob consulta',
+        area: privateArea ? `${privateArea.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} m²` : 'Área sob consulta',
         suites: suites
             ? `${Math.round(suites)} ${suites === 1 ? 'suite' : 'suites'}`
-            : (bedrooms ? `${Math.round(bedrooms)} dormitorios` : 'Configuracao sob consulta'),
+            : (bedrooms ? `${Math.round(bedrooms)} dormitórios` : 'Configuração sob consulta'),
         price: price ? formatMoney(price) : 'Consulte',
         sourceSlug: sourceSlug || propertyId || sourceReference,
     }
@@ -770,7 +770,7 @@ const PROPERTY_SECONDARY_QUERY_TIMEOUT_MS = 7000
 const PROPERTY_LOOKUP_RETRY_DELAYS_MS = [700]
 
 class PropertyLookupUnavailableError extends Error {
-    constructor(message = 'Nao foi possivel consultar o imovel agora.') {
+    constructor(message = 'Não foi possível consultar o imóvel agora.') {
         super(message)
         this.name = 'PropertyLookupUnavailableError'
     }
@@ -865,7 +865,7 @@ async function runPropertyLookup<T>(
             }
 
             console.error(`[Property Detail] ${logLabel} failed:`, summary)
-            throw new Error('Nao foi possivel carregar este imovel agora.')
+            throw new Error('Não foi possível carregar este imóvel agora.')
         }
 
         await waitForPropertyLookupRetry(retryDelaysMs[attempt])
@@ -933,7 +933,8 @@ async function getPropertyDevelopmentContext(supabase: any, property: any): Prom
         return fallbackContext
     }
 
-    const candidates: PropertyDevelopmentCandidate[] = []
+    const directCandidates: PropertyDevelopmentCandidate[] = []
+    const inferredCandidates: PropertyDevelopmentCandidate[] = []
 
     for (const page of data || []) {
         const content = asSafeRecord(page.content)
@@ -958,7 +959,7 @@ async function getPropertyDevelopmentContext(supabase: any, property: any): Prom
 
         if (!relatedUnit) continue
 
-        candidates.push({
+        const candidate = {
             page,
             content,
             contentDevelopment,
@@ -967,8 +968,15 @@ async function getPropertyDevelopmentContext(supabase: any, property: any): Prom
             units,
             score: matchedUnit ? matchedUnitScore : 100,
             unitCount: units.length,
-        })
+        }
+
+        if (matchedUnit) directCandidates.push(candidate)
+        else inferredCandidates.push(candidate)
     }
+
+    const candidates = directCandidates.length
+        ? directCandidates
+        : (inferredCandidates.length === 1 ? inferredCandidates : [])
 
     const bestCandidate = candidates.sort((left, right) => {
         if (right.score !== left.score) return right.score - left.score
@@ -1891,7 +1899,7 @@ function PropertyLookupUnavailablePage({ identifier }: { identifier: string }) {
                             lineHeight: 1.05,
                         }}
                     >
-                        Nao foi possivel carregar este imovel agora.
+                        Não foi possível carregar este imóvel agora.
                     </h1>
                     <p
                         style={{
@@ -1933,7 +1941,7 @@ function PropertyLookupUnavailablePage({ identifier }: { identifier: string }) {
                         </Link>
                         <WhatsAppCaptureLink
                             phone={GLOBAL_PROPERTY_WHATSAPP_PHONE}
-                            message={`Ola, tentei abrir este imovel e quero confirmar disponibilidade: ${requestedUrl}`}
+                            message={`Olá, tentei abrir este imóvel e quero confirmar disponibilidade: ${requestedUrl}`}
                             slug="imovel"
                             template="property-unavailable"
                             metadata={{
@@ -2509,9 +2517,17 @@ export default async function PropertyDetailPage({
         ...(mobileVideoItem ? [mobileVideoItem] : []),
         ...mobilePhotoItems.slice(2),
     ]
-    const developmentHref = developmentContext
-        ? (developmentContext.slug ? `/${developmentContext.slug}` : `/busca?${new URLSearchParams({ q: developmentContext.name }).toString()}`)
+    const developmentHref = developmentContext?.slug ? `/${developmentContext.slug}` : ''
+    const developmentActionMessage = developmentContext
+        ? `Olá! Vi o imóvel ${displayTitle} e quero confirmar o condomínio ${developmentContext.name}, disponibilidade e alternativas relacionadas. ${propertyUrl}`
         : ''
+    const developmentActionMetadata = developmentContext ? {
+        ...propertyTrackingMetadata,
+        development_name: developmentContext.name,
+        development_slug: developmentContext.slug || null,
+        cta_context: developmentHref ? 'property_development_context_link' : 'property_development_context_consult',
+        tracking_event_type: developmentHref ? 'property_development_page_opened' : 'property_development_consult_requested',
+    } : {}
     const developmentGalleryPreview = developmentContext?.gallery?.length
         ? developmentContext.gallery
         : developmentContext
@@ -2795,10 +2811,23 @@ export default async function PropertyDetailPage({
                                     </div>
                                 )}
                                 <div className="plp-mobile-development-actions">
-                                    <Link href={developmentHref || '/busca'}>
-                                        Conhecer condomínio
-                                        <ArrowRight size={15} />
-                                    </Link>
+                                    {developmentHref ? (
+                                        <Link href={developmentHref}>
+                                            Conhecer condomínio
+                                            <ArrowRight size={15} />
+                                        </Link>
+                                    ) : (
+                                        <WhatsAppCaptureLink
+                                            phone={contactPhone}
+                                            message={developmentActionMessage}
+                                            slug={canonicalSegment}
+                                            template="property-development-context"
+                                            metadata={developmentActionMetadata}
+                                        >
+                                            Consultar condomínio
+                                            <ArrowRight size={15} />
+                                        </WhatsAppCaptureLink>
+                                    )}
                                 </div>
                             </section>
                         )}
@@ -3047,10 +3076,24 @@ export default async function PropertyDetailPage({
                                                 <span>{developmentContext.unit.area} | {developmentContext.unit.suites} | {developmentContext.unit.price}</span>
                                             </div>
                                             <div className="plp-development-context-actions">
-                                                <Link href={developmentHref || '/busca'} className="plp-development-primary-link">
-                                                    Conhecer condomínio
-                                                    <ArrowRight size={16} />
-                                                </Link>
+                                                {developmentHref ? (
+                                                    <Link href={developmentHref} className="plp-development-primary-link">
+                                                        Conhecer condomínio
+                                                        <ArrowRight size={16} />
+                                                    </Link>
+                                                ) : (
+                                                    <WhatsAppCaptureLink
+                                                        phone={contactPhone}
+                                                        message={developmentActionMessage}
+                                                        slug={canonicalSegment}
+                                                        template="property-development-context"
+                                                        metadata={developmentActionMetadata}
+                                                        className="plp-development-primary-link"
+                                                    >
+                                                        Consultar condomínio
+                                                        <ArrowRight size={16} />
+                                                    </WhatsAppCaptureLink>
+                                                )}
                                             </div>
                                         </div>
                                     </div>

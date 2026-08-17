@@ -105,8 +105,12 @@ function normalizeDevelopment(page: Record<string, any>): PublicDevelopment | nu
     if (content.template && content.template !== 'brava-concetto') return null
 
     const development = asRecord(content.development)
+    const metadata = asRecord(page.metadata)
+    const canonicalSlug = asText(metadata.canonical_development_slug ?? content.canonical_development_slug)
     const slug = asText(page.slug)
     if (!slug) return null
+    if (canonicalSlug && canonicalSlug !== slug) return null
+
     const isBravaConcetto = slug === 'bravaconceto'
     const stage = resolveDevelopmentStage(page, content, development)
 
@@ -159,7 +163,7 @@ export async function GET(request: NextRequest) {
         const supabase = createAdminClient()
         const { data, error } = await supabase
             .from('landing_pages')
-            .select('id, slug, title, content, created_at')
+            .select('id, slug, title, content, metadata, created_at')
             .eq('status', 'published')
             .order('created_at', { ascending: true })
 

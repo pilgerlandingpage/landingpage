@@ -354,6 +354,12 @@ function auditLandingPage(page) {
   return issue
 }
 
+function canonicalDevelopmentSlug(page) {
+  const content = asRecord(page.content)
+  const metadata = asRecord(page.metadata)
+  return text(metadata.canonical_development_slug ?? content.canonical_development_slug)
+}
+
 function sortIssues(a, b) {
   const priorityRank = { P0: 0, P1: 1, P2: 2, OK: 3 }
   const byPriority = priorityRank[a.priority] - priorityRank[b.priority]
@@ -433,7 +439,12 @@ function summarizeIssues(issues, totalsBase) {
 
 async function main() {
   const landingPages = await fetchAllLandingPages()
-  const developmentPages = landingPages.filter(page => Object.keys(asRecord(asRecord(page.content).development)).length > 0)
+  const developmentPages = landingPages
+    .filter(page => {
+      const canonicalSlug = canonicalDevelopmentSlug(page)
+      return !canonicalSlug || canonicalSlug === page.slug
+    })
+    .filter(page => Object.keys(asRecord(asRecord(page.content).development)).length > 0)
   const issues = developmentPages.map(auditLandingPage).sort(sortIssues)
   const buckets = {
     P0: issues.filter(issue => issue.priority === 'P0'),

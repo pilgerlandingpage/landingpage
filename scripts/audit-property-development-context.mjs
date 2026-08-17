@@ -203,15 +203,26 @@ function pageDevelopmentKeys(page) {
   return keys
 }
 
+function canonicalDevelopmentSlug(page) {
+  const content = asRecord(page.content)
+  const metadata = asRecord(page.metadata)
+  return text(metadata.canonical_development_slug ?? content.canonical_development_slug)
+}
+
 function pageUnits(page) {
   return asArray(asRecord(asRecord(page.content).development).units)
 }
 
 function unitIdentifiers(unit) {
   const record = asRecord(unit)
-  return [
+  const strong = [
     text(record.propertyId ?? record.property_id),
     text(record.sourceReference ?? record.source_reference ?? record.id),
+  ].filter(Boolean).map(normalizeText)
+
+  if (strong.length) return strong
+
+  return [
     text(record.sourceSlug ?? record.source_slug ?? record.slug),
   ].filter(Boolean).map(normalizeText)
 }
@@ -219,6 +230,10 @@ function unitIdentifiers(unit) {
 function buildLandingIndexes(landingPages) {
   const developmentPages = landingPages
     .filter(page => page.status === 'published')
+    .filter(page => {
+      const canonicalSlug = canonicalDevelopmentSlug(page)
+      return !canonicalSlug || canonicalSlug === page.slug
+    })
     .filter(page => Object.keys(asRecord(asRecord(page.content).development)).length > 0)
     .map(page => {
       const content = asRecord(page.content)
@@ -258,9 +273,14 @@ function buildLandingIndexes(landingPages) {
 }
 
 function propertyIdentifiers(property) {
-  return [
+  const strong = [
     property.id,
     property.source_reference,
+  ].map(normalizeText).filter(Boolean)
+
+  if (strong.length) return strong
+
+  return [
     property.source_slug,
   ].map(normalizeText).filter(Boolean)
 }

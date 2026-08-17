@@ -37,7 +37,6 @@ import Footer from '@/components/layout/Footer'
 import GoogleReviewsSection from '@/components/marketplace/GoogleReviewsSection'
 import HomeBlogSection, { type HomeBlogPost } from '@/components/marketplace/HomeBlogSection'
 import MobileNav from '@/components/marketplace/MobileNav'
-import WhatsAppCaptureLink from '@/components/common/WhatsAppCaptureLink'
 import PropertyDesktopMediaShowcase from '@/components/property/PropertyDesktopMediaShowcase'
 import PropertyBrokerAvatar from '@/components/property/PropertyBrokerAvatar'
 import PropertyLocationMap, { type PropertyLocationMapProperty } from '@/components/property/PropertyLocationMap'
@@ -45,6 +44,7 @@ import PropertyMobileMapPreview from '@/components/property/PropertyMobileMapPre
 import PropertyNearbyBenefits from '@/components/property/PropertyNearbyBenefits'
 import PropertyLandingMobileMenu from '@/components/property/PropertyLandingMobileMenu'
 import PropertyMobileDetailSheet from '@/components/property/PropertyMobileDetailSheet'
+import PropertySidebarLeadForm from '@/components/property/PropertySidebarLeadForm'
 import PropertyLandingStyles from '@/app/imovel/[id]/PropertyLandingStyles'
 import type { HomepageGoogleReviews } from '@/lib/google-reviews'
 import { openWhatsAppWithLeadCapture } from '@/lib/tracking/whatsapp-capture'
@@ -127,111 +127,111 @@ const DEVELOPMENTS: Development[] = [
         id: 'brava-concetto',
         name: 'Brava Concetto',
         pageSlug: 'bravaconceto',
-        city: 'Itajai',
-        locationName: 'Praia Brava, Itajai - SC',
-        tagline: 'O privilegio de viver na Praia Brava com elegancia, exclusividade e design atemporal.',
+        city: 'Itajaí',
+        locationName: 'Praia Brava, Itajaí - SC',
+        tagline: 'O privilégio de viver na Praia Brava com elegância, exclusividade e design atemporal.',
         priceRange: 'R$ 8.600.000 a R$ 21.000.000',
         availableUnitsCount: 3,
-        areaRange: '280m2 a 592m2',
-        suitesRange: '4 suites',
+        areaRange: '280 m² a 592 m²',
+        suitesRange: '4 suítes',
         heroImage: '/images/brava-concetto/1_CL_BC_FACHADA_DIURNA_R01.jpg',
-        description: 'Um empreendimento de poucas unidades na Praia Brava, pensado para quem busca privacidade, arquitetura autoral e uma experiencia residencial com leitura de patrimonio.',
+        description: 'Um empreendimento de poucas unidades na Praia Brava, pensado para quem busca privacidade, arquitetura autoral e uma experiência residencial com leitura de patrimônio.',
         address: 'Av. Carlos Drummond de Andrade, 111 - Praia Brava',
         latitude: -26.95665680834595,
         longitude: -48.62979654548911,
         benefits: [
             { title: 'Privacidade e Exclusividade', description: 'Poucas unidades, plantas amplas e uma atmosfera residencial reservada.', icon: 'ShieldCheck' },
-            { title: 'Lazer com Essencia de Resort', description: 'Piscina, salao de festas, espaco gourmet, fitness e areas sociais integradas.', icon: 'Waves' },
-            { title: 'Rotina de Praia Sofisticada', description: 'Entrada para banhistas, bicicletario, box de praia e acesso rapido a orla.', icon: 'Compass' },
+            { title: 'Lazer com Essência de Resort', description: 'Piscina, salão de festas, espaço gourmet, fitness e áreas sociais integradas.', icon: 'Waves' },
+            { title: 'Rotina de Praia Sofisticada', description: 'Entrada para banhistas, bicicletário, box de praia e acesso rápido à orla.', icon: 'Compass' },
         ],
         differentials: [
-            { title: 'Design Assinado', description: 'Arquitetura contemporanea, fachada marcante e interiores com acabamento de alto padrao.' },
-            { title: 'Localizacao Praia Brava', description: 'Entre mar, gastronomia, servicos premium e conexao rapida com Balneario Camboriu.' },
-            { title: 'Unidades de Alto Ticket', description: 'Garden, apartamento tipo e cobertura duplex com areas generosas e vagas amplas.' },
+            { title: 'Design Assinado', description: 'Arquitetura contemporânea, fachada marcante e interiores com acabamento de alto padrão.' },
+            { title: 'Localização Praia Brava', description: 'Entre mar, gastronomia, serviços premium e conexão rápida com Balneário Camboriú.' },
+            { title: 'Unidades de Alto Ticket', description: 'Garden, apartamento tipo e cobertura duplex com áreas generosas e vagas amplas.' },
         ],
         units: [
             {
                 id: 'bc-2299',
                 type: 'Apartamento Tipo',
                 title: 'Apartamento no Ed. Brava Concetto',
-                area: '280m2',
-                suites: '4 suites',
+                area: '280 m²',
+                suites: '4 suítes',
                 vagas: '3 vagas',
                 price: 'R$ 8.600.000',
                 image: `${R2}/properties/imported/2299/001-2_cl_bc_fachada_noturna_r01-17690304118299.jpg`,
-                status: 'Ultima Unidade',
+                status: 'Última unidade',
                 sourceSlug: 'apartamento-garden-no-ed-brava-concetto-na-praia-brava-em-itajaisc',
             },
             {
                 id: 'bc-2298',
                 type: 'Apartamento Garden',
                 title: 'Apartamento Garden no Ed. Brava Concetto',
-                area: '368m2',
-                suites: '4 suites',
+                area: '368 m²',
+                suites: '4 suítes',
                 vagas: '3 vagas',
                 price: 'R$ 10.000.000',
                 image: `${R2}/properties/imported/2298/001-5_cl_bc_voo_passaro_r01-1769030411830.jpg`,
-                status: 'Disponivel',
+                status: 'Disponível',
                 sourceSlug: 'apartamento-garden-no-ed-brava-concetto-na-praia-brava-em-itajaisc',
             },
             {
                 id: 'bc-2300',
                 type: 'Cobertura Duplex',
                 title: 'Cobertura Duplex no Ed. Brava Concetto',
-                area: '592m2',
-                suites: '4 suites',
+                area: '592 m²',
+                suites: '4 suítes',
                 vagas: '5 vagas',
                 price: 'R$ 21.000.000',
                 image: `${R2}/properties/imported/2300/001-6_cl_bc_detalhe_fachada_ang_01_ef-17690304118301.jpg`,
-                status: 'Disponivel',
+                status: 'Disponível',
                 sourceSlug: 'apartamento-garden-no-ed-brava-concetto-na-praia-brava-em-itajaisc',
             },
         ],
         gallery: [
             { title: 'Fachada diurna', image: '/images/brava-concetto/1_CL_BC_FACHADA_DIURNA_R01.jpg', category: 'Fachada' },
             { title: 'Fachada noturna', image: '/images/brava-concetto/2_CL_BC_FACHADA_NOTURNA_R01.jpg', category: 'Fachada' },
-            { title: 'Vista aerea', image: '/images/brava-concetto/5_CL_BC_VOO_PASSARO_R01.jpg', category: 'Implantacao' },
+            { title: 'Vista aérea', image: '/images/brava-concetto/5_CL_BC_VOO_PASSARO_R01.jpg', category: 'Implantação' },
             { title: 'Hall de entrada', image: '/images/brava-concetto/8_CL_BC_HALL_DE_ENTRADA_EF_web.jpg', category: 'Hall' },
             { title: 'Piscina', image: '/images/brava-concetto/15_CL_BC_PISCINA_EF_web.jpg', category: 'Lazer' },
             { title: 'Living', image: '/images/brava-concetto/22_CL_BC_LIVING_FINAL_02_EF_web.jpg', category: 'Interior' },
         ],
         faq: [
-            { question: 'Quantas unidades ainda aparecem disponiveis?', answer: 'Hoje a vitrine trabalha com 3 unidades ativas no Brava Concetto: apartamento tipo, garden e cobertura duplex.' },
-            { question: 'Posso receber uma leitura comparativa das unidades?', answer: 'Sim. O especialista pode comparar area, valor, posicao, vagas e liquidez de cada unidade para o seu objetivo.' },
-            { question: 'A disponibilidade muda?', answer: 'Sim. Imoveis de alto padrao podem mudar de status rapidamente, entao a confirmacao final deve ser feita com o atendimento.' },
+            { question: 'Quantas unidades ainda aparecem disponíveis?', answer: 'Hoje a vitrine trabalha com 3 unidades ativas no Brava Concetto: apartamento tipo, garden e cobertura duplex.' },
+            { question: 'Posso receber uma leitura comparativa das unidades?', answer: 'Sim. O especialista pode comparar área, valor, posição, vagas e liquidez de cada unidade para o seu objetivo.' },
+            { question: 'A disponibilidade muda?', answer: 'Sim. Imóveis de alto padrão podem mudar de status rapidamente, então a confirmação final deve ser feita com o atendimento.' },
         ],
     },
     {
         id: 'ibiza-towers',
         name: 'Ibiza Towers',
         pageSlug: 'ibiza-towers',
-        city: 'Balneario Camboriu',
-        locationName: 'Barra Sul, Balneario Camboriu - SC',
+        city: 'Balneário Camboriú',
+        locationName: 'Barra Sul, Balneário Camboriú - SC',
         tagline: 'Frente mar real, lazer monumental e unidades amplas em uma das torres mais desejadas da Barra Sul.',
         priceRange: 'R$ 8.900.000 a R$ 29.500.000',
         availableUnitsCount: 18,
-        areaRange: '230m2 a 490m2',
-        suitesRange: '4 a 5 suites',
+        areaRange: '230 m² a 490 m²',
+        suitesRange: '4 a 5 suítes',
         heroImage: `${R2}/properties/imported/2523/001-whatsapp-image-2026-05-09-at-130333-17785968756664.jpeg`,
-        description: 'Uma vitrine de alto padrao para quem procura frente mar, liquidez e estrutura de lazer completa em Balneario Camboriu.',
-        address: 'Avenida Atlantica - Barra Sul',
+        description: 'Uma vitrine de alto padrão para quem procura frente mar, liquidez e estrutura de lazer completa em Balneário Camboriú.',
+        address: 'Avenida Atlântica - Barra Sul',
         benefits: [
-            { title: 'Frente Mar', description: 'Localizacao de alta procura, com vista e acesso privilegiado a orla.', icon: 'Waves' },
-            { title: 'Lazer Completo', description: 'Piscina, spa, sauna, cinema, salao de festas, quadra e fitness.', icon: 'Dumbbell' },
-            { title: 'Portfolio Amplo', description: 'Mais opcoes de unidades para comparar valor, andar e configuracao.', icon: 'Building2' },
+            { title: 'Frente Mar', description: 'Localização de alta procura, com vista e acesso privilegiado à orla.', icon: 'Waves' },
+            { title: 'Lazer Completo', description: 'Piscina, spa, sauna, cinema, salão de festas, quadra e fitness.', icon: 'Dumbbell' },
+            { title: 'Portfólio Amplo', description: 'Mais opções de unidades para comparar valor, andar e configuração.', icon: 'Building2' },
         ],
         differentials: [
-            { title: 'Barra Sul Consolidada', description: 'Regiao com forte demanda qualificada, turismo premium e alta liquidez.' },
+            { title: 'Barra Sul Consolidada', description: 'Região com forte demanda qualificada, turismo premium e alta liquidez.' },
             { title: 'Unidades Grandes', description: 'Apartamentos e coberturas com metragens generosas e vagas robustas.' },
-            { title: 'Comparacao Imediata', description: 'Bom empreendimento para comparar varias alternativas no mesmo predio.' },
+            { title: 'Comparação Imediata', description: 'Bom empreendimento para comparar várias alternativas no mesmo prédio.' },
         ],
         units: [
             {
                 id: 'ib-2523',
                 type: 'Apartamento Frente Mar',
                 title: 'Apartamento no Ed. Ibiza Towers',
-                area: '230m2',
-                suites: '4 suites',
+                area: '230 m²',
+                suites: '4 suítes',
                 vagas: '4 vagas',
                 price: 'R$ 8.900.000',
                 image: `${R2}/properties/imported/2523/001-whatsapp-image-2026-05-09-at-130333-17785968756664.jpeg`,
@@ -242,24 +242,24 @@ const DEVELOPMENTS: Development[] = [
                 id: 'ib-282',
                 type: 'Apartamento Mobiliado',
                 title: 'Apartamento frente mar no Ibiza Towers',
-                area: '237m2',
-                suites: '4 suites',
+                area: '237 m²',
+                suites: '4 suítes',
                 vagas: '4 vagas',
                 price: 'R$ 9.980.000',
                 image: `${R2}/properties/imported/282/001-thumb-2-16284623018784.jpg`,
-                status: 'Disponivel',
+                status: 'Disponível',
                 sourceSlug: 'apartamento-mobiliado-com-vista-para-o-mar-no-ibiza-towers-em-balneario-camboriu',
             },
             {
                 id: 'ib-2185',
                 type: 'Apartamento Vista Mar',
                 title: 'Apartamento no Ed. Ibiza Towers',
-                area: '237m2',
-                suites: '4 suites',
+                area: '237 m²',
+                suites: '4 suítes',
                 vagas: '4 vagas',
                 price: 'R$ 10.000.000',
                 image: `${R2}/properties/imported/2185/001-0b2e2b3c-800f-4886-b8e0-cc3b4707d374-17291740271884.jpeg`,
-                status: 'Disponivel',
+                status: 'Disponível',
                 sourceSlug: 'apartamnto-mobiliado-vista-para-o-mar-ibiza-tower-em-balneario-camboriu',
             },
         ],
@@ -271,41 +271,41 @@ const DEVELOPMENTS: Development[] = [
         ],
         faq: [
             { question: 'Quantas unidades do Ibiza aparecem na base?', answer: 'A varredura encontrou 18 unidades ativas associadas ao Ibiza Towers.' },
-            { question: 'O Ibiza serve para comprador frente mar?', answer: 'Sim. Ele e uma das melhores vitrines para quem quer comparar frente mar em Balneario Camboriu.' },
-            { question: 'Da para enviar unidades especificas?', answer: 'Sim. Cada card leva a pessoa para a unidade de interesse ou para o atendimento com o especialista.' },
+            { question: 'O Ibiza serve para comprador frente mar?', answer: 'Sim. Ele é uma das melhores vitrines para quem quer comparar frente mar em Balneário Camboriú.' },
+            { question: 'Dá para enviar unidades específicas?', answer: 'Sim. Cada card leva a pessoa para a unidade de interesse ou para o atendimento com o especialista.' },
         ],
     },
     {
         id: 'one-tower',
         name: 'One Tower',
         pageSlug: 'one-tower',
-        city: 'Balneario Camboriu',
-        locationName: 'Centro, Balneario Camboriu - SC',
-        tagline: 'Um endereco frente mar iconico para quem busca exclusividade, vista e solidez patrimonial.',
+        city: 'Balneário Camboriú',
+        locationName: 'Centro, Balneário Camboriú - SC',
+        tagline: 'Um endereço frente mar icônico para quem busca exclusividade, vista e solidez patrimonial.',
         priceRange: 'R$ 9.800.000 a R$ 15.000.000',
         availableUnitsCount: 13,
-        areaRange: '194m2 a 215m2',
-        suitesRange: '4 suites',
+        areaRange: '194 m² a 215 m²',
+        suitesRange: '4 suítes',
         heroImage: `${R2}/properties/imported/746/003-whatsapp-image-2024-01-02-at-112504-1-17042062907829.jpeg`,
-        description: 'O One Tower concentra alto padrao, frente mar e unidades com perfil de comprador exigente em Balneario Camboriu.',
-        address: 'Avenida Atlantica, Centro - Balneario Camboriu',
+        description: 'O One Tower concentra alto padrão, frente mar e unidades com perfil de comprador exigente em Balneário Camboriú.',
+        address: 'Avenida Atlântica, Centro - Balneário Camboriú',
         benefits: [
-            { title: 'Frente Mar Iconico', description: 'Endereco de visibilidade e desejo para moradia ou investimento.', icon: 'Waves' },
-            { title: 'Seguranca de Liquidez', description: 'Produto conhecido, com forte procura no mercado de alto padrao.', icon: 'Lock' },
-            { title: 'Unidades Comparaveis', description: 'Boa leitura para comparar andar, acabamento, preco e area.', icon: 'KeyRound' },
+            { title: 'Frente Mar Icônico', description: 'Endereço de visibilidade e desejo para moradia ou investimento.', icon: 'Waves' },
+            { title: 'Segurança de Liquidez', description: 'Produto conhecido, com forte procura no mercado de alto padrão.', icon: 'Lock' },
+            { title: 'Unidades Comparáveis', description: 'Boa leitura para comparar andar, acabamento, preço e área.', icon: 'KeyRound' },
         ],
         differentials: [
-            { title: 'Endereco Consolidado', description: 'Localizacao em eixo nobre e com leitura clara de valorizacao.' },
-            { title: 'Padrao Frente Mar', description: 'Unidades amplas, vistas abertas e configuracoes consistentes.' },
-            { title: 'Curadoria Objetiva', description: 'Ideal para quem quer poucas opcoes fortes e comparacao direta.' },
+            { title: 'Endereço Consolidado', description: 'Localização em eixo nobre e com leitura clara de valorização.' },
+            { title: 'Padrão Frente Mar', description: 'Unidades amplas, vistas abertas e configurações consistentes.' },
+            { title: 'Curadoria Objetiva', description: 'Ideal para quem quer poucas opções fortes e comparação direta.' },
         ],
         units: [
             {
                 id: 'ot-746',
                 type: 'Apartamento Decorado',
                 title: 'Apartamento no Ed. One Tower Decorado Frente Mar',
-                area: '194m2',
-                suites: '4 suites',
+                area: '194 m²',
+                suites: '4 suítes',
                 vagas: '3 vagas',
                 price: 'R$ 9.800.000',
                 image: `${R2}/properties/imported/746/003-whatsapp-image-2024-01-02-at-112504-1-17042062907829.jpeg`,
@@ -316,24 +316,24 @@ const DEVELOPMENTS: Development[] = [
                 id: 'ot-809',
                 type: 'Apartamento Frente Mar',
                 title: 'Apartamento no Ed. One Tower',
-                area: '196m2',
-                suites: '4 suites',
+                area: '196 m²',
+                suites: '4 suítes',
                 vagas: '3 vagas',
                 price: 'R$ 10.000.000',
                 image: `${R2}/properties/imported/809/005-whatsapp-image-2024-01-02-at-112506-17042064294075.jpeg`,
-                status: 'Disponivel',
+                status: 'Disponível',
                 sourceSlug: 'apartamento-no-ed-one-tower-em-balneario-camboriu',
             },
             {
                 id: 'ot-375',
                 type: 'Apartamento Vista Mar',
                 title: 'Apartamento no Ed. One Tower',
-                area: '196m2',
-                suites: '4 suites',
+                area: '196 m²',
+                suites: '4 suítes',
                 vagas: '3 vagas',
                 price: 'R$ 10.900.000',
                 image: `${R2}/properties/imported/375/003-whatsapp-image-2024-01-02-at-112503-17042058358438.jpeg`,
-                status: 'Disponivel',
+                status: 'Disponível',
                 sourceSlug: 'apartamento-no-ed-one-tower-em-balneario-camboriu',
             },
         ],
@@ -343,9 +343,9 @@ const DEVELOPMENTS: Development[] = [
             { title: 'Living', image: `${R2}/properties/imported/375/003-whatsapp-image-2024-01-02-at-112503-17042058358438.jpeg`, category: 'Interior' },
         ],
         faq: [
-            { question: 'Quantas unidades do One Tower aparecem disponiveis?', answer: 'A varredura encontrou 13 unidades ativas relacionadas ao One Tower.' },
-            { question: 'Ele e indicado para investidor?', answer: 'Sim, especialmente para quem procura endereco frente mar consolidado e produto de alta liquidez.' },
-            { question: 'Posso comparar com Ibiza e Brava?', answer: 'Sim. Use o seletor da propria pagina para alternar entre empreendimentos e entender as diferencas.' },
+            { question: 'Quantas unidades do One Tower aparecem disponíveis?', answer: 'A varredura encontrou 13 unidades ativas relacionadas ao One Tower.' },
+            { question: 'Ele é indicado para investidor?', answer: 'Sim, especialmente para quem procura endereço frente mar consolidado e produto de alta liquidez.' },
+            { question: 'Posso comparar com Ibiza e Brava?', answer: 'Sim. Use o seletor da própria página para alternar entre empreendimentos e entender as diferenças.' },
         ],
     },
 ]
@@ -629,8 +629,8 @@ function normalizeDevelopment(value: unknown): Development | null {
         name,
         pageSlug: asText(value.pageSlug ?? value.page_slug ?? value.slug, fallback?.pageSlug),
         city: asText(value.city, fallback?.city || 'Santa Catarina'),
-        locationName: asText(value.locationName ?? value.location_name, fallback?.locationName || 'Localizacao privilegiada'),
-        tagline: asText(value.tagline, fallback?.tagline || 'Empreendimento de alto padrao com curadoria Guilherme Pilger.'),
+        locationName: asText(value.locationName ?? value.location_name, fallback?.locationName || 'Localização privilegiada'),
+        tagline: asText(value.tagline, fallback?.tagline || 'Empreendimento de alto padrão com curadoria Guilherme Pilger.'),
         priceRange: asText(value.priceRange ?? value.price_range, fallback?.priceRange || 'Consulte'),
         availableUnitsCount: displayUnits.length,
         areaRange: asText(value.areaRange ?? value.area_range, fallback?.areaRange || 'Consulte'),
@@ -678,8 +678,8 @@ function buildDevelopmentSellingDescription(development: Development) {
 
 function buildDevelopmentHeadline(development: Development) {
     const count = developmentUnitCount(development)
-    if (!count) return `Conheca o ${development.name} e consulte disponibilidade atual.`
-    return `Conheca o ${development.name} e compare ${count} ${count === 1 ? 'unidade disponivel' : 'unidades disponiveis'}.`
+    if (!count) return `Conheça o ${development.name} e consulte disponibilidade atual.`
+    return `Conheça o ${development.name} e compare ${count} ${count === 1 ? 'unidade disponível' : 'unidades disponíveis'}.`
 }
 
 function buildDevelopmentBenefits(development: Development): Development['benefits'] {
@@ -697,7 +697,7 @@ function buildDevelopmentBenefits(development: Development): Development['benefi
             },
             {
                 title: 'Alternativas equivalentes',
-                description: `Quando nao houver unidade publicada, a curadoria compara empreendimentos similares por perfil, localizacao e liquidez.`,
+                description: `Quando não houver unidade publicada, a curadoria compara empreendimentos similares por perfil, localização e liquidez.`,
                 icon: 'ShieldCheck',
             },
         ]
@@ -717,7 +717,7 @@ function buildDevelopmentBenefits(development: Development): Development['benefi
         },
         {
             title: 'Curadoria para decidir',
-            description: `A equipe confirma disponibilidade, condicoes de negociacao e quais opcoes combinam melhor com o seu objetivo.`,
+            description: `A equipe confirma disponibilidade, condições de negociação e quais opções combinam melhor com o seu objetivo.`,
             icon: 'ShieldCheck',
         },
     ]
@@ -729,15 +729,15 @@ function buildDevelopmentDifferentials(development: Development): Development['d
         return [
             {
                 title: 'Pagina do empreendimento preservada',
-                description: `Mesmo sem unidade publicada, o ${development.name} continua com contexto de localizacao, fotos, mapa e leitura comercial para orientar a decisao.`,
+                description: `Mesmo sem unidade publicada, o ${development.name} continua com contexto de localização, fotos, mapa e leitura comercial para orientar a decisão.`,
             },
             {
                 title: 'Consulta de disponibilidade',
-                description: 'O atendimento confirma unidades reservadas, novas entradas e oportunidades que ainda nao voltaram para a vitrine publica.',
+                description: 'O atendimento confirma unidades reservadas, novas entradas e oportunidades que ainda não voltaram para a vitrine pública.',
             },
             {
                 title: 'Curadoria de semelhantes',
-                description: 'Se nao houver estoque atual, a equipe indica empreendimentos com perfil parecido para manter a busca em movimento.',
+                description: 'Se não houver estoque atual, a equipe indica empreendimentos com perfil parecido para manter a busca em movimento.',
             },
         ]
     }
@@ -745,7 +745,7 @@ function buildDevelopmentDifferentials(development: Development): Development['d
     return [
         {
             title: 'Escolha por unidade',
-            description: `${count} ${count === 1 ? 'opcao ativa aparece reunida' : 'opcoes ativas aparecem reunidas'} para comparar preco, metragem, suites e vagas antes de abrir a ficha completa.`,
+            description: `${count} ${count === 1 ? 'opção ativa aparece reunida' : 'opções ativas aparecem reunidas'} para comparar preço, metragem, suítes e vagas antes de abrir a ficha completa.`,
         },
         {
             title: 'Fotos, mapa e Street View',
@@ -753,7 +753,7 @@ function buildDevelopmentDifferentials(development: Development): Development['d
         },
         {
             title: 'Proximo passo claro',
-            description: `Abra os detalhes da unidade que chamou atencao ou peca uma curadoria para comparar as melhores opcoes disponiveis.`,
+            description: `Abra os detalhes da unidade que chamou atenção ou peça uma curadoria para comparar as melhores opções disponíveis.`,
         },
     ]
 }
@@ -1101,9 +1101,9 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
         [activeDev.units]
     )
     const unitsSectionKicker = hasAvailableUnits ? 'Inventario exclusivo' : 'Disponibilidade'
-    const unitsSectionTitle = hasAvailableUnits ? 'Escolha uma unidade disponivel' : 'Consulte a disponibilidade atual'
+    const unitsSectionTitle = hasAvailableUnits ? 'Escolha uma unidade disponível' : 'Consulte a disponibilidade atual'
     const unitsSectionCopy = hasAvailableUnits
-        ? `Compare as unidades ativas do ${activeDev.name}, abra a ficha completa da melhor opcao ou peca ajuda para decidir entre elas.`
+        ? `Compare as unidades ativas do ${activeDev.name}, abra a ficha completa da melhor opção ou peça ajuda para decidir entre elas.`
         : `As unidades publicadas do ${activeDev.name} estao sob consulta neste momento. Fale com a equipe para confirmar novas entradas, reservas e alternativas semelhantes.`
     const unitsPrimaryLabel = hasAvailableUnits ? 'Ver unidades' : 'Consultar disponibilidade'
     const unitsSecondaryLabel = hasAvailableUnits ? 'Enviar interesse' : 'Receber alternativas'
@@ -1115,7 +1115,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
         const fallbackHighlights: Array<{ title: string; icon: keyof typeof iconMap }> = [
             { title: 'Estoque conferido', icon: 'KeyRound' },
             { title: 'Comparacao objetiva', icon: 'Building2' },
-            { title: 'Localizacao premium', icon: 'Compass' },
+            { title: 'Localização premium', icon: 'Compass' },
             { title: 'Curadoria Pilger', icon: 'ShieldCheck' },
         ]
         const highlights = [
@@ -1139,7 +1139,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
     const developmentQuickFeatureItems = useMemo(() => uniqueTextItems([
         stockLabel,
         activeDev.areaRange ? `Metragens de ${activeDev.areaRange}` : '',
-        activeDev.suitesRange ? `Configuracao de ${activeDev.suitesRange}` : '',
+        activeDev.suitesRange ? `Configuração de ${activeDev.suitesRange}` : '',
         ...activeDev.units.map(unit => unit.type),
         ...sellingBenefits.map(benefit => benefit.title),
         ...decisionDifferentials.map(differential => differential.title),
@@ -1218,7 +1218,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
     const brokerCardName = broker?.name || GLOBAL_PROPERTY_BROKER_NAME
     const brokerCardImage = broker?.photo_url || null
     const contactPhone = broker?.phone || GLOBAL_PROPERTY_WHATSAPP_PHONE
-    const developmentLeadMessage = `Ola, tenho interesse no empreendimento ${activeDev.name} ${developmentUrl}`
+    const developmentLeadMessage = `Olá, tenho interesse no empreendimento ${activeDev.name} ${developmentUrl}`
     const developmentLeadMetadata = {
         landing_page_slug: slug,
         landing_page_id: landingPageId || null,
@@ -1236,10 +1236,10 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
         if (!contactPhone) return
 
         const message = unit
-            ? `Ola! Vi a pagina do empreendimento ${activeDev.name} e quero confirmar disponibilidade e detalhes da unidade ${unit.type} (${unit.area}, ${unit.price}).`
+            ? `Olá! Vi a página do empreendimento ${activeDev.name} e quero confirmar disponibilidade e detalhes da unidade ${unit.type} (${unit.area}, ${unit.price}).`
             : broker?.greeting_message || (hasAvailableUnits
-                ? `Ola! Vi a pagina do empreendimento ${activeDev.name} e quero uma curadoria das unidades disponiveis.`
-                : `Ola! Vi a pagina do empreendimento ${activeDev.name} e quero consultar disponibilidade atual ou receber alternativas semelhantes.`)
+                ? `Olá! Vi a página do empreendimento ${activeDev.name} e quero uma curadoria das unidades disponíveis.`
+                : `Olá! Vi a página do empreendimento ${activeDev.name} e quero consultar disponibilidade atual ou receber alternativas semelhantes.`)
 
         openWhatsAppWithLeadCapture({
             phone: contactPhone,
@@ -1277,7 +1277,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 <div className="plp-shell bc-dev-shell">
                     <section className="plp-title-band bc-dev-title-band">
                         <div className="plp-breadcrumbs">
-                            <Link href="/">Inicio</Link>
+                            <Link href="/">Início</Link>
                             <span>/</span>
                             <Link href="/busca">Empreendimentos</Link>
                             <span>/</span>
@@ -1477,7 +1477,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                                 <div className="plp-mobile-card-head plp-mobile-card-head--split">
                                     <div>
                                         <span className="plp-kicker">{hasAvailableUnits ? 'Unidades' : 'Disponibilidade'}</span>
-                                        <h2 id="bc-mobile-units-title">{hasAvailableUnits ? 'Escolha a unidade que faz sentido.' : 'Confirme as proximas oportunidades.'}</h2>
+                                        <h2 id="bc-mobile-units-title">{hasAvailableUnits ? 'Escolha a unidade que faz sentido.' : 'Confirme as próximas oportunidades.'}</h2>
                                     </div>
                                 </div>
                                 {hasAvailableUnits ? (
@@ -1496,7 +1496,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                                         <div className="bc-dev-empty-units-icon"><KeyRound size={22} /></div>
                                         <div>
                                             <h3>Estoque sob consulta</h3>
-                                            <p>O especialista confirma novas entradas, unidades reservadas e empreendimentos parecidos com o perfil deste endereco.</p>
+                                            <p>O especialista confirma novas entradas, unidades reservadas e empreendimentos parecidos com o perfil deste endereço.</p>
                                         </div>
                                         <button type="button" onClick={() => openChat()}>
                                             Consultar agora
@@ -1542,30 +1542,34 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                         </div>
 
                         <div className="plp-main-column plp-content-column bc-dev-content-column">
-                            <section className="plp-section plp-copy-section plp-summary-card bc-dev-overview-card">
-                                <span className="plp-kicker">Visao geral</span>
-                                <h2>{developmentHeadline}</h2>
-                                <div className="plp-narrative">
-                                    <p>{sellingDescription}</p>
-                                    <p>{activeDev.description}</p>
-                                </div>
-                            </section>
+                            <div className="plp-overview-facts-grid bc-dev-overview-facts-grid">
+                                <section className="plp-overview-combined-card bc-dev-overview-combined-card" aria-label="Visão geral e ficha rápida do empreendimento">
+                                    <div className="plp-overview-copy-pane plp-copy-section bc-dev-overview-card">
+                                        <span className="plp-kicker">Visão geral</span>
+                                        <h2>{developmentHeadline}</h2>
+                                        <div className="plp-narrative">
+                                            <p>{sellingDescription}</p>
+                                            <p>{activeDev.description}</p>
+                                        </div>
+                                    </div>
 
-                            <section id="ficha" className="plp-section plp-summary-card plp-quick-facts-card bc-dev-quick-facts-card">
-                                <div className="plp-section-head compact">
-                                    <span className="plp-kicker">Ficha rapida</span>
-                                </div>
-                                <div className="plp-spec-grid">
-                                    <SpecCardLike icon={<Maximize2 size={21} />} label="Area" value={activeDev.areaRange} />
-                                    <SpecCardLike icon={<BedDouble size={21} />} label="Configuracao" value={activeDev.suitesRange} />
-                                    <SpecCardLike icon={<Building2 size={21} />} label="Estoque" value={stockLabel} />
-                                    <SpecCardLike icon={<KeyRound size={21} />} label="Faixa de preco" value={activeDev.priceRange} />
-                                    <SpecCardLike icon={<MapPin size={21} />} label="Localizacao" value={activeDev.locationName} />
-                                </div>
-                                <div className="plp-quick-facts-features">
-                                    <DevelopmentInfoList title="Caracteristicas do empreendimento" items={developmentQuickFeatureItems} />
-                                </div>
-                            </section>
+                                    <div id="ficha" className="plp-overview-facts-pane plp-quick-facts-card bc-dev-quick-facts-card">
+                                        <div className="plp-section-head compact">
+                                            <span className="plp-kicker">Ficha rápida</span>
+                                        </div>
+                                        <div className="plp-spec-grid">
+                                            <SpecCardLike icon={<Maximize2 size={21} />} label="Área" value={activeDev.areaRange} />
+                                            <SpecCardLike icon={<BedDouble size={21} />} label="Configuração" value={activeDev.suitesRange} />
+                                            <SpecCardLike icon={<Building2 size={21} />} label="Estoque" value={stockLabel} />
+                                            <SpecCardLike icon={<KeyRound size={21} />} label="Faixa de preço" value={activeDev.priceRange} />
+                                            <SpecCardLike icon={<MapPin size={21} />} label="Localização" value={activeDev.locationName} />
+                                        </div>
+                                        <div className="plp-quick-facts-features">
+                                            <DevelopmentInfoList title="Características do empreendimento" items={developmentQuickFeatureItems} />
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
                         </div>
 
                         <aside className="plp-sidebar bc-dev-sidebar" aria-label="Atendimento e resumo do empreendimento">
@@ -1585,37 +1589,38 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
 
                                 <div className="plp-side-facts bc-dev-side-facts">
                                     <DevelopmentSideFact icon={<Building2 size={17} />} value={stockValue} label={stockFactLabel} />
-                                    <DevelopmentSideFact icon={<Maximize2 size={17} />} value={activeDev.areaRange} label="areas" />
-                                    <DevelopmentSideFact icon={<BedDouble size={17} />} value={activeDev.suitesRange} label="configuracoes" />
+                                    <DevelopmentSideFact icon={<Maximize2 size={17} />} value={activeDev.areaRange} label="áreas" />
+                                    <DevelopmentSideFact icon={<BedDouble size={17} />} value={activeDev.suitesRange} label="configurações" />
                                 </div>
 
-                                <p className="plp-commercial-note">A disponibilidade muda com frequencia. Primeiro escolha as unidades de interesse, depois confirme valores e condicoes.</p>
+                                <p className="plp-commercial-note">A disponibilidade muda com frequência. Primeiro escolha as unidades de interesse, depois confirme valores e condições.</p>
                             </div>
 
                             <div className="plp-side-card plp-lead-card bc-dev-lead-card">
-                                <h3><MessageCircle size={18} /> Mais informacoes sobre este empreendimento</h3>
+                                <h3><MessageCircle size={18} /> Mais informações sobre este empreendimento</h3>
                                 <p>Envie seus dados para receber disponibilidade, unidades e atendimento direto pelo WhatsApp.</p>
-                                <div className="plp-form-preview" aria-hidden="true">
-                                    <span className="plp-form-message">Ola, tenho interesse no empreendimento {activeDev.name} {developmentUrl}</span>
-                                    <span>Nome completo *</span>
-                                    <span>Telefone *</span>
-                                    <span>Email *</span>
-                                </div>
-                                <div className="bc-dev-lead-actions">
+                                {hasAvailableUnits && (
+                                    <div className="bc-dev-lead-actions">
+                                        <button type="button" className="plp-dark-button bc-dev-sidebar-primary" onClick={handleUnitsPrimaryAction}>
+                                            Ir para unidades
+                                        </button>
+                                    </div>
+                                )}
+                                <PropertySidebarLeadForm
+                                    phone={contactPhone}
+                                    message={developmentLeadMessage}
+                                    slug={slug}
+                                    template="development-sidebar-form"
+                                    metadata={developmentLeadMetadata}
+                                    subjectLabel={`o empreendimento ${activeDev.name}`}
+                                />
+                                {!hasAvailableUnits && (
+                                    <div className="bc-dev-lead-actions bc-dev-lead-actions--after-form">
                                     <button type="button" className="plp-dark-button bc-dev-sidebar-primary" onClick={handleUnitsPrimaryAction}>
-                                        {hasAvailableUnits ? 'Ir para unidades' : 'Consultar'}
+                                        Consultar disponibilidade
                                     </button>
-                                    <WhatsAppCaptureLink
-                                        phone={contactPhone}
-                                        message={developmentLeadMessage}
-                                        slug={slug}
-                                        template="development-sidebar-form"
-                                        metadata={developmentLeadMetadata}
-                                        className="plp-dark-button"
-                                    >
-                                        Enviar interesse
-                                    </WhatsAppCaptureLink>
-                                </div>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="plp-side-card plp-broker-card bc-dev-broker-card">
@@ -1662,7 +1667,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                                 <div className="bc-dev-empty-units-icon"><KeyRound size={26} /></div>
                                 <div>
                                     <h3>Unidades sob consulta neste momento</h3>
-                                    <p>O {activeDev.name} continua no radar da curadoria. A equipe confirma se ha nova unidade, revenda reservada ou oportunidade similar antes de direcionar o atendimento.</p>
+                                    <p>O {activeDev.name} continua no radar da curadoria. A equipe confirma se há nova unidade, revenda reservada ou oportunidade similar antes de direcionar o atendimento.</p>
                                 </div>
                                 <div className="bc-dev-empty-units-actions">
                                     <button type="button" onClick={() => openChat()}>
@@ -1697,7 +1702,7 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 <section className="bc-dev-faq-section">
                     <div className="bc-dev-section-inner bc-dev-split-section">
                         <div className="bc-dev-section-headline">
-                            <span className="plp-kicker">Duvidas frequentes</span>
+                            <span className="plp-kicker">Dúvidas frequentes</span>
                         </div>
                         <div className="bc-dev-faq-list">
                             {activeDev.faq.map((item, index) => (
@@ -1728,8 +1733,8 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                 <MobileNav
                     phone={broker?.phone}
                     message={hasAvailableUnits
-                        ? `Ola! Vi a pagina do empreendimento ${activeDev.name} e quero comparar as unidades disponiveis.`
-                        : `Ola! Vi a pagina do empreendimento ${activeDev.name} e quero consultar disponibilidade atual ou receber alternativas semelhantes.`
+                        ? `Olá! Vi a página do empreendimento ${activeDev.name} e quero comparar as unidades disponíveis.`
+                        : `Olá! Vi a página do empreendimento ${activeDev.name} e quero consultar disponibilidade atual ou receber alternativas semelhantes.`
                     }
                     slug={slug}
                     template="development-mobile-nav"
@@ -6072,7 +6077,7 @@ function RelatedDevelopmentsSection({ activeDev, developments }: { activeDev: De
                         <span>Empreendimentos semelhantes</span>
                         <h2 id="bc-related-developments-title">Outras oportunidades para comparar com {activeDev.name}.</h2>
                     </div>
-                    <p>Veja outros predios e condominios com unidades selecionadas pela curadoria Guilherme Pilger.</p>
+                    <p>Veja outros prédios e condomínios com unidades selecionadas pela curadoria Guilherme Pilger.</p>
                 </div>
 
                 <div className="bc-related-developments-grid">
@@ -6207,7 +6212,7 @@ function DevelopmentMediaShowcase({ development, mapEmbedSrc, streetViewEmbedSrc
     const isLocationMedia = activeMedia.type === 'map' || activeMedia.type === 'street'
 
     return (
-        <div className="bc-development-showcase" aria-label={`Midias de ${development.name}`}>
+        <div className="bc-development-showcase" aria-label={`Mídias de ${development.name}`}>
             <div className="bc-development-showcase-toolbar">
                 <button type="button" className="bc-development-showcase-pill" onClick={() => selectMedia(0)}>
                     <Camera size={15} />
@@ -6252,7 +6257,7 @@ function DevelopmentMediaShowcase({ development, mapEmbedSrc, streetViewEmbedSrc
                                 type="button"
                                 className="bc-development-showcase-nav bc-development-showcase-nav--next"
                                 onClick={() => selectMedia(safeActiveIndex + 1)}
-                                aria-label="Proxima midia"
+                                aria-label="Próxima mídia"
                             >
                                 <ChevronRight size={24} />
                             </button>
@@ -6271,7 +6276,7 @@ function DevelopmentMediaShowcase({ development, mapEmbedSrc, streetViewEmbedSrc
                     )}
                 </div>
 
-                <div className="bc-development-showcase-rail" ref={railRef} aria-label="Selecionar midia">
+                <div className="bc-development-showcase-rail" ref={railRef} aria-label="Selecionar mídia">
                     {mediaItems.map((item, index) => (
                         <button
                             key={`${item.type}-${item.type === 'photo' ? item.photoIndex : item.title}`}
@@ -6688,7 +6693,7 @@ function UnitCard({ unit, development, propertyMedia }: { unit: Unit; developmen
                 <h3 className="mb-5 text-2xl font-semibold tracking-wide text-white">{unit.type}</h3>
 
                 <div className="mb-6 grid grid-cols-3 gap-3 border-y border-zinc-800/60 py-4">
-                    <Spec icon={Maximize2} label="Area" value={unit.area} />
+                    <Spec icon={Maximize2} label="Área" value={unit.area} />
                     <Spec icon={BedDouble} label="Suites" value={unit.suites} />
                     <Spec icon={Car} label="Vagas" value={unit.vagas} />
                 </div>

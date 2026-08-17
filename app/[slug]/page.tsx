@@ -1,5 +1,5 @@
 import { createAdminClient, createSupabaseAbortSignal, summarizeSupabaseError } from '@/lib/supabase/server'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import ClassicTemplate from '@/components/templates/ClassicTemplate'
 import ModernLuxuryTemplate from '@/components/templates/ModernLuxuryTemplate'
@@ -30,6 +30,7 @@ const LANDING_PAGE_SELECT = `
     slug,
     description,
     content,
+    metadata,
     page_type,
     primary_color,
     property_id,
@@ -391,6 +392,18 @@ function landingSeo(content: Record<string, any>) {
     return landingRecord(content.seo)
 }
 
+function landingCanonicalDevelopmentSlug(slug: string, content: Record<string, any>, metadata?: Record<string, any>) {
+    const candidate = landingText(
+        metadata?.canonical_development_slug
+        ?? content.canonical_development_slug
+        ?? landingRecord(content.seo).canonical_development_slug
+    )
+
+    if (!candidate || candidate === slug) return ''
+    if (!/^[a-z0-9][a-z0-9-]{1,180}$/i.test(candidate)) return ''
+    return candidate
+}
+
 function landingPageType(lp: Record<string, any>, content: Record<string, any>): 'development' | 'product' {
     const explicit = landingText(lp.page_type)
     if (explicit === 'product') return 'product'
@@ -667,6 +680,11 @@ export default async function DynamicLandingPage({ params }: { params: Promise<{
     }
 
     const rawContent = landingRecord(lp.content)
+    const canonicalDevelopmentSlug = landingCanonicalDevelopmentSlug(slug, rawContent, landingRecord(lp.metadata))
+    if (canonicalDevelopmentSlug) {
+        redirect(`/${canonicalDevelopmentSlug}`)
+    }
+
     const initialPageType = landingPageType(lp, rawContent)
     const content = initialPageType === 'product' ? normalizeProductLandingContent(rawContent) : rawContent
     const pageType = landingPageType(lp, content)

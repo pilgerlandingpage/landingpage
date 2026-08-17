@@ -9,6 +9,8 @@ type PropertySidebarLeadFormProps = {
     slug?: string
     template?: string
     metadata?: Record<string, unknown>
+    buttonLabel?: string
+    subjectLabel?: string
 }
 
 const LEAD_CACHE_KEY = 'pilger_lead_capture'
@@ -54,6 +56,8 @@ export default function PropertySidebarLeadForm({
     slug = 'imovel',
     template = 'property-classic-form',
     metadata = {},
+    buttonLabel = 'Enviar interesse',
+    subjectLabel = 'este imóvel',
 }: PropertySidebarLeadFormProps) {
     const [leadMessage, setLeadMessage] = useState(message)
     const [name, setName] = useState('')
@@ -74,7 +78,7 @@ export default function PropertySidebarLeadForm({
         '',
         `Nome: ${name.trim()}`,
         `Telefone: ${leadPhone.trim()}`,
-        `Email: ${normalizedEmail}`,
+        `E-mail: ${normalizedEmail}`,
     ].filter(Boolean).join('\n')
 
     const persistLeadCapture = async (whatsappMessage: string, leadMetaEventId: string) => {
@@ -117,7 +121,7 @@ export default function PropertySidebarLeadForm({
 
             if (!response.ok) {
                 const data = await response.json().catch(() => ({}))
-                throw new Error(data?.error || 'Nao foi possivel salvar o lead.')
+                throw new Error(data?.error || 'Não foi possível salvar o lead.')
             }
 
             trackMetaPixelEvent('Lead', {
@@ -143,7 +147,7 @@ export default function PropertySidebarLeadForm({
             }))
         } catch (err) {
             console.warn('[PropertySidebarLeadForm] lead capture skipped:', err)
-            setError('WhatsApp aberto. Se o cadastro nao salvar automaticamente, o atendimento segue pela conversa.')
+            setError('WhatsApp aberto. Se o cadastro não salvar automaticamente, o atendimento segue pela conversa.')
         }
     }
 
@@ -152,7 +156,7 @@ export default function PropertySidebarLeadForm({
         setStatus('')
 
         if (!canSubmit) {
-            setError('Preencha nome, telefone e email para continuar.')
+            setError('Preencha nome, telefone e e-mail para continuar.')
             return
         }
 
@@ -209,19 +213,19 @@ export default function PropertySidebarLeadForm({
                 required
             />
             <input
-                aria-label="Email"
+                aria-label="E-mail"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder="Email *"
+                placeholder="E-mail *"
                 autoComplete="email"
                 inputMode="email"
                 type="email"
                 required
             />
             <button type="submit" className="plp-dark-button" disabled={!canSubmit}>
-                Enviar interesse
+                {buttonLabel}
             </button>
-            <p className="plp-sidebar-lead-privacy">Ao enviar, voce aceita receber contato sobre este imovel.</p>
+            <p className="plp-sidebar-lead-privacy">Ao enviar, você aceita receber contato sobre {subjectLabel}.</p>
             {error && <p className="plp-sidebar-lead-feedback is-error">{error}</p>}
             {status && !error && <p className="plp-sidebar-lead-feedback is-success">{status}</p>}
         </form>
