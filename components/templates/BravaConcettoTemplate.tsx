@@ -10,6 +10,7 @@ import {
     Building2,
     Camera,
     Car,
+    CheckCircle2,
     ChevronLeft,
     ChevronRight,
     Compass,
@@ -29,6 +30,7 @@ import {
     ShieldCheck,
     Share2,
     Sparkles,
+    Star,
     Waves,
     X,
 } from 'lucide-react'
@@ -451,7 +453,7 @@ function normalizeUnit(value: unknown): Unit | null {
         price: asText(value.price, 'Consulte'),
         image,
         images,
-        status: asText(value.status, 'Disponivel'),
+        status: asText(value.status, 'Disponível'),
         sourceSlug,
         propertyId: propertyId || undefined,
         sourceReference: sourceReference || undefined,
@@ -669,11 +671,11 @@ function developmentStockLabel(development: Development) {
 function buildDevelopmentSellingDescription(development: Development) {
     const count = developmentUnitCount(development)
     if (!count) {
-        return `O ${development.name} segue mapeado pela curadoria Guilherme Pilger em ${development.locationName}. As unidades publicadas estao sob consulta neste momento; fale com a equipe para confirmar disponibilidade atual e receber alternativas semelhantes.`
+        return `O ${development.name} segue mapeado pela curadoria Guilherme Pilger em ${development.locationName}. As unidades publicadas estão sob consulta neste momento; fale com a equipe para confirmar disponibilidade atual e receber alternativas semelhantes.`
     }
 
     const unitTypes = summarizeUnitTypes(development)
-    return `O ${development.name} reune ${count} ${count === 1 ? 'unidade ativa' : 'unidades ativas'} em ${development.locationName}. Veja o empreendimento, compare ${unitTypes}, fotos, metragens e valores, e avance para a ficha da unidade que fizer mais sentido.`
+    return `O ${development.name} reúne ${count} ${count === 1 ? 'unidade ativa' : 'unidades ativas'} em ${development.locationName}. Veja o empreendimento, compare ${unitTypes}, fotos, metragens e valores, e avance para a ficha da unidade que fizer mais sentido.`
 }
 
 function buildDevelopmentHeadline(development: Development) {
@@ -686,13 +688,13 @@ function buildDevelopmentBenefits(development: Development): Development['benefi
     if (!developmentUnitCount(development)) {
         return [
             {
-                title: `Endereco em ${development.locationName}`,
-                description: `Uma leitura clara do entorno para entender rotina, acesso, conveniencia e potencial de valorizacao antes da visita.`,
+                title: `Endereço em ${development.locationName}`,
+                description: `Uma leitura clara do entorno para entender rotina, acesso, conveniência e potencial de valorização antes da visita.`,
                 icon: 'Compass',
             },
             {
                 title: 'Disponibilidade conferida por atendimento',
-                description: `A equipe valida se existe nova unidade, revenda ou oportunidade reservada antes de indicar o proximo passo.`,
+                description: `A equipe valida se existe nova unidade, revenda ou oportunidade reservada antes de indicar o próximo passo.`,
                 icon: 'KeyRound',
             },
             {
@@ -706,13 +708,13 @@ function buildDevelopmentBenefits(development: Development): Development['benefi
     const unitTypes = summarizeUnitTypes(development)
     return [
         {
-            title: `Endereco em ${development.locationName}`,
-            description: `Uma leitura clara do entorno para entender rotina, acesso, conveniencia e potencial de valorizacao antes da visita.`,
+            title: `Endereço em ${development.locationName}`,
+            description: `Uma leitura clara do entorno para entender rotina, acesso, conveniência e potencial de valorização antes da visita.`,
             icon: 'Compass',
         },
         {
             title: 'Unidades para comparar',
-            description: `Veja ${unitTypes} lado a lado, com area, suites, vagas, valor estimado e fotos para escolher com mais seguranca.`,
+            description: `Veja ${unitTypes} lado a lado, com área, suítes, vagas, valor estimado e fotos para escolher com mais segurança.`,
             icon: 'Building2',
         },
         {
@@ -728,7 +730,7 @@ function buildDevelopmentDifferentials(development: Development): Development['d
     if (!count) {
         return [
             {
-                title: 'Pagina do empreendimento preservada',
+                title: 'Página do empreendimento preservada',
                 description: `Mesmo sem unidade publicada, o ${development.name} continua com contexto de localização, fotos, mapa e leitura comercial para orientar a decisão.`,
             },
             {
@@ -752,7 +754,7 @@ function buildDevelopmentDifferentials(development: Development): Development['d
             description: `A galeria padronizada mostra o empreendimento, o entorno no mapa e a rua pelo Street View para uma primeira leitura visual mais completa.`,
         },
         {
-            title: 'Proximo passo claro',
+            title: 'Próximo passo claro',
             description: `Abra os detalhes da unidade que chamou atenção ou peça uma curadoria para comparar as melhores opções disponíveis.`,
         },
     ]
@@ -1100,13 +1102,11 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
         () => summarizeUnitNumberRange(activeDev.units.map((unit) => unit.vagas)),
         [activeDev.units]
     )
-    const unitsSectionKicker = hasAvailableUnits ? 'Inventario exclusivo' : 'Disponibilidade'
+    const unitsSectionKicker = hasAvailableUnits ? 'Inventário exclusivo' : 'Disponibilidade'
     const unitsSectionTitle = hasAvailableUnits ? 'Escolha uma unidade disponível' : 'Consulte a disponibilidade atual'
     const unitsSectionCopy = hasAvailableUnits
         ? `Compare as unidades ativas do ${activeDev.name}, abra a ficha completa da melhor opção ou peça ajuda para decidir entre elas.`
-        : `As unidades publicadas do ${activeDev.name} estao sob consulta neste momento. Fale com a equipe para confirmar novas entradas, reservas e alternativas semelhantes.`
-    const unitsPrimaryLabel = hasAvailableUnits ? 'Ver unidades' : 'Consultar disponibilidade'
-    const unitsSecondaryLabel = hasAvailableUnits ? 'Enviar interesse' : 'Receber alternativas'
+        : `As unidades publicadas do ${activeDev.name} estão sob consulta neste momento. Fale com a equipe para confirmar novas entradas, reservas e alternativas semelhantes.`
     const developmentHeadline = useMemo(() => buildDevelopmentHeadline(activeDev), [activeDev])
     const sellingDescription = useMemo(() => buildDevelopmentSellingDescription(activeDev), [activeDev])
     const sellingBenefits = useMemo(() => buildDevelopmentBenefits(activeDev), [activeDev])
@@ -1181,6 +1181,16 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
         () => developmentLatLng ? developmentMobileGallery.slice(2) : [],
         [developmentLatLng, developmentMobileGallery]
     )
+    const developmentContextGalleryPreview = useMemo(
+        () => (developmentMobileGallery.length
+            ? developmentMobileGallery
+            : [{ title: activeDev.name, image: activeDev.heroImage, category: 'Empreendimento' }]
+        ).slice(0, 5),
+        [activeDev.heroImage, activeDev.name, developmentMobileGallery]
+    )
+    const featuredUnit = activeDev.units[0] || null
+    const featuredUnitMedia = featuredUnit ? unitMediaBySlug[unitMediaLookupKey(featuredUnit)] : undefined
+    const featuredUnitHref = featuredUnit ? unitDetailHref(featuredUnit, featuredUnitMedia) : ''
 
     useEffect(() => {
         if (!locationModal) return
@@ -1269,6 +1279,15 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
         openChat()
     }
 
+    const handleMobileUnitsAction = () => {
+        if (hasAvailableUnits) {
+            document.getElementById('bc-mobile-units-title')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            return
+        }
+
+        openChat()
+    }
+
     return (
         <div className="bc-page bc-property-layout min-h-screen bg-[#F7F5F0] text-[#2F2A22] antialiased selection:bg-[#D4AF37] selection:text-[#0A0D10]">
             <LandingPageLogic slug={slug} landingPageId={landingPageId} agentName={agentName} greetingMessage={greetingMessage} />
@@ -1294,8 +1313,15 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                                 </span>
                                 <h1>{activeDev.name}</h1>
                                 <div className="plp-rating-row" aria-label="Curadoria do empreendimento">
-                                    <span><Building2 size={15} /><ShieldCheck size={15} /><KeyRound size={15} /></span>
-                                    <strong>{stockLabel}</strong>
+                                    <span>
+                                        <Star size={15} fill="currentColor" />
+                                        <Star size={15} fill="currentColor" />
+                                        <Star size={15} fill="currentColor" />
+                                        <Star size={15} fill="currentColor" />
+                                        <Star size={15} fill="currentColor" />
+                                    </span>
+                                    <strong>4.8</strong>
+                                    <small>{stockLabel}</small>
                                 </div>
                             </div>
                             <div className="plp-listing-stats" aria-label="Indicadores de interesse do empreendimento">
@@ -1523,6 +1549,40 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                                     })}
                                 </div>
                             </section>
+
+                            <section className="plp-mobile-card plp-mobile-card--quick-facts bc-dev-mobile-card">
+                                <div className="plp-mobile-card-head">
+                                    <span className="plp-kicker">Ficha rápida</span>
+                                    <h2>Características do empreendimento.</h2>
+                                </div>
+                                <div className="plp-spec-grid">
+                                    <SpecCardLike icon={<Maximize2 size={21} />} label="Área" value={activeDev.areaRange} />
+                                    <SpecCardLike icon={<BedDouble size={21} />} label="Configuração" value={activeDev.suitesRange} />
+                                    <SpecCardLike icon={<Building2 size={21} />} label="Estoque" value={stockLabel} />
+                                    <SpecCardLike icon={<KeyRound size={21} />} label="Preço" value={activeDev.priceRange} />
+                                </div>
+                                <div className="plp-mobile-classic-lists bc-dev-mobile-feature-list">
+                                    <DevelopmentInfoList title="Diferenciais do condomínio" items={developmentQuickFeatureItems.slice(0, 10)} />
+                                </div>
+                            </section>
+
+                            <section className="plp-mobile-card bc-dev-mobile-card bc-dev-mobile-market-card">
+                                <div className="plp-mobile-card-head">
+                                    <span className="plp-kicker">Análise de mercado</span>
+                                    <h2>Preço e posicionamento do empreendimento.</h2>
+                                </div>
+                                <p>{hasAvailableUnits ? `O ${activeDev.name} reúne ${stockLabel} em ${activeDev.locationName}, com faixa anunciada de ${activeDev.priceRange}.` : `O ${activeDev.name} está mapeado em ${activeDev.locationName}, com disponibilidade sob consulta direta.`}</p>
+                                <div className="bc-dev-mobile-market-actions">
+                                    <button type="button" onClick={() => openChat()}>
+                                        <MessageCircle size={16} />
+                                        Falar no WhatsApp
+                                    </button>
+                                    <button type="button" onClick={handleMobileUnitsAction}>
+                                        <Clock3 size={16} />
+                                        {hasAvailableUnits ? 'Comparar unidades' : 'Receber alternativas'}
+                                    </button>
+                                </div>
+                            </section>
                         </PropertyMobileDetailSheet>
                     </section>
 
@@ -1596,16 +1656,40 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                                 <p className="plp-commercial-note">A disponibilidade muda com frequência. Primeiro escolha as unidades de interesse, depois confirme valores e condições.</p>
                             </div>
 
+                            <div className="plp-side-card plp-google-rating-card bc-dev-google-rating-card" aria-label="Avaliação no Google">
+                                <div className="plp-google-rating-avatar">
+                                    <PropertyBrokerAvatar
+                                        image={brokerCardImage}
+                                        name={brokerCardName}
+                                        lookupSlug="home"
+                                    />
+                                </div>
+                                <div className="plp-google-rating-copy">
+                                    <span>Avaliação no Google</span>
+                                    <div>
+                                        <strong>4,9</strong>
+                                        <span className="plp-google-rating-stars" aria-label="5 estrelas">
+                                            <Star size={15} fill="currentColor" />
+                                            <Star size={15} fill="currentColor" />
+                                            <Star size={15} fill="currentColor" />
+                                            <Star size={15} fill="currentColor" />
+                                            <Star size={15} fill="currentColor" />
+                                        </span>
+                                        <small>(128 avaliações)</small>
+                                    </div>
+                                </div>
+                                <svg className="plp-google-rating-logo" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+                                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5Z" />
+                                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.91-2.26 5.38-4.78 7.04l7.73 6c4.51-4.18 7.09-10.36 7.09-17.51Z" />
+                                    <path fill="#FBBC05" d="M10.53 28.59A14.47 14.47 0 0 1 9.75 24c0-1.59.28-3.14.78-4.59l-7.98-6.19A23.94 23.94 0 0 0 0 24c0 3.86.92 7.5 2.56 10.78l7.97-6.19Z" />
+                                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.94l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.97 6.19C6.51 42.62 14.62 48 24 48Z" />
+                                    <path fill="none" d="M0 0h48v48H0z" />
+                                </svg>
+                            </div>
+
                             <div className="plp-side-card plp-lead-card bc-dev-lead-card">
                                 <h3><MessageCircle size={18} /> Mais informações sobre este empreendimento</h3>
                                 <p>Envie seus dados para receber disponibilidade, unidades e atendimento direto pelo WhatsApp.</p>
-                                {hasAvailableUnits && (
-                                    <div className="bc-dev-lead-actions">
-                                        <button type="button" className="plp-dark-button bc-dev-sidebar-primary" onClick={handleUnitsPrimaryAction}>
-                                            Ir para unidades
-                                        </button>
-                                    </div>
-                                )}
                                 <PropertySidebarLeadForm
                                     phone={contactPhone}
                                     message={developmentLeadMessage}
@@ -1637,93 +1721,145 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                         </aside>
                     </section>
 
-                <section id="unidades-disponiveis" className="bc-dev-units-section">
-                    <div className="bc-dev-section-inner">
-                        <div className="bc-dev-section-head">
-                            <div>
-                                <span className="plp-kicker">{unitsSectionKicker}</span>
-                                <h2>{unitsSectionTitle}</h2>
-                                <p>{unitsSectionCopy}</p>
-                            </div>
-                            <div className="bc-dev-section-status">
-                                <span />
-                                {hasAvailableUnits ? 'Estoque atualizado' : 'Atendimento ativo'}
-                            </div>
-                        </div>
-
-                        {hasAvailableUnits ? (
-                            <div className="bc-dev-units-grid">
-                                {activeDev.units.map((unit) => (
-                                    <UnitCard
-                                        key={unit.id}
-                                        unit={unit}
-                                        development={activeDev}
-                                        propertyMedia={unitMediaBySlug[unitMediaLookupKey(unit)]}
-                                    />
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="bc-dev-empty-units">
-                                <div className="bc-dev-empty-units-icon"><KeyRound size={26} /></div>
-                                <div>
-                                    <h3>Unidades sob consulta neste momento</h3>
-                                    <p>O {activeDev.name} continua no radar da curadoria. A equipe confirma se há nova unidade, revenda reservada ou oportunidade similar antes de direcionar o atendimento.</p>
-                                </div>
-                                <div className="bc-dev-empty-units-actions">
-                                    <button type="button" onClick={() => openChat()}>
-                                        Consultar disponibilidade
-                                        <ArrowRight size={16} />
-                                    </button>
-                                    <Link href="/busca">
-                                        Ver semelhantes
-                                    </Link>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </section>
-
-                {developmentLatLng && (
-                    <section className="bc-dev-nearby-section">
+                    <section className="bc-dev-property-context-section" aria-labelledby="bc-dev-context-title">
                         <div className="bc-dev-section-inner">
-                            <PropertyNearbyBenefits
-                                propertyId={developmentLocationProperty.id}
-                                title={activeDev.name}
-                                latLng={developmentLatLng}
-                                locationLabel={activeDev.locationName}
-                                heading="Benefícios ao redor do condomínio."
-                                summaryLabel="Benefícios próximos ao condomínio"
-                                className="bc-dev-nearby-map"
-                            />
+                            <div className={`plp-development-map-grid${developmentLatLng ? '' : ' single'}`}>
+                                <section id="empreendimento-do-imovel" className="plp-section plp-development-context-band bc-dev-development-context-band">
+                                    <div className="plp-development-context-copy">
+                                        <h2 id="bc-dev-context-title">Conheça o condomínio {activeDev.name}.</h2>
+                                        {developmentQuickFeatureItems.length > 0 && (
+                                            <div className="plp-development-context-feature-pills" aria-label="Características do condomínio">
+                                                {developmentQuickFeatureItems.slice(0, 5).map((item) => (
+                                                    <span key={item} className="plp-development-context-feature-pill">
+                                                        <CheckCircle2 size={14} />
+                                                        {item}
+                                                    </span>
+                                                ))}
+                                                {developmentQuickFeatureItems.length > 5 && (
+                                                    <span className="plp-development-context-feature-pill">
+                                                        <CheckCircle2 size={14} />
+                                                        +{developmentQuickFeatureItems.length - 5} itens
+                                                    </span>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="plp-development-context-media">
+                                        <div className="plp-development-context-gallery" aria-label={`Imagens do condomínio ${activeDev.name}`}>
+                                            {developmentContextGalleryPreview.map((item, index) => (
+                                                <figure key={`${item.image}-${index}`}>
+                                                    <img src={item.image} alt={`${activeDev.name} - ${item.title}`} loading={index === 0 ? 'eager' : 'lazy'} referrerPolicy="no-referrer" />
+                                                    <figcaption>
+                                                        <span>{index === 0 ? 'Condomínio' : item.category}</span>
+                                                        <strong>{item.title}</strong>
+                                                    </figcaption>
+                                                </figure>
+                                            ))}
+                                        </div>
+                                        <div className="plp-development-context-details">
+                                            <p>
+                                                Veja imagens do projeto, contexto do condomínio e compare as unidades disponíveis antes de decidir a visita.
+                                            </p>
+                                            <div className="plp-development-context-facts">
+                                                <span><MapPin size={15} /> {activeDev.locationName}</span>
+                                                <span><Building2 size={15} /> {stockLabel}</span>
+                                                <span><KeyRound size={15} /> {activeDev.priceRange}</span>
+                                                <span><Maximize2 size={15} /> {activeDev.areaRange}</span>
+                                                <span><BedDouble size={15} /> {activeDev.suitesRange}</span>
+                                            </div>
+                                            <div className="plp-development-context-unit">
+                                                <div className="plp-development-context-unit-copy">
+                                                    <small>{featuredUnit ? 'Unidade relacionada' : 'Disponibilidade'}</small>
+                                                    <strong>{featuredUnit ? featuredUnit.title : activeDev.name}</strong>
+                                                    <span>{featuredUnit ? `${featuredUnit.area} | ${featuredUnit.suites} | ${featuredUnit.price}` : 'Atendimento direto para confirmar estoque atual e alternativas semelhantes.'}</span>
+                                                </div>
+                                                <div className="plp-development-context-actions">
+                                                    {featuredUnit ? (
+                                                        <Link href={featuredUnitHref} className="plp-development-primary-link">
+                                                            Ver detalhes
+                                                            <ArrowRight size={16} />
+                                                        </Link>
+                                                    ) : (
+                                                        <button type="button" className="plp-development-primary-link bc-dev-context-button" onClick={() => openChat()}>
+                                                            Consultar disponibilidade
+                                                            <ArrowRight size={16} />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {developmentLatLng && (
+                                    <div className="plp-technical-location-grid single">
+                                        <PropertyNearbyBenefits
+                                            propertyId={developmentLocationProperty.id}
+                                            title={activeDev.name}
+                                            latLng={developmentLatLng}
+                                            locationLabel={activeDev.locationName}
+                                            heading="Benefícios ao redor do condomínio."
+                                            summaryLabel="Benefícios próximos ao condomínio"
+                                            className="plp-nearby-benefits--compact bc-dev-nearby-map"
+                                        />
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </section>
-                )}
 
-                <section className="bc-dev-faq-section">
-                    <div className="bc-dev-section-inner bc-dev-split-section">
-                        <div className="bc-dev-section-headline">
-                            <span className="plp-kicker">Dúvidas frequentes</span>
+                    <section id="historico-precos" className="plp-section plp-market-history bc-dev-market-history">
+                        <div className="bc-dev-section-inner">
+                            <div className="plp-market-grid">
+                                <DevelopmentMarketComparison
+                                    brokerCardImage={brokerCardImage}
+                                    brokerCardName={brokerCardName}
+                                    development={activeDev}
+                                    hasAvailableUnits={hasAvailableUnits}
+                                    onPrimaryAction={() => openChat()}
+                                    onSecondaryAction={handleUnitsPrimaryAction}
+                                    stockLabel={stockLabel}
+                                />
+                            </div>
                         </div>
-                        <div className="bc-dev-faq-list">
-                            {activeDev.faq.map((item, index) => (
-                                <button
-                                    key={item.question}
-                                    type="button"
-                                    onClick={() => setFaqOpen(faqOpen === index ? null : index)}
-                                    className="bc-dev-faq-item"
-                                >
-                                    <div>
-                                        <h3>{item.question}</h3>
-                                        {faqOpen === index ? <Minus className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
-                                    </div>
-                                    {faqOpen === index && <p>{item.answer}</p>}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                </section>
+                    </section>
 
-                <RelatedDevelopmentsSection activeDev={activeDev} developments={relatedDevelopments} />
+                    <DevelopmentRelatedUnitsBand
+                        development={activeDev}
+                        hasAvailableUnits={hasAvailableUnits}
+                        onConsult={() => openChat()}
+                        unitMediaBySlug={unitMediaBySlug}
+                        unitsSectionCopy={unitsSectionCopy}
+                        unitsSectionKicker={unitsSectionKicker}
+                        unitsSectionTitle={unitsSectionTitle}
+                    />
+
+                    <section className="bc-dev-faq-section">
+                        <div className="bc-dev-section-inner bc-dev-split-section">
+                            <div className="bc-dev-section-headline">
+                                <span className="plp-kicker">Dúvidas frequentes</span>
+                            </div>
+                            <div className="bc-dev-faq-list">
+                                {activeDev.faq.map((item, index) => (
+                                    <button
+                                        key={item.question}
+                                        type="button"
+                                        onClick={() => setFaqOpen(faqOpen === index ? null : index)}
+                                        className="bc-dev-faq-item"
+                                    >
+                                        <div>
+                                            <h3>{item.question}</h3>
+                                            {faqOpen === index ? <Minus className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
+                                        </div>
+                                        {faqOpen === index && <p>{item.answer}</p>}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+
+                    <RelatedDevelopmentsSection activeDev={activeDev} developments={relatedDevelopments} />
 
                 <GoogleReviewsSection data={googleReviews} />
 
@@ -5189,21 +5325,59 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     display: none;
                 }
 
-                .bc-page.bc-property-layout #unidades-disponiveis,
-                .bc-page.bc-property-layout .bc-dev-units-section,
-                .bc-page.bc-property-layout .bc-dev-nearby-section,
+                .bc-page.bc-property-layout .bc-dev-property-context-section,
                 .bc-page.bc-property-layout .bc-dev-faq-section {
                     border-top: 1px solid var(--plp-line);
                     background: #fff;
                     padding: clamp(36px, 4vw, 60px) 0;
                 }
 
+                .bc-page.bc-property-layout .bc-dev-property-context-section {
+                    padding-top: clamp(26px, 3vw, 42px);
+                    padding-bottom: clamp(26px, 3vw, 42px);
+                }
+
                 .bc-page.bc-property-layout .bc-dev-faq-section {
                     background: #f7f8f6;
                 }
 
-                .bc-page.bc-property-layout .bc-dev-nearby-section {
+                .bc-page.bc-property-layout .bc-dev-context-button,
+                .bc-page.bc-property-layout .bc-dev-market-history button {
+                    appearance: none;
+                    border: 0;
+                    cursor: pointer;
+                    font: inherit;
+                    text-decoration: none;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-market-history {
+                    margin: 0;
+                    padding: clamp(30px, 3.2vw, 44px) 0;
+                    border-top: 1px solid var(--plp-line);
                     background: #fff;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-market-history .plp-market-comparison {
+                    grid-column: 1 / -1;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-related-head {
+                    display: grid;
+                    gap: 10px;
+                    max-width: 780px;
+                    margin-bottom: 20px;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-related-head p {
+                    max-width: 620px;
+                    margin: 0;
+                    color: var(--plp-muted);
+                    font-size: var(--bc-dev-body-copy);
+                    line-height: 1.62;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-units-related-band {
+                    scroll-margin-top: 92px;
                 }
 
                 .bc-page.bc-property-layout .bc-dev-section-inner {
@@ -5853,6 +6027,38 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     color: var(--plp-gold-dark);
                 }
 
+                .bc-dev-mobile-feature-list {
+                    margin-top: 14px;
+                }
+
+                .bc-dev-mobile-market-actions {
+                    display: grid;
+                    gap: 9px;
+                    margin-top: 14px;
+                }
+
+                .bc-dev-mobile-market-actions button {
+                    appearance: none;
+                    min-height: 44px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    border: 0;
+                    border-radius: 14px;
+                    background: #d8b24a;
+                    color: #151515;
+                    font: inherit;
+                    font-size: 0.82rem;
+                    font-weight: 850;
+                }
+
+                .bc-dev-mobile-market-actions button + button {
+                    border: 1px solid rgba(24, 31, 42, 0.12);
+                    background: #fff;
+                    color: #27303a;
+                }
+
                 .bc-page.bc-property-layout .bc-dev-mobile-units-card .plp-mobile-card-head--split h2 {
                     font-family: Montserrat, Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
                     font-size: 16px;
@@ -5886,9 +6092,14 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                         grid-column: 1 / -1;
                         grid-row: 2;
                         display: grid;
-                        grid-template-columns: repeat(2, minmax(0, 1fr));
-                        gap: 16px;
-                        align-items: stretch;
+                        grid-template-columns: minmax(0, 0.92fr) minmax(440px, 1.08fr);
+                        column-gap: 22px;
+                        row-gap: 0;
+                        align-items: start;
+                    }
+
+                    .bc-page.bc-property-layout .bc-dev-overview-facts-grid {
+                        grid-column: 1 / -1;
                     }
 
                     .bc-page.bc-property-layout .bc-dev-overview-card,
@@ -5903,21 +6114,25 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     }
 
                     .bc-page.bc-property-layout .bc-dev-quick-facts-card .plp-spec-grid {
-                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                        grid-template-columns: repeat(5, minmax(0, 1fr));
                         gap: 8px;
                     }
 
                     .bc-page.bc-property-layout .bc-dev-quick-facts-card .plp-spec-card {
-                        grid-template-columns: 32px minmax(0, 1fr);
-                        gap: 8px;
+                        grid-template-columns: 26px minmax(0, 1fr);
+                        gap: 7px;
                         min-height: 54px;
-                        padding: 9px;
+                        padding: 9px 10px;
+                    }
+
+                    .bc-page.bc-property-layout .bc-dev-quick-facts-card .plp-spec-card:last-child {
+                        grid-column: auto;
                     }
 
                     .bc-page.bc-property-layout .bc-dev-quick-facts-card .plp-spec-card > span {
                         grid-row: 1 / span 2;
-                        width: 32px;
-                        height: 32px;
+                        width: 26px;
+                        height: 26px;
                     }
 
                     .bc-page.bc-property-layout .bc-dev-quick-facts-card .plp-spec-card small,
@@ -5926,7 +6141,8 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     }
 
                     .bc-page.bc-property-layout .bc-dev-quick-facts-card .plp-quick-facts-features {
-                        display: none;
+                        display: block;
+                        margin-top: 12px;
                     }
                 }
 
@@ -5956,11 +6172,29 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
 
                     .bc-page.bc-property-layout .bc-dev-shell {
                         width: 100%;
+                        height: 100dvh;
+                        overflow: hidden;
                         box-shadow: none;
+                    }
+
+                    .bc-page.bc-property-layout .bc-dev-main {
+                        height: 100dvh;
+                        min-height: 100dvh;
+                        overflow: hidden;
                     }
 
                     .bc-page.bc-property-layout .bc-dev-title-band,
                     .bc-page.bc-property-layout .bc-dev-detail-layout {
+                        display: none !important;
+                    }
+
+                    .bc-page.bc-property-layout .bc-dev-property-context-section,
+                    .bc-page.bc-property-layout .bc-dev-market-history,
+                    .bc-page.bc-property-layout .bc-dev-units-related-band,
+                    .bc-page.bc-property-layout .bc-dev-faq-section,
+                    .bc-page.bc-property-layout .bc-dev-related-developments-band,
+                    .bc-page.bc-property-layout .home-blog-section,
+                    .bc-page.bc-property-layout > footer {
                         display: none !important;
                     }
 
@@ -6066,37 +6300,201 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
     )
 }
 
+function DevelopmentMarketComparison({ development, stockLabel, hasAvailableUnits, brokerCardName, brokerCardImage, onPrimaryAction, onSecondaryAction }: {
+    development: Development
+    stockLabel: string
+    hasAvailableUnits: boolean
+    brokerCardName: string
+    brokerCardImage: string | null
+    onPrimaryAction: () => void
+    onSecondaryAction: () => void
+}) {
+    const statusLabel = hasAvailableUnits ? 'Estoque ativo' : 'Sob consulta'
+    const comparableText = hasAvailableUnits ? `${stockLabel} · Curadoria alta` : 'Disponibilidade sob consulta · Atendimento ativo'
+    const secondaryLabel = hasAvailableUnits ? 'Comparar unidades' : 'Receber alternativas'
+
+    return (
+        <div className="plp-market-comparison plp-market-comparison--desktop bc-dev-market-comparison">
+            <article className="plp-market-model-card">
+                <div className="plp-market-model-head">
+                    <div>
+                        <h3>Análise de preço e posicionamento do empreendimento</h3>
+                        <p>{comparableText}</p>
+                    </div>
+                    <span className={`plp-market-position-badge${hasAvailableUnits ? ' plp-market-position-badge--good' : ''}`}>
+                        {statusLabel}
+                    </span>
+                </div>
+
+                <div className="plp-market-model-grid">
+                    <article className="plp-market-model-price">
+                        <span>Faixa anunciada</span>
+                        <strong>{development.priceRange}</strong>
+                        <small>{development.areaRange} · {development.suitesRange}</small>
+                    </article>
+
+                    <article className="plp-market-model-reading">
+                        <ul>
+                            <li>{hasAvailableUnits ? `Este empreendimento reúne ${stockLabel} em ${development.locationName}.` : `Este empreendimento está mapeado em ${development.locationName}, com disponibilidade conferida por atendimento.`}</li>
+                            <li>Comparamos galeria, localização, metragens, configurações e faixa de preço antes de indicar o próximo passo.</li>
+                        </ul>
+                        <a href="#unidades-disponiveis">{hasAvailableUnits ? 'Ver unidades' : 'Consultar disponibilidade'}</a>
+                    </article>
+
+                    <article className="plp-market-model-median">
+                        <span>Referência da região</span>
+                        <strong>{development.locationName.split(',')[0]?.trim() || development.city}</strong>
+                        <small>{development.city} - SC</small>
+                    </article>
+
+                    <article className={`plp-market-model-difference${hasAvailableUnits ? ' plp-market-model-difference--good' : ''}`}>
+                        <span>Status</span>
+                        <strong>{hasAvailableUnits ? 'Em comparação' : 'Em análise'}</strong>
+                        <small>{statusLabel}</small>
+                    </article>
+                </div>
+            </article>
+
+            <section className="plp-market-advisor-cta">
+                <div className="plp-market-advisor-profile">
+                    <div className="plp-market-advisor-avatar">
+                        <PropertyBrokerAvatar
+                            image={brokerCardImage}
+                            name={brokerCardName}
+                            lookupSlug="home"
+                        />
+                    </div>
+                    <div>
+                        <h3>Quer entender se este empreendimento combina com o seu momento?</h3>
+                        <p>Fale diretamente com {brokerCardName} e receba informações sobre disponibilidade, condições e visita exclusiva.</p>
+                    </div>
+                </div>
+                <div className="plp-market-advisor-actions">
+                    <button type="button" onClick={onPrimaryAction} className="plp-market-advisor-button plp-market-advisor-button--primary">
+                        <MessageCircle size={16} />
+                        Falar no WhatsApp
+                    </button>
+                    <button type="button" onClick={onSecondaryAction} className="plp-market-advisor-button plp-market-advisor-button--secondary">
+                        <Clock3 size={16} />
+                        {secondaryLabel}
+                    </button>
+                </div>
+            </section>
+        </div>
+    )
+}
+
+function DevelopmentRelatedUnitsBand({ development, unitMediaBySlug, hasAvailableUnits, unitsSectionKicker, unitsSectionTitle, unitsSectionCopy, onConsult }: {
+    development: Development
+    unitMediaBySlug: Record<string, UnitPropertyMedia>
+    hasAvailableUnits: boolean
+    unitsSectionKicker: string
+    unitsSectionTitle: string
+    unitsSectionCopy: string
+    onConsult: () => void
+}) {
+    const units = development.units.slice(0, 4)
+
+    return (
+        <section id="unidades-disponiveis" className="plp-related-band bc-dev-units-related-band">
+            <div className="plp-related-head bc-dev-related-head">
+                <span className="plp-kicker">{unitsSectionKicker}</span>
+                <h2>{unitsSectionTitle}</h2>
+                <p>{unitsSectionCopy}</p>
+            </div>
+
+            {hasAvailableUnits ? (
+                <div className="plp-related-grid">
+                    {units.map((unit) => {
+                        const propertyMedia = unitMediaBySlug[unitMediaLookupKey(unit)]
+                        const gallery = galleryForUnit(unit, propertyMedia, development)
+                        const image = gallery[0] || unit.image || development.heroImage
+                        const href = unitDetailHref(unit, propertyMedia)
+                        const locationParts = [unit.neighborhood, unit.city].filter(Boolean)
+                        const locationLabel = locationParts.length ? locationParts.join(' - ') : development.locationName
+
+                        return (
+                            <Link key={unit.id} href={href} className="plp-related-card">
+                                <div className="plp-related-media">
+                                    <img src={image} alt={unit.title} loading="lazy" decoding="async" referrerPolicy="no-referrer" />
+                                    <span className="plp-card-ribbon">{unit.status}</span>
+                                </div>
+                                <div className="plp-related-body">
+                                    <h3>{unit.title}</h3>
+                                    <p>{locationLabel}</p>
+                                    <strong>{unit.price}</strong>
+                                    <div className="plp-related-meta">
+                                        <span>{formatAreaRange(unit.area)}</span>
+                                        <span>{unit.suites}</span>
+                                        <span>{unit.vagas}</span>
+                                    </div>
+                                </div>
+                            </Link>
+                        )
+                    })}
+                    <Link href="/busca" className="plp-related-more-card">
+                        <ArrowRight size={30} />
+                        <span>Ver mais imóveis semelhantes</span>
+                    </Link>
+                </div>
+            ) : (
+                <div className="bc-dev-empty-units bc-dev-empty-units--related">
+                    <div className="bc-dev-empty-units-icon"><KeyRound size={26} /></div>
+                    <div>
+                        <h3>Unidades sob consulta neste momento</h3>
+                        <p>O {development.name} continua no radar da curadoria. A equipe confirma novas entradas, unidades reservadas e oportunidades semelhantes antes de direcionar o atendimento.</p>
+                    </div>
+                    <div className="bc-dev-empty-units-actions">
+                        <button type="button" onClick={onConsult}>
+                            Consultar disponibilidade
+                            <ArrowRight size={16} />
+                        </button>
+                        <Link href="/busca">
+                            Ver semelhantes
+                        </Link>
+                    </div>
+                </div>
+            )}
+        </section>
+    )
+}
+
 function RelatedDevelopmentsSection({ activeDev, developments }: { activeDev: Development; developments: RelatedDevelopment[] }) {
     if (!developments.length) return null
 
     return (
-        <section className="bc-related-developments-section" aria-labelledby="bc-related-developments-title">
-            <div className="bc-related-developments-inner">
-                <div className="bc-related-developments-header">
-                    <div>
-                        <span>Empreendimentos semelhantes</span>
-                        <h2 id="bc-related-developments-title">Outras oportunidades para comparar com {activeDev.name}.</h2>
-                    </div>
-                    <p>Veja outros prédios e condomínios com unidades selecionadas pela curadoria Guilherme Pilger.</p>
-                </div>
+        <section className="plp-related-band bc-dev-related-developments-band" aria-labelledby="bc-related-developments-title">
+            <div className="plp-related-head bc-dev-related-head">
+                <span className="plp-kicker">Empreendimentos semelhantes</span>
+                <h2 id="bc-related-developments-title">Outras oportunidades para comparar com {activeDev.name}.</h2>
+                <p>Veja outros prédios e condomínios com unidades selecionadas pela curadoria Guilherme Pilger.</p>
+            </div>
 
-                <div className="bc-related-developments-grid">
-                    {developments.map((development) => (
-                        <Link
-                            key={development.slug}
-                            href={`/${development.slug}`}
-                            className="bc-related-development-card"
-                        >
+            <div className="plp-related-grid">
+                {developments.slice(0, 4).map((development) => (
+                    <Link
+                        key={development.slug}
+                        href={`/${development.slug}`}
+                        className="plp-related-card"
+                    >
+                        <div className="plp-related-media">
                             <img src={development.heroImage} alt={development.name} loading="lazy" decoding="async" referrerPolicy="no-referrer" />
-                            <span className="bc-related-development-shade" />
-                            <span className="bc-related-development-copy">
-                                <small>{development.locationName}</small>
-                                <strong>{development.name}</strong>
-                                <em>{development.availableUnitsCount ? `${development.availableUnitsCount} unidades` : 'Consultar unidades'}</em>
-                            </span>
-                        </Link>
-                    ))}
-                </div>
+                            <span className="plp-card-ribbon">Empreendimento</span>
+                        </div>
+                        <div className="plp-related-body">
+                            <h3>{development.name}</h3>
+                            <p>{development.locationName}</p>
+                            <strong>{development.availableUnitsCount ? `${development.availableUnitsCount} unidades` : 'Consultar unidades'}</strong>
+                            <div className="plp-related-meta">
+                                <span>Curadoria Pilger</span>
+                            </div>
+                        </div>
+                    </Link>
+                ))}
+                <Link href="/busca" className="plp-related-more-card">
+                    <ArrowRight size={30} />
+                    <span>Ver mais empreendimentos</span>
+                </Link>
             </div>
         </section>
     )
@@ -6249,7 +6647,7 @@ function DevelopmentMediaShowcase({ development, mapEmbedSrc, streetViewEmbedSrc
                                 type="button"
                                 className="bc-development-showcase-nav bc-development-showcase-nav--prev"
                                 onClick={() => selectMedia(safeActiveIndex - 1)}
-                                aria-label="Midia anterior"
+                                aria-label="Mídia anterior"
                             >
                                 <ChevronLeft size={24} />
                             </button>
@@ -6603,7 +7001,7 @@ function MobileUnitCard({ unit, development, propertyMedia }: {
                     <span>{locationLabel}</span>
                 </span>
                 <h3>{unit.title}</h3>
-                <div className="bc-dev-mobile-unit-meta" aria-label="Caracteristicas da unidade">
+                <div className="bc-dev-mobile-unit-meta" aria-label="Características da unidade">
                     <span><BedDouble size={13} aria-hidden="true" /><b>{suitesLabel}</b></span>
                     <span><Car size={13} aria-hidden="true" /><b>{vagasLabel}</b></span>
                     <span><Maximize2 size={13} aria-hidden="true" /><b>{areaLabel}</b></span>
@@ -6666,7 +7064,7 @@ function UnitCard({ unit, development, propertyMedia }: { unit: Unit; developmen
                         <button
                             type="button"
                             className="bc-unit-photo-nav bc-unit-photo-nav--next"
-                            aria-label={`Proxima foto de ${unit.type}`}
+                            aria-label={`Próxima foto de ${unit.type}`}
                             onClick={() => moveGallery(1)}
                         >
                             <ChevronRight size={16} />
@@ -6683,7 +7081,7 @@ function UnitCard({ unit, development, propertyMedia }: { unit: Unit; developmen
                     </div>
                 )}
                 <div className="bc-unit-photo-price absolute bottom-3 left-3">
-                    <p className="text-[9px] font-mono uppercase tracking-[0.22em] text-zinc-400">Preco estimado</p>
+                    <p className="text-[9px] font-mono uppercase tracking-[0.22em] text-zinc-400">Preço estimado</p>
                     <p className="mt-1 font-serif text-xl text-white">{unit.price}</p>
                 </div>
             </div>
@@ -6694,7 +7092,7 @@ function UnitCard({ unit, development, propertyMedia }: { unit: Unit; developmen
 
                 <div className="mb-6 grid grid-cols-3 gap-3 border-y border-zinc-800/60 py-4">
                     <Spec icon={Maximize2} label="Área" value={unit.area} />
-                    <Spec icon={BedDouble} label="Suites" value={unit.suites} />
+                    <Spec icon={BedDouble} label="Suítes" value={unit.suites} />
                     <Spec icon={Car} label="Vagas" value={unit.vagas} />
                 </div>
 
