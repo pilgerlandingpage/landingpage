@@ -1102,10 +1102,10 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
         () => summarizeUnitNumberRange(activeDev.units.map((unit) => unit.vagas)),
         [activeDev.units]
     )
-    const unitsSectionKicker = hasAvailableUnits ? 'Inventário exclusivo' : 'Disponibilidade'
-    const unitsSectionTitle = hasAvailableUnits ? 'Escolha uma unidade disponível' : 'Consulte a disponibilidade atual'
+    const unitsSectionKicker = hasAvailableUnits ? 'Unidades disponíveis' : 'Disponibilidade'
+    const unitsSectionTitle = hasAvailableUnits ? `Unidades disponíveis no ${activeDev.name}.` : `Disponibilidade do ${activeDev.name}.`
     const unitsSectionCopy = hasAvailableUnits
-        ? `Compare as unidades ativas do ${activeDev.name}, abra a ficha completa da melhor opção ou peça ajuda para decidir entre elas.`
+        ? `Compare os imóveis ativos neste empreendimento, abra a ficha completa da melhor opção ou peça ajuda para decidir entre as unidades.`
         : `As unidades publicadas do ${activeDev.name} estão sob consulta neste momento. Fale com a equipe para confirmar novas entradas, reservas e alternativas semelhantes.`
     const developmentHeadline = useMemo(() => buildDevelopmentHeadline(activeDev), [activeDev])
     const sellingDescription = useMemo(() => buildDevelopmentSellingDescription(activeDev), [activeDev])
@@ -1181,17 +1181,6 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
         () => developmentLatLng ? developmentMobileGallery.slice(2) : [],
         [developmentLatLng, developmentMobileGallery]
     )
-    const developmentContextGalleryPreview = useMemo(
-        () => (developmentMobileGallery.length
-            ? developmentMobileGallery
-            : [{ title: activeDev.name, image: activeDev.heroImage, category: 'Empreendimento' }]
-        ).slice(0, 5),
-        [activeDev.heroImage, activeDev.name, developmentMobileGallery]
-    )
-    const featuredUnit = activeDev.units[0] || null
-    const featuredUnitMedia = featuredUnit ? unitMediaBySlug[unitMediaLookupKey(featuredUnit)] : undefined
-    const featuredUnitHref = featuredUnit ? unitDetailHref(featuredUnit, featuredUnitMedia) : ''
-
     useEffect(() => {
         if (!locationModal) return
 
@@ -1721,75 +1710,40 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                         </aside>
                     </section>
 
+                    <span id="unidades-disponiveis" className="bc-dev-scroll-anchor" aria-hidden="true" />
+
                     <section className="bc-dev-property-context-section" aria-labelledby="bc-dev-context-title">
                         <div className="bc-dev-section-inner">
                             <div className={`plp-development-map-grid${developmentLatLng ? '' : ' single'}`}>
-                                <section id="empreendimento-do-imovel" className="plp-section plp-development-context-band bc-dev-development-context-band">
-                                    <div className="plp-development-context-copy">
-                                        <h2 id="bc-dev-context-title">Conheça o condomínio {activeDev.name}.</h2>
+                                <section id="empreendimento-do-imovel" className="plp-section plp-development-context-band bc-dev-development-context-band bc-dev-available-units-band">
+                                    <div className="plp-development-context-copy bc-dev-available-units-copy">
+                                        <span className="plp-kicker">{unitsSectionKicker}</span>
+                                        <h2 id="bc-dev-context-title">{unitsSectionTitle}</h2>
+                                        <p>{unitsSectionCopy}</p>
                                         {developmentQuickFeatureItems.length > 0 && (
-                                            <div className="plp-development-context-feature-pills" aria-label="Características do condomínio">
-                                                {developmentQuickFeatureItems.slice(0, 5).map((item) => (
+                                            <div className="plp-development-context-feature-pills" aria-label="Resumo do estoque">
+                                                {developmentQuickFeatureItems.slice(0, 4).map((item) => (
                                                     <span key={item} className="plp-development-context-feature-pill">
                                                         <CheckCircle2 size={14} />
                                                         {item}
                                                     </span>
                                                 ))}
-                                                {developmentQuickFeatureItems.length > 5 && (
+                                                {developmentQuickFeatureItems.length > 4 && (
                                                     <span className="plp-development-context-feature-pill">
                                                         <CheckCircle2 size={14} />
-                                                        +{developmentQuickFeatureItems.length - 5} itens
+                                                        +{developmentQuickFeatureItems.length - 4} itens
                                                     </span>
                                                 )}
                                             </div>
                                         )}
                                     </div>
 
-                                    <div className="plp-development-context-media">
-                                        <div className="plp-development-context-gallery" aria-label={`Imagens do condomínio ${activeDev.name}`}>
-                                            {developmentContextGalleryPreview.map((item, index) => (
-                                                <figure key={`${item.image}-${index}`}>
-                                                    <img src={item.image} alt={`${activeDev.name} - ${item.title}`} loading={index === 0 ? 'eager' : 'lazy'} referrerPolicy="no-referrer" />
-                                                    <figcaption>
-                                                        <span>{index === 0 ? 'Condomínio' : item.category}</span>
-                                                        <strong>{item.title}</strong>
-                                                    </figcaption>
-                                                </figure>
-                                            ))}
-                                        </div>
-                                        <div className="plp-development-context-details">
-                                            <p>
-                                                Veja imagens do projeto, contexto do condomínio e compare as unidades disponíveis antes de decidir a visita.
-                                            </p>
-                                            <div className="plp-development-context-facts">
-                                                <span><MapPin size={15} /> {activeDev.locationName}</span>
-                                                <span><Building2 size={15} /> {stockLabel}</span>
-                                                <span><KeyRound size={15} /> {activeDev.priceRange}</span>
-                                                <span><Maximize2 size={15} /> {activeDev.areaRange}</span>
-                                                <span><BedDouble size={15} /> {activeDev.suitesRange}</span>
-                                            </div>
-                                            <div className="plp-development-context-unit">
-                                                <div className="plp-development-context-unit-copy">
-                                                    <small>{featuredUnit ? 'Unidade relacionada' : 'Disponibilidade'}</small>
-                                                    <strong>{featuredUnit ? featuredUnit.title : activeDev.name}</strong>
-                                                    <span>{featuredUnit ? `${featuredUnit.area} | ${featuredUnit.suites} | ${featuredUnit.price}` : 'Atendimento direto para confirmar estoque atual e alternativas semelhantes.'}</span>
-                                                </div>
-                                                <div className="plp-development-context-actions">
-                                                    {featuredUnit ? (
-                                                        <Link href={featuredUnitHref} className="plp-development-primary-link">
-                                                            Ver detalhes
-                                                            <ArrowRight size={16} />
-                                                        </Link>
-                                                    ) : (
-                                                        <button type="button" className="plp-development-primary-link bc-dev-context-button" onClick={() => openChat()}>
-                                                            Consultar disponibilidade
-                                                            <ArrowRight size={16} />
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <DevelopmentAvailableUnitsPanel
+                                        development={activeDev}
+                                        hasAvailableUnits={hasAvailableUnits}
+                                        onConsult={() => openChat()}
+                                        unitMediaBySlug={unitMediaBySlug}
+                                    />
                                 </section>
 
                                 {developmentLatLng && (
@@ -1824,16 +1778,6 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                             </div>
                         </div>
                     </section>
-
-                    <DevelopmentRelatedUnitsBand
-                        development={activeDev}
-                        hasAvailableUnits={hasAvailableUnits}
-                        onConsult={() => openChat()}
-                        unitMediaBySlug={unitMediaBySlug}
-                        unitsSectionCopy={unitsSectionCopy}
-                        unitsSectionKicker={unitsSectionKicker}
-                        unitsSectionTitle={unitsSectionTitle}
-                    />
 
                     <section className="bc-dev-faq-section">
                         <div className="bc-dev-section-inner bc-dev-split-section">
@@ -5380,6 +5324,277 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     scroll-margin-top: 92px;
                 }
 
+                .bc-page.bc-property-layout .bc-dev-scroll-anchor#unidades-disponiveis {
+                    display: block;
+                    width: 100%;
+                    height: 0;
+                    margin: 0;
+                    overflow: hidden;
+                    border: 0;
+                    background: transparent;
+                    padding: 0 !important;
+                    scroll-margin-top: 92px;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-available-units-band {
+                    align-content: start;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-available-units-copy {
+                    gap: 10px;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-available-units-copy .plp-kicker {
+                    color: var(--plp-gold-dark);
+                    font-family: Montserrat, Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+                    font-size: 10px;
+                    font-weight: 700;
+                    letter-spacing: 0.08em;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-available-units-copy p {
+                    margin: 0;
+                    color: var(--plp-muted);
+                    font-size: 13px;
+                    line-height: 1.5;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-available-units-copy .plp-development-context-feature-pills {
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                }
+
+                .bc-page.bc-property-layout .bc-dev-available-units-panel {
+                    display: grid;
+                    align-content: start;
+                    gap: 10px;
+                    min-width: 0;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-available-units-list {
+                    display: grid;
+                    gap: 10px;
+                    max-height: clamp(336px, 31vw, 452px);
+                    overflow-y: auto;
+                    overflow-x: hidden;
+                    padding-right: 4px;
+                    scrollbar-width: thin;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-available-unit-row {
+                    display: grid;
+                    grid-template-columns: 112px minmax(0, 1fr) minmax(108px, auto);
+                    align-items: center;
+                    gap: 12px;
+                    min-width: 0;
+                    min-height: 116px;
+                    border: 1px solid rgba(184, 148, 95, 0.18);
+                    border-radius: var(--plp-radius);
+                    background: rgba(255, 255, 255, 0.88);
+                    color: var(--plp-ink);
+                    padding: 10px;
+                    text-decoration: none;
+                    box-shadow: 0 10px 22px rgba(31, 27, 21, 0.05);
+                    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-available-unit-row:hover {
+                    border-color: rgba(189, 149, 81, 0.42);
+                    box-shadow: 0 16px 32px rgba(31, 27, 21, 0.1);
+                    transform: translateY(-2px);
+                }
+
+                .bc-page.bc-property-layout .bc-dev-available-unit-media {
+                    position: relative;
+                    min-width: 0;
+                    width: 100%;
+                    aspect-ratio: 4 / 3;
+                    overflow: hidden;
+                    border-radius: calc(var(--plp-radius) - 2px);
+                    background: #eee8df;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-available-unit-media img {
+                    width: 100%;
+                    height: 100%;
+                    display: block;
+                    object-fit: cover;
+                    transition: transform 0.35s ease;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-available-unit-row:hover .bc-dev-available-unit-media img {
+                    transform: scale(1.04);
+                }
+
+                .bc-page.bc-property-layout .bc-dev-available-unit-media span {
+                    position: absolute;
+                    left: 8px;
+                    top: 8px;
+                    max-width: calc(100% - 16px);
+                    overflow: hidden;
+                    border-radius: 5px;
+                    background: rgba(217, 181, 47, 0.95);
+                    color: #17130e;
+                    padding: 5px 7px;
+                    font-size: 8px;
+                    font-weight: 900;
+                    letter-spacing: 0.08em;
+                    line-height: 1.1;
+                    text-overflow: ellipsis;
+                    text-transform: uppercase;
+                    white-space: nowrap;
+                    box-shadow: 0 10px 18px rgba(31, 27, 21, 0.18);
+                }
+
+                .bc-page.bc-property-layout .bc-dev-available-unit-copy {
+                    display: grid;
+                    min-width: 0;
+                    gap: 5px;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-available-unit-copy small {
+                    overflow: hidden;
+                    color: var(--plp-gold-dark);
+                    font-size: 9px;
+                    font-weight: 900;
+                    letter-spacing: 0.08em;
+                    text-overflow: ellipsis;
+                    text-transform: uppercase;
+                    white-space: nowrap;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-available-unit-copy strong {
+                    display: -webkit-box;
+                    overflow: hidden;
+                    color: var(--plp-ink);
+                    font-family: Georgia, 'Times New Roman', serif;
+                    font-size: 16px;
+                    font-weight: 600;
+                    letter-spacing: 0;
+                    line-height: 1.18;
+                    -webkit-box-orient: vertical;
+                    -webkit-line-clamp: 2;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-available-unit-location {
+                    display: flex;
+                    align-items: center;
+                    gap: 5px;
+                    min-width: 0;
+                    overflow: hidden;
+                    color: #5b6470;
+                    font-size: 11px;
+                    font-weight: 650;
+                    line-height: 1.2;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-available-unit-location svg {
+                    flex: 0 0 auto;
+                    color: var(--plp-gold-dark);
+                }
+
+                .bc-page.bc-property-layout .bc-dev-available-unit-meta {
+                    display: grid;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    gap: 5px;
+                    min-width: 0;
+                    margin-top: 2px;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-available-unit-meta span {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 4px;
+                    min-width: 0;
+                    min-height: 30px;
+                    overflow: hidden;
+                    border: 1px solid rgba(184, 148, 95, 0.14);
+                    border-radius: 6px;
+                    background: #faf8f2;
+                    color: #332d24;
+                    padding: 0 5px;
+                    font-size: 10px;
+                    font-weight: 800;
+                    line-height: 1.1;
+                    text-align: center;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-available-unit-meta svg {
+                    flex: 0 0 auto;
+                    color: var(--plp-gold-dark);
+                }
+
+                .bc-page.bc-property-layout .bc-dev-available-unit-action {
+                    display: grid;
+                    justify-items: end;
+                    gap: 8px;
+                    min-width: 0;
+                    text-align: right;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-available-unit-action strong {
+                    max-width: 132px;
+                    color: #17130e;
+                    font-size: 14px;
+                    font-weight: 900;
+                    line-height: 1.12;
+                    overflow-wrap: anywhere;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-available-unit-action span {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 6px;
+                    min-height: 34px;
+                    border-radius: 6px;
+                    background: #d9b52f;
+                    color: #101010;
+                    padding: 0 11px;
+                    font-size: 9px;
+                    font-weight: 950;
+                    letter-spacing: 0.08em;
+                    line-height: 1;
+                    text-transform: uppercase;
+                    white-space: nowrap;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-available-units-foot {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: flex-start;
+                    gap: 7px;
+                    min-width: 0;
+                    color: #5b6470;
+                    font-size: 12px;
+                    font-weight: 700;
+                    line-height: 1.3;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-available-units-foot svg {
+                    flex: 0 0 auto;
+                    color: var(--plp-gold-dark);
+                }
+
+                .bc-page.bc-property-layout .bc-dev-empty-units--context {
+                    grid-template-columns: auto minmax(0, 1fr);
+                    align-items: start;
+                    padding: 18px;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-empty-units--context .bc-dev-empty-units-actions {
+                    grid-column: 1 / -1;
+                    justify-content: stretch;
+                }
+
+                .bc-page.bc-property-layout .bc-dev-empty-units--context .bc-dev-empty-units-actions button {
+                    width: 100%;
+                }
+
                 .bc-page.bc-property-layout .bc-dev-section-inner {
                     width: min(calc(100% - clamp(28px, 5vw, 88px)), 1320px);
                     margin: 0 auto;
@@ -6163,6 +6378,38 @@ export default function BravaConcettoTemplate({ slug, landingPageId, agentName, 
                     .bc-page.bc-property-layout .bc-dev-split-section {
                         grid-template-columns: 1fr;
                     }
+
+                    .bc-page.bc-property-layout .bc-dev-available-units-band {
+                        grid-template-columns: 1fr;
+                    }
+
+                    .bc-page.bc-property-layout .bc-dev-available-units-copy .plp-development-context-feature-pills {
+                        grid-template-columns: repeat(3, minmax(0, 1fr));
+                    }
+                }
+
+                @media (max-width: 860px) {
+                    .bc-page.bc-property-layout .bc-dev-available-units-copy .plp-development-context-feature-pills {
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                    }
+
+                    .bc-page.bc-property-layout .bc-dev-available-unit-row {
+                        grid-template-columns: 96px minmax(0, 1fr);
+                        align-items: start;
+                    }
+
+                    .bc-page.bc-property-layout .bc-dev-available-unit-action {
+                        grid-column: 1 / -1;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        gap: 12px;
+                        text-align: left;
+                    }
+
+                    .bc-page.bc-property-layout .bc-dev-available-unit-action strong {
+                        max-width: none;
+                    }
                 }
 
                 @media (max-width: 720px) {
@@ -6384,78 +6631,85 @@ function DevelopmentMarketComparison({ development, stockLabel, hasAvailableUnit
     )
 }
 
-function DevelopmentRelatedUnitsBand({ development, unitMediaBySlug, hasAvailableUnits, unitsSectionKicker, unitsSectionTitle, unitsSectionCopy, onConsult }: {
+function DevelopmentAvailableUnitsPanel({ development, unitMediaBySlug, hasAvailableUnits, onConsult }: {
     development: Development
     unitMediaBySlug: Record<string, UnitPropertyMedia>
     hasAvailableUnits: boolean
-    unitsSectionKicker: string
-    unitsSectionTitle: string
-    unitsSectionCopy: string
     onConsult: () => void
 }) {
-    const units = development.units.slice(0, 4)
+    const units = development.units
 
-    return (
-        <section id="unidades-disponiveis" className="plp-related-band bc-dev-units-related-band">
-            <div className="plp-related-head bc-dev-related-head">
-                <span className="plp-kicker">{unitsSectionKicker}</span>
-                <h2>{unitsSectionTitle}</h2>
-                <p>{unitsSectionCopy}</p>
-            </div>
-
-            {hasAvailableUnits ? (
-                <div className="plp-related-grid">
-                    {units.map((unit) => {
-                        const propertyMedia = unitMediaBySlug[unitMediaLookupKey(unit)]
-                        const gallery = galleryForUnit(unit, propertyMedia, development)
-                        const image = gallery[0] || unit.image || development.heroImage
-                        const href = unitDetailHref(unit, propertyMedia)
-                        const locationParts = [unit.neighborhood, unit.city].filter(Boolean)
-                        const locationLabel = locationParts.length ? locationParts.join(' - ') : development.locationName
-
-                        return (
-                            <Link key={unit.id} href={href} className="plp-related-card">
-                                <div className="plp-related-media">
-                                    <img src={image} alt={unit.title} loading="lazy" decoding="async" referrerPolicy="no-referrer" />
-                                    <span className="plp-card-ribbon">{unit.status}</span>
-                                </div>
-                                <div className="plp-related-body">
-                                    <h3>{unit.title}</h3>
-                                    <p>{locationLabel}</p>
-                                    <strong>{unit.price}</strong>
-                                    <div className="plp-related-meta">
-                                        <span>{formatAreaRange(unit.area)}</span>
-                                        <span>{unit.suites}</span>
-                                        <span>{unit.vagas}</span>
-                                    </div>
-                                </div>
-                            </Link>
-                        )
-                    })}
-                    <Link href="/busca" className="plp-related-more-card">
-                        <ArrowRight size={30} />
-                        <span>Ver mais imóveis semelhantes</span>
-                    </Link>
-                </div>
-            ) : (
-                <div className="bc-dev-empty-units bc-dev-empty-units--related">
-                    <div className="bc-dev-empty-units-icon"><KeyRound size={26} /></div>
+    if (!hasAvailableUnits || !units.length) {
+        return (
+            <div className="plp-development-context-media bc-dev-available-units-panel">
+                <div className="bc-dev-empty-units bc-dev-empty-units--context">
+                    <div className="bc-dev-empty-units-icon"><KeyRound size={24} /></div>
                     <div>
                         <h3>Unidades sob consulta neste momento</h3>
-                        <p>O {development.name} continua no radar da curadoria. A equipe confirma novas entradas, unidades reservadas e oportunidades semelhantes antes de direcionar o atendimento.</p>
+                        <p>O atendimento confirma novas entradas, unidades reservadas e alternativas com perfil semelhante antes de direcionar a visita.</p>
                     </div>
                     <div className="bc-dev-empty-units-actions">
                         <button type="button" onClick={onConsult}>
                             Consultar disponibilidade
                             <ArrowRight size={16} />
                         </button>
-                        <Link href="/busca">
-                            Ver semelhantes
-                        </Link>
                     </div>
                 </div>
-            )}
-        </section>
+            </div>
+        )
+    }
+
+    return (
+        <div className="plp-development-context-media bc-dev-available-units-panel">
+            <div className="bc-dev-available-units-list" aria-label={`Unidades disponíveis no ${development.name}`}>
+                {units.map((unit) => {
+                    const propertyMedia = unitMediaBySlug[unitMediaLookupKey(unit)]
+                    const gallery = galleryForUnit(unit, propertyMedia, development)
+                    const image = gallery[0] || unit.image || development.heroImage
+                    const href = unitDetailHref(unit, propertyMedia)
+                    const locationParts = [
+                        asText(propertyMedia?.neighborhood || unit.neighborhood),
+                        asText(propertyMedia?.city || unit.city),
+                    ].filter(Boolean)
+                    const locationLabel = locationParts.length ? locationParts.join(' - ') : development.locationName
+
+                    return (
+                        <Link key={unit.id} href={href} className="bc-dev-available-unit-row">
+                            <div className="bc-dev-available-unit-media">
+                                <img src={image} alt={unit.title} loading="lazy" decoding="async" referrerPolicy="no-referrer" />
+                                <span>{unit.status}</span>
+                            </div>
+                            <div className="bc-dev-available-unit-copy">
+                                <small>{development.name}</small>
+                                <strong>{unit.title}</strong>
+                                <span className="bc-dev-available-unit-location">
+                                    <MapPin size={13} />
+                                    {locationLabel}
+                                </span>
+                                <div className="bc-dev-available-unit-meta" aria-label="Características da unidade">
+                                    <span><Maximize2 size={13} /> {formatAreaRange(unit.area)}</span>
+                                    <span><BedDouble size={13} /> {unit.suites}</span>
+                                    <span><Car size={13} /> {unit.vagas}</span>
+                                </div>
+                            </div>
+                            <div className="bc-dev-available-unit-action">
+                                <strong>{unit.price}</strong>
+                                <span>
+                                    Ver detalhes
+                                    <ArrowRight size={14} />
+                                </span>
+                            </div>
+                        </Link>
+                    )
+                })}
+            </div>
+            <div className="bc-dev-available-units-foot">
+                <Building2 size={15} />
+                {units.length === 1
+                    ? '1 imóvel disponível neste empreendimento'
+                    : `${units.length} imóveis disponíveis neste empreendimento`}
+            </div>
+        </div>
     )
 }
 
