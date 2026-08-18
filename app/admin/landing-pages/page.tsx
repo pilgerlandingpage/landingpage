@@ -1,21 +1,26 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { corretorNota8Content, corretorNota8Offer } from '@/lib/products/corretor-nota-8-content'
 import {
     Check,
     Copy,
+    ArrowDown,
+    ArrowUp,
     ExternalLink,
     FileText,
+    Image as ImageIcon,
     Loader2,
     MessageSquare,
     Package,
+    Pencil,
     Plus,
     Save,
     Search,
     ShoppingCart,
     Trash2,
+    Upload,
     User,
     X,
 } from 'lucide-react'
@@ -60,6 +65,20 @@ type ProductDraft = {
     aiContext: string
 }
 
+type DevelopmentGalleryItem = {
+    title: string
+    image: string
+    category: string
+}
+
+type LandingEditDraft = {
+    title: string
+    description: string
+    heroImage: string
+    gallery: DevelopmentGalleryItem[]
+    aiContext: string
+}
+
 const TEMPLATES = [
     { id: 'corretor-nota-8', name: 'Corretor Nota 8', description: 'Landing editorial premium para venda de produto', color: '#c8a25a', type: 'product' },
     { id: 'brava-concetto', name: 'Brava Concetto', description: 'Estilo Clarus Construtora, tons terrosos e quiet luxury', color: '#948369', type: 'development' },
@@ -95,6 +114,10 @@ const DEFAULT_PRODUCT_DRAFT: ProductDraft = {
 
 function asRecord(value: unknown): Record<string, any> {
     return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {}
+}
+
+function asText(value: unknown, fallback = '') {
+    return typeof value === 'string' && value.trim() ? value.trim() : fallback
 }
 
 function normalizeFilterText(value: unknown) {
@@ -182,6 +205,87 @@ function listFromTextarea(value: string) {
         .filter(Boolean)
 }
 
+function normalizeGalleryItem(value: unknown, index: number, fallbackTitle = 'Imagem do empreendimento'): DevelopmentGalleryItem | null {
+    if (typeof value === 'string') {
+        const image = value.trim()
+        if (!image) return null
+        return {
+            title: `${fallbackTitle} - foto ${index + 1}`,
+            image,
+            category: 'Empreendimento',
+        }
+    }
+
+    const item = asRecord(value)
+    const image = asText(item.image ?? item.url ?? item.src)
+    if (!image) return null
+
+    return {
+        title: asText(item.title, `${fallbackTitle} - foto ${index + 1}`),
+        image,
+        category: asText(item.category, 'Empreendimento'),
+    }
+}
+
+function normalizeGalleryItems(value: unknown, fallbackTitle?: string) {
+    const items = Array.isArray(value) ? value : []
+    const seen = new Set<string>()
+    const result: DevelopmentGalleryItem[] = []
+
+    items.forEach((item, index) => {
+        const normalized = normalizeGalleryItem(item, index, fallbackTitle)
+        if (!normalized || seen.has(normalized.image)) return
+        seen.add(normalized.image)
+        result.push(normalized)
+    })
+
+    return result
+}
+
+function developmentDraftFromPage(page: LandingPage): LandingEditDraft {
+    const content = asRecord(page.content)
+    const development = asRecord(content.development)
+    const title = asText(development.name ?? content.custom_title ?? page.title, page.title || 'Empreendimento')
+    const primaryGallery = Array.isArray(development.gallery) && development.gallery.length
+        ? development.gallery
+        : content.custom_gallery
+    const gallery = normalizeGalleryItems(primaryGallery, title)
+    const heroImage = asText(
+        development.heroImage
+        ?? development.hero_image
+        ?? content.custom_hero_image
+        ?? gallery[0]?.image
+    )
+
+    return {
+        title,
+        description: asText(development.description ?? content.custom_description),
+        heroImage,
+        gallery,
+        aiContext: page.ai_context || '',
+    }
+}
+
+function developmentPhotoCount(page: LandingPage) {
+    const content = asRecord(page.content)
+    const development = asRecord(content.development)
+    const seen = new Set<string>()
+    const addImage = (value: unknown) => {
+        const image = asText(value)
+        if (image) seen.add(image)
+    }
+
+    addImage(development.heroImage ?? development.hero_image ?? content.custom_hero_image)
+    normalizeGalleryItems(Array.isArray(development.gallery) && development.gallery.length ? development.gallery : content.custom_gallery)
+        .forEach(item => addImage(item.image))
+
+    return seen.size
+}
+
+function fileTitle(file: File) {
+    return file.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').trim() || 'Imagem do empreendimento'
+}
+
 export default function LandingPagesAdmin() {
     const [pages, setPages] = useState<LandingPage[]>([])
     const [loading, setLoading] = useState(true)
@@ -198,6 +302,15 @@ export default function LandingPagesAdmin() {
     const [editingContextId, setEditingContextId] = useState<string | null>(null)
     const [contextText, setContextText] = useState('')
     const [savingContext, setSavingContext] = useState(false)
+    const [editingPage, setEditingPage] = useState<LandingPage | null>(null)
+    const [editDraft, setEditDraft] = useState<LandingEditDraft | null>(null)
+    const [editError, setEditError] = useState('')
+    const [savingEdit, setSavingEdit] = useState(false)
+    const [uploadingHero, setUploadingHero] = useState(false)
+    const [uploadingGallery, setUploadingGallery] = useState(false)
+    const [newGalleryUrl, setNewGalleryUrl] = useState('')
+    const heroInputRef = useRef<HTMLInputElement | null>(null)
+    const galleryInputRef = useRef<HTMLInputElement | null>(null)
 
     const supabase = createClient()
 
@@ -334,6 +447,205 @@ export default function LandingPagesAdmin() {
             setProductError(error?.message || 'Erro ao criar landing page de produto')
         } finally {
             setSavingProduct(false)
+        }
+    }
+
+    const openEditModal = (page: LandingPage) => {
+        if (pageType(page) !== 'development') return
+        setEditingPage(page)
+        setEditDraft(developmentDraftFromPage(page))
+        setEditError('')
+        setNewGalleryUrl('')
+    }
+
+    const closeEditModal = () => {
+        if (savingEdit || uploadingHero || uploadingGallery) return
+        setEditingPage(null)
+        setEditDraft(null)
+        setEditError('')
+        setNewGalleryUrl('')
+    }
+
+    const updateEditDraft = <K extends keyof LandingEditDraft,>(field: K, value: LandingEditDraft[K]) => {
+        setEditDraft(prev => prev ? { ...prev, [field]: value } : prev)
+    }
+
+    const updateGalleryItem = (index: number, patch: Partial<DevelopmentGalleryItem>) => {
+        setEditDraft(prev => prev ? {
+            ...prev,
+            gallery: prev.gallery.map((item, itemIndex) => itemIndex === index ? { ...item, ...patch } : item),
+        } : prev)
+    }
+
+    const uploadLandingImage = async (file: File, slug: string) => {
+        if (!file.type.startsWith('image/')) {
+            throw new Error('Envie apenas arquivos de imagem.')
+        }
+
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('folder', `landing-pages/${slug || 'sem-slug'}`)
+        formData.append('kind', 'image')
+
+        const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+        })
+        const payload = await response.json().catch(() => null)
+
+        if (!response.ok || !payload?.url) {
+            throw new Error(payload?.details || payload?.error || 'Nao foi possivel enviar a imagem.')
+        }
+
+        return String(payload.url)
+    }
+
+    const handleHeroUpload = async (files: FileList | null) => {
+        const file = files?.[0]
+        if (!file || !editingPage) return
+
+        setUploadingHero(true)
+        setEditError('')
+        try {
+            const image = await uploadLandingImage(file, editingPage.slug)
+            const item = { title: fileTitle(file), image, category: 'Empreendimento' }
+            setEditDraft(prev => {
+                if (!prev) return prev
+                const gallery = prev.gallery.some(galleryItem => galleryItem.image === image)
+                    ? prev.gallery
+                    : [item, ...prev.gallery]
+                return { ...prev, heroImage: image, gallery }
+            })
+        } catch (error: any) {
+            setEditError(error?.message || 'Erro ao enviar imagem principal.')
+        } finally {
+            setUploadingHero(false)
+            if (heroInputRef.current) heroInputRef.current.value = ''
+        }
+    }
+
+    const handleGalleryUpload = async (files: FileList | null) => {
+        const selectedFiles = Array.from(files || [])
+        if (!selectedFiles.length || !editingPage) return
+
+        setUploadingGallery(true)
+        setEditError('')
+        try {
+            const uploaded: DevelopmentGalleryItem[] = []
+            for (const file of selectedFiles) {
+                const image = await uploadLandingImage(file, editingPage.slug)
+                uploaded.push({ title: fileTitle(file), image, category: 'Empreendimento' })
+            }
+
+            setEditDraft(prev => {
+                if (!prev) return prev
+                const gallery = normalizeGalleryItems([...prev.gallery, ...uploaded], prev.title)
+                return {
+                    ...prev,
+                    heroImage: prev.heroImage || gallery[0]?.image || '',
+                    gallery,
+                }
+            })
+        } catch (error: any) {
+            setEditError(error?.message || 'Erro ao enviar imagens.')
+        } finally {
+            setUploadingGallery(false)
+            if (galleryInputRef.current) galleryInputRef.current.value = ''
+        }
+    }
+
+    const addGalleryUrl = () => {
+        const image = newGalleryUrl.trim()
+        if (!image) return
+
+        setEditDraft(prev => {
+            if (!prev || prev.gallery.some(item => item.image === image)) return prev
+            const nextGallery = [
+                ...prev.gallery,
+                {
+                    title: `${prev.title || 'Empreendimento'} - foto ${prev.gallery.length + 1}`,
+                    image,
+                    category: 'Empreendimento',
+                },
+            ]
+            return {
+                ...prev,
+                heroImage: prev.heroImage || image,
+                gallery: nextGallery,
+            }
+        })
+        setNewGalleryUrl('')
+    }
+
+    const removeGalleryImage = (index: number) => {
+        setEditDraft(prev => {
+            if (!prev) return prev
+            const removed = prev.gallery[index]
+            const gallery = prev.gallery.filter((_, itemIndex) => itemIndex !== index)
+            return {
+                ...prev,
+                heroImage: removed?.image === prev.heroImage ? gallery[0]?.image || '' : prev.heroImage,
+                gallery,
+            }
+        })
+    }
+
+    const moveGalleryImage = (index: number, direction: -1 | 1) => {
+        setEditDraft(prev => {
+            if (!prev) return prev
+            const targetIndex = index + direction
+            if (targetIndex < 0 || targetIndex >= prev.gallery.length) return prev
+            const gallery = [...prev.gallery]
+            const [item] = gallery.splice(index, 1)
+            gallery.splice(targetIndex, 0, item)
+            return { ...prev, gallery }
+        })
+    }
+
+    const saveLandingEdit = async () => {
+        if (!editingPage || !editDraft) return
+
+        const title = editDraft.title.trim()
+        if (!title) {
+            setEditError('Informe um titulo para a landing page.')
+            return
+        }
+
+        const gallery = normalizeGalleryItems(editDraft.gallery, title)
+        setSavingEdit(true)
+        setEditError('')
+        try {
+            const response = await fetch('/api/admin/landing-pages', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: editingPage.id,
+                    page_type: 'development',
+                    title,
+                    description: editDraft.description,
+                    heroImage: editDraft.heroImage,
+                    gallery,
+                    ai_context: editDraft.aiContext,
+                }),
+            })
+            const payload = await response.json().catch(() => null)
+            if (!response.ok) {
+                throw new Error(payload?.error || 'Erro ao salvar landing page.')
+            }
+
+            if (payload?.data) {
+                setPages(prev => prev.map(page => page.id === payload.data.id ? { ...page, ...payload.data } : page))
+            } else {
+                fetchPages()
+            }
+
+            setEditingPage(null)
+            setEditDraft(null)
+            setNewGalleryUrl('')
+        } catch (error: any) {
+            setEditError(error?.message || 'Erro ao salvar landing page.')
+        } finally {
+            setSavingEdit(false)
         }
     }
 
@@ -551,6 +863,7 @@ export default function LandingPagesAdmin() {
                             const currentProduct = asRecord(asRecord(page.content).product)
                             const pageStage = getPageStage(page)
                             const stageLabel = STAGE_TABS.find(tab => tab.id === pageStage)?.label || 'Prontas'
+                            const photoCount = currentType === 'development' ? developmentPhotoCount(page) : 0
                             return (
                                 <div
                                     key={page.id}
@@ -594,6 +907,14 @@ export default function LandingPagesAdmin() {
                                             <span>/{page.slug}</span>
                                             <span>|</span>
                                             <span>{page.page_views || 0} views</span>
+                                            {currentType === 'development' && (
+                                                <>
+                                                    <span>|</span>
+                                                    <span className={photoCount ? '' : 'landing-admin-missing-photos'}>
+                                                        {photoCount ? `${photoCount} fotos` : 'sem fotos'}
+                                                    </span>
+                                                </>
+                                            )}
                                             {currentType === 'product' && currentProduct.price && (
                                                 <>
                                                     <span>|</span>
@@ -636,6 +957,17 @@ export default function LandingPagesAdmin() {
                                     </div>
 
                                     <div className="landing-page-actions">
+                                        {currentType === 'development' && (
+                                            <button
+                                                className="btn btn-outline btn-sm"
+                                                title="Editar fotos e conteudo da landing"
+                                                onClick={() => openEditModal(page)}
+                                                style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+                                            >
+                                                <Pencil size={15} /> Editar
+                                            </button>
+                                        )}
+
                                         <button
                                             className="btn btn-outline btn-sm"
                                             title="Instrucoes e treinamento da IA"
@@ -740,6 +1072,167 @@ export default function LandingPagesAdmin() {
                             <button type="button" className="btn btn-primary" onClick={createProductLandingPage} disabled={savingProduct}>
                                 {savingProduct ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                                 Criar landing de produto
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {editingPage && editDraft && (
+                <div className="landing-admin-modal">
+                    <div className="landing-admin-edit-modal">
+                        <div className="landing-admin-modal-head">
+                            <div>
+                                <h3><ImageIcon size={20} /> Editar landing de empreendimento</h3>
+                                <p>{editingPage.title || `/${editingPage.slug}`}</p>
+                            </div>
+                            <button type="button" onClick={closeEditModal} aria-label="Fechar">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div className="landing-admin-edit-body">
+                            <section className="landing-edit-section">
+                                <div className="landing-edit-fields">
+                                    <label>
+                                        <span>Titulo</span>
+                                        <input value={editDraft.title} onChange={(event) => updateEditDraft('title', event.target.value)} />
+                                    </label>
+                                    <label>
+                                        <span>Descricao</span>
+                                        <textarea value={editDraft.description} onChange={(event) => updateEditDraft('description', event.target.value)} rows={4} />
+                                    </label>
+                                </div>
+                            </section>
+
+                            <section className="landing-edit-section">
+                                <div className="landing-edit-section-head">
+                                    <h4>Imagem principal</h4>
+                                    <button type="button" className="btn btn-outline btn-sm" onClick={() => heroInputRef.current?.click()} disabled={uploadingHero}>
+                                        {uploadingHero ? <Loader2 size={15} className="animate-spin" /> : <Upload size={15} />}
+                                        Enviar foto
+                                    </button>
+                                    <input
+                                        ref={heroInputRef}
+                                        type="file"
+                                        accept="image/*"
+                                        hidden
+                                        onChange={(event) => handleHeroUpload(event.target.files)}
+                                    />
+                                </div>
+                                <div className="landing-edit-hero-grid">
+                                    <div className="landing-edit-preview landing-edit-preview-hero">
+                                        {editDraft.heroImage ? (
+                                            <img src={editDraft.heroImage} alt={editDraft.title || 'Imagem principal'} />
+                                        ) : (
+                                            <span><ImageIcon size={22} /> Sem imagem principal</span>
+                                        )}
+                                    </div>
+                                    <label>
+                                        <span>URL da imagem principal</span>
+                                        <input value={editDraft.heroImage} onChange={(event) => updateEditDraft('heroImage', event.target.value)} placeholder="https://..." />
+                                    </label>
+                                </div>
+                            </section>
+
+                            <section className="landing-edit-section">
+                                <div className="landing-edit-section-head">
+                                    <h4>Galeria ({editDraft.gallery.length})</h4>
+                                    <button type="button" className="btn btn-outline btn-sm" onClick={() => galleryInputRef.current?.click()} disabled={uploadingGallery}>
+                                        {uploadingGallery ? <Loader2 size={15} className="animate-spin" /> : <Upload size={15} />}
+                                        Enviar fotos
+                                    </button>
+                                    <input
+                                        ref={galleryInputRef}
+                                        type="file"
+                                        accept="image/*"
+                                        hidden
+                                        multiple
+                                        onChange={(event) => handleGalleryUpload(event.target.files)}
+                                    />
+                                </div>
+
+                                <div className="landing-edit-add-url">
+                                    <input
+                                        value={newGalleryUrl}
+                                        onChange={(event) => setNewGalleryUrl(event.target.value)}
+                                        placeholder="Adicionar imagem por URL"
+                                    />
+                                    <button type="button" className="btn btn-outline btn-sm" onClick={addGalleryUrl} disabled={!newGalleryUrl.trim()}>
+                                        <Plus size={15} />
+                                        Adicionar
+                                    </button>
+                                </div>
+
+                                {editDraft.gallery.length ? (
+                                    <div className="landing-edit-gallery-grid">
+                                        {editDraft.gallery.map((item, index) => (
+                                            <div className="landing-edit-gallery-item" key={`${item.image}-${index}`}>
+                                                <div className="landing-edit-preview">
+                                                    {item.image ? (
+                                                        <img src={item.image} alt={item.title || `Imagem ${index + 1}`} />
+                                                    ) : (
+                                                        <span><ImageIcon size={18} /> Sem URL</span>
+                                                    )}
+                                                </div>
+                                                <label>
+                                                    <span>Titulo</span>
+                                                    <input value={item.title} onChange={(event) => updateGalleryItem(index, { title: event.target.value })} />
+                                                </label>
+                                                <label>
+                                                    <span>Categoria</span>
+                                                    <input value={item.category} onChange={(event) => updateGalleryItem(index, { category: event.target.value })} />
+                                                </label>
+                                                <label>
+                                                    <span>URL</span>
+                                                    <input value={item.image} onChange={(event) => updateGalleryItem(index, { image: event.target.value })} />
+                                                </label>
+                                                <div className="landing-edit-gallery-actions">
+                                                    <button type="button" onClick={() => moveGalleryImage(index, -1)} disabled={index === 0} title="Mover para cima">
+                                                        <ArrowUp size={15} />
+                                                    </button>
+                                                    <button type="button" onClick={() => moveGalleryImage(index, 1)} disabled={index === editDraft.gallery.length - 1} title="Mover para baixo">
+                                                        <ArrowDown size={15} />
+                                                    </button>
+                                                    <button type="button" onClick={() => updateEditDraft('heroImage', item.image)} disabled={!item.image || item.image === editDraft.heroImage}>
+                                                        Principal
+                                                    </button>
+                                                    <button type="button" onClick={() => removeGalleryImage(index)} title="Remover imagem">
+                                                        <Trash2 size={15} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="landing-edit-empty-gallery">
+                                        <ImageIcon size={28} />
+                                        <span>Sem fotos na galeria</span>
+                                    </div>
+                                )}
+                            </section>
+
+                            <section className="landing-edit-section">
+                                <label>
+                                    <span>Contexto da IA/WhatsApp</span>
+                                    <textarea
+                                        value={editDraft.aiContext}
+                                        onChange={(event) => updateEditDraft('aiContext', event.target.value)}
+                                        rows={4}
+                                    />
+                                </label>
+                            </section>
+                        </div>
+
+                        {editError && <div className="landing-admin-error">{editError}</div>}
+
+                        <div className="landing-admin-modal-actions">
+                            <button type="button" className="btn btn-outline" onClick={closeEditModal} disabled={savingEdit || uploadingHero || uploadingGallery}>
+                                Cancelar
+                            </button>
+                            <button type="button" className="btn btn-primary" onClick={saveLandingEdit} disabled={savingEdit || uploadingHero || uploadingGallery}>
+                                {savingEdit ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                                Salvar alteracoes
                             </button>
                         </div>
                     </div>
@@ -961,6 +1454,11 @@ export default function LandingPagesAdmin() {
                     color: var(--text-secondary);
                 }
 
+                .landing-admin-missing-photos {
+                    color: #fca5a5;
+                    font-weight: 700;
+                }
+
                 .landing-page-meta-row {
                     display: flex;
                     align-items: center;
@@ -1137,7 +1635,8 @@ export default function LandingPagesAdmin() {
                 }
 
                 .landing-admin-product-modal,
-                .landing-admin-context-modal {
+                .landing-admin-context-modal,
+                .landing-admin-edit-modal {
                     width: min(100%, 760px);
                     max-height: min(92vh, 880px);
                     overflow: auto;
@@ -1149,6 +1648,10 @@ export default function LandingPagesAdmin() {
 
                 .landing-admin-context-modal {
                     width: min(100%, 620px);
+                }
+
+                .landing-admin-edit-modal {
+                    width: min(100%, 980px);
                 }
 
                 .landing-admin-modal-head {
@@ -1192,12 +1695,14 @@ export default function LandingPagesAdmin() {
                 }
 
                 .landing-admin-form-grid label,
+                .landing-admin-edit-body label,
                 .landing-admin-context-body {
                     display: grid;
                     gap: 8px;
                 }
 
-                .landing-admin-form-grid span {
+                .landing-admin-form-grid span,
+                .landing-admin-edit-body label > span {
                     color: #ddd;
                     font-size: 0.76rem;
                     font-weight: 800;
@@ -1210,6 +1715,8 @@ export default function LandingPagesAdmin() {
 
                 .landing-admin-form-grid input,
                 .landing-admin-form-grid textarea,
+                .landing-admin-edit-body input,
+                .landing-admin-edit-body textarea,
                 .landing-admin-context-body textarea {
                     width: 100%;
                     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -1223,9 +1730,161 @@ export default function LandingPagesAdmin() {
                 }
 
                 .landing-admin-form-grid textarea,
+                .landing-admin-edit-body textarea,
                 .landing-admin-context-body textarea {
                     resize: vertical;
                     line-height: 1.5;
+                }
+
+                .landing-admin-edit-body {
+                    display: grid;
+                    gap: 18px;
+                    padding: 24px;
+                }
+
+                .landing-edit-section {
+                    display: grid;
+                    gap: 14px;
+                    min-width: 0;
+                    padding: 16px;
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 8px;
+                    background: rgba(255, 255, 255, 0.025);
+                }
+
+                .landing-edit-section-head {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 12px;
+                    min-width: 0;
+                }
+
+                .landing-edit-section-head h4 {
+                    margin: 0;
+                    color: #fff;
+                    font-family: Inter, sans-serif;
+                    font-size: 0.95rem;
+                    font-weight: 800;
+                    letter-spacing: 0;
+                }
+
+                .landing-edit-section-head .btn,
+                .landing-edit-add-url .btn {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 7px;
+                    min-height: 38px;
+                    white-space: nowrap;
+                }
+
+                .landing-edit-fields {
+                    display: grid;
+                    gap: 14px;
+                }
+
+                .landing-edit-hero-grid {
+                    display: grid;
+                    grid-template-columns: minmax(240px, 0.75fr) minmax(0, 1fr);
+                    align-items: end;
+                    gap: 14px;
+                    min-width: 0;
+                }
+
+                .landing-edit-preview {
+                    position: relative;
+                    width: 100%;
+                    min-width: 0;
+                    overflow: hidden;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 8px;
+                    aspect-ratio: 16 / 10;
+                    background: #171717;
+                }
+
+                .landing-edit-preview img {
+                    width: 100%;
+                    height: 100%;
+                    display: block;
+                    object-fit: cover;
+                }
+
+                .landing-edit-preview span,
+                .landing-edit-empty-gallery {
+                    min-height: 100%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    color: #aaa;
+                    font-size: 0.84rem;
+                    text-align: center;
+                }
+
+                .landing-edit-preview-hero {
+                    aspect-ratio: 16 / 9;
+                }
+
+                .landing-edit-add-url {
+                    display: grid;
+                    grid-template-columns: minmax(0, 1fr) auto;
+                    gap: 10px;
+                    min-width: 0;
+                }
+
+                .landing-edit-gallery-grid {
+                    display: grid;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    gap: 12px;
+                }
+
+                .landing-edit-gallery-item {
+                    display: grid;
+                    gap: 10px;
+                    min-width: 0;
+                    padding: 10px;
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 8px;
+                    background: rgba(0, 0, 0, 0.24);
+                }
+
+                .landing-edit-gallery-actions {
+                    display: grid;
+                    grid-template-columns: 36px 36px minmax(0, 1fr) 36px;
+                    gap: 6px;
+                    min-width: 0;
+                }
+
+                .landing-edit-gallery-actions button {
+                    min-width: 0;
+                    min-height: 34px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 0 8px;
+                    border: 1px solid rgba(255, 255, 255, 0.12);
+                    border-radius: 7px;
+                    background: rgba(255, 255, 255, 0.03);
+                    color: #fff;
+                    cursor: pointer;
+                    font: inherit;
+                    font-size: 0.74rem;
+                    font-weight: 700;
+                    letter-spacing: 0;
+                    white-space: nowrap;
+                }
+
+                .landing-edit-gallery-actions button:disabled {
+                    cursor: not-allowed;
+                    opacity: 0.42;
+                }
+
+                .landing-edit-empty-gallery {
+                    min-height: 150px;
+                    border: 1px dashed rgba(255, 255, 255, 0.14);
+                    border-radius: 8px;
+                    background: rgba(255, 255, 255, 0.02);
                 }
 
                 .landing-admin-context-body {
@@ -1301,8 +1960,15 @@ export default function LandingPagesAdmin() {
                     }
 
                     .landing-admin-type-tabs,
-                    .landing-admin-form-grid {
+                    .landing-admin-form-grid,
+                    .landing-edit-hero-grid,
+                    .landing-edit-gallery-grid,
+                    .landing-edit-add-url {
                         grid-template-columns: 1fr;
+                    }
+
+                    .landing-admin-edit-body {
+                        padding: 16px;
                     }
 
                     .landing-page-card {

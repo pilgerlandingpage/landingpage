@@ -5,6 +5,11 @@ import { NextRequest, NextResponse } from 'next/server'
 export const dynamic = 'force-dynamic'
 
 type LandingPageType = 'development' | 'product'
+type GalleryItem = {
+    title: string
+    image: string
+    category: string
+}
 
 function text(value: unknown, fallback = '') {
     return typeof value === 'string' && value.trim() ? value.trim() : fallback
@@ -39,8 +44,57 @@ function objectList(value: unknown) {
     return value.filter(item => item && typeof item === 'object' && !Array.isArray(item))
 }
 
+function asRecord(value: unknown): Record<string, any> {
+    return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {}
+}
+
+function galleryItem(value: unknown, index: number, fallbackTitle = 'Imagem do empreendimento'): GalleryItem | null {
+    if (typeof value === 'string') {
+        const image = text(value)
+        if (!image) return null
+        return {
+            title: `${fallbackTitle} - foto ${index + 1}`,
+            image,
+            category: 'Empreendimento',
+        }
+    }
+
+    const item = asRecord(value)
+    const image = text(item.image ?? item.url ?? item.src)
+    if (!image) return null
+
+    return {
+        title: text(item.title, `${fallbackTitle} - foto ${index + 1}`),
+        image,
+        category: text(item.category, 'Empreendimento'),
+    }
+}
+
+function galleryItems(value: unknown, fallbackTitle?: string) {
+    const source = Array.isArray(value) ? value : stringList(value)
+    const seen = new Set<string>()
+    const result: GalleryItem[] = []
+
+    source.forEach((item, index) => {
+        const normalized = galleryItem(item, index, fallbackTitle)
+        if (!normalized || seen.has(normalized.image)) return
+        seen.add(normalized.image)
+        result.push(normalized)
+    })
+
+    return result
+}
+
 function landingPageType(value: unknown): LandingPageType {
     return value === 'product' ? 'product' : 'development'
+}
+
+function existingLandingPageType(value: unknown, content: Record<string, any>): LandingPageType {
+    if (value === 'product' || asRecord(content.product).name || content.template === 'corretor-nota-8') {
+        return 'product'
+    }
+
+    return 'development'
 }
 
 export async function GET() {
@@ -175,6 +229,106 @@ export async function POST(req: NextRequest) {
 
         if (error) {
             console.error('Error creating landing page:', error)
+            return NextResponse.json({ error: error.message }, { status: 500 })
+        }
+
+        return NextResponse.json({ success: true, data })
+    } catch (err: any) {
+        console.error('Error:', err)
+        return NextResponse.json({ error: err.message }, { status: 500 })
+    }
+}
+
+export async function PATCH(req: NextRequest) {
+    try {
+        const supabase = createAdminClient()
+        const body = await req.json()
+        const id = text(body?.id)
+
+        if (!id) {
+            return NextResponse.json({ error: 'ID da landing page e obrigatorio.' }, { status: 400 })
+        }
+
+        const { data: existing, error: existingError } = await supabase
+            .from('landing_pages')
+            .select('id, slug, title, page_type, content, ai_context')
+            .eq('id', id)
+            .maybeSingle()
+
+        if (existingError) {
+            return NextResponse.json({ error: existingError.message }, { status: 400 })
+        }
+
+        if (!existing) {
+            return NextResponse.json({ error: 'Landing page nao encontrada.' }, { status: 404 })
+        }
+
+        const content = asRecord(existing.content)
+        const page_type = existingLandingPageType(existing.page_type, content)
+
+        if (page_type !== 'development') {
+            return NextResponse.json({ error: 'A edicao visual esta disponivel para landing pages de empreendimentos.' }, { status: 400 })
+        }
+
+        const development = asRecord(content.development)
+        const seo = asRecord(content.seo)
+        const fallbackTitle = text(development.name ?? content.custom_title ?? existing.title, existing.title || 'Empreendimento')
+        const title = text(body?.title, fallbackTitle)
+        const description = text(body?.description, text(development.description ?? content.custom_description))
+        const gallery = galleryItems(body?.gallery, title)
+        const heroImage = text(
+            body?.heroImage ?? body?.hero_image,
+            text(development.heroImage ?? development.hero_image ?? content.custom_hero_image, gallery[0]?.image || '')
+        )
+        const seoDescription = description || text(seo.description ?? content.custom_description)
+        const timestamp = new Date().toISOString()
+
+        const nextDevelopment = {
+            ...development,
+            id: text(development.id, existing.slug),
+            name: title,
+            description,
+            heroImage,
+            hero_image: heroImage,
+            gallery,
+        }
+
+        const nextContent = {
+            ...content,
+            custom_title: title,
+            custom_description: description,
+            custom_hero_image: heroImage,
+            custom_gallery: gallery,
+            development: nextDevelopment,
+            seo: {
+                ...seo,
+                title,
+                description: seoDescription,
+                image: heroImage || seo.image,
+                og_image: heroImage || seo.og_image,
+                updated_at: timestamp,
+            },
+        }
+
+        const updates: Record<string, any> = {
+            title,
+            content: nextContent,
+            updated_at: timestamp,
+        }
+
+        if (Object.prototype.hasOwnProperty.call(body, 'ai_context')) {
+            updates.ai_context = text(body.ai_context) || null
+        }
+
+        const { data, error } = await supabase
+            .from('landing_pages')
+            .update(updates)
+            .eq('id', id)
+            .select('id, slug, title, status, page_type, page_views, content, primary_color, created_at, ai_context, assigned_broker_id')
+            .single()
+
+        if (error) {
+            console.error('Error updating landing page:', error)
             return NextResponse.json({ error: error.message }, { status: 500 })
         }
 
