@@ -44,6 +44,7 @@ interface Property {
     purpose?: string | null
     rent?: number | null
     amenities?: string[] | null
+    feature_flags?: string[] | null
     slug?: string
 }
 
@@ -348,12 +349,17 @@ function propertyText(property: Property) {
         property.source_status,
         property.purpose,
         Array.isArray(property.amenities) ? property.amenities.join(' ') : '',
+        Array.isArray(property.feature_flags) ? property.feature_flags.join(' ') : '',
     ].filter(Boolean).join(' '))
 }
 
 function textHasAny(property: Property, terms: string[]) {
     const text = propertyText(property)
     return terms.some(term => text.includes(normalizeSearchText(term)))
+}
+
+function hasFeatureFlag(property: Property, feature: string) {
+    return Array.isArray(property.feature_flags) && property.feature_flags.includes(feature)
 }
 
 function parseFilterNumber(value: string) {
@@ -400,9 +406,9 @@ function matchesPropertyType(property: Property, type: string | null) {
 function matchesFeature(property: Property, feature: string) {
     if (feature === 'exclusive') return Boolean(property.exclusive)
     if (feature === 'premium') return Number(property.price || 0) >= 5000000
-    if (feature === 'frente-mar') return textHasAny(property, ['frente mar', 'frente ao mar', 'beira mar', 'vista mar'])
-    if (feature === 'lancamento') return textHasAny(property, ['lancamento', 'lançamento', 'construcao', 'construção', 'na planta'])
-    if (feature === 'mobiliado') return textHasAny(property, ['mobiliado', 'mobiliada', 'mobiliad'])
+    if (feature === 'frente-mar') return hasFeatureFlag(property, feature) || textHasAny(property, ['frente mar', 'frente ao mar', 'beira mar', 'vista mar'])
+    if (feature === 'lancamento') return hasFeatureFlag(property, feature) || textHasAny(property, ['lancamento', 'lançamento', 'construcao', 'construção', 'na planta'])
+    if (feature === 'mobiliado') return hasFeatureFlag(property, feature) || textHasAny(property, ['mobiliado', 'mobiliada', 'mobiliad'])
 
     return true
 }
@@ -482,8 +488,8 @@ function matchesQuickFilter(item: MappedProperty, filter: QuickFilter) {
     if (filter === 'all') return true
     if (filter === 'exclusive') return Boolean(property.exclusive)
     if (filter === 'premium') return Number(property.price || 0) >= 5000000
-    if (filter === 'waterfront') return textHasAny(property, ['frente mar', 'frente ao mar', 'beira mar', 'vista mar'])
-    if (filter === 'launch') return textHasAny(property, ['lancamento', 'lançamento', 'construcao', 'construção', 'na planta'])
+    if (filter === 'waterfront') return hasFeatureFlag(property, 'frente-mar') || textHasAny(property, ['frente mar', 'frente ao mar', 'beira mar', 'vista mar'])
+    if (filter === 'launch') return hasFeatureFlag(property, 'lancamento') || textHasAny(property, ['lancamento', 'lançamento', 'construcao', 'construção', 'na planta'])
 
     return true
 }

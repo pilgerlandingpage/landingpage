@@ -55,8 +55,8 @@ const HOME_SECONDARY_DATA_TIMEOUT_MS = 8000
 const HOME_BASE_REVALIDATE_SECONDS = 300
 const HOME_PROPERTY_FEED_LIMIT = 480
 const HOME_PROPERTY_FALLBACK_LIMIT = 120
-const HOME_PROPERTY_VIEW_EVENT_LIMIT = 12000
-const HOME_LANDING_PAGE_VIEW_EVENT_LIMIT = 6000
+const HOME_PROPERTY_VIEW_EVENT_LIMIT = 2000
+const HOME_LANDING_PAGE_VIEW_EVENT_LIMIT = 1000
 const HOME_SECTION_PROPERTY_LIMIT = 4
 const DEFAULT_HOME_SECTIONS = ['newest', 'cta']
 const HOME_BLOG_POST_LIMIT = 4
@@ -205,7 +205,7 @@ const getCachedHomeBaseData = unstable_cache(
       fetchHomeProperties(supabase),
       supabase
         .from('landing_pages')
-        .select('id, slug, title, property_id, content')
+        .select('id, slug, property_id')
         .eq('status', 'published')
         .or('content->>home_featured.is.null,content->>home_featured.neq.false')
         .order('created_at', { ascending: true })
@@ -236,7 +236,7 @@ const getCachedHomeBaseData = unstable_cache(
       },
     }
   },
-  ['marketplace-home-base-data-v3'],
+  ['marketplace-home-base-data-v4'],
   {
     revalidate: HOME_BASE_REVALIDATE_SECONDS,
     tags: ['marketplace-home'],
@@ -450,7 +450,7 @@ export default async function MarketplaceHome() {
     ? await Promise.all([
       supabase
         .from('funnel_events')
-        .select('landing_page_id, event_type, metadata, created_at')
+        .select('landing_page_id, metadata')
         .eq('event_type', 'property_details_landing_viewed')
         .order('created_at', { ascending: false })
         .limit(HOME_PROPERTY_VIEW_EVENT_LIMIT)
@@ -458,8 +458,8 @@ export default async function MarketplaceHome() {
       landingPageIds.length > 0
         ? supabase
           .from('funnel_events')
-          .select('landing_page_id, event_type, metadata, created_at')
-          .in('landing_page_id', landingPageIds)
+          .select('landing_page_id, metadata')
+          .not('landing_page_id', 'is', null)
           .eq('event_type', 'page_view')
           .order('created_at', { ascending: false })
           .limit(HOME_LANDING_PAGE_VIEW_EVENT_LIMIT)

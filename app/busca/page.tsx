@@ -729,13 +729,17 @@ function applySearchTermFilter(query: any, value: string | undefined, expansion?
     return query.or([...textFilters, ...expansionFilters].join(','))
 }
 
-const SEARCH_PROPERTY_FIELDS = [
+const SEARCH_CARD_RESULT_LIMIT = 60
+const SEARCH_MAP_RESULT_LIMIT = 1200
+
+const SEARCH_PROPERTY_CARD_FIELDS = [
     'id',
     'source_slug',
     'title',
     'city',
     'state',
     'price',
+    'rent',
     'bedrooms',
     'bathrooms',
     'suites',
@@ -744,7 +748,6 @@ const SEARCH_PROPERTY_FIELDS = [
     'area_private_m2',
     'featured_image',
     'images',
-    'video_url',
     'property_type',
     'exclusive',
     'latitude',
@@ -758,10 +761,35 @@ const SEARCH_PROPERTY_FIELDS = [
     'updated_at',
 ].join(',')
 
+const SEARCH_PROPERTY_MAP_FIELDS = [
+    'id',
+    'source_slug',
+    'title',
+    'city',
+    'state',
+    'price',
+    'rent',
+    'bedrooms',
+    'bathrooms',
+    'suites',
+    'parking_spaces',
+    'area_m2',
+    'area_private_m2',
+    'property_type',
+    'exclusive',
+    'latitude',
+    'longitude',
+    'neighborhood',
+    'purpose',
+    'source_status',
+    'amenities',
+    'created_at',
+].join(',')
+
 const MIN_SEARCH_PRICE = 4000000
-const SEARCH_PROPERTY_DESCRIPTION_LIMIT = 360
-const SEARCH_PROPERTY_IMAGE_LIMIT = 6
-const SEARCH_PROPERTY_AMENITY_LIMIT = 8
+const SEARCH_PROPERTY_DESCRIPTION_LIMIT = 240
+const SEARCH_PROPERTY_IMAGE_LIMIT = 2
+const SEARCH_PROPERTY_AMENITY_LIMIT = 6
 const COMMERCIAL_SUBTYPES = new Set(['terreno-comercial', 'galpao', 'sala-comercial'])
 
 function shouldIncludeCommercialInventory(input: SearchDataInput) {
@@ -813,6 +841,54 @@ function compactSearchProperty(property: any) {
         amenities: Array.isArray(property.amenities)
             ? property.amenities.filter(Boolean).slice(0, SEARCH_PROPERTY_AMENITY_LIMIT)
             : property.amenities,
+    }
+}
+
+function mapFeatureFlags(property: any) {
+    const text = normalizeLocationName([
+        property.title,
+        property.property_type,
+        property.neighborhood,
+        property.city,
+        property.source_status,
+        property.purpose,
+        Array.isArray(property.amenities) ? property.amenities.join(' ') : '',
+    ].filter(Boolean).join(' '))
+    const flags = new Set<string>()
+
+    if (property.exclusive) flags.add('exclusive')
+    if (Number(property.price || property.rent || 0) >= 5000000) flags.add('premium')
+    if (/\b(frente mar|frente ao mar|frente para o mar|beira mar|vista mar|pe na areia)\b/.test(text)) flags.add('frente-mar')
+    if (/\b(lancamento|pre lancamento|na planta|construcao|em construcao|obra|em obra|entrega prevista)\b/.test(text)) flags.add('lancamento')
+    if (/\b(mobiliad|porteira fechada|com moveis)\b/.test(text)) flags.add('mobiliado')
+
+    return Array.from(flags)
+}
+
+function compactSearchMapProperty(property: any) {
+    return {
+        id: property.id,
+        source_slug: property.source_slug,
+        title: property.title,
+        city: property.city,
+        state: property.state,
+        price: property.price,
+        rent: property.rent,
+        bedrooms: property.bedrooms,
+        bathrooms: property.bathrooms,
+        suites: property.suites,
+        parking_spaces: property.parking_spaces,
+        area_m2: property.area_m2,
+        area_private_m2: property.area_private_m2,
+        property_type: property.property_type,
+        exclusive: property.exclusive,
+        latitude: property.latitude,
+        longitude: property.longitude,
+        neighborhood: property.neighborhood,
+        purpose: property.purpose,
+        source_status: property.source_status,
+        feature_flags: mapFeatureFlags(property),
+        created_at: property.created_at,
     }
 }
 
@@ -929,15 +1005,15 @@ const getCachedSearchData = unstable_cache(async (input: SearchDataInput) => {
         ? null
         : await resolveBrokerPropertyIds(supabase, input.brokerName, input.brokerLogin)
 
-    const createPropertyQuery = (useSpatialFilter: boolean) => (
+    const createPropertyQuery = (useSpatialFilter: boolean, fields: string) => (
         useSpatialFilter && hasServerSpatialFilter
             ? supabase
                 .rpc('search_active_properties_in_area', {
                     p_draw_area: input.drawArea,
                     p_bounds: input.mapBounds,
                 })
-                .select(SEARCH_PROPERTY_FIELDS)
-            : supabase.from('properties').select(SEARCH_PROPERTY_FIELDS).eq('status', 'active')
+                .select(fields)
+            : supabase.from('properties').select(fields).eq('status', 'active')
     )
 
     const applyPropertyFilters = (initialQuery: any) => {
@@ -1020,16 +1096,43 @@ const getCachedSearchData = unstable_cache(async (input: SearchDataInput) => {
         return query.order('created_at', { ascending: false })
     }
 
-    let properties: any[] | null = []
+    let mapProperties: any[] = []
+    let properties: any[] = []
 
     if (!isDevelopmentMode) {
-        const spatialResult = await applyPropertyFilters(createPropertyQuery(hasServerSpatialFilter))
-        properties = spatialResult.data
+        const spatialResult = await applyPropertyFilters(createPropertyQuery(hasServerSpatialFilter, SEARCH_PROPERTY_MAP_FIELDS))
+            .limit(SEARCH_MAP_RESULT_LIMIT)
+        mapProperties = spatialResult.data || []
 
         if (spatialResult.error && hasServerSpatialFilter) {
             console.warn('[Busca] Spatial property search failed; falling back to the regular property query.', spatialResult.error.message)
-            const fallbackResult = await applyPropertyFilters(createPropertyQuery(false))
-            properties = fallbackResult.data
+            const fallbackResult = await applyPropertyFilters(createPropertyQuery(false, SEARCH_PROPERTY_MAP_FIELDS))
+                .limit(SEARCH_MAP_RESULT_LIMIT)
+            mapProperties = fallbackResult.data || []
+        }
+
+        const propertyIds = mapProperties
+            .slice(0, SEARCH_CARD_RESULT_LIMIT)
+            .map((property: any) => String(property?.id || ''))
+            .filter(Boolean)
+
+        if (propertyIds.length > 0) {
+            const { data: cardRows, error: cardError } = await supabase
+                .from('properties')
+                .select(SEARCH_PROPERTY_CARD_FIELDS)
+                .eq('status', 'active')
+                .in('id', propertyIds)
+
+            if (cardError) {
+                console.warn('[Busca] Full property cards unavailable; using compact map rows.', cardError.message)
+                properties = mapProperties.slice(0, SEARCH_CARD_RESULT_LIMIT)
+            } else {
+                const cardsById = new Map((cardRows || []).map((property: any) => [String(property?.id || ''), property]))
+                const mapRowsById = new Map(mapProperties.map((property: any) => [String(property?.id || ''), property]))
+                properties = propertyIds
+                    .map(id => cardsById.get(id) || mapRowsById.get(id))
+                    .filter(Boolean)
+            }
         }
     }
 
@@ -1051,9 +1154,11 @@ const getCachedSearchData = unstable_cache(async (input: SearchDataInput) => {
     return {
         developmentResults: developmentSearch.developmentResults,
         lpMap,
-        properties: (properties || []).map(compactSearchProperty),
+        properties: properties.map(compactSearchProperty),
+        mapProperties: mapProperties.map(compactSearchMapProperty),
+        totalPropertiesCount: mapProperties.length,
     }
-}, ['public-search-data-v2'], { revalidate: 120, tags: ['public-search'] })
+}, ['public-search-data-v5'], { revalidate: 120, tags: ['public-search'] })
 
 export default async function SearchPage({
     searchParams
@@ -1082,7 +1187,7 @@ export default async function SearchPage({
     ]
     const resolvedParams = await searchParams
     const searchDataInput = buildSearchDataInput(resolvedParams)
-    const { properties, lpMap, developmentResults } = await getCachedSearchData(searchDataInput)
+    const { properties, mapProperties, totalPropertiesCount, lpMap, developmentResults } = await getCachedSearchData(searchDataInput)
 
     return (
         <div
@@ -1094,6 +1199,8 @@ export default async function SearchPage({
             <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
                 <SearchResults
                     properties={properties}
+                    mapProperties={mapProperties}
+                    totalPropertiesCount={totalPropertiesCount}
                     lpMap={lpMap}
                     developmentResults={developmentResults}
                     brokerSearchName={searchDataInput.brokerName || null}

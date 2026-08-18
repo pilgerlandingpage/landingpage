@@ -124,7 +124,7 @@ export default function HomepageSection({
                             <PropertyCard
                                 property={property}
                                 landingPageSlug={lpMap.get(property.id)}
-                                imagePriority={index < 4}
+                                imagePriority={index === 0}
                                 variant="homeCompact"
                             />
                         </div>

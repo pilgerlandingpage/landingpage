@@ -18,6 +18,7 @@ import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
 import { getVisitorId, trackEvent } from '@/lib/tracking/client'
 
 const MAX_RENDERED_CARDS = 60
+const MAX_MAP_PREVIEW_PROPERTIES = 18
 const FAVORITES_KEY = 'pilger_property_favorites'
 const HISTORY_KEY = 'pilger_property_history'
 const MAX_MEMORY_PROPERTIES = 10
@@ -437,21 +438,58 @@ interface MapBounds {
 
 interface SearchResultsProps {
     properties: any[]
+    mapProperties?: any[]
+    totalPropertiesCount?: number
     lpMap: Record<string, string>
     developmentResults?: SearchDevelopmentResult[]
     brokerSearchName?: string | null
 }
 
-export default function SearchResults({ properties, lpMap, developmentResults = [], brokerSearchName }: SearchResultsProps) {
+export default function SearchResults({
+    properties,
+    mapProperties = [],
+    totalPropertiesCount,
+    lpMap,
+    developmentResults = [],
+    brokerSearchName,
+}: SearchResultsProps) {
     const router = useRouter()
     const searchParams = useSearchParams()
     const searchKey = searchParams.toString()
     const isDevelopmentOnlySearch = isDevelopmentSearchCategory(
         searchParams.get('category') || searchParams.get('resultType') || searchParams.get('view')
     )
+    const [hydratedMapProperties, setHydratedMapProperties] = useState<Record<string, any>>({})
+    const baseMapProperties = useMemo(
+        () => isDevelopmentOnlySearch ? [] : (mapProperties.length ? mapProperties : properties),
+        [isDevelopmentOnlySearch, mapProperties, properties]
+    )
+    const fullPropertiesById = useMemo(() => {
+        const map = new Map<string, any>()
+
+        properties.forEach(property => {
+            const id = String(property?.id || '')
+            if (id) map.set(id, property)
+        })
+
+        Object.values(hydratedMapProperties).forEach(property => {
+            const id = String(property?.id || '')
+            if (id) map.set(id, property)
+        })
+
+        return map
+    }, [hydratedMapProperties, properties])
+    const enrichProperty = useCallback((property: any) => {
+        const id = String(property?.id || '')
+        return id ? fullPropertiesById.get(id) || property : property
+    }, [fullPropertiesById])
+    const searchProperties = useMemo(
+        () => baseMapProperties.map(enrichProperty),
+        [baseMapProperties, enrichProperty]
+    )
     const propertiesWithCoords = useMemo(
-        () => isDevelopmentOnlySearch ? [] : properties.filter(property => Boolean(getLatLng(property))),
-        [isDevelopmentOnlySearch, properties]
+        () => isDevelopmentOnlySearch ? [] : searchProperties.filter(property => Boolean(getLatLng(property))),
+        [isDevelopmentOnlySearch, searchProperties]
     )
     const mapSelectionKey = useMemo(() => {
         const params = new URLSearchParams(searchKey)
@@ -552,6 +590,35 @@ export default function SearchResults({ properties, lpMap, developmentResults = 
         }
     }, [memoryIds, memoryIdsKey])
 
+    useEffect(() => {
+        if (!selectedMapPropertyId || shouldShowOfficeOnMap || isDevelopmentOnlySearch) return
+        if (fullPropertiesById.has(String(selectedMapPropertyId))) return
+
+        let cancelled = false
+
+        async function loadSelectedMapProperty() {
+            try {
+                const response = await fetch(`/api/public/properties?ids=${encodeURIComponent(String(selectedMapPropertyId))}`)
+                const data = await response.json().catch(() => ({}))
+                const property = Array.isArray(data.properties) ? data.properties[0] : null
+                if (cancelled || !property?.id) return
+
+                setHydratedMapProperties(current => ({
+                    ...current,
+                    [String(property.id)]: property,
+                }))
+            } catch {
+                // The lightweight marker remains enough to keep the map usable.
+            }
+        }
+
+        void loadSelectedMapProperty()
+
+        return () => {
+            cancelled = true
+        }
+    }, [fullPropertiesById, isDevelopmentOnlySearch, selectedMapPropertyId, shouldShowOfficeOnMap])
+
     const activeFilters = useMemo(() => {
         const ignored = new Set(['page', MAP_PROPERTY_PARAM, DRAW_AREA_PARAM, MAP_BOUNDS_PARAM, 'brokerLogin'])
 
@@ -636,8 +703,8 @@ export default function SearchResults({ properties, lpMap, developmentResults = 
 
     const visibleProperties = useMemo(() => {
         if (isDevelopmentOnlySearch) return []
-        return filterPropertiesByDrawArea(filterPropertiesByBounds(properties, mapBounds), selectedDrawArea)
-    }, [isDevelopmentOnlySearch, properties, mapBounds, selectedDrawArea])
+        return filterPropertiesByDrawArea(filterPropertiesByBounds(searchProperties, mapBounds), selectedDrawArea)
+    }, [isDevelopmentOnlySearch, searchProperties, mapBounds, selectedDrawArea])
 
     const developmentMapProperties = useMemo(() => {
         if (!isDevelopmentOnlySearch) return []
@@ -662,11 +729,12 @@ export default function SearchResults({ properties, lpMap, developmentResults = 
             ? selectedMapPropertyOverride.property
             : null
 
-        return propertiesWithCoords.find(item => String(item.id) === String(selectedMapPropertyId))
+        return fullPropertiesById.get(String(selectedMapPropertyId))
+            || propertiesWithCoords.find(item => String(item.id) === String(selectedMapPropertyId))
             || visibleMapProperties.find(item => String(item.id) === String(selectedMapPropertyId))
             || overrideProperty
             || null
-    }, [isDevelopmentOnlySearch, mapSelectionKey, propertiesWithCoords, selectedMapPropertyId, selectedMapPropertyOverride, shouldShowOfficeOnMap, visibleMapProperties])
+    }, [fullPropertiesById, isDevelopmentOnlySearch, mapSelectionKey, propertiesWithCoords, selectedMapPropertyId, selectedMapPropertyOverride, shouldShowOfficeOnMap, visibleMapProperties])
     const mapPreviewAnchorProperty = useMemo(() => {
         const anchor = mapPreviewAnchorOverride?.key === mapSelectionKey ? mapPreviewAnchorOverride : null
         if (!anchor?.id) return selectedMapProperty
@@ -675,24 +743,85 @@ export default function SearchResults({ properties, lpMap, developmentResults = 
             : null
 
         return anchorProperty
+            || fullPropertiesById.get(String(anchor.id))
             || propertiesWithCoords.find(item => String(item.id) === String(anchor.id))
             || visibleMapProperties.find(item => String(item.id) === String(anchor.id))
             || selectedMapProperty
-    }, [mapPreviewAnchorOverride, mapSelectionKey, propertiesWithCoords, selectedMapProperty, visibleMapProperties])
+    }, [fullPropertiesById, mapPreviewAnchorOverride, mapSelectionKey, propertiesWithCoords, selectedMapProperty, visibleMapProperties])
     const mapPreviewProperties = useMemo(() => {
-        if (!selectedMapProperty) return orderPropertiesBySmoothGeoPath(visibleMapProperties, mapPreviewAnchorProperty)
+        const hydratePreviewProperties = (items: any[]) => items.map(enrichProperty)
+
+        if (!selectedMapProperty) {
+            return hydratePreviewProperties(orderPropertiesBySmoothGeoPath(visibleMapProperties, mapPreviewAnchorProperty))
+                .slice(0, MAX_MAP_PREVIEW_PROPERTIES)
+        }
+
         const hasSelectedProperty = visibleMapProperties.some(item => String(item.id) === String(selectedMapProperty.id))
         const previewProperties = hasSelectedProperty ? visibleMapProperties : [selectedMapProperty, ...visibleMapProperties]
-        return orderPropertiesBySmoothGeoPath(previewProperties, mapPreviewAnchorProperty || selectedMapProperty)
-    }, [mapPreviewAnchorProperty, selectedMapProperty, visibleMapProperties])
+        const orderedProperties = hydratePreviewProperties(orderPropertiesBySmoothGeoPath(previewProperties, mapPreviewAnchorProperty || selectedMapProperty))
+        const limitedProperties = orderedProperties.slice(0, MAX_MAP_PREVIEW_PROPERTIES)
+
+        return limitedProperties.some(item => String(item.id) === String(selectedMapProperty.id))
+            ? limitedProperties
+            : [selectedMapProperty, ...limitedProperties.slice(0, MAX_MAP_PREVIEW_PROPERTIES - 1)]
+    }, [enrichProperty, mapPreviewAnchorProperty, selectedMapProperty, visibleMapProperties])
     const developmentCount = developmentResults.length
-    const visibleCount = isDevelopmentOnlySearch ? developmentCount : visibleProperties.length
-    const totalCount = isDevelopmentOnlySearch ? developmentCount : properties.length
+    const totalMatchedPropertyCount = Math.max(
+        searchProperties.length,
+        Number.isFinite(Number(totalPropertiesCount)) ? Number(totalPropertiesCount) : 0
+    )
+    const visibleCount = isDevelopmentOnlySearch
+        ? developmentCount
+        : (selectedDrawArea || mapBounds ? visibleProperties.length : totalMatchedPropertyCount)
+    const totalCount = isDevelopmentOnlySearch ? developmentCount : totalMatchedPropertyCount
     const brokerResultName = String(brokerSearchName || '').trim()
     const isBrokerSearch = brokerResultName.length > 0
     const renderedProperties = visibleProperties.slice(0, MAX_RENDERED_CARDS)
     const hiddenVisibleCount = Math.max(0, visibleCount - renderedProperties.length)
+    const renderedPropertyIdsKey = useMemo(
+        () => renderedProperties.map(property => String(property?.id || '')).filter(Boolean).join(','),
+        [renderedProperties]
+    )
     const isSpatiallyFiltered = !isDevelopmentOnlySearch && Boolean(selectedDrawArea || (mapBounds && visibleCount < totalCount))
+
+    useEffect(() => {
+        if (isDevelopmentOnlySearch || !renderedPropertyIdsKey) return
+
+        const missingIds = renderedPropertyIdsKey
+            .split(',')
+            .filter(id => id && !fullPropertiesById.has(id))
+            .slice(0, MAX_RENDERED_CARDS)
+
+        if (missingIds.length === 0) return
+
+        let cancelled = false
+
+        async function loadRenderedProperties() {
+            try {
+                const response = await fetch(`/api/public/properties?ids=${encodeURIComponent(missingIds.join(','))}`)
+                const data = await response.json().catch(() => ({}))
+                const nextProperties = Array.isArray(data.properties) ? data.properties : []
+                if (cancelled || nextProperties.length === 0) return
+
+                setHydratedMapProperties(current => {
+                    const next = { ...current }
+                    nextProperties.forEach((property: any) => {
+                        if (property?.id) next[String(property.id)] = property
+                    })
+                    return next
+                })
+            } catch {
+                // Compact rows are still enough to keep the results usable.
+            }
+        }
+
+        void loadRenderedProperties()
+
+        return () => {
+            cancelled = true
+        }
+    }, [fullPropertiesById, isDevelopmentOnlySearch, renderedPropertyIdsKey])
+
     const searchAlertTitle = useMemo(
         () => buildSearchAlertTitle(activeFilters, selectedRegionArea?.label, Boolean(selectedDrawArea)),
         [activeFilters, selectedDrawArea, selectedRegionArea]
@@ -830,7 +959,7 @@ export default function SearchResults({ properties, lpMap, developmentResults = 
         replaceSpatialSearchParams({ drawArea: area, mapPropertyId: null })
 
         if (area) {
-            const nextVisibleCount = filterPropertiesByDrawArea(filterPropertiesByBounds(properties, mapBounds), area).length
+            const nextVisibleCount = filterPropertiesByDrawArea(filterPropertiesByBounds(searchProperties, mapBounds), area).length
 
             void trackEvent('property_map_draw_area_applied', {
                 active_filters: activeFilters,
@@ -846,13 +975,13 @@ export default function SearchResults({ properties, lpMap, developmentResults = 
             void trackEvent('property_map_draw_area_cleared', {
                 active_filters: activeFilters,
                 total_count: totalCount,
-                visible_count: filterPropertiesByBounds(properties, mapBounds).length,
+                visible_count: filterPropertiesByBounds(searchProperties, mapBounds).length,
                 bounds: mapBounds,
                 selected_region: selectedRegionArea?.id || null,
                 selected_region_label: selectedRegionArea?.label || null,
             })
         }
-    }, [activeFilters, mapBounds, properties, replaceSpatialSearchParams, searchKey, selectedRegionArea, totalCount])
+    }, [activeFilters, mapBounds, replaceSpatialSearchParams, searchKey, searchProperties, selectedRegionArea, totalCount])
 
     const handleMapPropertySelect = useCallback((property: any) => {
         setSelectedMapPropertyOverride({ key: mapSelectionKey, id: property.id, property })
@@ -1863,7 +1992,7 @@ export default function SearchResults({ properties, lpMap, developmentResults = 
                                     <PropertyCard
                                         property={property}
                                         landingPageSlug={lpMap[property.id]}
-                                        imagePriority={index < 4}
+                                        imagePriority={index < 2}
                                         variant="homeCompact"
                                     />
                                 </div>
