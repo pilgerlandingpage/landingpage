@@ -863,7 +863,7 @@ function buildDevelopmentContextFromCandidate(
         ?? (units.length || null)
 
     return {
-        slug: asSafeText(development.pageSlug ?? development.page_slug ?? page.slug),
+        slug: resolveDevelopmentPageSlug(page, content, development),
         name,
         locationName: asSafeText(development.locationName ?? development.location_name, locationLabelFromProperty(property)),
         priceRange: asSafeText(development.priceRange ?? development.price_range, relatedUnit.price),
@@ -875,6 +875,33 @@ function buildDevelopmentContextFromCandidate(
         gallery,
         unit: relatedUnit,
     }
+}
+
+function safeDevelopmentRouteSlug(value: unknown) {
+    const text = asSafeText(value)
+    if (!text) return ''
+    if (/^[a-z0-9][a-z0-9-]{1,180}$/i.test(text)) return text
+    return slugifyPropertySegment(text, '')
+}
+
+function resolveDevelopmentPageSlug(page: any, content: Record<string, any>, development: Record<string, any>) {
+    const metadata = asSafeRecord(page?.metadata)
+    const seo = asSafeRecord(content.seo)
+
+    for (const value of [
+        metadata.canonical_development_slug,
+        metadata.redirect_to_slug,
+        content.canonical_development_slug,
+        seo.canonical_development_slug,
+        page?.slug,
+        development.page_slug,
+        development.pageSlug,
+    ]) {
+        const slug = safeDevelopmentRouteSlug(value)
+        if (slug) return slug
+    }
+
+    return ''
 }
 
 function locationLabelFromProperty(property: any) {

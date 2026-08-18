@@ -15,6 +15,7 @@ import { LandingPageData } from '@/components/templates/types'
 import { Metadata } from 'next'
 import { JsonLd, absoluteUrl, breadcrumbJsonLd, organizationJsonLd, webPageJsonLd, DEFAULT_OG_IMAGE, faqPageJsonLd, itemListJsonLd } from '@/lib/seo/json-ld'
 import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
+import { slugifyPropertySegment } from '@/lib/properties/seo-url'
 
 export const revalidate = 300
 
@@ -68,6 +69,13 @@ const landingLookupMemoryCache = new Map<string, Record<string, any>>()
 
 function landingLookupCacheKey(slug: string, select: string) {
     return `${slug}:${select.replace(/\s+/g, ' ').trim()}`
+}
+
+function normalizedLandingSlugCandidate(slug: string) {
+    const decoded = decodeURIComponent(String(slug || '')).trim()
+    const normalized = slugifyPropertySegment(decoded, '')
+
+    return normalized && normalized !== slug ? normalized : ''
 }
 
 function isRetriableLandingLookupError(error: unknown) {
@@ -669,13 +677,24 @@ export default async function DynamicLandingPage({ params }: { params: Promise<{
     const { slug } = await params
 
     const lookup = await fetchHydratedLandingPageBySlug(slug)
-    const lp = lookup.data
+    let lp = lookup.data
 
     if (lookup.unavailable) {
         return <LandingPageUnavailable slug={slug} />
     }
 
     if (!lp) {
+        const normalizedSlug = normalizedLandingSlugCandidate(slug)
+        if (normalizedSlug) {
+            const normalizedLookup = await fetchHydratedLandingPageBySlug(normalizedSlug)
+            if (normalizedLookup.unavailable) {
+                return <LandingPageUnavailable slug={normalizedSlug} />
+            }
+            if (normalizedLookup.data) {
+                redirect(`/${normalizedSlug}`)
+            }
+        }
+
         notFound()
     }
 
