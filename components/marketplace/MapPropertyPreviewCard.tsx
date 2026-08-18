@@ -326,7 +326,10 @@ export default function MapPropertyPreviewCard({
         if (!carouselMode) return
         if (event.pointerType === 'touch') return
         if (event.button !== 0) return
-        if ((event.target as HTMLElement).closest('a, button, input, textarea, select')) return
+
+        const target = event.target as HTMLElement
+        if (target.closest('.map-preview-card')) return
+        if (target.closest('a, button, input, textarea, select')) return
 
         const track = trackRef.current
         if (!track || track.scrollWidth <= track.clientWidth) return
@@ -410,6 +413,16 @@ export default function MapPropertyPreviewCard({
             source,
         })
         router.push(meta.detailsHref)
+
+        window.setTimeout(() => {
+            const targetUrl = new URL(meta.detailsHref, window.location.origin)
+            const currentPath = `${window.location.pathname}${window.location.search}${window.location.hash}`
+            const targetPath = `${targetUrl.pathname}${targetUrl.search}${targetUrl.hash}`
+
+            if (currentPath !== targetPath) {
+                window.location.assign(targetPath)
+            }
+        }, 250)
     }, [router])
 
     const handlePreviewCardClick = useCallback((event: ReactMouseEvent<HTMLElement>, nextProperty: PreviewProperty) => {
@@ -420,8 +433,22 @@ export default function MapPropertyPreviewCard({
             return
         }
 
-        if ((event.target as HTMLElement).closest('a, button')) return
+        const target = event.target as HTMLElement
+        if (target.closest('button, input, textarea, select')) return
 
+        const link = target.closest('a')
+        if (link && !link.closest('.map-preview-media-hit, .map-preview-body-link')) return
+
+        const isPrimaryUnmodifiedClick = (
+            (event.button ?? 0) === 0 &&
+            !event.metaKey &&
+            !event.ctrlKey &&
+            !event.shiftKey &&
+            !event.altKey
+        )
+        if (!isPrimaryUnmodifiedClick) return
+
+        event.preventDefault()
         navigateToPropertyDetails(nextProperty, 'card_click')
     }, [navigateToPropertyDetails])
 
@@ -455,8 +482,10 @@ export default function MapPropertyPreviewCard({
 
         if (Math.abs(delta) < SWIPE_THRESHOLD) return
         suppressDetailsClick.current = true
+        suppressCardClick.current = true
         window.setTimeout(() => {
             suppressDetailsClick.current = false
+            suppressCardClick.current = false
         }, 140)
         goToImage(targetProperty, gallery, delta < 0 ? 1 : -1)
     }, [goToImage])
@@ -468,7 +497,12 @@ export default function MapPropertyPreviewCard({
     ) => {
         if (suppressDetailsClick.current) {
             event.preventDefault()
+            event.stopPropagation()
             suppressDetailsClick.current = false
+            suppressCardClick.current = true
+            window.setTimeout(() => {
+                suppressCardClick.current = false
+            }, 140)
             return
         }
 
@@ -616,6 +650,7 @@ export default function MapPropertyPreviewCard({
                     display: flex;
                     flex-wrap: wrap;
                     gap: 4px;
+                    pointer-events: none;
                 }
                 .map-preview-badge {
                     padding: 4px 6px;
@@ -642,6 +677,7 @@ export default function MapPropertyPreviewCard({
                     background: rgba(10,10,10,0.72);
                     color: #fff;
                     font: 800 0.58rem/1 'Inter', sans-serif;
+                    pointer-events: none;
                 }
                 .map-preview-photo-dots {
                     position: absolute;
