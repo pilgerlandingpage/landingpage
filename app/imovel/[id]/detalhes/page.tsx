@@ -49,7 +49,7 @@ import PropertyLandingStyles from '../PropertyLandingStyles'
 import { displayLocationName, normalizeLocationName, replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
 import { JsonLd, absoluteUrl, breadcrumbJsonLd, organizationJsonLd, DEFAULT_OG_IMAGE, webPageJsonLd } from '@/lib/seo/json-ld'
 import { cleanPublicPropertyText, compactPublicPropertyText } from '@/lib/properties/text'
-import { extractPropertyIdFromSeoSlug } from '@/lib/properties/seo-url'
+import { extractPropertyIdFromSeoSlug, slugifyPropertySegment } from '@/lib/properties/seo-url'
 import { propertyDetailsPath, propertyDetailsSegment } from '@/lib/properties/responsive-destination'
 import { getPropertyPrimaryQualityLabel } from '@/lib/properties/intelligence'
 import { GLOBAL_PROPERTY_BROKER_NAME, GLOBAL_PROPERTY_WHATSAPP_PHONE, getResponsibleBrokerForProperty } from '@/lib/properties/responsible-broker'
@@ -557,6 +557,8 @@ function developmentPageNameKeys(page: any, content: Record<string, any>, develo
         development.source_condominium_key,
         development.sourceCondominiumName,
         development.source_condominium_name,
+        metadata.source_condominium_key,
+        metadata.source_condominium_name,
         development.name,
         development.pageSlug,
         development.page_slug,
@@ -758,6 +760,123 @@ function pickDevelopmentUnit(units: PropertyDevelopmentUnitContext[], property: 
     return pickBestDevelopmentUnit(bySourceSlug, property)
 }
 
+function developmentSlugCandidates(propertyNameKeys: Set<string>) {
+    const slugs = new Set<string>()
+
+    for (const key of propertyNameKeys) {
+        const baseSlug = slugifyPropertySegment(key, '')
+        if (!baseSlug || baseSlug.length < 3) continue
+
+        slugs.add(baseSlug)
+
+        for (const prefix of ['ed-', 'edificio-', 'cond-', 'condominio-', 'residencial-']) {
+            if (baseSlug.startsWith(prefix)) {
+                const withoutPrefix = baseSlug.slice(prefix.length)
+                if (withoutPrefix.length >= 3) slugs.add(withoutPrefix)
+            }
+        }
+    }
+
+    return [...slugs].slice(0, 24)
+}
+
+function findBestDevelopmentCandidate(
+    pages: any[] | null | undefined,
+    property: any,
+    propertyNameKeys: Set<string>
+) {
+    const directCandidates: PropertyDevelopmentCandidate[] = []
+    const inferredCandidates: PropertyDevelopmentCandidate[] = []
+
+    for (const page of pages || []) {
+        const content = asSafeRecord(page.content)
+        const contentDevelopment = asSafeRecord(content.development)
+        const fallbackDevelopment = developmentFallbackForPage(page, content)
+        const hasDevelopmentContent = Boolean(fallbackDevelopment || Object.keys(contentDevelopment).length)
+        const development = fallbackDevelopment
+            ? { ...fallbackDevelopment, ...contentDevelopment }
+            : contentDevelopment
+        const rawUnits = Array.isArray(contentDevelopment.units) && contentDevelopment.units.length
+            ? contentDevelopment.units
+            : (fallbackDevelopment?.units || [])
+        const units = Array.isArray(rawUnits)
+            ? rawUnits.map(normalizeDevelopmentUnitContext).filter((unit): unit is PropertyDevelopmentUnitContext => Boolean(unit))
+            : []
+        const matchedUnit = pickDevelopmentUnit(units, property)
+        const matchedUnitScore = matchedUnit ? developmentUnitMatchScore(matchedUnit, property) : 0
+        const inferredUnit = !matchedUnit && hasDevelopmentContent && developmentPageMatchesProperty(page, content, development, propertyNameKeys)
+            ? propertyDevelopmentFallbackUnit(property)
+            : null
+        const relatedUnit = matchedUnit || inferredUnit
+
+        if (!relatedUnit) continue
+
+        const candidate = {
+            page,
+            content,
+            contentDevelopment,
+            development,
+            relatedUnit,
+            units,
+            score: matchedUnit ? matchedUnitScore : 100,
+            unitCount: units.length,
+        }
+
+        if (matchedUnit) directCandidates.push(candidate)
+        else inferredCandidates.push(candidate)
+    }
+
+    const candidates = directCandidates.length
+        ? directCandidates
+        : (inferredCandidates.length === 1 ? inferredCandidates : [])
+
+    return candidates.sort((left, right) => {
+        if (right.score !== left.score) return right.score - left.score
+        if (right.unitCount !== left.unitCount) return right.unitCount - left.unitCount
+        return new Date(right.page?.created_at || 0).getTime() - new Date(left.page?.created_at || 0).getTime()
+    })[0] || null
+}
+
+function buildDevelopmentContextFromCandidate(
+    candidate: PropertyDevelopmentCandidate,
+    property: any
+): PropertyDevelopmentContext {
+    const { page, content, contentDevelopment, development, relatedUnit, units } = candidate
+    const fallbackDevelopment = developmentFallbackForPage(page, content)
+    const name = asSafeText(development.name, asSafeText(content.custom_title, asSafeText(page.title, 'Empreendimento')))
+    const heroImage = asSafeText(development.heroImage ?? development.hero_image ?? content.custom_hero_image, property.featured_image || property.images?.[0] || DEFAULT_OG_IMAGE)
+    const rawDevelopmentGallery = Array.isArray(contentDevelopment.gallery) && contentDevelopment.gallery.length
+        ? contentDevelopment.gallery
+        : (fallbackDevelopment?.gallery || [])
+    const developmentGallery = Array.isArray(rawDevelopmentGallery)
+        ? rawDevelopmentGallery.map((item: unknown) => normalizeDevelopmentGalleryItem(item, name)).filter((item): item is PropertyDevelopmentGalleryItem => Boolean(item))
+        : []
+    const customGallery = Array.isArray(content.custom_gallery)
+        ? content.custom_gallery.map((item: unknown) => normalizeDevelopmentGalleryItem(item, name)).filter((item): item is PropertyDevelopmentGalleryItem => Boolean(item))
+        : []
+    const gallery = uniqueDevelopmentGallery([
+        { image: heroImage, title: name, category: 'Condomínio' },
+        ...developmentGallery,
+        ...customGallery,
+    ]).slice(0, 6)
+    const availableUnitsCount = asSafeNumber(development.availableUnitsCount ?? development.available_units_count ?? content.available_units_count)
+        ?? (units.length || null)
+
+    return {
+        slug: asSafeText(development.pageSlug ?? development.page_slug ?? page.slug),
+        name,
+        locationName: asSafeText(development.locationName ?? development.location_name, locationLabelFromProperty(property)),
+        priceRange: asSafeText(development.priceRange ?? development.price_range, relatedUnit.price),
+        availableUnitsCount,
+        areaRange: asSafeText(development.areaRange ?? development.area_range, relatedUnit.area),
+        suitesRange: asSafeText(development.suitesRange ?? development.suites_range, relatedUnit.suites),
+        heroImage,
+        description: asSafeText(development.description, `Conheça o condomínio ${name} e compare as unidades disponíveis antes da visita.`),
+        gallery,
+        unit: relatedUnit,
+    }
+}
+
 function locationLabelFromProperty(property: any) {
     return [...buildDisplayLocationParts(property?.neighborhood, property?.city), property?.state]
         .filter(Boolean)
@@ -920,6 +1039,24 @@ async function getPropertyDevelopmentContext(supabase: any, property: any): Prom
     const fallbackContext = propertyDevelopmentFallbackContext(property)
     if (!propertyDevelopmentKeys(property).size) return fallbackContext
     const propertyNameKeys = propertyDevelopmentNameCandidates(property)
+    const preferredSlugs = developmentSlugCandidates(propertyNameKeys)
+
+    if (preferredSlugs.length) {
+        const { data: targetedPages, error: targetedError } = await supabase
+            .from('landing_pages')
+            .select('id, slug, title, content, metadata, created_at')
+            .eq('status', 'published')
+            .in('slug', preferredSlugs)
+            .order('created_at', { ascending: true })
+            .abortSignal(createSupabaseAbortSignal(PROPERTY_SECONDARY_QUERY_TIMEOUT_MS))
+
+        if (targetedError) {
+            console.warn('[Property Detail] targeted development context unavailable:', targetedError.message)
+        } else {
+            const targetedCandidate = findBestDevelopmentCandidate(targetedPages, property, propertyNameKeys)
+            if (targetedCandidate) return buildDevelopmentContextFromCandidate(targetedCandidate, property)
+        }
+    }
 
     const { data, error } = await supabase
         .from('landing_pages')
@@ -933,93 +1070,11 @@ async function getPropertyDevelopmentContext(supabase: any, property: any): Prom
         return fallbackContext
     }
 
-    const directCandidates: PropertyDevelopmentCandidate[] = []
-    const inferredCandidates: PropertyDevelopmentCandidate[] = []
-
-    for (const page of data || []) {
-        const content = asSafeRecord(page.content)
-        const contentDevelopment = asSafeRecord(content.development)
-        const fallbackDevelopment = developmentFallbackForPage(page, content)
-        const hasDevelopmentContent = Boolean(fallbackDevelopment || Object.keys(contentDevelopment).length)
-        const development = fallbackDevelopment
-            ? { ...fallbackDevelopment, ...contentDevelopment }
-            : contentDevelopment
-        const rawUnits = Array.isArray(contentDevelopment.units) && contentDevelopment.units.length
-            ? contentDevelopment.units
-            : (fallbackDevelopment?.units || [])
-        const units = Array.isArray(rawUnits)
-            ? rawUnits.map(normalizeDevelopmentUnitContext).filter((unit): unit is PropertyDevelopmentUnitContext => Boolean(unit))
-            : []
-        const matchedUnit = pickDevelopmentUnit(units, property)
-        const matchedUnitScore = matchedUnit ? developmentUnitMatchScore(matchedUnit, property) : 0
-        const inferredUnit = !matchedUnit && hasDevelopmentContent && developmentPageMatchesProperty(page, content, development, propertyNameKeys)
-            ? propertyDevelopmentFallbackUnit(property)
-            : null
-        const relatedUnit = matchedUnit || inferredUnit
-
-        if (!relatedUnit) continue
-
-        const candidate = {
-            page,
-            content,
-            contentDevelopment,
-            development,
-            relatedUnit,
-            units,
-            score: matchedUnit ? matchedUnitScore : 100,
-            unitCount: units.length,
-        }
-
-        if (matchedUnit) directCandidates.push(candidate)
-        else inferredCandidates.push(candidate)
-    }
-
-    const candidates = directCandidates.length
-        ? directCandidates
-        : (inferredCandidates.length === 1 ? inferredCandidates : [])
-
-    const bestCandidate = candidates.sort((left, right) => {
-        if (right.score !== left.score) return right.score - left.score
-        if (right.unitCount !== left.unitCount) return right.unitCount - left.unitCount
-        return new Date(right.page?.created_at || 0).getTime() - new Date(left.page?.created_at || 0).getTime()
-    })[0]
+    const bestCandidate = findBestDevelopmentCandidate(data, property, propertyNameKeys)
 
     if (!bestCandidate) return fallbackContext
 
-    const { page, content, contentDevelopment, development, relatedUnit, units } = bestCandidate
-    const fallbackDevelopment = developmentFallbackForPage(page, content)
-    const name = asSafeText(development.name, asSafeText(content.custom_title, asSafeText(page.title, 'Empreendimento')))
-    const heroImage = asSafeText(development.heroImage ?? development.hero_image ?? content.custom_hero_image, property.featured_image || property.images?.[0] || DEFAULT_OG_IMAGE)
-    const rawDevelopmentGallery = Array.isArray(contentDevelopment.gallery) && contentDevelopment.gallery.length
-        ? contentDevelopment.gallery
-        : (fallbackDevelopment?.gallery || [])
-    const developmentGallery = Array.isArray(rawDevelopmentGallery)
-        ? rawDevelopmentGallery.map((item: unknown) => normalizeDevelopmentGalleryItem(item, name)).filter((item): item is PropertyDevelopmentGalleryItem => Boolean(item))
-        : []
-    const customGallery = Array.isArray(content.custom_gallery)
-        ? content.custom_gallery.map((item: unknown) => normalizeDevelopmentGalleryItem(item, name)).filter((item): item is PropertyDevelopmentGalleryItem => Boolean(item))
-        : []
-    const gallery = uniqueDevelopmentGallery([
-        { image: heroImage, title: name, category: 'Condomínio' },
-        ...developmentGallery,
-        ...customGallery,
-    ]).slice(0, 6)
-    const availableUnitsCount = asSafeNumber(development.availableUnitsCount ?? development.available_units_count ?? content.available_units_count)
-        ?? (units.length || null)
-
-    return {
-        slug: asSafeText(development.pageSlug ?? development.page_slug ?? page.slug),
-        name,
-        locationName: asSafeText(development.locationName ?? development.location_name, locationLabelFromProperty(property)),
-        priceRange: asSafeText(development.priceRange ?? development.price_range, relatedUnit.price),
-        availableUnitsCount,
-        areaRange: asSafeText(development.areaRange ?? development.area_range, relatedUnit.area),
-        suitesRange: asSafeText(development.suitesRange ?? development.suites_range, relatedUnit.suites),
-        heroImage,
-        description: asSafeText(development.description, `Conheça o condomínio ${name} e compare as unidades disponíveis antes da visita.`),
-        gallery,
-        unit: relatedUnit,
-    }
+    return buildDevelopmentContextFromCandidate(bestCandidate, property)
 }
 
 async function getPropertyForSeo(identifier: string) {
