@@ -10,7 +10,7 @@ import type {
 import { ArrowRight, BedDouble, Camera, Car, ChevronLeft, ChevronRight, MapPin, Ruler, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { displayLocationName, replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
-import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
+import { isPlainLeftClick, propertyDetailsPath } from '@/lib/properties/responsive-destination'
 import { getPropertyPrimaryQualityLabel } from '@/lib/properties/intelligence'
 import { trackEvent } from '@/lib/tracking/client'
 
@@ -325,7 +325,8 @@ export default function MapPropertyPreviewCard({
     const handleCarouselPointerDown = useCallback((event: ReactPointerEvent<HTMLElement>) => {
         if (!carouselMode) return
         if (event.pointerType === 'touch') return
-        if ((event.target as HTMLElement).closest('button')) return
+        if (event.button !== 0) return
+        if ((event.target as HTMLElement).closest('a, button, input, textarea, select')) return
 
         const track = trackRef.current
         if (!track || track.scrollWidth <= track.clientWidth) return
@@ -471,13 +472,20 @@ export default function MapPropertyPreviewCard({
             return
         }
 
-        void trackEvent('property_map_preview_details_clicked', {
-            property_id: targetProperty.id,
-            title: meta.displayTitle,
-            price: targetProperty.price || null,
-            destination: meta.detailsHref,
-        })
-    }, [])
+        if (!isPlainLeftClick(event)) {
+            void trackEvent('property_map_preview_details_clicked', {
+                property_id: targetProperty.id,
+                title: meta.displayTitle,
+                price: targetProperty.price || null,
+                destination: meta.detailsHref,
+                source: 'details_link',
+            })
+            return
+        }
+
+        event.preventDefault()
+        navigateToPropertyDetails(targetProperty, 'details_link')
+    }, [navigateToPropertyDetails])
 
     return (
         <article className="map-property-preview" aria-live="polite">
