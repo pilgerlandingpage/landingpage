@@ -4,33 +4,83 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const MINIMUM_FIRST_CONTACT_PRICE = 4000000
 
+type NeighborhoodSuggestion = {
+    type: 'neighborhood'
+    label: string
+    neighborhood: string
+    count: number
+}
+
+function displayCityLabel(city: string | null | undefined) {
+    const displayCity = displayLocationName(city).trim()
+
+    if (!displayCity) return ''
+    if (/\/\s*SC$/i.test(displayCity)) return displayCity
+    if (/,\s*SC$/i.test(displayCity)) return displayCity.replace(/\s*,\s*SC$/i, ' / SC')
+
+    return `${displayCity} / SC`
+}
+
 function displayNeighborhoodLabel(neighborhood: string, city?: string | null) {
     const displayNeighborhood = replaceItajaiWithPraiaBrava(neighborhood.trim())
-    const displayCity = displayLocationName(city)
+    const displayCity = displayCityLabel(city)
 
-    if (!displayCity || normalizeLocationName(displayNeighborhood) === normalizeLocationName(displayCity)) {
+    if (!displayCity || normalizeLocationName(displayNeighborhood) === normalizeLocationName(displayLocationName(city))) {
         return displayNeighborhood
     }
 
-    return `${displayNeighborhood}, ${displayCity}`
+    return `${displayNeighborhood} - ${displayCity}`
 }
 
 function citySuggestionsFromCount(cityCount: Map<string, number>, limit: number) {
     const merged = new Map<string, { type: 'city'; label: string; city: string; count: number }>()
 
     cityCount.forEach((count, name) => {
-        const label = displayLocationName(name)
-        const current = merged.get(label)
+        const city = displayLocationName(name).trim()
+        const label = displayCityLabel(city)
+        const current = merged.get(normalizeLocationName(city))
 
         if (current) {
             current.count += count
             return
         }
 
-        merged.set(label, { type: 'city', label, city: label, count })
+        if (city && label) merged.set(normalizeLocationName(city), { type: 'city', label, city, count })
     })
 
     return [...merged.values()]
+        .sort((a, b) => b.count - a.count)
+        .slice(0, limit)
+}
+
+function addNeighborhoodCount(
+    neighborhoodCount: Map<string, NeighborhoodSuggestion>,
+    neighborhood: string | null | undefined,
+    city?: string | null
+) {
+    if (!neighborhood) return
+
+    const cleanNeighborhood = replaceItajaiWithPraiaBrava(neighborhood.trim())
+    if (!cleanNeighborhood) return
+
+    const label = displayNeighborhoodLabel(neighborhood, city)
+    const current = neighborhoodCount.get(label)
+
+    if (current) {
+        current.count += 1
+        return
+    }
+
+    neighborhoodCount.set(label, {
+        type: 'neighborhood',
+        label,
+        neighborhood: cleanNeighborhood,
+        count: 1,
+    })
+}
+
+function neighborhoodSuggestionsFromCount(neighborhoodCount: Map<string, NeighborhoodSuggestion>, limit: number) {
+    return [...neighborhoodCount.values()]
         .sort((a, b) => b.count - a.count)
         .slice(0, limit)
 }
@@ -50,19 +100,20 @@ export async function GET(req: NextRequest) {
             .limit(500)
 
         const cityCount = new Map<string, number>()
-        const neighborhoodSet = new Set<string>()
+        const neighborhoodCount = new Map<string, NeighborhoodSuggestion>()
 
         properties?.forEach((p: any) => {
             if (p.city) {
                 const c = p.city.trim()
                 cityCount.set(c, (cityCount.get(c) || 0) + 1)
             }
-            if (p.neighborhood) neighborhoodSet.add(p.neighborhood.trim())
+            addNeighborhoodCount(neighborhoodCount, p.neighborhood, p.city)
         })
 
         const cities = citySuggestionsFromCount(cityCount, 8)
+        const neighborhoods = neighborhoodSuggestionsFromCount(neighborhoodCount, 8)
 
-        return NextResponse.json({ suggestions: cities })
+        return NextResponse.json({ suggestions: [...cities, ...neighborhoods] })
     }
 
     // Search with query
@@ -97,7 +148,7 @@ export async function GET(req: NextRequest) {
 
     // Build grouped suggestions: cities, neighborhoods, and direct properties
     const cityCount = new Map<string, number>()
-    const neighborhoodCount = new Map<string, number>()
+    const neighborhoodCount = new Map<string, NeighborhoodSuggestion>()
     const directMatches: any[] = []
 
     properties.forEach((p: any) => {
@@ -105,10 +156,7 @@ export async function GET(req: NextRequest) {
             const c = p.city.trim()
             cityCount.set(c, (cityCount.get(c) || 0) + 1)
         }
-        if (p.neighborhood) {
-            const n = displayNeighborhoodLabel(p.neighborhood, p.city)
-            neighborhoodCount.set(n, (neighborhoodCount.get(n) || 0) + 1)
-        }
+        addNeighborhoodCount(neighborhoodCount, p.neighborhood, p.city)
         if (p.title && normalizeLocationName(p.title).includes(normalizedTerm)) {
             directMatches.push(p)
         }
@@ -122,12 +170,9 @@ export async function GET(req: NextRequest) {
     })
 
     // Neighborhoods matching
-    ;[...neighborhoodCount.entries()]
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 4)
-        .forEach(([name, count]) => {
-            suggestions.push({ type: 'neighborhood', label: name, count })
-        })
+    neighborhoodSuggestionsFromCount(neighborhoodCount, 4).forEach(suggestion => {
+        suggestions.push(suggestion)
+    })
 
     // Direct property matches
     directMatches.slice(0, 3).forEach((p) => {

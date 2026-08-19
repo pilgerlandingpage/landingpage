@@ -13,6 +13,7 @@ type Suggestion = {
     type: 'city' | 'neighborhood' | 'property' | 'office'
     label: string
     count?: number
+    neighborhood?: string
     id?: string
     source_slug?: string | null
     slug?: string | null
@@ -192,7 +193,6 @@ export default function HomeSearchBar({
     const shouldShowTitle = showTitle ?? variant === 'home'
     const suggestionsDirection = suggestionsPlacement ?? (variant === 'map' ? 'up' : 'down')
     const initialValues = useMemo(() => valuesFromParams(initialSearchParams), [initialSearchParams])
-    const suggestionsNeedTyping = variant === 'map'
     const [locationLabel, setLocationLabel] = useState(initialValues.locationLabel)
     const [locationType, setLocationType] = useState<HomeSearchValues['locationType']>(initialValues.locationType)
     const [locationValue, setLocationValue] = useState(initialValues.locationValue || '')
@@ -200,7 +200,6 @@ export default function HomeSearchBar({
     const [priceValue, setPriceValue] = useState(initialValues.priceValue)
     const [suggestions, setSuggestions] = useState<Suggestion[]>([])
     const [showSuggestions, setShowSuggestions] = useState(false)
-    const [hasTypedLocationQuery, setHasTypedLocationQuery] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const [activeSuggestion, setActiveSuggestion] = useState(-1)
     const wrapperRef = useRef<HTMLDivElement>(null)
@@ -220,7 +219,6 @@ export default function HomeSearchBar({
         setLocationValue(initialValues.locationValue || '')
         setTypeValue(initialValues.typeValue)
         setPriceValue(initialValues.priceValue)
-        setHasTypedLocationQuery(false)
         setShowSuggestions(false)
     }, [initialValues])
 
@@ -300,32 +298,21 @@ export default function HomeSearchBar({
     }, [displayedSuggestions])
 
     function updateLocation(value: string) {
-        const hasSearchTerm = value.trim().length > 0
         setLocationLabel(value)
         setLocationType(undefined)
         setLocationValue('')
         setActiveSuggestion(-1)
-        setHasTypedLocationQuery(true)
-        setShowSuggestions(!suggestionsNeedTyping || hasSearchTerm)
+        setShowSuggestions(true)
 
         if (debounceRef.current) clearTimeout(debounceRef.current)
-        if (suggestionsNeedTyping && !hasSearchTerm) {
-            setSuggestions([])
-            setIsLoading(false)
-            return
-        }
         debounceRef.current = setTimeout(() => {
             void fetchSuggestions(value)
         }, 240)
     }
 
     function focusLocation() {
-        if (suggestionsNeedTyping && (!hasTypedLocationQuery || !locationLabel.trim())) {
-            setShowSuggestions(false)
-            return
-        }
         setShowSuggestions(true)
-        if (displayedSuggestions.length === 0 || (locationLabel.trim() && suggestions.length === 0)) {
+        if (suggestions.length === 0 || locationLabel.trim()) {
             void fetchSuggestions(locationLabel)
         }
     }
@@ -396,7 +383,6 @@ export default function HomeSearchBar({
 
     function chooseSuggestion(suggestion: Suggestion) {
         setShowSuggestions(false)
-        setHasTypedLocationQuery(false)
         setActiveSuggestion(-1)
 
         if (suggestion.type === 'property' && suggestion.id) {
@@ -430,7 +416,9 @@ export default function HomeSearchBar({
         }
 
         const cityFallback = FALLBACK_CITIES.find(city => city.label === suggestion.label)
-        const nextLocationValue = cityFallback?.value || suggestion.city || stripStateSuffix(suggestion.label)
+        const nextLocationValue = suggestion.type === 'city'
+            ? cityFallback?.value || suggestion.city || stripStateSuffix(suggestion.label)
+            : suggestion.neighborhood || stripStateSuffix(suggestion.label)
         setLocationLabel(suggestion.label)
         setLocationType(suggestion.type === 'city' ? 'city' : 'neighborhood')
         setLocationValue(suggestion.type === 'city' ? canonicalCityValue(nextLocationValue) || nextLocationValue : nextLocationValue)
