@@ -54,6 +54,45 @@ body {
   overflow-x: hidden;
 }
 
+html[data-property-navigation-pending="true"],
+html[data-property-navigation-pending="true"] body {
+  cursor: progress;
+}
+
+html[data-property-navigation-pending="true"]::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2147483647;
+  width: 100%;
+  height: 3px;
+  pointer-events: none;
+  background: linear-gradient(90deg, #c49a3a, #e1bf56, #111827);
+  background-size: 180% 100%;
+  animation: propertyNavigationPending 900ms ease-in-out infinite;
+}
+
+@keyframes propertyNavigationPending {
+  0% {
+    transform: scaleX(0.35);
+    transform-origin: left center;
+    background-position: 0% 50%;
+  }
+
+  55% {
+    transform: scaleX(0.88);
+    transform-origin: left center;
+    background-position: 100% 50%;
+  }
+
+  100% {
+    transform: scaleX(1);
+    transform-origin: left center;
+    background-position: 0% 50%;
+  }
+}
+
 body::before {
   display: none;
 }

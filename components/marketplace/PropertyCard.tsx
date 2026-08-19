@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { MouseEvent, ReactNode, TouchEvent, WheelEvent } from 'react'
 import { Bath, BedDouble, Camera, Car, ChevronLeft, ChevronRight, Eye, Heart, MapPin, Ruler } from 'lucide-react'
 import { displayLocationName, normalizeLocationName, replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
-import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
+import { openPropertyDestinationOnDesktopClick, propertyDetailsPath } from '@/lib/properties/responsive-destination'
 import { getPropertyIntelligenceLabels, getPropertyPrimaryQualityLabel } from '@/lib/properties/intelligence'
 import { trackEvent } from '@/lib/tracking/client'
 
@@ -253,15 +253,17 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
         compactArea ? { key: 'area', icon: <Ruler size={14} aria-hidden="true" />, label: `${formatCompactNumber(compactArea)} m²` } : null,
         shouldShowTotalArea ? { key: 'total-area', icon: <Ruler size={14} aria-hidden="true" />, label: `${formatCompactNumber(compactTotalArea)} m\u00b2` } : null,
     ].filter(Boolean) as { key: string; icon: ReactNode; label: string }[]
-    const handlePropertyClick = () => {
-        if (!isHomeCompact) return
+    const handlePropertyClick = (event: MouseEvent<HTMLAnchorElement>) => {
+        if (isHomeCompact) {
+            void trackEvent('home_property_details_clicked', {
+                property_id: property.id,
+                title: displayTitle,
+                destination: detailsHref,
+                source: 'home_property_card',
+            })
+        }
 
-        void trackEvent('home_property_details_clicked', {
-            property_id: property.id,
-            title: displayTitle,
-            destination: detailsHref,
-            source: 'home_property_card',
-        })
+        openPropertyDestinationOnDesktopClick(event, href)
     }
 
     const changeGalleryImage = (direction: 1 | -1, interaction: 'button' | 'swipe' | 'wheel') => {
@@ -289,7 +291,7 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
             return
         }
 
-        handlePropertyClick()
+        handlePropertyClick(event)
     }
 
     const handleImageTouchStart = (event: TouchEvent<HTMLAnchorElement>) => {
@@ -461,6 +463,7 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                 className="card-shell-hit"
                 aria-label={`Abrir detalhes de ${displayTitle}`}
                 tabIndex={-1}
+                prefetch={false}
                 onClick={handlePropertyClick}
             />
             <div className="card-image-container">
@@ -469,6 +472,7 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                     href={href}
                     className={`image-link${canBrowseImages ? ' image-link-gallery' : ''}`}
                     tabIndex={-1}
+                    prefetch={false}
                     onClick={handleImageLinkClick}
                     onTouchStart={handleImageTouchStart}
                     onTouchMove={handleImageTouchMove}
@@ -579,7 +583,7 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
 
             </div>
 
-            <Link href={href} className="card-content-link" onClick={handlePropertyClick}>
+            <Link href={href} className="card-content-link" prefetch={false} onClick={handlePropertyClick}>
                 <div className="property-head">
                     <div className="property-heading-copy">
                         <div className="property-title">{isHomeCompact ? displayTitle : boldifyTitle(cardTitle)}</div>

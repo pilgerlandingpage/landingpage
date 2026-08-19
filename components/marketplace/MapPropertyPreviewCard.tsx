@@ -10,7 +10,7 @@ import type {
 import { ArrowRight, BedDouble, Camera, Car, ChevronLeft, ChevronRight, MapPin, Ruler, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { displayLocationName, replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
-import { isPlainLeftClick, propertyDetailsPath } from '@/lib/properties/responsive-destination'
+import { isPlainLeftClick, openPropertyDestinationOnDesktopClick, propertyDetailsPath } from '@/lib/properties/responsive-destination'
 import { getPropertyPrimaryQualityLabel } from '@/lib/properties/intelligence'
 import { trackEvent } from '@/lib/tracking/client'
 
@@ -448,6 +448,17 @@ export default function MapPropertyPreviewCard({
         )
         if (!isPrimaryUnmodifiedClick) return
 
+        const meta = previewMetaFor(nextProperty)
+        if (openPropertyDestinationOnDesktopClick(event, meta.detailsHref, () => {
+            void trackEvent('property_map_preview_details_clicked', {
+                property_id: nextProperty.id,
+                title: meta.displayTitle,
+                price: nextProperty.price || null,
+                destination: meta.detailsHref,
+                source: 'card_click',
+            })
+        })) return
+
         event.preventDefault()
         navigateToPropertyDetails(nextProperty, 'card_click')
     }, [navigateToPropertyDetails])
@@ -516,6 +527,16 @@ export default function MapPropertyPreviewCard({
             })
             return
         }
+
+        if (openPropertyDestinationOnDesktopClick(event, meta.detailsHref, () => {
+            void trackEvent('property_map_preview_details_clicked', {
+                property_id: targetProperty.id,
+                title: meta.displayTitle,
+                price: targetProperty.price || null,
+                destination: meta.detailsHref,
+                source: 'details_link',
+            })
+        })) return
 
         event.preventDefault()
         navigateToPropertyDetails(targetProperty, 'details_link')
@@ -1078,6 +1099,7 @@ export default function MapPropertyPreviewCard({
                                     className="map-preview-media-hit"
                                     aria-label={`Abrir detalhes de ${meta.displayTitle}`}
                                     draggable={false}
+                                    prefetch={false}
                                     onClick={event => handleDetailsNavigation(event, item, meta)}
                                     onTouchStart={event => {
                                         event.stopPropagation()
@@ -1159,6 +1181,7 @@ export default function MapPropertyPreviewCard({
                                     className="map-preview-body-link"
                                     aria-label={`Abrir detalhes de ${meta.displayTitle}`}
                                     draggable={false}
+                                    prefetch={false}
                                     onClick={event => handleDetailsNavigation(event, item, meta)}
                                 >
                                     <div className="map-preview-location">

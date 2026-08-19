@@ -14,7 +14,7 @@ import HomeSearchBar, { type HomeSearchValues } from './HomeSearchBar'
 import type { MapDrawArea, MapSearchFilters } from './PropertyMap'
 import { replaceItajaiWithPraiaBrava } from '@/lib/locations/display'
 import { findMapRegionByText, findMapRegionForSearchParams } from '@/lib/locations/map-regions'
-import { propertyDetailsPath } from '@/lib/properties/responsive-destination'
+import { openPropertyDestinationOnDesktopClick, propertyDetailsPath } from '@/lib/properties/responsive-destination'
 import { getVisitorId, trackEvent } from '@/lib/tracking/client'
 
 const MAX_RENDERED_CARDS = 60
@@ -1927,29 +1927,37 @@ export default function SearchResults({
                         </div>
                         {memoryItems.length > 0 && (
                             <div className="search-memory-row">
-                                {memoryItems.map(({ property, source }) => (
-                                    <Link
-                                        href={propertyDetailsPath(property)}
-                                        className="search-memory-card"
-                                        key={`${source}-${property.id}`}
-                                        onClick={() => handleMemoryPropertyClick(property, source)}
-                                    >
-                                        <span className="search-memory-media" aria-hidden="true">
-                                            <img src={memoryPropertyImage(property)} alt="" loading="lazy" />
-                                        </span>
-                                        <span className="search-memory-copy">
-                                            <strong>{memoryPropertyTitle(property)}</strong>
-                                            <span>{memoryPropertyLocation(property)}</span>
-                                            <span className="search-memory-meta">
-                                                <span className={`search-memory-chip ${source === 'favorite' ? 'search-memory-chip--favorite' : ''}`}>
-                                                    {source === 'favorite' ? <Heart size={10} /> : <Clock3 size={10} />}
-                                                    {source === 'favorite' ? 'Salvo' : 'Visto'}
-                                                </span>
-                                                <span>{formatMemoryPrice(property.price)}</span>
+                                {memoryItems.map(({ property, source }) => {
+                                    const href = propertyDetailsPath(property)
+
+                                    return (
+                                        <Link
+                                            href={href}
+                                            className="search-memory-card"
+                                            key={`${source}-${property.id}`}
+                                            prefetch={false}
+                                            onClick={event => {
+                                                handleMemoryPropertyClick(property, source)
+                                                openPropertyDestinationOnDesktopClick(event, href)
+                                            }}
+                                        >
+                                            <span className="search-memory-media" aria-hidden="true">
+                                                <img src={memoryPropertyImage(property)} alt="" loading="lazy" />
                                             </span>
-                                        </span>
-                                    </Link>
-                                ))}
+                                            <span className="search-memory-copy">
+                                                <strong>{memoryPropertyTitle(property)}</strong>
+                                                <span>{memoryPropertyLocation(property)}</span>
+                                                <span className="search-memory-meta">
+                                                    <span className={`search-memory-chip ${source === 'favorite' ? 'search-memory-chip--favorite' : ''}`}>
+                                                        {source === 'favorite' ? <Heart size={10} /> : <Clock3 size={10} />}
+                                                        {source === 'favorite' ? 'Salvo' : 'Visto'}
+                                                    </span>
+                                                    <span>{formatMemoryPrice(property.price)}</span>
+                                                </span>
+                                            </span>
+                                        </Link>
+                                    )
+                                })}
                             </div>
                         )}
                     </section>

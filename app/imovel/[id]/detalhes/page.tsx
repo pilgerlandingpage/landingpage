@@ -913,6 +913,8 @@ function locationLabelFromProperty(property: any) {
 const PROPERTY_LOOKUP_TIMEOUT_MS = 7000
 const PROPERTY_METADATA_LOOKUP_TIMEOUT_MS = 3500
 const PROPERTY_SECONDARY_QUERY_TIMEOUT_MS = 7000
+const PROPERTY_ENRICHMENT_QUERY_TIMEOUT_MS = 3500
+const PROPERTY_NON_CRITICAL_QUERY_TIMEOUT_MS = 2500
 const PROPERTY_LOOKUP_RETRY_DELAYS_MS = [700]
 
 class PropertyLookupUnavailableError extends Error {
@@ -943,15 +945,20 @@ function fallbackResponsibleBroker() {
     }
 }
 
-function propertySecondaryTimeout<T>(label: string): Promise<T> {
+function propertySecondaryTimeout<T>(label: string, timeoutMs = PROPERTY_SECONDARY_QUERY_TIMEOUT_MS): Promise<T> {
     return new Promise((_, reject) => {
-        setTimeout(() => reject(new Error(`${label} timed out`)), PROPERTY_SECONDARY_QUERY_TIMEOUT_MS)
+        setTimeout(() => reject(new Error(`${label} timed out`)), timeoutMs)
     })
 }
 
-async function withPropertySecondaryFallback<T>(promise: Promise<T>, label: string, fallback: T): Promise<T> {
+async function withPropertySecondaryFallback<T>(
+    promise: Promise<T>,
+    label: string,
+    fallback: T,
+    timeoutMs = PROPERTY_SECONDARY_QUERY_TIMEOUT_MS
+): Promise<T> {
     try {
-        return await Promise.race([promise, propertySecondaryTimeout<T>(label)])
+        return await Promise.race([promise, propertySecondaryTimeout<T>(label, timeoutMs)])
     } catch (error) {
         console.warn(`[Property Detail] ${label} unavailable:`, summarizeSupabaseError(error))
         return fallback
@@ -973,6 +980,46 @@ async function getPropertyPrivateDevelopmentMetadata(
 
     if (error) throw error
     return data || null
+}
+
+async function getPropertyViewCount(supabase: any, propertyId: string) {
+    const { count, error } = await supabase
+        .from('funnel_events')
+        .select('id', { count: 'exact', head: true })
+        .eq('event_type', 'property_details_landing_viewed')
+        .contains('metadata', { property_id: propertyId })
+        .abortSignal(createSupabaseAbortSignal(PROPERTY_NON_CRITICAL_QUERY_TIMEOUT_MS))
+
+    if (error) throw error
+    return count || 0
+}
+
+async function getPropertySaveCount(supabase: any, propertyId: string) {
+    const { data, error } = await supabase
+        .from('funnel_events')
+        .select('id, visitor_id, event_type, created_at')
+        .in('event_type', ['property_favorited', 'property_unfavorited'])
+        .contains('metadata', { property_id: propertyId })
+        .order('created_at', { ascending: false })
+        .limit(5000)
+        .abortSignal(createSupabaseAbortSignal(PROPERTY_NON_CRITICAL_QUERY_TIMEOUT_MS))
+
+    if (error) throw error
+    return countCurrentPropertySaves(data)
+}
+
+async function getPropertyMapModalRows(supabase: any) {
+    const { data, error } = await supabase
+        .from('properties')
+        .select(PROPERTY_MAP_MODAL_SELECT)
+        .eq('status', 'active')
+        .gte('price', PROPERTY_MAP_MODAL_MIN_PRICE)
+        .order('updated_at', { ascending: false, nullsFirst: false })
+        .limit(260)
+        .abortSignal(createSupabaseAbortSignal(PROPERTY_NON_CRITICAL_QUERY_TIMEOUT_MS))
+
+    if (error) throw error
+    return data || []
 }
 
 function isRetriablePropertyLookupError(error: unknown) {
@@ -2083,16 +2130,42 @@ export default async function PropertyDetailPage({
     }
 
     const adminSupabase = createAdminClient()
-    const [privateDevelopmentMetadata, responsibleBroker] = await Promise.all([
+    const [
+        privateDevelopmentMetadata,
+        responsibleBroker,
+        propertyViewCount,
+        propertySaveCount,
+        propertyMapModalRows,
+    ] = await Promise.all([
         withPropertySecondaryFallback(
             getPropertyPrivateDevelopmentMetadata(adminSupabase, property.id),
             'property private development metadata',
-            null
+            null,
+            PROPERTY_ENRICHMENT_QUERY_TIMEOUT_MS
         ),
         withPropertySecondaryFallback(
             getResponsibleBrokerForProperty(adminSupabase, property.id),
             'responsible broker',
-            fallbackResponsibleBroker()
+            fallbackResponsibleBroker(),
+            PROPERTY_ENRICHMENT_QUERY_TIMEOUT_MS
+        ),
+        withPropertySecondaryFallback(
+            getPropertyViewCount(adminSupabase, property.id),
+            'view count',
+            0,
+            PROPERTY_NON_CRITICAL_QUERY_TIMEOUT_MS
+        ),
+        withPropertySecondaryFallback(
+            getPropertySaveCount(adminSupabase, property.id),
+            'save count',
+            0,
+            PROPERTY_NON_CRITICAL_QUERY_TIMEOUT_MS
+        ),
+        withPropertySecondaryFallback(
+            getPropertyMapModalRows(supabase),
+            'map modal portfolio',
+            [],
+            PROPERTY_NON_CRITICAL_QUERY_TIMEOUT_MS
         ),
     ])
 
@@ -2103,45 +2176,7 @@ export default async function PropertyDetailPage({
             construction_company: privateDevelopmentMetadata.construction_company || property.construction_company,
         }
     }
-    const { count: propertyViewCountRaw, error: propertyViewCountError } = await adminSupabase
-        .from('funnel_events')
-        .select('id', { count: 'exact', head: true })
-        .eq('event_type', 'property_details_landing_viewed')
-        .contains('metadata', { property_id: property.id })
-        .abortSignal(createSupabaseAbortSignal(PROPERTY_SECONDARY_QUERY_TIMEOUT_MS))
 
-    const { data: propertySaveEvents, error: propertySaveEventsError } = await adminSupabase
-        .from('funnel_events')
-        .select('id, visitor_id, event_type, created_at')
-        .in('event_type', ['property_favorited', 'property_unfavorited'])
-        .contains('metadata', { property_id: property.id })
-        .order('created_at', { ascending: false })
-        .limit(5000)
-        .abortSignal(createSupabaseAbortSignal(PROPERTY_SECONDARY_QUERY_TIMEOUT_MS))
-
-    const { data: propertyMapModalRows, error: propertyMapModalError } = await supabase
-        .from('properties')
-        .select(PROPERTY_MAP_MODAL_SELECT)
-        .eq('status', 'active')
-        .gte('price', PROPERTY_MAP_MODAL_MIN_PRICE)
-        .order('updated_at', { ascending: false, nullsFirst: false })
-        .limit(260)
-        .abortSignal(createSupabaseAbortSignal(PROPERTY_SECONDARY_QUERY_TIMEOUT_MS))
-
-    if (propertyViewCountError) {
-        console.warn('[Property Detail] view count unavailable:', propertyViewCountError.message)
-    }
-
-    if (propertySaveEventsError) {
-        console.warn('[Property Detail] save count unavailable:', propertySaveEventsError.message)
-    }
-
-    if (propertyMapModalError) {
-        console.warn('[Property Detail] map modal portfolio unavailable:', propertyMapModalError.message)
-    }
-
-    const propertyViewCount = propertyViewCountRaw || 0
-    const propertySaveCount = countCurrentPropertySaves(propertySaveEvents)
     const listingAge = listingAgeParts(daysBetweenNow(propertyPublishedAt(property)))
     const viewStat = statTextParts(propertyViewCount, 'view', 'views')
     const saveStat = statTextParts(propertySaveCount, 'salvo', 'salvos')
@@ -2264,9 +2299,24 @@ export default async function PropertyDetailPage({
     }
 
     const [relatedCandidates, priceHistoryEvents, developmentContext] = await Promise.all([
-        getRelatedPropertyCandidates(supabase, property),
-        fetchPropertyPriceHistory(adminSupabase, property.id),
-        getPropertyDevelopmentContext(adminSupabase, property),
+        withPropertySecondaryFallback(
+            getRelatedPropertyCandidates(supabase, property),
+            'market comparables',
+            [],
+            PROPERTY_ENRICHMENT_QUERY_TIMEOUT_MS
+        ),
+        withPropertySecondaryFallback(
+            fetchPropertyPriceHistory(adminSupabase, property.id),
+            'price history',
+            [],
+            PROPERTY_NON_CRITICAL_QUERY_TIMEOUT_MS
+        ),
+        withPropertySecondaryFallback(
+            getPropertyDevelopmentContext(adminSupabase, property),
+            'development context',
+            propertyDevelopmentFallbackContext(property),
+            PROPERTY_ENRICHMENT_QUERY_TIMEOUT_MS
+        ),
     ])
     const showTechnicalLocationSection = Boolean(propertyMapLatLng)
     const marketHistory = buildMarketHistory(property, relatedCandidates, area, locationLabel, priceHistoryEvents)

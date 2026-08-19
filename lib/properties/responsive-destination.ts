@@ -20,6 +20,7 @@ type PlainClickLike = {
     ctrlKey?: boolean
     shiftKey?: boolean
     altKey?: boolean
+    preventDefault?: () => void
 }
 
 export function propertyDetailsSegment(property: PropertyRouteInput) {
@@ -68,4 +69,24 @@ export function isPlainLeftClick(event: PlainClickLike) {
         !event.shiftKey &&
         !event.altKey
     )
+}
+
+function markPropertyNavigationPending() {
+    document.documentElement.setAttribute('data-property-navigation-pending', 'true')
+
+    window.setTimeout(() => {
+        document.documentElement.removeAttribute('data-property-navigation-pending')
+    }, 12000)
+}
+
+export function openPropertyDestinationOnDesktopClick(event: PlainClickLike, href: string, beforeNavigate?: () => void) {
+    if (typeof window === 'undefined') return false
+    if (!shouldOpenPropertyDetailsOnDesktop()) return false
+    if (!isPlainLeftClick(event)) return false
+
+    event.preventDefault?.()
+    markPropertyNavigationPending()
+    beforeNavigate?.()
+    window.location.assign(new URL(href, window.location.origin).toString())
+    return true
 }
