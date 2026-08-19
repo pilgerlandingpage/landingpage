@@ -866,7 +866,7 @@ export default function SearchResults({
         const nextOpen = !showRefineSearch
         setShowRefineSearch(nextOpen)
 
-        if (nextOpen) {
+        if (nextOpen && window.innerWidth < 768) {
             window.setTimeout(() => {
                 refinePanelRef.current?.querySelector('input')?.focus()
             }, 0)
@@ -1059,6 +1059,10 @@ export default function SearchResults({
             history_count: historyIds.length,
         })
     }, [favoriteIds.length, historyIds.length])
+
+    const shouldShowMemoryPanel = !isDevelopmentOnlySearch && (memoryItems.length > 0 || memoryLoading)
+    const primaryRenderedProperties = shouldShowMemoryPanel ? renderedProperties.slice(0, 4) : renderedProperties
+    const secondaryRenderedProperties = shouldShowMemoryPanel ? renderedProperties.slice(4) : []
 
     return (
         <>
@@ -1579,6 +1583,89 @@ export default function SearchResults({
                     text-align: center;
                     text-transform: uppercase;
                 }
+                @media (min-width: 1024px) {
+                    .result-lux-header {
+                        margin-bottom: 10px;
+                        padding: 5px 0 9px;
+                    }
+                    .result-kicker {
+                        margin-bottom: 4px;
+                        font-size: 0.55rem;
+                    }
+                    .result-title {
+                        font-size: clamp(1.02rem, 1.14vw, 1.28rem);
+                    }
+                    .result-subtitle {
+                        margin-top: 3px;
+                        font-size: 0.7rem;
+                    }
+                    .result-count {
+                        margin-top: 2px;
+                        font-size: 0.7rem;
+                    }
+                    .result-action {
+                        height: 34px;
+                        padding: 0 11px;
+                        font-size: 0.68rem;
+                    }
+                    .result-refine-panel {
+                        margin-top: 9px;
+                        padding: 8px;
+                        border-radius: 12px;
+                    }
+                    .active-filter-row {
+                        gap: 7px;
+                        margin-top: 9px;
+                    }
+                    .active-filter-chip {
+                        height: 28px;
+                        padding: 0 8px 0 10px;
+                        font-size: 0.64rem;
+                    }
+                    .search-memory-panel {
+                        margin: 0 0 11px;
+                        padding: 9px;
+                        border-radius: 12px;
+                    }
+                    .search-memory-head {
+                        margin-bottom: 7px;
+                    }
+                    .search-memory-title {
+                        font-size: 0.72rem;
+                    }
+                    .search-memory-row {
+                        gap: 8px;
+                        margin: 0 -9px;
+                        padding: 0 9px 1px;
+                    }
+                    .search-memory-card {
+                        grid-template-columns: 44px minmax(0, 1fr);
+                        flex-basis: clamp(182px, 31%, 218px);
+                        min-height: 56px;
+                        padding: 6px;
+                    }
+                    .search-memory-media {
+                        width: 44px;
+                        min-height: 44px;
+                    }
+                    .search-memory-copy strong {
+                        font-size: 0.66rem;
+                    }
+                    .search-memory-copy span {
+                        font-size: 0.58rem;
+                    }
+                    .search-memory-chip {
+                        height: 18px;
+                        padding: 0 6px;
+                        font-size: 0.52rem;
+                    }
+                    .search-results-grid {
+                        gap: 15px 12px;
+                    }
+                    .search-results-grid .search-card-wrap {
+                        border-radius: 10px;
+                    }
+                }
                 @media (max-width: 649px) {
                     .result-lux-header {
                         margin: 0 -2px 12px;
@@ -1902,67 +1989,6 @@ export default function SearchResults({
                     </section>
                 )}
 
-                {!isDevelopmentOnlySearch && (memoryItems.length > 0 || memoryLoading) && (
-                    <section className="search-memory-panel" aria-label="Imóveis salvos e vistos recentemente">
-                        <div className="search-memory-head">
-                            <div className="search-memory-title">
-                                <Clock3 size={15} />
-                                <span>Continue de onde parou</span>
-                            </div>
-                            {favoriteIds.length > 0 && (
-                                <Link
-                                    href="/favoritos"
-                                    className="search-memory-link"
-                                    onClick={() => {
-                                        void trackEvent('search_results_favorites_shortcut_clicked', {
-                                            favorite_count: favoriteIds.length,
-                                            history_count: historyIds.length,
-                                        })
-                                    }}
-                                >
-                                    Comparar salvos
-                                    <ArrowRight size={13} />
-                                </Link>
-                            )}
-                        </div>
-                        {memoryItems.length > 0 && (
-                            <div className="search-memory-row">
-                                {memoryItems.map(({ property, source }) => {
-                                    const href = propertyDetailsPath(property)
-
-                                    return (
-                                        <Link
-                                            href={href}
-                                            className="search-memory-card"
-                                            key={`${source}-${property.id}`}
-                                            prefetch={false}
-                                            onClick={event => {
-                                                handleMemoryPropertyClick(property, source)
-                                                openPropertyDestinationOnDesktopClick(event, href)
-                                            }}
-                                        >
-                                            <span className="search-memory-media" aria-hidden="true">
-                                                <img src={memoryPropertyImage(property)} alt="" loading="lazy" />
-                                            </span>
-                                            <span className="search-memory-copy">
-                                                <strong>{memoryPropertyTitle(property)}</strong>
-                                                <span>{memoryPropertyLocation(property)}</span>
-                                                <span className="search-memory-meta">
-                                                    <span className={`search-memory-chip ${source === 'favorite' ? 'search-memory-chip--favorite' : ''}`}>
-                                                        {source === 'favorite' ? <Heart size={10} /> : <Clock3 size={10} />}
-                                                        {source === 'favorite' ? 'Salvo' : 'Visto'}
-                                                    </span>
-                                                    <span>{formatMemoryPrice(property.price)}</span>
-                                                </span>
-                                            </span>
-                                        </Link>
-                                    )
-                                })}
-                            </div>
-                        )}
-                    </section>
-                )}
-
                 {visibleProperties.length === 0 && !hasDevelopmentResults ? (
                     <div className="search-empty-state">
                         <div className="search-empty-icon">
@@ -1990,7 +2016,7 @@ export default function SearchResults({
                 ) : visibleProperties.length > 0 ? (
                     <>
                         <div className="search-results-grid">
-                            {renderedProperties.map((property: any, index: number) => (
+                            {primaryRenderedProperties.map((property: any, index: number) => (
                                 <div
                                     key={property.id}
                                     className={`search-card-wrap ${mapHoveredId === property.id ? 'search-card-wrap--highlighted' : ''}`}
@@ -2000,12 +2026,95 @@ export default function SearchResults({
                                     <PropertyCard
                                         property={property}
                                         landingPageSlug={lpMap[property.id]}
-                                        imagePriority={index < 2}
-                                        variant="homeCompact"
+                                        imagePriority={index < 4}
+                                        variant="searchCompact"
                                     />
                                 </div>
                             ))}
                         </div>
+                        {shouldShowMemoryPanel && (
+                            <section className="search-memory-panel" aria-label="Imóveis salvos e vistos recentemente">
+                                <div className="search-memory-head">
+                                    <div className="search-memory-title">
+                                        <Clock3 size={15} />
+                                        <span>Continue de onde parou</span>
+                                    </div>
+                                    {favoriteIds.length > 0 && (
+                                        <Link
+                                            href="/favoritos"
+                                            className="search-memory-link"
+                                            onClick={() => {
+                                                void trackEvent('search_results_favorites_shortcut_clicked', {
+                                                    favorite_count: favoriteIds.length,
+                                                    history_count: historyIds.length,
+                                                })
+                                            }}
+                                        >
+                                            Comparar salvos
+                                            <ArrowRight size={13} />
+                                        </Link>
+                                    )}
+                                </div>
+                                {memoryItems.length > 0 && (
+                                    <div className="search-memory-row">
+                                        {memoryItems.map(({ property, source }) => {
+                                            const href = propertyDetailsPath(property)
+
+                                            return (
+                                                <Link
+                                                    href={href}
+                                                    className="search-memory-card"
+                                                    key={`${source}-${property.id}`}
+                                                    prefetch={false}
+                                                    onClick={event => {
+                                                        handleMemoryPropertyClick(property, source)
+                                                        openPropertyDestinationOnDesktopClick(event, href)
+                                                    }}
+                                                >
+                                                    <span className="search-memory-media" aria-hidden="true">
+                                                        <img src={memoryPropertyImage(property)} alt="" loading="lazy" />
+                                                    </span>
+                                                    <span className="search-memory-copy">
+                                                        <strong>{memoryPropertyTitle(property)}</strong>
+                                                        <span>{memoryPropertyLocation(property)}</span>
+                                                        <span className="search-memory-meta">
+                                                            <span className={`search-memory-chip ${source === 'favorite' ? 'search-memory-chip--favorite' : ''}`}>
+                                                                {source === 'favorite' ? <Heart size={10} /> : <Clock3 size={10} />}
+                                                                {source === 'favorite' ? 'Salvo' : 'Visto'}
+                                                            </span>
+                                                            <span>{formatMemoryPrice(property.price)}</span>
+                                                        </span>
+                                                    </span>
+                                                </Link>
+                                            )
+                                        })}
+                                    </div>
+                                )}
+                            </section>
+                        )}
+                        {secondaryRenderedProperties.length > 0 && (
+                            <div className="search-results-grid">
+                                {secondaryRenderedProperties.map((property: any, index: number) => {
+                                    const absoluteIndex = index + primaryRenderedProperties.length
+
+                                    return (
+                                        <div
+                                            key={property.id}
+                                            className={`search-card-wrap ${mapHoveredId === property.id ? 'search-card-wrap--highlighted' : ''}`}
+                                            onMouseEnter={() => handleCardHover(property.id)}
+                                            onMouseLeave={() => handleCardHover(null)}
+                                        >
+                                            <PropertyCard
+                                                property={property}
+                                                landingPageSlug={lpMap[property.id]}
+                                                imagePriority={absoluteIndex < 4}
+                                                variant="searchCompact"
+                                            />
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        )}
                         {hiddenVisibleCount > 0 && (
                             <div className="search-render-limit">
                                 Mostrando os primeiros {renderedProperties.length} imóveis desta área. Aproxime o mapa para refinar os resultados.

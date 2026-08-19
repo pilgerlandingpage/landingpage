@@ -40,7 +40,7 @@ interface PropertyCardProps {
     }
     landingPageSlug?: string
     imagePriority?: boolean
-    variant?: 'default' | 'homeCompact'
+    variant?: 'default' | 'homeCompact' | 'searchCompact'
 }
 
 const FAVORITES_KEY = 'pilger_property_favorites'
@@ -178,7 +178,9 @@ function getHomeFilterBadge(property: PropertyCardProps['property']) {
 
 export default function PropertyCard({ property, landingPageSlug, imagePriority = false, variant = 'default' }: PropertyCardProps) {
     const isHomeCompact = variant === 'homeCompact'
-    const showFavoriteToggle = !isHomeCompact
+    const isSearchCompact = variant === 'searchCompact'
+    const isCompact = isHomeCompact || isSearchCompact
+    const showFavoriteToggle = !isCompact
     const [isFavorite, setIsFavorite] = useState(false)
     const [activeImageState, setActiveImageState] = useState({ propertyId: property.id, imageCount: 0, index: 0 })
     const touchStartXRef = useRef<number | null>(null)
@@ -188,9 +190,9 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
     const imageSwipeIntentRef = useRef<'horizontal' | 'vertical' | null>(null)
     const imageLinkRef = useRef<HTMLAnchorElement | null>(null)
     const suppressImageClickRef = useRef(false)
-    const formattedPrice = property.price ? formatPrice(property.price) : isHomeCompact ? 'Consulte-nos' : formatPrice(property.price)
+    const formattedPrice = property.price ? formatPrice(property.price) : isCompact ? 'Consulte-nos' : formatPrice(property.price)
     const detailsHref = propertyDetailsPath(property)
-    const href = isHomeCompact ? detailsHref : landingPageSlug ? `/${landingPageSlug}` : detailsHref
+    const href = isCompact ? detailsHref : landingPageSlug ? `/${landingPageSlug}` : detailsHref
     const galleryImages = useMemo(() => {
         const images = [property.featured_image, ...(property.images || [])]
             .map(item => typeof item === 'string' ? item.trim() : '')
@@ -208,7 +210,7 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
     const imageSrc = displayGalleryImages[safeActiveImageIndex] || FALLBACK_IMAGE
     const rawViewCount = Number(property.view_count)
     const compactViewCount = Number.isFinite(rawViewCount) ? Math.max(0, Math.trunc(rawViewCount)) : null
-    const hasCompactViewCount = isHomeCompact && compactViewCount !== null
+    const hasCompactViewCount = isCompact && compactViewCount !== null
     const compactViewLabel = compactViewCount !== null ? formatCompactNumber(compactViewCount) : ''
     const displayTitle = replaceItajaiWithPraiaBrava(property.title)
     const displayCity = displayLocationName(property.city)
@@ -221,8 +223,8 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
     const amenities = Array.isArray(property.amenities) ? property.amenities.filter(Boolean) : []
     const visibleAmenities = amenities.slice(0, 3)
     const primaryQualityLabel = getPropertyPrimaryQualityLabel(property)
-    const homeFilterBadge = isHomeCompact ? getHomeFilterBadge(property) : null
-    const intelligenceLabels = isHomeCompact
+    const homeFilterBadge = isCompact ? getHomeFilterBadge(property) : null
+    const intelligenceLabels = isCompact
         ? []
         : getPropertyIntelligenceLabels(property, {
             includeFrontSea: false,
@@ -279,7 +281,7 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
             image_index: nextIndex + 1,
             gallery_count: imageCount,
             interaction,
-            source: isHomeCompact ? 'compact_property_card' : 'property_card',
+            source: isCompact ? 'compact_property_card' : 'property_card',
         })
     }
 
@@ -451,13 +453,13 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
         void trackEvent(current.includes(property.id) ? 'property_unfavorited' : 'property_favorited', {
             property_id: property.id,
             title: displayTitle,
-            source: isHomeCompact ? 'search_card' : 'property_card',
+            source: isCompact ? 'search_card' : 'property_card',
             favorite_count: next.length,
         })
     }
 
     return (
-        <div className={`property-card ${isHomeCompact ? 'property-card-compact' : ''}`}>
+        <div className={`property-card ${isCompact ? 'property-card-compact' : ''} ${isSearchCompact ? 'property-card-search-compact' : ''}`}>
             <Link
                 href={href}
                 className="card-shell-hit"
@@ -481,7 +483,7 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                     onWheel={handleImageWheel}
                     style={{ display: 'block', height: '100%', overflow: 'hidden', position: 'relative', width: '100%' }}
                 >
-                    {isHomeCompact ? (
+                    {isCompact ? (
                         <>
                             <Image
                                 src={imageSrc}
@@ -586,15 +588,15 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
             <Link href={href} className="card-content-link" prefetch={false} onClick={handlePropertyClick}>
                 <div className="property-head">
                     <div className="property-heading-copy">
-                        <div className="property-title">{isHomeCompact ? displayTitle : boldifyTitle(cardTitle)}</div>
-                        <div className={`property-location ${isHomeCompact ? 'compact-location-row' : ''}`}>
-                            {isHomeCompact && <MapPin size={13} aria-hidden="true" />}
-                            <span>{isHomeCompact ? compactLocation || locationLabel : locationLabel}</span>
+                        <div className="property-title">{isCompact ? displayTitle : boldifyTitle(cardTitle)}</div>
+                        <div className={`property-location ${isCompact ? 'compact-location-row' : ''}`}>
+                            {isCompact && <MapPin size={13} aria-hidden="true" />}
+                            <span>{isCompact ? compactLocation || locationLabel : locationLabel}</span>
                         </div>
                     </div>
                 </div>
 
-                {!isHomeCompact && <div className="property-price">{formattedPrice}</div>}
+                {!isCompact && <div className="property-price">{formattedPrice}</div>}
 
                 {intelligenceLabels.length > 0 && (
                     <div className="property-intelligence-row" aria-label="Sinais de curadoria">
@@ -607,7 +609,7 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                 )}
 
                 <div className="property-meta">
-                    {isHomeCompact ? (
+                    {isCompact ? (
                         compactFeatureItems.map(item => (
                             <span className="compact-feature-item" key={item.key}>
                                 {item.icon}
@@ -624,9 +626,9 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                     )}
                 </div>
 
-                {isHomeCompact && <div className="property-price">{formattedPrice}</div>}
+                {isCompact && <div className="property-price">{formattedPrice}</div>}
 
-                {!isHomeCompact && visibleAmenities.length > 0 && (
+                {!isCompact && visibleAmenities.length > 0 && (
                     <div className="property-tags">
                         {visibleAmenities.map((amenity, index) => <span key={`${amenity}-${index}`}>{amenity}</span>)}
                         {amenities.length > 3 && <span>+{amenities.length - 3}</span>}
@@ -975,6 +977,64 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                     font-weight: 650;
                     margin-top: 5px;
                     padding-bottom: 8px;
+                }
+                @media (min-width: 1024px) {
+                    .property-card-search-compact .card-image-container {
+                        aspect-ratio: 2.06 / 1;
+                        border-radius: 14px;
+                    }
+                    .property-card-search-compact .card-content-link,
+                    .property-card-search-compact :global(.card-content-link) {
+                        min-height: 78px;
+                        padding: 8px 2px 0;
+                    }
+                    .property-card-search-compact .compact-location-row {
+                        margin-bottom: 2px;
+                        font-size: 0.64rem;
+                    }
+                    .property-card-search-compact .property-title {
+                        font-size: 0.68rem;
+                        line-height: 1.2;
+                    }
+                    .property-card-search-compact .property-meta {
+                        gap: 5px;
+                        margin-top: 4px;
+                        font-size: 0.64rem;
+                    }
+                    .property-card-search-compact .property-meta .compact-feature-item svg {
+                        width: 12px;
+                        height: 12px;
+                    }
+                    .property-card-search-compact .property-price {
+                        margin-top: 4px;
+                        padding-bottom: 6px;
+                        font-size: 0.78rem;
+                    }
+                    .property-card-search-compact .property-quality-badge {
+                        top: 8px;
+                        left: 8px;
+                        min-height: 21px;
+                        padding: 0 8px;
+                        font-size: 0.56rem;
+                    }
+                    .property-card-search-compact .compact-photo-count,
+                    .property-card-search-compact .compact-view-count {
+                        min-height: 21px;
+                        padding: 0 7px;
+                        font-size: 0.56rem;
+                    }
+                    .property-card-search-compact .thumbnail-gallery-dots {
+                        bottom: 8px;
+                    }
+                }
+                @media (min-width: 1500px) {
+                    .property-card-search-compact .card-image-container {
+                        aspect-ratio: 2.18 / 1;
+                    }
+                    .property-card-search-compact .card-content-link,
+                    .property-card-search-compact :global(.card-content-link) {
+                        min-height: 74px;
+                    }
                 }
                 .favorite-toggle {
                     position: absolute;

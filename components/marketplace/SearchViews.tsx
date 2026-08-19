@@ -181,8 +181,8 @@ export default function SearchViews({ children, map, overlay, previewOpen = fals
                         display: grid;
                         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
                         align-items: stretch;
-                        padding: 22px 28px;
-                        gap: 24px;
+                        padding: 18px 24px 22px;
+                        gap: 22px;
                         height: 100%;
                         min-height: 0;
                         background:
@@ -212,7 +212,7 @@ export default function SearchViews({ children, map, overlay, previewOpen = fals
                     .sv-panel::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 20px; }
                     .sv-handle { display: none; }
                     .sv-scroll {
-                        padding: 4px 16px 22px 4px;
+                        padding: 2px 12px 18px 2px;
                         overflow-y: auto;
                         overflow-x: hidden;
                     }
@@ -234,8 +234,8 @@ export default function SearchViews({ children, map, overlay, previewOpen = fals
                 }
                 @media (min-width: 1280px) {
                     .sv-wrap {
-                        padding: 24px 34px 28px;
-                        gap: 26px;
+                        padding: 20px 30px 24px;
+                        gap: 24px;
                     }
                 }
 

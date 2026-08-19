@@ -889,6 +889,41 @@ export default function HomeSearchBar({
                     top: calc(100% + 7px);
                     z-index: 1500;
                 }
+                @media (min-width: 1180px) {
+                    .home-search-box-results .home-search-panel {
+                        display: grid;
+                        grid-template-columns: minmax(250px, 0.94fr) minmax(320px, 1.06fr);
+                        gap: 7px;
+                        align-items: start;
+                    }
+                    .home-search-box-results .home-search-select-row {
+                        grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+                    }
+                    .home-search-box-results .home-search-location-row {
+                        grid-template-columns: minmax(0, 1fr) 44px;
+                        margin-top: 0;
+                    }
+                    .home-search-box-results select,
+                    .home-search-box-results input,
+                    .home-search-box-results .home-search-submit-button {
+                        height: 36px;
+                    }
+                    .home-search-box-results .home-search-submit-button {
+                        width: 44px;
+                    }
+                    .home-search-box-results select,
+                    .home-search-box-results input {
+                        font-size: 0.74rem;
+                    }
+                    .home-search-box-results :global(.home-search-chevron),
+                    .home-search-box-results :global(.home-search-pin) {
+                        transform: translateY(-50%) scale(0.88);
+                    }
+                    .home-search-box-results .home-search-suggestions {
+                        right: 50px;
+                        top: calc(100% + 6px);
+                    }
+                }
                 @media (max-width: 700px) {
                     .home-search-box {
                         margin: 14px auto 22px;
