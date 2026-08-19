@@ -667,8 +667,21 @@ function metaTemplateWabaLabel(template?: MetaTemplate | null) {
     return textValue(metadata.waba_label) || textValue(template?.waba_id) || 'WABA'
 }
 
-function metaTemplateSelectValue(template: MetaTemplate) {
-    return [template.waba_id || '', template.name, template.language].join('::')
+function metaTemplateNameLanguageValue(template: Pick<MetaTemplate, 'name' | 'language'>) {
+    return [template.name || '', template.language || 'pt_BR'].join('::')
+}
+
+function templateHasImageHeader(template: MetaTemplate) {
+    return Array.isArray(template.components)
+        && template.components.some(component => {
+            const item = asRecord(component)
+            return textValue(item.type).toUpperCase() === 'HEADER'
+                && textValue(item.format).toUpperCase() === 'IMAGE'
+        })
+}
+
+function isApprovedImageMetaTemplate(template: MetaTemplate) {
+    return String(template.status || '').toUpperCase() === 'APPROVED' && templateHasImageHeader(template)
 }
 
 function metaPortfolioUsageFromSenders(senders: MetaSender[]) {
@@ -1678,11 +1691,17 @@ export default function CampaignsPage() {
         setMetaButtonParameterValues({})
     }
 
-    const getSelectedMetaTemplate = () => metaTemplates.find(template =>
-        template.name === metaTemplateName
-        && template.language === metaTemplateLanguage
-        && (!metaTemplateWabaId || template.waba_id === metaTemplateWabaId)
-    ) || null
+    const getSelectedMetaTemplate = (preferredWabaId = '') => {
+        const matches = metaTemplates.filter(template =>
+            isApprovedImageMetaTemplate(template)
+            && template.name === metaTemplateName
+            && template.language === metaTemplateLanguage
+        )
+        const targetWabaId = metaTemplateWabaId || preferredWabaId
+        return (targetWabaId ? matches.find(template => template.waba_id === targetWabaId) : null)
+            || matches[0]
+            || null
+    }
 
     const getMissingMetaTemplateFields = (skipBodyValues = false, skipHeaderMedia = false) => {
         const template = getSelectedMetaTemplate()
@@ -2139,6 +2158,24 @@ export default function CampaignsPage() {
 
     const currentInstance = instances.find(i => i.id === selectedInstance)
     const approvedMetaTemplates = metaTemplates.filter(template => String(template.status || '').toUpperCase() === 'APPROVED')
+    const approvedImageMetaTemplates = approvedMetaTemplates.filter(templateHasImageHeader)
+    const metaTemplateOptions = Array.from(approvedImageMetaTemplates.reduce((options, template) => {
+        const key = metaTemplateNameLanguageValue(template)
+        const current = options.get(key)
+        if (current) {
+            current.variants.push(template)
+            return options
+        }
+        options.set(key, {
+            key,
+            name: template.name,
+            language: template.language || 'pt_BR',
+            category: template.category,
+            variants: [template],
+        })
+        return options
+    }, new Map<string, { key: string; name: string; language: string; category: string; variants: MetaTemplate[] }>()).values())
+        .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
     const activeMetaSenders = metaSenders.filter(sender => sender.local_status === 'active')
     const selectedMetaSender = activeMetaSenders.find(sender => sender.id === selectedMetaSenderId) || null
     const selectedContactList = metaContactLists.find(list => list.id === selectedContactListId) || null
@@ -2164,13 +2201,9 @@ export default function CampaignsPage() {
         || selectedContactListValidationStatus === 'running'
     const selectedContactListWillIncludeUnverified = contactListValidationMode === 'include_unverified'
         && selectedContactListHasPendingValidation
-    const selectedMetaTemplate = approvedMetaTemplates.find(template => (
-        template.name === metaTemplateName
-        && template.language === metaTemplateLanguage
-        && (!metaTemplateWabaId || template.waba_id === metaTemplateWabaId)
-    )) || null
+    const selectedMetaTemplate = getSelectedMetaTemplate(selectedMetaSender?.waba_id || '')
     const selectedMetaTemplateVariants = metaTemplateName.trim()
-        ? approvedMetaTemplates.filter(template => (
+        ? approvedImageMetaTemplates.filter(template => (
             template.name === metaTemplateName
             && template.language === metaTemplateLanguage
         ))
@@ -2497,12 +2530,12 @@ export default function CampaignsPage() {
                                         <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
                                             Template aprovado Meta
                                         </label>
-                                        {approvedMetaTemplates.length > 0 ? (
+                                        {metaTemplateOptions.length > 0 ? (
                                             <select
-                                                value={selectedMetaTemplate ? metaTemplateSelectValue(selectedMetaTemplate) : ''}
+                                                value={selectedMetaTemplate ? metaTemplateNameLanguageValue(selectedMetaTemplate) : ''}
                                                 onChange={e => {
-                                                    const [wabaId, name, language] = e.target.value.split('::')
-                                                    setMetaTemplateWabaId(wabaId || '')
+                                                    const [name, language] = e.target.value.split('::')
+                                                    setMetaTemplateWabaId('')
                                                     setMetaTemplateName(name || '')
                                                     setMetaTemplateLanguage(language || 'pt_BR')
                                                     resetMetaTemplateBuilder()
@@ -2514,9 +2547,9 @@ export default function CampaignsPage() {
                                                 }}
                                             >
                                                 <option value="">Selecione um template aprovado</option>
-                                                {approvedMetaTemplates.map(template => (
-                                                    <option key={template.id} value={metaTemplateSelectValue(template)}>
-                                                        {template.name} ({template.language}) - {template.category} - {metaTemplateWabaLabel(template)}
+                                                {metaTemplateOptions.map(option => (
+                                                    <option key={option.key} value={option.key}>
+                                                        {option.name} ({option.language}) - {option.category} - {option.variants.length} conta(s)
                                                     </option>
                                                 ))}
                                             </select>
@@ -2601,7 +2634,7 @@ export default function CampaignsPage() {
                                             color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box',
                                         }}
                                     >
-                                        <option value="weighted_pool">Usar somente a conta do template</option>
+                                        <option value="weighted_pool">Usar uma conta aprovada</option>
                                         <option value="round_robin" disabled={!portfolioRoutingAvailable}>
                                             Distribuir entre contas aprovadas ({portfolioRoutingReadyWabaIds.length} prontas)
                                         </option>
@@ -2642,10 +2675,13 @@ export default function CampaignsPage() {
                                                 : `Pool automatico por capacidade (${metaPortfolioUsage.remaining} vagas livres no portfolio)`}
                                         </option>
                                         {activeMetaSenders.map(sender => {
-                                            const wabaMismatch = Boolean(selectedMetaTemplate?.waba_id && sender.waba_id !== selectedMetaTemplate.waba_id)
+                                            const wabaMismatch = Boolean(
+                                                selectedTemplateApprovedWabaIds.length
+                                                && !selectedTemplateApprovedWabaIds.includes(sender.waba_id)
+                                            )
                                             return (
                                                 <option key={sender.id} value={sender.id} disabled={!isMetaSenderAvailable(sender) || !hasMetaPortfolioCapacity || wabaMismatch}>
-                                                    {wabaMismatch ? `${metaSenderOptionLabel(sender)} - conta diferente do template` : metaSenderOptionLabel(sender)}
+                                                    {wabaMismatch ? `${metaSenderOptionLabel(sender)} - criativo nao aprovado nesta conta` : metaSenderOptionLabel(sender)}
                                                 </option>
                                             )
                                         })}
@@ -2662,7 +2698,7 @@ export default function CampaignsPage() {
                                         <div style={{ marginTop: '8px', color: '#16a34a', fontSize: '0.78rem', fontWeight: 700 }}>
                                             {isMetaPortfolioRouting
                                                 ? `Distribuicao ativa: o sistema balanceia entre ${portfolioRoutingReadyWabaIds.length} contas com este template aprovado, sem ultrapassar o limite compartilhado.`
-                                                : 'Pool automatico vai usar um numero conectado da conta alvo, respeitando o limite compartilhado.'}
+                                                : 'Pool automatico vai usar um numero conectado de uma conta aprovada, respeitando o limite compartilhado.'}
                                         </div>
                                     )}
                                 </div>
