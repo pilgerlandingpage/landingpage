@@ -877,6 +877,7 @@ function splitMetaAgentReplyIntoChunks(text: string) {
 async function showMetaAgentTypingIndicator(input: {
   configMap: Record<string, string | undefined>
   phoneNumberId?: string | null
+  wabaId?: string | null
   providerMessageId?: string | null
 }) {
   if (!configBoolean(input.configMap, 'meta_whatsapp_agent_typing_indicator_enabled', true)) return
@@ -887,6 +888,7 @@ async function showMetaAgentTypingIndicator(input: {
     await sendMetaWhatsAppTypingIndicator({
       messageId,
       phoneNumberId: cleanText(input.phoneNumberId, 120) || undefined,
+      wabaId: cleanText(input.wabaId, 120) || undefined,
       config: input.configMap,
     })
   } catch (error) {
@@ -900,6 +902,7 @@ async function sendHumanizedMetaWhatsAppReply(input: {
   text: string
   configMap: Record<string, string | undefined>
   phoneNumberId?: string | null
+  wabaId?: string | null
   providerMessageId?: string | null
   messageType?: string | null
 }) {
@@ -1929,6 +1932,7 @@ async function sendInternalAdminNotification(input: {
   notifyPhone: string
   notification: InternalNotificationInput
   phoneNumberId?: string | null
+  wabaId?: string | null
   configMap: Record<string, string | undefined>
 }) {
   const templateName = cleanText(input.configMap.meta_whatsapp_triage_interest_notify_template_name, 120)
@@ -1946,6 +1950,7 @@ async function sendInternalAdminNotification(input: {
         templateName,
         language: templateLanguage,
         phoneNumberId: input.phoneNumberId || undefined,
+        wabaId: input.wabaId || undefined,
         components: buildInternalNotificationTemplateComponents(input.notification),
         config: input.configMap,
       })
@@ -1964,6 +1969,7 @@ async function sendInternalAdminNotification(input: {
           to: input.notifyPhone,
           text,
           phoneNumberId: input.phoneNumberId || undefined,
+          wabaId: input.wabaId || undefined,
           config: input.configMap,
         })
       } catch (fallbackError) {
@@ -1986,6 +1992,7 @@ async function sendInternalAdminNotification(input: {
     to: input.notifyPhone,
     text,
     phoneNumberId: input.phoneNumberId || undefined,
+    wabaId: input.wabaId || undefined,
     config: input.configMap,
   })
   return {
@@ -2718,6 +2725,7 @@ export async function handleMetaWhatsAppReplyTriage(
   const receivedAt = input.receivedAt || isoNow()
   const senderId = cleanText(input.senderId || conversation?.sender_id || recipient?.sender_id, 80) || null
   const phoneNumberId = cleanText(input.phoneNumberId || conversation?.phone_number_id, 120) || null
+  const wabaId = cleanText(conversation?.waba_id, 120) || null
   const campaignId = cleanText(campaign?.id || recipient?.campaign_id || conversation?.last_campaign_id, 80) || null
   const recipientId = cleanText(recipient?.id || conversation?.last_recipient_id, 80) || null
   const contactName = cleanText(input.contactName || conversation?.contact_name || recipient?.recipient_name, 160) || null
@@ -2934,6 +2942,7 @@ export async function handleMetaWhatsAppReplyTriage(
         text: replyText,
         configMap,
         phoneNumberId,
+        wabaId,
         providerMessageId,
         messageType: input.messageType,
       })
@@ -3016,6 +3025,7 @@ export async function handleMetaWhatsAppReplyTriage(
             reason: effectiveReason,
           },
           phoneNumberId: phoneNumberId || undefined,
+          wabaId: wabaId || undefined,
           configMap,
         })
         notifiedStatus = 'sent'

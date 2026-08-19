@@ -36,6 +36,8 @@ export async function GET(request: NextRequest) {
     const result = await listMetaWhatsAppConversations({
       status: request.nextUrl.searchParams.get('status'),
       search: request.nextUrl.searchParams.get('search'),
+      senderId: request.nextUrl.searchParams.get('sender_id'),
+      wabaId: request.nextUrl.searchParams.get('waba_id'),
       limit: Number(request.nextUrl.searchParams.get('limit') || 80),
     })
 

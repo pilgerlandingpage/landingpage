@@ -9,6 +9,7 @@ const CONFIG_KEYS = [
   'meta_whatsapp_enabled',
   'meta_whatsapp_app_id',
   'meta_whatsapp_business_account_id',
+  'meta_whatsapp_waba_accounts',
   'meta_whatsapp_default_phone_number_id',
   'meta_whatsapp_access_token',
   'meta_whatsapp_webhook_verify_token',
@@ -59,6 +60,12 @@ export interface MetaWhatsAppResolvedConfig {
   missing: string[]
 }
 
+export interface MetaWhatsAppAccountConfig extends MetaWhatsAppResolvedConfig {
+  label: string
+  configKey: string
+  primary: boolean
+}
+
 export interface MetaWhatsAppSender {
   id: string
   display_phone_number?: string
@@ -85,6 +92,7 @@ export interface MetaWhatsAppTemplateMutationInput {
   category?: string
   components?: unknown[]
   templateId?: string
+  wabaId?: string
   messageSendTtlSeconds?: number
 }
 
@@ -100,6 +108,7 @@ export interface SendTemplateMessageInput {
   templateName: string
   language?: string
   phoneNumberId?: string
+  wabaId?: string
   components?: unknown[]
   config?: ConfigMap
 }
@@ -108,6 +117,7 @@ export interface SendTextMessageInput {
   to: string
   text: string
   phoneNumberId?: string
+  wabaId?: string
   config?: ConfigMap
   previewUrl?: boolean
 }
@@ -116,12 +126,14 @@ export interface SendAudioMessageInput {
   to: string
   audioUrl: string
   phoneNumberId?: string
+  wabaId?: string
   config?: ConfigMap
 }
 
 export interface MarkMessageReadInput {
   messageId: string
   phoneNumberId?: string
+  wabaId?: string
   config?: ConfigMap
   typingIndicator?: boolean
 }
@@ -308,6 +320,166 @@ export function resolveMetaWhatsAppConfig(config: ConfigMap = {}): MetaWhatsAppR
   }
 }
 
+function booleanConfig(value: unknown, fallback: boolean) {
+  if (value === undefined || value === null || value === '') return fallback
+  if (typeof value === 'boolean') return value
+  const selected = cleanText(value, 40).toLowerCase()
+  if (['true', '1', 'yes', 'sim', 'active', 'ativo', 'enabled'].includes(selected)) return true
+  if (['false', '0', 'no', 'nao', 'não', 'inactive', 'inativo', 'disabled'].includes(selected)) return false
+  return fallback
+}
+
+function parseMetaWhatsAppAccountEntries(value: unknown): Array<Record<string, unknown>> {
+  const source = cleanText(value, 20000)
+  if (!source) return []
+
+  try {
+    const parsed = JSON.parse(source)
+    if (Array.isArray(parsed)) {
+      return parsed
+        .map(item => typeof item === 'string' ? { waba_id: item } : asMetadata(item))
+        .filter(item => cleanText(item.waba_id || item.wabaId || item.id, 120))
+    }
+    const single = asMetadata(parsed)
+    if (cleanText(single.waba_id || single.wabaId || single.id, 120)) return [single]
+  } catch {
+    // Aceita tambem lista simples separada por virgula, ponto-e-virgula ou linha.
+  }
+
+  return source
+    .split(/[\n,;]+/g)
+    .map(item => cleanText(item, 120))
+    .filter(Boolean)
+    .map(item => ({ waba_id: item }))
+}
+
+function normalizeMetaWhatsAppAccountConfig(
+  entry: Record<string, unknown>,
+  primary: MetaWhatsAppResolvedConfig,
+  index: number,
+  isPrimary: boolean,
+): MetaWhatsAppAccountConfig | null {
+  const wabaId = firstText(entry.waba_id, entry.wabaId, entry.id, isPrimary ? primary.wabaId : '')
+  if (!wabaId) return null
+
+  const accessToken = firstText(
+    entry.access_token,
+    entry.accessToken,
+    entry.token,
+    isPrimary ? primary.accessToken : '',
+    primary.accessToken
+  )
+  const appSecret = firstText(entry.app_secret, entry.appSecret, primary.appSecret)
+  const appId = firstText(entry.app_id, entry.appId, primary.appId)
+  const defaultPhoneNumberId = firstText(
+    entry.default_phone_number_id,
+    entry.defaultPhoneNumberId,
+    entry.phone_number_id,
+    entry.phoneNumberId,
+    isPrimary ? primary.defaultPhoneNumberId : ''
+  )
+  const label = firstText(
+    entry.label,
+    entry.name,
+    entry.display_name,
+    isPrimary ? 'Conta principal' : `Conta WhatsApp ${index + 1}`
+  )
+  const defaultLanguage = normalizeLanguage(firstText(entry.default_language, entry.defaultLanguage, primary.defaultLanguage))
+  const sendRatePerMinute = positiveInt(
+    firstText(entry.send_rate_per_minute, entry.sendRatePerMinute, primary.sendRatePerMinute),
+    primary.sendRatePerMinute,
+    1,
+    1000
+  )
+  const dailyLimitPerNumber = positiveInt(
+    firstText(entry.daily_limit_per_number, entry.dailyLimitPerNumber, entry.daily_limit, primary.dailyLimitPerNumber),
+    primary.dailyLimitPerNumber,
+    1,
+    1000000
+  )
+  const missing: string[] = []
+  if (!wabaId) missing.push('WhatsApp Business Account ID')
+  if (!accessToken) missing.push('System User Access Token')
+
+  return {
+    ...primary,
+    enabled: primary.enabled && booleanConfig(entry.enabled, true),
+    wabaId,
+    defaultPhoneNumberId,
+    accessToken,
+    appId,
+    appSecret,
+    apiVersion: normalizeGraphVersion(firstText(entry.api_version, entry.apiVersion, primary.apiVersion)),
+    defaultLanguage,
+    supportRedirectPhone: normalizeMetaWhatsAppPhone(firstText(entry.support_redirect_phone, entry.supportRedirectPhone, primary.supportRedirectPhone)),
+    sendRatePerMinute,
+    dailyLimitPerNumber,
+    usedGeneralMetaToken: primary.usedGeneralMetaToken && accessToken === primary.accessToken,
+    missing,
+    label,
+    configKey: cleanText(entry.key, 80) || (isPrimary ? 'primary' : `waba_${index + 1}`),
+    primary: isPrimary,
+  }
+}
+
+export function resolveMetaWhatsAppAccountConfigs(config: ConfigMap = {}): MetaWhatsAppAccountConfig[] {
+  const primary = resolveMetaWhatsAppConfig(config)
+  const entries = parseMetaWhatsAppAccountEntries(firstText(
+    config.meta_whatsapp_waba_accounts,
+    process.env.META_WHATSAPP_WABA_ACCOUNTS
+  ))
+  const accounts: MetaWhatsAppAccountConfig[] = []
+  const byWabaId = new Map<string, number>()
+
+  const addAccount = (account: MetaWhatsAppAccountConfig | null) => {
+    if (!account?.wabaId) return
+    const existingIndex = byWabaId.get(account.wabaId)
+    if (existingIndex !== undefined) {
+      accounts[existingIndex] = {
+        ...accounts[existingIndex],
+        ...account,
+        primary: accounts[existingIndex].primary || account.primary,
+      }
+      return
+    }
+    byWabaId.set(account.wabaId, accounts.length)
+    accounts.push(account)
+  }
+
+  addAccount(normalizeMetaWhatsAppAccountConfig({}, primary, 0, true))
+  entries.forEach((entry, index) => {
+    addAccount(normalizeMetaWhatsAppAccountConfig(entry, primary, index, false))
+  })
+
+  if (!accounts.length && primary.wabaId) {
+    addAccount(normalizeMetaWhatsAppAccountConfig({}, primary, 0, true))
+  }
+
+  return accounts
+}
+
+export function resolveMetaWhatsAppConfigForWaba(config: ConfigMap = {}, wabaId?: string | null): MetaWhatsAppResolvedConfig {
+  const selectedWabaId = cleanText(wabaId, 120)
+  const primary = resolveMetaWhatsAppConfig(config)
+  if (!selectedWabaId) return primary
+
+  const account = resolveMetaWhatsAppAccountConfigs(config)
+    .find(item => item.wabaId === selectedWabaId)
+  if (account) return account
+
+  const missing = [...primary.missing]
+  if (!primary.accessToken && !missing.includes('System User Access Token')) {
+    missing.push('System User Access Token')
+  }
+
+  return {
+    ...primary,
+    wabaId: selectedWabaId,
+    defaultPhoneNumberId: '',
+    missing,
+  }
+}
+
 async function graphRequest<T>(
   resolved: MetaWhatsAppResolvedConfig,
   path: string,
@@ -377,8 +549,7 @@ export async function getMetaWhatsAppTokenDiagnostics(config: ConfigMap = {}) {
   }
 }
 
-export async function listMetaWhatsAppSenders(config: ConfigMap = {}) {
-  const resolved = resolveMetaWhatsAppConfig(config)
+async function listMetaWhatsAppSendersForResolved(resolved: MetaWhatsAppResolvedConfig) {
   if (resolved.missing.length) {
     throw new Error(`Configuracao incompleta: ${resolved.missing.join(', ')}`)
   }
@@ -393,6 +564,11 @@ export async function listMetaWhatsAppSenders(config: ConfigMap = {}) {
   return payload.data || []
 }
 
+export async function listMetaWhatsAppSenders(config: ConfigMap = {}) {
+  const resolved = resolveMetaWhatsAppConfig(config)
+  return listMetaWhatsAppSendersForResolved(resolved)
+}
+
 export async function getMetaWhatsAppPhoneNumber(phoneNumberId: string, config: ConfigMap = {}) {
   const resolved = resolveMetaWhatsAppConfig(config)
   if (!resolved.accessToken) throw new Error('System User Access Token ausente.')
@@ -404,8 +580,7 @@ export async function getMetaWhatsAppPhoneNumber(phoneNumberId: string, config: 
   })
 }
 
-export async function listMetaWhatsAppTemplates(config: ConfigMap = {}) {
-  const resolved = resolveMetaWhatsAppConfig(config)
+async function listMetaWhatsAppTemplatesForResolved(resolved: MetaWhatsAppResolvedConfig) {
   if (resolved.missing.length) {
     throw new Error(`Configuracao incompleta: ${resolved.missing.join(', ')}`)
   }
@@ -420,9 +595,52 @@ export async function listMetaWhatsAppTemplates(config: ConfigMap = {}) {
   return payload.data || []
 }
 
+export async function listMetaWhatsAppTemplates(config: ConfigMap = {}) {
+  const resolved = resolveMetaWhatsAppConfig(config)
+  return listMetaWhatsAppTemplatesForResolved(resolved)
+}
+
 function normalizeTemplateCategory(value?: string) {
   const selected = cleanText(value || 'MARKETING', 40).toUpperCase()
   return ['MARKETING', 'UTILITY', 'AUTHENTICATION'].includes(selected) ? selected : 'MARKETING'
+}
+
+function normalizeAuthenticationTemplateComponents(value: unknown[]) {
+  return value
+    .map(componentValue => asMetadata(componentValue))
+    .map(component => {
+      const type = cleanText(component.type, 30).toUpperCase()
+      if (type === 'BODY') {
+        return {
+          type: 'BODY',
+          add_security_recommendation: component.add_security_recommendation !== false,
+        }
+      }
+      if (type === 'FOOTER') {
+        const minutes = positiveInt(component.code_expiration_minutes, 10, 1, 90)
+        return {
+          type: 'FOOTER',
+          code_expiration_minutes: minutes,
+        }
+      }
+      if (type === 'BUTTONS') {
+        const buttons = Array.isArray(component.buttons) ? component.buttons : []
+        const button = asMetadata(buttons[0])
+        const otpType = cleanText(button.otp_type, 40).toUpperCase() === 'ONE_TAP'
+          ? 'ONE_TAP'
+          : 'COPY_CODE'
+        return {
+          type: 'BUTTONS',
+          buttons: [{
+            type: 'OTP',
+            otp_type: otpType,
+            text: cleanText(button.text, 25) || 'Copiar codigo',
+          }],
+        }
+      }
+      return null
+    })
+    .filter(Boolean)
 }
 
 export function normalizeMetaWhatsAppTemplateName(value: unknown) {
@@ -518,11 +736,14 @@ function validateMetaWhatsAppTemplateComponents(components: unknown[]) {
 }
 
 export async function createMetaWhatsAppTemplate(input: MetaWhatsAppTemplateMutationInput, config: ConfigMap = {}) {
-  const resolved = resolveMetaWhatsAppConfig(config)
+  const resolved = resolveMetaWhatsAppConfigForWaba(config, input.wabaId)
   if (resolved.missing.length) throw new Error(`Configuracao incompleta: ${resolved.missing.join(', ')}`)
 
   const name = normalizeMetaWhatsAppTemplateName(input.name)
-  const components = cleanTemplateComponents(input.components)
+  const category = normalizeTemplateCategory(input.category)
+  const components = category === 'AUTHENTICATION'
+    ? normalizeAuthenticationTemplateComponents(cleanTemplateComponents(input.components))
+    : cleanTemplateComponents(input.components)
   if (!name) throw new Error('Nome do template obrigatorio.')
   if (!components.some(component => cleanText((component as Record<string, unknown>).type).toUpperCase() === 'BODY')) {
     throw new Error('Template precisa ter componente BODY.')
@@ -534,7 +755,7 @@ export async function createMetaWhatsAppTemplate(input: MetaWhatsAppTemplateMuta
     body: {
       name,
       language: normalizeLanguage(input.language || resolved.defaultLanguage),
-      category: normalizeTemplateCategory(input.category),
+      category,
       parameter_format: 'positional',
       components,
       ...(input.messageSendTtlSeconds ? { message_send_ttl_seconds: input.messageSendTtlSeconds } : {}),
@@ -543,7 +764,7 @@ export async function createMetaWhatsAppTemplate(input: MetaWhatsAppTemplateMuta
 }
 
 export async function editMetaWhatsAppTemplate(input: MetaWhatsAppTemplateMutationInput, config: ConfigMap = {}) {
-  const resolved = resolveMetaWhatsAppConfig(config)
+  const resolved = resolveMetaWhatsAppConfigForWaba(config, input.wabaId)
   if (!resolved.accessToken) throw new Error('System User Access Token ausente.')
 
   const templateId = cleanText(input.templateId, 120)
@@ -565,7 +786,7 @@ export async function editMetaWhatsAppTemplate(input: MetaWhatsAppTemplateMutati
 }
 
 export async function deleteMetaWhatsAppTemplate(input: MetaWhatsAppTemplateMutationInput, config: ConfigMap = {}) {
-  const resolved = resolveMetaWhatsAppConfig(config)
+  const resolved = resolveMetaWhatsAppConfigForWaba(config, input.wabaId)
   if (resolved.missing.length) throw new Error(`Configuracao incompleta: ${resolved.missing.join(', ')}`)
 
   const templateId = cleanText(input.templateId, 120)
@@ -639,7 +860,7 @@ export async function uploadMetaWhatsAppTemplateHeaderMedia(input: UploadMetaWha
 }
 
 export async function sendMetaWhatsAppTemplateMessage(input: SendTemplateMessageInput) {
-  const resolved = resolveMetaWhatsAppConfig(input.config || {})
+  const resolved = resolveMetaWhatsAppConfigForWaba(input.config || {}, input.wabaId)
   const phoneNumberId = cleanText(input.phoneNumberId || resolved.defaultPhoneNumberId, 80)
   const to = normalizeMetaWhatsAppPhone(input.to)
 
@@ -669,7 +890,7 @@ export async function sendMetaWhatsAppTemplateMessage(input: SendTemplateMessage
 }
 
 export async function sendMetaWhatsAppTextMessage(input: SendTextMessageInput) {
-  const resolved = resolveMetaWhatsAppConfig(input.config || {})
+  const resolved = resolveMetaWhatsAppConfigForWaba(input.config || {}, input.wabaId)
   const phoneNumberId = cleanText(input.phoneNumberId || resolved.defaultPhoneNumberId, 80)
   const to = normalizeMetaWhatsAppPhone(input.to)
   const text = cleanText(input.text, 4096)
@@ -700,7 +921,7 @@ export async function sendMetaWhatsAppTextMessage(input: SendTextMessageInput) {
 }
 
 export async function sendMetaWhatsAppAudioMessage(input: SendAudioMessageInput) {
-  const resolved = resolveMetaWhatsAppConfig(input.config || {})
+  const resolved = resolveMetaWhatsAppConfigForWaba(input.config || {}, input.wabaId)
   const phoneNumberId = cleanText(input.phoneNumberId || resolved.defaultPhoneNumberId, 80)
   const to = normalizeMetaWhatsAppPhone(input.to)
   const audioUrl = cleanText(input.audioUrl, 2000)
@@ -730,7 +951,7 @@ export async function sendMetaWhatsAppAudioMessage(input: SendAudioMessageInput)
 }
 
 export async function markMetaWhatsAppMessageAsRead(input: MarkMessageReadInput) {
-  const resolved = resolveMetaWhatsAppConfig(input.config || {})
+  const resolved = resolveMetaWhatsAppConfigForWaba(input.config || {}, input.wabaId)
   const phoneNumberId = cleanText(input.phoneNumberId || resolved.defaultPhoneNumberId, 80)
   const messageId = cleanText(input.messageId, 300)
 
@@ -759,10 +980,48 @@ export async function sendMetaWhatsAppTypingIndicator(input: Omit<MarkMessageRea
 }
 
 export async function syncMetaWhatsAppAssets(config: ConfigMap = {}, supabase = createAdminClient()) {
-  const resolved = resolveMetaWhatsAppConfig(config)
+  const accounts = resolveMetaWhatsAppAccountConfigs(config).filter(account => account.enabled)
+  const targets = accounts.length ? accounts : [resolveMetaWhatsAppConfig(config)]
+  const warnings: string[] = []
+  const synced: Array<Awaited<ReturnType<typeof syncMetaWhatsAppAssetsForResolved>>> = []
+  let firstError: unknown = null
+
+  for (const account of targets) {
+    if (account.missing.length) {
+      warnings.push(`${'label' in account ? account.label : account.wabaId}: configuracao incompleta (${account.missing.join(', ')}).`)
+      continue
+    }
+
+    try {
+      synced.push(await syncMetaWhatsAppAssetsForResolved(account, supabase))
+    } catch (error) {
+      if (!firstError) firstError = error
+      const message = error instanceof Error ? error.message : String(error)
+      warnings.push(`${'label' in account ? account.label : account.wabaId}: ${message}`)
+    }
+  }
+
+  if (!synced.length && firstError) throw firstError
+
+  const senders = synced.flatMap(item => item.senders)
+  const templates = synced.flatMap(item => item.templates)
+  return {
+    senders,
+    templates,
+    senderCount: senders.length,
+    templateCount: templates.length,
+    accounts: synced.map(item => item.account),
+    warnings,
+  }
+}
+
+async function syncMetaWhatsAppAssetsForResolved(
+  resolved: MetaWhatsAppResolvedConfig & Partial<Pick<MetaWhatsAppAccountConfig, 'label' | 'configKey' | 'primary'>>,
+  supabase = createAdminClient()
+) {
   const [senders, templates] = await Promise.all([
-    listMetaWhatsAppSenders(config),
-    listMetaWhatsAppTemplates(config),
+    listMetaWhatsAppSendersForResolved(resolved),
+    listMetaWhatsAppTemplatesForResolved(resolved),
   ])
 
   if (senders.length) {
@@ -780,7 +1039,12 @@ export async function syncMetaWhatsAppAssets(config: ConfigMap = {}, supabase = 
       daily_limit: resolved.dailyLimitPerNumber,
       last_health_check_at: new Date().toISOString(),
       last_error: null,
-      metadata: sender as unknown as Record<string, unknown>,
+      metadata: {
+        ...(sender as unknown as Record<string, unknown>),
+        waba_label: resolved.label || null,
+        waba_config_key: resolved.configKey || null,
+        waba_primary: Boolean(resolved.primary),
+      },
     }))
 
     const { error } = await supabase
@@ -873,6 +1137,11 @@ export async function syncMetaWhatsAppAssets(config: ConfigMap = {}, supabase = 
     templates,
     senderCount: senders.length,
     templateCount: templates.length,
+    account: {
+      wabaId: resolved.wabaId,
+      label: resolved.label || resolved.wabaId,
+      primary: Boolean(resolved.primary),
+    },
   }
 }
 

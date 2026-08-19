@@ -10,6 +10,7 @@ import { inngest } from '@/lib/inngest/client'
 import {
     createMetaWhatsAppCampaign,
     getMetaWhatsAppDailyReport,
+    getMetaWhatsAppDetailedReport,
     getMetaWhatsAppCampaignDetail,
     listMetaWhatsAppCampaigns,
     manageMetaWhatsAppCampaign,
@@ -58,6 +59,21 @@ export async function GET(request: NextRequest) {
                     date: request.nextUrl.searchParams.get('date'),
                 })
                 return NextResponse.json({ success: true, provider: 'meta_whatsapp', report: 'daily', ...result })
+            }
+            if (report === 'detailed') {
+                const result = await getMetaWhatsAppDetailedReport({
+                    dateFrom: request.nextUrl.searchParams.get('dateFrom'),
+                    dateTo: request.nextUrl.searchParams.get('dateTo'),
+                    templateName: request.nextUrl.searchParams.get('template_name'),
+                    campaignId: request.nextUrl.searchParams.get('campaign_id'),
+                    senderId: request.nextUrl.searchParams.get('sender_id'),
+                    wabaId: request.nextUrl.searchParams.get('waba_id'),
+                    status: request.nextUrl.searchParams.get('status'),
+                    intent: request.nextUrl.searchParams.get('intent'),
+                    search: request.nextUrl.searchParams.get('search'),
+                    limit: Math.min(Math.max(Number(request.nextUrl.searchParams.get('limit') || 1000), 1), 5000),
+                })
+                return NextResponse.json({ success: true, provider: 'meta_whatsapp', report: 'detailed', ...result })
             }
 
             const campaignId = request.nextUrl.searchParams.get('campaign_id')
@@ -148,6 +164,23 @@ export async function POST(request: NextRequest) {
                 || campaignData.creative_deduplication_mode === 'allow_repeat'
                 ? 'allow_repeat'
                 : 'skip_previous'
+            const senderRoutingMode = campaignData.senderRoutingMode || campaignData.sender_routing_mode || 'weighted_pool'
+            const portfolioRoutingEnabled = senderRoutingMode === 'round_robin'
+                && (campaignData.portfolioRouting === true
+                    || campaignData.portfolio_routing === true
+                    || campaignData.portfolioRoutingEnabled === true
+                    || campaignData.portfolio_routing_enabled === true)
+            const requestedWabaId = String(
+                portfolioRoutingEnabled
+                    ? ''
+                    : campaignData.wabaId
+                    || campaignData.waba_id
+                    || campaignData.targetWabaId
+                    || campaignData.target_waba_id
+                    || campaignData.templateWabaId
+                    || campaignData.template_waba_id
+                || ''
+            ).trim()
 
             const result = await createMetaWhatsAppCampaign({
                 name: campaignData.name || campaignData.folder || `Campanha Meta ${new Date().toLocaleDateString('pt-BR')}`,
@@ -159,16 +192,23 @@ export async function POST(request: NextRequest) {
                 scheduledFor: campaignData.scheduled_for || campaignData.scheduledFor,
                 confirmOptIn: Boolean(campaignData.confirmOptIn || campaignData.confirm_opt_in),
                 optInSource: campaignData.optInSource || campaignData.opt_in_source || 'site_lead_authorized',
-                senderRoutingMode: campaignData.senderRoutingMode || campaignData.sender_routing_mode || 'weighted_pool',
-                defaultSenderId: campaignData.defaultSenderId || campaignData.default_sender_id || null,
+                senderRoutingMode,
+                defaultSenderId: portfolioRoutingEnabled
+                    ? null
+                    : campaignData.defaultSenderId || campaignData.default_sender_id || null,
                 whatsAppValidationMode,
                 creativeDeduplicationMode,
                 templateParameters: campaignData.templateParameters || campaignData.template_parameters || {},
                 audienceSource: contactListId ? 'saved_contact_list' : campaignData.audienceSource || campaignData.audience_source || 'custom_paste',
                 metadata: {
                     ...contactListMetadata,
+                    ...(requestedWabaId ? {
+                        waba_id: requestedWabaId,
+                        target_waba_id: requestedWabaId,
+                    } : {}),
                     whatsapp_validation_mode: whatsAppValidationMode,
                     creative_deduplication_mode: creativeDeduplicationMode,
+                    portfolio_routing_enabled: portfolioRoutingEnabled,
                     contact_segment: asMetadataRecord(campaignData.contactSegment || campaignData.contact_segment),
                     created_from: 'admin_whatsapp_campaigns',
                     legacy_instance_id_ignored: instanceId || null,
@@ -192,7 +232,7 @@ export async function POST(request: NextRequest) {
                 queued: result.queuedCount,
                 skipped: result.skippedCount,
                 message: result.queuedCount > 0
-                    ? `Campanha lancada com sucesso. ${result.queuedCount} contato(s) foram 100% liberados para envio em segundo plano pela Meta.${result.skippedCount > 0 ? ` ${result.skippedCount} contato(s) foram bloqueados por opt-out, validacao, regra de lista ou criativo repetido.` : ''}`
+                    ? `Campanha lancada com sucesso. ${result.queuedCount} contato(s) foram 100% liberados para envio em segundo plano pela Meta${portfolioRoutingEnabled ? ' com distribuicao entre contas aprovadas para este template' : ''}.${result.skippedCount > 0 ? ` ${result.skippedCount} contato(s) foram bloqueados por opt-out, validacao, regra de lista ou criativo repetido.` : ''}`
                     : `Campanha preparada, mas nenhum contato ficou elegivel para envio.${result.skippedCount > 0 ? ` ${result.skippedCount} contato(s) foram bloqueados por opt-out, validacao, regra de lista ou criativo repetido.` : ''}`,
             })
         }

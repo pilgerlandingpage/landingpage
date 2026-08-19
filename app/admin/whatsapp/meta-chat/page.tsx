@@ -34,11 +34,20 @@ type ConversationStatus = 'open' | 'pending' | 'closed' | 'archived'
 type ReplyIntent = 'interested' | 'opt_out' | 'question' | 'unknown'
 
 type SenderSummary = {
+  id?: string | null
   display_name?: string | null
   phone_number?: string | null
   phone_number_id?: string | null
+  waba_id?: string | null
   meta_status?: string | null
+  local_status?: string | null
   quality_rating?: string | null
+  conversation_count?: number | null
+  unread_count?: number | null
+  open_count?: number | null
+  pending_count?: number | null
+  closed_count?: number | null
+  window_active_count?: number | null
 }
 
 type CampaignSummary = {
@@ -120,6 +129,7 @@ type MetaReplyIntent = {
 type ChatPayload = {
   success: boolean
   conversations?: MetaConversation[]
+  senders?: SenderSummary[]
   conversation?: MetaConversation
   messages?: MetaMessage[]
   replyIntent?: MetaReplyIntent | null
@@ -205,6 +215,11 @@ function formatPhone(value?: string | null) {
     return `+55 ${phone.slice(2, 4)} ${phone.slice(4, 8)}-${phone.slice(8)}`
   }
   return phone ? `+${phone}` : '-'
+}
+
+function senderDisplayName(sender?: SenderSummary | null) {
+  const phone = String(sender?.phone_number || '').replace(/\D/g, '')
+  return sender?.display_name || (phone ? formatPhone(phone) : 'Numero oficial')
 }
 
 function isWindowActive(conversation?: MetaConversation | null) {
@@ -317,6 +332,7 @@ function LeadAvatar({ name, src, size = 'md' }: { name?: string | null; src?: st
 
 export default function MetaWhatsAppChatPage() {
   const [conversations, setConversations] = useState<MetaConversation[]>([])
+  const [chatSenders, setChatSenders] = useState<SenderSummary[]>([])
   const [summary, setSummary] = useState<ChatPayload['summary']>({
     total: 0,
     unread: 0,
@@ -330,6 +346,7 @@ export default function MetaWhatsAppChatPage() {
   const [messages, setMessages] = useState<MetaMessage[]>([])
   const [selectedReplyIntent, setSelectedReplyIntent] = useState<MetaReplyIntent | null>(null)
   const [statusFilter, setStatusFilter] = useState<'all' | ConversationStatus>('all')
+  const [senderFilter, setSenderFilter] = useState('all')
   const [search, setSearch] = useState('')
   const [reply, setReply] = useState('')
   const [loading, setLoading] = useState(true)
@@ -351,6 +368,7 @@ export default function MetaWhatsAppChatPage() {
   const selectedSender = useMemo(() => asSingle(selected?.sender), [selected])
   const selectedCampaign = useMemo(() => asSingle(selected?.campaign), [selected])
   const selectedLead = useMemo(() => asSingle(selected?.lead), [selected])
+  const totalSenderConversations = chatSenders.reduce((total, sender) => total + Number(sender.conversation_count || 0), 0)
   const activeWindow = isWindowActive(selected)
 
   const loadConversations = async (keepSelection = true) => {
@@ -358,6 +376,7 @@ export default function MetaWhatsAppChatPage() {
     try {
       const params = new URLSearchParams({ limit: '100' })
       if (statusFilter !== 'all') params.set('status', statusFilter)
+      if (senderFilter !== 'all') params.set('sender_id', senderFilter)
       if (search.trim()) params.set('search', search.trim())
 
       const response = await fetch(`/api/admin/whatsapp/meta-chat?${params.toString()}`, { cache: 'no-store' })
@@ -366,6 +385,7 @@ export default function MetaWhatsAppChatPage() {
 
       const rows = payload.conversations || []
       setConversations(rows)
+      setChatSenders(payload.senders || [])
       setSummary(payload.summary)
 
       if (!keepSelection || !selectedId || !rows.some(row => row.id === selectedId)) {
@@ -405,7 +425,7 @@ export default function MetaWhatsAppChatPage() {
 
   useEffect(() => {
     loadConversations(false)
-  }, [statusFilter])
+  }, [statusFilter, senderFilter])
 
   useEffect(() => {
     const timeout = window.setTimeout(() => loadConversations(true), 350)
@@ -422,7 +442,7 @@ export default function MetaWhatsAppChatPage() {
       if (selectedId) loadDetail(selectedId)
     }, 20000)
     return () => window.clearInterval(interval)
-  }, [selectedId, statusFilter, search])
+  }, [selectedId, statusFilter, senderFilter, search])
 
   useEffect(() => {
     const messagesContainer = messagesEndRef.current?.parentElement
@@ -639,6 +659,33 @@ export default function MetaWhatsAppChatPage() {
             ))}
           </div>
 
+          <div className="wa-senders">
+            <button
+              type="button"
+              className={senderFilter === 'all' ? 'active' : ''}
+              onClick={() => setSenderFilter('all')}
+              title="Mostrar conversas de todos os numeros oficiais ativos"
+            >
+              <span>Todos</span>
+              <small>{totalSenderConversations || summary?.total || 0}</small>
+            </button>
+            {chatSenders.map(sender => (
+              <button
+                key={sender.id || sender.phone_number_id || sender.phone_number}
+                type="button"
+                className={senderFilter === sender.id ? 'active' : ''}
+                onClick={() => setSenderFilter(sender.id || 'all')}
+                title={`${senderDisplayName(sender)} | ${formatPhone(sender.phone_number)} | ${sender.quality_rating || sender.meta_status || '-'}`}
+              >
+                <span>{senderDisplayName(sender)}</span>
+                <small>
+                  {Number(sender.conversation_count || 0)}
+                  {Number(sender.unread_count || 0) > 0 ? ` / ${sender.unread_count} nao lida(s)` : ''}
+                </small>
+              </button>
+            ))}
+          </div>
+
           <div className="wa-summary-row">
             <span><Inbox size={14} /> {summary?.open || 0} abertas</span>
             <span><MessageSquareText size={14} /> {summary?.unread || 0} nao lidas</span>
@@ -672,7 +719,7 @@ export default function MetaWhatsAppChatPage() {
                       <span className="wa-row-preview">{shortText(conversation.last_message_preview, 88)}</span>
                       <span className="wa-row-meta">
                         {statusLabels[conversation.status] || conversation.status}
-                        <small>{sender?.display_name || 'Numero oficial'}</small>
+                        <small>{senderDisplayName(sender)}</small>
                       </span>
                     </span>
                     {conversation.unread_count > 0 && <span className="unread-badge">{conversation.unread_count}</span>}
@@ -696,7 +743,7 @@ export default function MetaWhatsAppChatPage() {
                 <LeadAvatar name={conversationName(selected)} src={conversationAvatar(selected)} />
                 <div className="wa-chat-title">
                   <strong>{conversationName(selected)}</strong>
-                  <span>{formatPhone(selected.contact_phone)} | {selectedSender?.display_name || 'Numero oficial'}</span>
+                  <span>{formatPhone(selected.contact_phone)} | {senderDisplayName(selectedSender)}</span>
                 </div>
                 <div className="wa-chat-actions">
                   <button type="button" className="add-list-button" aria-label="Adicionar a lista">
@@ -867,7 +914,7 @@ export default function MetaWhatsAppChatPage() {
                   <dt>Template</dt>
                   <dd>{selectedCampaign?.template_name || '-'}</dd>
                   <dt>Numero oficial</dt>
-                  <dd>{selectedSender?.display_name || '-'}</dd>
+                  <dd>{senderDisplayName(selectedSender)}</dd>
                   <dt>Qualidade</dt>
                   <dd>{selectedSender?.quality_rating || selectedSender?.meta_status || '-'}</dd>
                 </dl>
@@ -991,7 +1038,7 @@ export default function MetaWhatsAppChatPage() {
 
         .wa-sidebar {
           display: grid;
-          grid-template-rows: auto auto auto auto 1fr;
+          grid-template-rows: auto auto auto auto auto 1fr;
           min-width: 0;
           background: #fff;
           border-right: 1px solid #d7dde3;
@@ -1092,6 +1139,54 @@ export default function MetaWhatsAppChatPage() {
           border-color: #00a884;
           background: #d9fdd3;
           color: #0b8f61;
+        }
+
+        .wa-senders {
+          display: flex;
+          gap: 6px;
+          padding: 0 12px 10px;
+          overflow-x: auto;
+        }
+
+        .wa-senders button {
+          flex: 0 0 auto;
+          min-width: 116px;
+          max-width: 166px;
+          min-height: 42px;
+          display: grid;
+          gap: 2px;
+          justify-items: start;
+          border: 1px solid #d7dde3;
+          border-radius: 8px;
+          background: #fff;
+          color: #1f2937;
+          padding: 6px 9px;
+          cursor: pointer;
+          text-align: left;
+        }
+
+        .wa-senders button.active {
+          border-color: #00a884;
+          background: #d9fdd3;
+          color: #0b8f61;
+        }
+
+        .wa-senders button span,
+        .wa-senders button small {
+          max-width: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .wa-senders button span {
+          font-size: 12px;
+          font-weight: 800;
+        }
+
+        .wa-senders button small {
+          color: #667085;
+          font-size: 11px;
         }
 
         .wa-summary-row {
@@ -1777,7 +1872,7 @@ export default function MetaWhatsAppChatPage() {
         }
 
         .wa-sidebar {
-          grid-template-rows: auto auto auto 1fr;
+          grid-template-rows: auto auto auto auto auto 1fr;
           min-height: 0;
           overflow: hidden;
           border-right-color: #d1d7db;

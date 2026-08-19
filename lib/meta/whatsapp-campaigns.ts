@@ -2,7 +2,9 @@ import { createAdminClient } from '@/lib/supabase/server'
 import {
   loadMetaWhatsAppConfigMap,
   normalizeMetaWhatsAppPhone,
+  resolveMetaWhatsAppAccountConfigs,
   resolveMetaWhatsAppConfig,
+  resolveMetaWhatsAppConfigForWaba,
   sendMetaWhatsAppTemplateMessage,
 } from '@/lib/meta/whatsapp-cloud'
 import {
@@ -57,6 +59,19 @@ export interface GetMetaWhatsAppDailyReportInput {
   date?: string | null
 }
 
+export interface GetMetaWhatsAppDetailedReportInput {
+  dateFrom?: string | null
+  dateTo?: string | null
+  templateName?: string | null
+  campaignId?: string | null
+  senderId?: string | null
+  wabaId?: string | null
+  status?: string | null
+  intent?: string | null
+  search?: string | null
+  limit?: number
+}
+
 type MetaWhatsAppAnalyticsBucket = {
   date: string
   campaigns: number
@@ -83,6 +98,54 @@ function asMetadata(value: unknown): Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
     ? value as Record<string, unknown>
     : {}
+}
+
+function campaignWabaId(campaign: any, fallback = '') {
+  const metadata = asMetadata(campaign?.metadata)
+  return cleanText(
+    campaign?.waba_id ||
+    metadata.waba_id ||
+    metadata.target_waba_id ||
+    fallback,
+    120
+  )
+}
+
+function uniqueCleanText(values: unknown[], maxLength = 120) {
+  return Array.from(new Set(
+    values
+      .map(value => cleanText(value, maxLength))
+      .filter(Boolean)
+  ))
+}
+
+function arrayFromMetadata(value: unknown) {
+  return Array.isArray(value) ? value : []
+}
+
+function campaignUsesPortfolioRouting(campaign: any) {
+  const metadata = asMetadata(campaign?.metadata)
+  return cleanText(campaign?.sender_routing_mode, 40) === 'round_robin'
+    && metadata.portfolio_routing_enabled === true
+}
+
+function campaignRoutingWabaIds(campaign: any, fallback = '') {
+  const metadata = asMetadata(campaign?.metadata)
+  if (campaignUsesPortfolioRouting(campaign)) {
+    const routed = uniqueCleanText(arrayFromMetadata(metadata.routing_waba_ids))
+    if (routed.length) return routed
+  }
+
+  const wabaId = campaignWabaId(campaign, fallback)
+  return wabaId ? [wabaId] : []
+}
+
+function visibleWabaIdsFromConfig(configMap: Record<string, string | undefined>) {
+  const resolved = resolveMetaWhatsAppConfig(configMap)
+  const configuredVisibleWabaIds = resolveMetaWhatsAppAccountConfigs(configMap)
+    .filter(account => account.enabled && !account.missing.length)
+    .map(account => account.wabaId)
+  return uniqueCleanText(configuredVisibleWabaIds.length ? configuredVisibleWabaIds : [resolved.wabaId])
 }
 
 function recipientWhatsAppCheckStatus(recipient: MetaWhatsAppRecipientInput) {
@@ -809,12 +872,17 @@ async function fetchPriorCreativeDeliveries(
 export async function createMetaWhatsAppCampaign(input: CreateMetaWhatsAppCampaignInput, supabase = createAdminClient()) {
   const configMap = await loadMetaWhatsAppConfigMap(supabase)
   const resolved = resolveMetaWhatsAppConfig(configMap)
+  const configuredAccounts = resolveMetaWhatsAppAccountConfigs(configMap).filter(account => account.enabled)
+  const readyAccounts = configuredAccounts.filter(account => !account.missing.length)
 
   if (!resolved.enabled) {
     throw new Error('Meta WhatsApp Oficial esta inativo na Sala de Manutencao.')
   }
-  if (resolved.missing.length) {
-    throw new Error(`Configuracao Meta WhatsApp incompleta: ${resolved.missing.join(', ')}.`)
+  if (!readyAccounts.length) {
+    const missing = Array.from(new Set(
+      (configuredAccounts.length ? configuredAccounts : [resolved]).flatMap(account => account.missing)
+    )).filter(Boolean)
+    throw new Error(`Configuracao Meta WhatsApp incompleta: ${missing.join(', ') || 'ao menos uma WABA confirmada e token valido'}.`)
   }
   if (!input.confirmOptIn) {
     throw new Error('Confirme que todos os contatos deram opt-in antes de criar campanha oficial.')
@@ -835,43 +903,134 @@ export async function createMetaWhatsAppCampaign(input: CreateMetaWhatsAppCampai
   const creativeDeduplicationMode = input.creativeDeduplicationMode === 'allow_repeat'
     ? 'allow_repeat'
     : 'skip_previous'
+  const metadata = asMetadata(input.metadata)
+  const rawRoutingMode = cleanText(input.senderRoutingMode, 40)
+  const requestedRoutingMode = ['single', 'round_robin', 'weighted_pool'].includes(rawRoutingMode)
+    ? rawRoutingMode as 'single' | 'round_robin' | 'weighted_pool'
+    : 'weighted_pool'
+  const portfolioRoutingEnabled = requestedRoutingMode === 'round_robin'
+    && metadata.portfolio_routing_enabled === true
+  const selectedDefaultSenderId = portfolioRoutingEnabled ? null : input.defaultSenderId
+  let selectedSenderForWaba: any = null
 
-  const { data: template } = await supabase
+  if (selectedDefaultSenderId) {
+    const { data: senderForWaba, error: senderForWabaError } = await supabase
+      .from('meta_whatsapp_senders')
+      .select('id, waba_id')
+      .eq('id', selectedDefaultSenderId)
+      .maybeSingle()
+    if (senderForWabaError) throw senderForWabaError
+    selectedSenderForWaba = senderForWaba
+  }
+
+  const requestedWabaId = portfolioRoutingEnabled
+    ? ''
+    : cleanText(
+      selectedSenderForWaba?.waba_id ||
+      metadata.waba_id ||
+      metadata.target_waba_id ||
+      metadata.template_waba_id,
+      120
+    )
+  const configuredWabaIds = Array.from(new Set(readyAccounts.map(account => account.wabaId).filter(Boolean)))
+  let templateQuery = supabase
     .from('meta_whatsapp_templates')
-    .select('id, name, language, status')
-    .eq('waba_id', resolved.wabaId)
+    .select('id, waba_id, name, language, status')
     .eq('name', templateName)
     .eq('language', templateLanguage)
-    .maybeSingle()
+    .order('status', { ascending: true })
+
+  if (requestedWabaId) {
+    templateQuery = templateQuery.eq('waba_id', requestedWabaId)
+  } else if (configuredWabaIds.length) {
+    templateQuery = templateQuery.in('waba_id', configuredWabaIds)
+  }
+
+  const { data: templateMatches, error: templateError } = await templateQuery.limit(25)
+
+  if (templateError) throw templateError
+  const approvedTemplateMatches = (templateMatches || [])
+    .filter((item: any) => String(item.status || '').toUpperCase() === 'APPROVED')
+  const routingWabaIds = portfolioRoutingEnabled
+    ? uniqueCleanText(approvedTemplateMatches.map((item: any) => item.waba_id))
+      .filter(wabaId => configuredWabaIds.includes(wabaId))
+    : []
+
+  if (portfolioRoutingEnabled && !routingWabaIds.length) {
+    throw new Error(`Template ${templateName} (${templateLanguage}) precisa estar aprovado em ao menos uma WABA configurada para usar distribuicao entre contas.`)
+  }
+
+  const template = approvedTemplateMatches[0]
+    || templateMatches?.[0]
+    || null
+  const targetWabaId = cleanText(
+    requestedWabaId ||
+    routingWabaIds[0] ||
+    template?.waba_id ||
+    configuredWabaIds[0] ||
+    resolved.wabaId,
+    120
+  )
+  const activeRoutingWabaIds = portfolioRoutingEnabled
+    ? routingWabaIds
+    : uniqueCleanText([targetWabaId])
+
+  for (const wabaId of activeRoutingWabaIds) {
+    const routingConfig = resolveMetaWhatsAppConfigForWaba(configMap, wabaId)
+    if (routingConfig.missing.length) {
+      throw new Error(`Configuracao Meta WhatsApp incompleta para a WABA ${wabaId || 'selecionada'}: ${routingConfig.missing.join(', ')}.`)
+    }
+  }
+  const targetConfig = resolveMetaWhatsAppConfigForWaba(configMap, targetWabaId)
+  const targetAccount = readyAccounts.find(account => account.wabaId === targetWabaId)
+    || configuredAccounts.find(account => account.wabaId === targetWabaId)
+  const routingAccounts = activeRoutingWabaIds
+    .map(wabaId => readyAccounts.find(account => account.wabaId === wabaId)
+      || configuredAccounts.find(account => account.wabaId === wabaId))
+    .filter(Boolean)
+
+  if (!template) {
+    throw new Error(`Template ${templateName} (${templateLanguage}) nao foi encontrado nas contas configuradas. Sincronize os templates antes de criar a campanha.`)
+  }
 
   if (template?.status && String(template.status).toUpperCase() !== 'APPROVED') {
     throw new Error(`Template ${templateName} existe na base, mas esta com status ${template.status}. Use apenas templates aprovados.`)
   }
 
-  const { data: senders, error: sendersError } = await supabase
+  const portfolioWabaIds = configuredWabaIds.length ? configuredWabaIds : activeRoutingWabaIds
+  let sendersQuery = supabase
     .from('meta_whatsapp_senders')
-    .select('id, display_name, phone_number, phone_number_id, local_status, meta_status, quality_rating, messaging_limit_tier, daily_limit, daily_sent_count, daily_limit_resets_at, use_case, weight, last_error, metadata')
-    .eq('waba_id', resolved.wabaId)
+    .select('id, display_name, phone_number, phone_number_id, waba_id, local_status, meta_status, quality_rating, messaging_limit_tier, daily_limit, daily_sent_count, daily_limit_resets_at, use_case, weight, last_error, metadata')
     .eq('local_status', 'active')
-    .limit(50)
+    .limit(200)
+
+  if (portfolioWabaIds.length > 1) {
+    sendersQuery = sendersQuery.in('waba_id', portfolioWabaIds)
+  } else {
+    sendersQuery = sendersQuery.eq('waba_id', portfolioWabaIds[0] || targetWabaId)
+  }
+
+  const { data: senders, error: sendersError } = await sendersQuery
 
   if (sendersError) throw sendersError
-  const preparedSenders = await syncSenderDailyUsageFromCampaignRecipients(supabase, senders || [])
-  const portfolioUsage = portfolioDailyUsage(preparedSenders)
-  const selectedSender = input.defaultSenderId
-    ? preparedSenders.find((sender: any) => sender.id === input.defaultSenderId)
+  const preparedPortfolioSenders = await syncSenderDailyUsageFromCampaignRecipients(supabase, senders || [])
+  const preparedSenders = preparedPortfolioSenders
+    .filter((sender: any) => activeRoutingWabaIds.includes(cleanText(sender.waba_id, 120)))
+  const portfolioUsage = portfolioDailyUsage(preparedPortfolioSenders)
+  const selectedSender = selectedDefaultSenderId
+    ? preparedSenders.find((sender: any) => sender.id === selectedDefaultSenderId)
     : null
   const readyPoolSenders = preparedSenders.filter(isMetaSenderReady)
-  const hasReadySender = input.defaultSenderId
+  const hasReadySender = selectedDefaultSenderId
     ? Boolean(selectedSender && isMetaSenderReady(selectedSender))
     : readyPoolSenders.length > 0
 
   if (portfolioUsage.remaining <= 0) {
-    throw new Error(`${describePortfolioAvailability(preparedSenders)} Aguarde o reset da janela de 24h ou crie a campanha agendada para depois.`)
+    throw new Error(`${describePortfolioAvailability(preparedPortfolioSenders)} Aguarde o reset da janela de 24h ou crie a campanha agendada para depois.`)
   }
 
   if (!hasReadySender) {
-    if (input.defaultSenderId) {
+    if (selectedDefaultSenderId) {
       throw new Error(`Numero oficial selecionado indisponivel para envio: ${describeSenderAvailability(selectedSender)} Escolha "Pool automatico por capacidade" ou um numero com saldo diario.`)
     }
 
@@ -909,8 +1068,8 @@ export async function createMetaWhatsAppCampaign(input: CreateMetaWhatsAppCampai
       template_id: template?.id || null,
       template_name: templateName,
       template_language: templateLanguage,
-      sender_routing_mode: input.senderRoutingMode || 'weighted_pool',
-      default_sender_id: input.defaultSenderId || null,
+      sender_routing_mode: requestedRoutingMode,
+      default_sender_id: selectedDefaultSenderId || null,
       audience_source: input.audienceSource || 'custom_paste',
       audience_query: {
         count: recipients.length,
@@ -921,11 +1080,23 @@ export async function createMetaWhatsAppCampaign(input: CreateMetaWhatsAppCampai
       scheduled_for: scheduledFor,
       total_recipients: recipients.length,
       metadata: {
-        ...(input.metadata || {}),
+        ...metadata,
+        waba_id: targetWabaId,
+        waba_label: targetAccount?.label || targetWabaId,
+        portfolio_routing_enabled: portfolioRoutingEnabled,
+        routing_waba_ids: activeRoutingWabaIds,
+        routing_waba_labels: routingAccounts.map((account: any) => account.label || account.wabaId).filter(Boolean),
+        routing_template_ids: portfolioRoutingEnabled
+          ? approvedTemplateMatches
+            .filter((item: any) => activeRoutingWabaIds.includes(cleanText(item.waba_id, 120)))
+            .map((item: any) => item.id)
+            .filter(Boolean)
+          : template?.id ? [template.id] : [],
+        routing_sender_count: readyPoolSenders.length,
         whatsapp_validation_mode: whatsAppValidationMode,
         creative_deduplication_mode: creativeDeduplicationMode,
         template_status_at_creation: template?.status || 'not_synced',
-        support_redirect_phone: resolved.supportRedirectPhone,
+        support_redirect_phone: targetConfig.supportRedirectPhone,
       },
     })
     .select('*')
@@ -1075,6 +1246,47 @@ function dateInRange(value: unknown, startAt: string, endAt: string) {
     && time < new Date(endAt).getTime()
 }
 
+function saoPauloDateOffset(daysOffset: number) {
+  const parts = saoPauloDateParts(new Date())
+  const date = new Date(Date.UTC(parts.year, parts.month - 1, parts.day + daysOffset, 3, 0, 0, 0))
+  return date.toISOString().slice(0, 10)
+}
+
+function normalizeDetailedReportDate(value: string | null | undefined, fallback: string) {
+  const selected = cleanText(value, 20)
+  if (/^\d{4}-\d{2}-\d{2}$/.test(selected)) return selected
+  return fallback
+}
+
+function normalizeDetailedReportStatus(value?: string | null) {
+  const selected = cleanText(value, 40).toLowerCase()
+  const allowed = new Set(['queued', 'sending', 'sent', 'delivered', 'read', 'failed', 'cancelled', 'skipped', 'opted_out'])
+  return allowed.has(selected) ? selected : ''
+}
+
+function normalizeDetailedReportIntent(value?: string | null) {
+  const selected = cleanText(value, 40).toLowerCase()
+  const allowed = new Set(['interested', 'opt_out', 'question', 'unknown'])
+  return allowed.has(selected) ? selected : ''
+}
+
+function rowHasActivityInRange(row: any, startAt: string, endAt: string) {
+  return [
+    row?.sent_at,
+    row?.delivered_at,
+    row?.read_at,
+    row?.failed_at,
+    row?.cost_recorded_at,
+    row?.updated_at,
+    row?.created_at,
+  ].some(value => dateInRange(value, startAt, endAt))
+}
+
+function rowSender(row: any) {
+  if (Array.isArray(row?.sender)) return row.sender[0] || null
+  return row?.sender || null
+}
+
 function rowCampaign(row: any) {
   if (Array.isArray(row?.campaign)) return row.campaign[0] || null
   return row?.campaign || null
@@ -1125,13 +1337,22 @@ export async function getMetaWhatsAppDailyReport(
 ) {
   const date = normalizeReportDate(input.date)
   const { startAt, endAt } = saoPauloDateRangeIso(date)
+  const configMap = await loadMetaWhatsAppConfigMap(supabase)
+  const visibleWabaIds = visibleWabaIdsFromConfig(configMap)
 
-  const [recipientsResult, repliesResult] = await Promise.all([
+  const [visibleSendersResult, recipientsResult, repliesResult] = await Promise.all([
+    visibleWabaIds.length
+      ? supabase
+        .from('meta_whatsapp_senders')
+        .select('id')
+        .in('waba_id', visibleWabaIds)
+      : Promise.resolve({ data: [], error: null }),
     supabase
       .from('meta_whatsapp_campaign_recipients')
       .select(`
         id,
         campaign_id,
+        sender_id,
         recipient_phone,
         recipient_name,
         status,
@@ -1145,7 +1366,7 @@ export async function getMetaWhatsAppDailyReport(
         cost_recorded_at,
         created_at,
         updated_at,
-        campaign:meta_whatsapp_campaigns(id, name, status, campaign_type, template_name, template_language, metadata)
+        campaign:meta_whatsapp_campaigns(id, name, status, campaign_type, template_name, template_language, default_sender_id, metadata)
       `)
       .or(`sent_at.gte.${startAt},delivered_at.gte.${startAt},read_at.gte.${startAt},failed_at.gte.${startAt},cost_recorded_at.gte.${startAt},updated_at.gte.${startAt}`)
       .order('updated_at', { ascending: false })
@@ -1155,6 +1376,7 @@ export async function getMetaWhatsAppDailyReport(
       .select(`
         id,
         campaign_id,
+        sender_id,
         contact_phone,
         contact_name,
         intent,
@@ -1164,7 +1386,7 @@ export async function getMetaWhatsAppDailyReport(
         campaign_name,
         template_name,
         created_at,
-        campaign:meta_whatsapp_campaigns(id, name, status, campaign_type, template_name, template_language, metadata)
+        campaign:meta_whatsapp_campaigns(id, name, status, campaign_type, template_name, template_language, default_sender_id, metadata)
       `)
       .gte('created_at', startAt)
       .lt('created_at', endAt)
@@ -1172,12 +1394,26 @@ export async function getMetaWhatsAppDailyReport(
       .limit(20000),
   ])
 
+  if (visibleSendersResult.error) throw visibleSendersResult.error
   if (recipientsResult.error) throw recipientsResult.error
   if (repliesResult.error) throw repliesResult.error
+
+  const visibleSenderIds = new Set((visibleSendersResult.data || [])
+    .map((sender: any) => cleanText(sender.id, 80))
+    .filter(Boolean))
+  const rowIsVisible = (row: any) => {
+    const campaign = rowCampaign(row)
+    const wabaId = campaignWabaId(campaign)
+    if (wabaId) return visibleWabaIds.includes(wabaId)
+    const senderId = cleanText(row.sender_id || campaign?.default_sender_id, 80)
+    if (senderId) return visibleSenderIds.has(senderId)
+    return true
+  }
 
   const campaignRows = new Map<string, ReturnType<typeof emptyDailyCampaignRow>>()
   const recipients = ((recipientsResult.data || []) as any[])
     .filter(row => !asMetadata(rowCampaign(row)?.metadata).deleted_from_panel_at)
+    .filter(rowIsVisible)
 
   let dispatched = 0
   let delivered = 0
@@ -1223,6 +1459,7 @@ export async function getMetaWhatsAppDailyReport(
 
   const replies = ((repliesResult.data || []) as any[])
     .filter(row => !asMetadata(rowCampaign(row)?.metadata).deleted_from_panel_at)
+    .filter(rowIsVisible)
   let positiveReplies = 0
   let optOutReplies = 0
   let questionReplies = 0
@@ -1268,10 +1505,337 @@ export async function getMetaWhatsAppDailyReport(
   }
 }
 
+function chunkValues<T>(values: T[], size: number) {
+  const chunks: T[][] = []
+  for (let index = 0; index < values.length; index += size) {
+    chunks.push(values.slice(index, index + size))
+  }
+  return chunks
+}
+
+function incrementDetailedGroup(
+  map: Map<string, any>,
+  key: string,
+  label: string,
+  row: any,
+  reply: any | null
+) {
+  const selectedKey = key || 'sem-identificacao'
+  const current = map.get(selectedKey) || {
+    key: selectedKey,
+    label: label || selectedKey,
+    recipients: 0,
+    sent: 0,
+    delivered: 0,
+    read: 0,
+    failed: 0,
+    skipped: 0,
+    replies: 0,
+    positive_replies: 0,
+    cost_amount: 0,
+  }
+  const status = cleanText(row?.status, 40).toLowerCase()
+  const wasSent = Boolean(row?.sent_at) || ['sent', 'delivered', 'read'].includes(status)
+  const wasDelivered = Boolean(row?.delivered_at || row?.read_at) || ['delivered', 'read'].includes(status)
+  const wasRead = Boolean(row?.read_at) || status === 'read'
+  const wasFailed = Boolean(row?.failed_at) || status === 'failed'
+  const wasSkipped = status === 'skipped' || status === 'cancelled' || status === 'opted_out'
+  const intent = cleanText(reply?.intent, 40).toLowerCase()
+
+  current.recipients += 1
+  if (wasSent) current.sent += 1
+  if (wasDelivered) current.delivered += 1
+  if (wasRead) current.read += 1
+  if (wasFailed) current.failed += 1
+  if (wasSkipped) current.skipped += 1
+  if (reply) current.replies += 1
+  if (intent === 'interested') current.positive_replies += 1
+  current.cost_amount += asNumber(row?.cost_amount)
+  map.set(selectedKey, current)
+}
+
+export async function getMetaWhatsAppDetailedReport(
+  input: GetMetaWhatsAppDetailedReportInput = {},
+  supabase = createAdminClient()
+) {
+  const fallbackFrom = saoPauloDateOffset(-7)
+  const fallbackTo = saoPauloDateOffset(0)
+  let dateFrom = normalizeDetailedReportDate(input.dateFrom, fallbackFrom)
+  let dateTo = normalizeDetailedReportDate(input.dateTo, fallbackTo)
+  if (dateFrom > dateTo) {
+    const previousFrom = dateFrom
+    dateFrom = dateTo
+    dateTo = previousFrom
+  }
+
+  const startAt = saoPauloDateRangeIso(dateFrom).startAt
+  const endAt = saoPauloDateRangeIso(dateTo).endAt
+  const limit = Math.min(5000, Math.max(1, Number(input.limit || 1000)))
+  const queryLimit = Math.min(25000, Math.max(limit * 4, 1000))
+  const templateName = cleanText(input.templateName, 160)
+  const campaignId = cleanText(input.campaignId, 80)
+  const senderId = cleanText(input.senderId, 80)
+  const requestedWabaId = cleanText(input.wabaId, 120)
+  const status = normalizeDetailedReportStatus(input.status)
+  const intent = normalizeDetailedReportIntent(input.intent)
+  const search = cleanText(input.search, 160).toLowerCase()
+  const configMap = await loadMetaWhatsAppConfigMap(supabase)
+  const accountConfigs = resolveMetaWhatsAppAccountConfigs(configMap)
+    .filter(account => account.enabled && !account.missing.length)
+  const visibleWabaIds = visibleWabaIdsFromConfig(configMap)
+  const wabaLabelById = new Map(accountConfigs.map(account => [account.wabaId, account.label]))
+
+  let sendersQuery = supabase
+    .from('meta_whatsapp_senders')
+    .select('id, display_name, phone_number, phone_number_id, waba_id, local_status, meta_status, quality_rating, metadata')
+  if (visibleWabaIds.length) sendersQuery = sendersQuery.in('waba_id', visibleWabaIds)
+  const { data: visibleSenders, error: sendersError } = await sendersQuery
+  if (sendersError) throw sendersError
+
+  const senderEntries: Array<[string, any]> = (visibleSenders || [])
+    .map((sender: any) => [cleanText(sender?.id, 80), sender])
+    .filter((entry: [string, any]) => Boolean(entry[0]))
+  const senderById = new Map(senderEntries)
+  const visibleSenderIds = new Set(senderById.keys())
+
+  let query = supabase
+    .from('meta_whatsapp_campaign_recipients')
+    .select(`
+      id,
+      campaign_id,
+      sender_id,
+      recipient_phone,
+      recipient_name,
+      status,
+      provider_message_id,
+      error_code,
+      error_message,
+      sent_at,
+      delivered_at,
+      read_at,
+      failed_at,
+      cost_amount,
+      currency,
+      cost_status,
+      cost_recorded_at,
+      created_at,
+      updated_at,
+      campaign:meta_whatsapp_campaigns(id, name, status, campaign_type, template_name, template_language, default_sender_id, metadata),
+      sender:meta_whatsapp_senders(id, display_name, phone_number, phone_number_id, waba_id, local_status, meta_status, quality_rating, metadata)
+    `)
+    .or(`sent_at.gte.${startAt},delivered_at.gte.${startAt},read_at.gte.${startAt},failed_at.gte.${startAt},cost_recorded_at.gte.${startAt},updated_at.gte.${startAt},created_at.gte.${startAt}`)
+    .order('updated_at', { ascending: false })
+    .limit(queryLimit)
+
+  if (campaignId) query = query.eq('campaign_id', campaignId)
+  if (senderId) query = query.eq('sender_id', senderId)
+  if (status) query = query.eq('status', status)
+
+  const { data: recipientRows, error } = await query
+  if (error) throw error
+
+  const rowIsVisible = (row: any) => {
+    const campaign = rowCampaign(row)
+    const sender = rowSender(row) || senderById.get(cleanText(row?.sender_id || campaign?.default_sender_id, 80))
+    const wabaId = cleanText(sender?.waba_id || campaignWabaId(campaign), 120)
+    if (requestedWabaId && wabaId !== requestedWabaId) return false
+    if (wabaId) return !visibleWabaIds.length || visibleWabaIds.includes(wabaId)
+    const resolvedSenderId = cleanText(row?.sender_id || campaign?.default_sender_id, 80)
+    if (resolvedSenderId) return visibleSenderIds.has(resolvedSenderId)
+    return true
+  }
+
+  let recipients = ((recipientRows || []) as any[])
+    .filter(row => !asMetadata(rowCampaign(row)?.metadata).deleted_from_panel_at)
+    .filter(rowIsVisible)
+    .filter(row => rowHasActivityInRange(row, startAt, endAt))
+
+  if (templateName) {
+    recipients = recipients.filter(row => cleanText(rowCampaign(row)?.template_name, 160) === templateName)
+  }
+
+  if (search) {
+    recipients = recipients.filter(row => {
+      const campaign = rowCampaign(row)
+      const sender = rowSender(row) || senderById.get(cleanText(row?.sender_id || campaign?.default_sender_id, 80))
+      return [
+        row?.recipient_phone,
+        row?.recipient_name,
+        row?.status,
+        row?.error_code,
+        row?.error_message,
+        campaign?.name,
+        campaign?.template_name,
+        campaign?.template_language,
+        sender?.display_name,
+        sender?.phone_number,
+      ].some(value => cleanText(value, 500).toLowerCase().includes(search))
+    })
+  }
+
+  const recipientIds = recipients.map((row: any) => cleanText(row?.id, 80)).filter(Boolean)
+  const latestReplyByRecipient = new Map<string, any>()
+
+  for (const chunk of chunkValues(recipientIds, 500)) {
+    let repliesQuery = supabase
+      .from('meta_whatsapp_reply_intents')
+      .select('id, recipient_id, campaign_id, sender_id, contact_phone, contact_name, intent, button_text, button_payload, raw_text, auto_reply_status, notified_status, created_at')
+      .in('recipient_id', chunk)
+      .order('created_at', { ascending: false })
+      .limit(Math.min(2500, Math.max(chunk.length * 3, 200)))
+    if (intent) repliesQuery = repliesQuery.eq('intent', intent)
+
+    const { data: replies, error: repliesError } = await repliesQuery
+    if (repliesError) throw repliesError
+
+    for (const reply of replies || []) {
+      const recipientId = cleanText((reply as any).recipient_id, 80)
+      if (recipientId && !latestReplyByRecipient.has(recipientId)) {
+        latestReplyByRecipient.set(recipientId, reply)
+      }
+    }
+  }
+
+  if (intent) {
+    recipients = recipients.filter(row => latestReplyByRecipient.has(cleanText(row?.id, 80)))
+  }
+
+  const rows = recipients.slice(0, limit).map((row: any) => {
+    const campaign = rowCampaign(row)
+    const fallbackSenderId = cleanText(row?.sender_id || campaign?.default_sender_id, 80)
+    const sender = rowSender(row) || senderById.get(fallbackSenderId) || null
+    const wabaId = cleanText(sender?.waba_id || campaignWabaId(campaign), 120) || null
+    const reply = latestReplyByRecipient.get(cleanText(row?.id, 80)) || null
+
+    return {
+      recipient_id: row.id,
+      campaign_id: row.campaign_id || campaign?.id || null,
+      campaign_name: cleanText(campaign?.name, 180) || 'Sem campanha vinculada',
+      campaign_type: cleanText(campaign?.campaign_type, 60) || null,
+      template_name: cleanText(campaign?.template_name, 160) || 'Sem template',
+      template_language: cleanText(campaign?.template_language, 40) || null,
+      sender_id: fallbackSenderId || null,
+      sender_name: cleanText(sender?.display_name, 180) || null,
+      sender_phone: cleanText(sender?.phone_number, 40) || null,
+      waba_id: wabaId,
+      waba_label: wabaId ? (wabaLabelById.get(wabaId) || wabaId) : null,
+      recipient_phone: cleanText(row.recipient_phone, 40),
+      recipient_name: cleanText(row.recipient_name, 180) || null,
+      status: cleanText(row.status, 40) || 'sem_status',
+      sent_at: row.sent_at || null,
+      delivered_at: row.delivered_at || null,
+      read_at: row.read_at || null,
+      failed_at: row.failed_at || null,
+      created_at: row.created_at || null,
+      updated_at: row.updated_at || null,
+      error_code: cleanText(row.error_code, 80) || null,
+      error_message: cleanText(row.error_message, 500) || null,
+      reply_intent: cleanText(reply?.intent, 40) || null,
+      reply_text: cleanText(reply?.raw_text, 1000) || null,
+      reply_button: cleanText(reply?.button_text || reply?.button_payload, 300) || null,
+      reply_at: reply?.created_at || null,
+      cost_amount: asNumber(row.cost_amount),
+      currency: cleanText(row.currency || 'BRL', 12) || 'BRL',
+    }
+  })
+
+  const byStatus: Record<string, number> = {}
+  const byTemplate = new Map<string, any>()
+  const byCampaign = new Map<string, any>()
+  const bySender = new Map<string, any>()
+  const byWaba = new Map<string, any>()
+  let sent = 0
+  let delivered = 0
+  let read = 0
+  let failed = 0
+  let skipped = 0
+  let replies = 0
+  let positiveReplies = 0
+  let costAmount = 0
+  const currencies = new Set<string>()
+
+  rows.forEach(row => {
+    const statusValue = cleanText(row.status, 40).toLowerCase()
+    const reply = row.reply_intent ? { intent: row.reply_intent } : null
+    const wasSent = Boolean(row.sent_at) || ['sent', 'delivered', 'read'].includes(statusValue)
+    const wasDelivered = Boolean(row.delivered_at || row.read_at) || ['delivered', 'read'].includes(statusValue)
+    const wasRead = Boolean(row.read_at) || statusValue === 'read'
+    const wasFailed = Boolean(row.failed_at) || statusValue === 'failed'
+    const wasSkipped = statusValue === 'skipped' || statusValue === 'cancelled' || statusValue === 'opted_out'
+
+    byStatus[statusValue || 'sem_status'] = (byStatus[statusValue || 'sem_status'] || 0) + 1
+    if (wasSent) sent += 1
+    if (wasDelivered) delivered += 1
+    if (wasRead) read += 1
+    if (wasFailed) failed += 1
+    if (wasSkipped) skipped += 1
+    if (reply) replies += 1
+    if (row.reply_intent === 'interested') positiveReplies += 1
+    costAmount += asNumber(row.cost_amount)
+    if (row.currency) currencies.add(row.currency)
+
+    incrementDetailedGroup(byTemplate, `${row.template_name}::${row.template_language || ''}`, `${row.template_name}${row.template_language ? ` (${row.template_language})` : ''}`, row, reply)
+    incrementDetailedGroup(byCampaign, row.campaign_id || row.campaign_name, row.campaign_name, row, reply)
+    incrementDetailedGroup(bySender, row.sender_id || row.sender_phone || 'sem-remetente', row.sender_name || row.sender_phone || 'Sem remetente', row, reply)
+    incrementDetailedGroup(byWaba, row.waba_id || 'sem-conta', row.waba_label || row.waba_id || 'Sem conta', row, reply)
+  })
+
+  const sortedGroups = (map: Map<string, any>) => Array.from(map.values())
+    .map(group => ({
+      ...group,
+      delivery_rate: metricRate(group.delivered, group.sent || group.recipients),
+      read_rate: metricRate(group.read, group.delivered || group.sent || group.recipients),
+      reply_rate: metricRate(group.replies, group.sent || group.recipients),
+      cost_amount: Number(asNumber(group.cost_amount).toFixed(4)),
+    }))
+    .sort((a, b) => b.recipients - a.recipients || b.replies - a.replies || a.label.localeCompare(b.label))
+
+  return {
+    filters: {
+      date_from: dateFrom,
+      date_to: dateTo,
+      start_at: startAt,
+      end_at: endAt,
+      template_name: templateName || null,
+      campaign_id: campaignId || null,
+      sender_id: senderId || null,
+      waba_id: requestedWabaId || null,
+      status: status || null,
+      intent: intent || null,
+      search: search || null,
+      limit,
+    },
+    summary: {
+      recipients: rows.length,
+      sent,
+      delivered,
+      read,
+      failed,
+      skipped,
+      replies,
+      positive_replies: positiveReplies,
+      cost_amount: Number(costAmount.toFixed(4)),
+      cost_currency: currencies.size === 1 ? Array.from(currencies)[0] : 'BRL',
+      delivery_rate: metricRate(delivered, sent || rows.length),
+      read_rate: metricRate(read, delivered || sent || rows.length),
+      reply_rate: metricRate(replies, sent || rows.length),
+      positive_reply_rate: metricRate(positiveReplies, sent || rows.length),
+      by_status: byStatus,
+      by_template: sortedGroups(byTemplate),
+      by_campaign: sortedGroups(byCampaign),
+      by_sender: sortedGroups(bySender),
+      by_waba: sortedGroups(byWaba),
+    },
+    rows,
+  }
+}
+
 export async function listMetaWhatsAppCampaigns(input: ListMetaWhatsAppCampaignsInput = {}, supabase = createAdminClient()) {
   const limit = Math.min(250, Math.max(1, Number(input.limit || 40)))
   const queryLimit = Math.min(500, limit * 3)
   const status = normalizeCampaignStatusFilter(input.status)
+  const configMap = await loadMetaWhatsAppConfigMap(supabase)
+  const visibleWabaIds = visibleWabaIdsFromConfig(configMap)
 
   let query = supabase
     .from('meta_whatsapp_campaigns')
@@ -1283,26 +1847,38 @@ export async function listMetaWhatsAppCampaigns(input: ListMetaWhatsAppCampaigns
 
   const { data: campaigns, error } = await query
   if (error) throw error
-  const visibleCampaigns = (campaigns || [])
-    .filter((campaign: any) => !asMetadata(campaign.metadata).deleted_from_panel_at)
-    .slice(0, limit)
 
-  const { data: senders, error: sendersError } = await supabase
+  let sendersQuery = supabase
     .from('meta_whatsapp_senders')
-    .select('id, display_name, phone_number, phone_number_id, local_status, meta_status, quality_rating, messaging_limit_tier, daily_limit, daily_sent_count, daily_limit_resets_at, use_case, weight, last_error, metadata')
+    .select('id, display_name, phone_number, phone_number_id, waba_id, local_status, meta_status, quality_rating, messaging_limit_tier, daily_limit, daily_sent_count, daily_limit_resets_at, use_case, weight, last_error, metadata')
     .order('local_status', { ascending: true })
     .order('display_name', { ascending: true })
+  if (visibleWabaIds.length) sendersQuery = sendersQuery.in('waba_id', visibleWabaIds)
 
+  const { data: senders, error: sendersError } = await sendersQuery
   if (sendersError) throw sendersError
   const preparedSenders = await syncSenderDailyUsageFromCampaignRecipients(supabase, senders || [])
+  const visibleSenderIds = new Set(preparedSenders.map((sender: any) => cleanText(sender.id, 80)).filter(Boolean))
+  const visibleCampaigns = (campaigns || [])
+    .filter((campaign: any) => !asMetadata(campaign.metadata).deleted_from_panel_at)
+    .filter((campaign: any) => {
+      const wabaId = campaignWabaId(campaign)
+      if (wabaId) return !visibleWabaIds.length || visibleWabaIds.includes(wabaId)
+      const defaultSenderId = cleanText(campaign.default_sender_id, 80)
+      if (defaultSenderId) return visibleSenderIds.has(defaultSenderId)
+      return true
+    })
+    .slice(0, limit)
 
-  const { data: templates, error: templatesError } = await supabase
+  let templatesQuery = supabase
     .from('meta_whatsapp_templates')
-    .select('id, name, language, category, status, quality_score, components, metadata, last_synced_at')
+    .select('id, waba_id, name, language, category, status, quality_score, components, metadata, last_synced_at')
     .order('status', { ascending: true })
     .order('name', { ascending: true })
     .limit(200)
+  if (visibleWabaIds.length) templatesQuery = templatesQuery.in('waba_id', visibleWabaIds)
 
+  const { data: templates, error: templatesError } = await templatesQuery
   if (templatesError) throw templatesError
   const campaignTemplates = (templates || []).filter(isCampaignTemplateEligible)
 
@@ -1623,27 +2199,47 @@ function bodyParametersFromTemplateParameters(value: unknown) {
   }]
 }
 
-async function selectSenderForRecipient(supabase: SupabaseAdmin, campaign: any, recipient: any, wabaId: string) {
-  const { data: portfolioSenders, error: portfolioSendersError } = await supabase
+async function selectSenderForRecipient(
+  supabase: SupabaseAdmin,
+  campaign: any,
+  recipient: any,
+  wabaId: string,
+  portfolioWabaIds: string[] = []
+) {
+  const allowedWabaIds = campaignRoutingWabaIds(campaign, wabaId)
+  const usageWabaIds = uniqueCleanText([
+    ...portfolioWabaIds,
+    ...allowedWabaIds,
+  ])
+  let sendersQuery = supabase
     .from('meta_whatsapp_senders')
     .select('*')
-    .eq('waba_id', wabaId)
     .eq('local_status', 'active')
+
+  if (usageWabaIds.length > 1) {
+    sendersQuery = sendersQuery.in('waba_id', usageWabaIds)
+  } else {
+    sendersQuery = sendersQuery.eq('waba_id', usageWabaIds[0] || wabaId)
+  }
+
+  const { data: portfolioSenders, error: portfolioSendersError } = await sendersQuery
 
   if (portfolioSendersError) throw portfolioSendersError
   const preparedPortfolioSenders = await syncSenderDailyUsageFromCampaignRecipients(supabase, portfolioSenders || [])
+  const preparedAllowedSenders = preparedPortfolioSenders
+    .filter((sender: any) => allowedWabaIds.includes(cleanText(sender.waba_id, 120)))
   const usage = portfolioDailyUsage(preparedPortfolioSenders)
   if (usage.remaining <= 0) {
     throw new Error(`${describePortfolioAvailability(preparedPortfolioSenders)} Nenhuma nova conversa iniciada pelo negocio pode ser aberta agora.`)
   }
 
   if (recipient.sender_id) {
-    const sender = preparedPortfolioSenders.find((item: any) => item.id === recipient.sender_id)
+    const sender = preparedAllowedSenders.find((item: any) => item.id === recipient.sender_id)
     if (sender && isMetaSenderReady(sender)) return sender
   }
 
   if (campaign.default_sender_id) {
-    const sender = preparedPortfolioSenders.find((item: any) => item.id === campaign.default_sender_id)
+    const sender = preparedAllowedSenders.find((item: any) => item.id === campaign.default_sender_id)
     if (sender && isMetaSenderReady(sender)) return sender
     throw new Error(`Numero oficial selecionado indisponivel para envio: ${describeSenderAvailability(sender)}`)
   }
@@ -1654,7 +2250,7 @@ async function selectSenderForRecipient(supabase: SupabaseAdmin, campaign: any, 
       ? ['followup', 'campaign', 'global']
       : ['campaign', 'global']
 
-  return preparedPortfolioSenders
+  return preparedAllowedSenders
     .filter((sender: any) => preferredUseCase.includes(cleanText(sender.use_case, 40)))
     .sort((a: any, b: any) => {
       const sentDiff = senderDailySentCount(a) - senderDailySentCount(b)
@@ -1852,7 +2448,10 @@ export async function processMetaWhatsAppCampaignBatch(params: {
   const supabase = createAdminClient()
   const configMap = await loadMetaWhatsAppConfigMap(supabase)
   const resolved = resolveMetaWhatsAppConfig(configMap)
-  if (resolved.missing.length) throw new Error(`Meta WhatsApp incompleto: ${resolved.missing.join(', ')}.`)
+  if (!resolved.enabled) throw new Error('Meta WhatsApp Oficial esta inativo na Sala de Manutencao.')
+  const readyAccounts = resolveMetaWhatsAppAccountConfigs(configMap)
+    .filter(account => account.enabled && !account.missing.length)
+  const portfolioWabaIds = uniqueCleanText(readyAccounts.map(account => account.wabaId))
 
   const { data: campaign, error: campaignError } = await supabase
     .from('meta_whatsapp_campaigns')
@@ -1871,6 +2470,12 @@ export async function processMetaWhatsAppCampaignBatch(params: {
     return { skipped: true, reason: 'campaign_not_due', processed: 0, hasMore: true }
   }
 
+  const targetWabaId = campaignWabaId(campaign, readyAccounts[0]?.wabaId || resolved.wabaId)
+  const routingWabaIds = campaignRoutingWabaIds(campaign, targetWabaId)
+  for (const routingWabaId of routingWabaIds) {
+    const targetConfig = resolveMetaWhatsAppConfigForWaba(configMap, routingWabaId)
+    if (targetConfig.missing.length) throw new Error(`Meta WhatsApp incompleto para a WABA ${routingWabaId || 'selecionada'}: ${targetConfig.missing.join(', ')}.`)
+  }
   const batchSize = Math.min(100, Math.max(1, Number(params.batchSize || DEFAULT_META_WHATSAPP_BATCH_SIZE)))
   await supabase
     .from('meta_whatsapp_campaigns')
@@ -1935,7 +2540,7 @@ export async function processMetaWhatsAppCampaignBatch(params: {
 
       if (groupStopsOnReply && groupKey) attemptedGroupKeys.add(groupKey)
 
-      const sender = await selectSenderForRecipient(supabase, campaign, recipient, resolved.wabaId)
+      const sender = await selectSenderForRecipient(supabase, campaign, recipient, targetWabaId, portfolioWabaIds)
       if (!sender?.phone_number_id) {
         throw new Error('Nenhum numero Meta conectado disponivel para envio. Sincronize os numeros oficiais e confirme que o status Meta do Phone Number esta CONNECTED.')
       }
@@ -1950,6 +2555,7 @@ export async function processMetaWhatsAppCampaignBatch(params: {
         templateName: campaign.template_name,
         language: campaign.template_language,
         phoneNumberId: sender.phone_number_id,
+        wabaId: sender.waba_id || targetWabaId,
         components: bodyParametersFromTemplateParameters(recipient.template_parameters),
         config: configMap,
       })

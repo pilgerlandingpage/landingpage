@@ -19,6 +19,10 @@ import {
   recordMetaWhatsAppMessageStatus,
 } from '@/lib/meta/whatsapp-chat'
 import { handleMetaWhatsAppReplyTriage } from '@/lib/meta/whatsapp-triage'
+import {
+  loadMetaWhatsAppConfigMap,
+  syncMetaWhatsAppAssets,
+} from '@/lib/meta/whatsapp-cloud'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -165,13 +169,28 @@ async function findMetaWhatsAppSenderId(supabase: ReturnType<typeof createAdminC
   const selected = String(phoneNumberId || '').trim()
   if (!selected) return null
 
-  const { data } = await supabase
-    .from('meta_whatsapp_senders')
-    .select('id')
-    .eq('phone_number_id', selected)
-    .maybeSingle()
+  const loadSender = async () => {
+    const { data } = await supabase
+      .from('meta_whatsapp_senders')
+      .select('id')
+      .eq('phone_number_id', selected)
+      .maybeSingle()
+    return data || null
+  }
 
-  return data?.id || null
+  const existing = await loadSender()
+  if (existing?.id) return existing.id
+
+  try {
+    const configMap = await loadMetaWhatsAppConfigMap(supabase)
+    await syncMetaWhatsAppAssets(configMap, supabase)
+    const synced = await loadSender()
+    return synced?.id || null
+  } catch (error) {
+    console.warn('[Meta WhatsApp Webhook] Sender sync fallback failed:', error)
+  }
+
+  return null
 }
 
 async function findMetaWhatsAppRecipient(supabase: ReturnType<typeof createAdminClient>, providerMessageId?: string) {

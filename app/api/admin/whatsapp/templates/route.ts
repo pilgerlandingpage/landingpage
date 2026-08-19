@@ -6,9 +6,12 @@ import {
   editMetaWhatsAppTemplate,
   getMetaWhatsAppErrorInfo,
   loadMetaWhatsAppConfigMap,
+  resolveMetaWhatsAppAccountConfigs,
   resolveMetaWhatsAppConfig,
+  resolveMetaWhatsAppConfigForWaba,
   syncMetaWhatsAppAssets,
   normalizeMetaWhatsAppTemplateName,
+  uploadMetaWhatsAppTemplateHeaderMedia,
 } from '@/lib/meta/whatsapp-cloud'
 
 const DRAFT_CONFIG_KEY = 'meta_whatsapp_template_drafts'
@@ -22,6 +25,23 @@ type TemplateDraft = {
   form?: Record<string, unknown>
   created_at: string
   updated_at: string
+}
+
+type LocalTemplateRecord = {
+  name: string
+  language: string
+  category: string
+  status?: string | null
+  components?: unknown[] | null
+  metadata?: unknown
+}
+
+type ExistingTemplateRecord = {
+  waba_id: string
+  name: string
+  language: string
+  status?: string | null
+  metadata?: unknown
 }
 
 function nowIso() {
@@ -115,9 +135,85 @@ async function writeDrafts(drafts: TemplateDraft[], supabase = createAdminClient
   if (error) throw error
 }
 
+function normalizeWabaIdList(value: unknown) {
+  const raw = Array.isArray(value)
+    ? value
+    : String(value || '').split(/[\n,;]+/g)
+  return Array.from(new Set(raw.map(item => cleanText(item, 120)).filter(Boolean)))
+}
+
+function firstTemplateExampleList(value: unknown) {
+  if (!Array.isArray(value)) return []
+  return Array.isArray(value[0]) ? value[0] : value
+}
+
+function inferHeaderMediaFileType(headerFormat: string, responseType: string) {
+  const contentType = cleanText(responseType, 120).toLowerCase().split(';')[0]?.trim()
+  if (contentType && contentType !== 'application/octet-stream') return contentType
+  if (headerFormat === 'VIDEO') return 'video/mp4'
+  if (headerFormat === 'DOCUMENT') return 'application/pdf'
+  return 'image/jpeg'
+}
+
+async function refreshTemplateHeaderMediaHandles(input: {
+  template: LocalTemplateRecord
+  configMap: Record<string, string | undefined>
+  cache: Map<string, string>
+}) {
+  const components = safeArray(input.template.components).map(component => (
+    typeof component === 'object' && component !== null && !Array.isArray(component)
+      ? { ...(component as Record<string, unknown>) }
+      : component
+  ))
+
+  for (const component of components) {
+    if (typeof component !== 'object' || component === null || Array.isArray(component)) continue
+    const record = component as Record<string, unknown>
+    const type = cleanText(record.type, 30).toUpperCase()
+    const format = cleanText(record.format, 30).toUpperCase()
+    if (type !== 'HEADER' || !['IMAGE', 'VIDEO', 'DOCUMENT'].includes(format)) continue
+
+    const example = asMetadata(record.example)
+    const sourceUrl = cleanText(firstTemplateExampleList(example.header_handle)[0], 2000)
+    if (!/^https?:\/\//i.test(sourceUrl)) continue
+
+    const cacheKey = `${format}:${sourceUrl}`
+    let handle = input.cache.get(cacheKey)
+    if (!handle) {
+      const mediaResponse = await fetch(sourceUrl, { cache: 'no-store' })
+      if (!mediaResponse.ok) {
+        throw new Error(`Nao foi possivel baixar a midia do template ${input.template.name} (${mediaResponse.status}).`)
+      }
+
+      const fileType = inferHeaderMediaFileType(format, mediaResponse.headers.get('content-type') || '')
+      const upload = await uploadMetaWhatsAppTemplateHeaderMedia({
+        fileName: `${input.template.name}.${fileType.split('/')[1] || 'jpg'}`.slice(0, 180),
+        fileType,
+        fileBuffer: Buffer.from(await mediaResponse.arrayBuffer()),
+        config: input.configMap,
+      })
+      handle = upload.handle
+      input.cache.set(cacheKey, handle)
+    }
+
+    record.example = {
+      ...example,
+      header_handle: [handle],
+    }
+  }
+
+  return components
+}
+
 async function listLocalTemplates(supabase = createAdminClient()) {
   const configMap = await loadMetaWhatsAppConfigMap(supabase)
   const resolved = resolveMetaWhatsAppConfig(configMap)
+  const accounts = resolveMetaWhatsAppAccountConfigs(configMap)
+    .filter(account => account.enabled && !account.missing.length)
+  const visibleWabaIds = Array.from(new Set(
+    (accounts.length ? accounts.map(account => account.wabaId) : [resolved.wabaId])
+      .filter(Boolean)
+  ))
 
   let query = supabase
     .from('meta_whatsapp_templates')
@@ -125,18 +221,29 @@ async function listLocalTemplates(supabase = createAdminClient()) {
     .order('updated_at', { ascending: false })
     .limit(300)
 
-  if (resolved.wabaId) query = query.eq('waba_id', resolved.wabaId)
+  if (visibleWabaIds.length) query = query.in('waba_id', visibleWabaIds)
 
   const { data: templates, error } = await query
   if (error) throw error
+  const visibleTemplates = (templates || []).filter((template: any) => {
+    const metadata = asMetadata(template.metadata)
+    return !metadata.hidden_from_panel_at
+      && !metadata.deleted_from_panel_at
+      && !metadata.deleted_from_meta_at
+  })
 
   return {
     config: {
       enabled: resolved.enabled,
       wabaId: resolved.wabaId,
+      accounts: accounts.map(account => ({
+        wabaId: account.wabaId,
+        label: account.label,
+        primary: account.primary,
+      })),
       missing: resolved.missing,
     },
-    templates: templates || [],
+    templates: visibleTemplates,
     drafts: await readDrafts(supabase),
   }
 }
@@ -151,8 +258,10 @@ async function markTemplateManagedFromPanel(params: {
   templateId?: unknown
   result?: unknown
   panelHeaderMedia?: unknown
+  wabaId?: unknown
 }) {
-  const resolved = resolveMetaWhatsAppConfig(params.configMap)
+  const requestedWabaId = cleanText(params.wabaId, 120)
+  const resolved = resolveMetaWhatsAppConfigForWaba(params.configMap, requestedWabaId)
   const name = normalizeMetaWhatsAppTemplateName(params.templateName)
   const language = normalizeLanguage(params.language || resolved.defaultLanguage)
   const templateId = cleanText(params.templateId, 120)
@@ -241,6 +350,147 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    if (action === 'clone_to_wabas') {
+      const sourceWabaId = cleanText(body.sourceWabaId || body.source_waba_id, 120)
+      const targetWabaIds = normalizeWabaIdList(body.targetWabaIds || body.target_waba_ids || body.targetWabaId || body.target_waba_id)
+        .filter(wabaId => wabaId !== sourceWabaId)
+      const selectedTemplateNames = normalizeWabaIdList(body.templateNames || body.template_names || body.names)
+      const refreshHeaderMedia = Boolean(body.refreshHeaderMediaHandles || body.refresh_header_media_handles)
+      const pauseMs = Math.min(Math.max(Number(body.pauseMs || body.pause_ms || 250), 0), 5000)
+
+      if (!sourceWabaId) {
+        return NextResponse.json({ success: false, message: 'WABA de origem obrigatoria.' }, { status: 400 })
+      }
+      if (!targetWabaIds.length) {
+        return NextResponse.json({ success: false, message: 'Informe ao menos uma WABA de destino.' }, { status: 400 })
+      }
+
+      const { data: sourceTemplates, error: sourceError } = await supabase
+        .from('meta_whatsapp_templates')
+        .select('name, language, category, status, components, metadata')
+        .eq('waba_id', sourceWabaId)
+        .eq('status', 'APPROVED')
+        .order('name', { ascending: true })
+        .limit(200)
+
+      if (sourceError) throw sourceError
+
+      const templates = ((sourceTemplates || []) as LocalTemplateRecord[]).filter(template => {
+        const metadata = asMetadata(template.metadata)
+        return !metadata.deleted_from_panel_at
+          && !metadata.deleted_from_meta_at
+          && (!selectedTemplateNames.length || selectedTemplateNames.includes(template.name))
+      })
+      const names = Array.from(new Set(templates.map(template => template.name).filter(Boolean)))
+      let existingKeys = new Set<string>()
+
+      if (names.length) {
+        const { data: existing, error: existingError } = await supabase
+          .from('meta_whatsapp_templates')
+          .select('waba_id, name, language, status, metadata')
+          .in('waba_id', targetWabaIds)
+          .in('name', names)
+          .limit(1000)
+
+        if (existingError) throw existingError
+        existingKeys = new Set(((existing || []) as ExistingTemplateRecord[])
+          .filter(template => {
+            const metadata = asMetadata(template.metadata)
+            return String(template.status || '').toLowerCase() !== 'deleted'
+              && !metadata.deleted_from_panel_at
+              && !metadata.deleted_from_meta_at
+          })
+          .map(template => `${template.waba_id}:${template.name}:${template.language}`))
+      }
+
+      const cloneResults: Array<Record<string, unknown>> = []
+      const mediaHandleCache = new Map<string, string>()
+      let rateLimited = false
+
+      for (const targetWabaId of targetWabaIds) {
+        for (const template of templates) {
+          const key = `${targetWabaId}:${template.name}:${template.language}`
+          if (existingKeys.has(key)) {
+            cloneResults.push({
+              targetWabaId,
+              templateName: template.name,
+              language: template.language,
+              status: 'skipped',
+              reason: 'already_exists',
+            })
+            continue
+          }
+
+          try {
+            const components = refreshHeaderMedia
+              ? await refreshTemplateHeaderMediaHandles({ template, configMap, cache: mediaHandleCache })
+              : safeArray(template.components)
+            const result = await createMetaWhatsAppTemplate({
+              name: template.name,
+              language: template.language,
+              category: template.category,
+              components,
+              wabaId: targetWabaId,
+            }, configMap)
+            await markTemplateManagedFromPanel({
+              supabase,
+              configMap,
+              templateName: template.name,
+              language: template.language,
+              category: template.category,
+              components,
+              wabaId: targetWabaId,
+              result,
+            })
+            cloneResults.push({
+              targetWabaId,
+              templateName: template.name,
+              language: template.language,
+              status: 'submitted',
+              providerStatus: result.status || null,
+              providerId: result.id || null,
+            })
+            existingKeys.add(key)
+          } catch (error) {
+            const limited = isMetaApplicationLimit(error)
+            rateLimited = rateLimited || limited
+            cloneResults.push({
+              targetWabaId,
+              templateName: template.name,
+              language: template.language,
+              status: 'failed',
+              retryable: limited,
+              message: getMetaWhatsAppErrorInfo(error).userMessage || (error instanceof Error ? error.message : String(error)),
+            })
+            if (limited) break
+          }
+
+          if (pauseMs > 0) await new Promise(resolve => setTimeout(resolve, pauseMs))
+        }
+        if (rateLimited) break
+      }
+
+      const sync = await syncMetaWhatsAppAssets(configMap, supabase)
+      const submitted = cloneResults.filter(result => result.status === 'submitted').length
+      const skipped = cloneResults.filter(result => result.status === 'skipped').length
+      const failed = cloneResults.filter(result => result.status === 'failed').length
+      return NextResponse.json({
+        success: failed === 0 || submitted > 0,
+        message: `Clonagem enviada: ${submitted} template(s), ${skipped} ja existentes, ${failed} falha(s).`,
+        sourceWabaId,
+        targetWabaIds,
+        counts: {
+          sourceTemplates: templates.length,
+          submitted,
+          skipped,
+          failed,
+        },
+        rateLimited,
+        results: cloneResults,
+        sync,
+      }, { status: failed > 0 && submitted === 0 ? 400 : 200 })
+    }
+
     if (action === 'save_draft') {
       const drafts = await readDrafts(supabase)
       const id = cleanText(body.id, 80) || `draft_${Date.now()}`
@@ -282,6 +532,7 @@ export async function POST(request: NextRequest) {
         language: normalizedLanguage,
         category: body.category,
         components,
+        wabaId: body.wabaId || body.waba_id,
         messageSendTtlSeconds: Number(body.messageSendTtlSeconds || 0) || undefined,
       }, configMap)
       const sync = await syncMetaWhatsAppAssets(configMap, supabase)
@@ -292,6 +543,7 @@ export async function POST(request: NextRequest) {
         language: normalizedLanguage,
         category: body.category,
         components,
+        wabaId: body.wabaId || body.waba_id,
         panelHeaderMedia: body.panelHeaderMedia,
         result,
       })
@@ -309,6 +561,7 @@ export async function POST(request: NextRequest) {
         templateId: body.templateId || body.template_external_id,
         category: body.category,
         components,
+        wabaId: body.wabaId || body.waba_id,
         messageSendTtlSeconds: Number(body.messageSendTtlSeconds || 0) || undefined,
       }, configMap)
       const sync = await syncMetaWhatsAppAssets(configMap, supabase)
@@ -320,6 +573,7 @@ export async function POST(request: NextRequest) {
         category: body.category,
         components,
         templateId: body.templateId || body.template_external_id,
+        wabaId: body.wabaId || body.waba_id,
         panelHeaderMedia: body.panelHeaderMedia,
         result,
       })
@@ -334,7 +588,8 @@ export async function POST(request: NextRequest) {
     if (action === 'delete') {
       const templateId = cleanText(body.templateId || body.template_external_id, 120)
       const name = normalizeMetaWhatsAppTemplateName(body.name)
-      const result = await deleteMetaWhatsAppTemplate({ templateId, name }, configMap)
+      const requestedWabaId = cleanText(body.wabaId || body.waba_id, 120)
+      const result = await deleteMetaWhatsAppTemplate({ templateId, name, wabaId: requestedWabaId || undefined }, configMap)
       if (templateId || name) {
         let update = supabase
           .from('meta_whatsapp_templates')
@@ -350,6 +605,7 @@ export async function POST(request: NextRequest) {
         update = templateId
           ? update.eq('template_external_id', templateId)
           : update.eq('name', name)
+        if (requestedWabaId) update = update.eq('waba_id', requestedWabaId)
 
         await update
       }

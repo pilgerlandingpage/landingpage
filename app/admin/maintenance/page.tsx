@@ -156,6 +156,7 @@ const INTEGRATIONS: IntegrationCard[] = [
             },
             { key: 'meta_whatsapp_app_id', label: 'Meta WhatsApp App ID', placeholder: 'App ID dedicado do app WhatsApp (opcional)', isSecret: false },
             { key: 'meta_whatsapp_business_account_id', label: 'WhatsApp Business Account ID', placeholder: 'WABA ID do WhatsApp Manager', isSecret: false },
+            { key: 'meta_whatsapp_waba_accounts', label: 'Contas WhatsApp confirmadas (JSON)', placeholder: '[{"label":"Guilherme Pilger 01","waba_id":"1722962442262455"},{"label":"Guilherme Pilger 02","waba_id":"1624622552630866"},{"label":"Guilherme Pilger 03","waba_id":"1249458004919697"}]', isSecret: false },
             { key: 'meta_whatsapp_default_phone_number_id', label: 'Phone Number ID padrao', placeholder: 'ID do numero oficial de disparo', isSecret: false },
             { key: 'meta_whatsapp_access_token', label: 'System User Access Token', placeholder: 'Token com whatsapp_business_messaging e whatsapp_business_management', isSecret: true },
             { key: 'meta_whatsapp_webhook_verify_token', label: 'Webhook Verify Token', placeholder: 'pilger-meta-whatsapp-webhook', isSecret: true },
@@ -1368,7 +1369,7 @@ export default function MaintenancePage() {
                 : integrationId === 'mercado_pago'
                     ? Boolean(configs.mercado_pago_public_key && configs.mercado_pago_access_token)
                 : integrationId === 'meta_whatsapp'
-                    ? Boolean(configs.meta_whatsapp_business_account_id && (configs.meta_whatsapp_access_token || configs.meta_access_token))
+                    ? Boolean((configs.meta_whatsapp_business_account_id || configs.meta_whatsapp_waba_accounts) && (configs.meta_whatsapp_access_token || configs.meta_access_token))
                 : integration?.fields.some(f => configs[f.key])
             return (
                 <span style={{

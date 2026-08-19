@@ -2,8 +2,11 @@ import { createAdminClient } from '@/lib/supabase/server'
 import {
   loadMetaWhatsAppConfigMap,
   normalizeMetaWhatsAppPhone,
+  resolveMetaWhatsAppAccountConfigs,
+  resolveMetaWhatsAppConfig,
   sendMetaWhatsAppAudioMessage,
   sendMetaWhatsAppTextMessage,
+  syncMetaWhatsAppAssets,
 } from '@/lib/meta/whatsapp-cloud'
 
 type SupabaseAdmin = ReturnType<typeof createAdminClient>
@@ -33,6 +36,8 @@ export interface RecordMetaWhatsAppStatusInput {
 export interface ListMetaWhatsAppConversationsInput {
   status?: string | null
   search?: string | null
+  senderId?: string | null
+  wabaId?: string | null
   limit?: number
 }
 
@@ -56,6 +61,23 @@ function asRecord(value: unknown): Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
     ? value as Record<string, unknown>
     : {}
+}
+
+function uniqueCleanText(values: unknown[], maxLength = 120) {
+  return Array.from(new Set(
+    values
+      .map(value => cleanText(value, maxLength))
+      .filter(Boolean)
+  ))
+}
+
+async function visibleMetaWhatsAppWabaIds(supabase: SupabaseAdmin) {
+  const configMap = await loadMetaWhatsAppConfigMap(supabase)
+  const resolved = resolveMetaWhatsAppConfig(configMap)
+  const configuredWabaIds = resolveMetaWhatsAppAccountConfigs(configMap)
+    .filter(account => account.enabled && !account.missing.length)
+    .map(account => account.wabaId)
+  return uniqueCleanText(configuredWabaIds.length ? configuredWabaIds : [resolved.wabaId])
 }
 
 function isoNow() {
@@ -161,14 +183,28 @@ async function findSender(
   const selectedPhoneNumberId = cleanText(phoneNumberId, 120)
   if (!selectedPhoneNumberId) return null
 
-  const { data, error } = await supabase
-    .from('meta_whatsapp_senders')
-    .select('id, display_name, phone_number, phone_number_id, waba_id, meta_status, local_status')
-    .eq('phone_number_id', selectedPhoneNumberId)
-    .maybeSingle()
+  const loadSenderByPhoneNumberId = async () => {
+    const { data, error } = await supabase
+      .from('meta_whatsapp_senders')
+      .select('id, display_name, phone_number, phone_number_id, waba_id, meta_status, local_status')
+      .eq('phone_number_id', selectedPhoneNumberId)
+      .maybeSingle()
+    if (error) throw error
+    return data || null
+  }
 
-  if (error) throw error
-  return data || null
+  const existing = await loadSenderByPhoneNumberId()
+  if (existing?.id) return existing
+
+  try {
+    const configMap = await loadMetaWhatsAppConfigMap(supabase)
+    await syncMetaWhatsAppAssets(configMap, supabase)
+    return await loadSenderByPhoneNumberId()
+  } catch (error) {
+    console.warn('[Meta WhatsApp Chat] Sender sync fallback failed:', error)
+  }
+
+  return null
 }
 
 async function findLatestCampaignRecipient(
@@ -668,19 +704,96 @@ export async function listMetaWhatsAppConversations(
   const limit = Math.min(100, Math.max(1, Number(input.limit || 50)))
   const status = normalizeConversationStatus(input.status)
   const search = cleanText(input.search, 80)
+  const senderId = cleanText(input.senderId, 80)
+  const wabaId = cleanText(input.wabaId, 120)
+  const visibleWabaIds = await visibleMetaWhatsAppWabaIds(supabase)
+  const emptySummary = { total: 0, unread: 0, open: 0, pending: 0, closed: 0, windowActive: 0 }
+
+  if (!visibleWabaIds.length) {
+    return {
+      conversations: [],
+      senders: [],
+      summary: emptySummary,
+    }
+  }
+
+  const { data: visibleSenders, error: sendersError } = await supabase
+    .from('meta_whatsapp_senders')
+    .select('id, display_name, phone_number, phone_number_id, waba_id, meta_status, local_status, quality_rating, metadata')
+    .in('waba_id', visibleWabaIds)
+    .order('display_name', { ascending: true })
+  if (sendersError) throw sendersError
+
+  const visibleSenderIds = new Set((visibleSenders || [])
+    .map((sender: any) => cleanText(sender.id, 80))
+    .filter(Boolean))
+  const selectedSenderId = senderId && visibleSenderIds.has(senderId) ? senderId : ''
+  const selectedWabaId = wabaId && visibleWabaIds.includes(wabaId) ? wabaId : ''
+
+  const { data: countRows, error: countError } = await supabase
+    .from('meta_whatsapp_conversations')
+    .select('sender_id, status, unread_count, customer_window_expires_at, waba_id')
+    .in('waba_id', visibleWabaIds)
+    .limit(5000)
+  if (countError) throw countError
+
+  const countsBySender = new Map<string, Record<string, number>>()
+  for (const row of countRows || []) {
+    const key = cleanText((row as any).sender_id, 80)
+    if (!key) continue
+    const current = countsBySender.get(key) || {
+      conversations: 0,
+      unread: 0,
+      open: 0,
+      pending: 0,
+      closed: 0,
+      windowActive: 0,
+    }
+    current.conversations += 1
+    current.unread += Number((row as any).unread_count || 0) > 0 ? 1 : 0
+    current.open += (row as any).status === 'open' ? 1 : 0
+    current.pending += (row as any).status === 'pending' ? 1 : 0
+    current.closed += (row as any).status === 'closed' ? 1 : 0
+    if (toTimestamp((row as any).customer_window_expires_at) > Date.now()) current.windowActive += 1
+    countsBySender.set(key, current)
+  }
+
+  const senders = (visibleSenders || []).map((sender: any) => {
+    const counts = countsBySender.get(cleanText(sender.id, 80)) || {}
+    return {
+      ...sender,
+      conversation_count: Number(counts.conversations || 0),
+      unread_count: Number(counts.unread || 0),
+      open_count: Number(counts.open || 0),
+      pending_count: Number(counts.pending || 0),
+      closed_count: Number(counts.closed || 0),
+      window_active_count: Number(counts.windowActive || 0),
+    }
+  })
+
+  if ((senderId && !selectedSenderId) || (wabaId && !selectedWabaId)) {
+    return {
+      conversations: [],
+      senders,
+      summary: emptySummary,
+    }
+  }
 
   let query = supabase
     .from('meta_whatsapp_conversations')
     .select(`
       *,
-      sender:meta_whatsapp_senders(display_name, phone_number, phone_number_id, meta_status, quality_rating),
+      sender:meta_whatsapp_senders(display_name, phone_number, phone_number_id, waba_id, meta_status, quality_rating),
       campaign:meta_whatsapp_campaigns(id, name, campaign_type, template_name),
       lead:leads(id, name, email, phone, phone_e164, funnel_stage, lead_classification, lead_purpose, avatar_url, avatar_source, avatar_updated_at)
     `)
+    .in('waba_id', visibleWabaIds)
     .order('last_message_at', { ascending: false, nullsFirst: false })
     .limit(limit)
 
   if (status) query = query.eq('status', status)
+  if (selectedSenderId) query = query.eq('sender_id', selectedSenderId)
+  if (selectedWabaId) query = query.eq('waba_id', selectedWabaId)
   if (search) {
     const pattern = `%${search.replace(/[%_]/g, '')}%`
     query = query.or(`contact_phone.ilike.${pattern},contact_name.ilike.${pattern},last_message_preview.ilike.${pattern}`)
@@ -703,6 +816,7 @@ export async function listMetaWhatsAppConversations(
 
   return {
     conversations: enrichedConversations,
+    senders,
     summary,
   }
 }
@@ -713,13 +827,14 @@ export async function getMetaWhatsAppConversationDetail(
 ) {
   const selected = cleanText(conversationId, 80)
   if (!selected) throw new Error('conversation_id obrigatorio.')
+  const visibleWabaIds = await visibleMetaWhatsAppWabaIds(supabase)
 
   const [conversationResult, messagesResult, replyIntentResult] = await Promise.all([
     supabase
       .from('meta_whatsapp_conversations')
       .select(`
         *,
-        sender:meta_whatsapp_senders(display_name, phone_number, phone_number_id, meta_status, quality_rating),
+        sender:meta_whatsapp_senders(display_name, phone_number, phone_number_id, waba_id, meta_status, quality_rating),
         campaign:meta_whatsapp_campaigns(id, name, campaign_type, template_name),
         lead:leads(id, name, email, phone, phone_e164, funnel_stage, lead_classification, lead_purpose, lead_budget, avatar_url, avatar_source, avatar_updated_at, created_at)
       `)
@@ -743,6 +858,9 @@ export async function getMetaWhatsAppConversationDetail(
   if (messagesResult.error) throw messagesResult.error
   if (replyIntentResult.error) throw replyIntentResult.error
   if (!conversationResult.data) throw new Error('Conversa Meta WhatsApp nao encontrada.')
+  if (!visibleWabaIds.includes(cleanText(conversationResult.data.waba_id, 120))) {
+    throw new Error('Esta conversa pertence a uma conta WhatsApp removida do painel operacional.')
+  }
 
   const [conversation] = await enrichConversationsWithContactAvatars(supabase, [conversationResult.data])
 
@@ -768,6 +886,7 @@ export async function sendMetaWhatsAppChatReply(
 
   const sender = Array.isArray(conversation.sender) ? conversation.sender[0] : conversation.sender
   const phoneNumberId = cleanText(sender?.phone_number_id || conversation.phone_number_id, 120)
+  const wabaId = cleanText(sender?.waba_id || conversation.waba_id, 120)
   if (!phoneNumberId) throw new Error('Numero oficial da conversa sem Phone Number ID.')
 
   const configMap = await loadMetaWhatsAppConfigMap(supabase)
@@ -778,6 +897,7 @@ export async function sendMetaWhatsAppChatReply(
       to: conversation.contact_phone,
       text,
       phoneNumberId,
+      wabaId: wabaId || undefined,
       config: configMap,
       previewUrl: input.previewUrl,
     })
@@ -861,6 +981,7 @@ export async function sendMetaWhatsAppChatAudioReply(
 
   const sender = Array.isArray(conversation.sender) ? conversation.sender[0] : conversation.sender
   const phoneNumberId = cleanText(sender?.phone_number_id || conversation.phone_number_id, 120)
+  const wabaId = cleanText(sender?.waba_id || conversation.waba_id, 120)
   if (!phoneNumberId) throw new Error('Numero oficial da conversa sem Phone Number ID.')
 
   const configMap = await loadMetaWhatsAppConfigMap(supabase)
@@ -872,6 +993,7 @@ export async function sendMetaWhatsAppChatAudioReply(
       to: conversation.contact_phone,
       audioUrl,
       phoneNumberId,
+      wabaId: wabaId || undefined,
       config: configMap,
     })
 

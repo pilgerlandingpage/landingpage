@@ -45,6 +45,7 @@ interface MetaSender {
     display_name: string
     phone_number: string
     phone_number_id: string
+    waba_id: string
     local_status: string
     meta_status?: string | null
     quality_rating?: string | null
@@ -60,6 +61,7 @@ interface MetaSender {
 
 interface MetaTemplate {
     id: string
+    waba_id?: string | null
     name: string
     language: string
     category: string
@@ -327,6 +329,93 @@ interface MetaDailyReport {
     campaigns: MetaDailyReportCampaign[]
 }
 
+interface MetaDetailedReportGroup {
+    key: string
+    label: string
+    recipients: number
+    sent: number
+    delivered: number
+    read: number
+    failed: number
+    skipped: number
+    replies: number
+    positive_replies: number
+    cost_amount: number
+    delivery_rate?: number
+    read_rate?: number
+    reply_rate?: number
+}
+
+interface MetaDetailedReportRow {
+    recipient_id: string
+    campaign_id?: string | null
+    campaign_name: string
+    campaign_type?: string | null
+    template_name: string
+    template_language?: string | null
+    sender_id?: string | null
+    sender_name?: string | null
+    sender_phone?: string | null
+    waba_id?: string | null
+    waba_label?: string | null
+    recipient_phone: string
+    recipient_name?: string | null
+    status: string
+    sent_at?: string | null
+    delivered_at?: string | null
+    read_at?: string | null
+    failed_at?: string | null
+    created_at?: string | null
+    updated_at?: string | null
+    error_code?: string | null
+    error_message?: string | null
+    reply_intent?: string | null
+    reply_text?: string | null
+    reply_button?: string | null
+    reply_at?: string | null
+    cost_amount?: number
+    currency?: string | null
+}
+
+interface MetaDetailedReport {
+    filters: Record<string, unknown>
+    summary: {
+        recipients: number
+        sent: number
+        delivered: number
+        read: number
+        failed: number
+        skipped: number
+        replies: number
+        positive_replies: number
+        cost_amount: number
+        cost_currency: string
+        delivery_rate: number
+        read_rate: number
+        reply_rate: number
+        positive_reply_rate: number
+        by_status: Record<string, number>
+        by_template: MetaDetailedReportGroup[]
+        by_campaign: MetaDetailedReportGroup[]
+        by_sender: MetaDetailedReportGroup[]
+        by_waba: MetaDetailedReportGroup[]
+    }
+    rows: MetaDetailedReportRow[]
+}
+
+interface MetaDetailedReportFilters {
+    dateFrom: string
+    dateTo: string
+    templateName: string
+    campaignId: string
+    senderId: string
+    wabaId: string
+    status: string
+    intent: string
+    search: string
+    limit: string
+}
+
 interface MetaRecipientDraft {
     phone: string
     name?: string
@@ -558,14 +647,28 @@ function isMetaSenderAvailable(sender: MetaSender) {
     return isMetaWhatsAppSenderAvailable(sender)
 }
 
+function metaSenderWabaLabel(sender: MetaSender) {
+    const metadata = asRecord(sender.metadata)
+    return textValue(metadata.waba_label) || sender.waba_id || 'WABA'
+}
+
 function metaSenderOptionLabel(sender: MetaSender) {
     const usage = metaSenderUsage(sender)
     const health = getMetaWhatsAppSenderHealth(sender)
     const name = sender.display_name || sender.phone_number
-    const base = `${name} - ${sender.phone_number} (${usage.usageLabel})`
+    const base = `${name} - ${sender.phone_number} [${metaSenderWabaLabel(sender)}] (${usage.usageLabel})`
     if (!health.available) return `${base} - ${health.reason}`
     if (health.warning) return `${base} - ${health.warning}`
     return `${base} - ${usage.remaining} livres`
+}
+
+function metaTemplateWabaLabel(template?: MetaTemplate | null) {
+    const metadata = asRecord(template?.metadata)
+    return textValue(metadata.waba_label) || textValue(template?.waba_id) || 'WABA'
+}
+
+function metaTemplateSelectValue(template: MetaTemplate) {
+    return [template.waba_id || '', template.name, template.language].join('::')
 }
 
 function metaPortfolioUsageFromSenders(senders: MetaSender[]) {
@@ -798,6 +901,20 @@ export default function CampaignsPage() {
     const [metaDailyReport, setMetaDailyReport] = useState<MetaDailyReport | null>(null)
     const [metaDailyReportDate, setMetaDailyReportDate] = useState(() => saoPauloDateInputDaysAgo(1))
     const [loadingMetaDailyReport, setLoadingMetaDailyReport] = useState(false)
+    const [metaDetailedReport, setMetaDetailedReport] = useState<MetaDetailedReport | null>(null)
+    const [loadingMetaDetailedReport, setLoadingMetaDetailedReport] = useState(false)
+    const [metaDetailedReportFilters, setMetaDetailedReportFilters] = useState<MetaDetailedReportFilters>(() => ({
+        dateFrom: saoPauloDateInputDaysAgo(7),
+        dateTo: saoPauloDateInputDaysAgo(0),
+        templateName: '',
+        campaignId: '',
+        senderId: '',
+        wabaId: '',
+        status: '',
+        intent: '',
+        search: '',
+        limit: '1000',
+    }))
     const [metaStatusFilter, setMetaStatusFilter] = useState('')
     const [expandedMetaCampaignId, setExpandedMetaCampaignId] = useState('')
     const [loadingMetaCampaignDetail, setLoadingMetaCampaignDetail] = useState('')
@@ -823,6 +940,7 @@ export default function CampaignsPage() {
     const [scheduleDate, setScheduleDate] = useState('')
     const [metaTemplateName, setMetaTemplateName] = useState('')
     const [metaTemplateLanguage, setMetaTemplateLanguage] = useState('pt_BR')
+    const [metaTemplateWabaId, setMetaTemplateWabaId] = useState('')
     const [metaCampaignType, setMetaCampaignType] = useState<'marketing' | 'editorial' | 'followup' | 'utility' | 'test'>('marketing')
     const [metaTemplateParameters, setMetaTemplateParameters] = useState('')
     const [metaBodyParameterValues, setMetaBodyParameterValues] = useState<Record<string, string>>({})
@@ -831,6 +949,7 @@ export default function CampaignsPage() {
     const [metaButtonParameterValues, setMetaButtonParameterValues] = useState<Record<string, string>>({})
     const [metaAudiencePersonalized, setMetaAudiencePersonalized] = useState(false)
     const [selectedMetaSenderId, setSelectedMetaSenderId] = useState('')
+    const [metaSenderRoutingMode, setMetaSenderRoutingMode] = useState<'weighted_pool' | 'round_robin'>('weighted_pool')
     const [confirmOptIn, setConfirmOptIn] = useState(false)
 
     useEffect(() => { loadInstances() }, [])
@@ -975,12 +1094,45 @@ export default function CampaignsPage() {
         }
     }
 
+    const loadMetaDetailedReport = async (filters = metaDetailedReportFilters) => {
+        setLoadingMetaDetailedReport(true)
+        try {
+            const params = new URLSearchParams({
+                provider: 'meta_whatsapp',
+                report: 'detailed',
+                dateFrom: filters.dateFrom,
+                dateTo: filters.dateTo,
+                limit: filters.limit || '1000',
+            })
+            if (filters.templateName) params.set('template_name', filters.templateName)
+            if (filters.campaignId) params.set('campaign_id', filters.campaignId)
+            if (filters.senderId) params.set('sender_id', filters.senderId)
+            if (filters.wabaId) params.set('waba_id', filters.wabaId)
+            if (filters.status) params.set('status', filters.status)
+            if (filters.intent) params.set('intent', filters.intent)
+            if (filters.search.trim()) params.set('search', filters.search.trim())
+
+            const res = await fetch(`/api/admin/whatsapp/campaigns?${params.toString()}`)
+            const data = await res.json()
+            if (data.success) {
+                setMetaDetailedReport(data)
+            } else {
+                setFeedback({ type: 'error', text: data.message || 'Erro ao carregar relatorio detalhado Meta' })
+            }
+        } catch {
+            setFeedback({ type: 'error', text: 'Erro ao carregar relatorio detalhado Meta' })
+        } finally {
+            setLoadingMetaDetailedReport(false)
+        }
+    }
+
     const refreshMetaWorkspace = async () => {
         await Promise.all([
             loadMetaCampaigns(),
             loadMetaContactLists(),
             loadMetaReplyReport(),
             loadMetaDailyReport(),
+            loadMetaDetailedReport(),
         ])
     }
 
@@ -1121,6 +1273,74 @@ export default function CampaignsPage() {
 
         anchor.href = url
         anchor.download = `relatorio-meta-whatsapp-${metaDailyReport.date}.csv`
+        anchor.click()
+        URL.revokeObjectURL(url)
+    }
+
+    const exportMetaDetailedReportCsv = () => {
+        const rows = metaDetailedReport?.rows || []
+        if (!rows.length) {
+            setFeedback({ type: 'error', text: 'Busque um relatorio com resultados antes de exportar.' })
+            return
+        }
+
+        const headers = [
+            'campanha',
+            'criativo_template',
+            'idioma',
+            'tipo_campanha',
+            'conta_whatsapp',
+            'waba_id',
+            'numero_remetente',
+            'telefone_destinatario',
+            'nome_destinatario',
+            'status',
+            'enviado_em',
+            'entregue_em',
+            'lido_em',
+            'falhou_em',
+            'resposta_intencao',
+            'resposta_texto',
+            'resposta_botao',
+            'resposta_em',
+            'codigo_erro',
+            'mensagem_erro',
+            'custo',
+            'moeda',
+        ]
+        const csv = [
+            headers.map(escapeAudienceCell).join(';'),
+            ...rows.map(row => [
+                row.campaign_name,
+                row.template_name,
+                row.template_language || '',
+                row.campaign_type || '',
+                row.waba_label || '',
+                row.waba_id || '',
+                row.sender_phone || row.sender_name || '',
+                row.recipient_phone,
+                row.recipient_name || '',
+                metaStatusLabel(row.status),
+                formatMetaDate(row.sent_at),
+                formatMetaDate(row.delivered_at),
+                formatMetaDate(row.read_at),
+                formatMetaDate(row.failed_at),
+                metaReplyIntentLabel(row.reply_intent),
+                row.reply_text || '',
+                row.reply_button || '',
+                formatMetaDate(row.reply_at),
+                row.error_code || '',
+                row.error_message || '',
+                String(row.cost_amount || 0).replace('.', ','),
+                row.currency || 'BRL',
+            ].map(value => escapeAudienceCell(String(value || ''))).join(';')),
+        ].join('\n')
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+        const url = URL.createObjectURL(blob)
+        const anchor = document.createElement('a')
+
+        anchor.href = url
+        anchor.download = `relatorio-detalhado-meta-whatsapp-${metaDetailedReportFilters.dateFrom}-a-${metaDetailedReportFilters.dateTo}.csv`
         anchor.click()
         URL.revokeObjectURL(url)
     }
@@ -1459,7 +1679,9 @@ export default function CampaignsPage() {
     }
 
     const getSelectedMetaTemplate = () => metaTemplates.find(template =>
-        template.name === metaTemplateName && template.language === metaTemplateLanguage
+        template.name === metaTemplateName
+        && template.language === metaTemplateLanguage
+        && (!metaTemplateWabaId || template.waba_id === metaTemplateWabaId)
     ) || null
 
     const getMissingMetaTemplateFields = (skipBodyValues = false, skipHeaderMedia = false) => {
@@ -1732,6 +1954,24 @@ export default function CampaignsPage() {
         setSending(true)
         setFeedback(null)
         try {
+            const selectedTemplateForSubmit = sendProvider === 'meta_whatsapp' ? getSelectedMetaTemplate() : null
+            const usingPortfolioRouting = sendProvider === 'meta_whatsapp' && isMetaPortfolioRouting
+            const targetWabaId = usingPortfolioRouting
+                ? ''
+                : selectedMetaSender?.waba_id || selectedTemplateForSubmit?.waba_id || metaTemplateWabaId
+            if (
+                sendProvider === 'meta_whatsapp'
+                && !usingPortfolioRouting
+                && selectedMetaSender?.waba_id
+                && selectedTemplateForSubmit?.waba_id
+                && selectedMetaSender.waba_id !== selectedTemplateForSubmit.waba_id
+            ) {
+                setFeedback({
+                    type: 'error',
+                    text: `O template selecionado pertence a ${metaTemplateWabaLabel(selectedTemplateForSubmit)}, mas o numero escolhido pertence a ${metaSenderWabaLabel(selectedMetaSender)}. Escolha um numero da mesma conta ou use o pool automatico.`,
+                })
+                return
+            }
             const templateParameters = sendProvider === 'meta_whatsapp'
                 ? buildMetaTemplateParameters()
                 : []
@@ -1764,7 +2004,10 @@ export default function CampaignsPage() {
                         confirmOptIn,
                         optInSource: 'site_lead_authorized',
                         campaignType: metaCampaignType,
-                        defaultSenderId: selectedMetaSenderId || undefined,
+                        senderRoutingMode: usingPortfolioRouting ? 'round_robin' : 'weighted_pool',
+                        portfolioRouting: usingPortfolioRouting,
+                        defaultSenderId: usingPortfolioRouting ? undefined : selectedMetaSenderId || undefined,
+                        wabaId: usingPortfolioRouting ? undefined : targetWabaId || undefined,
                         scheduled_for: scheduleDate ? new Date(scheduleDate).getTime() / 1000 : undefined,
                     }
                     : {
@@ -1788,6 +2031,7 @@ export default function CampaignsPage() {
                 clearSavedContactListSelection()
                 setMsgText('')
                 setMediaUrl('')
+                setMetaSenderRoutingMode('weighted_pool')
                 resetMetaTemplateBuilder()
                 if (sendProvider === 'connectyhub') loadCampaigns()
                 if (sendProvider === 'meta_whatsapp') loadMetaCampaigns()
@@ -1896,9 +2140,6 @@ export default function CampaignsPage() {
     const currentInstance = instances.find(i => i.id === selectedInstance)
     const approvedMetaTemplates = metaTemplates.filter(template => String(template.status || '').toUpperCase() === 'APPROVED')
     const activeMetaSenders = metaSenders.filter(sender => sender.local_status === 'active')
-    const metaPortfolioUsage = metaPortfolioUsageFromSenders(activeMetaSenders)
-    const hasMetaPortfolioCapacity = metaPortfolioUsage.limit > 0 && metaPortfolioUsage.remaining > 0
-    const readyMetaSenders = activeMetaSenders.filter(isMetaSenderAvailable)
     const selectedMetaSender = activeMetaSenders.find(sender => sender.id === selectedMetaSenderId) || null
     const selectedContactList = metaContactLists.find(list => list.id === selectedContactListId) || null
     const selectedContactListUsage = contactListUsage(selectedContactList)
@@ -1923,7 +2164,39 @@ export default function CampaignsPage() {
         || selectedContactListValidationStatus === 'running'
     const selectedContactListWillIncludeUnverified = contactListValidationMode === 'include_unverified'
         && selectedContactListHasPendingValidation
-    const selectedMetaTemplate = approvedMetaTemplates.find(template => template.name === metaTemplateName && template.language === metaTemplateLanguage) || null
+    const selectedMetaTemplate = approvedMetaTemplates.find(template => (
+        template.name === metaTemplateName
+        && template.language === metaTemplateLanguage
+        && (!metaTemplateWabaId || template.waba_id === metaTemplateWabaId)
+    )) || null
+    const selectedMetaTemplateVariants = metaTemplateName.trim()
+        ? approvedMetaTemplates.filter(template => (
+            template.name === metaTemplateName
+            && template.language === metaTemplateLanguage
+        ))
+        : []
+    const selectedTemplateApprovedWabaIds = Array.from(new Set(
+        selectedMetaTemplateVariants.map(template => textValue(template.waba_id)).filter(Boolean)
+    ))
+    const selectedTemplateApprovedWabaKey = selectedTemplateApprovedWabaIds.join('|')
+    const portfolioRoutingEligibleSenders = selectedTemplateApprovedWabaIds.length > 0
+        ? activeMetaSenders.filter(sender => selectedTemplateApprovedWabaIds.includes(sender.waba_id))
+        : []
+    const portfolioRoutingReadySenders = portfolioRoutingEligibleSenders.filter(isMetaSenderAvailable)
+    const portfolioRoutingReadyWabaIds = Array.from(new Set(portfolioRoutingReadySenders.map(sender => sender.waba_id).filter(Boolean)))
+    const portfolioRoutingAvailable = portfolioRoutingReadyWabaIds.length >= 2
+    const isMetaPortfolioRouting = metaSenderRoutingMode === 'round_robin' && portfolioRoutingAvailable
+    const selectedTargetWabaId = isMetaPortfolioRouting
+        ? ''
+        : selectedMetaSender?.waba_id || selectedMetaTemplate?.waba_id || metaTemplateWabaId
+    const targetMetaSenders = isMetaPortfolioRouting
+        ? portfolioRoutingEligibleSenders
+        : selectedTargetWabaId
+            ? activeMetaSenders.filter(sender => sender.waba_id === selectedTargetWabaId)
+            : activeMetaSenders
+    const metaPortfolioUsage = metaPortfolioUsageFromSenders(activeMetaSenders)
+    const hasMetaPortfolioCapacity = metaPortfolioUsage.limit > 0 && metaPortfolioUsage.remaining > 0
+    const readyMetaSenders = targetMetaSenders.filter(isMetaSenderAvailable)
     const selectedTemplateUsage = selectedContactListUsage.templates.find(template =>
         templateUsageKey(template.template_name, template.template_language) === templateUsageKey(metaTemplateName, metaTemplateLanguage)
     ) || null
@@ -1943,16 +2216,35 @@ export default function CampaignsPage() {
     const previewHeaderText = replaceTemplateVariables(selectedHeaderText, { 1: metaHeaderParameterValue }, 'header')
 
     useEffect(() => {
-        if (selectedMetaSenderId && selectedMetaSender && (!isMetaSenderAvailable(selectedMetaSender) || !hasMetaPortfolioCapacity)) {
+        if (metaSenderRoutingMode === 'round_robin' && !portfolioRoutingAvailable) {
+            setMetaSenderRoutingMode('weighted_pool')
+        }
+    }, [metaSenderRoutingMode, portfolioRoutingAvailable, selectedTemplateApprovedWabaKey])
+
+    useEffect(() => {
+        if (metaSenderRoutingMode === 'round_robin' && selectedMetaSenderId) {
+            setSelectedMetaSenderId('')
+        }
+    }, [metaSenderRoutingMode, selectedMetaSenderId])
+
+    useEffect(() => {
+        const templateMismatch = Boolean(
+            selectedMetaSender?.waba_id
+            && selectedMetaTemplate?.waba_id
+            && selectedMetaSender.waba_id !== selectedMetaTemplate.waba_id
+        )
+        if (selectedMetaSenderId && selectedMetaSender && (!isMetaSenderAvailable(selectedMetaSender) || !hasMetaPortfolioCapacity || templateMismatch)) {
             setSelectedMetaSenderId('')
             setFeedback({
                 type: 'error',
-                text: hasMetaPortfolioCapacity
+                text: templateMismatch
+                    ? `O numero selecionado pertence a ${metaSenderWabaLabel(selectedMetaSender)}, mas o template pertence a ${metaTemplateWabaLabel(selectedMetaTemplate)}. Alterei para Pool automatico por capacidade.`
+                    : hasMetaPortfolioCapacity
                     ? `O numero selecionado ficou indisponivel (${metaSenderOptionLabel(selectedMetaSender)}). Alterei para Pool automatico por capacidade.`
                     : `O portfolio Meta atingiu o uso/reserva diaria compartilhada (${metaPortfolioUsage.usageLabel}).`,
             })
         }
-    }, [selectedMetaSenderId, selectedMetaSender, hasMetaPortfolioCapacity, metaPortfolioUsage.usageLabel])
+    }, [selectedMetaSenderId, selectedMetaSender, selectedMetaTemplate, hasMetaPortfolioCapacity, metaPortfolioUsage.usageLabel])
     const previewBodyText = replaceTemplateVariables(selectedBodyText, metaBodyParameterValues, 'exemplo')
     const parsedMetaRecipientDrafts = sendProvider === 'meta_whatsapp' && metaAudiencePersonalized ? parseMetaRecipientDrafts() : []
     const parsedNumbers = sendProvider === 'meta_whatsapp' && metaAudiencePersonalized
@@ -2102,6 +2394,31 @@ export default function CampaignsPage() {
                 <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.78rem', lineHeight: 1.45 }}>
                     Use somente listas com opt-in e templates aprovados. Follow-ups, campanhas em massa e mensagens ativas saem pelo WhatsApp oficial da Meta.
                 </p>
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                    gap: '10px',
+                    marginTop: '4px',
+                }}>
+                    <div style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(201,169,110,0.24)', background: 'rgba(201,169,110,0.08)' }}>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Limite compartilhado</div>
+                        <div style={{ marginTop: '3px', color: hasMetaPortfolioCapacity ? '#16a34a' : '#ef4444', fontSize: '0.9rem', fontWeight: 800 }}>
+                            {metaPortfolioUsage.sent}/{metaPortfolioUsage.limit || 'sem limite'} usados; {metaPortfolioUsage.remaining} livres
+                        </div>
+                        <div style={{ marginTop: '3px', color: 'var(--text-muted)', fontSize: '0.74rem', lineHeight: 1.35 }}>
+                            O teto e do portfolio de negocios, somando todas as contas conectadas.
+                        </div>
+                    </div>
+                    <div style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(34,197,94,0.22)', background: 'rgba(34,197,94,0.07)' }}>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Contas oficiais</div>
+                        <div style={{ marginTop: '3px', color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 800 }}>
+                            {activeMetaSenders.filter(isMetaSenderAvailable).length}/{activeMetaSenders.length} numeros prontos
+                        </div>
+                        <div style={{ marginTop: '3px', color: 'var(--text-muted)', fontSize: '0.74rem', lineHeight: 1.35 }}>
+                            O envio automatico usa apenas numeros conectados e sem alerta de politica/qualidade.
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* Instance Selector */}
@@ -2182,9 +2499,10 @@ export default function CampaignsPage() {
                                         </label>
                                         {approvedMetaTemplates.length > 0 ? (
                                             <select
-                                                value={metaTemplateName ? `${metaTemplateName}::${metaTemplateLanguage}` : ''}
+                                                value={selectedMetaTemplate ? metaTemplateSelectValue(selectedMetaTemplate) : ''}
                                                 onChange={e => {
-                                                    const [name, language] = e.target.value.split('::')
+                                                    const [wabaId, name, language] = e.target.value.split('::')
+                                                    setMetaTemplateWabaId(wabaId || '')
                                                     setMetaTemplateName(name || '')
                                                     setMetaTemplateLanguage(language || 'pt_BR')
                                                     resetMetaTemplateBuilder()
@@ -2197,8 +2515,8 @@ export default function CampaignsPage() {
                                             >
                                                 <option value="">Selecione um template aprovado</option>
                                                 {approvedMetaTemplates.map(template => (
-                                                    <option key={template.id} value={`${template.name}::${template.language}`}>
-                                                        {template.name} ({template.language}) - {template.category}
+                                                    <option key={template.id} value={metaTemplateSelectValue(template)}>
+                                                        {template.name} ({template.language}) - {template.category} - {metaTemplateWabaLabel(template)}
                                                     </option>
                                                 ))}
                                             </select>
@@ -2272,26 +2590,68 @@ export default function CampaignsPage() {
                                 </div>
                                 <div>
                                     <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
-                                        Numero oficial de envio
+                                        Roteamento entre contas
                                     </label>
                                     <select
-                                        value={selectedMetaSenderId}
-                                        onChange={e => setSelectedMetaSenderId(e.target.value)}
+                                        value={metaSenderRoutingMode}
+                                        onChange={e => setMetaSenderRoutingMode(e.target.value as typeof metaSenderRoutingMode)}
                                         style={{
                                             width: '100%', padding: '10px 14px', borderRadius: '8px', fontSize: '0.9rem',
                                             background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)',
                                             color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box',
                                         }}
+                                    >
+                                        <option value="weighted_pool">Usar somente a conta do template</option>
+                                        <option value="round_robin" disabled={!portfolioRoutingAvailable}>
+                                            Distribuir entre contas aprovadas ({portfolioRoutingReadyWabaIds.length} prontas)
+                                        </option>
+                                    </select>
+                                    <div style={{
+                                        marginTop: '8px',
+                                        padding: '9px 10px',
+                                        borderRadius: '8px',
+                                        border: `1px solid ${portfolioRoutingAvailable ? 'rgba(34,197,94,0.2)' : 'rgba(245,158,11,0.2)'}`,
+                                        background: portfolioRoutingAvailable ? 'rgba(34,197,94,0.08)' : 'rgba(245,158,11,0.08)',
+                                        color: 'var(--text-secondary)',
+                                        fontSize: '0.78rem',
+                                        lineHeight: 1.35,
+                                    }}>
+                                        {selectedMetaTemplate
+                                            ? `Este template esta aprovado em ${selectedTemplateApprovedWabaIds.length} conta(s); ${portfolioRoutingReadyWabaIds.length} conta(s) tem numero pronto para roteamento. O limite continua compartilhado no portfolio.`
+                                            : 'Escolha um template aprovado para ver em quais contas ele pode ser usado.'}
+                                    </div>
+                                </div>
+                                <div>
+                                    <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
+                                        Numero oficial de envio
+                                    </label>
+                                    <select
+                                        value={selectedMetaSenderId}
+                                        onChange={e => setSelectedMetaSenderId(e.target.value)}
+                                        disabled={isMetaPortfolioRouting}
+                                        style={{
+                                            width: '100%', padding: '10px 14px', borderRadius: '8px', fontSize: '0.9rem',
+                                            background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)',
+                                            color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box',
+                                            cursor: isMetaPortfolioRouting ? 'not-allowed' : 'pointer',
+                                        }}
                                         >
-                                        <option value="">Pool automatico por capacidade ({metaPortfolioUsage.remaining} vagas livres no portfolio)</option>
-                                        {activeMetaSenders.map(sender => (
-                                            <option key={sender.id} value={sender.id} disabled={!isMetaSenderAvailable(sender) || !hasMetaPortfolioCapacity}>
-                                                {metaSenderOptionLabel(sender)}
-                                            </option>
-                                        ))}
+                                        <option value="">
+                                            {isMetaPortfolioRouting
+                                                ? `Pool do portfolio (${portfolioRoutingReadyWabaIds.length} contas prontas; ${metaPortfolioUsage.remaining} vagas livres)`
+                                                : `Pool automatico por capacidade (${metaPortfolioUsage.remaining} vagas livres no portfolio)`}
+                                        </option>
+                                        {activeMetaSenders.map(sender => {
+                                            const wabaMismatch = Boolean(selectedMetaTemplate?.waba_id && sender.waba_id !== selectedMetaTemplate.waba_id)
+                                            return (
+                                                <option key={sender.id} value={sender.id} disabled={!isMetaSenderAvailable(sender) || !hasMetaPortfolioCapacity || wabaMismatch}>
+                                                    {wabaMismatch ? `${metaSenderOptionLabel(sender)} - conta diferente do template` : metaSenderOptionLabel(sender)}
+                                                </option>
+                                            )
+                                        })}
                                     </select>
                                     <div style={{ marginTop: '8px', color: hasMetaPortfolioCapacity ? '#16a34a' : '#ef4444', fontSize: '0.78rem', fontWeight: 700 }}>
-                                        Uso/reserva compartilhada do portfolio: {metaPortfolioUsage.usageLabel}; vagas livres {metaPortfolioUsage.remaining}.
+                                        Uso/reserva compartilhada do portfolio Meta: {metaPortfolioUsage.usageLabel}; vagas livres {metaPortfolioUsage.remaining}.
                                     </div>
                                     {selectedMetaSender && !isMetaSenderAvailable(selectedMetaSender) && (
                                         <div style={{ marginTop: '8px', color: '#ef4444', fontSize: '0.78rem', fontWeight: 700 }}>
@@ -2300,7 +2660,9 @@ export default function CampaignsPage() {
                                     )}
                                     {!selectedMetaSenderId && readyMetaSenders.length > 0 && hasMetaPortfolioCapacity && (
                                         <div style={{ marginTop: '8px', color: '#16a34a', fontSize: '0.78rem', fontWeight: 700 }}>
-                                            Pool automatico vai usar um numero conectado, respeitando o limite compartilhado.
+                                            {isMetaPortfolioRouting
+                                                ? `Distribuicao ativa: o sistema balanceia entre ${portfolioRoutingReadyWabaIds.length} contas com este template aprovado, sem ultrapassar o limite compartilhado.`
+                                                : 'Pool automatico vai usar um numero conectado da conta alvo, respeitando o limite compartilhado.'}
                                         </div>
                                     )}
                                 </div>
@@ -2318,7 +2680,7 @@ export default function CampaignsPage() {
                                         <div style={{ display: 'grid', gap: '12px' }}>
                                             <div style={{ padding: '12px', borderRadius: '10px', border: '1px solid rgba(34,197,94,0.22)', background: 'rgba(34,197,94,0.08)', color: 'var(--text-secondary)', fontSize: '0.82rem', lineHeight: 1.45 }}>
                                                 <strong style={{ color: 'var(--text-primary)' }}>{selectedMetaTemplate.name}</strong>
-                                                <div>{selectedMetaTemplate.category} | {selectedMetaTemplate.language} | {selectedTemplateButtons.length} botao(s)</div>
+                                                <div>{selectedMetaTemplate.category} | {selectedMetaTemplate.language} | {metaTemplateWabaLabel(selectedMetaTemplate)} | {selectedTemplateButtons.length} botao(s)</div>
                                             </div>
 
                                             {selectedHeaderComponent && (
@@ -3243,6 +3605,9 @@ export default function CampaignsPage() {
                     dailyReport={metaDailyReport}
                     dailyReportDate={metaDailyReportDate}
                     dailyReportLoading={loadingMetaDailyReport}
+                    detailedReport={metaDetailedReport}
+                    detailedReportFilters={metaDetailedReportFilters}
+                    detailedReportLoading={loadingMetaDetailedReport}
                     replyReport={metaReplyReport}
                     replyReportLoading={loadingMetaReplyReport}
                     replyIntentFilter={metaReplyIntentFilter}
@@ -3256,6 +3621,9 @@ export default function CampaignsPage() {
                     onDailyReportDateChange={setMetaDailyReportDate}
                     onDailyReportRefresh={() => loadMetaDailyReport()}
                     onDailyReportExport={exportMetaDailyReportCsv}
+                    onDetailedReportFiltersChange={setMetaDetailedReportFilters}
+                    onDetailedReportRefresh={() => loadMetaDetailedReport()}
+                    onDetailedReportExport={exportMetaDetailedReportCsv}
                     onReplyIntentFilterChange={setMetaReplyIntentFilter}
                     onReplyDateFilterChange={setMetaReplyDateFilter}
                     onRefresh={refreshMetaWorkspace}
@@ -3465,7 +3833,7 @@ function campaignErrorGroups(recipients: MetaCampaignRecipient[], events: MetaCa
 }
 
 const META_CHART_COLORS = ['#b08a43', '#22c55e', '#38bdf8', '#ef4444', '#6366f1', '#f59e0b']
-type MetaCampaignWorkspaceTab = 'overview' | 'campaigns' | 'replies' | 'diagnostics'
+type MetaCampaignWorkspaceTab = 'overview' | 'campaigns' | 'reports' | 'replies' | 'diagnostics'
 type MetaCampaignSortKey = 'created_desc' | 'created_asc' | 'name_asc' | 'recipients_desc' | 'failed_desc' | 'delivery_desc' | 'read_desc'
 type MetaCampaignSignalFilter = 'all' | 'with_failures' | 'high_failure' | 'with_reads' | 'without_failures'
 const META_CAMPAIGN_PAGE_SIZE_OPTIONS = [20, 50, 100]
@@ -3636,6 +4004,438 @@ function MetaDailyReportPanel({
     )
 }
 
+function MetaDetailedGroupList({
+    title,
+    groups,
+    metricLabel = 'dest.',
+}: {
+    title: string
+    groups: MetaDetailedReportGroup[]
+    metricLabel?: string
+}) {
+    const visibleGroups = groups.slice(0, 5)
+    return (
+        <div style={{
+            border: '1px solid var(--border)',
+            borderRadius: '10px',
+            padding: '10px',
+            display: 'grid',
+            gap: '8px',
+            background: 'rgba(255,255,255,0.025)',
+            minWidth: 0,
+        }}>
+            <strong style={{ color: 'var(--text-primary)', fontSize: '0.78rem' }}>{title}</strong>
+            {visibleGroups.length === 0 ? (
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>Sem dados no filtro.</span>
+            ) : (
+                visibleGroups.map(group => (
+                    <div key={group.key} style={{ display: 'grid', gap: '5px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', alignItems: 'center' }}>
+                            <span style={{ color: 'var(--text-secondary)', fontSize: '0.72rem', fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {group.label}
+                            </span>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.68rem', whiteSpace: 'nowrap' }}>
+                                {Number(group.recipients || 0).toLocaleString('pt-BR')} {metricLabel}
+                            </span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '7px', color: 'var(--text-muted)', fontSize: '0.67rem', flexWrap: 'wrap' }}>
+                            <span>Entrega <strong style={{ color: '#22c55e' }}>{percentLabel(group.delivery_rate || 0)}</strong></span>
+                            <span>Leitura <strong style={{ color: '#0ea5e9' }}>{percentLabel(group.read_rate || 0)}</strong></span>
+                            <span>Resp. <strong style={{ color: '#f59e0b' }}>{percentLabel(group.reply_rate || 0)}</strong></span>
+                        </div>
+                    </div>
+                ))
+            )}
+        </div>
+    )
+}
+
+function MetaDetailedReportPanel({
+    report,
+    filters,
+    campaigns,
+    senders,
+    loading,
+    onFiltersChange,
+    onRefresh,
+    onExport,
+}: {
+    report: MetaDetailedReport | null
+    filters: MetaDetailedReportFilters
+    campaigns: MetaCampaign[]
+    senders: MetaSender[]
+    loading: boolean
+    onFiltersChange: (filters: MetaDetailedReportFilters) => void
+    onRefresh: () => void
+    onExport: () => void
+}) {
+    const summary = report?.summary
+    const rows = report?.rows || []
+    const templateOptionEntries: Array<[string, { name: string; language: string }]> = campaigns
+        .map(campaign => [templateUsageKey(campaign.template_name, campaign.template_language), {
+            name: campaign.template_name || '',
+            language: campaign.template_language || '',
+        }] as [string, { name: string; language: string }])
+        .filter(([, template]) => Boolean(template.name))
+    const templateOptions = Array.from(new Map(templateOptionEntries).values())
+        .sort((a, b) => a.name.localeCompare(b.name))
+    const wabaOptionEntries: Array<[string, { id: string; label: string }]> = senders
+        .map(sender => [sender.waba_id, {
+            id: sender.waba_id,
+            label: sender.display_name || sender.phone_number || sender.waba_id,
+        }] as [string, { id: string; label: string }])
+        .filter(([id]) => Boolean(id))
+    const wabaOptions = Array.from(new Map(wabaOptionEntries).values())
+    const metricItems = [
+        { label: 'Destinatarios', value: summary?.recipients || 0, detail: 'linhas encontradas', icon: Users, color: 'var(--gold)' },
+        { label: 'Aceitas', value: summary?.sent || 0, detail: percentLabel(summary?.delivery_rate || 0), icon: CheckCircle2, color: '#22c55e' },
+        { label: 'Entregues', value: summary?.delivered || 0, detail: 'confirmadas', icon: Inbox, color: '#16a34a' },
+        { label: 'Lidas', value: summary?.read || 0, detail: percentLabel(summary?.read_rate || 0), icon: Eye, color: '#0ea5e9' },
+        { label: 'Respostas', value: summary?.replies || 0, detail: percentLabel(summary?.reply_rate || 0), icon: MessageSquare, color: '#f59e0b' },
+        { label: 'Falhas', value: summary?.failed || 0, detail: 'erros Meta', icon: AlertCircle, color: '#ef4444' },
+    ]
+    const updateFilter = (key: keyof MetaDetailedReportFilters, value: string) => {
+        onFiltersChange({ ...filters, [key]: value })
+    }
+    const clearFilters = () => {
+        onFiltersChange({
+            dateFrom: saoPauloDateInputDaysAgo(7),
+            dateTo: saoPauloDateInputDaysAgo(0),
+            templateName: '',
+            campaignId: '',
+            senderId: '',
+            wabaId: '',
+            status: '',
+            intent: '',
+            search: '',
+            limit: filters.limit || '1000',
+        })
+    }
+
+    return (
+        <div id="relatorios-meta-whatsapp" style={{
+            borderRadius: '12px',
+            background: 'var(--bg-secondary)',
+            border: '1px solid var(--border)',
+            overflow: 'hidden',
+        }}>
+            <div style={{
+                padding: '13px 14px',
+                borderBottom: '1px solid var(--border)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '10px',
+                flexWrap: 'wrap',
+            }}>
+                <div>
+                    <strong style={{ color: 'var(--text-primary)', fontSize: '0.92rem', display: 'flex', alignItems: 'center', gap: '7px' }}>
+                        <Download size={16} style={{ color: 'var(--gold)' }} />
+                        Relatorio detalhado
+                    </strong>
+                    <p style={{ margin: '4px 0 0', color: 'var(--text-muted)', fontSize: '0.74rem' }}>
+                        Filtre por criativo, periodo, campanha, conta, numero, status, resposta ou busca livre.
+                    </p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <button
+                        type="button"
+                        onClick={clearFilters}
+                        style={{
+                            minHeight: '36px',
+                            borderRadius: '8px',
+                            border: '1px solid var(--border)',
+                            background: 'rgba(255,255,255,0.04)',
+                            color: 'var(--text-secondary)',
+                            padding: '0 10px',
+                            cursor: 'pointer',
+                            fontSize: '0.74rem',
+                            fontWeight: 800,
+                        }}
+                    >
+                        Limpar
+                    </button>
+                    <button
+                        type="button"
+                        onClick={onExport}
+                        disabled={!rows.length || loading}
+                        style={{
+                            minHeight: '36px',
+                            borderRadius: '8px',
+                            border: '1px solid rgba(176,138,67,0.42)',
+                            background: 'rgba(176,138,67,0.13)',
+                            color: 'var(--gold)',
+                            padding: '0 10px',
+                            cursor: !rows.length || loading ? 'not-allowed' : 'pointer',
+                            fontSize: '0.74rem',
+                            fontWeight: 900,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                        }}
+                    >
+                        <Download size={14} /> Baixar CSV
+                    </button>
+                    <button
+                        type="button"
+                        onClick={onRefresh}
+                        disabled={loading}
+                        style={{
+                            minHeight: '36px',
+                            borderRadius: '8px',
+                            border: '1px solid var(--border)',
+                            background: 'rgba(255,255,255,0.04)',
+                            color: 'var(--text-secondary)',
+                            padding: '0 10px',
+                            cursor: loading ? 'not-allowed' : 'pointer',
+                            fontSize: '0.74rem',
+                            fontWeight: 800,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                        }}
+                    >
+                        <RefreshCw size={14} className={loading ? 'spin' : ''} /> Buscar
+                    </button>
+                </div>
+            </div>
+
+            <div style={{
+                padding: '12px 14px',
+                borderBottom: '1px solid var(--border)',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(154px, 1fr))',
+                gap: '8px',
+            }}>
+                <input
+                    type="date"
+                    value={filters.dateFrom}
+                    onChange={event => updateFilter('dateFrom', event.target.value)}
+                    title="Data inicial"
+                    style={{ minHeight: '38px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '0 10px', fontSize: '0.78rem' }}
+                />
+                <input
+                    type="date"
+                    value={filters.dateTo}
+                    onChange={event => updateFilter('dateTo', event.target.value)}
+                    title="Data final"
+                    style={{ minHeight: '38px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '0 10px', fontSize: '0.78rem' }}
+                />
+                <select
+                    value={filters.templateName}
+                    onChange={event => updateFilter('templateName', event.target.value)}
+                    title="Filtrar por criativo/template"
+                    style={{ minHeight: '38px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '0 10px', fontSize: '0.78rem' }}
+                >
+                    <option value="">Todos os criativos</option>
+                    {templateOptions.map(template => (
+                        <option key={`${template.name}-${template.language}`} value={template.name}>
+                            {template.name}{template.language ? ` (${template.language})` : ''}
+                        </option>
+                    ))}
+                </select>
+                <select
+                    value={filters.campaignId}
+                    onChange={event => updateFilter('campaignId', event.target.value)}
+                    title="Filtrar por campanha"
+                    style={{ minHeight: '38px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '0 10px', fontSize: '0.78rem' }}
+                >
+                    <option value="">Todas as campanhas</option>
+                    {campaigns.map(campaign => (
+                        <option key={campaign.id} value={campaign.id}>{campaign.name}</option>
+                    ))}
+                </select>
+                <select
+                    value={filters.wabaId}
+                    onChange={event => updateFilter('wabaId', event.target.value)}
+                    title="Filtrar por conta WhatsApp"
+                    style={{ minHeight: '38px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '0 10px', fontSize: '0.78rem' }}
+                >
+                    <option value="">Todas as contas</option>
+                    {wabaOptions.map(option => (
+                        <option key={option.id} value={option.id}>{option.label}</option>
+                    ))}
+                </select>
+                <select
+                    value={filters.senderId}
+                    onChange={event => updateFilter('senderId', event.target.value)}
+                    title="Filtrar por numero remetente"
+                    style={{ minHeight: '38px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '0 10px', fontSize: '0.78rem' }}
+                >
+                    <option value="">Todos os numeros</option>
+                    {senders.map(sender => (
+                        <option key={sender.id} value={sender.id}>{sender.display_name || sender.phone_number}</option>
+                    ))}
+                </select>
+                <select
+                    value={filters.status}
+                    onChange={event => updateFilter('status', event.target.value)}
+                    title="Filtrar por status da mensagem"
+                    style={{ minHeight: '38px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '0 10px', fontSize: '0.78rem' }}
+                >
+                    <option value="">Todos os status</option>
+                    <option value="queued">Fila</option>
+                    <option value="sending">Enviando</option>
+                    <option value="sent">Aceita Meta</option>
+                    <option value="delivered">Entregue</option>
+                    <option value="read">Lida</option>
+                    <option value="failed">Falha</option>
+                    <option value="skipped">Ignorada</option>
+                    <option value="opted_out">Saida</option>
+                </select>
+                <select
+                    value={filters.intent}
+                    onChange={event => updateFilter('intent', event.target.value)}
+                    title="Filtrar por tipo de resposta"
+                    style={{ minHeight: '38px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '0 10px', fontSize: '0.78rem' }}
+                >
+                    <option value="">Todas as respostas</option>
+                    <option value="interested">Interessados</option>
+                    <option value="opt_out">Saidas</option>
+                    <option value="question">Perguntas</option>
+                    <option value="unknown">Sem classificacao</option>
+                </select>
+                <select
+                    value={filters.limit}
+                    onChange={event => updateFilter('limit', event.target.value)}
+                    title="Limite de linhas retornadas"
+                    style={{ minHeight: '38px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '0 10px', fontSize: '0.78rem' }}
+                >
+                    <option value="500">500 linhas</option>
+                    <option value="1000">1.000 linhas</option>
+                    <option value="2500">2.500 linhas</option>
+                    <option value="5000">5.000 linhas</option>
+                </select>
+                <label style={{ minHeight: '38px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-muted)', padding: '0 10px', display: 'flex', alignItems: 'center', gap: '8px', gridColumn: '1 / -1' }}>
+                    <Search size={14} />
+                    <input
+                        value={filters.search}
+                        onChange={event => updateFilter('search', event.target.value)}
+                        placeholder="Buscar telefone, nome, campanha, criativo, numero ou erro"
+                        style={{ border: 0, outline: 'none', background: 'transparent', color: 'var(--text-primary)', width: '100%', fontSize: '0.78rem' }}
+                    />
+                </label>
+            </div>
+
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(6, minmax(126px, 1fr))',
+                borderBottom: '1px solid var(--border)',
+                overflowX: 'auto',
+            }}>
+                {metricItems.map(item => {
+                    const Icon = item.icon
+                    return (
+                        <div key={item.label} style={{
+                            minWidth: '126px',
+                            padding: '12px',
+                            borderRight: '1px solid var(--border)',
+                            display: 'grid',
+                            gap: '5px',
+                        }}>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', fontSize: '0.66rem', fontWeight: 900, textTransform: 'uppercase' }}>
+                                <Icon size={13} style={{ color: item.color }} /> {item.label}
+                            </span>
+                            <strong style={{ color: item.color, fontSize: '0.95rem' }}>
+                                {Number(item.value || 0).toLocaleString('pt-BR')}
+                            </strong>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.68rem' }}>{item.detail}</span>
+                        </div>
+                    )
+                })}
+            </div>
+
+            <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+                <MetaDetailedGroupList title="Por criativo" groups={summary?.by_template || []} />
+                <MetaDetailedGroupList title="Por conta" groups={summary?.by_waba || []} />
+                <MetaDetailedGroupList title="Por numero" groups={summary?.by_sender || []} />
+            </div>
+
+            <div style={{ minWidth: 0, overflowX: 'auto' }}>
+                <div style={{
+                    minWidth: '1180px',
+                    display: 'grid',
+                    gridTemplateColumns: '130px 170px 170px 130px 120px 110px 110px 110px 110px 1fr',
+                    gap: '8px',
+                    padding: '9px 12px',
+                    borderBottom: '1px solid var(--border)',
+                    color: 'var(--text-muted)',
+                    fontSize: '0.66rem',
+                    fontWeight: 900,
+                    textTransform: 'uppercase',
+                    background: 'rgba(255,255,255,0.025)',
+                }}>
+                    <span>Contato</span>
+                    <span>Campanha</span>
+                    <span>Criativo</span>
+                    <span>Conta</span>
+                    <span>Numero</span>
+                    <span>Status</span>
+                    <span>Enviado</span>
+                    <span>Lido</span>
+                    <span>Resposta</span>
+                    <span>Erro</span>
+                </div>
+
+                {loading ? (
+                    <div style={{ minWidth: '1180px', padding: '34px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                        <Loader2 size={16} className="spin" /> Carregando relatorio...
+                    </div>
+                ) : !report ? (
+                    <div style={{ minWidth: '1180px', padding: '34px', color: 'var(--text-muted)', textAlign: 'center' }}>
+                        Clique em Buscar para carregar o relatorio detalhado.
+                    </div>
+                ) : rows.length === 0 ? (
+                    <div style={{ minWidth: '1180px', padding: '34px', color: 'var(--text-muted)', textAlign: 'center' }}>
+                        Nenhum resultado encontrado para os filtros atuais.
+                    </div>
+                ) : (
+                    <div style={{ minWidth: '1180px' }}>
+                        {rows.slice(0, 80).map(row => (
+                            <div key={row.recipient_id} style={{
+                                display: 'grid',
+                                gridTemplateColumns: '130px 170px 170px 130px 120px 110px 110px 110px 110px 1fr',
+                                gap: '8px',
+                                padding: '10px 12px',
+                                borderBottom: '1px solid var(--border)',
+                                alignItems: 'center',
+                                color: 'var(--text-secondary)',
+                                fontSize: '0.72rem',
+                            }}>
+                                <span style={{ minWidth: 0 }}>
+                                    <strong style={{ color: 'var(--text-primary)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                        {row.recipient_name || row.recipient_phone}
+                                    </strong>
+                                    <span style={{ color: 'var(--text-muted)' }}>{row.recipient_phone}</span>
+                                </span>
+                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.campaign_name}</span>
+                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.template_name}</span>
+                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.waba_label || row.waba_id || '-'}</span>
+                                <span>{row.sender_phone || row.sender_name || '-'}</span>
+                                <span style={{ color: metaStatusColor(row.status), fontWeight: 900 }}>{metaStatusLabel(row.status)}</span>
+                                <span>{formatMetaDate(row.sent_at)}</span>
+                                <span>{formatMetaDate(row.read_at)}</span>
+                                <span style={{ color: row.reply_intent === 'interested' ? '#22c55e' : row.reply_intent === 'opt_out' ? '#ef4444' : 'var(--text-muted)' }}>
+                                    {row.reply_intent ? metaReplyIntentLabel(row.reply_intent) : '-'}
+                                </span>
+                                <span style={{ color: row.error_message ? '#ef4444' : 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                    {row.error_message || row.error_code || '-'}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {rows.length > 80 && (
+                <div style={{ padding: '10px 14px', color: 'var(--text-muted)', fontSize: '0.72rem', borderTop: '1px solid var(--border)' }}>
+                    Mostrando 80 de {rows.length.toLocaleString('pt-BR')} linhas na tela. O CSV baixa todas as linhas retornadas pelo filtro.
+                </div>
+            )}
+        </div>
+    )
+}
+
 function MetaOfficialCampaignPanel({
     campaigns,
     senders,
@@ -3644,6 +4444,9 @@ function MetaOfficialCampaignPanel({
     dailyReport,
     dailyReportDate,
     dailyReportLoading,
+    detailedReport,
+    detailedReportFilters,
+    detailedReportLoading,
     replyReport,
     replyReportLoading,
     replyIntentFilter,
@@ -3657,6 +4460,9 @@ function MetaOfficialCampaignPanel({
     onDailyReportDateChange,
     onDailyReportRefresh,
     onDailyReportExport,
+    onDetailedReportFiltersChange,
+    onDetailedReportRefresh,
+    onDetailedReportExport,
     onReplyIntentFilterChange,
     onReplyDateFilterChange,
     onRefresh,
@@ -3674,6 +4480,9 @@ function MetaOfficialCampaignPanel({
     dailyReport: MetaDailyReport | null
     dailyReportDate: string
     dailyReportLoading: boolean
+    detailedReport: MetaDetailedReport | null
+    detailedReportFilters: MetaDetailedReportFilters
+    detailedReportLoading: boolean
     replyReport: MetaReplyReport | null
     replyReportLoading: boolean
     replyIntentFilter: string
@@ -3687,6 +4496,9 @@ function MetaOfficialCampaignPanel({
     onDailyReportDateChange: (value: string) => void
     onDailyReportRefresh: () => void
     onDailyReportExport: () => void
+    onDetailedReportFiltersChange: (filters: MetaDetailedReportFilters) => void
+    onDetailedReportRefresh: () => void
+    onDetailedReportExport: () => void
     onReplyIntentFilterChange: (value: string) => void
     onReplyDateFilterChange: (value: string) => void
     onRefresh: () => void
@@ -3732,6 +4544,7 @@ function MetaOfficialCampaignPanel({
     const tabItems: Array<{ key: MetaCampaignWorkspaceTab; label: string; count: number; icon: typeof MessageSquare }> = [
         { key: 'overview', label: 'Resumo', count: dailyReport?.totals?.dispatched || summary?.total || 0, icon: BarChart3 },
         { key: 'campaigns', label: 'Campanhas', count: summary?.total || campaigns.length, icon: Send },
+        { key: 'reports', label: 'Relatorios', count: detailedReport?.rows?.length || 0, icon: Download },
         { key: 'replies', label: 'Respostas', count: replySummary.total || 0, icon: MessageSquare },
         { key: 'diagnostics', label: 'Diagnostico', count: analytics?.errorBreakdown?.length || summary?.failed || 0, icon: Activity },
     ]
@@ -3810,7 +4623,12 @@ function MetaOfficialCampaignPanel({
                                 <button
                                     key={tab.key}
                                     type="button"
-                                    onClick={() => setActiveTab(tab.key)}
+                                    onClick={() => {
+                                        setActiveTab(tab.key)
+                                        if (tab.key === 'reports' && !detailedReport && !detailedReportLoading) {
+                                            onDetailedReportRefresh()
+                                        }
+                                    }}
                                     style={{
                                         minHeight: '34px',
                                         border: 'none',
@@ -4308,6 +5126,19 @@ function MetaOfficialCampaignPanel({
                 )}
             </div>
 
+            {activeTab === 'reports' && (
+                <MetaDetailedReportPanel
+                    report={detailedReport}
+                    filters={detailedReportFilters}
+                    campaigns={campaigns}
+                    senders={senders}
+                    loading={detailedReportLoading}
+                    onFiltersChange={onDetailedReportFiltersChange}
+                    onRefresh={onDetailedReportRefresh}
+                    onExport={onDetailedReportExport}
+                />
+            )}
+
             {activeTab === 'replies' && (
                 <MetaReplyOpsPanel
                     report={replyReport}
@@ -4375,6 +5206,11 @@ function MetaCampaignTableRow({
     const canCancel = ['scheduled', 'queued', 'sending', 'preparing'].includes(campaign.status)
     const canDelete = finalStatus || ['draft', 'paused'].includes(campaign.status)
     const canRetryFailed = campaign.total_failed > 0 && !['queued', 'sending', 'scheduled', 'preparing', 'cancelled'].includes(campaign.status)
+    const campaignMetadata = asRecord(campaign.metadata)
+    const portfolioRoutingEnabled = campaignMetadata.portfolio_routing_enabled === true
+    const routingWabaLabels = Array.isArray(campaignMetadata.routing_waba_labels)
+        ? campaignMetadata.routing_waba_labels.map(label => textValue(label)).filter(Boolean)
+        : []
 
     return (
         <div
@@ -4434,7 +5270,9 @@ function MetaCampaignTableRow({
                     whiteSpace: 'nowrap',
                 }}>
                     {campaign.template_name || '-'} ({campaign.template_language || 'pt_BR'})
-                    {sender ? ` | ${sender.display_name || sender.phone_number}` : ''}
+                    {portfolioRoutingEnabled
+                        ? ` | Pool portfolio${routingWabaLabels.length ? ` (${routingWabaLabels.length} contas)` : ''}`
+                        : sender ? ` | ${sender.display_name || sender.phone_number}` : ''}
                 </span>
                 <div style={{ height: '5px', borderRadius: '999px', background: 'rgba(148,163,184,0.16)', overflow: 'hidden' }}>
                     <div style={{
@@ -5060,6 +5898,13 @@ function MetaCampaignDetailPanel({
     const segmentSearch = textValue(contactSegment.search)
     const segmentFilteredContacts = Number(contactSegment.filteredContacts || contactSegment.filtered_contacts || 0)
     const segmentTotalContacts = Number(contactSegment.totalContacts || contactSegment.total_contacts || 0)
+    const campaignPortfolioRouting = campaignMetadata.portfolio_routing_enabled === true
+    const routingWabaLabels = Array.isArray(campaignMetadata.routing_waba_labels)
+        ? campaignMetadata.routing_waba_labels.map(label => textValue(label)).filter(Boolean)
+        : []
+    const routingDescription = campaignPortfolioRouting
+        ? `Pool portfolio (${routingWabaLabels.length || 1} conta(s))${routingWabaLabels.length ? `: ${routingWabaLabels.join(', ')}` : ''}`
+        : textValue(campaignMetadata.waba_label) || 'Conta do template'
     const segmentDescription = [
         textValue(campaignMetadata.contact_list_name) ? `Lista: ${textValue(campaignMetadata.contact_list_name)}` : '',
         segmentCity ? `Cidade: ${segmentCity}` : '',
@@ -5228,6 +6073,7 @@ function MetaCampaignDetailPanel({
                     <strong style={{ color: 'var(--text-primary)', fontSize: '0.82rem' }}>Resumo da mensagem</strong>
                     <MetaDetailLine label="Template" value={`${campaign.template_name || '-'} (${campaign.template_language || 'pt_BR'})`} />
                     <MetaDetailLine label="Tipo" value={campaign.campaign_type || '-'} />
+                    <MetaDetailLine label="Roteamento" value={routingDescription} />
                     <MetaDetailLine label="Criada" value={formatMetaDate(campaign.created_at)} />
                     <MetaDetailLine label="Iniciada" value={formatMetaDate(campaign.started_at)} />
                     <MetaDetailLine label="Finalizada" value={formatMetaDate(campaign.completed_at)} />
