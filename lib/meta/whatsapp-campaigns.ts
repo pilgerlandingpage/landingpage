@@ -241,9 +241,20 @@ function isLegacySyncedTemplate(template: any) {
   return /^sir\d+_\d+_[a-f0-9]+$/i.test(name)
 }
 
+function templateHasImageHeader(template: any) {
+  return Array.isArray(template?.components)
+    && template.components.some((component: any) => {
+      const type = cleanText(component?.type, 30).toUpperCase()
+      const format = cleanText(component?.format, 30).toUpperCase()
+      return type === 'HEADER' && format === 'IMAGE'
+    })
+}
+
 function isCampaignTemplateEligible(template: any) {
   const metadata = asMetadata(template?.metadata)
   if (metadata.deleted_from_panel_at) return false
+  if (metadata.hidden_from_panel_at) return false
+  if (!templateHasImageHeader(template)) return false
   if (metadata.managed_from_panel || metadata.created_from_panel) return true
 
   const status = cleanText(template?.status, 40).toUpperCase()
