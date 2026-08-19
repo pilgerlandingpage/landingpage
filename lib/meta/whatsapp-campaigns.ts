@@ -5,6 +5,12 @@ import {
   resolveMetaWhatsAppConfig,
   sendMetaWhatsAppTemplateMessage,
 } from '@/lib/meta/whatsapp-cloud'
+import {
+  getMetaWhatsAppSenderHealth,
+  isMetaWhatsAppSenderAvailable,
+  isMetaWhatsAppSenderPolicyEligible,
+  metaWhatsAppSenderUsage,
+} from '@/lib/meta/whatsapp-sender-health'
 
 type SupabaseAdmin = ReturnType<typeof createAdminClient>
 
@@ -182,12 +188,7 @@ function isCampaignTemplateEligible(template: any) {
 }
 
 function isMetaSenderReady(sender: any) {
-  const metaStatus = cleanText(sender?.meta_status, 40).toUpperCase()
-  const dailyLimit = Number(sender.daily_limit || 0)
-  return dailyLimit > 0
-    && sender?.local_status === 'active'
-    && metaStatus === 'CONNECTED'
-    && senderDailySentCount(sender) < dailyLimit
+  return isMetaWhatsAppSenderAvailable(sender)
 }
 
 function asNumber(value: unknown) {
@@ -227,11 +228,12 @@ function isSenderUsageExpired(sender: any, now = new Date()) {
 }
 
 function senderDailySentCount(sender: any) {
-  return isSenderUsageExpired(sender) ? 0 : asNumber(sender?.daily_sent_count)
+  return metaWhatsAppSenderUsage(sender).sent
 }
 
 function portfolioDailyLimit(senders: any[]) {
-  return Math.max(...senders.map(sender => asNumber(sender?.daily_limit)), 0)
+  const eligibleSenders = senders.filter(isMetaWhatsAppSenderPolicyEligible)
+  return Math.max(...eligibleSenders.map(sender => asNumber(sender?.daily_limit)), 0)
 }
 
 function portfolioDailySentCount(senders: any[]) {
@@ -336,16 +338,8 @@ async function syncSenderDailyUsageFromCampaignRecipients(supabase: SupabaseAdmi
 function describeSenderAvailability(sender: any) {
   if (!sender) return 'numero selecionado nao encontrado.'
   const name = sender.display_name || sender.phone_number || 'Numero Meta'
-  const metaStatus = cleanText(sender.meta_status, 40).toUpperCase() || 'sem status'
-  const localStatus = cleanText(sender.local_status, 40) || 'sem status local'
-  const dailyLimit = asNumber(sender.daily_limit)
-  const dailySent = senderDailySentCount(sender)
-
-  if (localStatus !== 'active') return `${name}: status local ${localStatus}.`
-  if (metaStatus !== 'CONNECTED') return `${name}: status Meta ${metaStatus}.`
-  if (dailyLimit <= 0) return `${name}: limite diario nao configurado.`
-  if (dailyLimit > 0 && dailySent >= dailyLimit) return `${name}: limite diario esgotado (${dailySent}/${dailyLimit}).`
-  return `${name}: disponivel (${dailySent}/${dailyLimit || 'sem limite'}).`
+  const health = getMetaWhatsAppSenderHealth(sender)
+  return `${name}: ${health.warning || health.reason}`
 }
 
 function describePortfolioAvailability(senders: any[]) {
@@ -600,6 +594,7 @@ function buildMetaWhatsAppAnalytics(campaigns: any[], senders: any[], recipients
       }
       const dailyLimit = asNumber(sender.daily_limit)
       const dailySent = senderDailySentCount(sender)
+      const senderHealth = getMetaWhatsAppSenderHealth(sender)
       return {
         sender_id: sender.id,
         display_name: sender.display_name || sender.phone_number || 'Numero Meta',
@@ -608,6 +603,10 @@ function buildMetaWhatsAppAnalytics(campaigns: any[], senders: any[], recipients
         quality_rating: sender.quality_rating || null,
         daily_limit: dailyLimit,
         daily_sent_count: dailySent,
+        available: senderHealth.available,
+        policy_eligible: senderHealth.policyEligible,
+        health_status: senderHealth.severity,
+        health_reason: senderHealth.warning || senderHealth.reason,
         usageRate: percentage(dailySent, dailyLimit),
         recipients: stats.recipients,
         accepted: stats.accepted,
@@ -851,7 +850,7 @@ export async function createMetaWhatsAppCampaign(input: CreateMetaWhatsAppCampai
 
   const { data: senders, error: sendersError } = await supabase
     .from('meta_whatsapp_senders')
-    .select('id, display_name, phone_number, phone_number_id, local_status, meta_status, daily_limit, daily_sent_count, daily_limit_resets_at, use_case')
+    .select('id, display_name, phone_number, phone_number_id, local_status, meta_status, quality_rating, messaging_limit_tier, daily_limit, daily_sent_count, daily_limit_resets_at, use_case, weight, last_error, metadata')
     .eq('waba_id', resolved.wabaId)
     .eq('local_status', 'active')
     .limit(50)
@@ -1290,7 +1289,7 @@ export async function listMetaWhatsAppCampaigns(input: ListMetaWhatsAppCampaigns
 
   const { data: senders, error: sendersError } = await supabase
     .from('meta_whatsapp_senders')
-    .select('id, display_name, phone_number, phone_number_id, local_status, meta_status, quality_rating, messaging_limit_tier, daily_limit, daily_sent_count, daily_limit_resets_at, use_case, weight')
+    .select('id, display_name, phone_number, phone_number_id, local_status, meta_status, quality_rating, messaging_limit_tier, daily_limit, daily_sent_count, daily_limit_resets_at, use_case, weight, last_error, metadata')
     .order('local_status', { ascending: true })
     .order('display_name', { ascending: true })
 
@@ -1646,6 +1645,7 @@ async function selectSenderForRecipient(supabase: SupabaseAdmin, campaign: any, 
   if (campaign.default_sender_id) {
     const sender = preparedPortfolioSenders.find((item: any) => item.id === campaign.default_sender_id)
     if (sender && isMetaSenderReady(sender)) return sender
+    throw new Error(`Numero oficial selecionado indisponivel para envio: ${describeSenderAvailability(sender)}`)
   }
 
   const preferredUseCase = campaign.campaign_type === 'editorial'

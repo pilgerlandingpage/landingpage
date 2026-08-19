@@ -66,7 +66,7 @@ export default function HomepageSection({
         if (!el) return
         const cardWidth = el.querySelector('.card-slide')?.clientWidth ?? 280
         const gap = 18
-        const scrollAmount = (cardWidth + gap) * 2
+        const scrollAmount = (cardWidth + gap) * 3
         el.scrollBy({
             left: direction === 'left' ? -scrollAmount : scrollAmount,
             behavior: 'smooth',
@@ -124,7 +124,7 @@ export default function HomepageSection({
                             <PropertyCard
                                 property={property}
                                 landingPageSlug={lpMap.get(property.id)}
-                                imagePriority={index === 0}
+                                imagePriority={index < 6}
                                 variant="homeCompact"
                             />
                         </div>
@@ -380,6 +380,11 @@ export default function HomepageSection({
                 @media (min-width: 1024px) {
                     .card-slide {
                         flex-basis: calc((100% - 54px) / 4);
+                    }
+                }
+                @media (min-width: 1440px) {
+                    .card-slide {
+                        flex-basis: calc((100% - 90px) / 6);
                     }
                 }
                 @media (max-width: 760px) {

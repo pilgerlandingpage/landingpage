@@ -79,6 +79,9 @@ interface MapSearchProps {
     overviewMode?: boolean
     fixedOverviewView?: MapFixedView | null
     onSearchFiltersApply?: (filters: MapSearchFilters, params: URLSearchParams) => void
+    mapOptionsToggleSignal?: number
+    hideDesktopMapOptionsButton?: boolean
+    onMapOptionsStateChange?: (state: { open: boolean; activeCount: number }) => void
 }
 
 export default function MapSearch({
@@ -99,6 +102,9 @@ export default function MapSearch({
     overviewMode = false,
     fixedOverviewView = null,
     onSearchFiltersApply,
+    mapOptionsToggleSignal,
+    hideDesktopMapOptionsButton = false,
+    onMapOptionsStateChange,
 }: MapSearchProps) {
     return (
         <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: 'inherit', overflow: 'hidden' }}>
@@ -120,6 +126,9 @@ export default function MapSearch({
                 overviewMode={overviewMode}
                 fixedOverviewView={fixedOverviewView}
                 onSearchFiltersApply={onSearchFiltersApply}
+                mapOptionsToggleSignal={mapOptionsToggleSignal}
+                hideDesktopMapOptionsButton={hideDesktopMapOptionsButton}
+                onMapOptionsStateChange={onMapOptionsStateChange}
             />
         </div>
     )

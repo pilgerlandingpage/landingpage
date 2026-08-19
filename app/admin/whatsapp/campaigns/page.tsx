@@ -14,6 +14,12 @@ import {
     ResponsiveContainer, Tooltip, XAxis, YAxis
 } from 'recharts'
 import AdminLoadingState from '@/components/admin/AdminLoadingState'
+import {
+    getMetaWhatsAppSenderHealth,
+    isMetaWhatsAppSenderAvailable,
+    isMetaWhatsAppSenderPolicyEligible,
+    metaWhatsAppSenderUsage,
+} from '@/lib/meta/whatsapp-sender-health'
 
 interface Instance {
     id: string
@@ -47,6 +53,9 @@ interface MetaSender {
     daily_sent_count: number
     daily_limit_resets_at?: string | null
     use_case: string
+    weight?: number
+    metadata?: unknown
+    last_error?: string | null
 }
 
 interface MetaTemplate {
@@ -266,6 +275,10 @@ interface MetaCampaignAnalytics {
         quality_rating?: string | null
         daily_limit: number
         daily_sent_count: number
+        available?: boolean
+        policy_eligible?: boolean
+        health_status?: string | null
+        health_reason?: string | null
         usageRate: number
         recipients: number
         accepted: number
@@ -538,37 +551,27 @@ function formatCurrencyBRL(value: number, currency = 'BRL') {
 }
 
 function metaSenderUsage(sender: MetaSender) {
-    const limit = asFiniteNumber(sender.daily_limit)
-    const sent = asFiniteNumber(sender.daily_sent_count)
-    return {
-        limit,
-        sent,
-        remaining: Math.max(limit - sent, 0),
-        usageLabel: `${sent}/${limit || 'sem limite'}`,
-    }
+    return metaWhatsAppSenderUsage(sender)
 }
 
 function isMetaSenderAvailable(sender: MetaSender) {
-    const usage = metaSenderUsage(sender)
-    return sender.local_status === 'active'
-        && String(sender.meta_status || '').toUpperCase() === 'CONNECTED'
-        && usage.limit > 0
-        && usage.sent < usage.limit
+    return isMetaWhatsAppSenderAvailable(sender)
 }
 
 function metaSenderOptionLabel(sender: MetaSender) {
     const usage = metaSenderUsage(sender)
+    const health = getMetaWhatsAppSenderHealth(sender)
     const name = sender.display_name || sender.phone_number
     const base = `${name} - ${sender.phone_number} (${usage.usageLabel})`
-    if (sender.local_status !== 'active') return `${base} - pausado`
-    if (String(sender.meta_status || '').toUpperCase() !== 'CONNECTED') return `${base} - Meta ${sender.meta_status || 'sem status'}`
-    if (usage.limit > 0 && usage.sent >= usage.limit) return `${base} - limite esgotado`
+    if (!health.available) return `${base} - ${health.reason}`
+    if (health.warning) return `${base} - ${health.warning}`
     return `${base} - ${usage.remaining} livres`
 }
 
 function metaPortfolioUsageFromSenders(senders: MetaSender[]) {
-    const limit = Math.max(...senders.map(sender => asFiniteNumber(sender.daily_limit)), 0)
-    const sent = senders.reduce((total, sender) => total + asFiniteNumber(sender.daily_sent_count), 0)
+    const eligibleSenders = senders.filter(isMetaWhatsAppSenderPolicyEligible)
+    const limit = Math.max(...eligibleSenders.map(sender => asFiniteNumber(sender.daily_limit)), 0)
+    const sent = senders.reduce((total, sender) => total + metaSenderUsage(sender).sent, 0)
     return {
         limit,
         sent,
@@ -1716,11 +1719,12 @@ export default function CampaignsPage() {
                 return
             }
             if (readyMetaSenders.length === 0) {
-                setFeedback({ type: 'error', text: 'Todos os numeros Meta ativos atingiram o uso/reserva diaria ou nao estao prontos. Aguarde liberacao por falha, reset diario ou ative outro numero conectado.' })
+                const firstBlocked = activeMetaSenders[0] ? metaSenderOptionLabel(activeMetaSenders[0]) : ''
+                setFeedback({ type: 'error', text: `Nenhum numero Meta esta liberado para envio agora.${firstBlocked ? ` Primeiro diagnostico: ${firstBlocked}.` : ''} Sincronize os numeros oficiais ou pause o disparo ate recuperar saude/capacidade.` })
                 return
             }
             if (selectedMetaSenderId && selectedMetaSender && !isMetaSenderAvailable(selectedMetaSender)) {
-                setFeedback({ type: 'error', text: `O numero selecionado esta indisponivel para envio (${metaSenderOptionLabel(selectedMetaSender)}). Use Pool automatico por capacidade ou escolha outro numero.` })
+                setFeedback({ type: 'error', text: `O numero selecionado esta indisponivel para envio (${metaSenderOptionLabel(selectedMetaSender)}). Escolha um numero saudavel ou use o pool automatico por capacidade.` })
                 return
             }
         }
@@ -1944,7 +1948,7 @@ export default function CampaignsPage() {
             setFeedback({
                 type: 'error',
                 text: hasMetaPortfolioCapacity
-                    ? `O numero selecionado atingiu o uso/reserva diaria (${metaSenderUsage(selectedMetaSender).usageLabel}). Alterei para Pool automatico por capacidade.`
+                    ? `O numero selecionado ficou indisponivel (${metaSenderOptionLabel(selectedMetaSender)}). Alterei para Pool automatico por capacidade.`
                     : `O portfolio Meta atingiu o uso/reserva diaria compartilhada (${metaPortfolioUsage.usageLabel}).`,
             })
         }
@@ -2291,7 +2295,7 @@ export default function CampaignsPage() {
                                     </div>
                                     {selectedMetaSender && !isMetaSenderAvailable(selectedMetaSender) && (
                                         <div style={{ marginTop: '8px', color: '#ef4444', fontSize: '0.78rem', fontWeight: 700 }}>
-                                            Este numero atingiu o uso/reserva diaria. Use o pool automatico ou outro numero conectado.
+                                            Este numero nao esta liberado para envio: {getMetaWhatsAppSenderHealth(selectedMetaSender).reason}
                                         </div>
                                     )}
                                     {!selectedMetaSenderId && readyMetaSenders.length > 0 && hasMetaPortfolioCapacity && (
@@ -4065,19 +4069,23 @@ function MetaOfficialCampaignPanel({
                                 Nenhum numero Meta sincronizado.
                             </span>
                         ) : (
-                            senders.map(sender => (
-                                <span key={sender.id} style={{
-                                    padding: '6px 9px',
-                                    borderRadius: '999px',
-                                    border: '1px solid var(--border)',
-                                    color: sender.local_status === 'active' ? '#22c55e' : 'var(--text-muted)',
-                                    background: sender.local_status === 'active' ? 'rgba(34,197,94,0.08)' : 'rgba(255,255,255,0.03)',
-                                    fontSize: '0.72rem',
-                                    fontWeight: 800,
-                                }}>
-                                    {sender.display_name || sender.phone_number} | {sender.daily_sent_count}/{sender.daily_limit}
-                                </span>
-                            ))
+                            senders.map(sender => {
+                                const health = getMetaWhatsAppSenderHealth(sender)
+                                const color = health.available ? '#22c55e' : health.policyEligible ? '#f59e0b' : '#ef4444'
+                                return (
+                                    <span key={sender.id} title={health.warning || health.reason} style={{
+                                        padding: '6px 9px',
+                                        borderRadius: '999px',
+                                        border: `1px solid ${color}55`,
+                                        color,
+                                        background: health.available ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.06)',
+                                        fontSize: '0.72rem',
+                                        fontWeight: 800,
+                                    }}>
+                                        {sender.display_name || sender.phone_number} | {health.usage.usageLabel}
+                                    </span>
+                                )
+                            })
                         )}
                     </div>
 
@@ -4958,11 +4966,11 @@ function MetaCampaignDashboard({
                         rows={(analytics?.senderHealth || []).map(sender => ({
                             key: sender.sender_id,
                             name: sender.display_name || sender.phone_number,
-                            detail: `${sender.meta_status || 'sem status'} | uso/reserva ${percentLabel(sender.usageRate)} | falha ${percentLabel(sender.failureRate)}`,
+                            detail: `${sender.health_reason || sender.meta_status || 'sem status'} | uso/reserva ${percentLabel(sender.usageRate)} | falha ${percentLabel(sender.failureRate)}`,
                             value: `${sender.daily_sent_count}/${sender.daily_limit}`,
-                            color: sender.daily_limit > 0 && sender.daily_sent_count >= sender.daily_limit
+                            color: sender.health_status === 'blocked'
                                 ? '#ef4444'
-                                : sender.meta_status === 'CONNECTED' ? '#22c55e' : '#f59e0b',
+                                : sender.health_status === 'warn' ? '#f59e0b' : '#22c55e',
                         }))}
                     />
                     <MetaMiniRanking

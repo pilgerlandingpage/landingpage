@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ArrowRight, BellRing, Building2, Check, Clock3, Heart, Home, Loader2, MapPin, MapPinned, Search, SearchX, Sparkles, X } from 'lucide-react'
+import { ArrowRight, BellRing, Building2, Check, Clock3, Heart, Home, Loader2, MapPin, MapPinned, Search, SearchX, SlidersHorizontal, Sparkles, X } from 'lucide-react'
 import MapSearch from './MapSearch'
 import SearchViews from './SearchViews'
 import PropertyCard from './PropertyCard'
@@ -22,6 +22,7 @@ const MAX_MAP_PREVIEW_PROPERTIES = 18
 const FAVORITES_KEY = 'pilger_property_favorites'
 const HISTORY_KEY = 'pilger_property_history'
 const MAX_MEMORY_PROPERTIES = 10
+const PRIMARY_RESULTS_BEFORE_MEMORY = 6
 const OFFICE_SEARCH_PARAM_VALUE = '1'
 const DEVELOPMENT_SEARCH_CATEGORY_VALUE = 'empreendimentos'
 const MAP_PROPERTY_PARAM = 'mapProperty'
@@ -500,6 +501,8 @@ export default function SearchResults({
     const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null)
     const [mapHoveredId, setMapHoveredId] = useState<string | null>(null)
     const [showRefineSearch, setShowRefineSearch] = useState(false)
+    const [mapOptionsToggleSignal, setMapOptionsToggleSignal] = useState(0)
+    const [mapOptionsState, setMapOptionsState] = useState({ open: false, activeCount: 0 })
     const [selectedMapPropertyOverride, setSelectedMapPropertyOverride] = useState<{ key: string; id: string | null; property?: any | null } | null>(null)
     const [mapPreviewAnchorOverride, setMapPreviewAnchorOverride] = useState<{ key: string; id: string | null; property?: any | null } | null>(null)
     const [drawAreaOverride, setDrawAreaOverride] = useState<{ key: string; area: MapDrawArea | null } | null>(null)
@@ -880,6 +883,25 @@ export default function SearchResults({
         })
     }, [activeFilters, showRefineSearch, totalCount, visibleCount])
 
+    const handleMapOptionsStateChange = useCallback((state: { open: boolean; activeCount: number }) => {
+        setMapOptionsState(current => (
+            current.open === state.open && current.activeCount === state.activeCount
+                ? current
+                : state
+        ))
+    }, [])
+
+    const handleMapFiltersButtonClick = useCallback(() => {
+        setMapOptionsToggleSignal(signal => signal + 1)
+        void trackEvent('search_results_map_filters_clicked', {
+            active_filters: activeFilters,
+            total_count: totalCount,
+            visible_count: visibleCount,
+            map_filter_count: mapOptionsState.activeCount,
+            opened: !mapOptionsState.open,
+        })
+    }, [activeFilters, mapOptionsState.activeCount, mapOptionsState.open, totalCount, visibleCount])
+
     const buildSearchAlertSnapshot = useCallback(() => ({
         title: searchAlertTitle,
         active_filters: activeFilters,
@@ -1061,8 +1083,9 @@ export default function SearchResults({
     }, [favoriteIds.length, historyIds.length])
 
     const shouldShowMemoryPanel = !isDevelopmentOnlySearch && (memoryItems.length > 0 || memoryLoading)
-    const primaryRenderedProperties = shouldShowMemoryPanel ? renderedProperties.slice(0, 4) : renderedProperties
-    const secondaryRenderedProperties = shouldShowMemoryPanel ? renderedProperties.slice(4) : []
+    const primaryRenderedProperties = shouldShowMemoryPanel ? renderedProperties.slice(0, PRIMARY_RESULTS_BEFORE_MEMORY) : renderedProperties
+    const secondaryRenderedProperties = shouldShowMemoryPanel ? renderedProperties.slice(PRIMARY_RESULTS_BEFORE_MEMORY) : []
+    const selectedMapPropertyKey = selectedMapPropertyId ? String(selectedMapPropertyId) : null
 
     return (
         <>
@@ -1090,6 +1113,40 @@ export default function SearchResults({
                         0 14px 34px rgba(184,148,95,0.22);
                     transform: translateY(-2px);
                     z-index: 10;
+                }
+                .search-card-wrap--selected {
+                    filter: drop-shadow(0 0 20px rgba(244,221,170,0.34));
+                    box-shadow:
+                        0 0 0 2px rgba(223,193,142,0.98),
+                        0 0 0 8px rgba(223,193,142,0.2),
+                        0 18px 48px rgba(184,148,95,0.32),
+                        0 0 62px rgba(244,221,170,0.34);
+                    transform: translateY(-2px);
+                    z-index: 11;
+                }
+                .search-card-wrap--selected::after {
+                    content: 'Selecionado';
+                    position: absolute;
+                    left: 50%;
+                    top: 9px;
+                    z-index: 20;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    height: 23px;
+                    padding: 0 9px;
+                    border: 1px solid rgba(255,247,221,0.8);
+                    border-radius: 999px;
+                    background: linear-gradient(135deg, #f4ddaa, #dfc18e 45%, #b8945f);
+                    color: #1a130a;
+                    font: 850 0.58rem/1 'Inter', sans-serif;
+                    letter-spacing: 0.04em;
+                    box-shadow:
+                        0 10px 22px rgba(82,58,25,0.24),
+                        0 0 24px rgba(244,221,170,0.32);
+                    pointer-events: none;
+                    text-transform: uppercase;
+                    transform: translateX(-50%);
                 }
                 @media (min-width: 1024px) {
                     .search-map-property-preview .map-property-preview {
@@ -1246,6 +1303,29 @@ export default function SearchResults({
                     background: #fff4f2;
                     border-color: rgba(194,65,12,0.22);
                     color: #9a3412;
+                }
+                .result-action--active {
+                    border-color: rgba(184,148,95,0.42);
+                    background: rgba(255,255,255,0.92);
+                    box-shadow:
+                        0 10px 24px rgba(37,29,19,0.08),
+                        0 0 0 3px rgba(184,148,95,0.14);
+                }
+                .result-map-filter-action {
+                    display: none;
+                    position: relative;
+                }
+                .result-map-filter-count {
+                    display: grid;
+                    place-items: center;
+                    min-width: 17px;
+                    height: 17px;
+                    margin-left: -2px;
+                    padding: 0 5px;
+                    border-radius: 999px;
+                    background: #1f1b16;
+                    color: #fff8ea;
+                    font: 900 0.52rem/1 'Inter', sans-serif;
                 }
                 .result-action .spin {
                     animation: searchSpin 0.8s linear infinite;
@@ -1608,6 +1688,23 @@ export default function SearchResults({
                         padding: 0 11px;
                         font-size: 0.68rem;
                     }
+                    .result-map-filter-action {
+                        display: inline-flex;
+                        padding-right: 10px;
+                    }
+                    @media (max-width: 1340px) {
+                        .result-map-filter-action span {
+                            display: none;
+                        }
+                        .result-map-filter-action {
+                            width: 34px;
+                            padding: 0;
+                        }
+                        .result-map-filter-action.result-action--with-count {
+                            width: auto;
+                            padding: 0 8px;
+                        }
+                    }
                     .result-refine-panel {
                         margin-top: 9px;
                         padding: 8px;
@@ -1666,6 +1763,25 @@ export default function SearchResults({
                         border-radius: 10px;
                     }
                 }
+                @media (min-width: 1500px) {
+                    .search-results-grid {
+                        grid-template-columns: repeat(3, minmax(0, 1fr));
+                        gap: 14px 10px;
+                    }
+                    .search-map-property-preview .map-property-preview {
+                        width: min(1120px, calc(100% - 32px));
+                    }
+                    .search-map-property-preview .map-preview-track {
+                        gap: 10px;
+                        padding-inline: 10px;
+                        scroll-padding-inline: 10px;
+                    }
+                    .search-map-property-preview .map-preview-card {
+                        flex: 0 0 calc((100% - 20px) / 3);
+                        width: calc((100% - 20px) / 3);
+                        max-width: none;
+                    }
+                }
                 @media (max-width: 649px) {
                     .result-lux-header {
                         margin: 0 -2px 12px;
@@ -1703,6 +1819,16 @@ export default function SearchResults({
                     }
                     .result-action span {
                         display: none;
+                    }
+                    .result-map-filter-count {
+                        position: absolute;
+                        top: -5px;
+                        right: -5px;
+                        min-width: 16px;
+                        height: 16px;
+                        margin-left: 0;
+                        padding: 0 4px;
+                        font-size: 0.48rem;
                     }
                     .result-refine-panel {
                         margin-top: 10px;
@@ -1792,6 +1918,9 @@ export default function SearchResults({
                     .search-card-wrap--highlighted {
                         transform: none;
                     }
+                    .search-card-wrap--selected {
+                        transform: none;
+                    }
                     .search-footer {
                         margin-top: 20px;
                         padding-bottom: 4px;
@@ -1817,6 +1946,9 @@ export default function SearchResults({
                             refitKey={mapViewKey}
                             officeMarker={shouldShowOfficeOnMap ? OFFICE_LOCATION_MARKER : null}
                             initialMapStyle="luxury"
+                            mapOptionsToggleSignal={mapOptionsToggleSignal}
+                            hideDesktopMapOptionsButton
+                            onMapOptionsStateChange={handleMapOptionsStateChange}
                         />
                     </div>
                 }
@@ -1852,6 +1984,23 @@ export default function SearchResults({
                         </div>
                         <div className="result-actions">
                             <SearchAlertsPanel buttonClassName="result-action result-action-button" />
+                            <button
+                                type="button"
+                                className={`result-action result-action-button result-map-filter-action${mapOptionsState.open ? ' result-action--active' : ''}${mapOptionsState.activeCount > 0 ? ' result-action--with-count' : ''}`}
+                                aria-label="Abrir filtros do mapa"
+                                aria-expanded={mapOptionsState.open}
+                                aria-haspopup="dialog"
+                                title="Filtros do mapa"
+                                onClick={handleMapFiltersButtonClick}
+                            >
+                                <SlidersHorizontal size={15} />
+                                <span>Filtros</span>
+                                {mapOptionsState.activeCount > 0 && (
+                                    <strong className="result-map-filter-count" aria-label={`${mapOptionsState.activeCount} filtros ativos`}>
+                                        {mapOptionsState.activeCount}
+                                    </strong>
+                                )}
+                            </button>
                             {activeFilters.length > 0 && (
                                 <Link
                                     href="/busca"
@@ -2016,21 +2165,28 @@ export default function SearchResults({
                 ) : visibleProperties.length > 0 ? (
                     <>
                         <div className="search-results-grid">
-                            {primaryRenderedProperties.map((property: any, index: number) => (
-                                <div
-                                    key={property.id}
-                                    className={`search-card-wrap ${mapHoveredId === property.id ? 'search-card-wrap--highlighted' : ''}`}
-                                    onMouseEnter={() => handleCardHover(property.id)}
-                                    onMouseLeave={() => handleCardHover(null)}
-                                >
-                                    <PropertyCard
-                                        property={property}
-                                        landingPageSlug={lpMap[property.id]}
-                                        imagePriority={index < 4}
-                                        variant="searchCompact"
-                                    />
-                                </div>
-                            ))}
+                            {primaryRenderedProperties.map((property: any, index: number) => {
+                                const propertyKey = String(property.id)
+                                const isSelected = selectedMapPropertyKey === propertyKey
+                                const isHighlighted = String(mapHoveredId || '') === propertyKey || isSelected
+
+                                return (
+                                    <div
+                                        key={property.id}
+                                        className={`search-card-wrap${isHighlighted ? ' search-card-wrap--highlighted' : ''}${isSelected ? ' search-card-wrap--selected' : ''}`}
+                                        onMouseEnter={() => handleCardHover(property.id)}
+                                        onMouseLeave={() => handleCardHover(null)}
+                                        aria-current={isSelected ? 'true' : undefined}
+                                    >
+                                        <PropertyCard
+                                            property={property}
+                                            landingPageSlug={lpMap[property.id]}
+                                            imagePriority={index < PRIMARY_RESULTS_BEFORE_MEMORY}
+                                            variant="searchCompact"
+                                        />
+                                    </div>
+                                )
+                            })}
                         </div>
                         {shouldShowMemoryPanel && (
                             <section className="search-memory-panel" aria-label="Imóveis salvos e vistos recentemente">
@@ -2096,18 +2252,22 @@ export default function SearchResults({
                             <div className="search-results-grid">
                                 {secondaryRenderedProperties.map((property: any, index: number) => {
                                     const absoluteIndex = index + primaryRenderedProperties.length
+                                    const propertyKey = String(property.id)
+                                    const isSelected = selectedMapPropertyKey === propertyKey
+                                    const isHighlighted = String(mapHoveredId || '') === propertyKey || isSelected
 
                                     return (
                                         <div
                                             key={property.id}
-                                            className={`search-card-wrap ${mapHoveredId === property.id ? 'search-card-wrap--highlighted' : ''}`}
+                                            className={`search-card-wrap${isHighlighted ? ' search-card-wrap--highlighted' : ''}${isSelected ? ' search-card-wrap--selected' : ''}`}
                                             onMouseEnter={() => handleCardHover(property.id)}
                                             onMouseLeave={() => handleCardHover(null)}
+                                            aria-current={isSelected ? 'true' : undefined}
                                         >
                                             <PropertyCard
                                                 property={property}
                                                 landingPageSlug={lpMap[property.id]}
-                                                imagePriority={absoluteIndex < 4}
+                                                imagePriority={absoluteIndex < PRIMARY_RESULTS_BEFORE_MEMORY}
                                                 variant="searchCompact"
                                             />
                                         </div>

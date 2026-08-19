@@ -1029,7 +1029,7 @@ export default function PropertyCard({ property, landingPageSlug, imagePriority 
                 }
                 @media (min-width: 1500px) {
                     .property-card-search-compact .card-image-container {
-                        aspect-ratio: 2.18 / 1;
+                        aspect-ratio: 1.62 / 1;
                     }
                     .property-card-search-compact .card-content-link,
                     .property-card-search-compact :global(.card-content-link) {

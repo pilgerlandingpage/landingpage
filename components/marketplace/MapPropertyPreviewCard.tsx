@@ -621,9 +621,40 @@ export default function MapPropertyPreviewCard({
                     border-color: rgba(184,148,95,0.48);
                 }
                 .map-preview-card.is-active {
-                    border-color: rgba(184,148,95,0.64);
+                    border-color: rgba(223,193,142,0.98);
+                    filter: drop-shadow(0 0 24px rgba(244,221,170,0.38));
                     transform: translateZ(0) scale(1);
-                    box-shadow: 0 18px 42px rgba(50,42,30,0.24), 0 0 0 1px rgba(223,193,142,0.22);
+                    box-shadow:
+                        0 18px 42px rgba(50,42,30,0.24),
+                        0 0 0 2px rgba(223,193,142,0.98),
+                        0 0 0 8px rgba(223,193,142,0.2),
+                        0 0 70px rgba(244,221,170,0.4);
+                }
+                .map-preview-card.is-active::before {
+                    content: 'Selecionado';
+                    position: absolute;
+                    top: 9px;
+                    right: 43px;
+                    z-index: 6;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    height: 23px;
+                    padding: 0 9px;
+                    border: 1px solid rgba(255,247,221,0.8);
+                    border-radius: 999px;
+                    background: linear-gradient(135deg, #f4ddaa, #dfc18e 45%, #b8945f);
+                    color: #1a130a;
+                    font: 850 0.56rem/1 'Inter', sans-serif;
+                    letter-spacing: 0.04em;
+                    box-shadow:
+                        0 10px 22px rgba(82,58,25,0.24),
+                        0 0 24px rgba(244,221,170,0.32);
+                    pointer-events: none;
+                    text-transform: uppercase;
+                }
+                .map-preview-card.is-active .map-preview-open-indicator {
+                    color: #8b642d;
                 }
                 .map-preview-media {
                     position: relative;
@@ -1080,7 +1111,7 @@ export default function MapPropertyPreviewCard({
                     const activeIndex = imageState.propertyId === item.id
                         ? Math.min(imageState.index, Math.max(0, gallery.length - 1))
                         : 0
-                    const isSelected = item.id === selectedId
+                    const isSelected = String(item.id) === String(selectedId)
 
                     return (
                         <section
@@ -1091,6 +1122,7 @@ export default function MapPropertyPreviewCard({
                             }}
                             onClick={event => handlePreviewCardClick(event, item)}
                             aria-label={meta.displayTitle}
+                            aria-current={isSelected ? 'true' : undefined}
                         >
                             <div className="map-preview-media">
                                 <img src={gallery[activeIndex] || FALLBACK_IMAGE} alt={meta.displayTitle} loading="lazy" draggable={false} />

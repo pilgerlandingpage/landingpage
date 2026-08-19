@@ -73,6 +73,9 @@ interface PropertyMapProps {
     overviewMode?: boolean
     fixedOverviewView?: MapFixedView | null
     onSearchFiltersApply?: (filters: MapSearchFilters, params: URLSearchParams) => void
+    mapOptionsToggleSignal?: number
+    hideDesktopMapOptionsButton?: boolean
+    onMapOptionsStateChange?: (state: { open: boolean; activeCount: number }) => void
 }
 
 type MappedProperty = {
@@ -1755,6 +1758,9 @@ export default function PropertyMap({
     overviewMode = false,
     fixedOverviewView = null,
     onSearchFiltersApply,
+    mapOptionsToggleSignal,
+    hideDesktopMapOptionsButton = false,
+    onMapOptionsStateChange,
 }: PropertyMapProps) {
     const [mapStyle, setMapStyle] = useState<MapStyle>(initialMapStyle)
     const [quickFilter, setQuickFilter] = useState<QuickFilter>('all')
@@ -1769,7 +1775,7 @@ export default function PropertyMap({
     const [userMapLocation, setUserMapLocation] = useState<UserMapLocation | null>(null)
     const [showControlHints, setShowControlHints] = useState(false)
     const controlHintTimerRef = useRef<number | null>(null)
-    const [quickFilterMenuOpen, setQuickFilterMenuOpen] = useState(false)
+    const lastMapOptionsToggleSignalRef = useRef(0)
     const mapOptionsPortalRoot = typeof document === 'undefined' ? null : document.body
 
     const validProperties = useMemo<MappedProperty[]>(
@@ -1826,7 +1832,6 @@ export default function PropertyMap({
 
     const handleQuickFilterSelect = (filter: QuickFilter) => {
         handleQuickFilterChange(filter)
-        setQuickFilterMenuOpen(false)
         setMobileControlsOpen(false)
     }
 
@@ -2075,41 +2080,24 @@ export default function PropertyMap({
     const activeMapOptionCount = activeSearchFilterCount + activeLayerCount
     const shouldShowControlHints = showControlHints && !officeMarker
 
-    return (
-        <div className={`map-shell map-style-${mapStyle}${mobileControlsOpen ? ' map-mobile-filters-open' : ''}${mapOptionsOpen ? ' map-options-open' : ''}${drawModeEnabled ? ' map-shell--drawing' : ''}${hasDrawArea ? ' map-shell--has-draw-area' : ''}${hasRegionArea ? ' map-shell--has-region-area' : ''}${activeContextLayers.length ? ' map-shell--has-context-layers' : ''}${activeAmenityLayers.length ? ' map-shell--has-amenities' : ''}${shouldShowControlHints ? ' map-shell--control-hints' : ''}`}>
-            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossOrigin="" />
+    useEffect(() => {
+        if (!mapOptionsToggleSignal || mapOptionsToggleSignal === lastMapOptionsToggleSignalRef.current) return
+        lastMapOptionsToggleSignalRef.current = mapOptionsToggleSignal
+        const timer = window.setTimeout(() => {
+            setMobileControlsOpen(false)
+            setMapOptionsOpen(open => !open)
+        }, 0)
 
-            <div className={`map-topbar${quickFilterMenuOpen ? ' is-open' : ''}`}>
-                <button
-                    type="button"
-                    className={`map-quick-filter-trigger${quickFilter !== 'all' ? ' active' : ''}`}
-                    aria-label="Abrir filtros"
-                    aria-expanded={quickFilterMenuOpen}
-                    aria-haspopup="menu"
-                    onClick={() => {
-                        setMapOptionsOpen(false)
-                        setQuickFilterMenuOpen(isOpen => !isOpen)
-                    }}
-                >
-                    <SlidersHorizontal size={15} />
-                </button>
-                {quickFilterMenuOpen && (
-                    <div className="map-quick-filter-menu" role="menu" aria-label="Filtros rápidos do mapa">
-                        {QUICK_FILTERS.map(filter => (
-                            <button
-                                key={filter.value}
-                                type="button"
-                                role="menuitemradio"
-                                aria-checked={quickFilter === filter.value}
-                                className={quickFilter === filter.value ? 'active' : ''}
-                                onClick={() => handleQuickFilterSelect(filter.value)}
-                            >
-                                {filter.label}
-                            </button>
-                        ))}
-                    </div>
-                )}
-            </div>
+        return () => window.clearTimeout(timer)
+    }, [mapOptionsToggleSignal])
+
+    useEffect(() => {
+        onMapOptionsStateChange?.({ open: mapOptionsOpen, activeCount: activeMapOptionCount })
+    }, [activeMapOptionCount, mapOptionsOpen, onMapOptionsStateChange])
+
+    return (
+        <div className={`map-shell map-style-${mapStyle}${mobileControlsOpen ? ' map-mobile-filters-open' : ''}${mapOptionsOpen ? ' map-options-open' : ''}${drawModeEnabled ? ' map-shell--drawing' : ''}${hasDrawArea ? ' map-shell--has-draw-area' : ''}${hasRegionArea ? ' map-shell--has-region-area' : ''}${activeContextLayers.length ? ' map-shell--has-context-layers' : ''}${activeAmenityLayers.length ? ' map-shell--has-amenities' : ''}${hideDesktopMapOptionsButton ? ' map-shell--desktop-options-external' : ''}${shouldShowControlHints ? ' map-shell--control-hints' : ''}`}>
+            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossOrigin="" />
 
             <div className="map-mobile-style-stack" role="group" aria-label="Estilo do mapa">
                 <div className="map-mobile-style-grid">
@@ -2180,12 +2168,11 @@ export default function PropertyMap({
             <div className="map-mobile-action-dock" role="group" aria-label="Controles do mapa" onPointerDown={showControlHintsTemporarily}>
                 <button
                     type="button"
-                    className={`${mapOptionsOpen ? 'active' : ''}${activeMapOptionCount > 0 ? ' has-active-layers' : ''}`}
+                    className={`map-options-action-button${mapOptionsOpen ? ' active' : ''}${activeMapOptionCount > 0 ? ' has-active-layers' : ''}`}
                     aria-label="Abrir opções do mapa"
                     aria-expanded={mapOptionsOpen}
                     title="Opções do mapa"
                     onClick={() => {
-                        setQuickFilterMenuOpen(false)
                         setMobileControlsOpen(false)
                         setMapOptionsOpen(open => !open)
                     }}
@@ -2622,82 +2609,6 @@ export default function PropertyMap({
                 }
                 .leaflet-control-attribution a { color: rgba(255,255,255,0.66) !important; }
 
-                .map-topbar {
-                    position: absolute;
-                    top: 14px;
-                    left: 58px;
-                    z-index: 920;
-                    display: grid;
-                    gap: 8px;
-                    justify-items: start;
-                }
-                .map-quick-filter-trigger {
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                    height: 34px;
-                    width: 34px;
-                    padding: 0;
-                    border: 1px solid rgba(232,220,199,0.14);
-                    background: rgba(18, 18, 18, 0.76);
-                    color: #e8dcc7;
-                    border-radius: 999px;
-                    cursor: pointer;
-                    font: 900 0.72rem/1 'Inter', sans-serif;
-                    white-space: nowrap;
-                    backdrop-filter: blur(16px);
-                    box-shadow: 0 10px 24px rgba(0,0,0,0.18);
-                    transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
-                }
-                .map-quick-filter-trigger:hover {
-                    transform: translateY(-1px);
-                }
-                .map-quick-filter-trigger.active,
-                .map-topbar.is-open .map-quick-filter-trigger {
-                    background: linear-gradient(135deg, #dfc18e, #b8945f);
-                    color: #101010;
-                    border-color: rgba(255,255,255,0.28);
-                }
-                .map-quick-filter-trigger svg {
-                    width: 14px;
-                    height: 14px;
-                }
-                .map-quick-filter-menu {
-                    display: grid;
-                    gap: 5px;
-                    min-width: 172px;
-                    padding: 7px;
-                    border: 1px solid rgba(184,148,95,0.26);
-                    border-radius: 12px;
-                    background: rgba(247,244,239,0.94);
-                    box-shadow: 0 18px 38px rgba(0,0,0,0.22);
-                    backdrop-filter: blur(18px);
-                }
-                .map-quick-filter-menu button {
-                    display: flex;
-                    align-items: center;
-                    justify-content: flex-start;
-                    min-height: 31px;
-                    padding: 0 9px;
-                    border: 1px solid rgba(184,148,95,0.18);
-                    border-radius: 8px;
-                    background: rgba(255,255,255,0.74);
-                    color: #3c362e;
-                    cursor: pointer;
-                    font: 900 0.67rem/1 'Inter', sans-serif;
-                    text-align: left;
-                    white-space: nowrap;
-                    transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
-                }
-                .map-quick-filter-menu button:hover {
-                    transform: translateX(1px);
-                    background: rgba(255,255,255,0.92);
-                }
-                .map-quick-filter-menu button.active {
-                    background: linear-gradient(135deg, #dfc18e, #b8945f);
-                    color: #101010;
-                    border-color: rgba(255,255,255,0.28);
-                }
                 .map-mobile-style-stack,
                 .map-mobile-filter-panel {
                     display: none;
@@ -2905,7 +2816,6 @@ export default function PropertyMap({
                 .map-shell--drawing .leaflet-popup-pane {
                     pointer-events: none;
                 }
-                .map-shell--drawing .map-topbar,
                 .map-shell--drawing .map-mobile-style-stack,
                 .map-shell--drawing .map-mobile-filter-panel {
                     opacity: 0.24;
@@ -2990,6 +2900,11 @@ export default function PropertyMap({
                 }
                 .map-mobile-action-dock button.loading svg {
                     animation: mapLocateSpin 1s linear infinite;
+                }
+                @media (min-width: 1024px) {
+                    .map-shell--desktop-options-external .map-options-action-button {
+                        display: none;
+                    }
                 }
                 .map-mobile-action-count {
                     position: absolute;
@@ -3745,12 +3660,12 @@ export default function PropertyMap({
                         0 0 0 8px rgba(10,63,159,0.18);
                 }
                 .marker-wrap--dot.marker-wrap--selected .marker-dot {
-                    background: #0f8f5a;
+                    background: #dfc18e;
                     transform: scale(1.28);
                     box-shadow:
                         0 12px 24px rgba(0,0,0,0.32),
-                        0 0 0 8px rgba(15,143,90,0.2),
-                        0 0 28px rgba(15,143,90,0.32);
+                        0 0 0 8px rgba(223,193,142,0.22),
+                        0 0 34px rgba(223,193,142,0.42);
                 }
                 .marker-wrap--overview {
                     width: 24px;
@@ -3814,18 +3729,20 @@ export default function PropertyMap({
                 }
                 .marker-wrap--bubble.marker-wrap--selected {
                     transform: translateY(-4px) scale(1.16);
-                    filter: drop-shadow(0 16px 34px rgba(15,143,90,0.36));
+                    filter:
+                        drop-shadow(0 16px 34px rgba(184,148,95,0.42))
+                        drop-shadow(0 0 22px rgba(223,193,142,0.34));
                 }
                 .marker-wrap--bubble.marker-wrap--selected .marker-price {
-                    background: #0f8f5a;
-                    color: #fff;
+                    background: linear-gradient(135deg, #f4ddaa, #dfc18e 48%, #b8945f);
+                    color: #11100e;
                     box-shadow:
                         0 16px 32px rgba(0,0,0,0.34),
-                        0 0 0 7px rgba(15,143,90,0.18),
-                        0 0 34px rgba(15,143,90,0.28);
+                        0 0 0 7px rgba(223,193,142,0.2),
+                        0 0 42px rgba(223,193,142,0.36);
                 }
                 .marker-wrap--bubble.marker-wrap--selected .marker-price::before {
-                    border-top-color: #0f8f5a;
+                    border-top-color: #b8945f;
                 }
                 .cluster-dot-wrap {
                     display: grid;
@@ -4026,9 +3943,6 @@ export default function PropertyMap({
                     50% { transform: scale(1.045); }
                 }
                 @media (max-width: 1023px) {
-                    .map-topbar {
-                        display: none;
-                    }
                     .map-mobile-style-stack {
                         display: none;
                     }
