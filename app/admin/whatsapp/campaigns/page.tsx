@@ -2501,19 +2501,60 @@ export default function CampaignsPage() {
         <div className="meta-campaigns-page">
             <style>{`
                 .meta-create-shell {
-                    margin-bottom: 24px;
+                    margin-bottom: 18px;
                     border: 1px solid rgba(201,169,110,0.28);
                     border-radius: 12px;
                     background: color-mix(in srgb, var(--bg-secondary) 94%, #ffffff 6%);
                     overflow: clip;
                 }
 
+                .meta-channel-strip {
+                    display: grid;
+                    grid-template-columns: minmax(220px, 1.2fr) repeat(2, minmax(180px, 1fr));
+                    gap: 8px;
+                    align-items: stretch;
+                    margin-bottom: 14px;
+                }
+
+                .meta-channel-item {
+                    min-width: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 10px;
+                    padding: 10px 12px;
+                    border: 1px solid var(--border);
+                    border-radius: 8px;
+                    background: rgba(255,255,255,0.035);
+                }
+
+                .meta-channel-item span {
+                    color: var(--text-muted);
+                    font-size: 0.66rem;
+                    font-weight: 900;
+                    letter-spacing: 0.5px;
+                    text-transform: uppercase;
+                }
+
+                .meta-channel-item strong {
+                    min-width: 0;
+                    color: var(--text-primary);
+                    font-size: 0.82rem;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                .meta-channel-item-success strong {
+                    color: #16a34a;
+                }
+
                 .meta-create-titlebar {
                     display: flex;
                     justify-content: space-between;
-                    gap: 14px;
-                    align-items: flex-start;
-                    padding: 18px 20px;
+                    gap: 12px;
+                    align-items: center;
+                    padding: 12px 16px;
                     border-bottom: 1px solid var(--border);
                     background: rgba(255,255,255,0.025);
                 }
@@ -2524,13 +2565,13 @@ export default function CampaignsPage() {
                     gap: 9px;
                     margin: 0;
                     color: var(--text-primary);
-                    font-size: 1.08rem;
+                    font-size: 1rem;
                 }
 
                 .meta-create-titlebar p {
-                    margin: 5px 0 0;
+                    margin: 3px 0 0;
                     color: var(--text-muted);
-                    font-size: 0.78rem;
+                    font-size: 0.74rem;
                     line-height: 1.4;
                 }
 
@@ -2538,7 +2579,7 @@ export default function CampaignsPage() {
                     display: inline-flex;
                     align-items: center;
                     gap: 7px;
-                    padding: 8px 10px;
+                    padding: 7px 10px;
                     border-radius: 8px;
                     border: 1px solid rgba(34,197,94,0.28);
                     background: rgba(34,197,94,0.08);
@@ -2557,29 +2598,146 @@ export default function CampaignsPage() {
 
                 .meta-create-main {
                     display: grid;
-                    gap: 14px;
+                    gap: 10px;
                     min-width: 0;
-                    padding: 18px 20px 20px;
+                    padding: 12px 14px 14px;
                     border-right: 1px solid var(--border);
                 }
 
                 .meta-create-section {
                     display: grid;
-                    gap: 12px;
-                    padding: 14px;
+                    gap: 9px;
+                    padding: 10px;
                     border: 1px solid var(--border);
-                    border-radius: 10px;
-                    background: rgba(255,255,255,0.035);
+                    border-radius: 8px;
+                    background: rgba(255,255,255,0.028);
                 }
 
                 .meta-create-section-creative {
-                    background: rgba(34,197,94,0.045);
-                    border-color: rgba(34,197,94,0.16);
+                    background: rgba(255,255,255,0.032);
+                    border-color: var(--border);
+                }
+
+                .meta-create-section input:not([type="checkbox"]),
+                .meta-create-section select,
+                .meta-create-section textarea,
+                .meta-advanced-panel input:not([type="checkbox"]),
+                .meta-advanced-panel select,
+                .meta-advanced-panel textarea {
+                    min-height: 34px !important;
+                    padding: 7px 10px !important;
+                    border-radius: 6px !important;
+                    font-size: 0.82rem !important;
+                }
+
+                .meta-create-section textarea {
+                    min-height: 78px !important;
+                }
+
+                .meta-create-section label {
+                    font-size: 0.68rem !important;
+                    margin-bottom: 3px !important;
+                }
+
+                .meta-create-section h3 {
+                    font-size: 0.9rem !important;
+                }
+
+                .meta-compact-note {
+                    padding: 7px 9px;
+                    border-radius: 6px;
+                    border: 1px solid rgba(59,130,246,0.18);
+                    background: rgba(59,130,246,0.055);
+                    color: var(--text-secondary);
+                    font-size: 0.72rem;
+                    line-height: 1.35;
+                }
+
+                .meta-compact-note-success {
+                    border-color: rgba(34,197,94,0.18);
+                    background: rgba(34,197,94,0.055);
+                }
+
+                .meta-compact-grid-two {
+                    display: grid;
+                    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+                    gap: 10px;
+                    align-items: start;
+                }
+
+                .meta-advanced-panel {
+                    border: 1px solid var(--border);
+                    border-radius: 8px;
+                    background: rgba(255,255,255,0.025);
+                }
+
+                .meta-advanced-panel > summary {
+                    cursor: pointer;
+                    list-style: none;
+                    padding: 8px 10px;
+                    color: var(--text-secondary);
+                    font-size: 0.78rem;
+                    font-weight: 800;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 8px;
+                }
+
+                .meta-advanced-panel > summary::-webkit-details-marker {
+                    display: none;
+                }
+
+                .meta-advanced-panel > summary::after {
+                    content: '+';
+                    color: var(--text-muted);
+                    font-weight: 900;
+                }
+
+                .meta-advanced-panel[open] > summary::after {
+                    content: '-';
+                }
+
+                .meta-advanced-panel-body {
+                    display: grid;
+                    gap: 8px;
+                    padding: 0 10px 10px;
+                }
+
+                .meta-advanced-panel textarea {
+                    min-height: 78px !important;
+                }
+
+                .meta-compact-checkbox {
+                    display: flex !important;
+                    align-items: flex-start !important;
+                    gap: 8px !important;
+                    padding: 8px 10px !important;
+                    border-radius: 7px !important;
+                    border: 1px solid var(--border) !important;
+                    background: rgba(255,255,255,0.035) !important;
+                    color: var(--text-secondary) !important;
+                    font-size: 0.76rem !important;
+                    line-height: 1.35 !important;
+                }
+
+                .meta-template-mini-card {
+                    display: flex;
+                    justify-content: space-between;
+                    gap: 10px;
+                    align-items: center;
+                    padding: 8px 10px;
+                    border-radius: 7px;
+                    border: 1px solid rgba(34,197,94,0.2);
+                    background: rgba(34,197,94,0.055);
+                    color: var(--text-secondary);
+                    font-size: 0.76rem;
+                    line-height: 1.35;
                 }
 
                 .meta-template-config-grid {
                     display: grid;
-                    gap: 12px;
+                    gap: 9px;
                     align-items: start;
                 }
 
@@ -2589,13 +2747,13 @@ export default function CampaignsPage() {
 
                 .meta-create-actionbar {
                     position: sticky;
-                    bottom: 12px;
+                    bottom: 10px;
                     z-index: 5;
                     display: grid;
-                    gap: 10px;
-                    padding: 12px;
+                    gap: 8px;
+                    padding: 10px;
                     border: 1px solid rgba(201,169,110,0.28);
-                    border-radius: 10px;
+                    border-radius: 8px;
                     background: color-mix(in srgb, var(--bg-secondary) 92%, #ffffff 8%);
                     box-shadow: 0 12px 28px rgba(15,23,42,0.12);
                 }
@@ -2611,15 +2769,15 @@ export default function CampaignsPage() {
 
                 .meta-create-launch-button {
                     width: 100%;
-                    min-height: 48px;
-                    padding: 14px 24px;
-                    border-radius: 9px;
+                    min-height: 42px;
+                    padding: 11px 20px;
+                    border-radius: 8px;
                     border: none;
                     cursor: pointer;
                     background: linear-gradient(135deg, var(--gold), #b8860b);
                     color: #111827;
                     font-weight: 800;
-                    font-size: 0.96rem;
+                    font-size: 0.9rem;
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -2910,6 +3068,13 @@ export default function CampaignsPage() {
                     }
                 }
 
+                @media (max-width: 1280px) {
+                    .meta-channel-strip,
+                    .meta-compact-grid-two {
+                        grid-template-columns: minmax(0, 1fr);
+                    }
+                }
+
                 @media (max-width: 1180px) {
                     .meta-create-grid {
                         grid-template-columns: minmax(0, 1fr);
@@ -2982,54 +3147,18 @@ export default function CampaignsPage() {
                 </div>
             </div>
 
-            <div style={{
-                padding: '16px 20px', borderRadius: '12px', marginBottom: '20px',
-                background: 'var(--bg-secondary)', border: '1px solid var(--border)',
-                display: 'grid', gap: '8px',
-            }}>
-                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                    Canal oficial ativo
-                </span>
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-                    <span style={{
-                        padding: '9px 14px',
-                        borderRadius: '8px',
-                        border: '1px solid var(--gold)',
-                        background: 'rgba(201,169,110,0.12)',
-                        color: 'var(--gold)',
-                        fontWeight: 700,
-                        fontSize: '0.82rem',
-                    }}>
-                        WhatsApp Cloud API Oficial
-                    </span>
+            <div className="meta-channel-strip">
+                <div className="meta-channel-item">
+                    <span>Canal oficial</span>
+                    <strong>WhatsApp Cloud API</strong>
                 </div>
-                <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.78rem', lineHeight: 1.45 }}>
-                    Use somente listas com opt-in e templates aprovados. Follow-ups, campanhas em massa e mensagens ativas saem pelo WhatsApp oficial da Meta.
-                </p>
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                    gap: '10px',
-                    marginTop: '4px',
-                }}>
-                    <div style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(201,169,110,0.24)', background: 'rgba(201,169,110,0.08)' }}>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Limite compartilhado</div>
-                        <div style={{ marginTop: '3px', color: hasMetaPortfolioCapacity ? '#16a34a' : '#ef4444', fontSize: '0.9rem', fontWeight: 800 }}>
-                            {metaPortfolioUsage.sent}/{metaPortfolioUsage.limit || 'sem limite'} usados; {metaPortfolioUsage.remaining} livres
-                        </div>
-                        <div style={{ marginTop: '3px', color: 'var(--text-muted)', fontSize: '0.74rem', lineHeight: 1.35 }}>
-                            O teto e da BM/portfolio de negocios; todos os numeros compartilham este mesmo limite.
-                        </div>
-                    </div>
-                    <div style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(34,197,94,0.22)', background: 'rgba(34,197,94,0.07)' }}>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Contas oficiais</div>
-                        <div style={{ marginTop: '3px', color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 800 }}>
-                            {activeMetaSenders.filter(isMetaSenderAvailable).length}/{activeMetaSenders.length} numeros prontos
-                        </div>
-                        <div style={{ marginTop: '3px', color: 'var(--text-muted)', fontSize: '0.74rem', lineHeight: 1.35 }}>
-                            O envio automatico usa apenas numeros conectados e sem alerta de politica/qualidade.
-                        </div>
-                    </div>
+                <div className={`meta-channel-item ${hasMetaPortfolioCapacity ? 'meta-channel-item-success' : ''}`}>
+                    <span>Limite BM</span>
+                    <strong>{metaPortfolioUsage.sent}/{metaPortfolioUsage.limit || 'sem limite'} usados; {metaPortfolioUsage.remaining} livres</strong>
+                </div>
+                <div className="meta-channel-item meta-channel-item-success">
+                    <span>Contas</span>
+                    <strong>{activeMetaSenders.filter(isMetaSenderAvailable).length}/{activeMetaSenders.length} numeros prontos</strong>
                 </div>
             </div>
 
@@ -3206,6 +3335,7 @@ export default function CampaignsPage() {
                                         </select>
                                     </div>
                                 </div>
+                                <div className="meta-compact-grid-two">
                                 <div>
                                     <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
                                         Roteamento entre contas
@@ -3224,16 +3354,7 @@ export default function CampaignsPage() {
                                             Distribuir entre contas aprovadas ({portfolioRoutingReadyWabaIds.length} prontas)
                                         </option>
                                     </select>
-                                    <div style={{
-                                        marginTop: '8px',
-                                        padding: '9px 10px',
-                                        borderRadius: '8px',
-                                        border: `1px solid ${portfolioRoutingAvailable ? 'rgba(34,197,94,0.2)' : 'rgba(245,158,11,0.2)'}`,
-                                        background: portfolioRoutingAvailable ? 'rgba(34,197,94,0.08)' : 'rgba(245,158,11,0.08)',
-                                        color: 'var(--text-secondary)',
-                                        fontSize: '0.78rem',
-                                        lineHeight: 1.35,
-                                    }}>
+                                    <div className={`meta-compact-note ${portfolioRoutingAvailable ? 'meta-compact-note-success' : ''}`}>
                                         {selectedMetaTemplate
                                             ? `Este template esta aprovado em ${selectedTemplateApprovedWabaIds.length} conta(s); ${portfolioRoutingReadyWabaIds.length} conta(s) tem numero pronto para roteamento. O limite continua compartilhado no portfolio.`
                                             : 'Escolha um template aprovado para ver em quais contas ele pode ser usado.'}
@@ -3280,14 +3401,18 @@ export default function CampaignsPage() {
                                         </div>
                                     )}
                                     {!selectedMetaSenderId && readyMetaSenders.length > 0 && hasMetaPortfolioCapacity && (
-                                        <div style={{ marginTop: '8px', color: '#16a34a', fontSize: '0.78rem', fontWeight: 700 }}>
+                                        <div style={{ marginTop: '6px', color: '#16a34a', fontSize: '0.72rem', fontWeight: 700 }}>
                                             {isMetaPortfolioRouting
-                                                ? `Distribuicao ativa: o sistema balanceia entre ${portfolioRoutingReadyWabaIds.length} contas com este template aprovado, sem ultrapassar o limite compartilhado da BM/portfolio.`
-                                                : 'Pool automatico vai usar um numero conectado de uma conta aprovada, respeitando o limite compartilhado da BM/portfolio.'}
+                                                ? `Distribuicao ativa entre ${portfolioRoutingReadyWabaIds.length} contas aprovadas.`
+                                                : 'Pool automatico usa um numero conectado aprovado.'}
                                         </div>
                                     )}
                                 </div>
-                                <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--border)', background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)', fontSize: '0.82rem', lineHeight: 1.45 }}>
+                                </div>
+                                <details className="meta-advanced-panel">
+                                    <summary>Configuracoes avancadas do envio</summary>
+                                    <div className="meta-advanced-panel-body">
+                                <label className="meta-compact-checkbox" style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--border)', background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)', fontSize: '0.82rem', lineHeight: 1.45 }}>
                                     <input
                                         type="checkbox"
                                         checked={metaAudiencePersonalized}
@@ -3296,7 +3421,7 @@ export default function CampaignsPage() {
                                     />
                                     Personalizar valores por contato usando linhas com telefone, nome e variaveis do template.
                                 </label>
-                                <label style={{
+                                <label className="meta-compact-checkbox" style={{
                                     display: 'flex',
                                     alignItems: 'flex-start',
                                     gap: '10px',
@@ -3316,16 +3441,23 @@ export default function CampaignsPage() {
                                     />
                                     Permitir reenvio e registrar historico quando o contato ja recebeu este criativo. Desmarque apenas se quiser bloquear repeticao.
                                 </label>
+                                    </div>
+                                </details>
                                 {selectedMetaTemplate ? (
                                     <div className="meta-template-config-grid">
                                         <div style={{ display: 'grid', gap: '12px' }}>
-                                            <div style={{ padding: '12px', borderRadius: '10px', border: '1px solid rgba(34,197,94,0.22)', background: 'rgba(34,197,94,0.08)', color: 'var(--text-secondary)', fontSize: '0.82rem', lineHeight: 1.45 }}>
-                                                <strong style={{ color: 'var(--text-primary)' }}>{selectedMetaTemplate.name}</strong>
-                                                <div>{selectedMetaTemplate.category} | {selectedMetaTemplate.language} | {metaTemplateWabaLabel(selectedMetaTemplate)} | {selectedTemplateButtons.length} botao(s)</div>
+                                            <div className="meta-template-mini-card">
+                                                <div style={{ minWidth: 0 }}>
+                                                    <strong style={{ color: 'var(--text-primary)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{selectedMetaTemplate.name}</strong>
+                                                    <span>{selectedMetaTemplate.category} | {selectedMetaTemplate.language} | {selectedTemplateButtons.length} botao(s)</span>
+                                                </div>
+                                                <span style={{ color: '#16a34a', fontWeight: 800 }}>{metaTemplateWabaLabel(selectedMetaTemplate)}</span>
                                             </div>
 
                                             {selectedHeaderComponent && (
-                                                <div>
+                                                <details className="meta-advanced-panel" open={selectedHeaderUsesMedia && !selectedTemplateHeaderMediaUrl}>
+                                                    <summary>Midia e header</summary>
+                                                    <div className="meta-advanced-panel-body">
                                                     <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
                                                         Header {selectedHeaderFormat ? `(${selectedHeaderFormat})` : ''}
                                                     </label>
@@ -3342,8 +3474,8 @@ export default function CampaignsPage() {
                                                                 }}
                                                             />
                                                             {selectedTemplateHeaderMediaUrl ? (
-                                                                <div style={{ padding: '9px 10px', borderRadius: '8px', border: '1px solid rgba(34,197,94,0.2)', background: 'rgba(34,197,94,0.08)', color: 'var(--text-secondary)', fontSize: '0.78rem', lineHeight: 1.35 }}>
-                                                                    Midia padrao carregada do template. O usuario pode criar a campanha sem mexer nesse campo.
+                                                                <div className="meta-compact-note meta-compact-note-success">
+                                                                    Midia padrao carregada.
                                                                 </div>
                                                             ) : (
                                                                 <div style={{ padding: '9px 10px', borderRadius: '8px', border: '1px solid rgba(245,158,11,0.2)', background: 'rgba(245,158,11,0.08)', color: 'var(--text-secondary)', fontSize: '0.78rem', lineHeight: 1.35 }}>
@@ -3367,7 +3499,8 @@ export default function CampaignsPage() {
                                                             {selectedHeaderText || 'Header fixo aprovado'}
                                                         </div>
                                                     )}
-                                                </div>
+                                                    </div>
+                                                </details>
                                             )}
 
                                             <div>
@@ -3398,7 +3531,9 @@ export default function CampaignsPage() {
                                             </div>
 
                                             {selectedTemplateButtons.length > 0 && (
-                                                <div>
+                                                <details className="meta-advanced-panel">
+                                                    <summary>Botoes do template ({selectedTemplateButtons.length})</summary>
+                                                    <div className="meta-advanced-panel-body">
                                                     <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
                                                         Botoes do template
                                                     </label>
@@ -3431,7 +3566,8 @@ export default function CampaignsPage() {
                                                             )
                                                         })}
                                                     </div>
-                                                </div>
+                                                    </div>
+                                                </details>
                                             )}
                                         </div>
 
@@ -3565,10 +3701,10 @@ export default function CampaignsPage() {
                                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
                                     <div>
                                         <h3 style={{ margin: 0, fontSize: '0.98rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            <Users size={17} style={{ color: 'var(--gold)' }} /> Listas salvas de contatos
+                                            <Users size={17} style={{ color: 'var(--gold)' }} /> Publico
                                         </h3>
                                         <p style={{ margin: '4px 0 0', color: 'var(--text-muted)', fontSize: '0.78rem', lineHeight: 1.45 }}>
-                                            Salve listas XLSX, CSV ou TXT com nome, telefone e variaveis para reutilizar em campanhas futuras.
+                                            Escolha uma lista salva ou use uma entrada manual.
                                         </p>
                                     </div>
                                     <button
@@ -3629,90 +3765,90 @@ export default function CampaignsPage() {
                                         </select>
                                     </div>
 
-                                    <div>
-                                        <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
-                                            Nome da nova lista
-                                        </label>
-                                        <input
-                                            value={contactListName}
-                                            onChange={event => setContactListName(event.target.value)}
-                                            placeholder="Ex: Midhaus Selecao 250 Leads"
-                                            style={{
-                                                width: '100%',
-                                                padding: '10px 14px',
-                                                borderRadius: '8px',
-                                                fontSize: '0.9rem',
-                                                background: 'rgba(255,255,255,0.06)',
-                                                border: '1px solid var(--border)',
-                                                color: 'var(--text-primary)',
-                                                outline: 'none',
-                                                boxSizing: 'border-box',
-                                            }}
-                                        />
-                                    </div>
+                                    <details className="meta-advanced-panel">
+                                        <summary>Importar nova lista</summary>
+                                        <div className="meta-advanced-panel-body meta-compact-grid-two">
+                                            <div>
+                                                <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
+                                                    Nome da nova lista
+                                                </label>
+                                                <input
+                                                    value={contactListName}
+                                                    onChange={event => setContactListName(event.target.value)}
+                                                    placeholder="Ex: Midhaus Selecao 250 Leads"
+                                                    style={{
+                                                        width: '100%',
+                                                        padding: '10px 14px',
+                                                        borderRadius: '8px',
+                                                        fontSize: '0.9rem',
+                                                        background: 'rgba(255,255,255,0.06)',
+                                                        border: '1px solid var(--border)',
+                                                        color: 'var(--text-primary)',
+                                                        outline: 'none',
+                                                        boxSizing: 'border-box',
+                                                    }}
+                                                />
+                                            </div>
 
-                                    <div style={{ display: 'flex', alignItems: 'end', gap: '8px', flexWrap: 'wrap' }}>
-                                        <label
-                                            style={{
-                                                padding: '10px 12px',
-                                                borderRadius: '8px',
-                                                border: '1px solid var(--gold)',
-                                                background: 'rgba(201,169,110,0.12)',
-                                                color: 'var(--gold)',
-                                                cursor: savingContactList ? 'not-allowed' : 'pointer',
-                                                display: 'inline-flex',
-                                                alignItems: 'center',
-                                                gap: '6px',
-                                                fontSize: '0.82rem',
-                                                fontWeight: 700,
-                                                minHeight: '42px',
-                                            }}
-                                        >
-                                            {savingContactList ? <Loader2 size={14} className="spin" /> : <Upload size={14} />}
-                                            Salvar CSV/XLSX
-                                            <input
-                                                type="file"
-                                                accept=".xlsx,.csv,.txt,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,text/plain"
-                                                disabled={savingContactList}
-                                                onChange={event => {
-                                                    const selectedFile = event.currentTarget.files?.[0]
-                                                    event.currentTarget.value = ''
-                                                    void uploadSavedContactList(selectedFile)
-                                                }}
-                                                style={{ display: 'none' }}
-                                            />
-                                        </label>
-                                        {selectedContactListId && (
-                                            <button
-                                                type="button"
-                                                onClick={clearSavedContactListSelection}
-                                                style={{
-                                                    padding: '10px 12px',
-                                                    borderRadius: '8px',
-                                                    border: '1px solid var(--border)',
-                                                    background: 'rgba(255,255,255,0.04)',
-                                                    color: 'var(--text-secondary)',
-                                                    cursor: 'pointer',
-                                                    fontSize: '0.82rem',
-                                                    fontWeight: 700,
-                                                    minHeight: '42px',
-                                                }}
-                                            >
-                                                Desvincular
-                                            </button>
-                                        )}
-                                    </div>
+                                            <div style={{ display: 'flex', alignItems: 'end', gap: '8px', flexWrap: 'wrap' }}>
+                                                <label
+                                                    style={{
+                                                        padding: '10px 12px',
+                                                        borderRadius: '8px',
+                                                        border: '1px solid var(--gold)',
+                                                        background: 'rgba(201,169,110,0.12)',
+                                                        color: 'var(--gold)',
+                                                        cursor: savingContactList ? 'not-allowed' : 'pointer',
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: '6px',
+                                                        fontSize: '0.82rem',
+                                                        fontWeight: 700,
+                                                        minHeight: '42px',
+                                                    }}
+                                                >
+                                                    {savingContactList ? <Loader2 size={14} className="spin" /> : <Upload size={14} />}
+                                                    Salvar CSV/XLSX
+                                                    <input
+                                                        type="file"
+                                                        accept=".xlsx,.csv,.txt,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,text/plain"
+                                                        disabled={savingContactList}
+                                                        onChange={event => {
+                                                            const selectedFile = event.currentTarget.files?.[0]
+                                                            event.currentTarget.value = ''
+                                                            void uploadSavedContactList(selectedFile)
+                                                        }}
+                                                        style={{ display: 'none' }}
+                                                    />
+                                                </label>
+                                                {selectedContactListId && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={clearSavedContactListSelection}
+                                                        style={{
+                                                            padding: '10px 12px',
+                                                            borderRadius: '8px',
+                                                            border: '1px solid var(--border)',
+                                                            background: 'rgba(255,255,255,0.04)',
+                                                            color: 'var(--text-secondary)',
+                                                            cursor: 'pointer',
+                                                            fontSize: '0.82rem',
+                                                            fontWeight: 700,
+                                                            minHeight: '42px',
+                                                        }}
+                                                    >
+                                                        Desvincular
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </details>
                                 </div>
 
                                 {selectedContactList && (
-                                    <div style={{
-                                        display: 'grid',
-                                        gap: '12px',
-                                        padding: '12px',
-                                        borderRadius: '12px',
-                                        border: '1px solid rgba(59,130,246,0.18)',
-                                        background: 'rgba(59,130,246,0.06)',
-                                    }}>
+                                    <details className="meta-advanced-panel">
+                                        <summary>Segmentar e validar lista ({selectedContactListEligibleContacts.length} elegiveis)</summary>
+                                        <div className="meta-advanced-panel-body">
                                         <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
                                             <div>
                                                 <strong style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>Segmentar lista</strong>
@@ -4034,7 +4170,8 @@ export default function CampaignsPage() {
                                                 )}
                                             </div>
                                         )}
-                                    </div>
+                                        </div>
+                                    </details>
                                 )}
 
                                 <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.74rem', lineHeight: 1.45 }}>
@@ -4072,7 +4209,9 @@ export default function CampaignsPage() {
                         )}
 
                         {/* Numbers */}
-                        <div className="meta-create-section">
+                        <details className="meta-advanced-panel" open={sendProvider === 'connectyhub' ? true : undefined}>
+                            <summary>Colar ou importar numeros manualmente</summary>
+                            <div className="meta-advanced-panel-body">
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '6px' }}>
                                 <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block' }}>
                                     {sendProvider === 'meta_whatsapp' && metaAudiencePersonalized
@@ -4141,7 +4280,8 @@ export default function CampaignsPage() {
                                     )}
                                 </div>
                             )}
-                        </div>
+                            </div>
+                        </details>
 
                         {/* Delay & Schedule */}
                         <div className="meta-create-section" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))' }}>
