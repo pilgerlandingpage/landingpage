@@ -226,14 +226,22 @@ export async function POST(request: NextRequest) {
                 })
             }
 
+            const duplicateCreativeNote = result.duplicateCreativeSkippedCount > 0
+                ? ` ${result.duplicateCreativeSkippedCount} contato(s) foram bloqueados porque ja receberam ou ja estao na fila para este mesmo criativo. Para teste manual, marque "Permitir repetir este criativo".`
+                : ''
+            const genericSkippedCount = Math.max(result.skippedCount - result.duplicateCreativeSkippedCount, 0)
+            const genericSkippedNote = genericSkippedCount > 0
+                ? ` ${genericSkippedCount} contato(s) foram bloqueados por opt-out, validacao ou regra de lista.`
+                : ''
+
             return NextResponse.json({
                 success: true,
                 campaign: result.campaign,
                 queued: result.queuedCount,
                 skipped: result.skippedCount,
                 message: result.queuedCount > 0
-                    ? `Campanha lancada com sucesso. ${result.queuedCount} contato(s) foram 100% liberados para envio em segundo plano pela Meta${portfolioRoutingEnabled ? ' com distribuicao entre contas aprovadas para este template' : ''}.${result.skippedCount > 0 ? ` ${result.skippedCount} contato(s) foram bloqueados por opt-out, validacao, regra de lista ou criativo repetido.` : ''}`
-                    : `Campanha preparada, mas nenhum contato ficou elegivel para envio.${result.skippedCount > 0 ? ` ${result.skippedCount} contato(s) foram bloqueados por opt-out, validacao, regra de lista ou criativo repetido.` : ''}`,
+                    ? `Campanha lancada com sucesso. ${result.queuedCount} contato(s) foram 100% liberados para envio em segundo plano pela Meta${portfolioRoutingEnabled ? ' com distribuicao entre contas aprovadas para este template' : ''}.${duplicateCreativeNote}${genericSkippedNote}`
+                    : `Campanha preparada, mas nenhum contato ficou elegivel para envio.${duplicateCreativeNote}${genericSkippedNote}`,
             })
         }
 

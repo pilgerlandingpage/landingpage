@@ -968,6 +968,7 @@ export default function CampaignsPage() {
     const [selectedMetaSenderId, setSelectedMetaSenderId] = useState('')
     const [metaSenderRoutingMode, setMetaSenderRoutingMode] = useState<'weighted_pool' | 'round_robin'>('weighted_pool')
     const [confirmOptIn, setConfirmOptIn] = useState(false)
+    const [allowRepeatCreative, setAllowRepeatCreative] = useState(false)
 
     useEffect(() => { loadInstances() }, [])
 
@@ -1888,7 +1889,7 @@ export default function CampaignsPage() {
     }
 
     const sendCampaign = async () => {
-        let creativeDeduplicationMode: CreativeDeduplicationMode = 'skip_previous'
+        let creativeDeduplicationMode: CreativeDeduplicationMode = allowRepeatCreative ? 'allow_repeat' : 'skip_previous'
         const metaRecipientDrafts = sendProvider === 'meta_whatsapp' && metaAudiencePersonalized
             ? parseMetaRecipientDrafts()
             : []
@@ -1945,7 +1946,7 @@ export default function CampaignsPage() {
                 )
                 if (!confirmed) return
             }
-            if (selectedContactList && selectedTemplateWasUsedForList && selectedTemplateUsage) {
+            if (!allowRepeatCreative && selectedContactList && selectedTemplateWasUsedForList && selectedTemplateUsage) {
                 const confirmed = window.confirm(
                     `A lista "${selectedContactList.name}" ja foi usada com o template "${selectedTemplateUsage.template_name}" em ${selectedTemplateUsage.campaigns} campanha(s).\n\n` +
                     `Ultima campanha: ${selectedTemplateUsage.last_campaign_name || 'sem nome'}\n` +
@@ -2055,6 +2056,7 @@ export default function CampaignsPage() {
                 setMsgText('')
                 setMediaUrl('')
                 setMetaSenderRoutingMode('weighted_pool')
+                setAllowRepeatCreative(false)
                 resetMetaTemplateBuilder()
                 if (sendProvider === 'connectyhub') loadCampaigns()
                 if (sendProvider === 'meta_whatsapp') loadMetaCampaigns()
@@ -2714,6 +2716,26 @@ export default function CampaignsPage() {
                                         style={{ marginTop: '3px' }}
                                     />
                                     Personalizar valores por contato usando linhas com telefone, nome e variaveis do template.
+                                </label>
+                                <label style={{
+                                    display: 'flex',
+                                    alignItems: 'flex-start',
+                                    gap: '10px',
+                                    padding: '10px 12px',
+                                    borderRadius: '10px',
+                                    border: allowRepeatCreative ? '1px solid rgba(245,158,11,0.45)' : '1px solid var(--border)',
+                                    background: allowRepeatCreative ? 'rgba(245,158,11,0.1)' : 'rgba(255,255,255,0.04)',
+                                    color: allowRepeatCreative ? '#f59e0b' : 'var(--text-secondary)',
+                                    fontSize: '0.82rem',
+                                    lineHeight: 1.45,
+                                }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={allowRepeatCreative}
+                                        onChange={e => setAllowRepeatCreative(e.target.checked)}
+                                        style={{ marginTop: '3px' }}
+                                    />
+                                    Permitir repetir este criativo para contatos que ja receberam ou estao na fila. Use principalmente para testes controlados.
                                 </label>
                                 {selectedMetaTemplate ? (
                                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px', alignItems: 'start' }}>
