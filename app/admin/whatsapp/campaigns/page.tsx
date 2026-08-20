@@ -689,25 +689,6 @@ function isMetaSenderAvailable(sender: MetaSender) {
     return isMetaWhatsAppSenderAvailable(sender)
 }
 
-function metaSenderWabaLabel(sender: MetaSender) {
-    const metadata = asRecord(sender.metadata)
-    return textValue(metadata.waba_label) || sender.waba_id || 'WABA'
-}
-
-function metaSenderOptionLabel(sender: MetaSender) {
-    const health = getMetaWhatsAppSenderHealth(sender)
-    const name = sender.display_name || sender.phone_number
-    const base = `${name} - ${sender.phone_number} [${metaSenderWabaLabel(sender)}] - ${metaSenderSentTodayLabel(sender)}`
-    if (!health.available) return `${base} - ${health.reason}`
-    if (health.warning) return `${base} - ${health.warning}`
-    return `${base}; limite compartilhado da BM/portfolio`
-}
-
-function metaTemplateWabaLabel(template?: MetaTemplate | null) {
-    const metadata = asRecord(template?.metadata)
-    return textValue(metadata.waba_label) || textValue(template?.waba_id) || 'WABA'
-}
-
 function metaTemplateNameLanguageValue(template: Pick<MetaTemplate, 'name' | 'language'>) {
     return [template.name || '', template.language || 'pt_BR'].join('::')
 }
@@ -934,9 +915,6 @@ function MetaCampaignPhonePreview({
     buttons,
     audienceLabel,
     routingLabel,
-    approvedAccounts,
-    readyAccounts,
-    portfolioUsageLabel,
     portfolioRemaining,
     warnings,
 }: {
@@ -951,9 +929,6 @@ function MetaCampaignPhonePreview({
     buttons: TemplateButtonRecord[]
     audienceLabel: string
     routingLabel: string
-    approvedAccounts: number
-    readyAccounts: number
-    portfolioUsageLabel: string
     portfolioRemaining: number
     warnings: string[]
 }) {
@@ -1031,12 +1006,8 @@ function MetaCampaignPhonePreview({
                     <strong>{routingLabel}</strong>
                 </div>
                 <div>
-                    <span>Contas</span>
-                    <strong>{readyAccounts}/{approvedAccounts || 0} prontas</strong>
-                </div>
-                <div>
-                    <span>Limite BM</span>
-                    <strong>{portfolioUsageLabel}; {portfolioRemaining} livres</strong>
+                    <span>Disponivel</span>
+                    <strong>{portfolioRemaining} envio(s)</strong>
                 </div>
             </div>
 
@@ -2176,20 +2147,20 @@ export default function CampaignsPage() {
                 creativeDeduplicationMode = 'track_only'
             }
             if (!hasMetaPortfolioCapacity) {
-                setFeedback({ type: 'error', text: `A BM/portfolio Meta atingiu o uso/reserva diaria compartilhada (${metaPortfolioUsage.usageLabel}). Aguarde liberacao por falha, reset da janela de 24h ou agende para depois.` })
+                setFeedback({ type: 'error', text: 'O limite de envio disponivel foi atingido. Aguarde a liberacao da janela de 24h ou agende a campanha para depois.' })
                 return
             }
             if (!scheduleDate && numbers.length > metaPortfolioUsage.remaining) {
-                setFeedback({ type: 'error', text: `A lista tem ${numbers.length} contatos, mas restam ${metaPortfolioUsage.remaining} vagas livres no limite compartilhado da BM/portfolio Meta hoje. Divida a lista ou agende para depois.` })
+                setFeedback({ type: 'error', text: `A lista tem ${numbers.length} contatos, mas hoje restam ${metaPortfolioUsage.remaining} envio(s) disponivel(is). Divida a lista ou agende para depois.` })
                 return
             }
             if (readyMetaSenders.length === 0) {
-                const firstBlocked = activeMetaSenders[0] ? metaSenderOptionLabel(activeMetaSenders[0]) : ''
-                setFeedback({ type: 'error', text: `Nenhum numero Meta esta liberado para envio agora.${firstBlocked ? ` Primeiro diagnostico: ${firstBlocked}.` : ''} Sincronize os numeros oficiais ou pause o disparo ate recuperar saude/capacidade.` })
+                const firstBlocked = activeMetaSenders[0] ? getMetaWhatsAppSenderHealth(activeMetaSenders[0]).reason : ''
+                setFeedback({ type: 'error', text: `Nenhum numero esta liberado para envio agora.${firstBlocked ? ` Motivo: ${firstBlocked}.` : ''} Aguarde a liberacao ou sincronize os numeros oficiais.` })
                 return
             }
             if (selectedMetaSenderId && selectedMetaSender && !isMetaSenderAvailable(selectedMetaSender)) {
-                setFeedback({ type: 'error', text: `O numero selecionado esta indisponivel para envio (${metaSenderOptionLabel(selectedMetaSender)}). Escolha um numero saudavel ou use o pool automatico por capacidade.` })
+                setFeedback({ type: 'error', text: `O numero selecionado esta indisponivel para envio (${getMetaWhatsAppSenderHealth(selectedMetaSender).reason}). Use o envio automatico ou aguarde a liberacao.` })
                 return
             }
         }
@@ -2211,7 +2182,7 @@ export default function CampaignsPage() {
             ) {
                 setFeedback({
                     type: 'error',
-                    text: `O template selecionado pertence a ${metaTemplateWabaLabel(selectedTemplateForSubmit)}, mas o numero escolhido pertence a ${metaSenderWabaLabel(selectedMetaSender)}. Escolha um numero da mesma conta ou use o pool automatico.`,
+                    text: 'O numero selecionado nao esta disponivel para este template. Use o envio automatico.',
                 })
                 return
             }
@@ -2478,6 +2449,9 @@ export default function CampaignsPage() {
     const selectedHeaderVariables = extractTemplateVariables(selectedHeaderText)
     const selectedBodyVariables = extractTemplateVariables(selectedBodyText)
     const selectedTemplateHeaderMediaUrl = getTemplateHeaderMediaUrl(selectedMetaTemplate)
+    const selectedTemplateEditableButtons = selectedTemplateButtons
+        .map((button, index) => ({ button, index }))
+        .filter(({ button }) => buttonNeedsDynamicUrl(button) || buttonNeedsCouponCode(button))
     const previewHeaderText = replaceTemplateVariables(selectedHeaderText, { 1: metaHeaderParameterValue }, 'header')
 
     useEffect(() => {
@@ -2503,10 +2477,10 @@ export default function CampaignsPage() {
             setFeedback({
                 type: 'error',
                 text: templateMismatch
-                    ? `O numero selecionado pertence a ${metaSenderWabaLabel(selectedMetaSender)}, mas o template pertence a ${metaTemplateWabaLabel(selectedMetaTemplate)}. Alterei para Pool automatico por capacidade.`
+                    ? 'O numero selecionado nao combina com este template. Alterei para envio automatico.'
                     : hasMetaPortfolioCapacity
-                    ? `O numero selecionado ficou indisponivel (${metaSenderOptionLabel(selectedMetaSender)}). Alterei para Pool automatico por capacidade.`
-                    : `A BM/portfolio Meta atingiu o uso/reserva diaria compartilhada (${metaPortfolioUsage.usageLabel}).`,
+                    ? `O numero selecionado ficou indisponivel (${getMetaWhatsAppSenderHealth(selectedMetaSender).reason}). Alterei para envio automatico.`
+                    : 'O limite de envio disponivel foi atingido.',
             })
         }
     }, [selectedMetaSenderId, selectedMetaSender, selectedMetaTemplate, hasMetaPortfolioCapacity, metaPortfolioUsage.usageLabel])
@@ -2520,26 +2494,19 @@ export default function CampaignsPage() {
         ? `${selectedContactListEligibleContacts.length} de ${contactListAudienceCounts.all || selectedContactList.valid_contacts} elegiveis`
         : `${parsedNumbers.length} contato(s)`
     const metaRoutingPreviewLabel = isMetaPortfolioRouting
-        ? `Pool BM/portfolio (${portfolioRoutingReadyWabaIds.length} contas)`
+        ? 'Automatico'
         : selectedMetaSender
             ? selectedMetaSender.display_name || selectedMetaSender.phone_number
-            : 'Pool automatico'
+            : 'Automatico'
     const missingBodyVariableCount = selectedBodyVariables.filter(variable => !String(metaBodyParameterValues[String(variable)] || '').trim()).length
     const metaCreateWarnings = [
         !selectedMetaTemplate ? 'Escolha um template aprovado.' : '',
-        selectedHeaderUsesMedia && !metaHeaderMediaUrl.trim() ? 'Informe a midia do template.' : '',
-        missingBodyVariableCount > 0 ? `${missingBodyVariableCount} variavel(is) sem valor de exemplo.` : '',
+        selectedHeaderUsesMedia && !metaHeaderMediaUrl.trim() ? 'Template sem imagem cadastrada.' : '',
+        missingBodyVariableCount > 0 ? `${missingBodyVariableCount} campo(s) obrigatorio(s) sem preenchimento.` : '',
         parsedNumbers.length === 0 ? 'Selecione uma lista ou informe numeros.' : '',
         !confirmOptIn ? 'Confirme o opt-in da lista.' : '',
-        !hasMetaPortfolioCapacity ? 'Limite compartilhado da BM sem vagas livres.' : '',
+        !hasMetaPortfolioCapacity ? 'Limite de envio sem vagas livres.' : '',
     ].filter(Boolean)
-    const metaCampaignTypeLabel = {
-        marketing: 'Marketing',
-        editorial: 'Editorial',
-        followup: 'Follow-up',
-        utility: 'Utility',
-        test: 'Teste',
-    }[metaCampaignType]
     const metaScheduleLabel = scheduleDate
         ? new Date(scheduleDate).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
         : 'Enviar agora'
@@ -2872,6 +2839,10 @@ export default function CampaignsPage() {
                 }
 
                 .meta-step-hidden {
+                    display: none !important;
+                }
+
+                .meta-operator-hidden {
                     display: none !important;
                 }
 
@@ -3688,9 +3659,8 @@ export default function CampaignsPage() {
             <div className="meta-infra-bar">
                 <span><CheckCircle2 size={15} /> Meta conectada</span>
                 <span><Smartphone size={15} /> {readyMetaSenders.length} numeros ativos</span>
-                <span><Activity size={15} /> {metaPortfolioUsage.sent}/{metaPortfolioUsage.limit || 'sem limite'} utilizadas</span>
                 <span><Inbox size={15} /> {metaPortfolioUsage.remaining} disponiveis</span>
-                <span><Users size={15} /> {isMetaPortfolioRouting ? 'Pool automatico' : selectedMetaSender ? metaSenderOptionLabel(selectedMetaSender) : 'Pool automatico'}</span>
+                <span><Users size={15} /> Envio automatico ativo</span>
             </div>
 
             {/* Instance Selector */}
@@ -3803,7 +3773,7 @@ export default function CampaignsPage() {
                                                 <option value="">Selecione um template aprovado</option>
                                                 {metaTemplateOptions.map(option => (
                                                     <option key={option.key} value={option.key}>
-                                                        {option.name} ({option.language}) - {option.category} - {option.variants.length} conta(s)
+                                                        {option.name}
                                                     </option>
                                                 ))}
                                             </select>
@@ -3842,227 +3812,58 @@ export default function CampaignsPage() {
                                             </div>
                                         )}
                                     </div>
-                                    <div>
-                                        <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
-                                            Idioma
-                                        </label>
-                                        <input value={metaTemplateLanguage} onChange={e => setMetaTemplateLanguage(e.target.value)}
-                                            placeholder="pt_BR"
-                                            style={{
-                                                width: '100%', padding: '10px 14px', borderRadius: '8px', fontSize: '0.9rem',
-                                                background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)',
-                                                color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box',
-                                            }} />
-                                    </div>
-                                    <div>
-                                        <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
-                                            Tipo da campanha
-                                        </label>
-                                        <select
-                                            value={metaCampaignType}
-                                            onChange={e => setMetaCampaignType(e.target.value as typeof metaCampaignType)}
-                                            style={{
-                                                width: '100%', padding: '10px 14px', borderRadius: '8px', fontSize: '0.9rem',
-                                                background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)',
-                                                color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box',
-                                            }}
-                                        >
-                                            <option value="marketing">Marketing</option>
-                                            <option value="editorial">Editorial</option>
-                                            <option value="followup">Follow-up</option>
-                                            <option value="utility">Utility</option>
-                                            <option value="test">Teste</option>
-                                        </select>
-                                    </div>
                                 </div>
                                 <div className="meta-inline-readiness">
-                                    <span><CheckCircle2 size={13} /> {readyMetaSenders.length} numero(s) pronto(s)</span>
-                                    <span><CheckCircle2 size={13} /> BM: {metaPortfolioUsage.usageLabel}; {metaPortfolioUsage.remaining} livre(s)</span>
-                                    <span><CheckCircle2 size={13} /> {metaRoutingPreviewLabel}</span>
+                                    <span><CheckCircle2 size={13} /> Envio automatico pronto</span>
+                                    <span><CheckCircle2 size={13} /> {metaPortfolioUsage.remaining} envio(s) livre(s)</span>
                                 </div>
-                                <details className="meta-advanced-panel">
-                                    <summary>Roteamento automatico e limite compartilhado</summary>
-                                    <div className="meta-advanced-panel-body meta-compact-grid-two">
-                                <div>
-                                    <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
-                                        Roteamento entre contas
-                                    </label>
-                                    <select
-                                        value={metaSenderRoutingMode}
-                                        onChange={e => setMetaSenderRoutingMode(e.target.value as typeof metaSenderRoutingMode)}
-                                        style={{
-                                            width: '100%', padding: '10px 14px', borderRadius: '8px', fontSize: '0.9rem',
-                                            background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)',
-                                            color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box',
-                                        }}
-                                    >
-                                        <option value="weighted_pool">Usar uma conta aprovada</option>
-                                        <option value="round_robin" disabled={!portfolioRoutingAvailable}>
-                                            Distribuir entre contas aprovadas ({portfolioRoutingReadyWabaIds.length} prontas)
-                                        </option>
-                                    </select>
-                                    <div className={`meta-compact-note ${portfolioRoutingAvailable ? 'meta-compact-note-success' : ''}`}>
-                                        {selectedMetaTemplate
-                                            ? `Este template esta aprovado em ${selectedTemplateApprovedWabaIds.length} conta(s); ${portfolioRoutingReadyWabaIds.length} conta(s) tem numero pronto para roteamento. O limite continua compartilhado no portfolio.`
-                                            : 'Escolha um template aprovado para ver em quais contas ele pode ser usado.'}
-                                    </div>
-                                </div>
-                                <div>
-                                    <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
-                                        Numero oficial de envio
-                                    </label>
-                                    <select
-                                        value={selectedMetaSenderId}
-                                        onChange={e => setSelectedMetaSenderId(e.target.value)}
-                                        disabled={isMetaPortfolioRouting}
-                                        style={{
-                                            width: '100%', padding: '10px 14px', borderRadius: '8px', fontSize: '0.9rem',
-                                            background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)',
-                                            color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box',
-                                            cursor: isMetaPortfolioRouting ? 'not-allowed' : 'pointer',
-                                        }}
-                                        >
-                                        <option value="">
-                                            {isMetaPortfolioRouting
-                                                ? `Pool da BM/portfolio (${portfolioRoutingReadyWabaIds.length} contas prontas; ${metaPortfolioUsage.remaining} vagas livres)`
-                                                : `Pool automatico por capacidade (${metaPortfolioUsage.remaining} vagas livres na BM/portfolio)`}
-                                        </option>
-                                        {activeMetaSenders.map(sender => {
-                                            const wabaMismatch = Boolean(
-                                                selectedTemplateApprovedWabaIds.length
-                                                && !selectedTemplateApprovedWabaIds.includes(sender.waba_id)
-                                            )
-                                            return (
-                                                <option key={sender.id} value={sender.id} disabled={!isMetaSenderAvailable(sender) || !hasMetaPortfolioCapacity || wabaMismatch}>
-                                                    {wabaMismatch ? `${metaSenderOptionLabel(sender)} - criativo nao aprovado nesta conta` : metaSenderOptionLabel(sender)}
-                                                </option>
-                                            )
-                                        })}
-                                    </select>
-                                    <div style={{ marginTop: '8px', color: hasMetaPortfolioCapacity ? '#16a34a' : '#ef4444', fontSize: '0.78rem', fontWeight: 700 }}>
-                                        Uso/reserva compartilhada da BM/portfolio Meta: {metaPortfolioUsage.usageLabel}; vagas livres {metaPortfolioUsage.remaining}.
-                                    </div>
-                                    {selectedMetaSender && !isMetaSenderAvailable(selectedMetaSender) && (
-                                        <div style={{ marginTop: '8px', color: '#ef4444', fontSize: '0.78rem', fontWeight: 700 }}>
-                                            Este numero nao esta liberado para envio: {getMetaWhatsAppSenderHealth(selectedMetaSender).reason}
-                                        </div>
-                                    )}
-                                    {!selectedMetaSenderId && readyMetaSenders.length > 0 && hasMetaPortfolioCapacity && (
-                                        <div style={{ marginTop: '6px', color: '#16a34a', fontSize: '0.72rem', fontWeight: 700 }}>
-                                            {isMetaPortfolioRouting
-                                                ? `Distribuicao ativa entre ${portfolioRoutingReadyWabaIds.length} contas aprovadas.`
-                                                : 'Pool automatico usa um numero conectado aprovado.'}
-                                        </div>
-                                    )}
-                                </div>
-                                    </div>
-                                </details>
-                                <details className="meta-advanced-panel">
-                                    <summary>Configuracoes avancadas do envio</summary>
-                                    <div className="meta-advanced-panel-body">
-                                <label className="meta-compact-checkbox" style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--border)', background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)', fontSize: '0.82rem', lineHeight: 1.45 }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={metaAudiencePersonalized}
-                                        onChange={e => setMetaAudiencePersonalized(e.target.checked)}
-                                        style={{ marginTop: '3px' }}
-                                    />
-                                    Personalizar valores por contato usando linhas com telefone, nome e variaveis do template.
-                                </label>
-                                <label className="meta-compact-checkbox" style={{
-                                    display: 'flex',
-                                    alignItems: 'flex-start',
-                                    gap: '10px',
-                                    padding: '10px 12px',
-                                    borderRadius: '10px',
-                                    border: allowRepeatCreative ? '1px solid rgba(34,197,94,0.32)' : '1px solid rgba(245,158,11,0.45)',
-                                    background: allowRepeatCreative ? 'rgba(34,197,94,0.08)' : 'rgba(245,158,11,0.1)',
-                                    color: allowRepeatCreative ? 'var(--text-secondary)' : '#f59e0b',
-                                    fontSize: '0.82rem',
-                                    lineHeight: 1.45,
-                                }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={allowRepeatCreative}
-                                        onChange={e => setAllowRepeatCreative(e.target.checked)}
-                                        style={{ marginTop: '3px' }}
-                                    />
-                                    Permitir reenvio e registrar historico quando o contato ja recebeu este criativo. Desmarque apenas se quiser bloquear repeticao.
-                                </label>
-                                    </div>
-                                </details>
                                 {metaCreateStep === 'message' && (selectedMetaTemplate ? (
                                     <div className="meta-template-config-grid">
                                         <div style={{ display: 'grid', gap: '12px' }}>
                                             <div className="meta-template-mini-card">
                                                 <div style={{ minWidth: 0 }}>
                                                     <strong style={{ color: 'var(--text-primary)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{selectedMetaTemplate.name}</strong>
-                                                    <span>{selectedMetaTemplate.category} | {selectedMetaTemplate.language} | {selectedTemplateButtons.length} botao(s)</span>
+                                                    <span>Template aprovado para envio</span>
                                                 </div>
-                                                <span style={{ color: '#16a34a', fontWeight: 800 }}>{metaTemplateWabaLabel(selectedMetaTemplate)}</span>
+                                                <span style={{ color: '#16a34a', fontWeight: 800 }}>Pronto</span>
                                             </div>
 
-                                            {selectedHeaderComponent && (
-                                                <details className="meta-advanced-panel" open={selectedHeaderUsesMedia && !selectedTemplateHeaderMediaUrl}>
-                                                    <summary>Midia e header</summary>
-                                                    <div className="meta-advanced-panel-body">
+                                            {selectedHeaderUsesMedia && !metaHeaderMediaUrl.trim() && (
+                                                <div style={{ padding: '9px 10px', borderRadius: '8px', border: '1px solid rgba(245,158,11,0.2)', background: 'rgba(245,158,11,0.08)', color: 'var(--text-secondary)', fontSize: '0.78rem', lineHeight: 1.35 }}>
+                                                    Este template precisa de uma imagem cadastrada antes do envio. Ajuste em Templates Meta e volte para lancar a campanha.
+                                                </div>
+                                            )}
+
+                                            {!selectedHeaderUsesMedia && selectedHeaderVariables.length > 0 && (
+                                                <div>
                                                     <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
-                                                        Header {selectedHeaderFormat ? `(${selectedHeaderFormat})` : ''}
+                                                        Campo do titulo
                                                     </label>
-                                                    {['IMAGE', 'VIDEO', 'DOCUMENT'].includes(selectedHeaderFormat) ? (
-                                                        <div style={{ display: 'grid', gap: '8px' }}>
-                                                            <input
-                                                                value={metaHeaderMediaUrl}
-                                                                onChange={e => setMetaHeaderMediaUrl(e.target.value)}
-                                                                placeholder={selectedTemplateHeaderMediaUrl ? 'Midia padrao preenchida automaticamente' : 'Cole uma URL publica HTTPS para esta midia'}
-                                                                style={{
-                                                                    width: '100%', padding: '10px 14px', borderRadius: '8px', fontSize: '0.9rem',
-                                                                    background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)',
-                                                                    color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box',
-                                                                }}
-                                                            />
-                                                            {selectedTemplateHeaderMediaUrl ? (
-                                                                <div className="meta-compact-note meta-compact-note-success">
-                                                                    Midia padrao carregada.
-                                                                </div>
-                                                            ) : (
-                                                                <div style={{ padding: '9px 10px', borderRadius: '8px', border: '1px solid rgba(245,158,11,0.2)', background: 'rgba(245,158,11,0.08)', color: 'var(--text-secondary)', fontSize: '0.78rem', lineHeight: 1.35 }}>
-                                                                    Este template nao tem midia salva no R2. Reenvie o template com upload de midia pelo painel ou informe uma URL publica.
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    ) : selectedHeaderVariables.length > 0 ? (
                                                         <input
                                                             value={metaHeaderParameterValue}
                                                             onChange={e => setMetaHeaderParameterValue(e.target.value)}
-                                                            placeholder={`Valor para {{${selectedHeaderVariables[0]}}}`}
+                                                            placeholder="Texto que vai aparecer no titulo"
                                                             style={{
                                                                 width: '100%', padding: '10px 14px', borderRadius: '8px', fontSize: '0.9rem',
                                                                 background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)',
                                                                 color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box',
                                                             }}
                                                         />
-                                                    ) : (
-                                                        <div style={{ padding: '10px 12px', borderRadius: '8px', background: 'rgba(255,255,255,0.04)', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
-                                                            {selectedHeaderText || 'Header fixo aprovado'}
-                                                        </div>
-                                                    )}
-                                                    </div>
-                                                </details>
+                                                </div>
                                             )}
 
-                                            <div>
-                                                <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
-                                                    Variaveis do corpo
-                                                </label>
-                                                {selectedBodyVariables.length > 0 ? (
+                                            {selectedBodyVariables.length > 0 && (
+                                                <div>
+                                                    <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
+                                                        Campos da mensagem
+                                                    </label>
                                                     <div style={{ display: 'grid', gap: '8px' }}>
                                                         {selectedBodyVariables.map(variable => (
                                                             <input
                                                                 key={variable}
                                                                 value={metaBodyParameterValues[String(variable)] || ''}
                                                                 onChange={e => setMetaBodyParameterValues(prev => ({ ...prev, [String(variable)]: e.target.value }))}
-                                                                placeholder={`Valor para {{${variable}}}`}
+                                                                placeholder={`Texto para o campo ${variable}`}
                                                                 style={{
                                                                     width: '100%', padding: '10px 14px', borderRadius: '8px', fontSize: '0.9rem',
                                                                     background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)',
@@ -4071,45 +3872,36 @@ export default function CampaignsPage() {
                                                             />
                                                         ))}
                                                     </div>
-                                                ) : (
-                                                    <div style={{ padding: '10px 12px', borderRadius: '8px', background: 'rgba(255,255,255,0.04)', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
-                                                        Este template nao tem variaveis no corpo.
-                                                    </div>
-                                                )}
-                                            </div>
+                                                </div>
+                                            )}
 
-                                            {selectedTemplateButtons.length > 0 && (
-                                                <details className="meta-advanced-panel">
-                                                    <summary>Botoes do template ({selectedTemplateButtons.length})</summary>
+                                            {selectedTemplateEditableButtons.length > 0 && (
+                                                <details className="meta-advanced-panel meta-operator-hidden">
+                                                    <summary>Ajustes de link dos botoes ({selectedTemplateEditableButtons.length})</summary>
                                                     <div className="meta-advanced-panel-body">
                                                     <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
-                                                        Botoes do template
+                                                        Links dinamicos
                                                     </label>
                                                     <div style={{ display: 'grid', gap: '8px' }}>
-                                                        {selectedTemplateButtons.map((button, index) => {
+                                                        {selectedTemplateEditableButtons.map(({ button, index }) => {
                                                             const buttonType = textValue(button.type).toUpperCase()
                                                             const buttonLabel = textValue(button.text) || `Botao ${index + 1}`
-                                                            const needsValue = buttonNeedsDynamicUrl(button) || buttonNeedsCouponCode(button) || buttonType === 'QUICK_REPLY'
                                                             return (
                                                                 <div key={`${buttonType}-${index}`} style={{ padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'rgba(255,255,255,0.04)', display: 'grid', gap: '8px' }}>
                                                                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', color: 'var(--text-secondary)', fontSize: '0.82rem' }}>
                                                                         <strong style={{ color: 'var(--text-primary)' }}>{buttonLabel}</strong>
                                                                         <span>{buttonType}</span>
                                                                     </div>
-                                                                    {needsValue ? (
-                                                                        <input
-                                                                            value={metaButtonParameterValues[String(index)] || ''}
-                                                                            onChange={e => setMetaButtonParameterValues(prev => ({ ...prev, [String(index)]: e.target.value }))}
-                                                                            placeholder={buttonNeedsDynamicUrl(button) ? 'Complemento dinamico da URL' : buttonNeedsCouponCode(button) ? 'Codigo do cupom' : 'Payload interno opcional'}
-                                                                            style={{
-                                                                                width: '100%', padding: '9px 12px', borderRadius: '8px', fontSize: '0.84rem',
-                                                                                background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)',
-                                                                                color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box',
-                                                                            }}
-                                                                        />
-                                                                    ) : (
-                                                                        <span style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>Botao fixo aprovado no template</span>
-                                                                    )}
+                                                                    <input
+                                                                        value={metaButtonParameterValues[String(index)] || ''}
+                                                                        onChange={e => setMetaButtonParameterValues(prev => ({ ...prev, [String(index)]: e.target.value }))}
+                                                                        placeholder={buttonNeedsDynamicUrl(button) ? 'Complemento dinamico da URL' : 'Codigo do cupom'}
+                                                                        style={{
+                                                                            width: '100%', padding: '9px 12px', borderRadius: '8px', fontSize: '0.84rem',
+                                                                            background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)',
+                                                                            color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box',
+                                                                        }}
+                                                                    />
                                                                 </div>
                                                             )
                                                         })}
@@ -4157,19 +3949,8 @@ export default function CampaignsPage() {
                                         </div>
                                     </div>
                                 ) : (
-                                    <div>
-                                        <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
-                                            Parametros do corpo
-                                        </label>
-                                        <textarea value={metaTemplateParameters} onChange={e => setMetaTemplateParameters(e.target.value)}
-                                            placeholder={"Um valor por linha, na ordem {{1}}, {{2}}, {{3}} do template"}
-                                            rows={3}
-                                            style={{
-                                                width: '100%', padding: '10px 14px', borderRadius: '8px', fontSize: '0.9rem',
-                                                background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)',
-                                                color: 'var(--text-primary)', outline: 'none', resize: 'vertical',
-                                                fontFamily: 'inherit', boxSizing: 'border-box',
-                                            }} />
+                                    <div style={{ padding: '10px 12px', borderRadius: '8px', background: 'rgba(255,255,255,0.04)', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
+                                        Escolha um template aprovado para visualizar e preparar a mensagem.
                                     </div>
                                 ))}
                             </div>
@@ -4821,7 +4602,7 @@ export default function CampaignsPage() {
                             </div>
                             <textarea value={numbersInput} onChange={e => setNumbersInput(e.target.value)}
                                 placeholder={sendProvider === 'meta_whatsapp' && metaAudiencePersonalized
-                                    ? `5547999999999; Maria${selectedBodyVariables.map(variable => `; valor {{${variable}}}`).join('') || '; valor {{1}}'}${selectedHeaderUsesMedia ? '; https://guilhermepilger.ai/foto.jpg' : ''}\n5547888888888; Joao${selectedBodyVariables.map(variable => `; valor {{${variable}}}`).join('') || '; valor {{1}}'}${selectedHeaderUsesMedia ? '; https://guilhermepilger.ai/foto-2.jpg' : ''}`
+                                    ? `5547999999999; Maria${selectedBodyVariables.map(variable => `; valor {{${variable}}}`).join('') || '; valor {{1}}'}\n5547888888888; Joao${selectedBodyVariables.map(variable => `; valor {{${variable}}}`).join('') || '; valor {{1}}'}`
                                     : "5547999999999\n5547888888888\n5511777777777"}
                                 rows={5}
                                 style={{
@@ -4838,7 +4619,7 @@ export default function CampaignsPage() {
                             </div>
                             {sendProvider === 'meta_whatsapp' && metaAudiencePersonalized && (
                                 <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '6px', lineHeight: 1.45 }}>
-                                    Formato: telefone; nome{selectedBodyVariables.map(variable => `; valor para {{${variable}}}`).join('') || '; valor para {{1}}'}{selectedHeaderUsesMedia ? '; URL da midia do header' : ''}.
+                                    Formato: telefone; nome{selectedBodyVariables.map(variable => `; valor para {{${variable}}}`).join('') || '; valor para {{1}}'}.
                                     {parsedMetaRecipientDrafts.some(recipient => (recipient.missingVariables || []).length > 0) && (
                                         <span style={{ color: '#ef4444', display: 'block', marginTop: '4px' }}>
                                             Existem linhas com variaveis obrigatorias vazias.
@@ -4922,8 +4703,7 @@ export default function CampaignsPage() {
                                             <button type="button" onClick={() => setMetaCreateStep('message')}>Editar</button>
                                         </div>
                                         <div className="meta-review-row"><span>Nome</span><strong>{campaignName.trim() || 'Sem nome'}</strong></div>
-                                        <div className="meta-review-row"><span>Tipo</span><strong>{metaCampaignTypeLabel}</strong></div>
-                                        <div className="meta-review-row"><span>Idioma</span><strong>{metaTemplateLanguage || 'pt_BR'}</strong></div>
+                                        <div className="meta-review-row"><span>Status</span><strong>{metaCreateWarnings.length ? 'Com ajuste pendente' : 'Pronta'}</strong></div>
                                     </div>
 
                                     <div className="meta-review-card">
@@ -4932,8 +4712,8 @@ export default function CampaignsPage() {
                                             <button type="button" onClick={() => setMetaCreateStep('message')}>Editar</button>
                                         </div>
                                         <div className="meta-review-row"><span>Template</span><strong>{selectedMetaTemplate?.name || 'Nao selecionado'}</strong></div>
-                                        <div className="meta-review-row"><span>Categoria</span><strong>{selectedMetaTemplate?.category || 'Nao definida'}</strong></div>
-                                        <div className="meta-review-row"><span>Variaveis</span><strong>{selectedBodyVariables.length ? `${selectedBodyVariables.length} no corpo` : 'Sem variaveis'}</strong></div>
+                                        <div className="meta-review-row"><span>Imagem</span><strong>{selectedHeaderUsesMedia ? (metaHeaderMediaUrl.trim() ? 'Pronta' : 'Pendente') : 'Nao precisa'}</strong></div>
+                                        <div className="meta-review-row"><span>Campos</span><strong>{selectedBodyVariables.length ? `${selectedBodyVariables.length} campo(s)` : 'Tudo preenchido'}</strong></div>
                                     </div>
 
                                     <div className="meta-review-card">
@@ -4953,7 +4733,7 @@ export default function CampaignsPage() {
                                         </div>
                                         <div className="meta-review-row"><span>Envio</span><strong>{metaRoutingPreviewLabel}</strong></div>
                                         <div className="meta-review-row"><span>Agenda</span><strong>{metaScheduleLabel}</strong></div>
-                                        <div className="meta-review-row"><span>Limite</span><strong>{metaPortfolioUsage.usageLabel}; {metaPortfolioUsage.remaining} livres</strong></div>
+                                        <div className="meta-review-row"><span>Limite</span><strong>{metaPortfolioUsage.remaining} livre(s)</strong></div>
                                     </div>
                                 </div>
 
@@ -4975,7 +4755,7 @@ export default function CampaignsPage() {
                                             <>
                                                 <li><CheckCircle2 size={14} style={{ color: '#16a34a' }} /> Template aprovado e pronto para envio.</li>
                                                 <li><CheckCircle2 size={14} style={{ color: '#16a34a' }} /> Publico carregado com opt-in confirmado.</li>
-                                                <li><CheckCircle2 size={14} style={{ color: '#16a34a' }} /> Limite compartilhado da BM/portfolio disponivel.</li>
+                                                <li><CheckCircle2 size={14} style={{ color: '#16a34a' }} /> Capacidade de envio disponivel.</li>
                                             </>
                                         )}
                                     </ul>
@@ -4988,8 +4768,7 @@ export default function CampaignsPage() {
                             <div className="meta-create-action-summary">
                                 <span>{metaCampaignAudienceLabel}</span>
                                 <span>{metaRoutingPreviewLabel}</span>
-                                <span>{metaPortfolioUsage.usageLabel}; {metaPortfolioUsage.remaining} vagas livres na BM</span>
-                                {selectedMetaTemplate && <span>{selectedTemplateApprovedWabaIds.length} conta(s) com criativo aprovado</span>}
+                                <span>{metaPortfolioUsage.remaining} envio(s) disponivel(is)</span>
                             </div>
                             <div className="meta-create-actions">
                                 <button
@@ -5024,9 +4803,6 @@ export default function CampaignsPage() {
                         buttons={selectedTemplateButtons}
                         audienceLabel={metaCampaignAudienceLabel}
                         routingLabel={metaRoutingPreviewLabel}
-                        approvedAccounts={selectedTemplateApprovedWabaIds.length}
-                        readyAccounts={portfolioRoutingReadyWabaIds.length}
-                        portfolioUsageLabel={metaPortfolioUsage.usageLabel}
                         portfolioRemaining={metaPortfolioUsage.remaining}
                         warnings={metaCreateWarnings}
                     />
@@ -5255,14 +5031,14 @@ function metaErrorHint(code?: string | null, message?: string | null) {
     const selectedCode = String(code || '')
     const selectedMessage = String(message || '').toLowerCase()
     if (selectedCode === '131042' || selectedMessage.includes('payment')) {
-        return 'Pagamento/elegibilidade da WABA. Verifique metodo de pagamento, linha de credito e cobranca do WhatsApp.'
+        return 'Pagamento ou elegibilidade da conta. Verifique o metodo de pagamento e a cobranca do WhatsApp.'
     }
     if (selectedCode === '131026') return 'Numero nao pode receber a mensagem. Confira se existe no WhatsApp e se nao bloqueou o contato.'
     if (selectedCode === '131047') return 'Janela de atendimento expirada. Use template aprovado para iniciar conversa.'
-    if (selectedCode === '132000' || selectedCode === '132001') return 'Variaveis do template nao batem com o modelo aprovado.'
+    if (selectedCode === '132000' || selectedCode === '132001') return 'Os campos da mensagem nao batem com o modelo aprovado.'
     if (selectedCode === '132015' || selectedCode === '132016') return 'Template pausado/desabilitado pela Meta.'
     if (selectedCode === '131056' || selectedMessage.includes('limit')) return 'Limite do numero ou da conta atingido.'
-    return 'Confira o payload Meta e o status do destinatario para a causa exata.'
+    return 'Confira os dados do destinatario para identificar a causa exata.'
 }
 
 function campaignErrorGroups(recipients: MetaCampaignRecipient[], events: MetaCampaignEvent[] = []) {
@@ -6006,7 +5782,6 @@ function MetaDetailedReportPanel({
                             {[
                                 ['Campanha', selectedRow.campaign_name],
                                 ['Criativo', selectedRow.template_name],
-                                ['Conta', selectedRow.waba_label || selectedRow.waba_id || '-'],
                                 ['Numero', selectedRow.sender_phone || selectedRow.sender_name || '-'],
                                 ['Status', metaStatusLabel(selectedRow.status)],
                                 ['Enviado', formatMetaDate(selectedRow.sent_at)],
@@ -6596,7 +6371,7 @@ function MetaOfficialCampaignPanel({
                                 {activeSenderCount} numeros ativos · {Number(totalSenderSendsToday).toLocaleString('pt-BR')} envios hoje
                             </strong>
                             <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>
-                                Limite compartilhado da BM/portfolio Meta.
+                                Todos os envios usam a capacidade disponivel da conta.
                             </span>
                         </div>
                         <details style={{ position: 'relative' }}>
@@ -6979,12 +6754,9 @@ function MetaCampaignTableRow({
     const canRetryFailed = campaign.total_failed > 0 && !['queued', 'sending', 'scheduled', 'preparing', 'cancelled'].includes(campaign.status)
     const campaignMetadata = asRecord(campaign.metadata)
     const portfolioRoutingEnabled = campaignMetadata.portfolio_routing_enabled === true
-    const routingWabaLabels = Array.isArray(campaignMetadata.routing_waba_labels)
-        ? campaignMetadata.routing_waba_labels.map(label => textValue(label)).filter(Boolean)
-        : []
     const routedLabel = portfolioRoutingEnabled
-        ? `Pool automatico${routingWabaLabels.length ? ` (${routingWabaLabels.length} contas)` : ''}`
-        : sender?.display_name || sender?.phone_number || 'Conta nao identificada'
+        ? 'Envio automatico'
+        : sender?.display_name || sender?.phone_number || 'Envio automatico'
     const deliveryLabel = campaign.total_failed > 0
         ? `${Number(campaign.total_failed || 0).toLocaleString('pt-BR')} falha${campaign.total_failed === 1 ? '' : 's'}`
         : campaign.total_delivered > 0
@@ -7849,12 +7621,9 @@ function MetaCampaignDetailPanel({
     const segmentFilteredContacts = Number(contactSegment.filteredContacts || contactSegment.filtered_contacts || 0)
     const segmentTotalContacts = Number(contactSegment.totalContacts || contactSegment.total_contacts || 0)
     const campaignPortfolioRouting = campaignMetadata.portfolio_routing_enabled === true
-    const routingWabaLabels = Array.isArray(campaignMetadata.routing_waba_labels)
-        ? campaignMetadata.routing_waba_labels.map(label => textValue(label)).filter(Boolean)
-        : []
     const routingDescription = campaignPortfolioRouting
-        ? `Pool portfolio (${routingWabaLabels.length || 1} conta(s))${routingWabaLabels.length ? `: ${routingWabaLabels.join(', ')}` : ''}`
-        : textValue(campaignMetadata.waba_label) || 'Conta do template'
+        ? 'Envio automatico'
+        : textValue(campaignMetadata.sender_name) || textValue(campaignMetadata.sender_phone) || 'Envio automatico'
     const segmentDescription = [
         textValue(campaignMetadata.contact_list_name) ? `Lista: ${textValue(campaignMetadata.contact_list_name)}` : '',
         segmentCity ? `Cidade: ${segmentCity}` : '',
