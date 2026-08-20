@@ -520,6 +520,13 @@ async function graphRequest<T>(
   return payload as T
 }
 
+async function subscribeMetaWhatsAppWebhookForResolved(resolved: MetaWhatsAppResolvedConfig) {
+  if (resolved.missing.length) throw new Error(`Configuracao incompleta: ${resolved.missing.join(', ')}`)
+  return graphRequest<{ success?: boolean }>(resolved, `/${resolved.wabaId}/subscribed_apps`, {
+    method: 'POST',
+  })
+}
+
 export async function getMetaWhatsAppTokenDiagnostics(config: ConfigMap = {}) {
   const resolved = resolveMetaWhatsAppConfig(config)
   if (!resolved.accessToken || !resolved.appId || !resolved.appSecret) return null
@@ -990,6 +997,13 @@ export async function syncMetaWhatsAppAssets(config: ConfigMap = {}, supabase = 
     if (account.missing.length) {
       warnings.push(`${'label' in account ? account.label : account.wabaId}: configuracao incompleta (${account.missing.join(', ')}).`)
       continue
+    }
+
+    try {
+      await subscribeMetaWhatsAppWebhookForResolved(account)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      warnings.push(`${'label' in account ? account.label : account.wabaId}: webhook nao assinado automaticamente (${message}).`)
     }
 
     try {
