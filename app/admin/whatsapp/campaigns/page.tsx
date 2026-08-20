@@ -1026,10 +1026,10 @@ export default function CampaignsPage() {
         finally { setLoadingCampaigns(false) }
     }
 
-    const loadMetaCampaigns = async () => {
+    const loadMetaCampaigns = async (statusOverride = metaStatusFilter) => {
         setLoadingMetaCampaigns(true)
         try {
-            const statusParam = metaStatusFilter ? `&status=${encodeURIComponent(metaStatusFilter)}` : ''
+            const statusParam = statusOverride ? `&status=${encodeURIComponent(statusOverride)}` : ''
             const res = await fetch(`/api/admin/whatsapp/campaigns?provider=meta_whatsapp&limit=250${statusParam}`)
             const data = await res.json()
             if (data.success) {
@@ -2082,7 +2082,10 @@ export default function CampaignsPage() {
             const data = await res.json()
             if (data.success) {
                 setFeedback({ type: 'success', text: data.message || 'Campanha lancada com sucesso. Os contatos foram 100% liberados para envio em segundo plano.' })
+                const createdCampaignId = textValue(data.campaign?.id)
                 setShowCreateForm(false)
+                setMetaStatusFilter('')
+                if (createdCampaignId) setExpandedMetaCampaignId(createdCampaignId)
                 setNumbersInput('')
                 clearSavedContactListSelection()
                 setMsgText('')
@@ -2091,7 +2094,10 @@ export default function CampaignsPage() {
                 setAllowRepeatCreative(true)
                 resetMetaTemplateBuilder()
                 if (sendProvider === 'connectyhub') loadCampaigns()
-                if (sendProvider === 'meta_whatsapp') loadMetaCampaigns()
+                if (sendProvider === 'meta_whatsapp') await loadMetaCampaigns('')
+                window.setTimeout(() => {
+                    document.getElementById('meta-campaign-history-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                }, 0)
             } else {
                 setFeedback({ type: 'error', text: data.message || 'Erro ao lancar campanha.' })
             }
@@ -2436,7 +2442,7 @@ export default function CampaignsPage() {
                             color: showCreateForm ? '#ef4444' : '#000', fontWeight: 600,
                             display: 'flex', alignItems: 'center', gap: '8px',
                         }}>
-                        {showCreateForm ? <><ChevronUp size={16} /> Fechar</> : <><Plus size={16} /> Nova Campanha</>}
+                        {showCreateForm ? <><ChevronUp size={16} /> Ver historico</> : <><Plus size={16} /> Nova Campanha</>}
                     </button>
                 </div>
             </div>
@@ -3662,7 +3668,7 @@ export default function CampaignsPage() {
             )}
 
             {/* Campaigns List */}
-            {sendProvider === 'connectyhub' ? (
+            {!showCreateForm && (sendProvider === 'connectyhub' ? (
             <div>
                 <h2 style={{ fontSize: '1.05rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
                     <MessageSquare size={18} style={{ color: 'var(--gold)' }} /> Campanhas Enviadas
@@ -3728,7 +3734,7 @@ export default function CampaignsPage() {
                     retryingCampaignId={retryingMetaCampaignId}
                     onRetryFailed={retryFailedMetaCampaign}
                 />
-            )}
+            ))}
 
             <style>{`
                 @keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
@@ -4693,7 +4699,7 @@ function MetaOfficialCampaignPanel({
     }
 
     return (
-        <div style={{ display: 'grid', gap: '14px' }}>
+        <div id="meta-campaign-history-panel" style={{ display: 'grid', gap: '14px' }}>
             <div style={{
                 borderRadius: '12px',
                 background: 'var(--bg-secondary)',
