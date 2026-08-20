@@ -7,7 +7,7 @@ import {
     Plus, Trash2, Pause, Play, FileText, Image, Mic, Video,
     Tag, RefreshCw, MessageSquare, ChevronUp, ChevronLeft, ChevronRight,
     Smartphone, Search, BarChart3, TrendingUp, Eye, Inbox, Activity,
-    XCircle, Upload, Download, Bot, Calendar, DollarSign
+    XCircle, Upload, Download, Bot, Calendar, DollarSign, MoreVertical
 } from 'lucide-react'
 import {
     Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart,
@@ -2681,6 +2681,40 @@ export default function CampaignsPage() {
                     color: #d97706;
                 }
 
+                .meta-infra-bar {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    flex-wrap: wrap;
+                    margin-bottom: 14px;
+                    padding: 12px 14px;
+                    border: 1px solid var(--border);
+                    border-radius: 12px;
+                    background: rgba(255,255,255,0.04);
+                    color: var(--text-secondary);
+                    font-size: 0.78rem;
+                    box-shadow: 0 10px 26px rgba(15,23,42,0.04);
+                }
+
+                .meta-infra-bar span {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 7px;
+                    min-height: 22px;
+                    padding-right: 10px;
+                    border-right: 1px solid var(--border);
+                    white-space: nowrap;
+                }
+
+                .meta-infra-bar span:last-child {
+                    border-right: 0;
+                    padding-right: 0;
+                }
+
+                .meta-infra-bar svg {
+                    color: #16a34a;
+                }
+
                 .meta-create-titlebar {
                     display: flex;
                     justify-content: space-between;
@@ -3363,18 +3397,17 @@ export default function CampaignsPage() {
 
                 .meta-campaigns-workspace {
                     display: grid;
-                    grid-template-columns: minmax(640px, 1fr) minmax(380px, 460px);
+                    grid-template-columns: minmax(0, 1fr);
                     min-height: 0;
                 }
 
                 .meta-campaign-table-pane {
                     min-width: 0;
-                    border-right: 1px solid var(--border);
                     overflow-x: auto;
                 }
 
                 .meta-campaign-table-shell {
-                    min-width: 980px;
+                    min-width: 1040px;
                 }
 
                 .meta-campaign-list-scroll {
@@ -3398,7 +3431,67 @@ export default function CampaignsPage() {
                 }
 
                 .meta-campaigns-table-empty {
-                    min-width: 980px;
+                    min-width: 1040px;
+                }
+
+                .meta-campaign-drawer-backdrop {
+                    position: fixed;
+                    inset: 0;
+                    z-index: 70;
+                    display: flex;
+                    justify-content: flex-end;
+                    background: rgba(15,23,42,0.34);
+                    backdrop-filter: blur(2px);
+                }
+
+                .meta-campaign-drawer {
+                    width: min(540px, 100%);
+                    height: 100%;
+                    background: var(--bg-secondary);
+                    border-left: 1px solid var(--border);
+                    box-shadow: -22px 0 48px rgba(15,23,42,0.24);
+                    overflow: hidden;
+                    display: grid;
+                    grid-template-rows: auto 1fr;
+                }
+
+                .meta-campaign-drawer-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 14px 16px;
+                    border-bottom: 1px solid var(--border);
+                    background: rgba(255,255,255,0.035);
+                }
+
+                .meta-campaign-drawer-header strong {
+                    color: var(--text-primary);
+                    font-size: 0.92rem;
+                }
+
+                .meta-campaign-drawer-header button {
+                    width: 34px;
+                    height: 34px;
+                    border-radius: 8px;
+                    border: 1px solid var(--border);
+                    background: rgba(255,255,255,0.04);
+                    color: var(--text-secondary);
+                    cursor: pointer;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .meta-campaign-drawer-body {
+                    min-height: 0;
+                    overflow: hidden;
+                }
+
+                .meta-campaign-drawer-body .meta-campaign-detail-aside {
+                    height: 100%;
+                    max-height: none;
+                    background: var(--bg-secondary);
                 }
 
                 @media (max-width: 1500px) {
@@ -3487,10 +3580,10 @@ export default function CampaignsPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
                 <div>
                     <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.5rem', margin: 0 }}>
-                        <Send size={26} style={{ color: 'var(--gold)' }} /> Pilger Meta WhatsApp
+                        <Send size={26} style={{ color: 'var(--gold)' }} /> Central de Campanhas WhatsApp
                     </h1>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '6px' }}>
-                        Crie campanhas no WhatsApp usando a API oficial da Meta para listas com opt-in
+                        Acompanhe, analise e gerencie os envios realizados pela API oficial da Meta.
                     </p>
                 </div>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -3514,36 +3607,22 @@ export default function CampaignsPage() {
                     }}
                         style={{
                             padding: '10px 20px', borderRadius: '10px', border: 'none', cursor: 'pointer',
-                            background: showCreateForm ? 'rgba(239,68,68,0.15)' : 'linear-gradient(135deg, var(--gold), #b8860b)',
-                            color: showCreateForm ? '#ef4444' : '#000', fontWeight: 600,
+                            background: showCreateForm ? 'rgba(239,68,68,0.15)' : '#0866ff',
+                            color: showCreateForm ? '#ef4444' : '#fff', fontWeight: 700,
                             display: 'flex', alignItems: 'center', gap: '8px',
+                            boxShadow: showCreateForm ? 'none' : '0 10px 22px rgba(8,102,255,0.22)',
                         }}>
                         {showCreateForm ? <><ChevronUp size={16} /> Ver historico</> : <><Plus size={16} /> Nova Campanha</>}
                     </button>
                 </div>
             </div>
 
-            <div className="meta-channel-strip">
-                <div className="meta-channel-item meta-channel-item-success">
-                    <span>Conexao Meta</span>
-                    <strong>Ativa</strong>
-                </div>
-                <div className="meta-channel-item meta-channel-item-success">
-                    <span>Numeros de envio</span>
-                    <strong>{readyMetaSenders.length} de {activeMetaSenders.length}</strong>
-                </div>
-                <div className={`meta-channel-item ${hasMetaPortfolioCapacity ? '' : 'meta-channel-item-alert'}`}>
-                    <span>Capacidade da conta</span>
-                    <strong>{metaPortfolioUsage.sent}/{metaPortfolioUsage.limit || 'sem limite'}</strong>
-                </div>
-                <div className={`meta-channel-item ${hasMetaPortfolioCapacity ? 'meta-channel-item-success' : 'meta-channel-item-alert'}`}>
-                    <span>Capacidade livre</span>
-                    <strong>{metaPortfolioUsage.remaining} mensagens</strong>
-                </div>
-                <div className="meta-channel-item">
-                    <span>Conta selecionada</span>
-                    <strong>{isMetaPortfolioRouting ? 'Pool automatico' : selectedMetaSender ? metaSenderOptionLabel(selectedMetaSender) : 'Pool automatico'}</strong>
-                </div>
+            <div className="meta-infra-bar">
+                <span><CheckCircle2 size={15} /> Meta conectada</span>
+                <span><Smartphone size={15} /> {readyMetaSenders.length} numeros ativos</span>
+                <span><Activity size={15} /> {metaPortfolioUsage.sent}/{metaPortfolioUsage.limit || 'sem limite'} utilizadas</span>
+                <span><Inbox size={15} /> {metaPortfolioUsage.remaining} disponiveis</span>
+                <span><Users size={15} /> {isMetaPortfolioRouting ? 'Pool automatico' : selectedMetaSender ? metaSenderOptionLabel(selectedMetaSender) : 'Pool automatico'}</span>
             </div>
 
             {/* Instance Selector */}
@@ -5005,6 +5084,7 @@ function metaCampaignFailureRate(campaign: MetaCampaign) {
 }
 
 function metaCampaignMatchesSignal(campaign: MetaCampaign, filter: MetaCampaignSignalFilter) {
+    if (filter === 'in_progress') return ['queued', 'sending', 'preparing'].includes(campaign.status)
     if (filter === 'with_failures') return Number(campaign.total_failed || 0) > 0
     if (filter === 'high_failure') return metaCampaignFailureRate(campaign) >= 30
     if (filter === 'with_reads') return Number(campaign.total_read || 0) > 0
@@ -5121,7 +5201,7 @@ function campaignErrorGroups(recipients: MetaCampaignRecipient[], events: MetaCa
 const META_CHART_COLORS = ['#b08a43', '#22c55e', '#38bdf8', '#ef4444', '#6366f1', '#f59e0b']
 type MetaCampaignWorkspaceTab = 'overview' | 'campaigns' | 'reports' | 'replies' | 'diagnostics'
 type MetaCampaignSortKey = 'created_desc' | 'created_asc' | 'name_asc' | 'recipients_desc' | 'failed_desc' | 'delivery_desc' | 'read_desc'
-type MetaCampaignSignalFilter = 'all' | 'with_failures' | 'high_failure' | 'with_reads' | 'without_failures'
+type MetaCampaignSignalFilter = 'all' | 'in_progress' | 'with_failures' | 'high_failure' | 'with_reads' | 'without_failures'
 const META_CAMPAIGN_PAGE_SIZE_OPTIONS = [20, 50, 100]
 
 function MetaDailyReportPanel({
@@ -5954,29 +6034,32 @@ function MetaOfficialCampaignPanel({
     const [campaignSignalFilter, setCampaignSignalFilter] = useState<MetaCampaignSignalFilter>('all')
     const normalizedSearch = searchTerm.trim().toLowerCase()
     const statusCounts = summary?.byStatus || {}
-    const statusOptions = [
-        { value: '', label: 'Todas', count: summary?.total || campaigns.length },
-        { value: 'queued', label: 'Fila', count: statusCounts.queued || 0 },
-        { value: 'sending', label: 'Enviando', count: statusCounts.sending || 0 },
-        { value: 'completed', label: 'Concluidas', count: statusCounts.completed || 0 },
-        { value: 'failed', label: 'Falhas', count: statusCounts.failed || 0 },
-        { value: 'paused', label: 'Pausadas', count: statusCounts.paused || 0 },
-        { value: 'scheduled', label: 'Agendadas', count: statusCounts.scheduled || 0 },
+    const activeSenderCount = senders.filter(sender => getMetaWhatsAppSenderHealth(sender).available).length
+    const totalSenderSendsToday = senders.reduce((total, sender) => total + metaSenderUsage(sender).sent, 0)
+    const statusOptions: Array<{ key: string; value: string; label: string; count: number; signal: MetaCampaignSignalFilter }> = [
+        { key: 'all', value: '', label: 'Todas', count: summary?.total || campaigns.length, signal: 'all' },
+        {
+            key: 'progress',
+            value: '',
+            label: 'Em andamento',
+            count: (statusCounts.queued || 0) + (statusCounts.sending || 0) + (statusCounts.preparing || 0),
+            signal: 'in_progress',
+        },
+        { key: 'scheduled', value: 'scheduled', label: 'Agendadas', count: statusCounts.scheduled || 0, signal: 'all' },
+        { key: 'paused', value: 'paused', label: 'Pausadas', count: statusCounts.paused || 0, signal: 'all' },
+        { key: 'completed', value: 'completed', label: 'Concluidas', count: statusCounts.completed || 0, signal: 'all' },
+        { key: 'failures', value: '', label: 'Com falhas', count: summary?.failed || 0, signal: 'with_failures' },
     ]
     const metricItems = [
-        { label: 'Campanhas', value: summary?.total || 0, icon: MessageSquare, color: 'var(--gold)' },
-        { label: 'Destinatarios', value: summary?.recipients || 0, icon: Users, color: '#38bdf8' },
-        { label: 'Aceitas Meta', value: summary?.sent || 0, icon: CheckCircle2, color: '#22c55e' },
-        { label: 'Entregues', value: summary?.delivered || 0, icon: Inbox, color: '#16a34a' },
-        { label: 'Lidas', value: summary?.read || 0, icon: Eye, color: '#0ea5e9' },
-        { label: 'Falhas', value: summary?.failed || 0, icon: AlertCircle, color: '#ef4444' },
+        { label: 'Campanhas enviadas', value: summary?.total || 0, detail: 'Total de campanhas', icon: Send, color: '#0866ff' },
+        { label: 'Destinatarios', value: summary?.recipients || 0, detail: 'Total de contatos', icon: Users, color: '#6d5efc' },
+        { label: 'Aceitas pela Meta', value: summary?.sent || 0, detail: `${percentLabel(analytics?.rates?.acceptedRate ?? metricRate(summary?.sent || 0, summary?.recipients || 0))} dos destinatarios`, icon: CheckCircle2, color: '#22c55e' },
+        { label: 'Entregues', value: summary?.delivered || 0, detail: `${percentLabel(analytics?.rates?.deliveryRate ?? metricRate(summary?.delivered || 0, summary?.sent || summary?.recipients || 0))} das aceitas`, icon: Inbox, color: '#16a34a' },
+        { label: 'Lidas', value: summary?.read || 0, detail: `${percentLabel(analytics?.rates?.readRate ?? metricRate(summary?.read || 0, summary?.delivered || summary?.sent || summary?.recipients || 0))} das entregues`, icon: Eye, color: '#0ea5e9' },
+        { label: 'Falhas', value: summary?.failed || 0, detail: `${percentLabel(analytics?.rates?.failureRate ?? metricRate(summary?.failed || 0, summary?.recipients || 0))} dos destinatarios`, icon: AlertCircle, color: '#ef4444' },
     ]
-    const rateItems = [
-        { label: 'Taxa aceite', value: percentLabel(analytics?.rates?.acceptedRate ?? metricRate(summary?.sent || 0, summary?.recipients || 0)), color: '#38bdf8' },
-        { label: 'Entrega', value: percentLabel(analytics?.rates?.deliveryRate ?? metricRate(summary?.delivered || 0, summary?.sent || summary?.recipients || 0)), color: '#22c55e' },
-        { label: 'Leitura', value: percentLabel(analytics?.rates?.readRate ?? metricRate(summary?.read || 0, summary?.delivered || summary?.sent || summary?.recipients || 0)), color: '#0ea5e9' },
-        { label: 'Falha', value: percentLabel(analytics?.rates?.failureRate ?? metricRate(summary?.failed || 0, summary?.recipients || 0)), color: '#ef4444' },
-    ]
+    const failureLeader = [...campaigns].sort((a, b) => Number(b.total_failed || 0) - Number(a.total_failed || 0))[0] || null
+    const failureTotal = Number(summary?.failed || 0)
     const replySummary = replyReport?.summary || emptyMetaReplyReportSummary()
     const tabItems: Array<{ key: MetaCampaignWorkspaceTab; label: string; count: number; icon: typeof MessageSquare }> = [
         { key: 'overview', label: 'Resumo', count: dailyReport?.totals?.dispatched || summary?.total || 0, icon: BarChart3 },
@@ -6010,11 +6093,7 @@ function MetaOfficialCampaignPanel({
     const campaignPageStart = sortedCampaigns.length ? (safeCampaignPage - 1) * campaignPageSize : 0
     const campaignPageEnd = Math.min(campaignPageStart + campaignPageSize, sortedCampaigns.length)
     const paginatedCampaigns = sortedCampaigns.slice(campaignPageStart, campaignPageEnd)
-    const selectedCampaign = (
-        paginatedCampaigns.find(item => item.id === expandedCampaignId)
-        || paginatedCampaigns[0]
-        || null
-    )
+    const selectedCampaign = sortedCampaigns.find(item => item.id === expandedCampaignId) || null
     const selectedSender = selectedCampaign
         ? senders.find(item => item.id === selectedCampaign.default_sender_id)
         : undefined
@@ -6024,9 +6103,21 @@ function MetaOfficialCampaignPanel({
         if (expandedCampaignId === campaignId) return
         onToggleDetail(campaignId)
     }
+    const closeCampaignDrawer = () => {
+        if (selectedCampaignId) onToggleDetail(selectedCampaignId)
+    }
     const changeCampaignPage = (nextPage: number) => {
         setCampaignPage(Math.min(campaignPageTotal, Math.max(1, nextPage)))
     }
+
+    useEffect(() => {
+        if (!selectedCampaignId) return
+        const handleEscape = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') onToggleDetail(selectedCampaignId)
+        }
+        window.addEventListener('keydown', handleEscape)
+        return () => window.removeEventListener('keydown', handleEscape)
+    }, [onToggleDetail, selectedCampaignId])
 
     return (
         <div id="meta-campaign-history-panel" style={{ display: 'grid', gap: '14px' }}>
@@ -6075,8 +6166,8 @@ function MetaOfficialCampaignPanel({
                                         display: 'inline-flex',
                                         alignItems: 'center',
                                         gap: '7px',
-                                        background: active ? 'var(--gold)' : 'transparent',
-                                        color: active ? '#111827' : 'var(--text-secondary)',
+                                        background: active ? 'rgba(8,102,255,0.1)' : 'transparent',
+                                        color: active ? '#0866ff' : 'var(--text-secondary)',
                                         fontSize: '0.76rem',
                                         fontWeight: 900,
                                         whiteSpace: 'nowrap',
@@ -6088,7 +6179,7 @@ function MetaOfficialCampaignPanel({
                                         minWidth: '20px',
                                         height: '20px',
                                         borderRadius: '999px',
-                                        background: active ? 'rgba(17,24,39,0.12)' : 'rgba(148,163,184,0.14)',
+                                        background: active ? 'rgba(8,102,255,0.12)' : 'rgba(148,163,184,0.14)',
                                         display: 'inline-flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
@@ -6112,22 +6203,23 @@ function MetaOfficialCampaignPanel({
                     flexWrap: 'wrap',
                 }}>
                     {statusOptions.map(option => {
-                        const active = statusFilter === option.value
+                        const active = statusFilter === option.value && campaignSignalFilter === option.signal
                         return (
                             <button
-                                key={option.value || 'all'}
+                                key={option.key}
                                 type="button"
                                 onClick={() => {
                                     setCampaignPage(1)
+                                    setCampaignSignalFilter(option.signal)
                                     onStatusFilterChange(option.value)
                                 }}
                                 style={{
                                     minHeight: '34px',
                                     padding: '7px 11px',
                                     borderRadius: '8px',
-                                    border: active ? '1px solid rgba(176,138,67,0.36)' : '1px solid var(--border)',
-                                    background: active ? 'rgba(176,138,67,0.13)' : 'rgba(255,255,255,0.04)',
-                                    color: active ? 'var(--gold)' : 'var(--text-primary)',
+                                    border: active ? '1px solid rgba(8,102,255,0.26)' : '1px solid var(--border)',
+                                    background: active ? 'rgba(8,102,255,0.08)' : 'rgba(255,255,255,0.04)',
+                                    color: active ? '#0866ff' : 'var(--text-primary)',
                                     cursor: 'pointer',
                                     display: 'inline-flex',
                                     alignItems: 'center',
@@ -6141,8 +6233,8 @@ function MetaOfficialCampaignPanel({
                                     minWidth: '20px',
                                     height: '20px',
                                     borderRadius: '999px',
-                                    background: active ? 'rgba(176,138,67,0.18)' : 'rgba(148,163,184,0.14)',
-                                    color: active ? 'var(--gold)' : 'var(--text-muted)',
+                                    background: active ? 'rgba(8,102,255,0.14)' : 'rgba(148,163,184,0.14)',
+                                    color: active ? '#0866ff' : 'var(--text-muted)',
                                     display: 'inline-flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
@@ -6203,6 +6295,7 @@ function MetaOfficialCampaignPanel({
                             value={statusFilter}
                             onChange={event => {
                                 setCampaignPage(1)
+                                setCampaignSignalFilter('all')
                                 onStatusFilterChange(event.target.value)
                             }}
                             style={{
@@ -6248,30 +6341,57 @@ function MetaOfficialCampaignPanel({
                     </button>
                 </div>
 
+                {activeTab === 'campaigns' && (
+                <div style={{
+                    padding: '18px 14px 14px',
+                    borderBottom: '1px solid var(--border)',
+                    display: 'grid',
+                    gap: '16px',
+                    background: 'rgba(255,255,255,0.012)',
+                }}>
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(6, minmax(118px, 1fr))',
-                    borderBottom: '1px solid var(--border)',
-                    overflowX: 'auto',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
+                    gap: '10px',
                 }}>
                     {metricItems.map(item => {
                         const Icon = item.icon
                         return (
                             <div key={item.label} style={{
-                                minWidth: '118px',
-                                padding: '12px',
-                                borderRight: '1px solid var(--border)',
-                                background: 'rgba(255,255,255,0.02)',
+                                minHeight: '92px',
+                                padding: '14px',
+                                borderRadius: '12px',
+                                border: '1px solid var(--border)',
+                                background: 'rgba(255,255,255,0.055)',
                                 display: 'grid',
-                                gap: '6px',
+                                gap: '8px',
+                                alignContent: 'space-between',
                             }}>
-                                <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', fontSize: '0.66rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                                    <Icon size={13} style={{ color: item.color }} />
-                                    {item.label}
-                                </span>
-                                <strong style={{ color: 'var(--text-primary)', fontSize: '0.92rem' }}>
-                                    {Number(item.value || 0).toLocaleString('pt-BR')}
-                                </strong>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+                                    <span style={{
+                                        width: '32px',
+                                        height: '32px',
+                                        borderRadius: '50%',
+                                        background: `${item.color}18`,
+                                        color: item.color,
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}>
+                                        <Icon size={16} />
+                                    </span>
+                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.68rem', fontWeight: 800 }}>
+                                        {item.detail}
+                                    </span>
+                                </div>
+                                <div>
+                                    <strong style={{ color: 'var(--text-primary)', fontSize: '1.55rem', lineHeight: 1 }}>
+                                        {Number(item.value || 0).toLocaleString('pt-BR')}
+                                    </strong>
+                                    <span style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.76rem', marginTop: '6px', fontWeight: 800 }}>
+                                        {item.label}
+                                    </span>
+                                </div>
                             </div>
                         )
                     })}
@@ -6279,23 +6399,72 @@ function MetaOfficialCampaignPanel({
 
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(4, minmax(120px, 1fr))',
-                    borderBottom: '1px solid var(--border)',
-                    overflowX: 'auto',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                    gap: '12px',
+                    alignItems: 'stretch',
                 }}>
-                    {rateItems.map(item => (
-                        <div key={item.label} style={{
-                            minWidth: '120px',
-                            padding: '10px 12px',
-                            borderRight: '1px solid var(--border)',
-                            display: 'grid',
-                            gap: '3px',
-                        }}>
-                            <strong style={{ color: item.color, fontSize: '0.9rem' }}>{item.value}</strong>
-                            <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>{item.label}</span>
+                    <MetaCampaignFunnelCard summary={summary} analytics={analytics} />
+                    <div style={{
+                        padding: '16px',
+                        borderRadius: '12px',
+                        border: failureTotal > 0 ? '1px solid rgba(239,68,68,0.2)' : '1px solid rgba(34,197,94,0.2)',
+                        background: failureTotal > 0 ? 'rgba(239,68,68,0.075)' : 'rgba(34,197,94,0.065)',
+                        display: 'grid',
+                        gap: '12px',
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                            <span style={{
+                                width: '34px',
+                                height: '34px',
+                                borderRadius: '50%',
+                                background: failureTotal > 0 ? 'rgba(239,68,68,0.13)' : 'rgba(34,197,94,0.12)',
+                                color: failureTotal > 0 ? '#ef4444' : '#16a34a',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexShrink: 0,
+                            }}>
+                                {failureTotal > 0 ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
+                            </span>
+                            <div>
+                                <strong style={{ color: failureTotal > 0 ? '#ef4444' : '#16a34a', fontSize: '0.92rem' }}>
+                                    {failureTotal > 0 ? 'Atencao necessaria' : 'Operacao estavel'}
+                                </strong>
+                                <p style={{ margin: '4px 0 0', color: 'var(--text-secondary)', fontSize: '0.78rem', lineHeight: 1.45 }}>
+                                    {failureTotal > 0
+                                        ? `${Number(failureTotal).toLocaleString('pt-BR')} mensagens falharam.${failureLeader?.total_failed ? ` Maior concentracao: ${failureLeader.name || 'campanha sem nome'}.` : ''}`
+                                        : 'Nao ha falhas registradas nas campanhas carregadas.'}
+                                </p>
+                            </div>
                         </div>
-                    ))}
+                        {failureTotal > 0 && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setCampaignPage(1)
+                                    setCampaignSignalFilter('with_failures')
+                                    onStatusFilterChange('')
+                                }}
+                                style={{
+                                    justifySelf: 'start',
+                                    minHeight: '34px',
+                                    padding: '8px 12px',
+                                    borderRadius: '8px',
+                                    border: '1px solid rgba(239,68,68,0.22)',
+                                    background: 'rgba(255,255,255,0.08)',
+                                    color: '#ef4444',
+                                    cursor: 'pointer',
+                                    fontSize: '0.76rem',
+                                    fontWeight: 900,
+                                }}
+                            >
+                                Analisar falhas
+                            </button>
+                        )}
+                    </div>
                 </div>
+                </div>
+                )}
 
                 {activeTab === 'overview' && (
                     <MetaDailyReportPanel
@@ -6311,38 +6480,75 @@ function MetaOfficialCampaignPanel({
                 {activeTab === 'campaigns' && (
                     <>
                     <div style={{
-                        padding: '10px 14px',
+                        padding: '12px 14px',
                         borderBottom: '1px solid var(--border)',
                         display: 'flex',
-                        gap: '8px',
+                        gap: '12px',
                         alignItems: 'center',
+                        justifyContent: 'space-between',
                         flexWrap: 'wrap',
+                        background: 'rgba(255,255,255,0.018)',
                     }}>
-                        <strong style={{ color: 'var(--text-primary)', fontSize: '0.78rem', marginRight: '4px' }}>Numeros oficiais</strong>
-                        {senders.length === 0 ? (
-                            <span style={{ color: 'var(--text-muted)', fontSize: '0.76rem' }}>
-                                Nenhum numero Meta sincronizado.
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                            <strong style={{ color: 'var(--text-primary)', fontSize: '0.82rem' }}>
+                                {activeSenderCount} numeros ativos · {Number(totalSenderSendsToday).toLocaleString('pt-BR')} envios hoje
+                            </strong>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>
+                                Limite compartilhado da BM/portfolio Meta.
                             </span>
-                        ) : (
-                            senders.map(sender => {
-                                const health = getMetaWhatsAppSenderHealth(sender)
-                                const usage = metaSenderUsage(sender)
-                                const color = health.available ? '#22c55e' : health.policyEligible ? '#f59e0b' : '#ef4444'
-                                return (
-                                    <span key={sender.id} title={`${health.warning || health.reason} Limite compartilhado da BM/portfolio.`} style={{
-                                        padding: '6px 9px',
-                                        borderRadius: '999px',
-                                        border: `1px solid ${color}55`,
-                                        color,
-                                        background: health.available ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.06)',
-                                        fontSize: '0.72rem',
-                                        fontWeight: 800,
-                                    }}>
-                                        {sender.display_name || sender.phone_number} | {usage.sent} {usage.sent === 1 ? 'envio' : 'envios'} hoje
+                        </div>
+                        <details style={{ position: 'relative' }}>
+                            <summary style={{
+                                listStyle: 'none',
+                                cursor: 'pointer',
+                                color: '#0866ff',
+                                fontSize: '0.76rem',
+                                fontWeight: 900,
+                            }}>
+                                Ver numeros
+                            </summary>
+                            <div style={{
+                                position: 'absolute',
+                                right: 0,
+                                top: '28px',
+                                zIndex: 10,
+                                minWidth: '290px',
+                                display: 'grid',
+                                gap: '7px',
+                                padding: '10px',
+                                borderRadius: '10px',
+                                border: '1px solid var(--border)',
+                                background: 'var(--bg-secondary)',
+                                boxShadow: '0 16px 32px rgba(15,23,42,0.16)',
+                            }}>
+                                {senders.length === 0 ? (
+                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.76rem' }}>
+                                        Nenhum numero Meta sincronizado.
                                     </span>
-                                )
-                            })
-                        )}
+                                ) : (
+                                    senders.map(sender => {
+                                        const health = getMetaWhatsAppSenderHealth(sender)
+                                        const usage = metaSenderUsage(sender)
+                                        const color = health.available ? '#22c55e' : health.policyEligible ? '#f59e0b' : '#ef4444'
+                                        return (
+                                            <div key={sender.id} style={{
+                                                display: 'grid',
+                                                gap: '3px',
+                                                padding: '8px',
+                                                borderRadius: '8px',
+                                                border: '1px solid var(--border)',
+                                                background: 'rgba(255,255,255,0.035)',
+                                            }}>
+                                                <strong style={{ color, fontSize: '0.76rem' }}>{sender.display_name || sender.phone_number}</strong>
+                                                <span style={{ color: 'var(--text-muted)', fontSize: '0.68rem' }}>
+                                                    {metaSenderSentTodayLabel(sender)} · {health.warning || health.reason}
+                                                </span>
+                                            </div>
+                                        )
+                                    })
+                                )}
+                            </div>
+                        </details>
                     </div>
 
                     <div style={{
@@ -6386,6 +6592,7 @@ function MetaOfficialCampaignPanel({
                                 title="Filtrar campanhas por sinal operacional"
                             >
                                 <option value="all">Todos os sinais</option>
+                                <option value="in_progress">Em andamento</option>
                                 <option value="with_failures">Com falhas</option>
                                 <option value="high_failure">Falha acima de 30%</option>
                                 <option value="with_reads">Com leituras</option>
@@ -6495,7 +6702,7 @@ function MetaOfficialCampaignPanel({
                             <div className="meta-campaign-table-shell">
                                 <div style={{
                                     display: 'grid',
-                                    gridTemplateColumns: '84px minmax(260px, 1.45fr) 108px 84px 84px 78px 78px 142px',
+                                    gridTemplateColumns: 'minmax(280px, 1.45fr) 132px 118px minmax(210px, 1fr) 150px 122px 146px',
                                     gap: '0',
                                     padding: '9px 12px',
                                     borderBottom: '1px solid var(--border)',
@@ -6506,13 +6713,12 @@ function MetaOfficialCampaignPanel({
                                     letterSpacing: '0.04em',
                                     background: 'rgba(255,255,255,0.025)',
                                 }}>
-                                    <span>Status</span>
                                     <span>Campanha</span>
-                                    <span>Destinatarios</span>
-                                    <span>Aceitas</span>
-                                    <span>Entregues</span>
-                                    <span>Lidas</span>
-                                    <span>Falhas</span>
+                                    <span>Status</span>
+                                    <span>Publico</span>
+                                    <span>Desempenho</span>
+                                    <span>Entrega</span>
+                                    <span>Criada em</span>
                                     <span>Acoes</span>
                                 </div>
 
@@ -6549,17 +6755,41 @@ function MetaOfficialCampaignPanel({
                             </div>
                         </div>
 
-                        <MetaSelectedCampaignAside
-                            campaign={selectedCampaign}
-                            sender={selectedSender}
-                            detail={selectedDetail}
-                            loadingDetail={Boolean(selectedCampaign && loadingDetailCampaignId === selectedCampaign.id)}
-                            retrying={Boolean(selectedCampaign && retryingCampaignId === selectedCampaign.id)}
-                            onSelect={selectCampaign}
-                            onManage={onManage}
-                            onRetryFailed={onRetryFailed}
-                        />
                     </div>
+                    {selectedCampaign && (
+                        <div
+                            className="meta-campaign-drawer-backdrop"
+                            role="presentation"
+                            onClick={closeCampaignDrawer}
+                        >
+                            <div
+                                className="meta-campaign-drawer"
+                                role="dialog"
+                                aria-modal="true"
+                                aria-label={`Detalhes da campanha ${selectedCampaign.name || 'Meta'}`}
+                                onClick={event => event.stopPropagation()}
+                            >
+                                <div className="meta-campaign-drawer-header">
+                                    <strong>Detalhes da campanha</strong>
+                                    <button type="button" onClick={closeCampaignDrawer} title="Fechar detalhes">
+                                        <XCircle size={18} />
+                                    </button>
+                                </div>
+                                <div className="meta-campaign-drawer-body">
+                                    <MetaSelectedCampaignAside
+                                        campaign={selectedCampaign}
+                                        sender={selectedSender}
+                                        detail={selectedDetail}
+                                        loadingDetail={Boolean(selectedCampaign && loadingDetailCampaignId === selectedCampaign.id)}
+                                        retrying={Boolean(selectedCampaign && retryingCampaignId === selectedCampaign.id)}
+                                        onSelect={selectCampaign}
+                                        onManage={onManage}
+                                        onRetryFailed={onRetryFailed}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
                     </>
                 )}
             </div>
@@ -6636,8 +6866,9 @@ function MetaCampaignTableRow({
     onManage: (campaignId: string, action: MetaCampaignManageAction) => void
     onRetryFailed: (campaignId: string, failedCount: number) => void
 }) {
-    const progress = metaProgress(campaign)
-    const statusColor = metaStatusColor(campaign.status)
+    const completion = metaProgress(campaign)
+    const deliveryRate = metaCampaignDeliveryRate(campaign)
+    const failureRate = metaCampaignFailureRate(campaign)
     const finalStatus = ['completed', 'cancelled', 'failed'].includes(campaign.status)
     const canPause = ['scheduled', 'queued', 'sending', 'preparing'].includes(campaign.status)
     const canResume = campaign.status === 'paused'
@@ -6649,6 +6880,16 @@ function MetaCampaignTableRow({
     const routingWabaLabels = Array.isArray(campaignMetadata.routing_waba_labels)
         ? campaignMetadata.routing_waba_labels.map(label => textValue(label)).filter(Boolean)
         : []
+    const routedLabel = portfolioRoutingEnabled
+        ? `Pool automatico${routingWabaLabels.length ? ` (${routingWabaLabels.length} contas)` : ''}`
+        : sender?.display_name || sender?.phone_number || 'Conta nao identificada'
+    const deliveryLabel = campaign.total_failed > 0
+        ? `${Number(campaign.total_failed || 0).toLocaleString('pt-BR')} falha${campaign.total_failed === 1 ? '' : 's'}`
+        : campaign.total_delivered > 0
+            ? `${Number(campaign.total_delivered || 0).toLocaleString('pt-BR')} entregues`
+            : campaign.scheduled_for
+                ? 'Agendada'
+                : `${completion}% processado`
 
     return (
         <div
@@ -6662,73 +6903,94 @@ function MetaCampaignTableRow({
             }}
             style={{
                 display: 'grid',
-                gridTemplateColumns: '84px minmax(260px, 1.45fr) 108px 84px 84px 78px 78px 142px',
+                gridTemplateColumns: 'minmax(280px, 1.45fr) 132px 118px minmax(210px, 1fr) 150px 122px 146px',
                 gap: '0',
                 alignItems: 'center',
-                padding: '8px 12px',
+                padding: '12px',
                 borderBottom: '1px solid var(--border)',
-                background: selected ? 'rgba(176,138,67,0.08)' : 'transparent',
+                background: selected ? 'rgba(8,102,255,0.055)' : 'rgba(255,255,255,0.01)',
                 cursor: 'pointer',
                 outline: 'none',
             }}
         >
-            <span style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '7px',
-                color: statusColor,
-                fontSize: '0.72rem',
-                fontWeight: 900,
-            }}>
-                <span style={{
-                    width: '8px',
-                    height: '8px',
-                    borderRadius: '50%',
-                    background: statusColor,
-                    boxShadow: campaign.status === 'sending' ? '0 0 8px rgba(245,158,11,0.5)' : 'none',
-                }} />
-                {metaStatusLabel(campaign.status)}
-            </span>
-
             <div style={{ minWidth: 0, display: 'grid', gap: '4px' }}>
-                <strong style={{
-                    color: 'var(--text-primary)',
-                    fontSize: '0.78rem',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                }}>
-                    {campaign.name || 'Campanha Meta'}
-                </strong>
-                <span style={{
-                    color: 'var(--text-muted)',
-                    fontSize: '0.7rem',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                }}>
-                    {campaign.template_name || '-'} ({campaign.template_language || 'pt_BR'})
-                    {portfolioRoutingEnabled
-                        ? ` | Pool portfolio${routingWabaLabels.length ? ` (${routingWabaLabels.length} contas)` : ''}`
-                        : sender ? ` | ${sender.display_name || sender.phone_number}` : ''}
-                </span>
-                <div style={{ height: '5px', borderRadius: '999px', background: 'rgba(148,163,184,0.16)', overflow: 'hidden' }}>
-                    <div style={{
-                        width: `${progress}%`,
-                        height: '100%',
-                        borderRadius: '999px',
-                        background: campaign.total_failed > 0 ? '#ef4444' : '#22c55e',
-                    }} />
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', minWidth: 0 }}>
+                    <span style={{
+                        width: '34px',
+                        height: '34px',
+                        borderRadius: '10px',
+                        background: 'rgba(176,138,67,0.12)',
+                        color: 'var(--gold)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                    }}>
+                        <FileText size={16} />
+                    </span>
+                    <div style={{ minWidth: 0 }}>
+                        <strong style={{
+                            color: 'var(--text-primary)',
+                            fontSize: '0.82rem',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            display: 'block',
+                        }}>
+                            {campaign.name || 'Campanha Meta'}
+                        </strong>
+                        <span style={{
+                            color: 'var(--text-muted)',
+                            fontSize: '0.7rem',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            display: 'block',
+                            marginTop: '3px',
+                        }}>
+                            {campaign.template_name || '-'} ({campaign.template_language || 'pt_BR'}) · {routedLabel}
+                        </span>
+                    </div>
                 </div>
             </div>
 
-            <MetaTableNumber value={campaign.total_recipients} sub={`${progress}%`} />
-            <MetaTableNumber value={campaign.total_sent} />
-            <MetaTableNumber value={campaign.total_delivered} />
-            <MetaTableNumber value={campaign.total_read} />
-            <MetaTableNumber value={campaign.total_failed} color={campaign.total_failed > 0 ? '#ef4444' : 'var(--text-primary)'} />
+            <MetaCampaignStatusBadge status={campaign.status} failed={campaign.total_failed} />
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ display: 'grid', gap: '2px' }}>
+                <strong style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>
+                    {Number(campaign.total_recipients || 0).toLocaleString('pt-BR')}
+                </strong>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.68rem' }}>
+                    contato{campaign.total_recipients === 1 ? '' : 's'}
+                </span>
+            </div>
+
+            <div style={{ display: 'grid', gap: '7px', minWidth: 0 }}>
+                <MetaCampaignMiniBar label="Entregues" value={campaign.total_delivered} total={campaign.total_recipients} color="#22c55e" />
+                <MetaCampaignMiniBar label="Lidas" value={campaign.total_read} total={campaign.total_delivered || campaign.total_recipients} color="#0866ff" />
+            </div>
+
+            <div style={{ display: 'grid', gap: '4px' }}>
+                <strong style={{ color: campaign.total_failed > 0 ? '#ef4444' : 'var(--text-primary)', fontSize: '0.78rem' }}>
+                    {deliveryLabel}
+                </strong>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.68rem' }}>
+                    {campaign.total_failed > 0 ? `${percentLabel(failureRate)} de falha` : `${percentLabel(deliveryRate)} entrega`}
+                </span>
+            </div>
+
+            <div style={{ display: 'grid', gap: '2px' }}>
+                <strong style={{ color: 'var(--text-primary)', fontSize: '0.76rem' }}>
+                    {formatMetaDate(campaign.created_at)}
+                </strong>
+                {campaign.scheduled_for && (
+                    <span style={{ color: '#0ea5e9', fontSize: '0.68rem' }}>
+                        Agendada: {formatMetaDate(campaign.scheduled_for)}
+                    </span>
+                )}
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '7px', justifyContent: 'flex-start' }}>
                 <button
                     type="button"
                     onClick={event => {
@@ -6736,76 +6998,87 @@ function MetaCampaignTableRow({
                         onSelect(campaign.id)
                     }}
                     title="Abrir detalhes"
-                    style={{ padding: '7px', borderRadius: '7px', border: '1px solid var(--border)', background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                    style={{
+                        minHeight: '32px',
+                        padding: '7px 10px',
+                        borderRadius: '8px',
+                        border: '1px solid rgba(8,102,255,0.18)',
+                        background: 'rgba(8,102,255,0.06)',
+                        color: '#0866ff',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        fontSize: '0.72rem',
+                        fontWeight: 900,
+                    }}
                 >
                     {loadingDetail ? <Loader2 size={14} className="spin" /> : <Search size={14} />}
+                    Detalhes
                 </button>
-                {canRetryFailed && (
-                    <button
-                        type="button"
-                        onClick={event => {
-                            event.stopPropagation()
-                            onRetryFailed(campaign.id, campaign.total_failed)
-                        }}
-                        disabled={retrying}
-                        title="Reenviar falhas"
-                        style={{ padding: '7px', borderRadius: '7px', border: '1px solid rgba(245,158,11,0.22)', background: 'rgba(245,158,11,0.1)', color: '#f59e0b', cursor: retrying ? 'not-allowed' : 'pointer', opacity: retrying ? 0.7 : 1 }}
-                    >
-                        {retrying ? <Loader2 size={14} className="spin" /> : <RefreshCw size={14} />}
-                    </button>
-                )}
-                {canPause && (
-                    <button
-                        type="button"
-                        onClick={event => {
-                            event.stopPropagation()
-                            onManage(campaign.id, 'pause')
-                        }}
-                        title="Pausar"
-                        style={{ padding: '7px', borderRadius: '7px', border: '1px solid rgba(245,158,11,0.2)', background: 'rgba(245,158,11,0.1)', color: '#f59e0b', cursor: 'pointer' }}
-                    >
-                        <Pause size={14} />
-                    </button>
-                )}
-                {canResume && (
-                    <button
-                        type="button"
-                        onClick={event => {
-                            event.stopPropagation()
-                            onManage(campaign.id, 'resume')
-                        }}
-                        title="Retomar"
-                        style={{ padding: '7px', borderRadius: '7px', border: '1px solid rgba(34,197,94,0.2)', background: 'rgba(34,197,94,0.1)', color: '#22c55e', cursor: 'pointer' }}
-                    >
-                        <Play size={14} />
-                    </button>
-                )}
-                {canCancel && (
-                    <button
-                        type="button"
-                        onClick={event => {
-                            event.stopPropagation()
-                            onManage(campaign.id, 'cancel')
-                        }}
-                        title="Cancelar"
-                        style={{ padding: '7px', borderRadius: '7px', border: '1px solid rgba(239,68,68,0.16)', background: 'rgba(239,68,68,0.08)', color: '#ef4444', cursor: 'pointer' }}
-                    >
-                        <Trash2 size={14} />
-                    </button>
-                )}
-                {canDelete && (
-                    <button
-                        type="button"
-                        onClick={event => {
-                            event.stopPropagation()
-                            onManage(campaign.id, 'delete')
-                        }}
-                        title="Excluir do painel"
-                        style={{ padding: '7px', borderRadius: '7px', border: '1px solid rgba(239,68,68,0.16)', background: 'rgba(239,68,68,0.08)', color: '#ef4444', cursor: 'pointer' }}
-                    >
-                        <Trash2 size={14} />
-                    </button>
-                )}
+                <details style={{ position: 'relative' }} onClick={event => event.stopPropagation()}>
+                    <summary style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '8px',
+                        border: '1px solid var(--border)',
+                        background: 'rgba(255,255,255,0.04)',
+                        color: 'var(--text-secondary)',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        listStyle: 'none',
+                    }}>
+                        <MoreVertical size={15} />
+                    </summary>
+                    <div style={{
+                        position: 'absolute',
+                        right: 0,
+                        top: '38px',
+                        zIndex: 12,
+                        minWidth: '180px',
+                        display: 'grid',
+                        gap: '6px',
+                        padding: '8px',
+                        borderRadius: '10px',
+                        border: '1px solid var(--border)',
+                        background: 'var(--bg-secondary)',
+                        boxShadow: '0 16px 32px rgba(15,23,42,0.16)',
+                    }}>
+                        {canRetryFailed && (
+                            <button
+                                type="button"
+                                onClick={() => onRetryFailed(campaign.id, campaign.total_failed)}
+                                disabled={retrying}
+                                style={{ padding: '8px 10px', borderRadius: '8px', border: '1px solid rgba(245,158,11,0.22)', background: 'rgba(245,158,11,0.1)', color: '#f59e0b', cursor: retrying ? 'not-allowed' : 'pointer', display: 'inline-flex', alignItems: 'center', gap: '7px', fontSize: '0.74rem', fontWeight: 800 }}
+                            >
+                                {retrying ? <Loader2 size={14} className="spin" /> : <RefreshCw size={14} />}
+                                Reenviar falhas
+                            </button>
+                        )}
+                        {canPause && (
+                            <button type="button" onClick={() => onManage(campaign.id, 'pause')} style={{ padding: '8px 10px', borderRadius: '8px', border: '1px solid rgba(245,158,11,0.2)', background: 'rgba(245,158,11,0.1)', color: '#f59e0b', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '7px', fontSize: '0.74rem', fontWeight: 800 }}>
+                                <Pause size={14} /> Pausar
+                            </button>
+                        )}
+                        {canResume && (
+                            <button type="button" onClick={() => onManage(campaign.id, 'resume')} style={{ padding: '8px 10px', borderRadius: '8px', border: '1px solid rgba(34,197,94,0.2)', background: 'rgba(34,197,94,0.1)', color: '#22c55e', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '7px', fontSize: '0.74rem', fontWeight: 800 }}>
+                                <Play size={14} /> Retomar
+                            </button>
+                        )}
+                        {canCancel && (
+                            <button type="button" onClick={() => onManage(campaign.id, 'cancel')} style={{ padding: '8px 10px', borderRadius: '8px', border: '1px solid rgba(239,68,68,0.16)', background: 'rgba(239,68,68,0.08)', color: '#ef4444', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '7px', fontSize: '0.74rem', fontWeight: 800 }}>
+                                <Trash2 size={14} /> Cancelar
+                            </button>
+                        )}
+                        {canDelete && (
+                            <button type="button" onClick={() => onManage(campaign.id, 'delete')} style={{ padding: '8px 10px', borderRadius: '8px', border: '1px solid rgba(239,68,68,0.16)', background: 'rgba(239,68,68,0.08)', color: '#ef4444', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '7px', fontSize: '0.74rem', fontWeight: 800 }}>
+                                <Trash2 size={14} /> Excluir
+                            </button>
+                        )}
+                    </div>
+                </details>
             </div>
         </div>
     )
@@ -6825,6 +7098,143 @@ function MetaTableNumber({
             {Number(value || 0).toLocaleString('pt-BR')}
             {sub && <small style={{ color: 'var(--text-muted)', fontSize: '0.66rem', fontWeight: 600 }}>{sub}</small>}
         </span>
+    )
+}
+
+function MetaCampaignStatusBadge({
+    status,
+    failed,
+}: {
+    status: string
+    failed: number
+}) {
+    const hasFailures = Number(failed || 0) > 0
+    const color = hasFailures && status === 'completed' ? '#f59e0b' : metaStatusColor(status)
+    const label = hasFailures && status === 'completed' ? 'Concluida com falhas' : metaStatusLabel(status)
+
+    return (
+        <span style={{
+            justifySelf: 'start',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '7px',
+            maxWidth: '120px',
+            padding: '6px 9px',
+            borderRadius: '999px',
+            border: `1px solid ${color}33`,
+            background: `${color}12`,
+            color,
+            fontSize: '0.7rem',
+            fontWeight: 900,
+            whiteSpace: 'normal',
+            lineHeight: 1.2,
+        }}>
+            <span style={{
+                width: '7px',
+                height: '7px',
+                borderRadius: '50%',
+                background: color,
+                boxShadow: status === 'sending' ? '0 0 8px rgba(245,158,11,0.5)' : 'none',
+                flexShrink: 0,
+            }} />
+            {label}
+        </span>
+    )
+}
+
+function MetaCampaignMiniBar({
+    label,
+    value,
+    total,
+    color,
+}: {
+    label: string
+    value: number
+    total: number
+    color: string
+}) {
+    const rate = metricRate(Number(value || 0), Number(total || 0))
+
+    return (
+        <div style={{ display: 'grid', gap: '3px', minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', color: 'var(--text-secondary)', fontSize: '0.68rem' }}>
+                <span>{label}</span>
+                <strong style={{ color: 'var(--text-primary)' }}>{Number(value || 0).toLocaleString('pt-BR')}</strong>
+            </div>
+            <div style={{ height: '5px', borderRadius: '999px', background: 'rgba(148,163,184,0.18)', overflow: 'hidden' }}>
+                <div style={{
+                    width: `${Math.min(100, Math.max(0, rate))}%`,
+                    height: '100%',
+                    borderRadius: '999px',
+                    background: color,
+                }} />
+            </div>
+        </div>
+    )
+}
+
+function MetaCampaignFunnelCard({
+    summary,
+    analytics,
+}: {
+    summary: MetaCampaignSummary | null
+    analytics: MetaCampaignAnalytics | null
+}) {
+    const recipients = Number(summary?.recipients || 0)
+    const accepted = Number(summary?.sent || 0)
+    const delivered = Number(summary?.delivered || 0)
+    const read = Number(summary?.read || 0)
+    const funnelItems = [
+        { label: 'Destinatarios', value: recipients, rate: recipients > 0 ? 100 : 0, color: '#0866ff', background: 'rgba(8,102,255,0.1)' },
+        { label: 'Aceitas', value: accepted, rate: analytics?.rates?.acceptedRate ?? metricRate(accepted, recipients), color: '#6d5efc', background: 'rgba(109,94,252,0.1)' },
+        { label: 'Entregues', value: delivered, rate: metricRate(delivered, recipients), color: '#22c55e', background: 'rgba(34,197,94,0.1)' },
+        { label: 'Lidas', value: read, rate: metricRate(read, recipients), color: '#0ea5e9', background: 'rgba(14,165,233,0.1)' },
+    ]
+
+    return (
+        <div style={{
+            padding: '16px',
+            borderRadius: '12px',
+            border: '1px solid var(--border)',
+            background: 'rgba(255,255,255,0.055)',
+            display: 'grid',
+            gap: '14px',
+        }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+                <strong style={{ color: 'var(--text-primary)', fontSize: '0.92rem' }}>Funil de entrega</strong>
+                <span title="Acompanhe a passagem dos contatos por aceite, entrega e leitura." style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>i</span>
+            </div>
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+                gap: '8px',
+            }}>
+                {funnelItems.map(item => (
+                    <div key={item.label} style={{
+                        padding: '12px',
+                        borderRadius: '10px',
+                        background: item.background,
+                        border: `1px solid ${item.color}1f`,
+                        display: 'grid',
+                        gap: '8px',
+                    }}>
+                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.72rem' }}>{item.label}</span>
+                        <strong style={{ color: 'var(--text-primary)', fontSize: '1rem' }}>{Number(item.value || 0).toLocaleString('pt-BR')}</strong>
+                        <div style={{ display: 'grid', gap: '4px' }}>
+                            <div style={{ height: '5px', borderRadius: '999px', background: 'rgba(148,163,184,0.22)', overflow: 'hidden' }}>
+                                <div style={{
+                                    width: `${Math.min(100, Math.max(0, item.rate))}%`,
+                                    height: '100%',
+                                    background: item.color,
+                                    borderRadius: '999px',
+                                }} />
+                            </div>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.66rem' }}>{percentLabel(item.rate)}</span>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
     )
 }
 
