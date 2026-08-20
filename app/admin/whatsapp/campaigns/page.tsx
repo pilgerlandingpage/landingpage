@@ -3117,7 +3117,7 @@ export default function CampaignsPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
                 <div>
                     <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.5rem', margin: 0 }}>
-                        <Send size={26} style={{ color: 'var(--gold)' }} /> Campanhas Meta WhatsApp
+                        <Send size={26} style={{ color: 'var(--gold)' }} /> Pilger Meta WhatsApp
                     </h1>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '6px' }}>
                         Crie campanhas no WhatsApp usando a API oficial da Meta para listas com opt-in
