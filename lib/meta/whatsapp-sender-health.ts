@@ -135,6 +135,10 @@ export function metaWhatsAppSenderUsage(sender: MetaWhatsAppSenderLike): MetaWha
   }
 }
 
+function sentTodayLabel(sent: number) {
+  return `${sent} ${sent === 1 ? 'envio' : 'envios'} hoje por este numero`
+}
+
 export function hasMetaWhatsAppRestrictionSignal(sender: MetaWhatsAppSenderLike) {
   const metadata = asRecord(sender.metadata)
   const lastError = cleanText(sender.last_error, 800).toLowerCase()
@@ -212,7 +216,7 @@ export function getMetaWhatsAppSenderHealth(sender: MetaWhatsAppSenderLike | nul
       available: false,
       policyEligible: true,
       severity: 'blocked',
-      reason: 'limite diario nao configurado.',
+      reason: 'limite compartilhado da BM/portfolio nao configurado.',
       usage,
     }
   }
@@ -222,7 +226,7 @@ export function getMetaWhatsAppSenderHealth(sender: MetaWhatsAppSenderLike | nul
       available: false,
       policyEligible: true,
       severity: 'blocked',
-      reason: `limite diario esgotado (${usage.usageLabel}).`,
+      reason: `limite compartilhado da BM/portfolio esgotado; ${sentTodayLabel(usage.sent)}.`,
       usage,
     }
   }
@@ -235,7 +239,7 @@ export function getMetaWhatsAppSenderHealth(sender: MetaWhatsAppSenderLike | nul
     available: true,
     policyEligible: true,
     severity: warning ? 'warn' : 'ok',
-    reason: `disponivel (${usage.usageLabel}).`,
+    reason: `disponivel; ${sentTodayLabel(usage.sent)}.`,
     warning,
     usage,
   }

@@ -643,6 +643,11 @@ function metaSenderUsage(sender: MetaSender) {
     return metaWhatsAppSenderUsage(sender)
 }
 
+function metaSenderSentTodayLabel(sender: MetaSender) {
+    const sent = metaSenderUsage(sender).sent
+    return `${sent} ${sent === 1 ? 'envio' : 'envios'} hoje`
+}
+
 function isMetaSenderAvailable(sender: MetaSender) {
     return isMetaWhatsAppSenderAvailable(sender)
 }
@@ -653,13 +658,12 @@ function metaSenderWabaLabel(sender: MetaSender) {
 }
 
 function metaSenderOptionLabel(sender: MetaSender) {
-    const usage = metaSenderUsage(sender)
     const health = getMetaWhatsAppSenderHealth(sender)
     const name = sender.display_name || sender.phone_number
-    const base = `${name} - ${sender.phone_number} [${metaSenderWabaLabel(sender)}] (${usage.usageLabel})`
+    const base = `${name} - ${sender.phone_number} [${metaSenderWabaLabel(sender)}] - ${metaSenderSentTodayLabel(sender)}`
     if (!health.available) return `${base} - ${health.reason}`
     if (health.warning) return `${base} - ${health.warning}`
-    return `${base} - ${usage.remaining} livres`
+    return `${base}; limite compartilhado da BM/portfolio`
 }
 
 function metaTemplateWabaLabel(template?: MetaTemplate | null) {
@@ -1952,11 +1956,11 @@ export default function CampaignsPage() {
                 creativeDeduplicationMode = 'allow_repeat'
             }
             if (!hasMetaPortfolioCapacity) {
-                setFeedback({ type: 'error', text: `O portfolio Meta atingiu o uso/reserva diaria compartilhada (${metaPortfolioUsage.usageLabel}). Aguarde liberacao por falha, reset da janela de 24h ou agende para depois.` })
+                setFeedback({ type: 'error', text: `A BM/portfolio Meta atingiu o uso/reserva diaria compartilhada (${metaPortfolioUsage.usageLabel}). Aguarde liberacao por falha, reset da janela de 24h ou agende para depois.` })
                 return
             }
             if (!scheduleDate && numbers.length > metaPortfolioUsage.remaining) {
-                setFeedback({ type: 'error', text: `A lista tem ${numbers.length} contatos, mas restam ${metaPortfolioUsage.remaining} vagas livres no limite compartilhado do portfolio Meta hoje. Divida a lista ou agende para depois.` })
+                setFeedback({ type: 'error', text: `A lista tem ${numbers.length} contatos, mas restam ${metaPortfolioUsage.remaining} vagas livres no limite compartilhado da BM/portfolio Meta hoje. Divida a lista ou agende para depois.` })
                 return
             }
             if (readyMetaSenders.length === 0) {
@@ -2274,7 +2278,7 @@ export default function CampaignsPage() {
                     ? `O numero selecionado pertence a ${metaSenderWabaLabel(selectedMetaSender)}, mas o template pertence a ${metaTemplateWabaLabel(selectedMetaTemplate)}. Alterei para Pool automatico por capacidade.`
                     : hasMetaPortfolioCapacity
                     ? `O numero selecionado ficou indisponivel (${metaSenderOptionLabel(selectedMetaSender)}). Alterei para Pool automatico por capacidade.`
-                    : `O portfolio Meta atingiu o uso/reserva diaria compartilhada (${metaPortfolioUsage.usageLabel}).`,
+                    : `A BM/portfolio Meta atingiu o uso/reserva diaria compartilhada (${metaPortfolioUsage.usageLabel}).`,
             })
         }
     }, [selectedMetaSenderId, selectedMetaSender, selectedMetaTemplate, hasMetaPortfolioCapacity, metaPortfolioUsage.usageLabel])
@@ -2439,7 +2443,7 @@ export default function CampaignsPage() {
                             {metaPortfolioUsage.sent}/{metaPortfolioUsage.limit || 'sem limite'} usados; {metaPortfolioUsage.remaining} livres
                         </div>
                         <div style={{ marginTop: '3px', color: 'var(--text-muted)', fontSize: '0.74rem', lineHeight: 1.35 }}>
-                            O teto e do portfolio de negocios, somando todas as contas conectadas.
+                            O teto e da BM/portfolio de negocios; todos os numeros compartilham este mesmo limite.
                         </div>
                     </div>
                     <div style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(34,197,94,0.22)', background: 'rgba(34,197,94,0.07)' }}>
@@ -2671,8 +2675,8 @@ export default function CampaignsPage() {
                                         >
                                         <option value="">
                                             {isMetaPortfolioRouting
-                                                ? `Pool do portfolio (${portfolioRoutingReadyWabaIds.length} contas prontas; ${metaPortfolioUsage.remaining} vagas livres)`
-                                                : `Pool automatico por capacidade (${metaPortfolioUsage.remaining} vagas livres no portfolio)`}
+                                                ? `Pool da BM/portfolio (${portfolioRoutingReadyWabaIds.length} contas prontas; ${metaPortfolioUsage.remaining} vagas livres)`
+                                                : `Pool automatico por capacidade (${metaPortfolioUsage.remaining} vagas livres na BM/portfolio)`}
                                         </option>
                                         {activeMetaSenders.map(sender => {
                                             const wabaMismatch = Boolean(
@@ -2687,7 +2691,7 @@ export default function CampaignsPage() {
                                         })}
                                     </select>
                                     <div style={{ marginTop: '8px', color: hasMetaPortfolioCapacity ? '#16a34a' : '#ef4444', fontSize: '0.78rem', fontWeight: 700 }}>
-                                        Uso/reserva compartilhada do portfolio Meta: {metaPortfolioUsage.usageLabel}; vagas livres {metaPortfolioUsage.remaining}.
+                                        Uso/reserva compartilhada da BM/portfolio Meta: {metaPortfolioUsage.usageLabel}; vagas livres {metaPortfolioUsage.remaining}.
                                     </div>
                                     {selectedMetaSender && !isMetaSenderAvailable(selectedMetaSender) && (
                                         <div style={{ marginTop: '8px', color: '#ef4444', fontSize: '0.78rem', fontWeight: 700 }}>
@@ -2697,8 +2701,8 @@ export default function CampaignsPage() {
                                     {!selectedMetaSenderId && readyMetaSenders.length > 0 && hasMetaPortfolioCapacity && (
                                         <div style={{ marginTop: '8px', color: '#16a34a', fontSize: '0.78rem', fontWeight: 700 }}>
                                             {isMetaPortfolioRouting
-                                                ? `Distribuicao ativa: o sistema balanceia entre ${portfolioRoutingReadyWabaIds.length} contas com este template aprovado, sem ultrapassar o limite compartilhado.`
-                                                : 'Pool automatico vai usar um numero conectado de uma conta aprovada, respeitando o limite compartilhado.'}
+                                                ? `Distribuicao ativa: o sistema balanceia entre ${portfolioRoutingReadyWabaIds.length} contas com este template aprovado, sem ultrapassar o limite compartilhado da BM/portfolio.`
+                                                : 'Pool automatico vai usar um numero conectado de uma conta aprovada, respeitando o limite compartilhado da BM/portfolio.'}
                                         </div>
                                     )}
                                 </div>
@@ -4925,9 +4929,10 @@ function MetaOfficialCampaignPanel({
                         ) : (
                             senders.map(sender => {
                                 const health = getMetaWhatsAppSenderHealth(sender)
+                                const usage = metaSenderUsage(sender)
                                 const color = health.available ? '#22c55e' : health.policyEligible ? '#f59e0b' : '#ef4444'
                                 return (
-                                    <span key={sender.id} title={health.warning || health.reason} style={{
+                                    <span key={sender.id} title={`${health.warning || health.reason} Limite compartilhado da BM/portfolio.`} style={{
                                         padding: '6px 9px',
                                         borderRadius: '999px',
                                         border: `1px solid ${color}55`,
@@ -4936,7 +4941,7 @@ function MetaOfficialCampaignPanel({
                                         fontSize: '0.72rem',
                                         fontWeight: 800,
                                     }}>
-                                        {sender.display_name || sender.phone_number} | {health.usage.usageLabel}
+                                        {sender.display_name || sender.phone_number} | {usage.sent} {usage.sent === 1 ? 'envio' : 'envios'} hoje
                                     </span>
                                 )
                             })
@@ -5841,7 +5846,7 @@ function MetaCampaignDashboard({
                             key: sender.sender_id,
                             name: sender.display_name || sender.phone_number,
                             detail: `${sender.health_reason || sender.meta_status || 'sem status'} | uso/reserva ${percentLabel(sender.usageRate)} | falha ${percentLabel(sender.failureRate)}`,
-                            value: `${sender.daily_sent_count}/${sender.daily_limit}`,
+                            value: `${sender.daily_sent_count} ${sender.daily_sent_count === 1 ? 'envio' : 'envios'} hoje`,
                             color: sender.health_status === 'blocked'
                                 ? '#ef4444'
                                 : sender.health_status === 'warn' ? '#f59e0b' : '#22c55e',
