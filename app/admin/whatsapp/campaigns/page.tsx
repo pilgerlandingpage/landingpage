@@ -95,6 +95,17 @@ interface MetaCampaign {
 }
 
 type MetaCampaignManageAction = 'pause' | 'resume' | 'cancel' | 'delete'
+type MetaCreateStep = 'config' | 'message' | 'audience' | 'delivery' | 'review'
+
+const META_CREATE_STEP_ORDER: MetaCreateStep[] = ['config', 'message', 'audience', 'delivery', 'review']
+
+interface MetaCreateStepItem {
+    id: MetaCreateStep
+    title: string
+    description: string
+    complete: boolean
+    attention?: boolean
+}
 
 interface MetaCampaignRecipient {
     id: string
@@ -1042,6 +1053,50 @@ function MetaCampaignPhonePreview({
     )
 }
 
+function MetaCampaignStepper({
+    steps,
+    currentStep,
+    onStepChange,
+}: {
+    steps: MetaCreateStepItem[]
+    currentStep: MetaCreateStep
+    onStepChange: (step: MetaCreateStep) => void
+}) {
+    const currentIndex = steps.findIndex(step => step.id === currentStep)
+
+    return (
+        <nav className="meta-stepper" aria-label="Etapas da campanha">
+            {steps.map((step, index) => {
+                const isActive = step.id === currentStep
+                const isPast = index < currentIndex
+                const markerContent = step.complete
+                    ? <CheckCircle2 size={15} />
+                    : step.attention
+                        ? <AlertCircle size={15} />
+                        : index + 1
+
+                return (
+                    <button
+                        key={step.id}
+                        type="button"
+                        className={`meta-stepper-button ${isActive ? 'is-active' : ''} ${step.complete ? 'is-complete' : ''} ${step.attention ? 'has-attention' : ''}`}
+                        onClick={() => onStepChange(step.id)}
+                    >
+                        <span className="meta-stepper-marker">{markerContent}</span>
+                        <span className="meta-stepper-copy">
+                            <strong>{step.title}</strong>
+                            <span>{step.description}</span>
+                        </span>
+                        {index < steps.length - 1 && (
+                            <span className={`meta-stepper-line ${isPast ? 'is-past' : ''}`} aria-hidden="true" />
+                        )}
+                    </button>
+                )
+            })}
+        </nav>
+    )
+}
+
 export default function CampaignsPage() {
     const [instances, setInstances] = useState<Instance[]>([])
     const [selectedInstance, setSelectedInstance] = useState<string>('')
@@ -1095,6 +1150,7 @@ export default function CampaignsPage() {
     const [metaReplyIntentFilter, setMetaReplyIntentFilter] = useState('')
     const [metaReplyDateFilter, setMetaReplyDateFilter] = useState('')
     const [showCreateForm, setShowCreateForm] = useState(false)
+    const [metaCreateStep, setMetaCreateStep] = useState<MetaCreateStep>('config')
     const [sending, setSending] = useState(false)
     const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
@@ -2215,6 +2271,7 @@ export default function CampaignsPage() {
                 setFeedback({ type: 'success', text: data.message || 'Campanha lancada com sucesso. Os contatos foram 100% liberados para envio em segundo plano.' })
                 const createdCampaignId = textValue(data.campaign?.id)
                 setShowCreateForm(false)
+                setMetaCreateStep('config')
                 setMetaStatusFilter('')
                 if (createdCampaignId) setExpandedMetaCampaignId(createdCampaignId)
                 setNumbersInput('')
@@ -2476,6 +2533,77 @@ export default function CampaignsPage() {
         !confirmOptIn ? 'Confirme o opt-in da lista.' : '',
         !hasMetaPortfolioCapacity ? 'Limite compartilhado da BM sem vagas livres.' : '',
     ].filter(Boolean)
+    const metaCampaignTypeLabel = {
+        marketing: 'Marketing',
+        editorial: 'Editorial',
+        followup: 'Follow-up',
+        utility: 'Utility',
+        test: 'Teste',
+    }[metaCampaignType]
+    const metaScheduleLabel = scheduleDate
+        ? new Date(scheduleDate).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
+        : 'Enviar agora'
+    const metaCreateStepIndex = Math.max(0, META_CREATE_STEP_ORDER.indexOf(metaCreateStep))
+    const metaNextStep = META_CREATE_STEP_ORDER[metaCreateStepIndex + 1]
+    const metaPreviousStep = META_CREATE_STEP_ORDER[metaCreateStepIndex - 1]
+    const metaMessageStepReady = Boolean(
+        selectedMetaTemplate
+        && (!selectedHeaderUsesMedia || metaHeaderMediaUrl.trim())
+        && missingBodyVariableCount === 0
+    )
+    const metaAudienceStepReady = parsedNumbers.length > 0 && confirmOptIn
+    const metaDeliveryStepReady = hasMetaPortfolioCapacity && readyMetaSenders.length > 0
+    const metaCreateSteps: MetaCreateStepItem[] = [
+        {
+            id: 'config',
+            title: 'Configuracao',
+            description: 'Nome e infraestrutura',
+            complete: Boolean(campaignName.trim()) && metaDeliveryStepReady,
+            attention: !hasMetaPortfolioCapacity || readyMetaSenders.length === 0,
+        },
+        {
+            id: 'message',
+            title: 'Mensagem',
+            description: 'Template e variaveis',
+            complete: metaMessageStepReady,
+            attention: Boolean(selectedMetaTemplate) && !metaMessageStepReady,
+        },
+        {
+            id: 'audience',
+            title: 'Publico',
+            description: 'Lista e opt-in',
+            complete: metaAudienceStepReady,
+            attention: parsedNumbers.length > 0 && !confirmOptIn,
+        },
+        {
+            id: 'delivery',
+            title: 'Entrega',
+            description: 'Quando enviar',
+            complete: metaDeliveryStepReady,
+            attention: !metaDeliveryStepReady,
+        },
+        {
+            id: 'review',
+            title: 'Revisao',
+            description: 'Confirmar envio',
+            complete: metaCreateWarnings.length === 0,
+            attention: metaCreateWarnings.length > 0,
+        },
+    ]
+    const goToNextMetaStep = () => {
+        if (metaNextStep) setMetaCreateStep(metaNextStep)
+    }
+    const goToPreviousMetaStep = () => {
+        if (metaPreviousStep) setMetaCreateStep(metaPreviousStep)
+    }
+    const metaPrimaryActionLabel = metaCreateStep === 'review'
+        ? scheduleDate
+            ? `Agendar campanha para ${parsedNumbers.length} contatos`
+            : `Lancar campanha para ${parsedNumbers.length} contatos`
+        : metaNextStep
+            ? `Continuar para ${metaCreateSteps.find(step => step.id === metaNextStep)?.title.toLowerCase()}`
+            : 'Continuar'
+    const metaFinalSendDisabled = sending || parsedNumbers.length === 0 || metaCreateWarnings.length > 0
 
     useEffect(() => {
         if (!selectedContactListId || selectedContactListContacts.length === 0) return
@@ -2510,7 +2638,7 @@ export default function CampaignsPage() {
 
                 .meta-channel-strip {
                     display: grid;
-                    grid-template-columns: minmax(220px, 1.2fr) repeat(2, minmax(180px, 1fr));
+                    grid-template-columns: repeat(5, minmax(150px, 1fr));
                     gap: 8px;
                     align-items: stretch;
                     margin-bottom: 14px;
@@ -2547,6 +2675,10 @@ export default function CampaignsPage() {
 
                 .meta-channel-item-success strong {
                     color: #16a34a;
+                }
+
+                .meta-channel-item-alert strong {
+                    color: #d97706;
                 }
 
                 .meta-create-titlebar {
@@ -2589,6 +2721,107 @@ export default function CampaignsPage() {
                     white-space: nowrap;
                 }
 
+                .meta-stepper {
+                    display: grid;
+                    grid-template-columns: repeat(5, minmax(0, 1fr));
+                    gap: 0;
+                    padding: 14px 16px;
+                    border-bottom: 1px solid var(--border);
+                    background: rgba(255,255,255,0.018);
+                }
+
+                .meta-stepper-button {
+                    position: relative;
+                    min-width: 0;
+                    border: 0;
+                    background: transparent;
+                    color: var(--text-muted);
+                    cursor: pointer;
+                    display: grid;
+                    grid-template-columns: auto minmax(0, 1fr);
+                    gap: 9px;
+                    align-items: center;
+                    text-align: left;
+                    padding: 4px 18px 4px 0;
+                }
+
+                .meta-stepper-button:disabled {
+                    cursor: not-allowed;
+                }
+
+                .meta-stepper-marker {
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 999px;
+                    display: grid;
+                    place-items: center;
+                    border: 1px solid var(--border);
+                    background: rgba(255,255,255,0.05);
+                    color: var(--text-secondary);
+                    font-size: 0.78rem;
+                    font-weight: 900;
+                }
+
+                .meta-stepper-copy {
+                    min-width: 0;
+                    display: grid;
+                    gap: 2px;
+                }
+
+                .meta-stepper-copy strong {
+                    min-width: 0;
+                    color: var(--text-secondary);
+                    font-size: 0.78rem;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                .meta-stepper-copy span {
+                    min-width: 0;
+                    color: var(--text-muted);
+                    font-size: 0.68rem;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                .meta-stepper-line {
+                    position: absolute;
+                    right: 7px;
+                    top: 50%;
+                    width: 22px;
+                    height: 1px;
+                    background: var(--border);
+                }
+
+                .meta-stepper-line.is-past {
+                    background: rgba(34,197,94,0.36);
+                }
+
+                .meta-stepper-button.is-active .meta-stepper-marker {
+                    border-color: rgba(37,99,235,0.34);
+                    background: #2563eb;
+                    color: #fff;
+                    box-shadow: 0 8px 18px rgba(37,99,235,0.22);
+                }
+
+                .meta-stepper-button.is-active .meta-stepper-copy strong {
+                    color: var(--text-primary);
+                }
+
+                .meta-stepper-button.is-complete .meta-stepper-marker {
+                    border-color: rgba(34,197,94,0.28);
+                    background: rgba(34,197,94,0.12);
+                    color: #16a34a;
+                }
+
+                .meta-stepper-button.has-attention:not(.is-active) .meta-stepper-marker {
+                    border-color: rgba(245,158,11,0.34);
+                    background: rgba(245,158,11,0.1);
+                    color: #d97706;
+                }
+
                 .meta-create-grid {
                     display: grid;
                     grid-template-columns: minmax(0, 1fr) 360px;
@@ -2616,6 +2849,10 @@ export default function CampaignsPage() {
                 .meta-create-section-creative {
                     background: rgba(255,255,255,0.032);
                     border-color: var(--border);
+                }
+
+                .meta-step-hidden {
+                    display: none !important;
                 }
 
                 .meta-create-section input:not([type="checkbox"]),
@@ -2743,6 +2980,117 @@ export default function CampaignsPage() {
 
                 .meta-template-inline-preview {
                     display: none;
+                }
+
+                .meta-review-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+                    gap: 10px;
+                }
+
+                .meta-review-card {
+                    display: grid;
+                    gap: 8px;
+                    padding: 11px;
+                    border: 1px solid var(--border);
+                    border-radius: 8px;
+                    background: rgba(255,255,255,0.035);
+                    min-width: 0;
+                }
+
+                .meta-review-card-header {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 10px;
+                }
+
+                .meta-review-card h3 {
+                    margin: 0;
+                    color: var(--text-primary);
+                    font-size: 0.86rem;
+                }
+
+                .meta-review-card button {
+                    border: 1px solid var(--border);
+                    border-radius: 7px;
+                    background: rgba(255,255,255,0.04);
+                    color: var(--text-secondary);
+                    cursor: pointer;
+                    font-size: 0.72rem;
+                    font-weight: 800;
+                    padding: 6px 8px;
+                }
+
+                .meta-review-row {
+                    display: grid;
+                    grid-template-columns: 92px minmax(0, 1fr);
+                    gap: 8px;
+                    color: var(--text-secondary);
+                    font-size: 0.76rem;
+                    line-height: 1.35;
+                }
+
+                .meta-review-row span {
+                    color: var(--text-muted);
+                    font-size: 0.66rem;
+                    font-weight: 900;
+                    letter-spacing: 0.4px;
+                    text-transform: uppercase;
+                }
+
+                .meta-review-row strong {
+                    min-width: 0;
+                    color: var(--text-primary);
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                .meta-readiness-list {
+                    display: grid;
+                    gap: 7px;
+                    padding: 0;
+                    margin: 0;
+                    list-style: none;
+                }
+
+                .meta-readiness-list li {
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 7px;
+                    color: var(--text-secondary);
+                    font-size: 0.76rem;
+                    line-height: 1.35;
+                }
+
+                .meta-readiness-list svg {
+                    flex: 0 0 auto;
+                    margin-top: 1px;
+                }
+
+                .meta-create-actions {
+                    display: grid;
+                    grid-template-columns: auto minmax(0, 1fr);
+                    gap: 8px;
+                    align-items: center;
+                }
+
+                .meta-create-secondary-button {
+                    min-height: 42px;
+                    padding: 10px 14px;
+                    border-radius: 8px;
+                    border: 1px solid var(--border);
+                    background: rgba(255,255,255,0.045);
+                    color: var(--text-secondary);
+                    cursor: pointer;
+                    font-weight: 800;
+                    font-size: 0.84rem;
+                }
+
+                .meta-create-secondary-button:disabled {
+                    cursor: not-allowed;
+                    opacity: 0.45;
                 }
 
                 .meta-create-actionbar {
@@ -3073,6 +3421,15 @@ export default function CampaignsPage() {
                     .meta-compact-grid-two {
                         grid-template-columns: minmax(0, 1fr);
                     }
+
+                    .meta-stepper {
+                        grid-template-columns: repeat(3, minmax(0, 1fr));
+                        row-gap: 8px;
+                    }
+
+                    .meta-stepper-line {
+                        display: none;
+                    }
                 }
 
                 @media (max-width: 1180px) {
@@ -3099,6 +3456,15 @@ export default function CampaignsPage() {
                         min-width: 880px;
                     }
 
+                    .meta-stepper {
+                        grid-template-columns: minmax(0, 1fr);
+                        padding: 12px 14px;
+                    }
+
+                    .meta-stepper-button {
+                        padding-right: 0;
+                    }
+
                     .meta-create-titlebar {
                         flex-direction: column;
                     }
@@ -3110,6 +3476,10 @@ export default function CampaignsPage() {
 
                     .meta-create-actionbar {
                         bottom: 8px;
+                    }
+
+                    .meta-create-actions {
+                        grid-template-columns: minmax(0, 1fr);
                     }
                 }
             `}</style>
@@ -3135,7 +3505,13 @@ export default function CampaignsPage() {
                     >
                         <FileText size={16} /> Templates Meta
                     </Link>
-                    <button onClick={() => setShowCreateForm(!showCreateForm)}
+                    <button onClick={() => {
+                        setShowCreateForm(prev => {
+                            const next = !prev
+                            if (next) setMetaCreateStep('config')
+                            return next
+                        })
+                    }}
                         style={{
                             padding: '10px 20px', borderRadius: '10px', border: 'none', cursor: 'pointer',
                             background: showCreateForm ? 'rgba(239,68,68,0.15)' : 'linear-gradient(135deg, var(--gold), #b8860b)',
@@ -3148,17 +3524,25 @@ export default function CampaignsPage() {
             </div>
 
             <div className="meta-channel-strip">
-                <div className="meta-channel-item">
-                    <span>Canal oficial</span>
-                    <strong>WhatsApp Cloud API</strong>
-                </div>
-                <div className={`meta-channel-item ${hasMetaPortfolioCapacity ? 'meta-channel-item-success' : ''}`}>
-                    <span>Limite BM</span>
-                    <strong>{metaPortfolioUsage.sent}/{metaPortfolioUsage.limit || 'sem limite'} usados; {metaPortfolioUsage.remaining} livres</strong>
+                <div className="meta-channel-item meta-channel-item-success">
+                    <span>Conexao Meta</span>
+                    <strong>Ativa</strong>
                 </div>
                 <div className="meta-channel-item meta-channel-item-success">
-                    <span>Contas</span>
-                    <strong>{activeMetaSenders.filter(isMetaSenderAvailable).length}/{activeMetaSenders.length} numeros prontos</strong>
+                    <span>Numeros de envio</span>
+                    <strong>{readyMetaSenders.length} de {activeMetaSenders.length}</strong>
+                </div>
+                <div className={`meta-channel-item ${hasMetaPortfolioCapacity ? '' : 'meta-channel-item-alert'}`}>
+                    <span>Capacidade da conta</span>
+                    <strong>{metaPortfolioUsage.sent}/{metaPortfolioUsage.limit || 'sem limite'}</strong>
+                </div>
+                <div className={`meta-channel-item ${hasMetaPortfolioCapacity ? 'meta-channel-item-success' : 'meta-channel-item-alert'}`}>
+                    <span>Capacidade livre</span>
+                    <strong>{metaPortfolioUsage.remaining} mensagens</strong>
+                </div>
+                <div className="meta-channel-item">
+                    <span>Conta selecionada</span>
+                    <strong>{isMetaPortfolioRouting ? 'Pool automatico' : selectedMetaSender ? metaSenderOptionLabel(selectedMetaSender) : 'Pool automatico'}</strong>
                 </div>
             </div>
 
@@ -3221,10 +3605,16 @@ export default function CampaignsPage() {
                         </span>
                     </div>
 
+                    <MetaCampaignStepper
+                        steps={metaCreateSteps}
+                        currentStep={metaCreateStep}
+                        onStepChange={setMetaCreateStep}
+                    />
+
                     <div className="meta-create-grid">
                     <div className="meta-create-main">
                         {/* Campaign Name */}
-                        <div className="meta-create-section">
+                        <div className={`meta-create-section ${metaCreateStep === 'config' ? '' : 'meta-step-hidden'}`}>
                             <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
                                 Nome da Campanha
                             </label>
@@ -3237,9 +3627,12 @@ export default function CampaignsPage() {
                                 }} />
                         </div>
 
-                        {sendProvider === 'meta_whatsapp' && (
+                        {sendProvider === 'meta_whatsapp' && metaCreateStep !== 'delivery' && metaCreateStep !== 'review' && (
                             <div className="meta-create-section meta-create-section-creative">
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+                                <div
+                                    className={metaCreateStep === 'config' || metaCreateStep === 'message' ? '' : 'meta-step-hidden'}
+                                    style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}
+                                >
                                     <div>
                                         <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
                                             Template aprovado Meta
@@ -3335,7 +3728,7 @@ export default function CampaignsPage() {
                                         </select>
                                     </div>
                                 </div>
-                                <div className="meta-compact-grid-two">
+                                <div className={`meta-compact-grid-two ${metaCreateStep === 'config' ? '' : 'meta-step-hidden'}`}>
                                 <div>
                                     <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
                                         Roteamento entre contas
@@ -3409,7 +3802,7 @@ export default function CampaignsPage() {
                                     )}
                                 </div>
                                 </div>
-                                <details className="meta-advanced-panel">
+                                <details className={`meta-advanced-panel ${metaCreateStep === 'config' ? '' : 'meta-step-hidden'}`}>
                                     <summary>Configuracoes avancadas do envio</summary>
                                     <div className="meta-advanced-panel-body">
                                 <label className="meta-compact-checkbox" style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--border)', background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)', fontSize: '0.82rem', lineHeight: 1.45 }}>
@@ -3443,7 +3836,7 @@ export default function CampaignsPage() {
                                 </label>
                                     </div>
                                 </details>
-                                {selectedMetaTemplate ? (
+                                {metaCreateStep === 'message' && (selectedMetaTemplate ? (
                                     <div className="meta-template-config-grid">
                                         <div style={{ display: 'grid', gap: '12px' }}>
                                             <div className="meta-template-mini-card">
@@ -3623,8 +4016,8 @@ export default function CampaignsPage() {
                                                 fontFamily: 'inherit', boxSizing: 'border-box',
                                             }} />
                                     </div>
-                                )}
-                                <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', color: 'var(--text-secondary)', fontSize: '0.82rem', lineHeight: 1.45 }}>
+                                ))}
+                                <label className={metaCreateStep === 'audience' ? '' : 'meta-step-hidden'} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', color: 'var(--text-secondary)', fontSize: '0.82rem', lineHeight: 1.45 }}>
                                     <input
                                         type="checkbox"
                                         checked={confirmOptIn}
@@ -3696,7 +4089,7 @@ export default function CampaignsPage() {
                         </>
                         )}
 
-                        {sendProvider === 'meta_whatsapp' && (
+                        {sendProvider === 'meta_whatsapp' && metaCreateStep === 'audience' && (
                             <div className="meta-create-section">
                                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
                                     <div>
@@ -4209,7 +4602,7 @@ export default function CampaignsPage() {
                         )}
 
                         {/* Numbers */}
-                        <details className="meta-advanced-panel" open={sendProvider === 'connectyhub' ? true : undefined}>
+                        <details className={`meta-advanced-panel ${sendProvider === 'meta_whatsapp' && metaCreateStep !== 'audience' ? 'meta-step-hidden' : ''}`} open={sendProvider === 'connectyhub' ? true : undefined}>
                             <summary>Colar ou importar numeros manualmente</summary>
                             <div className="meta-advanced-panel-body">
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '6px' }}>
@@ -4284,7 +4677,7 @@ export default function CampaignsPage() {
                         </details>
 
                         {/* Delay & Schedule */}
-                        <div className="meta-create-section" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))' }}>
+                        <div className={`meta-create-section ${metaCreateStep === 'delivery' ? '' : 'meta-step-hidden'}`} style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))' }}>
                             {sendProvider === 'connectyhub' && (
                             <>
                             <div>
@@ -4320,9 +4713,94 @@ export default function CampaignsPage() {
                                         width: '100%', padding: '10px 14px', borderRadius: '8px', fontSize: '0.9rem',
                                         background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)',
                                         color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box',
-                                    }} />
+                                }} />
                             </div>
                         </div>
+
+                        {metaCreateStep === 'review' && (
+                            <div className="meta-create-section">
+                                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                    <div>
+                                        <h3 style={{ margin: 0, fontSize: '0.98rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <CheckCircle2 size={17} style={{ color: 'var(--gold)' }} /> Revisao da campanha
+                                        </h3>
+                                        <p style={{ margin: '4px 0 0', color: 'var(--text-muted)', fontSize: '0.78rem', lineHeight: 1.45 }}>
+                                            Confira os pontos principais antes de enviar pela API oficial.
+                                        </p>
+                                    </div>
+                                    <span className="meta-create-status-pill">
+                                        {metaCreateWarnings.length === 0 ? <CheckCircle2 size={15} /> : <AlertCircle size={15} />}
+                                        {metaCreateWarnings.length === 0 ? 'Pronta para envio' : `${metaCreateWarnings.length} ajuste(s)`}
+                                    </span>
+                                </div>
+
+                                <div className="meta-review-grid">
+                                    <div className="meta-review-card">
+                                        <div className="meta-review-card-header">
+                                            <h3>Configuracao</h3>
+                                            <button type="button" onClick={() => setMetaCreateStep('config')}>Editar</button>
+                                        </div>
+                                        <div className="meta-review-row"><span>Nome</span><strong>{campaignName.trim() || 'Sem nome'}</strong></div>
+                                        <div className="meta-review-row"><span>Tipo</span><strong>{metaCampaignTypeLabel}</strong></div>
+                                        <div className="meta-review-row"><span>Idioma</span><strong>{metaTemplateLanguage || 'pt_BR'}</strong></div>
+                                    </div>
+
+                                    <div className="meta-review-card">
+                                        <div className="meta-review-card-header">
+                                            <h3>Mensagem</h3>
+                                            <button type="button" onClick={() => setMetaCreateStep('message')}>Editar</button>
+                                        </div>
+                                        <div className="meta-review-row"><span>Template</span><strong>{selectedMetaTemplate?.name || 'Nao selecionado'}</strong></div>
+                                        <div className="meta-review-row"><span>Categoria</span><strong>{selectedMetaTemplate?.category || 'Nao definida'}</strong></div>
+                                        <div className="meta-review-row"><span>Variaveis</span><strong>{selectedBodyVariables.length ? `${selectedBodyVariables.length} no corpo` : 'Sem variaveis'}</strong></div>
+                                    </div>
+
+                                    <div className="meta-review-card">
+                                        <div className="meta-review-card-header">
+                                            <h3>Publico</h3>
+                                            <button type="button" onClick={() => setMetaCreateStep('audience')}>Editar</button>
+                                        </div>
+                                        <div className="meta-review-row"><span>Lista</span><strong>{selectedContactList?.name || 'Entrada manual'}</strong></div>
+                                        <div className="meta-review-row"><span>Contatos</span><strong>{metaCampaignAudienceLabel}</strong></div>
+                                        <div className="meta-review-row"><span>Opt-in</span><strong>{confirmOptIn ? 'Confirmado' : 'Pendente'}</strong></div>
+                                    </div>
+
+                                    <div className="meta-review-card">
+                                        <div className="meta-review-card-header">
+                                            <h3>Entrega</h3>
+                                            <button type="button" onClick={() => setMetaCreateStep('delivery')}>Editar</button>
+                                        </div>
+                                        <div className="meta-review-row"><span>Envio</span><strong>{metaRoutingPreviewLabel}</strong></div>
+                                        <div className="meta-review-row"><span>Agenda</span><strong>{metaScheduleLabel}</strong></div>
+                                        <div className="meta-review-row"><span>Limite</span><strong>{metaPortfolioUsage.usageLabel}; {metaPortfolioUsage.remaining} livres</strong></div>
+                                    </div>
+                                </div>
+
+                                <div className="meta-review-card">
+                                    <div className="meta-review-card-header">
+                                        <h3>Prontidao</h3>
+                                        <span style={{ color: metaCreateWarnings.length ? '#d97706' : '#16a34a', fontSize: '0.74rem', fontWeight: 800 }}>
+                                            {metaCreateWarnings.length ? 'Ajustes necessarios' : 'Tudo certo'}
+                                        </span>
+                                    </div>
+                                    <ul className="meta-readiness-list">
+                                        {metaCreateWarnings.length ? (
+                                            metaCreateWarnings.map(warning => (
+                                                <li key={warning} style={{ color: '#d97706' }}>
+                                                    <AlertCircle size={14} /> {warning}
+                                                </li>
+                                            ))
+                                        ) : (
+                                            <>
+                                                <li><CheckCircle2 size={14} style={{ color: '#16a34a' }} /> Template aprovado e pronto para envio.</li>
+                                                <li><CheckCircle2 size={14} style={{ color: '#16a34a' }} /> Publico carregado com opt-in confirmado.</li>
+                                                <li><CheckCircle2 size={14} style={{ color: '#16a34a' }} /> Limite compartilhado da BM/portfolio disponivel.</li>
+                                            </>
+                                        )}
+                                    </ul>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Send Button */}
                         <div className="meta-create-actionbar">
@@ -4332,11 +4810,25 @@ export default function CampaignsPage() {
                                 <span>{metaPortfolioUsage.usageLabel}; {metaPortfolioUsage.remaining} vagas livres na BM</span>
                                 {selectedMetaTemplate && <span>{selectedTemplateApprovedWabaIds.length} conta(s) com criativo aprovado</span>}
                             </div>
-                            <button onClick={sendCampaign} disabled={sending || parsedNumbers.length === 0}
-                                className="meta-create-launch-button">
-                                {sending ? <Loader2 size={18} className="spin" /> : <Send size={18} />}
-                                {sending ? 'Lancando...' : scheduleDate ? `Agendar lancamento para ${parsedNumbers.length} contatos` : `Lancar campanha para ${parsedNumbers.length} contatos`}
-                            </button>
+                            <div className="meta-create-actions">
+                                <button
+                                    type="button"
+                                    onClick={goToPreviousMetaStep}
+                                    disabled={!metaPreviousStep || sending}
+                                    className="meta-create-secondary-button"
+                                >
+                                    Voltar
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={metaCreateStep === 'review' ? sendCampaign : goToNextMetaStep}
+                                    disabled={metaCreateStep === 'review' ? metaFinalSendDisabled : sending}
+                                    className="meta-create-launch-button"
+                                >
+                                    {sending ? <Loader2 size={18} className="spin" /> : metaCreateStep === 'review' ? <Send size={18} /> : <ChevronRight size={18} />}
+                                    {sending ? 'Lancando...' : metaPrimaryActionLabel}
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <MetaCampaignPhonePreview
