@@ -160,10 +160,12 @@ export async function POST(request: NextRequest) {
                 || campaignData.allow_unverified_whatsapp === true
                 ? 'include_unverified'
                 : 'confirmed_only'
-            const creativeDeduplicationMode = campaignData.creativeDeduplicationMode === 'allow_repeat'
-                || campaignData.creative_deduplication_mode === 'allow_repeat'
-                ? 'allow_repeat'
-                : 'skip_previous'
+            const rawCreativeDeduplicationMode = campaignData.creativeDeduplicationMode || campaignData.creative_deduplication_mode
+            const creativeDeduplicationMode = rawCreativeDeduplicationMode === 'skip_previous'
+                ? 'skip_previous'
+                : rawCreativeDeduplicationMode === 'allow_repeat'
+                    ? 'allow_repeat'
+                    : 'track_only'
             const senderRoutingMode = campaignData.senderRoutingMode || campaignData.sender_routing_mode || 'weighted_pool'
             const portfolioRoutingEnabled = senderRoutingMode === 'round_robin'
                 && (campaignData.portfolioRouting === true
@@ -227,7 +229,10 @@ export async function POST(request: NextRequest) {
             }
 
             const duplicateCreativeNote = result.duplicateCreativeSkippedCount > 0
-                ? ` ${result.duplicateCreativeSkippedCount} contato(s) foram bloqueados porque ja receberam ou ja estao na fila para este mesmo criativo. Para teste manual, marque "Permitir repetir este criativo".`
+                ? ` ${result.duplicateCreativeSkippedCount} contato(s) foram bloqueados porque ja receberam ou ja estao na fila para este mesmo criativo. Para teste manual, marque "Permitir reenvio e registrar historico".`
+                : ''
+            const trackedCreativeNote = result.duplicateCreativeTrackedCount > 0
+                ? ` ${result.duplicateCreativeTrackedCount} contato(s) ja tinham historico deste criativo; o envio foi mantido e o historico foi registrado.`
                 : ''
             const genericSkippedCount = Math.max(result.skippedCount - result.duplicateCreativeSkippedCount, 0)
             const genericSkippedNote = genericSkippedCount > 0
@@ -240,7 +245,7 @@ export async function POST(request: NextRequest) {
                 queued: result.queuedCount,
                 skipped: result.skippedCount,
                 message: result.queuedCount > 0
-                    ? `Campanha lancada com sucesso. ${result.queuedCount} contato(s) foram 100% liberados para envio em segundo plano pela Meta${portfolioRoutingEnabled ? ' com distribuicao entre contas aprovadas para este template' : ''}.${duplicateCreativeNote}${genericSkippedNote}`
+                    ? `Campanha lancada com sucesso. ${result.queuedCount} contato(s) foram 100% liberados para envio em segundo plano pela Meta${portfolioRoutingEnabled ? ' com distribuicao entre contas aprovadas para este template' : ''}.${trackedCreativeNote}${duplicateCreativeNote}${genericSkippedNote}`
                     : `Campanha preparada, mas nenhum contato ficou elegivel para envio.${duplicateCreativeNote}${genericSkippedNote}`,
             })
         }

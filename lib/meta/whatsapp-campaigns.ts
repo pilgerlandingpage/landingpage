@@ -17,7 +17,7 @@ import {
 type SupabaseAdmin = ReturnType<typeof createAdminClient>
 
 type CampaignType = 'marketing' | 'editorial' | 'followup' | 'utility' | 'test'
-type CreativeDeduplicationMode = 'skip_previous' | 'allow_repeat'
+type CreativeDeduplicationMode = 'skip_previous' | 'track_only' | 'allow_repeat'
 
 export interface MetaWhatsAppRecipientInput {
   phone: string
@@ -911,9 +911,11 @@ export async function createMetaWhatsAppCampaign(input: CreateMetaWhatsAppCampai
   const whatsAppValidationMode = input.whatsAppValidationMode === 'include_unverified'
     ? 'include_unverified'
     : 'confirmed_only'
-  const creativeDeduplicationMode = input.creativeDeduplicationMode === 'allow_repeat'
-    ? 'allow_repeat'
-    : 'skip_previous'
+  const creativeDeduplicationMode: CreativeDeduplicationMode = input.creativeDeduplicationMode === 'skip_previous'
+    ? 'skip_previous'
+    : input.creativeDeduplicationMode === 'allow_repeat'
+      ? 'allow_repeat'
+      : 'track_only'
   const metadata = asMetadata(input.metadata)
   const rawRoutingMode = cleanText(input.senderRoutingMode, 40)
   const requestedRoutingMode = ['single', 'round_robin', 'weighted_pool'].includes(rawRoutingMode)
@@ -1065,7 +1067,7 @@ export async function createMetaWhatsAppCampaign(input: CreateMetaWhatsAppCampai
     throw new Error(`Nenhum numero Meta conectado para envio. O Phone Number precisa estar com status CONNECTED na Meta. Status atual: ${knownStatus || 'nenhum numero sincronizado'}.`)
   }
 
-  const priorCreativeDeliveries = creativeDeduplicationMode === 'skip_previous'
+  const priorCreativeDeliveries = creativeDeduplicationMode !== 'allow_repeat'
     ? await fetchPriorCreativeDeliveries(supabase, recipients, templateName, templateLanguage)
     : { byPhone: new Map<string, PriorCreativeDelivery>(), byGroupKey: new Map<string, PriorCreativeDelivery>() }
 
@@ -1121,10 +1123,21 @@ export async function createMetaWhatsAppCampaign(input: CreateMetaWhatsAppCampai
     const optedOut = optOutPhones.has(recipient.phone)
     const withoutWhatsApp = isRecipientNotConfirmedByWhatsAppCheck(recipient, whatsAppValidationMode)
     const contactGroupKey = recipientContactGroupKey(recipient)
-    const duplicateCreative = creativeDeduplicationMode === 'skip_previous'
+    const duplicateCreative = creativeDeduplicationMode !== 'allow_repeat'
       ? priorCreativeDeliveries.byPhone.get(recipient.phone) || (contactGroupKey ? priorCreativeDeliveries.byGroupKey.get(contactGroupKey) : null)
       : null
-    const skippedByDuplicateCreative = Boolean(duplicateCreative) && !optedOut && !withoutWhatsApp
+    const skippedByDuplicateCreative = creativeDeduplicationMode === 'skip_previous' && Boolean(duplicateCreative) && !optedOut && !withoutWhatsApp
+    const duplicateCreativeMetadata = duplicateCreative ? {
+      template_name: templateName,
+      template_language: templateLanguage,
+      prior_campaign_id: duplicateCreative.campaignId || null,
+      prior_campaign_name: duplicateCreative.campaignName || null,
+      prior_campaign_status: duplicateCreative.campaignStatus || null,
+      prior_recipient_status: duplicateCreative.recipientStatus || null,
+      prior_recipient_phone: duplicateCreative.recipientPhone || null,
+      prior_contact_group_key: duplicateCreative.contactGroupKey || null,
+      prior_created_at: duplicateCreative.createdAt || null,
+    } : null
     return {
       campaign_id: campaign.id,
       template_id: template?.id || null,
@@ -1148,6 +1161,13 @@ export async function createMetaWhatsAppCampaign(input: CreateMetaWhatsAppCampai
         ...(recipient.metadata || {}),
         whatsapp_validation_mode: whatsAppValidationMode,
         creative_deduplication_mode: creativeDeduplicationMode,
+        ...(duplicateCreativeMetadata ? {
+          repeat_creative_history: {
+            action: skippedByDuplicateCreative ? 'blocked' : 'tracked',
+            allowed: !skippedByDuplicateCreative,
+            ...duplicateCreativeMetadata,
+          },
+        } : {}),
         ...(withoutWhatsApp ? {
           skipped_reason: 'connectyhub_whatsapp_not_confirmed',
           skipped_at: now,
@@ -1155,17 +1175,7 @@ export async function createMetaWhatsAppCampaign(input: CreateMetaWhatsAppCampai
         ...(skippedByDuplicateCreative ? {
           skipped_reason: 'duplicate_creative_for_contact',
           skipped_at: now,
-          duplicate_creative: {
-            template_name: templateName,
-            template_language: templateLanguage,
-            prior_campaign_id: duplicateCreative?.campaignId || null,
-            prior_campaign_name: duplicateCreative?.campaignName || null,
-            prior_campaign_status: duplicateCreative?.campaignStatus || null,
-            prior_recipient_status: duplicateCreative?.recipientStatus || null,
-            prior_recipient_phone: duplicateCreative?.recipientPhone || null,
-            prior_contact_group_key: duplicateCreative?.contactGroupKey || null,
-            prior_created_at: duplicateCreative?.createdAt || null,
-          },
+          duplicate_creative: duplicateCreativeMetadata,
         } : {}),
       },
     }
@@ -1202,6 +1212,10 @@ export async function createMetaWhatsAppCampaign(input: CreateMetaWhatsAppCampai
     queuedCount,
     skippedCount,
     duplicateCreativeSkippedCount: rows.filter(row => row.error_code === 'duplicate_creative_for_contact').length,
+    duplicateCreativeTrackedCount: rows.filter(row => (
+      row.error_code !== 'duplicate_creative_for_contact'
+      && asMetadata(row.metadata).repeat_creative_history
+    )).length,
   }
 }
 
@@ -1629,6 +1643,7 @@ export async function getMetaWhatsAppDetailedReport(
       currency,
       cost_status,
       cost_recorded_at,
+      metadata,
       created_at,
       updated_at,
       campaign:meta_whatsapp_campaigns(id, name, status, campaign_type, template_name, template_language, default_sender_id, metadata),
@@ -1717,6 +1732,8 @@ export async function getMetaWhatsAppDetailedReport(
     const sender = rowSender(row) || senderById.get(fallbackSenderId) || null
     const wabaId = cleanText(sender?.waba_id || campaignWabaId(campaign), 120) || null
     const reply = latestReplyByRecipient.get(cleanText(row?.id, 80)) || null
+    const recipientMetadata = asMetadata(row.metadata)
+    const repeatCreativeHistory = asMetadata(recipientMetadata.repeat_creative_history || recipientMetadata.duplicate_creative)
 
     return {
       recipient_id: row.id,
@@ -1747,6 +1764,12 @@ export async function getMetaWhatsAppDetailedReport(
       reply_at: reply?.created_at || null,
       cost_amount: asNumber(row.cost_amount),
       currency: cleanText(row.currency || 'BRL', 12) || 'BRL',
+      repeat_creative_history: Boolean(repeatCreativeHistory.prior_campaign_id || repeatCreativeHistory.prior_created_at),
+      repeat_creative_action: cleanText(repeatCreativeHistory.action, 40) || null,
+      prior_campaign_id: cleanText(repeatCreativeHistory.prior_campaign_id, 80) || null,
+      prior_campaign_name: cleanText(repeatCreativeHistory.prior_campaign_name, 180) || null,
+      prior_recipient_status: cleanText(repeatCreativeHistory.prior_recipient_status, 40) || null,
+      prior_sent_at: cleanText(repeatCreativeHistory.prior_created_at, 40) || null,
     }
   })
 

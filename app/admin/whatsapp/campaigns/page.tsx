@@ -375,6 +375,12 @@ interface MetaDetailedReportRow {
     reply_at?: string | null
     cost_amount?: number
     currency?: string | null
+    repeat_creative_history?: boolean
+    repeat_creative_action?: string | null
+    prior_campaign_id?: string | null
+    prior_campaign_name?: string | null
+    prior_recipient_status?: string | null
+    prior_sent_at?: string | null
 }
 
 interface MetaDetailedReport {
@@ -520,7 +526,7 @@ const MSG_TYPES = [
 type TemplateComponentRecord = Record<string, unknown>
 type TemplateButtonRecord = Record<string, unknown>
 type ContactListValidationMode = 'confirmed_only' | 'include_unverified'
-type CreativeDeduplicationMode = 'skip_previous' | 'allow_repeat'
+type CreativeDeduplicationMode = 'skip_previous' | 'track_only' | 'allow_repeat'
 
 function asRecord(value: unknown): Record<string, unknown> {
     return typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -968,7 +974,7 @@ export default function CampaignsPage() {
     const [selectedMetaSenderId, setSelectedMetaSenderId] = useState('')
     const [metaSenderRoutingMode, setMetaSenderRoutingMode] = useState<'weighted_pool' | 'round_robin'>('weighted_pool')
     const [confirmOptIn, setConfirmOptIn] = useState(false)
-    const [allowRepeatCreative, setAllowRepeatCreative] = useState(false)
+    const [allowRepeatCreative, setAllowRepeatCreative] = useState(true)
 
     useEffect(() => { loadInstances() }, [])
 
@@ -1321,6 +1327,11 @@ export default function CampaignsPage() {
             'resposta_texto',
             'resposta_botao',
             'resposta_em',
+            'criativo_repetido',
+            'acao_repeticao',
+            'campanha_anterior',
+            'status_anterior',
+            'data_historico_anterior',
             'codigo_erro',
             'mensagem_erro',
             'custo',
@@ -1347,6 +1358,11 @@ export default function CampaignsPage() {
                 row.reply_text || '',
                 row.reply_button || '',
                 formatMetaDate(row.reply_at),
+                row.repeat_creative_history ? 'sim' : 'nao',
+                row.repeat_creative_action || '',
+                row.prior_campaign_name || row.prior_campaign_id || '',
+                row.prior_recipient_status || '',
+                formatMetaDate(row.prior_sent_at),
                 row.error_code || '',
                 row.error_message || '',
                 String(row.cost_amount || 0).replace('.', ','),
@@ -1889,7 +1905,7 @@ export default function CampaignsPage() {
     }
 
     const sendCampaign = async () => {
-        let creativeDeduplicationMode: CreativeDeduplicationMode = allowRepeatCreative ? 'allow_repeat' : 'skip_previous'
+        let creativeDeduplicationMode: CreativeDeduplicationMode = allowRepeatCreative ? 'track_only' : 'skip_previous'
         const metaRecipientDrafts = sendProvider === 'meta_whatsapp' && metaAudiencePersonalized
             ? parseMetaRecipientDrafts()
             : []
@@ -1954,7 +1970,7 @@ export default function CampaignsPage() {
                     'Se continuar, o sistema vai reenviar este mesmo criativo tambem para contatos que ja receberam ou estao na fila. Deseja continuar mesmo assim?'
                 )
                 if (!confirmed) return
-                creativeDeduplicationMode = 'allow_repeat'
+                creativeDeduplicationMode = 'track_only'
             }
             if (!hasMetaPortfolioCapacity) {
                 setFeedback({ type: 'error', text: `A BM/portfolio Meta atingiu o uso/reserva diaria compartilhada (${metaPortfolioUsage.usageLabel}). Aguarde liberacao por falha, reset da janela de 24h ou agende para depois.` })
@@ -2056,7 +2072,7 @@ export default function CampaignsPage() {
                 setMsgText('')
                 setMediaUrl('')
                 setMetaSenderRoutingMode('weighted_pool')
-                setAllowRepeatCreative(false)
+                setAllowRepeatCreative(true)
                 resetMetaTemplateBuilder()
                 if (sendProvider === 'connectyhub') loadCampaigns()
                 if (sendProvider === 'meta_whatsapp') loadMetaCampaigns()
@@ -2723,9 +2739,9 @@ export default function CampaignsPage() {
                                     gap: '10px',
                                     padding: '10px 12px',
                                     borderRadius: '10px',
-                                    border: allowRepeatCreative ? '1px solid rgba(245,158,11,0.45)' : '1px solid var(--border)',
-                                    background: allowRepeatCreative ? 'rgba(245,158,11,0.1)' : 'rgba(255,255,255,0.04)',
-                                    color: allowRepeatCreative ? '#f59e0b' : 'var(--text-secondary)',
+                                    border: allowRepeatCreative ? '1px solid rgba(34,197,94,0.32)' : '1px solid rgba(245,158,11,0.45)',
+                                    background: allowRepeatCreative ? 'rgba(34,197,94,0.08)' : 'rgba(245,158,11,0.1)',
+                                    color: allowRepeatCreative ? 'var(--text-secondary)' : '#f59e0b',
                                     fontSize: '0.82rem',
                                     lineHeight: 1.45,
                                 }}>
@@ -2735,7 +2751,7 @@ export default function CampaignsPage() {
                                         onChange={e => setAllowRepeatCreative(e.target.checked)}
                                         style={{ marginTop: '3px' }}
                                     />
-                                    Permitir repetir este criativo para contatos que ja receberam ou estao na fila. Use principalmente para testes controlados.
+                                    Permitir reenvio e registrar historico quando o contato ja recebeu este criativo. Desmarque apenas se quiser bloquear repeticao.
                                 </label>
                                 {selectedMetaTemplate ? (
                                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px', alignItems: 'start' }}>
@@ -3277,7 +3293,7 @@ export default function CampaignsPage() {
                                                             <AlertCircle size={14} style={{ flex: '0 0 auto', marginTop: '1px' }} />
                                                             <span>
                                                                 Este template ja foi usado nesta lista em {selectedTemplateUsage.campaigns} campanha(s).
-                                                                Ao lancar, o sistema vai pedir confirmacao antes de reenviar este mesmo criativo para os mesmos contatos.
+                                                                Ao lancar, o sistema vai registrar esse historico nos contatos e continuar o envio, salvo se a repeticao estiver bloqueada acima.
                                                             </span>
                                                         </div>
                                                     ) : (
@@ -4415,9 +4431,9 @@ function MetaDetailedReportPanel({
 
             <div style={{ minWidth: 0, overflowX: 'auto' }}>
                 <div style={{
-                    minWidth: '1180px',
+                    minWidth: '1300px',
                     display: 'grid',
-                    gridTemplateColumns: '130px 170px 170px 130px 120px 110px 110px 110px 110px 1fr',
+                    gridTemplateColumns: '130px 170px 170px 130px 120px 110px 110px 110px 110px 130px 1fr',
                     gap: '8px',
                     padding: '9px 12px',
                     borderBottom: '1px solid var(--border)',
@@ -4436,27 +4452,28 @@ function MetaDetailedReportPanel({
                     <span>Enviado</span>
                     <span>Lido</span>
                     <span>Resposta</span>
+                    <span>Historico</span>
                     <span>Erro</span>
                 </div>
 
                 {loading ? (
-                    <div style={{ minWidth: '1180px', padding: '34px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                    <div style={{ minWidth: '1300px', padding: '34px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                         <Loader2 size={16} className="spin" /> Carregando relatorio...
                     </div>
                 ) : !report ? (
-                    <div style={{ minWidth: '1180px', padding: '34px', color: 'var(--text-muted)', textAlign: 'center' }}>
+                    <div style={{ minWidth: '1300px', padding: '34px', color: 'var(--text-muted)', textAlign: 'center' }}>
                         Clique em Buscar para carregar o relatorio detalhado.
                     </div>
                 ) : rows.length === 0 ? (
-                    <div style={{ minWidth: '1180px', padding: '34px', color: 'var(--text-muted)', textAlign: 'center' }}>
+                    <div style={{ minWidth: '1300px', padding: '34px', color: 'var(--text-muted)', textAlign: 'center' }}>
                         Nenhum resultado encontrado para os filtros atuais.
                     </div>
                 ) : (
-                    <div style={{ minWidth: '1180px' }}>
+                    <div style={{ minWidth: '1300px' }}>
                         {rows.slice(0, 80).map(row => (
                             <div key={row.recipient_id} style={{
                                 display: 'grid',
-                                gridTemplateColumns: '130px 170px 170px 130px 120px 110px 110px 110px 110px 1fr',
+                                gridTemplateColumns: '130px 170px 170px 130px 120px 110px 110px 110px 110px 130px 1fr',
                                 gap: '8px',
                                 padding: '10px 12px',
                                 borderBottom: '1px solid var(--border)',
@@ -4479,6 +4496,12 @@ function MetaDetailedReportPanel({
                                 <span>{formatMetaDate(row.read_at)}</span>
                                 <span style={{ color: row.reply_intent === 'interested' ? '#22c55e' : row.reply_intent === 'opt_out' ? '#ef4444' : 'var(--text-muted)' }}>
                                     {row.reply_intent ? metaReplyIntentLabel(row.reply_intent) : '-'}
+                                </span>
+                                <span
+                                    title={row.repeat_creative_history ? `Ja havia historico em ${row.prior_campaign_name || row.prior_campaign_id || 'campanha anterior'} (${formatMetaDate(row.prior_sent_at)})` : ''}
+                                    style={{ color: row.repeat_creative_history ? '#f59e0b' : 'var(--text-muted)', fontWeight: row.repeat_creative_history ? 800 : 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                                >
+                                    {row.repeat_creative_history ? 'Reenvio registrado' : '-'}
                                 </span>
                                 <span style={{ color: row.error_message ? '#ef4444' : 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                     {row.error_message || row.error_code || '-'}
