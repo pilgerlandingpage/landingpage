@@ -538,6 +538,26 @@ function textValue(value: unknown) {
     return typeof value === 'string' ? value : ''
 }
 
+function isMetaHostedTemplateMediaUrl(value: string) {
+    const url = value.trim()
+    if (!/^https?:\/\//i.test(url)) return false
+
+    try {
+        const hostname = new URL(url).hostname.toLowerCase()
+        return hostname.includes('whatsapp.net')
+            || hostname.endsWith('fbcdn.net')
+            || hostname.startsWith('scontent.')
+    } catch {
+        return false
+    }
+}
+
+function publicTemplateMediaUrl(value: unknown) {
+    const url = textValue(value).trim()
+    if (!url.startsWith('https://')) return ''
+    return isMetaHostedTemplateMediaUrl(url) ? '' : url
+}
+
 function asFiniteNumber(value: unknown) {
     const parsed = Number(value || 0)
     return Number.isFinite(parsed) ? parsed : 0
@@ -724,14 +744,10 @@ function getTemplateButtons(template?: MetaTemplate | null): TemplateButtonRecor
 function getTemplateHeaderMediaUrl(template?: MetaTemplate | null) {
     const metadata = asRecord(template?.metadata)
     const panelHeaderMedia = asRecord(metadata.panel_header_media)
-    const savedUrl = textValue(panelHeaderMedia.url) || textValue(metadata.header_media_url)
+    const savedUrl = publicTemplateMediaUrl(panelHeaderMedia.url) || publicTemplateMediaUrl(metadata.header_media_url)
     if (savedUrl) return savedUrl
 
-    const header = findTemplateComponent(template, 'HEADER')
-    const example = asRecord(header?.example)
-    const headerHandles = Array.isArray(example.header_handle) ? example.header_handle : []
-    const metaSampleUrl = textValue(headerHandles[0])
-    return metaSampleUrl.startsWith('https://') ? metaSampleUrl : ''
+    return ''
 }
 
 function extractTemplateVariables(text: string) {

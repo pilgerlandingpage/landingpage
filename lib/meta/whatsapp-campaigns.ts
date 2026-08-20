@@ -100,6 +100,32 @@ function asMetadata(value: unknown): Record<string, unknown> {
     : {}
 }
 
+function isMetaHostedTemplateMediaUrl(value: unknown) {
+  const url = cleanText(value, 5000)
+  if (!/^https?:\/\//i.test(url)) return false
+
+  try {
+    const hostname = new URL(url).hostname.toLowerCase()
+    return hostname.includes('whatsapp.net')
+      || hostname.endsWith('fbcdn.net')
+      || hostname.startsWith('scontent.')
+  } catch {
+    return false
+  }
+}
+
+function publicTemplateMediaUrl(value: unknown) {
+  const url = cleanText(value, 5000)
+  if (!url.startsWith('https://')) return ''
+  return isMetaHostedTemplateMediaUrl(url) ? '' : url
+}
+
+function templateHeaderMediaUrlFromMetadata(value: unknown) {
+  const metadata = asMetadata(value)
+  const panelHeaderMedia = asMetadata(metadata.panel_header_media)
+  return publicTemplateMediaUrl(panelHeaderMedia.url) || publicTemplateMediaUrl(metadata.header_media_url)
+}
+
 function campaignWabaId(campaign: any, fallback = '') {
   const metadata = asMetadata(campaign?.metadata)
   return cleanText(
@@ -2233,6 +2259,159 @@ function bodyParametersFromTemplateParameters(value: unknown) {
   }]
 }
 
+function templateComponentsContainMetaHostedMedia(components?: unknown[]) {
+  if (!components?.length) return false
+
+  return components.some(component => {
+    const componentRecord = asMetadata(component)
+    if (cleanText(componentRecord.type, 40).toLowerCase() !== 'header') return false
+
+    const parameters = Array.isArray(componentRecord.parameters) ? componentRecord.parameters : []
+    return parameters.some(parameter => {
+      const parameterRecord = asMetadata(parameter)
+      const type = cleanText(parameterRecord.type, 40).toLowerCase()
+      if (!['image', 'video', 'document'].includes(type)) return false
+      const media = asMetadata(parameterRecord[type])
+      return isMetaHostedTemplateMediaUrl(media.link)
+    })
+  })
+}
+
+function replaceMetaHostedTemplateMediaLinks(components: unknown[] | undefined, replacementUrl: string) {
+  if (!components?.length) return { components, repaired: false }
+
+  let foundUnsafeMedia = false
+  let repaired = false
+  const updatedComponents = components.map(component => {
+    const componentRecord = asMetadata(component)
+    if (cleanText(componentRecord.type, 40).toLowerCase() !== 'header') return component
+
+    const parameters = Array.isArray(componentRecord.parameters) ? componentRecord.parameters : []
+    if (!parameters.length) return component
+
+    let componentRepaired = false
+    const updatedParameters = parameters.map(parameter => {
+      const parameterRecord = asMetadata(parameter)
+      const type = cleanText(parameterRecord.type, 40).toLowerCase()
+      if (!['image', 'video', 'document'].includes(type)) return parameter
+
+      const media = asMetadata(parameterRecord[type])
+      if (!isMetaHostedTemplateMediaUrl(media.link)) return parameter
+      foundUnsafeMedia = true
+
+      if (!replacementUrl) return parameter
+      componentRepaired = true
+      repaired = true
+      return {
+        ...parameterRecord,
+        [type]: {
+          ...media,
+          link: replacementUrl,
+        },
+      }
+    })
+
+    return componentRepaired
+      ? { ...componentRecord, parameters: updatedParameters }
+      : component
+  })
+
+  if (foundUnsafeMedia && !replacementUrl) {
+    throw new Error('A midia do header esta usando um link temporario da Meta/WhatsApp. Salve uma URL publica/R2 para este template antes de reenviar.')
+  }
+
+  return {
+    components: repaired ? updatedComponents : components,
+    repaired,
+  }
+}
+
+function templateParametersWithComponents(value: unknown, components: unknown[]) {
+  return {
+    ...asMetadata(value),
+    components,
+  }
+}
+
+async function queryStableTemplateHeaderMediaUrl(
+  supabase: SupabaseAdmin,
+  templateName: string,
+  templateLanguage: string,
+  wabaId: string
+) {
+  const name = cleanText(templateName, 120)
+  const language = normalizeLanguage(templateLanguage)
+  const targetWabaId = cleanText(wabaId, 120)
+  if (!name) return ''
+
+  if (targetWabaId) {
+    const { data: sameWabaRows, error: sameWabaError } = await supabase
+      .from('meta_whatsapp_templates')
+      .select('id, waba_id, metadata')
+      .eq('name', name)
+      .eq('language', language)
+      .eq('waba_id', targetWabaId)
+      .limit(5)
+
+    if (sameWabaError) throw sameWabaError
+    for (const row of sameWabaRows || []) {
+      const url = templateHeaderMediaUrlFromMetadata((row as any).metadata)
+      if (url) return url
+    }
+  }
+
+  const { data: rows, error } = await supabase
+    .from('meta_whatsapp_templates')
+    .select('id, waba_id, metadata')
+    .eq('name', name)
+    .eq('language', language)
+    .limit(50)
+
+  if (error) throw error
+  for (const row of rows || []) {
+    const url = templateHeaderMediaUrlFromMetadata((row as any).metadata)
+    if (url) return url
+  }
+
+  return ''
+}
+
+async function stableTemplateHeaderMediaUrl(
+  supabase: SupabaseAdmin,
+  cache: Map<string, string>,
+  templateName: string,
+  templateLanguage: string,
+  wabaId: string
+) {
+  const key = `${cleanText(wabaId, 120)}::${cleanText(templateName, 120)}::${normalizeLanguage(templateLanguage)}`
+  if (cache.has(key)) return cache.get(key) || ''
+
+  const url = await queryStableTemplateHeaderMediaUrl(supabase, templateName, templateLanguage, wabaId)
+  cache.set(key, url)
+  return url
+}
+
+async function prepareTemplateComponentsForSend(
+  supabase: SupabaseAdmin,
+  cache: Map<string, string>,
+  campaign: any,
+  wabaId: string,
+  components: unknown[] | undefined
+) {
+  if (!templateComponentsContainMetaHostedMedia(components)) {
+    return { components, repaired: false }
+  }
+
+  const replacementUrl = await stableTemplateHeaderMediaUrl(
+    supabase,
+    cache,
+    campaign.template_name,
+    campaign.template_language,
+    wabaId
+  )
+  return replaceMetaHostedTemplateMediaLinks(components, replacementUrl)
+}
+
 async function selectSenderForRecipient(
   supabase: SupabaseAdmin,
   campaign: any,
@@ -2539,6 +2718,7 @@ export async function processMetaWhatsAppCampaignBatch(params: {
   let skipped = 0
   let deferred = 0
   const attemptedGroupKeys = new Set<string>()
+  const templateHeaderMediaUrlCache = new Map<string, string>()
 
   for (const recipient of recipients) {
     try {
@@ -2579,9 +2759,36 @@ export async function processMetaWhatsAppCampaignBatch(params: {
         throw new Error('Nenhum numero Meta conectado disponivel para envio. Sincronize os numeros oficiais e confirme que o status Meta do Phone Number esta CONNECTED.')
       }
 
+      const senderWabaId = sender.waba_id || targetWabaId
+      const preparedComponents = await prepareTemplateComponentsForSend(
+        supabase,
+        templateHeaderMediaUrlCache,
+        campaign,
+        senderWabaId,
+        bodyParametersFromTemplateParameters(recipient.template_parameters)
+      )
+      const recipientMetadata = asMetadata(recipient.metadata)
+      const mediaRepairMetadata = preparedComponents.repaired
+        ? {
+          repaired_meta_template_media_link_at: new Date().toISOString(),
+          repaired_meta_template_media_link_reason: 'meta_hosted_header_media_forbidden',
+        }
+        : {}
+      const sendingUpdate: Record<string, unknown> = {
+        status: 'sending',
+        sender_id: sender.id,
+        ...(preparedComponents.repaired && preparedComponents.components?.length ? {
+          template_parameters: templateParametersWithComponents(recipient.template_parameters, preparedComponents.components),
+          metadata: {
+            ...recipientMetadata,
+            ...mediaRepairMetadata,
+          },
+        } : {}),
+      }
+
       await supabase
         .from('meta_whatsapp_campaign_recipients')
-        .update({ status: 'sending', sender_id: sender.id })
+        .update(sendingUpdate)
         .eq('id', recipient.id)
 
       const result = await sendMetaWhatsAppTemplateMessage({
@@ -2589,8 +2796,8 @@ export async function processMetaWhatsAppCampaignBatch(params: {
         templateName: campaign.template_name,
         language: campaign.template_language,
         phoneNumberId: sender.phone_number_id,
-        wabaId: sender.waba_id || targetWabaId,
-        components: bodyParametersFromTemplateParameters(recipient.template_parameters),
+        wabaId: senderWabaId,
+        components: preparedComponents.components,
         config: configMap,
       })
 
@@ -2602,7 +2809,8 @@ export async function processMetaWhatsAppCampaignBatch(params: {
           provider_message_id: result.providerMessageId || null,
           sent_at: new Date().toISOString(),
           metadata: {
-            ...(recipient.metadata || {}),
+            ...recipientMetadata,
+            ...mediaRepairMetadata,
             meta_send_response: result.raw,
           },
         })
