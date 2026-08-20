@@ -7,7 +7,7 @@ import {
     Plus, Trash2, Pause, Play, FileText, Image, Mic, Video,
     Tag, RefreshCw, MessageSquare, ChevronUp, ChevronLeft, ChevronRight,
     Smartphone, Search, BarChart3, TrendingUp, Eye, Inbox, Activity,
-    XCircle, Upload, Download, Bot, Calendar, DollarSign, MoreVertical
+    XCircle, Upload, Download, Bot, Calendar, DollarSign, MoreVertical, Clock
 } from 'lucide-react'
 import {
     Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart,
@@ -95,9 +95,9 @@ interface MetaCampaign {
 }
 
 type MetaCampaignManageAction = 'pause' | 'resume' | 'cancel' | 'delete'
-type MetaCreateStep = 'config' | 'message' | 'audience' | 'delivery' | 'review'
+type MetaCreateStep = 'message' | 'audience' | 'review'
 
-const META_CREATE_STEP_ORDER: MetaCreateStep[] = ['config', 'message', 'audience', 'delivery', 'review']
+const META_CREATE_STEP_ORDER: MetaCreateStep[] = ['message', 'audience', 'review']
 
 interface MetaCreateStepItem {
     id: MetaCreateStep
@@ -1150,7 +1150,7 @@ export default function CampaignsPage() {
     const [metaReplyIntentFilter, setMetaReplyIntentFilter] = useState('')
     const [metaReplyDateFilter, setMetaReplyDateFilter] = useState('')
     const [showCreateForm, setShowCreateForm] = useState(false)
-    const [metaCreateStep, setMetaCreateStep] = useState<MetaCreateStep>('config')
+    const [metaCreateStep, setMetaCreateStep] = useState<MetaCreateStep>('message')
     const [sending, setSending] = useState(false)
     const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
@@ -2271,7 +2271,7 @@ export default function CampaignsPage() {
                 setFeedback({ type: 'success', text: data.message || 'Campanha lancada com sucesso. Os contatos foram 100% liberados para envio em segundo plano.' })
                 const createdCampaignId = textValue(data.campaign?.id)
                 setShowCreateForm(false)
-                setMetaCreateStep('config')
+                setMetaCreateStep('message')
                 setMetaStatusFilter('')
                 if (createdCampaignId) setExpandedMetaCampaignId(createdCampaignId)
                 setNumbersInput('')
@@ -2555,18 +2555,11 @@ export default function CampaignsPage() {
     const metaDeliveryStepReady = hasMetaPortfolioCapacity && readyMetaSenders.length > 0
     const metaCreateSteps: MetaCreateStepItem[] = [
         {
-            id: 'config',
-            title: 'Configuracao',
-            description: 'Nome e infraestrutura',
-            complete: Boolean(campaignName.trim()) && metaDeliveryStepReady,
-            attention: !hasMetaPortfolioCapacity || readyMetaSenders.length === 0,
-        },
-        {
             id: 'message',
             title: 'Mensagem',
-            description: 'Template e variaveis',
-            complete: metaMessageStepReady,
-            attention: Boolean(selectedMetaTemplate) && !metaMessageStepReady,
+            description: 'Nome, template e preview',
+            complete: Boolean(campaignName.trim()) && metaMessageStepReady && metaDeliveryStepReady,
+            attention: Boolean(selectedMetaTemplate) && (!metaMessageStepReady || !metaDeliveryStepReady),
         },
         {
             id: 'audience',
@@ -2574,13 +2567,6 @@ export default function CampaignsPage() {
             description: 'Lista e opt-in',
             complete: metaAudienceStepReady,
             attention: parsedNumbers.length > 0 && !confirmOptIn,
-        },
-        {
-            id: 'delivery',
-            title: 'Entrega',
-            description: 'Quando enviar',
-            complete: metaDeliveryStepReady,
-            attention: !metaDeliveryStepReady,
         },
         {
             id: 'review',
@@ -2757,7 +2743,7 @@ export default function CampaignsPage() {
 
                 .meta-stepper {
                     display: grid;
-                    grid-template-columns: repeat(5, minmax(0, 1fr));
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
                     gap: 0;
                     padding: 14px 16px;
                     border-bottom: 1px solid var(--border);
@@ -2934,6 +2920,69 @@ export default function CampaignsPage() {
                     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
                     gap: 10px;
                     align-items: start;
+                }
+
+                .meta-inline-readiness {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 8px;
+                    align-items: center;
+                }
+
+                .meta-inline-readiness span {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    padding: 6px 9px;
+                    border-radius: 999px;
+                    border: 1px solid rgba(34,197,94,0.18);
+                    background: rgba(34,197,94,0.055);
+                    color: var(--text-secondary);
+                    font-size: 0.72rem;
+                    font-weight: 800;
+                    line-height: 1.25;
+                }
+
+                .meta-inline-readiness svg {
+                    color: #16a34a;
+                    flex: 0 0 auto;
+                }
+
+                .meta-audience-status-grid {
+                    display: grid;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    gap: 8px;
+                }
+
+                .meta-audience-status-card {
+                    min-width: 0;
+                    padding: 9px 10px;
+                    border-radius: 8px;
+                    border: 1px solid var(--border);
+                    background: rgba(255,255,255,0.035);
+                    display: grid;
+                    gap: 3px;
+                }
+
+                .meta-audience-status-card span {
+                    color: var(--text-muted);
+                    font-size: 0.66rem;
+                    font-weight: 900;
+                    letter-spacing: 0.4px;
+                    text-transform: uppercase;
+                }
+
+                .meta-audience-status-card strong {
+                    min-width: 0;
+                    color: var(--text-primary);
+                    font-size: 0.86rem;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                .meta-audience-status-card.is-ready strong {
+                    color: #16a34a;
                 }
 
                 .meta-advanced-panel {
@@ -3589,6 +3638,10 @@ export default function CampaignsPage() {
                     .meta-create-actions {
                         grid-template-columns: minmax(0, 1fr);
                     }
+
+                    .meta-audience-status-grid {
+                        grid-template-columns: minmax(0, 1fr);
+                    }
                 }
             `}</style>
             {/* Header */}
@@ -3616,7 +3669,7 @@ export default function CampaignsPage() {
                     <button onClick={() => {
                         setShowCreateForm(prev => {
                             const next = !prev
-                            if (next) setMetaCreateStep('config')
+                            if (next) setMetaCreateStep('message')
                             return next
                         })
                     }}
@@ -3708,7 +3761,7 @@ export default function CampaignsPage() {
                     <div className="meta-create-grid">
                     <div className="meta-create-main">
                         {/* Campaign Name */}
-                        <div className={`meta-create-section ${metaCreateStep === 'config' ? '' : 'meta-step-hidden'}`}>
+                        <div className={`meta-create-section ${metaCreateStep === 'message' ? '' : 'meta-step-hidden'}`}>
                             <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
                                 Nome da Campanha
                             </label>
@@ -3721,10 +3774,10 @@ export default function CampaignsPage() {
                                 }} />
                         </div>
 
-                        {sendProvider === 'meta_whatsapp' && metaCreateStep !== 'delivery' && metaCreateStep !== 'review' && (
+                        {sendProvider === 'meta_whatsapp' && metaCreateStep === 'message' && (
                             <div className="meta-create-section meta-create-section-creative">
                                 <div
-                                    className={metaCreateStep === 'config' || metaCreateStep === 'message' ? '' : 'meta-step-hidden'}
+                                    className="meta-message-basics-grid"
                                     style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}
                                 >
                                     <div>
@@ -3822,7 +3875,14 @@ export default function CampaignsPage() {
                                         </select>
                                     </div>
                                 </div>
-                                <div className={`meta-compact-grid-two ${metaCreateStep === 'config' ? '' : 'meta-step-hidden'}`}>
+                                <div className="meta-inline-readiness">
+                                    <span><CheckCircle2 size={13} /> {readyMetaSenders.length} numero(s) pronto(s)</span>
+                                    <span><CheckCircle2 size={13} /> BM: {metaPortfolioUsage.usageLabel}; {metaPortfolioUsage.remaining} livre(s)</span>
+                                    <span><CheckCircle2 size={13} /> {metaRoutingPreviewLabel}</span>
+                                </div>
+                                <details className="meta-advanced-panel">
+                                    <summary>Roteamento automatico e limite compartilhado</summary>
+                                    <div className="meta-advanced-panel-body meta-compact-grid-two">
                                 <div>
                                     <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
                                         Roteamento entre contas
@@ -3895,8 +3955,9 @@ export default function CampaignsPage() {
                                         </div>
                                     )}
                                 </div>
-                                </div>
-                                <details className={`meta-advanced-panel ${metaCreateStep === 'config' ? '' : 'meta-step-hidden'}`}>
+                                    </div>
+                                </details>
+                                <details className="meta-advanced-panel">
                                     <summary>Configuracoes avancadas do envio</summary>
                                     <div className="meta-advanced-panel-body">
                                 <label className="meta-compact-checkbox" style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--border)', background: 'rgba(255,255,255,0.04)', color: 'var(--text-secondary)', fontSize: '0.82rem', lineHeight: 1.45 }}>
@@ -4111,15 +4172,6 @@ export default function CampaignsPage() {
                                             }} />
                                     </div>
                                 ))}
-                                <label className={metaCreateStep === 'audience' ? '' : 'meta-step-hidden'} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', color: 'var(--text-secondary)', fontSize: '0.82rem', lineHeight: 1.45 }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={confirmOptIn}
-                                        onChange={e => setConfirmOptIn(e.target.checked)}
-                                        style={{ marginTop: '3px' }}
-                                    />
-                                    Confirmo que todos os contatos desta lista deram opt-in para receber mensagens WhatsApp da imobiliaria.
-                                </label>
                             </div>
                         )}
 
@@ -4214,6 +4266,21 @@ export default function CampaignsPage() {
                                     >
                                         <RefreshCw size={14} className={loadingContactLists ? 'spin' : ''} /> Atualizar listas
                                     </button>
+                                </div>
+
+                                <div className="meta-audience-status-grid">
+                                    <div className={`meta-audience-status-card ${selectedContactList ? 'is-ready' : ''}`}>
+                                        <span>Lista</span>
+                                        <strong>{selectedContactList?.name || 'Escolha uma lista'}</strong>
+                                    </div>
+                                    <div className={`meta-audience-status-card ${parsedNumbers.length > 0 ? 'is-ready' : ''}`}>
+                                        <span>Contatos</span>
+                                        <strong>{parsedNumbers.length || 0} para envio</strong>
+                                    </div>
+                                    <div className={`meta-audience-status-card ${confirmOptIn ? 'is-ready' : ''}`}>
+                                        <span>Opt-in</span>
+                                        <strong>{confirmOptIn ? 'Confirmado' : 'Pendente'}</strong>
+                                    </div>
                                 </div>
 
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
@@ -4692,6 +4759,18 @@ export default function CampaignsPage() {
                                         ) : null}
                                     </div>
                                 )}
+                                <label className="meta-compact-checkbox" style={{
+                                    borderColor: confirmOptIn ? 'rgba(34,197,94,0.32)' : 'rgba(245,158,11,0.42)',
+                                    background: confirmOptIn ? 'rgba(34,197,94,0.08)' : 'rgba(245,158,11,0.09)',
+                                }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={confirmOptIn}
+                                        onChange={e => setConfirmOptIn(e.target.checked)}
+                                        style={{ marginTop: '3px' }}
+                                    />
+                                    Confirmo que todos os contatos desta lista deram opt-in para receber mensagens WhatsApp da imobiliaria.
+                                </label>
                             </div>
                         )}
 
@@ -4771,7 +4850,15 @@ export default function CampaignsPage() {
                         </details>
 
                         {/* Delay & Schedule */}
-                        <div className={`meta-create-section ${metaCreateStep === 'delivery' ? '' : 'meta-step-hidden'}`} style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))' }}>
+                        <div id="meta-delivery-schedule" className={`meta-create-section ${metaCreateStep === 'review' ? '' : 'meta-step-hidden'}`} style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))' }}>
+                            <div style={{ gridColumn: '1 / -1' }}>
+                                <h3 style={{ margin: 0, fontSize: '0.98rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <Clock size={17} style={{ color: 'var(--gold)' }} /> Entrega
+                                </h3>
+                                <p style={{ margin: '4px 0 0', color: 'var(--text-muted)', fontSize: '0.78rem', lineHeight: 1.45 }}>
+                                    Envie agora ou deixe um horario agendado para esta campanha.
+                                </p>
+                            </div>
                             {sendProvider === 'connectyhub' && (
                             <>
                             <div>
@@ -4831,8 +4918,8 @@ export default function CampaignsPage() {
                                 <div className="meta-review-grid">
                                     <div className="meta-review-card">
                                         <div className="meta-review-card-header">
-                                            <h3>Configuracao</h3>
-                                            <button type="button" onClick={() => setMetaCreateStep('config')}>Editar</button>
+                                            <h3>Campanha</h3>
+                                            <button type="button" onClick={() => setMetaCreateStep('message')}>Editar</button>
                                         </div>
                                         <div className="meta-review-row"><span>Nome</span><strong>{campaignName.trim() || 'Sem nome'}</strong></div>
                                         <div className="meta-review-row"><span>Tipo</span><strong>{metaCampaignTypeLabel}</strong></div>
@@ -4862,7 +4949,7 @@ export default function CampaignsPage() {
                                     <div className="meta-review-card">
                                         <div className="meta-review-card-header">
                                             <h3>Entrega</h3>
-                                            <button type="button" onClick={() => setMetaCreateStep('delivery')}>Editar</button>
+                                            <button type="button" onClick={() => document.getElementById('meta-delivery-schedule')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}>Ajustar</button>
                                         </div>
                                         <div className="meta-review-row"><span>Envio</span><strong>{metaRoutingPreviewLabel}</strong></div>
                                         <div className="meta-review-row"><span>Agenda</span><strong>{metaScheduleLabel}</strong></div>
