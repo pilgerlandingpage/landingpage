@@ -3439,17 +3439,20 @@ export default function CampaignsPage() {
                     inset: 0;
                     z-index: 70;
                     display: flex;
-                    justify-content: flex-end;
-                    background: rgba(15,23,42,0.34);
-                    backdrop-filter: blur(2px);
+                    align-items: center;
+                    justify-content: center;
+                    padding: 24px;
+                    background: rgba(15,23,42,0.42);
+                    backdrop-filter: blur(4px);
                 }
 
                 .meta-campaign-drawer {
-                    width: min(540px, 100%);
-                    height: 100%;
+                    width: min(1220px, calc(100vw - 48px));
+                    height: min(88vh, 920px);
                     background: var(--bg-secondary);
-                    border-left: 1px solid var(--border);
-                    box-shadow: -22px 0 48px rgba(15,23,42,0.24);
+                    border: 1px solid var(--border);
+                    border-radius: 14px;
+                    box-shadow: 0 28px 70px rgba(15,23,42,0.34);
                     overflow: hidden;
                     display: grid;
                     grid-template-rows: auto 1fr;
@@ -3460,7 +3463,7 @@ export default function CampaignsPage() {
                     justify-content: space-between;
                     align-items: center;
                     gap: 12px;
-                    padding: 14px 16px;
+                    padding: 16px 18px;
                     border-bottom: 1px solid var(--border);
                     background: rgba(255,255,255,0.035);
                 }
@@ -3492,6 +3495,18 @@ export default function CampaignsPage() {
                     height: 100%;
                     max-height: none;
                     background: var(--bg-secondary);
+                }
+
+                @media (max-width: 760px) {
+                    .meta-campaign-drawer-backdrop {
+                        padding: 10px;
+                    }
+
+                    .meta-campaign-drawer {
+                        width: calc(100vw - 20px);
+                        height: calc(100vh - 20px);
+                        border-radius: 12px;
+                    }
                 }
 
                 @media (max-width: 1500px) {
@@ -7406,7 +7421,7 @@ function MetaSelectedCampaignAside({
                     </span>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '8px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '8px' }}>
                     {[
                         { label: 'Aceitas', value: acceptedTotal, color: '#38bdf8' },
                         { label: 'Entregues', value: deliveredTotal, color: '#22c55e' },
@@ -7421,7 +7436,7 @@ function MetaSelectedCampaignAside({
                 </div>
             </div>
 
-            <div style={{ minHeight: 0, overflowY: 'auto', padding: '14px' }}>
+            <div style={{ minHeight: 0, overflowY: 'auto', overflowX: 'hidden', padding: '16px' }}>
                 {loadingDetail && !detail ? (
                     <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '7px' }}>
                         <Loader2 size={14} className="spin" /> Carregando detalhes...
