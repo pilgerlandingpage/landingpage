@@ -5397,6 +5397,40 @@ function MetaDetailedReportPanel({
             limit: filters.limit || '1000',
         })
     }
+    const [reportView, setReportView] = useState<'all' | 'templates' | 'campaigns' | 'numbers' | 'failures' | 'replies'>('all')
+    const [selectedRecipientId, setSelectedRecipientId] = useState('')
+    const rowsForView = rows.filter(row => {
+        if (reportView === 'failures') return row.status === 'failed' || Boolean(row.error_code || row.error_message)
+        if (reportView === 'replies') return Boolean(row.reply_intent || row.reply_text || row.reply_button)
+        return true
+    })
+    const selectedRow = rowsForView.find(row => row.recipient_id === selectedRecipientId) || rowsForView[0] || null
+    const visibleRows = rowsForView.slice(0, 80)
+    const reportViewItems = [
+        { key: 'all', label: 'Todas as linhas', count: rows.length, icon: FileText },
+        { key: 'templates', label: 'Criativos', count: summary?.by_template?.length || 0, icon: Image },
+        { key: 'campaigns', label: 'Campanhas', count: summary?.by_campaign?.length || 0, icon: Send },
+        { key: 'numbers', label: 'Numeros', count: summary?.by_sender?.length || 0, icon: Smartphone },
+        { key: 'failures', label: 'Falhas', count: summary?.failed || 0, icon: AlertCircle },
+        { key: 'replies', label: 'Respostas', count: summary?.replies || 0, icon: MessageSquare },
+    ] as const
+    const activeGroups = reportView === 'campaigns'
+        ? summary?.by_campaign || []
+        : reportView === 'numbers'
+            ? summary?.by_sender || []
+            : reportView === 'all' || reportView === 'templates'
+                ? summary?.by_template || []
+                : []
+    const activeGroupTitle = reportView === 'campaigns'
+        ? 'Campanhas no filtro'
+        : reportView === 'numbers'
+            ? 'Numeros no filtro'
+            : 'Criativos no filtro'
+    const applyGroupFilter = (group: MetaDetailedReportGroup) => {
+        if (reportView === 'campaigns') updateFilter('campaignId', group.key)
+        if (reportView === 'numbers') updateFilter('senderId', group.key)
+        if (reportView === 'templates' || reportView === 'all') updateFilter('templateName', group.label)
+    }
 
     return (
         <div id="relatorios-meta-whatsapp" style={{
@@ -5487,244 +5521,354 @@ function MetaDetailedReportPanel({
             </div>
 
             <div style={{
-                padding: '12px 14px',
-                borderBottom: '1px solid var(--border)',
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(154px, 1fr))',
-                gap: '8px',
-            }}>
-                <input
-                    type="date"
-                    value={filters.dateFrom}
-                    onChange={event => updateFilter('dateFrom', event.target.value)}
-                    title="Data inicial"
-                    style={{ minHeight: '38px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '0 10px', fontSize: '0.78rem' }}
-                />
-                <input
-                    type="date"
-                    value={filters.dateTo}
-                    onChange={event => updateFilter('dateTo', event.target.value)}
-                    title="Data final"
-                    style={{ minHeight: '38px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '0 10px', fontSize: '0.78rem' }}
-                />
-                <select
-                    value={filters.templateName}
-                    onChange={event => updateFilter('templateName', event.target.value)}
-                    title="Filtrar por criativo/template"
-                    style={{ minHeight: '38px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '0 10px', fontSize: '0.78rem' }}
-                >
-                    <option value="">Todos os criativos</option>
-                    {templateOptions.map(template => (
-                        <option key={`${template.name}-${template.language}`} value={template.name}>
-                            {template.name}{template.language ? ` (${template.language})` : ''}
-                        </option>
-                    ))}
-                </select>
-                <select
-                    value={filters.campaignId}
-                    onChange={event => updateFilter('campaignId', event.target.value)}
-                    title="Filtrar por campanha"
-                    style={{ minHeight: '38px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '0 10px', fontSize: '0.78rem' }}
-                >
-                    <option value="">Todas as campanhas</option>
-                    {campaigns.map(campaign => (
-                        <option key={campaign.id} value={campaign.id}>{campaign.name}</option>
-                    ))}
-                </select>
-                <select
-                    value={filters.wabaId}
-                    onChange={event => updateFilter('wabaId', event.target.value)}
-                    title="Filtrar por conta WhatsApp"
-                    style={{ minHeight: '38px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '0 10px', fontSize: '0.78rem' }}
-                >
-                    <option value="">Todas as contas</option>
-                    {wabaOptions.map(option => (
-                        <option key={option.id} value={option.id}>{option.label}</option>
-                    ))}
-                </select>
-                <select
-                    value={filters.senderId}
-                    onChange={event => updateFilter('senderId', event.target.value)}
-                    title="Filtrar por numero remetente"
-                    style={{ minHeight: '38px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '0 10px', fontSize: '0.78rem' }}
-                >
-                    <option value="">Todos os numeros</option>
-                    {senders.map(sender => (
-                        <option key={sender.id} value={sender.id}>{sender.display_name || sender.phone_number}</option>
-                    ))}
-                </select>
-                <select
-                    value={filters.status}
-                    onChange={event => updateFilter('status', event.target.value)}
-                    title="Filtrar por status da mensagem"
-                    style={{ minHeight: '38px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '0 10px', fontSize: '0.78rem' }}
-                >
-                    <option value="">Todos os status</option>
-                    <option value="queued">Fila</option>
-                    <option value="sending">Enviando</option>
-                    <option value="sent">Aceita Meta</option>
-                    <option value="delivered">Entregue</option>
-                    <option value="read">Lida</option>
-                    <option value="failed">Falha</option>
-                    <option value="skipped">Ignorada</option>
-                    <option value="opted_out">Saida</option>
-                </select>
-                <select
-                    value={filters.intent}
-                    onChange={event => updateFilter('intent', event.target.value)}
-                    title="Filtrar por tipo de resposta"
-                    style={{ minHeight: '38px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '0 10px', fontSize: '0.78rem' }}
-                >
-                    <option value="">Todas as respostas</option>
-                    <option value="interested">Interessados</option>
-                    <option value="opt_out">Saidas</option>
-                    <option value="question">Perguntas</option>
-                    <option value="unknown">Sem classificacao</option>
-                </select>
-                <select
-                    value={filters.limit}
-                    onChange={event => updateFilter('limit', event.target.value)}
-                    title="Limite de linhas retornadas"
-                    style={{ minHeight: '38px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '0 10px', fontSize: '0.78rem' }}
-                >
-                    <option value="500">500 linhas</option>
-                    <option value="1000">1.000 linhas</option>
-                    <option value="2500">2.500 linhas</option>
-                    <option value="5000">5.000 linhas</option>
-                </select>
-                <label style={{ minHeight: '38px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-muted)', padding: '0 10px', display: 'flex', alignItems: 'center', gap: '8px', gridColumn: '1 / -1' }}>
-                    <Search size={14} />
-                    <input
-                        value={filters.search}
-                        onChange={event => updateFilter('search', event.target.value)}
-                        placeholder="Buscar telefone, nome, campanha, criativo, numero ou erro"
-                        style={{ border: 0, outline: 'none', background: 'transparent', color: 'var(--text-primary)', width: '100%', fontSize: '0.78rem' }}
-                    />
-                </label>
-            </div>
-
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(6, minmax(126px, 1fr))',
+                display: 'flex',
+                gap: '6px',
+                padding: '10px 12px',
                 borderBottom: '1px solid var(--border)',
                 overflowX: 'auto',
             }}>
-                {metricItems.map(item => {
+                {reportViewItems.map(item => {
                     const Icon = item.icon
+                    const active = reportView === item.key
                     return (
-                        <div key={item.label} style={{
-                            minWidth: '126px',
-                            padding: '12px',
-                            borderRight: '1px solid var(--border)',
-                            display: 'grid',
-                            gap: '5px',
-                        }}>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', fontSize: '0.66rem', fontWeight: 900, textTransform: 'uppercase' }}>
-                                <Icon size={13} style={{ color: item.color }} /> {item.label}
+                        <button
+                            key={item.key}
+                            type="button"
+                            onClick={() => setReportView(item.key)}
+                            style={{
+                                minHeight: '36px',
+                                borderRadius: '8px',
+                                border: `1px solid ${active ? 'rgba(176,138,67,0.42)' : 'var(--border)'}`,
+                                background: active ? 'rgba(176,138,67,0.14)' : 'rgba(255,255,255,0.035)',
+                                color: active ? 'var(--gold)' : 'var(--text-secondary)',
+                                padding: '0 11px',
+                                cursor: 'pointer',
+                                fontSize: '0.74rem',
+                                fontWeight: 900,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '7px',
+                                whiteSpace: 'nowrap',
+                            }}
+                        >
+                            <Icon size={14} />
+                            {item.label}
+                            <span style={{
+                                minWidth: '20px',
+                                height: '20px',
+                                borderRadius: '999px',
+                                background: active ? 'rgba(176,138,67,0.18)' : 'rgba(148,163,184,0.14)',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                padding: '0 6px',
+                                color: active ? 'var(--gold)' : 'var(--text-muted)',
+                                fontSize: '0.66rem',
+                            }}>
+                                {Number(item.count || 0).toLocaleString('pt-BR')}
                             </span>
-                            <strong style={{ color: item.color, fontSize: '0.95rem' }}>
-                                {Number(item.value || 0).toLocaleString('pt-BR')}
-                            </strong>
-                            <span style={{ color: 'var(--text-muted)', fontSize: '0.68rem' }}>{item.detail}</span>
-                        </div>
+                        </button>
                     )
                 })}
             </div>
 
-            <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
-                <MetaDetailedGroupList title="Por criativo" groups={summary?.by_template || []} />
-                <MetaDetailedGroupList title="Por conta" groups={summary?.by_waba || []} />
-                <MetaDetailedGroupList title="Por numero" groups={summary?.by_sender || []} />
-            </div>
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: '300px minmax(560px, 1fr) 330px',
+                minHeight: '620px',
+            }}>
+                <aside style={{ borderRight: '1px solid var(--border)', minWidth: 0, display: 'grid', gridTemplateRows: 'auto 1fr' }}>
+                    <div style={{ padding: '12px', borderBottom: '1px solid var(--border)', display: 'grid', gap: '8px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                            <input
+                                type="date"
+                                value={filters.dateFrom}
+                                onChange={event => updateFilter('dateFrom', event.target.value)}
+                                title="Data inicial"
+                                style={{ minHeight: '36px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '0 9px', fontSize: '0.76rem' }}
+                            />
+                            <input
+                                type="date"
+                                value={filters.dateTo}
+                                onChange={event => updateFilter('dateTo', event.target.value)}
+                                title="Data final"
+                                style={{ minHeight: '36px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '0 9px', fontSize: '0.76rem' }}
+                            />
+                        </div>
+                        <label style={{ minHeight: '36px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-muted)', padding: '0 9px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <Search size={14} />
+                            <input
+                                value={filters.search}
+                                onChange={event => updateFilter('search', event.target.value)}
+                                placeholder="Buscar telefone, nome ou erro"
+                                style={{ border: 0, outline: 'none', background: 'transparent', color: 'var(--text-primary)', width: '100%', fontSize: '0.76rem' }}
+                            />
+                        </label>
+                        <select value={filters.templateName} onChange={event => updateFilter('templateName', event.target.value)} style={{ minHeight: '36px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '0 9px', fontSize: '0.76rem' }}>
+                            <option value="">Todos os criativos</option>
+                            {templateOptions.map(template => (
+                                <option key={`${template.name}-${template.language}`} value={template.name}>
+                                    {template.name}{template.language ? ` (${template.language})` : ''}
+                                </option>
+                            ))}
+                        </select>
+                        <select value={filters.campaignId} onChange={event => updateFilter('campaignId', event.target.value)} style={{ minHeight: '36px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '0 9px', fontSize: '0.76rem' }}>
+                            <option value="">Todas as campanhas</option>
+                            {campaigns.map(campaign => (
+                                <option key={campaign.id} value={campaign.id}>{campaign.name}</option>
+                            ))}
+                        </select>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                            <select value={filters.status} onChange={event => updateFilter('status', event.target.value)} style={{ minHeight: '36px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '0 9px', fontSize: '0.76rem' }}>
+                                <option value="">Status</option>
+                                <option value="sent">Aceita</option>
+                                <option value="delivered">Entregue</option>
+                                <option value="read">Lida</option>
+                                <option value="failed">Falha</option>
+                                <option value="skipped">Ignorada</option>
+                            </select>
+                            <select value={filters.intent} onChange={event => updateFilter('intent', event.target.value)} style={{ minHeight: '36px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '0 9px', fontSize: '0.76rem' }}>
+                                <option value="">Resposta</option>
+                                <option value="interested">Interessado</option>
+                                <option value="opt_out">Saida</option>
+                                <option value="question">Pergunta</option>
+                                <option value="unknown">Sem classe</option>
+                            </select>
+                        </div>
+                        <select value={filters.senderId} onChange={event => updateFilter('senderId', event.target.value)} style={{ minHeight: '36px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '0 9px', fontSize: '0.76rem' }}>
+                            <option value="">Todos os numeros</option>
+                            {senders.map(sender => (
+                                <option key={sender.id} value={sender.id}>{sender.display_name || sender.phone_number}</option>
+                            ))}
+                        </select>
+                        <select value={filters.wabaId} onChange={event => updateFilter('wabaId', event.target.value)} style={{ minHeight: '36px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '0 9px', fontSize: '0.76rem' }}>
+                            <option value="">Todas as contas</option>
+                            {wabaOptions.map(option => (
+                                <option key={option.id} value={option.id}>{option.label}</option>
+                            ))}
+                        </select>
+                        <select value={filters.limit} onChange={event => updateFilter('limit', event.target.value)} style={{ minHeight: '36px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '0 9px', fontSize: '0.76rem' }}>
+                            <option value="500">500 linhas</option>
+                            <option value="1000">1.000 linhas</option>
+                            <option value="2500">2.500 linhas</option>
+                            <option value="5000">5.000 linhas</option>
+                        </select>
+                    </div>
 
-            <div style={{ minWidth: 0, overflowX: 'auto' }}>
-                <div style={{
-                    minWidth: '1300px',
-                    display: 'grid',
-                    gridTemplateColumns: '130px 170px 170px 130px 120px 110px 110px 110px 110px 130px 1fr',
-                    gap: '8px',
-                    padding: '9px 12px',
-                    borderBottom: '1px solid var(--border)',
-                    color: 'var(--text-muted)',
-                    fontSize: '0.66rem',
-                    fontWeight: 900,
-                    textTransform: 'uppercase',
-                    background: 'rgba(255,255,255,0.025)',
-                }}>
-                    <span>Contato</span>
-                    <span>Campanha</span>
-                    <span>Criativo</span>
-                    <span>Conta</span>
-                    <span>Numero</span>
-                    <span>Status</span>
-                    <span>Enviado</span>
-                    <span>Lido</span>
-                    <span>Resposta</span>
-                    <span>Historico</span>
-                    <span>Erro</span>
-                </div>
-
-                {loading ? (
-                    <div style={{ minWidth: '1300px', padding: '34px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                        <Loader2 size={16} className="spin" /> Carregando relatorio...
-                    </div>
-                ) : !report ? (
-                    <div style={{ minWidth: '1300px', padding: '34px', color: 'var(--text-muted)', textAlign: 'center' }}>
-                        Clique em Buscar para carregar o relatorio detalhado.
-                    </div>
-                ) : rows.length === 0 ? (
-                    <div style={{ minWidth: '1300px', padding: '34px', color: 'var(--text-muted)', textAlign: 'center' }}>
-                        Nenhum resultado encontrado para os filtros atuais.
-                    </div>
-                ) : (
-                    <div style={{ minWidth: '1300px' }}>
-                        {rows.slice(0, 80).map(row => (
-                            <div key={row.recipient_id} style={{
-                                display: 'grid',
-                                gridTemplateColumns: '130px 170px 170px 130px 120px 110px 110px 110px 110px 130px 1fr',
-                                gap: '8px',
-                                padding: '10px 12px',
-                                borderBottom: '1px solid var(--border)',
-                                alignItems: 'center',
-                                color: 'var(--text-secondary)',
-                                fontSize: '0.72rem',
-                            }}>
-                                <span style={{ minWidth: 0 }}>
-                                    <strong style={{ color: 'var(--text-primary)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                        {row.recipient_name || row.recipient_phone}
-                                    </strong>
-                                    <span style={{ color: 'var(--text-muted)' }}>{row.recipient_phone}</span>
-                                </span>
-                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.campaign_name}</span>
-                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.template_name}</span>
-                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.waba_label || row.waba_id || '-'}</span>
-                                <span>{row.sender_phone || row.sender_name || '-'}</span>
-                                <span style={{ color: metaStatusColor(row.status), fontWeight: 900 }}>{metaStatusLabel(row.status)}</span>
-                                <span>{formatMetaDate(row.sent_at)}</span>
-                                <span>{formatMetaDate(row.read_at)}</span>
-                                <span style={{ color: row.reply_intent === 'interested' ? '#22c55e' : row.reply_intent === 'opt_out' ? '#ef4444' : 'var(--text-muted)' }}>
-                                    {row.reply_intent ? metaReplyIntentLabel(row.reply_intent) : '-'}
-                                </span>
-                                <span
-                                    title={row.repeat_creative_history ? `Ja havia historico em ${row.prior_campaign_name || row.prior_campaign_id || 'campanha anterior'} (${formatMetaDate(row.prior_sent_at)})` : ''}
-                                    style={{ color: row.repeat_creative_history ? '#f59e0b' : 'var(--text-muted)', fontWeight: row.repeat_creative_history ? 800 : 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                                >
-                                    {row.repeat_creative_history ? 'Reenvio registrado' : '-'}
-                                </span>
-                                <span style={{ color: row.error_message ? '#ef4444' : 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                    {row.error_message || row.error_code || '-'}
-                                </span>
+                    <div style={{ minWidth: 0, overflowY: 'auto', maxHeight: '520px' }}>
+                        <div style={{ padding: '10px 12px', color: 'var(--text-muted)', fontSize: '0.68rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                            {activeGroupTitle}
+                        </div>
+                        {activeGroups.length === 0 ? (
+                            <div style={{ padding: '0 12px 12px', color: 'var(--text-muted)', fontSize: '0.74rem' }}>
+                                Sem recortes para os filtros atuais.
                             </div>
-                        ))}
+                        ) : (
+                            activeGroups.slice(0, 18).map(group => (
+                                <button
+                                    key={group.key}
+                                    type="button"
+                                    onClick={() => applyGroupFilter(group)}
+                                    style={{
+                                        width: '100%',
+                                        border: 0,
+                                        borderTop: '1px solid var(--border)',
+                                        background: 'transparent',
+                                        color: 'var(--text-secondary)',
+                                        cursor: 'pointer',
+                                        padding: '10px 12px',
+                                        display: 'grid',
+                                        gap: '5px',
+                                        textAlign: 'left',
+                                    }}
+                                >
+                                    <span style={{ color: 'var(--text-primary)', fontSize: '0.78rem', fontWeight: 900, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{group.label}</span>
+                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>
+                                        {Number(group.recipients || 0).toLocaleString('pt-BR')} dest. | {percentLabel(group.delivery_rate || 0)} entrega | {Number(group.failed || 0).toLocaleString('pt-BR')} falhas
+                                    </span>
+                                </button>
+                            ))
+                        )}
                     </div>
-                )}
-            </div>
+                </aside>
 
-            {rows.length > 80 && (
-                <div style={{ padding: '10px 14px', color: 'var(--text-muted)', fontSize: '0.72rem', borderTop: '1px solid var(--border)' }}>
-                    Mostrando 80 de {rows.length.toLocaleString('pt-BR')} linhas na tela. O CSV baixa todas as linhas retornadas pelo filtro.
-                </div>
-            )}
+                <main style={{ minWidth: 0, borderRight: '1px solid var(--border)', display: 'grid', gridTemplateRows: 'auto 1fr auto' }}>
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(6, minmax(118px, 1fr))',
+                        borderBottom: '1px solid var(--border)',
+                        overflowX: 'auto',
+                    }}>
+                        {metricItems.map(item => {
+                            const Icon = item.icon
+                            return (
+                                <div key={item.label} style={{ minWidth: '118px', padding: '11px', borderRight: '1px solid var(--border)', display: 'grid', gap: '4px' }}>
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', fontSize: '0.64rem', fontWeight: 900, textTransform: 'uppercase' }}>
+                                        <Icon size={13} style={{ color: item.color }} /> {item.label}
+                                    </span>
+                                    <strong style={{ color: item.color, fontSize: '0.95rem' }}>{Number(item.value || 0).toLocaleString('pt-BR')}</strong>
+                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.68rem' }}>{item.detail}</span>
+                                </div>
+                            )
+                        })}
+                    </div>
+
+                    <div style={{ minWidth: 0, overflow: 'auto' }}>
+                        <div style={{
+                            minWidth: '900px',
+                            display: 'grid',
+                            gridTemplateColumns: '150px minmax(170px, 1fr) minmax(170px, 1fr) 110px 110px 110px 120px',
+                            gap: '8px',
+                            padding: '9px 12px',
+                            borderBottom: '1px solid var(--border)',
+                            color: 'var(--text-muted)',
+                            fontSize: '0.66rem',
+                            fontWeight: 900,
+                            textTransform: 'uppercase',
+                            background: 'rgba(255,255,255,0.025)',
+                        }}>
+                            <span>Contato</span>
+                            <span>Campanha</span>
+                            <span>Criativo</span>
+                            <span>Status</span>
+                            <span>Entrega</span>
+                            <span>Resposta</span>
+                            <span>Erro</span>
+                        </div>
+
+                        {loading ? (
+                            <div style={{ minWidth: '900px', padding: '34px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                                <Loader2 size={16} className="spin" /> Carregando relatorio...
+                            </div>
+                        ) : !report ? (
+                            <div style={{ minWidth: '900px', padding: '34px', color: 'var(--text-muted)', textAlign: 'center' }}>
+                                Clique em Buscar para carregar o relatorio detalhado.
+                            </div>
+                        ) : rowsForView.length === 0 ? (
+                            <div style={{ minWidth: '900px', padding: '34px', color: 'var(--text-muted)', textAlign: 'center' }}>
+                                Nenhum resultado encontrado para esta visao e filtros atuais.
+                            </div>
+                        ) : (
+                            <div style={{ minWidth: '900px' }}>
+                                {visibleRows.map(row => {
+                                    const selected = selectedRow?.recipient_id === row.recipient_id
+                                    return (
+                                        <button
+                                            key={row.recipient_id}
+                                            type="button"
+                                            onClick={() => setSelectedRecipientId(row.recipient_id)}
+                                            style={{
+                                                width: '100%',
+                                                border: 0,
+                                                borderBottom: '1px solid var(--border)',
+                                                background: selected ? 'rgba(176,138,67,0.09)' : 'transparent',
+                                                cursor: 'pointer',
+                                                textAlign: 'left',
+                                                display: 'grid',
+                                                gridTemplateColumns: '150px minmax(170px, 1fr) minmax(170px, 1fr) 110px 110px 110px 120px',
+                                                gap: '8px',
+                                                padding: '10px 12px',
+                                                alignItems: 'center',
+                                                color: 'var(--text-secondary)',
+                                                fontSize: '0.72rem',
+                                            }}
+                                        >
+                                            <span style={{ minWidth: 0 }}>
+                                                <strong style={{ color: 'var(--text-primary)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.recipient_name || row.recipient_phone}</strong>
+                                                <span style={{ color: 'var(--text-muted)' }}>{row.recipient_phone}</span>
+                                            </span>
+                                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.campaign_name}</span>
+                                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.template_name}</span>
+                                            <span style={{ color: metaStatusColor(row.status), fontWeight: 900 }}>{metaStatusLabel(row.status)}</span>
+                                            <span>{row.read_at ? 'Lida' : row.delivered_at ? 'Entregue' : row.sent_at ? 'Aceita' : '-'}</span>
+                                            <span style={{ color: row.reply_intent === 'interested' ? '#22c55e' : row.reply_intent === 'opt_out' ? '#ef4444' : row.reply_intent ? '#f59e0b' : 'var(--text-muted)' }}>
+                                                {row.reply_intent ? metaReplyIntentLabel(row.reply_intent) : '-'}
+                                            </span>
+                                            <span style={{ color: row.error_message ? '#ef4444' : 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                {row.error_message || row.error_code || '-'}
+                                            </span>
+                                        </button>
+                                    )
+                                })}
+                            </div>
+                        )}
+                    </div>
+
+                    {rowsForView.length > 80 && (
+                        <div style={{ padding: '10px 12px', color: 'var(--text-muted)', fontSize: '0.72rem', borderTop: '1px solid var(--border)' }}>
+                            Mostrando 80 de {rowsForView.length.toLocaleString('pt-BR')} linhas na tela. O CSV baixa todas as linhas retornadas pelo filtro.
+                        </div>
+                    )}
+                </main>
+
+                <aside style={{ minWidth: 0, background: 'rgba(255,255,255,0.018)', display: 'grid', gridTemplateRows: 'auto 1fr' }}>
+                    <div style={{ padding: '14px', borderBottom: '1px solid var(--border)' }}>
+                        <strong style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>Detalhe do envio</strong>
+                        <p style={{ margin: '4px 0 0', color: 'var(--text-muted)', fontSize: '0.72rem', lineHeight: 1.4 }}>
+                            Selecione uma linha para ver campanha, criativo, datas, resposta e erro.
+                        </p>
+                    </div>
+
+                    {selectedRow ? (
+                        <div style={{ padding: '14px', display: 'grid', gap: '12px', alignContent: 'start', overflowY: 'auto', maxHeight: '620px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <div style={{ width: '44px', height: '44px', borderRadius: '999px', display: 'grid', placeItems: 'center', background: 'rgba(176,138,67,0.14)', color: 'var(--gold)', fontWeight: 900 }}>
+                                    {(selectedRow.recipient_name || selectedRow.recipient_phone || '?').slice(0, 2).toUpperCase()}
+                                </div>
+                                <div style={{ minWidth: 0 }}>
+                                    <strong style={{ color: 'var(--text-primary)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{selectedRow.recipient_name || selectedRow.recipient_phone}</strong>
+                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>{selectedRow.recipient_phone}</span>
+                                </div>
+                            </div>
+
+                            {[
+                                ['Campanha', selectedRow.campaign_name],
+                                ['Criativo', selectedRow.template_name],
+                                ['Conta', selectedRow.waba_label || selectedRow.waba_id || '-'],
+                                ['Numero', selectedRow.sender_phone || selectedRow.sender_name || '-'],
+                                ['Status', metaStatusLabel(selectedRow.status)],
+                                ['Enviado', formatMetaDate(selectedRow.sent_at)],
+                                ['Entregue', formatMetaDate(selectedRow.delivered_at)],
+                                ['Lido', formatMetaDate(selectedRow.read_at)],
+                                ['Resposta', selectedRow.reply_intent ? metaReplyIntentLabel(selectedRow.reply_intent) : '-'],
+                                ['Historico', selectedRow.repeat_creative_history ? `Reenvio: ${selectedRow.prior_campaign_name || selectedRow.prior_campaign_id || 'campanha anterior'}` : '-'],
+                            ].map(([label, value]) => (
+                                <div key={label} style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: '88px minmax(0, 1fr)',
+                                    gap: '8px',
+                                    alignItems: 'baseline',
+                                    color: 'var(--text-secondary)',
+                                    fontSize: '0.76rem',
+                                }}>
+                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.66rem', fontWeight: 900, textTransform: 'uppercase' }}>{label}</span>
+                                    <strong style={{ color: label === 'Status' ? metaStatusColor(selectedRow.status) : 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                        {value}
+                                    </strong>
+                                </div>
+                            ))}
+
+                            {selectedRow.reply_text && (
+                                <div style={{ border: '1px solid var(--border)', borderRadius: '10px', padding: '10px', background: 'rgba(255,255,255,0.035)', color: 'var(--text-secondary)', fontSize: '0.76rem', lineHeight: 1.45 }}>
+                                    <span style={{ display: 'block', color: 'var(--text-muted)', fontSize: '0.66rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '6px' }}>Texto da resposta</span>
+                                    {selectedRow.reply_text}
+                                </div>
+                            )}
+
+                            {(selectedRow.error_message || selectedRow.error_code) && (
+                                <div style={{ border: '1px solid rgba(239,68,68,0.24)', borderRadius: '10px', padding: '10px', background: 'rgba(239,68,68,0.08)', color: '#ef4444', fontSize: '0.76rem', lineHeight: 1.45 }}>
+                                    <span style={{ display: 'block', fontSize: '0.66rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '6px' }}>Erro Meta</span>
+                                    {selectedRow.error_code ? `Codigo ${selectedRow.error_code}: ` : ''}{selectedRow.error_message || 'Sem mensagem detalhada'}
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <div style={{ padding: '34px 18px', color: 'var(--text-muted)', textAlign: 'center', fontSize: '0.78rem', lineHeight: 1.45 }}>
+                            Nenhuma linha selecionada.
+                        </div>
+                    )}
+                </aside>
+            </div>
         </div>
     )
 }
