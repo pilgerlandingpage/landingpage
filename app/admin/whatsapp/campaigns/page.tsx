@@ -911,6 +911,137 @@ function renderWhatsAppPreviewText(text: string) {
     })
 }
 
+function MetaCampaignPhonePreview({
+    template,
+    campaignName,
+    headerComponent,
+    headerFormat,
+    headerText,
+    bodyText,
+    footerText,
+    mediaUrl,
+    buttons,
+    audienceLabel,
+    routingLabel,
+    approvedAccounts,
+    readyAccounts,
+    portfolioUsageLabel,
+    portfolioRemaining,
+    warnings,
+}: {
+    template: MetaTemplate | null
+    campaignName: string
+    headerComponent: TemplateComponentRecord | null
+    headerFormat: string
+    headerText: string
+    bodyText: string
+    footerText: string
+    mediaUrl: string
+    buttons: TemplateButtonRecord[]
+    audienceLabel: string
+    routingLabel: string
+    approvedAccounts: number
+    readyAccounts: number
+    portfolioUsageLabel: string
+    portfolioRemaining: number
+    warnings: string[]
+}) {
+    const hasMediaHeader = ['IMAGE', 'VIDEO', 'DOCUMENT'].includes(headerFormat)
+    const hasTextHeader = headerComponent && headerFormat === 'TEXT' && headerText
+    const messageText = bodyText || (template ? template.name : 'Escolha um template para visualizar a mensagem.')
+
+    return (
+        <aside className="meta-create-preview-pane" aria-label="Pre-visualizacao da campanha">
+            <div className="meta-create-preview-header">
+                <div>
+                    <span className="meta-create-eyebrow">Pre-visualizar mensagem</span>
+                    <h3>Como o lead vai receber</h3>
+                </div>
+                <Smartphone size={18} />
+            </div>
+
+            <div className="meta-phone-frame">
+                <div className="meta-phone-speaker" />
+                <div className="meta-phone-screen">
+                    <div className="meta-phone-topbar">
+                        <strong>{campaignName.trim() || 'Nova campanha'}</strong>
+                        <span>09:41</span>
+                    </div>
+                    <div className="meta-phone-chat">
+                        <div className="meta-phone-bubble">
+                            {headerComponent && hasMediaHeader && (
+                                <div className="meta-phone-media">
+                                    {headerFormat === 'IMAGE' && mediaUrl.trim() ? (
+                                        <img src={mediaUrl} alt="" />
+                                    ) : (
+                                        <span>{headerFormat || 'MIDIA'}</span>
+                                    )}
+                                </div>
+                            )}
+                            {hasTextHeader && (
+                                <strong className="meta-phone-header-text">
+                                    {renderWhatsAppPreviewText(headerText)}
+                                </strong>
+                            )}
+                            <div className="meta-phone-body">
+                                {renderWhatsAppPreviewText(messageText)}
+                            </div>
+                            {footerText && (
+                                <div className="meta-phone-template-footer">
+                                    {footerText}
+                                </div>
+                            )}
+                            {buttons.length > 0 && (
+                                <div className="meta-phone-buttons">
+                                    {buttons.map((button, index) => (
+                                        <div key={`phone-button-${index}`}>
+                                            {textValue(button.text) || `Botao ${index + 1}`}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                    <div className="meta-phone-footer">Mensagem oficial da imobiliaria</div>
+                </div>
+            </div>
+
+            <div className="meta-preview-summary">
+                <div>
+                    <span>Criativo</span>
+                    <strong>{template?.name || 'Nao selecionado'}</strong>
+                </div>
+                <div>
+                    <span>Publico</span>
+                    <strong>{audienceLabel}</strong>
+                </div>
+                <div>
+                    <span>Envio</span>
+                    <strong>{routingLabel}</strong>
+                </div>
+                <div>
+                    <span>Contas</span>
+                    <strong>{readyAccounts}/{approvedAccounts || 0} prontas</strong>
+                </div>
+                <div>
+                    <span>Limite BM</span>
+                    <strong>{portfolioUsageLabel}; {portfolioRemaining} livres</strong>
+                </div>
+            </div>
+
+            <div className={warnings.length ? 'meta-preview-alert meta-preview-alert-warning' : 'meta-preview-alert meta-preview-alert-ready'}>
+                {warnings.length ? (
+                    warnings.map(warning => (
+                        <span key={warning}><AlertCircle size={14} /> {warning}</span>
+                    ))
+                ) : (
+                    <span><CheckCircle2 size={14} /> Campanha pronta para revisar e lancar.</span>
+                )}
+            </div>
+        </aside>
+    )
+}
+
 export default function CampaignsPage() {
     const [instances, setInstances] = useState<Instance[]>([])
     const [selectedInstance, setSelectedInstance] = useState<string>('')
@@ -2328,6 +2459,23 @@ export default function CampaignsPage() {
         ? parsedMetaRecipientDrafts.map(recipient => recipient.phone)
         : parseNumbers()
     const selectedBodyVariablesKey = selectedBodyVariables.join(',')
+    const metaCampaignAudienceLabel = selectedContactList
+        ? `${selectedContactListEligibleContacts.length} de ${contactListAudienceCounts.all || selectedContactList.valid_contacts} elegiveis`
+        : `${parsedNumbers.length} contato(s)`
+    const metaRoutingPreviewLabel = isMetaPortfolioRouting
+        ? `Pool BM/portfolio (${portfolioRoutingReadyWabaIds.length} contas)`
+        : selectedMetaSender
+            ? selectedMetaSender.display_name || selectedMetaSender.phone_number
+            : 'Pool automatico'
+    const missingBodyVariableCount = selectedBodyVariables.filter(variable => !String(metaBodyParameterValues[String(variable)] || '').trim()).length
+    const metaCreateWarnings = [
+        !selectedMetaTemplate ? 'Escolha um template aprovado.' : '',
+        selectedHeaderUsesMedia && !metaHeaderMediaUrl.trim() ? 'Informe a midia do template.' : '',
+        missingBodyVariableCount > 0 ? `${missingBodyVariableCount} variavel(is) sem valor de exemplo.` : '',
+        parsedNumbers.length === 0 ? 'Selecione uma lista ou informe numeros.' : '',
+        !confirmOptIn ? 'Confirme o opt-in da lista.' : '',
+        !hasMetaPortfolioCapacity ? 'Limite compartilhado da BM sem vagas livres.' : '',
+    ].filter(Boolean)
 
     useEffect(() => {
         if (!selectedContactListId || selectedContactListContacts.length === 0) return
@@ -2352,6 +2500,361 @@ export default function CampaignsPage() {
     return (
         <div className="meta-campaigns-page">
             <style>{`
+                .meta-create-shell {
+                    margin-bottom: 24px;
+                    border: 1px solid rgba(201,169,110,0.28);
+                    border-radius: 12px;
+                    background: color-mix(in srgb, var(--bg-secondary) 94%, #ffffff 6%);
+                    overflow: clip;
+                }
+
+                .meta-create-titlebar {
+                    display: flex;
+                    justify-content: space-between;
+                    gap: 14px;
+                    align-items: flex-start;
+                    padding: 18px 20px;
+                    border-bottom: 1px solid var(--border);
+                    background: rgba(255,255,255,0.025);
+                }
+
+                .meta-create-titlebar h2 {
+                    display: flex;
+                    align-items: center;
+                    gap: 9px;
+                    margin: 0;
+                    color: var(--text-primary);
+                    font-size: 1.08rem;
+                }
+
+                .meta-create-titlebar p {
+                    margin: 5px 0 0;
+                    color: var(--text-muted);
+                    font-size: 0.78rem;
+                    line-height: 1.4;
+                }
+
+                .meta-create-status-pill {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 7px;
+                    padding: 8px 10px;
+                    border-radius: 8px;
+                    border: 1px solid rgba(34,197,94,0.28);
+                    background: rgba(34,197,94,0.08);
+                    color: #16a34a;
+                    font-size: 0.76rem;
+                    font-weight: 800;
+                    white-space: nowrap;
+                }
+
+                .meta-create-grid {
+                    display: grid;
+                    grid-template-columns: minmax(0, 1fr) 360px;
+                    gap: 0;
+                    align-items: start;
+                }
+
+                .meta-create-main {
+                    display: grid;
+                    gap: 14px;
+                    min-width: 0;
+                    padding: 18px 20px 20px;
+                    border-right: 1px solid var(--border);
+                }
+
+                .meta-create-section {
+                    display: grid;
+                    gap: 12px;
+                    padding: 14px;
+                    border: 1px solid var(--border);
+                    border-radius: 10px;
+                    background: rgba(255,255,255,0.035);
+                }
+
+                .meta-create-section-creative {
+                    background: rgba(34,197,94,0.045);
+                    border-color: rgba(34,197,94,0.16);
+                }
+
+                .meta-template-config-grid {
+                    display: grid;
+                    gap: 12px;
+                    align-items: start;
+                }
+
+                .meta-template-inline-preview {
+                    display: none;
+                }
+
+                .meta-create-actionbar {
+                    position: sticky;
+                    bottom: 12px;
+                    z-index: 5;
+                    display: grid;
+                    gap: 10px;
+                    padding: 12px;
+                    border: 1px solid rgba(201,169,110,0.28);
+                    border-radius: 10px;
+                    background: color-mix(in srgb, var(--bg-secondary) 92%, #ffffff 8%);
+                    box-shadow: 0 12px 28px rgba(15,23,42,0.12);
+                }
+
+                .meta-create-action-summary {
+                    display: flex;
+                    gap: 8px;
+                    flex-wrap: wrap;
+                    color: var(--text-muted);
+                    font-size: 0.74rem;
+                    line-height: 1.35;
+                }
+
+                .meta-create-launch-button {
+                    width: 100%;
+                    min-height: 48px;
+                    padding: 14px 24px;
+                    border-radius: 9px;
+                    border: none;
+                    cursor: pointer;
+                    background: linear-gradient(135deg, var(--gold), #b8860b);
+                    color: #111827;
+                    font-weight: 800;
+                    font-size: 0.96rem;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    transition: opacity 0.2s, transform 0.2s;
+                }
+
+                .meta-create-launch-button:disabled {
+                    cursor: not-allowed;
+                    opacity: 0.5;
+                    transform: none;
+                }
+
+                .meta-create-preview-pane {
+                    position: sticky;
+                    top: 16px;
+                    display: grid;
+                    gap: 14px;
+                    min-width: 0;
+                    padding: 18px;
+                    align-self: start;
+                }
+
+                .meta-create-preview-header {
+                    display: flex;
+                    justify-content: space-between;
+                    gap: 12px;
+                    align-items: flex-start;
+                }
+
+                .meta-create-preview-header h3 {
+                    margin: 3px 0 0;
+                    color: var(--text-primary);
+                    font-size: 0.98rem;
+                }
+
+                .meta-create-eyebrow {
+                    color: var(--text-muted);
+                    font-size: 0.68rem;
+                    font-weight: 900;
+                    letter-spacing: 0.5px;
+                    text-transform: uppercase;
+                }
+
+                .meta-phone-frame {
+                    width: min(100%, 310px);
+                    margin: 0 auto;
+                    padding: 10px;
+                    border-radius: 26px;
+                    border: 1px solid rgba(15,23,42,0.16);
+                    background: #f8fafc;
+                    box-shadow: 0 18px 38px rgba(15,23,42,0.16);
+                }
+
+                .meta-phone-speaker {
+                    width: 68px;
+                    height: 5px;
+                    margin: 3px auto 9px;
+                    border-radius: 999px;
+                    background: #cbd5e1;
+                }
+
+                .meta-phone-screen {
+                    overflow: hidden;
+                    min-height: 470px;
+                    border-radius: 19px;
+                    border: 1px solid rgba(15,23,42,0.12);
+                    background: #efe7dc;
+                    color: #111827;
+                    display: grid;
+                    grid-template-rows: auto 1fr auto;
+                }
+
+                .meta-phone-topbar {
+                    display: flex;
+                    justify-content: space-between;
+                    gap: 8px;
+                    align-items: center;
+                    padding: 11px 12px;
+                    border-bottom: 1px solid rgba(15,23,42,0.12);
+                    background: #ffffff;
+                    font-size: 0.74rem;
+                }
+
+                .meta-phone-topbar strong {
+                    min-width: 0;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                .meta-phone-chat {
+                    padding: 18px 11px;
+                    background:
+                        linear-gradient(45deg, rgba(255,255,255,0.34) 25%, transparent 25%),
+                        linear-gradient(-45deg, rgba(255,255,255,0.34) 25%, transparent 25%),
+                        #efe7dc;
+                    background-size: 22px 22px;
+                    display: flex;
+                    align-items: flex-start;
+                    justify-content: flex-end;
+                }
+
+                .meta-phone-bubble {
+                    width: min(100%, 240px);
+                    border-radius: 12px 12px 2px 12px;
+                    padding: 9px 10px;
+                    background: #dcf8c6;
+                    box-shadow: 0 1px 2px rgba(15,23,42,0.16);
+                    font-size: 0.78rem;
+                    line-height: 1.42;
+                    white-space: pre-wrap;
+                    overflow-wrap: anywhere;
+                }
+
+                .meta-phone-media {
+                    margin: -2px -2px 8px;
+                    min-height: 108px;
+                    border-radius: 9px;
+                    overflow: hidden;
+                    background: #cbd5e1;
+                    display: grid;
+                    place-items: center;
+                    color: #475569;
+                    font-size: 0.74rem;
+                    font-weight: 900;
+                }
+
+                .meta-phone-media img {
+                    width: 100%;
+                    max-height: 170px;
+                    object-fit: cover;
+                    display: block;
+                }
+
+                .meta-phone-header-text {
+                    display: block;
+                    margin-bottom: 6px;
+                }
+
+                .meta-phone-template-footer {
+                    margin-top: 8px;
+                    color: #64748b;
+                    font-size: 0.7rem;
+                }
+
+                .meta-phone-buttons {
+                    display: grid;
+                    gap: 0;
+                    margin-top: 9px;
+                    color: #0369a1;
+                    font-weight: 800;
+                    text-align: center;
+                }
+
+                .meta-phone-buttons div {
+                    padding-top: 7px;
+                    margin-top: 7px;
+                    border-top: 1px solid rgba(15,23,42,0.12);
+                }
+
+                .meta-phone-footer {
+                    padding: 8px 10px 10px;
+                    background: #ffffff;
+                    color: #64748b;
+                    text-align: center;
+                    font-size: 0.64rem;
+                }
+
+                .meta-preview-summary {
+                    display: grid;
+                    gap: 8px;
+                    padding: 12px;
+                    border: 1px solid var(--border);
+                    border-radius: 10px;
+                    background: rgba(255,255,255,0.035);
+                }
+
+                .meta-preview-summary div {
+                    display: grid;
+                    grid-template-columns: 82px minmax(0, 1fr);
+                    gap: 8px;
+                    align-items: baseline;
+                    font-size: 0.74rem;
+                }
+
+                .meta-preview-summary span {
+                    color: var(--text-muted);
+                    font-weight: 800;
+                    text-transform: uppercase;
+                    font-size: 0.62rem;
+                    letter-spacing: 0.4px;
+                }
+
+                .meta-preview-summary strong {
+                    min-width: 0;
+                    color: var(--text-primary);
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                .meta-preview-alert {
+                    display: grid;
+                    gap: 7px;
+                    padding: 10px 12px;
+                    border-radius: 10px;
+                    font-size: 0.75rem;
+                    line-height: 1.35;
+                }
+
+                .meta-preview-alert span {
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 7px;
+                }
+
+                .meta-preview-alert svg {
+                    flex: 0 0 auto;
+                    margin-top: 1px;
+                }
+
+                .meta-preview-alert-warning {
+                    border: 1px solid rgba(245,158,11,0.3);
+                    background: rgba(245,158,11,0.08);
+                    color: #b45309;
+                }
+
+                .meta-preview-alert-ready {
+                    border: 1px solid rgba(34,197,94,0.22);
+                    background: rgba(34,197,94,0.08);
+                    color: #16a34a;
+                    font-weight: 800;
+                }
+
                 .meta-campaigns-workspace {
                     display: grid;
                     grid-template-columns: minmax(640px, 1fr) minmax(380px, 460px);
@@ -2407,9 +2910,41 @@ export default function CampaignsPage() {
                     }
                 }
 
+                @media (max-width: 1180px) {
+                    .meta-create-grid {
+                        grid-template-columns: minmax(0, 1fr);
+                    }
+
+                    .meta-create-main {
+                        border-right: 0;
+                        border-bottom: 1px solid var(--border);
+                    }
+
+                    .meta-create-preview-pane {
+                        position: static;
+                    }
+
+                    .meta-phone-frame {
+                        max-width: 360px;
+                    }
+                }
+
                 @media (max-width: 900px) {
                     .meta-campaigns-table-empty {
                         min-width: 880px;
+                    }
+
+                    .meta-create-titlebar {
+                        flex-direction: column;
+                    }
+
+                    .meta-create-main,
+                    .meta-create-preview-pane {
+                        padding: 14px;
+                    }
+
+                    .meta-create-actionbar {
+                        bottom: 8px;
                     }
                 }
             `}</style>
@@ -2544,17 +3079,23 @@ export default function CampaignsPage() {
 
             {/* Create Campaign Form */}
             {showCreateForm && (
-                <div style={{
-                    padding: '24px', borderRadius: '14px', marginBottom: '24px',
-                    background: 'var(--bg-secondary)', border: '1px solid var(--gold-30, rgba(201,169,110,0.3))',
-                }}>
-                    <h2 style={{ fontSize: '1.1rem', margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Plus size={18} style={{ color: 'var(--gold)' }} /> Nova Campanha
-                    </h2>
-
-                    <div style={{ display: 'grid', gap: '16px' }}>
-                        {/* Campaign Name */}
+                <section className="meta-create-shell">
+                    <div className="meta-create-titlebar">
                         <div>
+                            <h2>
+                                <Plus size={18} style={{ color: 'var(--gold)' }} /> Nova Campanha
+                            </h2>
+                            <p>Monte o criativo, escolha o publico e revise a mensagem antes de lancar.</p>
+                        </div>
+                        <span className="meta-create-status-pill">
+                            <CheckCircle2 size={15} /> WhatsApp Cloud API
+                        </span>
+                    </div>
+
+                    <div className="meta-create-grid">
+                    <div className="meta-create-main">
+                        {/* Campaign Name */}
+                        <div className="meta-create-section">
                             <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
                                 Nome da Campanha
                             </label>
@@ -2568,7 +3109,7 @@ export default function CampaignsPage() {
                         </div>
 
                         {sendProvider === 'meta_whatsapp' && (
-                            <div style={{ display: 'grid', gap: '12px', padding: '14px', borderRadius: '10px', border: '1px solid var(--border)', background: 'rgba(34,197,94,0.06)' }}>
+                            <div className="meta-create-section meta-create-section-creative">
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
                                     <div>
                                         <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
@@ -2776,7 +3317,7 @@ export default function CampaignsPage() {
                                     Permitir reenvio e registrar historico quando o contato ja recebeu este criativo. Desmarque apenas se quiser bloquear repeticao.
                                 </label>
                                 {selectedMetaTemplate ? (
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px', alignItems: 'start' }}>
+                                    <div className="meta-template-config-grid">
                                         <div style={{ display: 'grid', gap: '12px' }}>
                                             <div style={{ padding: '12px', borderRadius: '10px', border: '1px solid rgba(34,197,94,0.22)', background: 'rgba(34,197,94,0.08)', color: 'var(--text-secondary)', fontSize: '0.82rem', lineHeight: 1.45 }}>
                                                 <strong style={{ color: 'var(--text-primary)' }}>{selectedMetaTemplate.name}</strong>
@@ -2894,7 +3435,7 @@ export default function CampaignsPage() {
                                             )}
                                         </div>
 
-                                        <div style={{ borderRadius: '18px', padding: '14px', background: 'linear-gradient(180deg, rgba(15,23,42,0.18), rgba(15,23,42,0.06))', border: '1px solid var(--border)' }}>
+                                        <div className="meta-template-inline-preview" style={{ borderRadius: '18px', padding: '14px', background: 'linear-gradient(180deg, rgba(15,23,42,0.18), rgba(15,23,42,0.06))', border: '1px solid var(--border)' }}>
                                             <div style={{ borderRadius: '16px', padding: '12px', background: '#efe7dc', color: '#111827', minHeight: '260px' }}>
                                                 <div style={{ maxWidth: '86%', marginLeft: 'auto', borderRadius: '12px 12px 2px 12px', padding: '10px 12px', background: '#dcf8c6', boxShadow: '0 1px 2px rgba(0,0,0,0.16)', fontSize: '0.86rem', lineHeight: 1.45, whiteSpace: 'pre-wrap' }}>
                                                     {selectedHeaderComponent && ['IMAGE', 'VIDEO', 'DOCUMENT'].includes(selectedHeaderFormat) && (
@@ -3020,14 +3561,7 @@ export default function CampaignsPage() {
                         )}
 
                         {sendProvider === 'meta_whatsapp' && (
-                            <div style={{
-                                display: 'grid',
-                                gap: '14px',
-                                padding: '14px',
-                                borderRadius: '12px',
-                                border: '1px solid var(--border)',
-                                background: 'rgba(255,255,255,0.03)',
-                            }}>
+                            <div className="meta-create-section">
                                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
                                     <div>
                                         <h3 style={{ margin: 0, fontSize: '0.98rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -3538,7 +4072,7 @@ export default function CampaignsPage() {
                         )}
 
                         {/* Numbers */}
-                        <div>
+                        <div className="meta-create-section">
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '6px' }}>
                                 <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block' }}>
                                     {sendProvider === 'meta_whatsapp' && metaAudiencePersonalized
@@ -3610,7 +4144,7 @@ export default function CampaignsPage() {
                         </div>
 
                         {/* Delay & Schedule */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
+                        <div className="meta-create-section" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))' }}>
                             {sendProvider === 'connectyhub' && (
                             <>
                             <div>
@@ -3651,20 +4185,40 @@ export default function CampaignsPage() {
                         </div>
 
                         {/* Send Button */}
-                        <button onClick={sendCampaign} disabled={sending || parsedNumbers.length === 0}
-                            style={{
-                                padding: '14px 24px', borderRadius: '12px', border: 'none', cursor: 'pointer',
-                                background: 'linear-gradient(135deg, var(--gold), #b8860b)',
-                                color: '#000', fontWeight: 700, fontSize: '1rem',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                                opacity: sending || parsedNumbers.length === 0 ? 0.5 : 1,
-                                transition: 'all 0.2s',
-                            }}>
-                            {sending ? <Loader2 size={18} className="spin" /> : <Send size={18} />}
-                            {sending ? 'Lancando...' : scheduleDate ? `Agendar lancamento para ${parsedNumbers.length} contatos` : `Lancar campanha para ${parsedNumbers.length} contatos`}
-                        </button>
+                        <div className="meta-create-actionbar">
+                            <div className="meta-create-action-summary">
+                                <span>{metaCampaignAudienceLabel}</span>
+                                <span>{metaRoutingPreviewLabel}</span>
+                                <span>{metaPortfolioUsage.usageLabel}; {metaPortfolioUsage.remaining} vagas livres na BM</span>
+                                {selectedMetaTemplate && <span>{selectedTemplateApprovedWabaIds.length} conta(s) com criativo aprovado</span>}
+                            </div>
+                            <button onClick={sendCampaign} disabled={sending || parsedNumbers.length === 0}
+                                className="meta-create-launch-button">
+                                {sending ? <Loader2 size={18} className="spin" /> : <Send size={18} />}
+                                {sending ? 'Lancando...' : scheduleDate ? `Agendar lancamento para ${parsedNumbers.length} contatos` : `Lancar campanha para ${parsedNumbers.length} contatos`}
+                            </button>
+                        </div>
                     </div>
-                </div>
+                    <MetaCampaignPhonePreview
+                        template={selectedMetaTemplate}
+                        campaignName={campaignName}
+                        headerComponent={selectedHeaderComponent}
+                        headerFormat={selectedHeaderFormat}
+                        headerText={previewHeaderText}
+                        bodyText={previewBodyText}
+                        footerText={selectedFooterText}
+                        mediaUrl={metaHeaderMediaUrl}
+                        buttons={selectedTemplateButtons}
+                        audienceLabel={metaCampaignAudienceLabel}
+                        routingLabel={metaRoutingPreviewLabel}
+                        approvedAccounts={selectedTemplateApprovedWabaIds.length}
+                        readyAccounts={portfolioRoutingReadyWabaIds.length}
+                        portfolioUsageLabel={metaPortfolioUsage.usageLabel}
+                        portfolioRemaining={metaPortfolioUsage.remaining}
+                        warnings={metaCreateWarnings}
+                    />
+                    </div>
+                </section>
             )}
 
             {/* Campaigns List */}
