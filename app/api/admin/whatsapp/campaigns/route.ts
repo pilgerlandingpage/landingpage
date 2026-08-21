@@ -238,6 +238,9 @@ export async function POST(request: NextRequest) {
             const genericSkippedNote = genericSkippedCount > 0
                 ? ` ${genericSkippedCount} contato(s) foram bloqueados por opt-out, validacao ou regra de lista.`
                 : ''
+            const createdCampaignMetadata = asMetadataRecord(result.campaign?.metadata)
+            const createdWithAutomaticRouting = createdCampaignMetadata.portfolio_routing_enabled === true
+                || (!result.campaign?.default_sender_id && senderRoutingMode === 'weighted_pool')
 
             return NextResponse.json({
                 success: true,
@@ -245,7 +248,7 @@ export async function POST(request: NextRequest) {
                 queued: result.queuedCount,
                 skipped: result.skippedCount,
                 message: result.queuedCount > 0
-                    ? `Campanha lancada com sucesso. ${result.queuedCount} contato(s) foram 100% liberados para envio em segundo plano pela Meta${portfolioRoutingEnabled ? ' com distribuicao entre contas aprovadas para este template' : ''}.${trackedCreativeNote}${duplicateCreativeNote}${genericSkippedNote}`
+                    ? `Campanha lancada com sucesso. ${result.queuedCount} contato(s) foram 100% liberados para envio em segundo plano pela Meta${createdWithAutomaticRouting ? ' com roteamento automatico entre contas saudaveis aprovadas para este template' : ''}.${trackedCreativeNote}${duplicateCreativeNote}${genericSkippedNote}`
                     : `Campanha preparada, mas nenhum contato ficou elegivel para envio.${duplicateCreativeNote}${genericSkippedNote}`,
             })
         }

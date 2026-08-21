@@ -5,6 +5,7 @@ import {
   resolveMetaWhatsAppAccountConfigs,
   resolveMetaWhatsAppConfig,
   resolveMetaWhatsAppConfigForWaba,
+  getMetaWhatsAppErrorInfo,
   sendMetaWhatsAppTemplateMessage,
 } from '@/lib/meta/whatsapp-cloud'
 import {
@@ -84,6 +85,9 @@ type MetaWhatsAppAnalyticsBucket = {
 }
 
 const DEFAULT_META_WHATSAPP_BATCH_SIZE = 50
+const META_SENDER_UNAVAILABLE_ERROR_CODES = new Set(['131031', '131042', '132015', '132016'])
+const META_SENDER_CAPACITY_ERROR_CODES = new Set(['131056'])
+type MetaSendFailureKind = 'sender_unavailable' | 'sender_capacity' | 'recipient' | ''
 
 export interface GetMetaWhatsAppCampaignDetailInput {
   campaignId: string
@@ -486,6 +490,55 @@ function getMetaErrorHint(code?: string | null, message?: string | null) {
     return 'Limite operacional atingido. Reduza velocidade, use pool de numeros ou aguarde o limite renovar.'
   }
   return 'Abra o detalhe da campanha e confira o payload/status retornado pela Meta para a causa exata.'
+}
+
+function metaSendErrorSummary(error: unknown) {
+  const info = getMetaWhatsAppErrorInfo(error)
+  const code = cleanText(info.code, 40)
+  const subcode = cleanText(info.subcode, 40)
+  const message = cleanText(
+    info.userMessage ||
+    info.details ||
+    info.message ||
+    (error instanceof Error ? error.message : String(error || 'Erro Meta WhatsApp')),
+    500
+  )
+  const searchable = [
+    code,
+    subcode,
+    info.type,
+    info.message,
+    info.details,
+    info.userTitle,
+    info.userMessage,
+  ].map(value => cleanText(value, 1000).toLowerCase()).join(' ')
+
+  return { code, subcode, message, searchable }
+}
+
+function classifyMetaSendFailure(error: unknown): MetaSendFailureKind {
+  const summary = metaSendErrorSummary(error)
+  const haystack = summary.searchable
+
+  if (summary.code === '131026') return 'recipient'
+  if (META_SENDER_CAPACITY_ERROR_CODES.has(summary.code)) return 'sender_capacity'
+  if (META_SENDER_UNAVAILABLE_ERROR_CODES.has(summary.code)) return 'sender_unavailable'
+  if (haystack.includes('business account locked')) return 'sender_unavailable'
+  if (haystack.includes('account locked')) return 'sender_unavailable'
+  if (haystack.includes('conta bloqueada')) return 'sender_unavailable'
+  if (haystack.includes('restricted') && (haystack.includes('whatsapp') || haystack.includes('account') || haystack.includes('business'))) return 'sender_unavailable'
+  if (haystack.includes('blocked') && (haystack.includes('whatsapp') || haystack.includes('account') || haystack.includes('business'))) return 'sender_unavailable'
+  if (haystack.includes('disabled') && (haystack.includes('template') || haystack.includes('whatsapp') || haystack.includes('account'))) return 'sender_unavailable'
+  if (haystack.includes('paused') && haystack.includes('template')) return 'sender_unavailable'
+  if (haystack.includes('payment') || haystack.includes('pagamento') || haystack.includes('eligibility') || haystack.includes('elegibilidade')) return 'sender_unavailable'
+  if (haystack.includes('rate limit') || haystack.includes('limit reached') || haystack.includes('limite atingido')) return 'sender_capacity'
+
+  return ''
+}
+
+function canFailoverMetaSendError(error: unknown) {
+  const kind = classifyMetaSendFailure(error)
+  return kind === 'sender_unavailable' || kind === 'sender_capacity'
 }
 
 function extractMetaErrorFromPayload(payload: unknown) {
@@ -947,8 +1000,10 @@ export async function createMetaWhatsAppCampaign(input: CreateMetaWhatsAppCampai
   const requestedRoutingMode = ['single', 'round_robin', 'weighted_pool'].includes(rawRoutingMode)
     ? rawRoutingMode as 'single' | 'round_robin' | 'weighted_pool'
     : 'weighted_pool'
-  const portfolioRoutingEnabled = requestedRoutingMode === 'round_robin'
-    && metadata.portfolio_routing_enabled === true
+  const hasExplicitDefaultSender = Boolean(cleanText(input.defaultSenderId, 80))
+  const automaticPoolAcrossAccounts = requestedRoutingMode === 'weighted_pool' && !hasExplicitDefaultSender
+  const portfolioRoutingEnabled = automaticPoolAcrossAccounts
+    || (requestedRoutingMode === 'round_robin' && metadata.portfolio_routing_enabled === true)
   const selectedDefaultSenderId = portfolioRoutingEnabled ? null : input.defaultSenderId
   let selectedSenderForWaba: any = null
 
@@ -2149,7 +2204,7 @@ export async function retryFailedMetaWhatsAppCampaignRecipients(params: {
 
   const { data: campaign, error: campaignError } = await supabase
     .from('meta_whatsapp_campaigns')
-    .select('id, status, metadata, total_queued, total_failed')
+    .select('id, status, template_name, template_language, metadata, total_queued, total_failed')
     .eq('id', campaignId)
     .maybeSingle()
 
@@ -2164,14 +2219,16 @@ export async function retryFailedMetaWhatsAppCampaignRecipients(params: {
     throw new Error('Campanha cancelada nao pode ser reenviada.')
   }
 
-  const { count: failedCount, error: countError } = await supabase
+  const { data: failedRecipients, error: failedRecipientsError } = await supabase
     .from('meta_whatsapp_campaign_recipients')
-    .select('id', { count: 'exact', head: true })
+    .select('id, sender_id, error_code, error_message, failed_at, metadata')
     .eq('campaign_id', campaignId)
     .eq('status', 'failed')
+    .order('failed_at', { ascending: false, nullsFirst: false })
+    .limit(20000)
 
-  if (countError) throw countError
-  const retryCount = failedCount || 0
+  if (failedRecipientsError) throw failedRecipientsError
+  const retryCount = failedRecipients?.length || 0
   if (retryCount <= 0) {
     return {
       status: currentStatus,
@@ -2181,25 +2238,58 @@ export async function retryFailedMetaWhatsAppCampaignRecipients(params: {
   }
 
   const now = new Date().toISOString()
-  const { error: recipientsError } = await supabase
-    .from('meta_whatsapp_campaign_recipients')
-    .update({
-      status: 'queued',
-      sender_id: null,
-      provider_message_id: null,
-      error_code: null,
-      error_message: null,
-      scheduled_for: null,
-      sent_at: null,
-      delivered_at: null,
-      read_at: null,
-      failed_at: null,
-    })
-    .eq('campaign_id', campaignId)
-    .eq('status', 'failed')
+  const retryChunks = chunkValues(failedRecipients || [], 100)
+  for (const chunk of retryChunks) {
+    const results = await Promise.all(chunk.map((recipient: any) => {
+      const metadata = asMetadata(recipient.metadata)
+      const history = Array.isArray(metadata.retry_history)
+        ? metadata.retry_history.slice(-9)
+        : []
 
-  if (recipientsError) throw recipientsError
+      return supabase
+        .from('meta_whatsapp_campaign_recipients')
+        .update({
+          status: 'queued',
+          sender_id: null,
+          provider_message_id: null,
+          error_code: null,
+          error_message: null,
+          scheduled_for: null,
+          sent_at: null,
+          delivered_at: null,
+          read_at: null,
+          failed_at: null,
+          metadata: {
+            ...metadata,
+            retry_history: [
+              ...history,
+              {
+                retried_at: now,
+                previous_sender_id: recipient.sender_id || null,
+                previous_error_code: recipient.error_code || null,
+                previous_error_message: recipient.error_message || null,
+                previous_failed_at: recipient.failed_at || null,
+              },
+            ],
+            retry_failover_requested: true,
+            retry_previous_sender_id: recipient.sender_id || null,
+          },
+        })
+        .eq('id', recipient.id)
+    }))
 
+    const chunkError = results.find(result => result.error)?.error
+    if (chunkError) throw chunkError
+  }
+
+  const configMap = await loadMetaWhatsAppConfigMap(supabase)
+  const readyAccounts = resolveMetaWhatsAppAccountConfigs(configMap)
+    .filter(account => account.enabled && !account.missing.length)
+  const approvedWabaIds = await approvedTemplateWabaIdsForCampaign(
+    supabase,
+    campaign,
+    readyAccounts.map(account => account.wabaId)
+  )
   const metadata = asMetadata(campaign.metadata)
   const totalQueued = Number(campaign.total_queued || 0)
   const totalFailed = Number(campaign.total_failed || 0)
@@ -2207,12 +2297,17 @@ export async function retryFailedMetaWhatsAppCampaignRecipients(params: {
     .from('meta_whatsapp_campaigns')
     .update({
       status: 'queued',
+      sender_routing_mode: approvedWabaIds.length >= 2 ? 'round_robin' : 'weighted_pool',
+      default_sender_id: null,
       total_queued: totalQueued + retryCount,
       total_failed: Math.max(0, totalFailed - retryCount),
       completed_at: null,
       paused_at: null,
       metadata: {
         ...metadata,
+        portfolio_routing_enabled: approvedWabaIds.length >= 2 || metadata.portfolio_routing_enabled === true,
+        routing_waba_ids: approvedWabaIds.length ? approvedWabaIds : arrayFromMetadata(metadata.routing_waba_ids),
+        retry_failover_enabled: true,
         retry_failed_count: Number(metadata.retry_failed_count || 0) + 1,
         last_retry_failed_at: now,
         last_retry_failed_recipients: retryCount,
@@ -2225,7 +2320,7 @@ export async function retryFailedMetaWhatsAppCampaignRecipients(params: {
   return {
     status: 'queued',
     queued: retryCount,
-    message: `${retryCount} destinatario(s) com falha voltaram para a fila.`,
+    message: `${retryCount} destinatario(s) com falha voltaram para a fila. O reenvio vai ignorar contas indisponiveis e usar contas saudaveis onde o template estiver aprovado.`,
   }
 }
 
@@ -2391,6 +2486,33 @@ async function stableTemplateHeaderMediaUrl(
   return url
 }
 
+async function approvedTemplateWabaIdsForCampaign(
+  supabase: SupabaseAdmin,
+  campaign: any,
+  candidateWabaIds: string[] = []
+) {
+  const templateName = cleanText(campaign?.template_name, 120)
+  if (!templateName) return []
+
+  const templateLanguage = normalizeLanguage(cleanText(campaign?.template_language, 12) || 'pt_BR')
+  const candidates = uniqueCleanText(candidateWabaIds)
+  let query = supabase
+    .from('meta_whatsapp_templates')
+    .select('waba_id, status')
+    .eq('name', templateName)
+    .eq('language', templateLanguage)
+    .limit(100)
+
+  if (candidates.length) query = query.in('waba_id', candidates)
+
+  const { data, error } = await query
+  if (error) throw error
+
+  return uniqueCleanText((data || [])
+    .filter((row: any) => cleanText(row.status, 40).toUpperCase() === 'APPROVED')
+    .map((row: any) => row.waba_id))
+}
+
 async function prepareTemplateComponentsForSend(
   supabase: SupabaseAdmin,
   cache: Map<string, string>,
@@ -2417,9 +2539,23 @@ async function selectSenderForRecipient(
   campaign: any,
   recipient: any,
   wabaId: string,
-  portfolioWabaIds: string[] = []
+  portfolioWabaIds: string[] = [],
+  options: {
+    approvedTemplateWabaIds?: string[]
+    excludedSenderIds?: string[]
+  } = {}
 ) {
-  const allowedWabaIds = campaignRoutingWabaIds(campaign, wabaId)
+  const excludedSenderIds = new Set((options.excludedSenderIds || [])
+    .map(value => cleanText(value, 80))
+    .filter(Boolean))
+  const metadata = asMetadata(campaign?.metadata)
+  const storedRoutingWabaIds = uniqueCleanText(arrayFromMetadata(metadata.routing_waba_ids))
+  const approvedTemplateWabaIds = uniqueCleanText(options.approvedTemplateWabaIds || [])
+  const allowedWabaIds = uniqueCleanText([
+    ...campaignRoutingWabaIds(campaign, wabaId),
+    ...storedRoutingWabaIds,
+    ...approvedTemplateWabaIds,
+  ])
   const usageWabaIds = uniqueCleanText([
     ...portfolioWabaIds,
     ...allowedWabaIds,
@@ -2441,6 +2577,7 @@ async function selectSenderForRecipient(
   const preparedPortfolioSenders = await syncSenderDailyUsageFromCampaignRecipients(supabase, portfolioSenders || [])
   const preparedAllowedSenders = preparedPortfolioSenders
     .filter((sender: any) => allowedWabaIds.includes(cleanText(sender.waba_id, 120)))
+    .filter((sender: any) => !excludedSenderIds.has(cleanText(sender.id, 80)))
   const usage = portfolioDailyUsage(preparedPortfolioSenders)
   if (usage.remaining <= 0) {
     throw new Error(`${describePortfolioAvailability(preparedPortfolioSenders)} Nenhuma nova conversa iniciada pelo negocio pode ser aberta agora.`)
@@ -2454,7 +2591,6 @@ async function selectSenderForRecipient(
   if (campaign.default_sender_id) {
     const sender = preparedAllowedSenders.find((item: any) => item.id === campaign.default_sender_id)
     if (sender && isMetaSenderReady(sender)) return sender
-    throw new Error(`Numero oficial selecionado indisponivel para envio: ${describeSenderAvailability(sender)}`)
   }
 
   const preferredUseCase = campaign.campaign_type === 'editorial'
@@ -2463,7 +2599,7 @@ async function selectSenderForRecipient(
       ? ['followup', 'campaign', 'global']
       : ['campaign', 'global']
 
-  return preparedAllowedSenders
+  const poolSender = preparedAllowedSenders
     .filter((sender: any) => preferredUseCase.includes(cleanText(sender.use_case, 40)))
     .sort((a: any, b: any) => {
       const sentDiff = senderDailySentCount(a) - senderDailySentCount(b)
@@ -2471,18 +2607,70 @@ async function selectSenderForRecipient(
       return asNumber(b.weight) - asNumber(a.weight)
     })
     .find(isMetaSenderReady) || null
+
+  if (poolSender) return poolSender
+
+  if (campaign.default_sender_id) {
+    const sender = preparedPortfolioSenders.find((item: any) => item.id === campaign.default_sender_id)
+    throw new Error(`Numero oficial selecionado indisponivel para envio: ${describeSenderAvailability(sender)} Nenhuma outra conta aprovada para este template ficou disponivel.`)
+  }
+
+  return null
 }
 
 async function markRecipientFailed(supabase: SupabaseAdmin, recipientId: string, error: unknown) {
-  const message = error instanceof Error ? error.message : String(error)
+  const summary = metaSendErrorSummary(error)
   await supabase
     .from('meta_whatsapp_campaign_recipients')
     .update({
       status: 'failed',
       failed_at: new Date().toISOString(),
-      error_message: message.slice(0, 500),
+      error_code: summary.code || null,
+      error_message: summary.message.slice(0, 500),
     })
     .eq('id', recipientId)
+}
+
+async function markSenderAfterMetaSendFailure(supabase: SupabaseAdmin, sender: any, error: unknown) {
+  const senderId = cleanText(sender?.id, 80)
+  if (!senderId) return
+
+  const kind = classifyMetaSendFailure(error)
+  if (kind !== 'sender_unavailable' && kind !== 'sender_capacity') return
+
+  const now = new Date().toISOString()
+  const summary = metaSendErrorSummary(error)
+  const metadata = asMetadata(sender?.metadata)
+  const updatePayload: Record<string, unknown> = {
+    last_health_check_at: now,
+    last_error: [summary.code, summary.message].filter(Boolean).join(' | ').slice(0, 500),
+  }
+
+  if (kind === 'sender_capacity') {
+    updatePayload.daily_sent_count = Math.max(asNumber(sender?.daily_limit), senderDailySentCount(sender))
+    updatePayload.daily_limit_resets_at = nextSaoPauloMidnightIso(new Date())
+  } else {
+    updatePayload.metadata = {
+      ...metadata,
+      restricted: true,
+      can_send_new_messages: false,
+      can_initiate_conversations: false,
+      restriction: {
+        ...asMetadata(metadata.restriction),
+        active: true,
+        source: 'meta_send_failover',
+        error_code: summary.code || null,
+        error_subcode: summary.subcode || null,
+        error_message: summary.message || null,
+        detected_at: now,
+      },
+    }
+  }
+
+  await supabase
+    .from('meta_whatsapp_senders')
+    .update(updatePayload)
+    .eq('id', senderId)
 }
 
 async function incrementSenderUsage(supabase: SupabaseAdmin, sender: any) {
@@ -2685,6 +2873,7 @@ export async function processMetaWhatsAppCampaignBatch(params: {
 
   const targetWabaId = campaignWabaId(campaign, readyAccounts[0]?.wabaId || resolved.wabaId)
   const routingWabaIds = campaignRoutingWabaIds(campaign, targetWabaId)
+  const approvedTemplateWabaIds = await approvedTemplateWabaIdsForCampaign(supabase, campaign, portfolioWabaIds)
   for (const routingWabaId of routingWabaIds) {
     const targetConfig = resolveMetaWhatsAppConfigForWaba(configMap, routingWabaId)
     if (targetConfig.missing.length) throw new Error(`Meta WhatsApp incompleto para a WABA ${routingWabaId || 'selecionada'}: ${targetConfig.missing.join(', ')}.`)
@@ -2754,69 +2943,108 @@ export async function processMetaWhatsAppCampaignBatch(params: {
 
       if (groupStopsOnReply && groupKey) attemptedGroupKeys.add(groupKey)
 
-      const sender = await selectSenderForRecipient(supabase, campaign, recipient, targetWabaId, portfolioWabaIds)
-      if (!sender?.phone_number_id) {
-        throw new Error('Nenhum numero Meta conectado disponivel para envio. Sincronize os numeros oficiais e confirme que o status Meta do Phone Number esta CONNECTED.')
-      }
-
-      const senderWabaId = sender.waba_id || targetWabaId
-      const preparedComponents = await prepareTemplateComponentsForSend(
-        supabase,
-        templateHeaderMediaUrlCache,
-        campaign,
-        senderWabaId,
-        bodyParametersFromTemplateParameters(recipient.template_parameters)
-      )
       const recipientMetadata = asMetadata(recipient.metadata)
-      const mediaRepairMetadata = preparedComponents.repaired
-        ? {
-          repaired_meta_template_media_link_at: new Date().toISOString(),
-          repaired_meta_template_media_link_reason: 'meta_hosted_header_media_forbidden',
+      const excludedSenderIds = new Set<string>()
+      let lastSendError: unknown = null
+      let deliveredByFailover = false
+
+      for (let attempt = 0; attempt < 6; attempt += 1) {
+        const sender = await selectSenderForRecipient(
+          supabase,
+          campaign,
+          recipient,
+          targetWabaId,
+          portfolioWabaIds,
+          {
+            approvedTemplateWabaIds,
+            excludedSenderIds: Array.from(excludedSenderIds),
+          }
+        )
+        if (!sender?.phone_number_id) {
+          throw lastSendError || new Error('Nenhum numero Meta conectado disponivel para envio. Sincronize os numeros oficiais e confirme que o status Meta do Phone Number esta CONNECTED.')
         }
-        : {}
-      const sendingUpdate: Record<string, unknown> = {
-        status: 'sending',
-        sender_id: sender.id,
-        ...(preparedComponents.repaired && preparedComponents.components?.length ? {
-          template_parameters: templateParametersWithComponents(recipient.template_parameters, preparedComponents.components),
-          metadata: {
-            ...recipientMetadata,
-            ...mediaRepairMetadata,
-          },
-        } : {}),
+
+        const senderWabaId = sender.waba_id || targetWabaId
+        const preparedComponents = await prepareTemplateComponentsForSend(
+          supabase,
+          templateHeaderMediaUrlCache,
+          campaign,
+          senderWabaId,
+          bodyParametersFromTemplateParameters(recipient.template_parameters)
+        )
+        const mediaRepairMetadata = preparedComponents.repaired
+          ? {
+            repaired_meta_template_media_link_at: new Date().toISOString(),
+            repaired_meta_template_media_link_reason: 'meta_hosted_header_media_forbidden',
+          }
+          : {}
+        const sendingUpdate: Record<string, unknown> = {
+          status: 'sending',
+          sender_id: sender.id,
+          ...(preparedComponents.repaired && preparedComponents.components?.length ? {
+            template_parameters: templateParametersWithComponents(recipient.template_parameters, preparedComponents.components),
+            metadata: {
+              ...recipientMetadata,
+              ...mediaRepairMetadata,
+            },
+          } : {}),
+        }
+
+        await supabase
+          .from('meta_whatsapp_campaign_recipients')
+          .update(sendingUpdate)
+          .eq('id', recipient.id)
+
+        try {
+          const result = await sendMetaWhatsAppTemplateMessage({
+            to: phone,
+            templateName: campaign.template_name,
+            language: campaign.template_language,
+            phoneNumberId: sender.phone_number_id,
+            wabaId: senderWabaId,
+            components: preparedComponents.components,
+            config: configMap,
+          })
+
+          await supabase
+            .from('meta_whatsapp_campaign_recipients')
+            .update({
+              status: 'sent',
+              sender_id: sender.id,
+              provider_message_id: result.providerMessageId || null,
+              sent_at: new Date().toISOString(),
+              metadata: {
+                ...recipientMetadata,
+                ...mediaRepairMetadata,
+                ...(excludedSenderIds.size ? {
+                  failover: {
+                    applied: true,
+                    skipped_sender_ids: Array.from(excludedSenderIds),
+                    routed_sender_id: sender.id,
+                    routed_waba_id: senderWabaId,
+                    at: new Date().toISOString(),
+                  },
+                } : {}),
+                meta_send_response: result.raw,
+              },
+            })
+            .eq('id', recipient.id)
+
+          await incrementSenderUsage(supabase, sender)
+          deliveredByFailover = true
+          break
+        } catch (sendError) {
+          lastSendError = sendError
+          if (!canFailoverMetaSendError(sendError)) throw sendError
+
+          await markSenderAfterMetaSendFailure(supabase, sender, sendError)
+          excludedSenderIds.add(cleanText(sender.id, 80))
+        }
       }
 
-      await supabase
-        .from('meta_whatsapp_campaign_recipients')
-        .update(sendingUpdate)
-        .eq('id', recipient.id)
-
-      const result = await sendMetaWhatsAppTemplateMessage({
-        to: phone,
-        templateName: campaign.template_name,
-        language: campaign.template_language,
-        phoneNumberId: sender.phone_number_id,
-        wabaId: senderWabaId,
-        components: preparedComponents.components,
-        config: configMap,
-      })
-
-      await supabase
-        .from('meta_whatsapp_campaign_recipients')
-        .update({
-          status: 'sent',
-          sender_id: sender.id,
-          provider_message_id: result.providerMessageId || null,
-          sent_at: new Date().toISOString(),
-          metadata: {
-            ...recipientMetadata,
-            ...mediaRepairMetadata,
-            meta_send_response: result.raw,
-          },
-        })
-        .eq('id', recipient.id)
-
-      await incrementSenderUsage(supabase, sender)
+      if (!deliveredByFailover) {
+        throw lastSendError || new Error('Nenhuma conta saudavel conseguiu enviar este destinatario.')
+      }
       sent += 1
     } catch (error) {
       await markRecipientFailed(supabase, recipient.id, error)

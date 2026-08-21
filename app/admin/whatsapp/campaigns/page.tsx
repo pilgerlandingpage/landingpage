@@ -2170,12 +2170,14 @@ export default function CampaignsPage() {
         try {
             const selectedTemplateForSubmit = sendProvider === 'meta_whatsapp' ? getSelectedMetaTemplate() : null
             const usingPortfolioRouting = sendProvider === 'meta_whatsapp' && isMetaPortfolioRouting
-            const targetWabaId = usingPortfolioRouting
+            const usingAutomaticMetaPool = sendProvider === 'meta_whatsapp' && !selectedMetaSenderId
+            const targetWabaId = usingPortfolioRouting || usingAutomaticMetaPool
                 ? ''
                 : selectedMetaSender?.waba_id || selectedTemplateForSubmit?.waba_id || metaTemplateWabaId
             if (
                 sendProvider === 'meta_whatsapp'
                 && !usingPortfolioRouting
+                && !usingAutomaticMetaPool
                 && selectedMetaSender?.waba_id
                 && selectedTemplateForSubmit?.waba_id
                 && selectedMetaSender.waba_id !== selectedTemplateForSubmit.waba_id
@@ -2220,8 +2222,8 @@ export default function CampaignsPage() {
                         campaignType: metaCampaignType,
                         senderRoutingMode: usingPortfolioRouting ? 'round_robin' : 'weighted_pool',
                         portfolioRouting: usingPortfolioRouting,
-                        defaultSenderId: usingPortfolioRouting ? undefined : selectedMetaSenderId || undefined,
-                        wabaId: usingPortfolioRouting ? undefined : targetWabaId || undefined,
+                        defaultSenderId: usingPortfolioRouting || usingAutomaticMetaPool ? undefined : selectedMetaSenderId || undefined,
+                        wabaId: usingPortfolioRouting || usingAutomaticMetaPool ? undefined : targetWabaId || undefined,
                         scheduled_for: scheduleDate ? new Date(scheduleDate).getTime() / 1000 : undefined,
                     }
                     : {
@@ -2325,7 +2327,7 @@ export default function CampaignsPage() {
 
     const retryFailedMetaCampaign = async (campaignId: string, failedCount: number) => {
         if (failedCount <= 0) return
-        const confirmed = window.confirm(`Reenviar ${failedCount} destinatario(s) que falharam nesta campanha?`)
+        const confirmed = window.confirm(`Reenviar ${failedCount} destinatario(s) que falharam? O sistema vai ignorar contas indisponiveis e usar outra conta saudavel com este template aprovado.`)
         if (!confirmed) return
 
         setRetryingMetaCampaignId(campaignId)
@@ -2422,10 +2424,12 @@ export default function CampaignsPage() {
     const portfolioRoutingReadyWabaIds = Array.from(new Set(portfolioRoutingReadySenders.map(sender => sender.waba_id).filter(Boolean)))
     const portfolioRoutingAvailable = portfolioRoutingReadyWabaIds.length >= 2
     const isMetaPortfolioRouting = metaSenderRoutingMode === 'round_robin' && portfolioRoutingAvailable
-    const selectedTargetWabaId = isMetaPortfolioRouting
+    const automaticMetaSenderPool = !selectedMetaSenderId
+    const usingAnyMetaSenderPool = isMetaPortfolioRouting || automaticMetaSenderPool
+    const selectedTargetWabaId = usingAnyMetaSenderPool
         ? ''
         : selectedMetaSender?.waba_id || selectedMetaTemplate?.waba_id || metaTemplateWabaId
-    const targetMetaSenders = isMetaPortfolioRouting
+    const targetMetaSenders = usingAnyMetaSenderPool
         ? portfolioRoutingEligibleSenders
         : selectedTargetWabaId
             ? activeMetaSenders.filter(sender => sender.waba_id === selectedTargetWabaId)
