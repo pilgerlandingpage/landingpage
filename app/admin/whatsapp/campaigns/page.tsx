@@ -108,6 +108,15 @@ interface MetaCreateStepItem {
     attention?: boolean
 }
 
+interface MetaLiveRefreshState {
+    enabled: boolean
+    active: boolean
+    refreshing: boolean
+    intervalMs: number
+    lastUpdatedAt: string | null
+    activeCampaigns: number
+}
+
 interface ActionConfirmationDialog {
     title: string
     message: string
@@ -1191,6 +1200,9 @@ export default function CampaignsPage() {
     const [sending, setSending] = useState(false)
     const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
     const [actionConfirmation, setActionConfirmation] = useState<ActionConfirmationDialog | null>(null)
+    const [liveMetaRefreshEnabled, setLiveMetaRefreshEnabled] = useState(true)
+    const [liveMetaRefreshing, setLiveMetaRefreshing] = useState(false)
+    const [lastMetaLiveRefreshAt, setLastMetaLiveRefreshAt] = useState<string | null>(null)
 
     const requestActionConfirmation = (dialog: Omit<ActionConfirmationDialog, 'resolve'>) => (
         new Promise<boolean>(resolve => {
@@ -1266,8 +1278,8 @@ export default function CampaignsPage() {
         finally { setLoadingCampaigns(false) }
     }
 
-    const loadMetaCampaigns = async (statusOverride = metaStatusFilter) => {
-        setLoadingMetaCampaigns(true)
+    const loadMetaCampaigns = async (statusOverride = metaStatusFilter, options: { silent?: boolean } = {}) => {
+        if (!options.silent) setLoadingMetaCampaigns(true)
         try {
             const statusParam = statusOverride ? `&status=${encodeURIComponent(statusOverride)}` : ''
             const res = await fetch(`/api/admin/whatsapp/campaigns?provider=meta_whatsapp&limit=250${statusParam}`)
@@ -1278,13 +1290,14 @@ export default function CampaignsPage() {
                 setMetaTemplates(data.templates || [])
                 setMetaSummary(data.summary || null)
                 setMetaAnalytics(data.analytics || null)
+                setLastMetaLiveRefreshAt(new Date().toISOString())
             } else {
-                setFeedback({ type: 'error', text: data.message || 'Erro ao carregar campanhas Meta' })
+                if (!options.silent) setFeedback({ type: 'error', text: data.message || 'Erro ao carregar campanhas Meta' })
             }
         } catch {
-            setFeedback({ type: 'error', text: 'Erro ao carregar campanhas Meta' })
+            if (!options.silent) setFeedback({ type: 'error', text: 'Erro ao carregar campanhas Meta' })
         } finally {
-            setLoadingMetaCampaigns(false)
+            if (!options.silent) setLoadingMetaCampaigns(false)
         }
     }
 
@@ -1416,16 +1429,9 @@ export default function CampaignsPage() {
         ])
     }
 
-    const toggleMetaCampaignDetail = async (campaignId: string) => {
-        if (expandedMetaCampaignId === campaignId) {
-            setExpandedMetaCampaignId('')
-            return
-        }
-
-        setExpandedMetaCampaignId(campaignId)
-        if (metaCampaignDetails[campaignId]) return
-
-        setLoadingMetaCampaignDetail(campaignId)
+    const loadMetaCampaignDetail = async (campaignId: string, options: { silent?: boolean } = {}) => {
+        if (!campaignId) return
+        if (!options.silent) setLoadingMetaCampaignDetail(campaignId)
         try {
             const res = await fetch(`/api/admin/whatsapp/campaigns?provider=meta_whatsapp&campaign_id=${encodeURIComponent(campaignId)}&limit=80`)
             const data = await res.json()
@@ -1440,14 +1446,61 @@ export default function CampaignsPage() {
                     },
                 }))
             } else {
-                setFeedback({ type: 'error', text: data.message || 'Erro ao carregar detalhe da campanha Meta' })
+                if (!options.silent) setFeedback({ type: 'error', text: data.message || 'Erro ao carregar detalhe da campanha Meta' })
             }
         } catch {
-            setFeedback({ type: 'error', text: 'Erro ao carregar detalhe da campanha Meta' })
+            if (!options.silent) setFeedback({ type: 'error', text: 'Erro ao carregar detalhe da campanha Meta' })
         } finally {
-            setLoadingMetaCampaignDetail('')
+            if (!options.silent) setLoadingMetaCampaignDetail('')
         }
     }
+
+    const toggleMetaCampaignDetail = async (campaignId: string) => {
+        if (expandedMetaCampaignId === campaignId) {
+            setExpandedMetaCampaignId('')
+            return
+        }
+
+        setExpandedMetaCampaignId(campaignId)
+        if (metaCampaignDetails[campaignId]) return
+
+        await loadMetaCampaignDetail(campaignId)
+    }
+
+    const metaLiveCampaignCount = metaCampaigns.filter(campaign => isMetaCampaignInProgress(campaign.status)).length
+    const metaLiveRefreshActive = sendProvider === 'meta_whatsapp' && liveMetaRefreshEnabled && !showCreateForm
+    const metaLiveRefreshIntervalMs = metaLiveCampaignCount > 0 || retryingMetaCampaignId ? 5000 : 20000
+
+    useEffect(() => {
+        if (!metaLiveRefreshActive) return
+
+        let cancelled = false
+        let running = false
+
+        const tick = async () => {
+            if (cancelled || running) return
+            running = true
+            setLiveMetaRefreshing(true)
+            try {
+                await loadMetaCampaigns(metaStatusFilter, { silent: true })
+                if (expandedMetaCampaignId) {
+                    await loadMetaCampaignDetail(expandedMetaCampaignId, { silent: true })
+                }
+            } finally {
+                running = false
+                if (!cancelled) setLiveMetaRefreshing(false)
+            }
+        }
+
+        const timer = window.setInterval(() => {
+            void tick()
+        }, metaLiveRefreshIntervalMs)
+
+        return () => {
+            cancelled = true
+            window.clearInterval(timer)
+        }
+    }, [metaLiveRefreshActive, metaLiveRefreshIntervalMs, metaStatusFilter, expandedMetaCampaignId])
 
     useEffect(() => {
         if (sendProvider === 'meta_whatsapp') {
@@ -5154,6 +5207,15 @@ export default function CampaignsPage() {
                     onReplyIntentFilterChange={setMetaReplyIntentFilter}
                     onReplyDateFilterChange={setMetaReplyDateFilter}
                     onRefresh={refreshMetaWorkspace}
+                    liveRefresh={{
+                        enabled: liveMetaRefreshEnabled,
+                        active: metaLiveRefreshActive,
+                        refreshing: liveMetaRefreshing,
+                        intervalMs: metaLiveRefreshIntervalMs,
+                        lastUpdatedAt: lastMetaLiveRefreshAt,
+                        activeCampaigns: metaLiveCampaignCount,
+                    }}
+                    onLiveRefreshToggle={() => setLiveMetaRefreshEnabled(current => !current)}
                     onReplyRefresh={loadMetaReplyReport}
                     onReplyExport={exportMetaRepliesCsv}
                     onToggleDetail={toggleMetaCampaignDetail}
@@ -5190,6 +5252,17 @@ function formatMetaDate(value?: string | null) {
     }).format(date)
 }
 
+function formatMetaTime(value?: string | null) {
+    if (!value) return ''
+    const date = new Date(value)
+    if (!Number.isFinite(date.getTime())) return ''
+    return new Intl.DateTimeFormat('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+    }).format(date)
+}
+
 function metaStatusLabel(status: string) {
     const labels: Record<string, string> = {
         draft: 'Rascunho',
@@ -5223,6 +5296,10 @@ function metaStatusColor(status: string) {
     return 'var(--text-muted)'
 }
 
+function isMetaCampaignInProgress(status?: string | null) {
+    return ['queued', 'sending', 'preparing'].includes(String(status || ''))
+}
+
 function metaProgress(campaign: MetaCampaign) {
     const total = Number(campaign.total_recipients || 0)
     if (total <= 0) return 0
@@ -5252,7 +5329,7 @@ function metaCampaignFailureRate(campaign: MetaCampaign) {
 }
 
 function metaCampaignMatchesSignal(campaign: MetaCampaign, filter: MetaCampaignSignalFilter) {
-    if (filter === 'in_progress') return ['queued', 'sending', 'preparing'].includes(campaign.status)
+    if (filter === 'in_progress') return isMetaCampaignInProgress(campaign.status)
     if (filter === 'with_failures') return Number(campaign.total_failed || 0) > 0
     if (filter === 'high_failure') return metaCampaignFailureRate(campaign) >= 30
     if (filter === 'with_reads') return Number(campaign.total_read || 0) > 0
@@ -6150,6 +6227,8 @@ function MetaOfficialCampaignPanel({
     onReplyIntentFilterChange,
     onReplyDateFilterChange,
     onRefresh,
+    liveRefresh,
+    onLiveRefreshToggle,
     onReplyRefresh,
     onReplyExport,
     onToggleDetail,
@@ -6186,6 +6265,8 @@ function MetaOfficialCampaignPanel({
     onReplyIntentFilterChange: (value: string) => void
     onReplyDateFilterChange: (value: string) => void
     onRefresh: () => void
+    liveRefresh: MetaLiveRefreshState
+    onLiveRefreshToggle: () => void
     onReplyRefresh: () => void
     onReplyExport: (intent?: string) => void
     onToggleDetail: (campaignId: string) => void
@@ -6286,6 +6367,16 @@ function MetaOfficialCampaignPanel({
         return () => window.removeEventListener('keydown', handleEscape)
     }, [onToggleDetail, selectedCampaignId])
 
+    const liveRefreshUpdatedAt = formatMetaTime(liveRefresh.lastUpdatedAt)
+    const liveRefreshStatusText = liveRefresh.enabled
+        ? liveRefresh.activeCampaigns > 0
+            ? `${liveRefresh.activeCampaigns} em andamento`
+            : `checando a cada ${Math.round(liveRefresh.intervalMs / 1000)}s`
+        : 'pausado'
+    const liveRefreshTimeText = liveRefreshUpdatedAt
+        ? `atualizado ${liveRefreshUpdatedAt}`
+        : 'aguardando primeira atualizacao'
+
     return (
         <div id="meta-campaign-history-panel" style={{ display: 'grid', gap: '14px' }}>
             <div style={{
@@ -6310,54 +6401,85 @@ function MetaOfficialCampaignPanel({
                             Use as abas para separar operacao, respostas e diagnosticos sem misturar os dados.
                         </p>
                     </div>
-                    <div style={{ display: 'inline-flex', gap: '5px', padding: '4px', borderRadius: '10px', border: '1px solid var(--border)', background: 'rgba(0,0,0,0.08)', overflowX: 'auto' }}>
-                        {tabItems.map(tab => {
-                            const active = activeTab === tab.key
-                            const Icon = tab.icon
-                            return (
-                                <button
-                                    key={tab.key}
-                                    type="button"
-                                    onClick={() => {
-                                        setActiveTab(tab.key)
-                                        if (tab.key === 'reports' && !detailedReport && !detailedReportLoading) {
-                                            onDetailedReportRefresh()
-                                        }
-                                    }}
-                                    style={{
-                                        minHeight: '34px',
-                                        border: 'none',
-                                        borderRadius: '8px',
-                                        padding: '7px 10px',
-                                        cursor: 'pointer',
-                                        display: 'inline-flex',
-                                        alignItems: 'center',
-                                        gap: '7px',
-                                        background: active ? 'rgba(8,102,255,0.1)' : 'transparent',
-                                        color: active ? '#0866ff' : 'var(--text-secondary)',
-                                        fontSize: '0.76rem',
-                                        fontWeight: 900,
-                                        whiteSpace: 'nowrap',
-                                    }}
-                                >
-                                    <Icon size={14} />
-                                    {tab.label}
-                                    <span style={{
-                                        minWidth: '20px',
-                                        height: '20px',
-                                        borderRadius: '999px',
-                                        background: active ? 'rgba(8,102,255,0.12)' : 'rgba(148,163,184,0.14)',
-                                        display: 'inline-flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        padding: '0 6px',
-                                        fontSize: '0.66rem',
-                                    }}>
-                                        {Number(tab.count || 0).toLocaleString('pt-BR')}
-                                    </span>
-                                </button>
-                            )
-                        })}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                        <button
+                            type="button"
+                            onClick={onLiveRefreshToggle}
+                            title={liveRefresh.enabled ? 'Pausar atualizacao ao vivo' : 'Ativar atualizacao ao vivo'}
+                            style={{
+                                minHeight: '34px',
+                                padding: '6px 10px',
+                                borderRadius: '999px',
+                                border: liveRefresh.enabled ? '1px solid rgba(34,197,94,0.24)' : '1px solid var(--border)',
+                                background: liveRefresh.enabled ? 'rgba(34,197,94,0.08)' : 'rgba(255,255,255,0.035)',
+                                color: liveRefresh.enabled ? '#16a34a' : 'var(--text-muted)',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '7px',
+                                fontSize: '0.72rem',
+                                fontWeight: 900,
+                                whiteSpace: 'nowrap',
+                            }}
+                        >
+                            {liveRefresh.refreshing ? <Loader2 size={14} className="spin" /> : <Activity size={14} />}
+                            {liveRefresh.enabled ? 'Ao vivo' : 'Pausado'}
+                            <span style={{ color: liveRefresh.enabled ? '#15803d' : 'var(--text-muted)', fontWeight: 800 }}>
+                                {liveRefreshStatusText}
+                            </span>
+                            <span style={{ color: 'var(--text-muted)', fontWeight: 700 }}>
+                                {liveRefreshTimeText}
+                            </span>
+                        </button>
+                        <div style={{ display: 'inline-flex', gap: '5px', padding: '4px', borderRadius: '10px', border: '1px solid var(--border)', background: 'rgba(0,0,0,0.08)', overflowX: 'auto' }}>
+                            {tabItems.map(tab => {
+                                const active = activeTab === tab.key
+                                const Icon = tab.icon
+                                return (
+                                    <button
+                                        key={tab.key}
+                                        type="button"
+                                        onClick={() => {
+                                            setActiveTab(tab.key)
+                                            if (tab.key === 'reports' && !detailedReport && !detailedReportLoading) {
+                                                onDetailedReportRefresh()
+                                            }
+                                        }}
+                                        style={{
+                                            minHeight: '34px',
+                                            border: 'none',
+                                            borderRadius: '8px',
+                                            padding: '7px 10px',
+                                            cursor: 'pointer',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '7px',
+                                            background: active ? 'rgba(8,102,255,0.1)' : 'transparent',
+                                            color: active ? '#0866ff' : 'var(--text-secondary)',
+                                            fontSize: '0.76rem',
+                                            fontWeight: 900,
+                                            whiteSpace: 'nowrap',
+                                        }}
+                                    >
+                                        <Icon size={14} />
+                                        {tab.label}
+                                        <span style={{
+                                            minWidth: '20px',
+                                            height: '20px',
+                                            borderRadius: '999px',
+                                            background: active ? 'rgba(8,102,255,0.12)' : 'rgba(148,163,184,0.14)',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            padding: '0 6px',
+                                            fontSize: '0.66rem',
+                                        }}>
+                                            {Number(tab.count || 0).toLocaleString('pt-BR')}
+                                        </span>
+                                    </button>
+                                )
+                            })}
+                        </div>
                     </div>
                 </div>
                 {activeTab === 'campaigns' && (
