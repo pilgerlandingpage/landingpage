@@ -96,6 +96,7 @@ interface MetaCampaign {
 
 type MetaCampaignManageAction = 'pause' | 'resume' | 'cancel' | 'delete'
 type MetaCreateStep = 'message' | 'audience' | 'review'
+type ActionConfirmationTone = 'info' | 'warning' | 'danger'
 
 const META_CREATE_STEP_ORDER: MetaCreateStep[] = ['message', 'audience', 'review']
 
@@ -105,6 +106,16 @@ interface MetaCreateStepItem {
     description: string
     complete: boolean
     attention?: boolean
+}
+
+interface ActionConfirmationDialog {
+    title: string
+    message: string
+    details?: string[]
+    confirmLabel: string
+    cancelLabel?: string
+    tone?: ActionConfirmationTone
+    resolve: (confirmed: boolean) => void
 }
 
 interface MetaCampaignRecipient {
@@ -1068,6 +1079,61 @@ function MetaCampaignStepper({
     )
 }
 
+function ActionConfirmationModal({
+    dialog,
+    onCancel,
+    onConfirm,
+}: {
+    dialog: ActionConfirmationDialog | null
+    onCancel: () => void
+    onConfirm: () => void
+}) {
+    if (!dialog) return null
+
+    const tone = dialog.tone || 'warning'
+    const Icon = tone === 'danger' ? Trash2 : tone === 'info' ? CheckCircle2 : AlertCircle
+
+    return (
+        <div className="meta-action-modal-backdrop" role="presentation" onClick={onCancel}>
+            <div
+                className={`meta-action-modal meta-action-modal-${tone}`}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="meta-action-modal-title"
+                onClick={event => event.stopPropagation()}
+            >
+                <div className="meta-action-modal-header">
+                    <span className="meta-action-modal-icon"><Icon size={20} /></span>
+                    <div>
+                        <h3 id="meta-action-modal-title">{dialog.title}</h3>
+                        <p>{dialog.message}</p>
+                    </div>
+                </div>
+
+                {dialog.details?.length ? (
+                    <ul className="meta-action-modal-details">
+                        {dialog.details.map(detail => (
+                            <li key={detail}>
+                                <CheckCircle2 size={14} />
+                                <span>{detail}</span>
+                            </li>
+                        ))}
+                    </ul>
+                ) : null}
+
+                <div className="meta-action-modal-actions">
+                    <button type="button" className="meta-action-modal-cancel" onClick={onCancel}>
+                        {dialog.cancelLabel || 'Cancelar'}
+                    </button>
+                    <button type="button" className="meta-action-modal-confirm" onClick={onConfirm}>
+                        {dialog.confirmLabel}
+                    </button>
+                </div>
+            </div>
+        </div>
+    )
+}
+
 export default function CampaignsPage() {
     const [instances, setInstances] = useState<Instance[]>([])
     const [selectedInstance, setSelectedInstance] = useState<string>('')
@@ -1124,6 +1190,22 @@ export default function CampaignsPage() {
     const [metaCreateStep, setMetaCreateStep] = useState<MetaCreateStep>('message')
     const [sending, setSending] = useState(false)
     const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+    const [actionConfirmation, setActionConfirmation] = useState<ActionConfirmationDialog | null>(null)
+
+    const requestActionConfirmation = (dialog: Omit<ActionConfirmationDialog, 'resolve'>) => (
+        new Promise<boolean>(resolve => {
+            setActionConfirmation({
+                ...dialog,
+                resolve,
+            })
+        })
+    )
+
+    const resolveActionConfirmation = (confirmed: boolean) => {
+        const resolver = actionConfirmation?.resolve
+        setActionConfirmation(null)
+        resolver?.(confirmed)
+    }
 
     // Campaign form state
     const [sendProvider] = useState<'connectyhub' | 'meta_whatsapp'>('meta_whatsapp')
@@ -1826,7 +1908,17 @@ export default function CampaignsPage() {
 
         const currentStatus = contactListValidationStatus(selectedContactList)
         const force = currentStatus === 'completed'
-            ? window.confirm('Revalidar todos os contatos desta lista na ConnectyHub?')
+            ? await requestActionConfirmation({
+                title: 'Revalidar lista de contatos?',
+                message: `Vamos revisar novamente todos os contatos da lista "${selectedContactList.name}".`,
+                details: [
+                    'A validacao atual sera atualizada no painel.',
+                    'Contatos sem WhatsApp confirmado podem sair do publico elegivel.',
+                    'A campanha so muda se voce selecionar a lista novamente ou aplicar o resultado.',
+                ],
+                confirmLabel: 'Revalidar lista',
+                tone: 'warning',
+            })
             : false
         if (currentStatus === 'completed' && !force) return
 
@@ -2127,22 +2219,33 @@ export default function CampaignsPage() {
                 return
             }
             if (selectedContactList && selectedContactListWillIncludeUnverified) {
-                const confirmed = window.confirm(
-                    `A lista "${selectedContactList.name}" ainda nao esta 100% validada.\n\n` +
-                    `Confirmados com WhatsApp: ${selectedContactListConfirmedContacts.length}\n` +
-                    `Pendentes/erro/sem verificacao: ${selectedContactListUnverifiedContacts.length}\n` +
-                    `Sem WhatsApp confirmado: ${selectedContactListInvalidContacts.length}\n\n` +
-                    'Enviar mesmo assim pode gastar limite Meta com numeros que talvez nao tenham WhatsApp. Deseja continuar?'
-                )
+                const confirmed = await requestActionConfirmation({
+                    title: 'Enviar com contatos ainda nao validados?',
+                    message: `A lista "${selectedContactList.name}" ainda nao esta 100% validada.`,
+                    details: [
+                        `${selectedContactListConfirmedContacts.length} confirmado(s) com WhatsApp.`,
+                        `${selectedContactListUnverifiedContacts.length} pendente(s), com erro ou sem verificacao.`,
+                        `${selectedContactListInvalidContacts.length} sem WhatsApp confirmado.`,
+                        'Enviar assim pode gastar limite Meta com numeros que talvez nao recebam.',
+                    ],
+                    confirmLabel: 'Enviar mesmo assim',
+                    tone: 'warning',
+                })
                 if (!confirmed) return
             }
             if (!allowRepeatCreative && selectedContactList && selectedTemplateWasUsedForList && selectedTemplateUsage) {
-                const confirmed = window.confirm(
-                    `A lista "${selectedContactList.name}" ja foi usada com o template "${selectedTemplateUsage.template_name}" em ${selectedTemplateUsage.campaigns} campanha(s).\n\n` +
-                    `Ultima campanha: ${selectedTemplateUsage.last_campaign_name || 'sem nome'}\n` +
-                    `Ultimo uso: ${formatMetaDate(selectedTemplateUsage.last_used_at)}\n\n` +
-                    'Se continuar, o sistema vai reenviar este mesmo criativo tambem para contatos que ja receberam ou estao na fila. Deseja continuar mesmo assim?'
-                )
+                const confirmed = await requestActionConfirmation({
+                    title: 'Repetir este criativo para a mesma lista?',
+                    message: `A lista "${selectedContactList.name}" ja foi usada com o template "${selectedTemplateUsage.template_name}".`,
+                    details: [
+                        `${selectedTemplateUsage.campaigns} campanha(s) anteriores com este criativo.`,
+                        `Ultima campanha: ${selectedTemplateUsage.last_campaign_name || 'sem nome'}.`,
+                        `Ultimo uso: ${formatMetaDate(selectedTemplateUsage.last_used_at)}.`,
+                        'O sistema vai registrar novo historico sem bloquear o envio.',
+                    ],
+                    confirmLabel: 'Repetir criativo',
+                    tone: 'warning',
+                })
                 if (!confirmed) return
                 creativeDeduplicationMode = 'track_only'
             }
@@ -2291,7 +2394,20 @@ export default function CampaignsPage() {
 
     const manageMetaCampaign = async (campaignId: string, action: MetaCampaignManageAction) => {
         if (action === 'delete') {
-            const confirmed = window.confirm('Excluir esta campanha do painel? Ela nao aparecera mais na lista, mas os dados historicos continuam salvos.')
+            const campaign = metaCampaigns.find(item => item.id === campaignId)
+            const confirmed = await requestActionConfirmation({
+                title: 'Excluir campanha do painel?',
+                message: campaign?.name
+                    ? `A campanha "${campaign.name}" deixara de aparecer na lista principal.`
+                    : 'Esta campanha deixara de aparecer na lista principal.',
+                details: [
+                    'Os dados historicos continuam salvos para relatorios.',
+                    'As respostas e eventos ja recebidos nao serao apagados.',
+                    'Use esta acao para limpar campanhas que nao serao mais acompanhadas.',
+                ],
+                confirmLabel: 'Excluir do painel',
+                tone: 'danger',
+            })
             if (!confirmed) return
         }
 
@@ -2327,7 +2443,19 @@ export default function CampaignsPage() {
 
     const retryFailedMetaCampaign = async (campaignId: string, failedCount: number) => {
         if (failedCount <= 0) return
-        const confirmed = window.confirm(`Reenviar ${failedCount} destinatario(s) que falharam? O sistema vai ignorar contas indisponiveis e usar outra conta saudavel com este template aprovado.`)
+        const campaign = metaCampaigns.find(item => item.id === campaignId)
+        const confirmed = await requestActionConfirmation({
+            title: 'Reenviar falhas desta campanha?',
+            message: `Vamos recolocar ${failedCount} destinatario(s) com falha na fila de envio.`,
+            details: [
+                campaign?.name ? `Campanha: ${campaign.name}.` : 'A campanha selecionada sera reenfileirada.',
+                'Contas indisponiveis ou com qualidade ruim serao ignoradas.',
+                'O roteamento usara outra conta saudavel com este template aprovado.',
+                'O historico anterior sera preservado para diagnostico.',
+            ],
+            confirmLabel: 'Reenviar falhas',
+            tone: 'warning',
+        })
         if (!confirmed) return
 
         setRetryingMetaCampaignId(campaignId)
@@ -3521,6 +3649,140 @@ export default function CampaignsPage() {
                     background: var(--bg-secondary);
                 }
 
+                .meta-action-modal-backdrop {
+                    position: fixed;
+                    inset: 0;
+                    z-index: 100;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 24px;
+                    background: rgba(15,23,42,0.48);
+                    backdrop-filter: blur(5px);
+                }
+
+                .meta-action-modal {
+                    width: min(520px, calc(100vw - 32px));
+                    border: 1px solid var(--border);
+                    border-radius: 14px;
+                    background: var(--bg-secondary);
+                    box-shadow: 0 30px 80px rgba(15,23,42,0.36);
+                    overflow: hidden;
+                }
+
+                .meta-action-modal-header {
+                    display: grid;
+                    grid-template-columns: auto minmax(0, 1fr);
+                    gap: 12px;
+                    padding: 18px 18px 14px;
+                    border-bottom: 1px solid var(--border);
+                    background: rgba(255,255,255,0.035);
+                }
+
+                .meta-action-modal-icon {
+                    width: 42px;
+                    height: 42px;
+                    border-radius: 12px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    border: 1px solid rgba(245,158,11,0.24);
+                    background: rgba(245,158,11,0.1);
+                    color: #f59e0b;
+                }
+
+                .meta-action-modal-danger .meta-action-modal-icon {
+                    border-color: rgba(239,68,68,0.24);
+                    background: rgba(239,68,68,0.1);
+                    color: #ef4444;
+                }
+
+                .meta-action-modal-info .meta-action-modal-icon {
+                    border-color: rgba(34,197,94,0.24);
+                    background: rgba(34,197,94,0.1);
+                    color: #16a34a;
+                }
+
+                .meta-action-modal h3 {
+                    margin: 0;
+                    color: var(--text-primary);
+                    font-size: 1rem;
+                    line-height: 1.25;
+                }
+
+                .meta-action-modal p {
+                    margin: 6px 0 0;
+                    color: var(--text-secondary);
+                    font-size: 0.8rem;
+                    line-height: 1.5;
+                }
+
+                .meta-action-modal-details {
+                    display: grid;
+                    gap: 8px;
+                    margin: 0;
+                    padding: 14px 18px;
+                    list-style: none;
+                    border-bottom: 1px solid var(--border);
+                }
+
+                .meta-action-modal-details li {
+                    display: grid;
+                    grid-template-columns: auto minmax(0, 1fr);
+                    gap: 8px;
+                    align-items: start;
+                    color: var(--text-secondary);
+                    font-size: 0.76rem;
+                    line-height: 1.45;
+                }
+
+                .meta-action-modal-details svg {
+                    margin-top: 2px;
+                    color: #16a34a;
+                }
+
+                .meta-action-modal-actions {
+                    display: flex;
+                    justify-content: flex-end;
+                    gap: 8px;
+                    padding: 14px 18px 18px;
+                    background: rgba(255,255,255,0.018);
+                }
+
+                .meta-action-modal-actions button {
+                    min-height: 38px;
+                    border-radius: 8px;
+                    padding: 8px 13px;
+                    cursor: pointer;
+                    font-size: 0.78rem;
+                    font-weight: 900;
+                }
+
+                .meta-action-modal-cancel {
+                    border: 1px solid var(--border);
+                    background: rgba(255,255,255,0.04);
+                    color: var(--text-secondary);
+                }
+
+                .meta-action-modal-confirm {
+                    border: 1px solid rgba(245,158,11,0.28);
+                    background: #b8892f;
+                    color: #fff;
+                    box-shadow: 0 10px 24px rgba(184,137,47,0.22);
+                }
+
+                .meta-action-modal-danger .meta-action-modal-confirm {
+                    border-color: rgba(239,68,68,0.28);
+                    background: #ef4444;
+                    box-shadow: 0 10px 24px rgba(239,68,68,0.2);
+                }
+
+                .meta-action-modal-info .meta-action-modal-confirm {
+                    border-color: rgba(22,163,74,0.28);
+                    background: #16a34a;
+                    box-shadow: 0 10px 24px rgba(22,163,74,0.2);
+                }
+
                 @media (max-width: 760px) {
                     .meta-campaign-drawer-backdrop {
                         padding: 10px;
@@ -3530,6 +3792,24 @@ export default function CampaignsPage() {
                         width: calc(100vw - 20px);
                         height: calc(100vh - 20px);
                         border-radius: 12px;
+                    }
+
+                    .meta-action-modal-backdrop {
+                        padding: 12px;
+                        align-items: flex-end;
+                    }
+
+                    .meta-action-modal {
+                        width: 100%;
+                        border-radius: 14px 14px 10px 10px;
+                    }
+
+                    .meta-action-modal-actions {
+                        flex-direction: column-reverse;
+                    }
+
+                    .meta-action-modal-actions button {
+                        width: 100%;
                     }
                 }
 
@@ -4882,6 +5162,12 @@ export default function CampaignsPage() {
                     onRetryFailed={retryFailedMetaCampaign}
                 />
             ))}
+
+            <ActionConfirmationModal
+                dialog={actionConfirmation}
+                onCancel={() => resolveActionConfirmation(false)}
+                onConfirm={() => resolveActionConfirmation(true)}
+            />
 
             <style>{`
                 @keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
